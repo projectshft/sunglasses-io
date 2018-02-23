@@ -34,7 +34,7 @@ const checkTokenFromUrlRequest = (request) => {
   //get token from url 
   let query = queryString.parse(request._parsedUrl.query);
   if (query.accessToken) {
-    //check if token exists in database and has not expired. if valid token found, return it. Otherwise return 
+    //check if token exists in database and has not expired. if valid token found, return it. Otherwise return value will be undefined. 
     return accessTokens.find((accessToken) => {
       return accessToken.token === query.accessToken && new Date() - accessToken.lastUpdated > SESSION_LENGTH;
     });
@@ -137,18 +137,26 @@ http.createServer(function (request, response) {
     });
 
     if (validUser) {
-      response.writeHead(200, DEFAULT_HEADERS);
+      //use CORS_HEADERS only, as response will be text, not JSON
+      response.writeHead(200, CORS_HEADERS);
       //check to see if user already has token. If so, update its "last updated" property. If not, create a new token for the user.
-
-    
-
-      let accessToken = uid(16);
-      accessTokens.push({
-        username: request.body.username,
-        token: accessToken,
-        lastUpdated: new Date()
-      })
-      return response.end(accessToken);
+    let currentAccessToken = findTokenByUsername(request.body.username);
+    let newAccessToken = null;
+      if (currentAccessToken) {
+        newAccessToken = currentAccessToken.token;
+        currentAccessToken.lastUpdated = new Date ();
+      } else { 
+        newAccessToken = uid(16);
+        accessTokens.push({
+          username: request.body.username,
+          token: newAccessToken,
+          lastUpdated: new Date()
+        })
+      }
+      return response.end(newAccessToken);
+    } else {
+      response.writeHead(401, "Invalid username or password.");
+      return response.end();
     }
 
   });
