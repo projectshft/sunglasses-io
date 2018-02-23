@@ -12,25 +12,16 @@ produces:
 paths:
   /brands:
     get:
-      summary: Get all brands in the store.
+      summary: Get a list of brands in the store.
       description: >
-        The brands endpoint allows you to access all the of brands in the store as well as the products associated with a given brand.
+        The brands endpoint allows you to access all the of brands in the store.
       parameters:
-        - name: query
+        - name: maxResults
           in: query
-          description: Search query string
+          description: Integer value specifying the maximum number of brands to return. If maxResults exceeds the number of brands, returns all brands. (Default number is 4 based on wireframe.)
           required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
+          type: integer
+          format: int32
       tags:
         - Brands
       responses:
@@ -40,16 +31,22 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected error
+        '400':
+          description: Improperly formatted request
           schema:
             $ref: '#/definitions/Error'
-  /brands/{id}/products:
+  /brands/{brandId}/products:
     get:
       summary: Get a list of products with the specified brand ID.
       description: >-
-        The User Profile endpoint returns information about the Uber user that
-        has authorized with the application.
+        This endpoint returns a list of products associated with a chosen brand ID.
+      parameters:
+        - name: brandId
+          in: path
+          description: Brand ID of products to return
+          required: true
+          type: integer
+          format: int64
       tags:
         - Brands
       responses:
@@ -93,7 +90,7 @@ paths:
           description: Improperly formatted query
           schema:
             $ref: '#/definitions/Error'
-  /api/login:
+  /login:
     post:
       summary: Allow a user to login.
       description: |
@@ -133,145 +130,176 @@ paths:
               - name
               - price
       tags:
-        - User
+        - Shopping Cart
       responses:
         '200':
           description: A list of products in a user's shopping cart
-        default:
-          description: Unexpected error
+        '400':
+          description: Improperly formatted query
           schema:
             $ref: '#/definitions/Error'
-  '/me/goals/{id}/gift/{userId}':
     post:
-      summary: Gift a Goal
+      summary: Add an item to the cart.
       description: |
-        This endpoint allows you gift a given goal
-      parameters:
-        - name: id
-          in: path
-          description: The id of the goal to gift
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user to gift the goal to
-          required: true
-          type: string
+        This endpoint allows products to be added to a user's shopping cart.
       tags:
-        - User
+        - Shopping Cart
       responses:
         '200':
-          description: Achievement is successful
-        default:
-          description: Unexpected error
+          description: Successful addition to shopping cart
+        '401':
+          description: You need to have access to continue.
           schema:
             $ref: '#/definitions/Error'
-  /categories:
-    get:
-      summary: Categories
+  /me/cart/{productId}:
+    post:
+      summary: Update quantity of an item in the cart
       description: |
-        Categories define groupings of goals for browsing.
+        Update the quantity of a product already in the shopping cart.
       parameters:
-        - name: limit
-          in: query
-          description: The number of results to limit the search to
-          required: false
+        - name: productId
+          in: path
+          description: The ID for the product to be updated in the cart.
+          required: true
           type: number
           format: int32
       tags:
-        - Categories
+        - Shopping Cart
       responses:
         '200':
-          description: An array of categories
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Category'
-        default:
-          description: Unexpected error
+          description: Successfully updated cart item
+        '401':
+          description: You need to have access to continue.
           schema:
             $ref: '#/definitions/Error'
-  '/categories/{id}/goals':
-    get:
-      summary: Goals in Category
+        '404':
+          description: This resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Remove an item from the cart
       description: |
-        All the goals in a given cateogyr
+        Remove a product with the specified product ID if it exists in the shopping cart.
       parameters:
-        - name: id
+        - name: productId
           in: path
-          description: The id of the category to search for goals in.
+          description: The ID for the product to be updated in the cart.
           required: true
-          type: string
+          type: number
+          format: int32
       tags:
-        - Categories
+        - Shopping Cart
       responses:
         '200':
-          description: An array of goals in the category
+          description: Successfully deleted cart item
+        '401':
+          description: You need to have access to continue.
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Goal'
-        default:
-          description: Unexpected error
+            $ref: '#/definitions/Error'
+        '404':
+          description: This resource does not exist.
           schema:
             $ref: '#/definitions/Error'
 definitions:
-  Goal:
+  Brand:
     type: object
     properties:
       id:
         type: string
-        description: Unique identifier for a goal.
-      categoryId:
-        type: string
-        description: The id of the category this goal belongs to.
-      description:
-        type: string
-        description: Description of product.
-      upVotes:
-        type: integer
-        format: int32
-        description: The number of up votes given to a goal
-      downVotes:
-        type: integer
-        format: int32
-        description: The number of down votes given to a goal
-      imageURL:
-        type: string
-        description: The URL for the image representing the goal
-  Category:
-    type: object
-    properties:
-      id:
-        type: string
-        description: The unique identifier given to the category
+        description: Unique identifier for a brand.
       name:
         type: string
-        description: The name of the category
+        description: The name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier for a product.
+      categoryId:
+        type: string
+        description: Unique identifier for product's brand.
+      name:
+        type: string
+        description: The name of the product.
+      price:
+        type: integer
+        format: int32
+        description: Price in USD.
+      imageUrls:
+        type: array
+        items:
+          type: string
   User:
     type: object
     properties:
-      first_name:
+      gender:
         type: string
-        description: First name of the Uber user.
-      last_name:
-        type: string
-        description: Last name of the Uber user.
+        description: User's gender.
+      cart:
+        type: array
+        description: List of items in a user's shopping cart.
+        items:
+          $ref: '#/definitions/Product'
+      name:
+        type: object
+        description: First name, last name, and title of a user.
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        description: Address and postal code of the user.
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
       email:
         type: string
-        description: Email address of the Uber user
-      acceptedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      achievedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      giftedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      challengedGoals:
-        items:
-          $ref: '#/definitions/Goal'
+      login:
+        type: object
+        description: User login credentials.
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: date
+      registered:
+        type: date
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
   Error:
     type: object
     properties:
