@@ -10,6 +10,7 @@ const VALID_API_KEYS = ["476b2e40-57d1-462c-a80e-37a778bfa335", "d1e9a4f4-7b40-4
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 const PORT = 3001;
 
+// Container arrays for API information
 var brands = [];
 var products = [];
 var users = [];
@@ -45,6 +46,7 @@ myRouter(request, response, finalHandler(request, response))
     console.log(`Server is listening on ${PORT}`);
 });
 
+// API call for all brands
 myRouter.get('/api/brands', (request, response) => {
     response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
     if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
@@ -54,6 +56,7 @@ myRouter.get('/api/brands', (request, response) => {
     response.end(JSON.stringify(brands));
 });
 
+// API call for products specified by associated brand
 myRouter.get('/api/brands/:id/products', (request, response) => {
     response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
     if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
@@ -66,12 +69,42 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
     response.end(JSON.stringify(productsByBrand));
 })
 
-// Use query to search products
+// API call for all products
 myRouter.get('/api/products', (request, response) => {
     response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type':'application/json'}));
     if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
         response.writeHead(401, "You need to have a valid API key to use this API", CORS_HEADERS);
         response.end();
+    };
+    // User can search for products by product's name
+    var parsedUrl = require('url').parse(request.url,true);
+    if (parsedUrl.query.search) {
+        let searchedProducts = products.filter((product) => {
+            if (product.name.toUpperCase().includes(parsedUrl.query.search.toUpperCase())) {
+                return product.name;
+            };
+        });
+        response.end(JSON.stringify(searchedProducts));
     }
     response.end(JSON.stringify(products));
+});
+
+// User login
+// Find a way for request.body to include username & password using Postman
+myRouter.post('/api/login', (request, response) => {
+    if (request.body.username && request.body.password) {
+        let user = users.find((user) => {
+            return user.login.username == request.body.username && user.login.password == request.body.password;
+        });
+        if (user) {
+            response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type':'application/json'}));
+            response.end();
+        } else {
+            response.writeHead(401, "Invalid username or passowrd", CORS_HEADERS);
+            response.end();
+        }
+    } else {
+        response.writeHead(400, "Incorrectly formatted response", CORS_HEADERS);
+        response.end();
+    }
 });
