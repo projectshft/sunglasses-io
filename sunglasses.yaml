@@ -7,9 +7,8 @@ info:
   
 schemes: 
   - https
-
-host: sunglasses.io
-basePath: /api
+# host: sunglasses.io
+# basePath: /api
 
 consumes:
   - application/json
@@ -119,13 +118,6 @@ paths:
           required: true
           description: Access token for user account, received after successful login.
           type: string
-        - name: itemToAdd
-          in: body
-          description: Product ID and quantity to be added to the user's cart.
-          schema:
-            required:
-              - productId
-              - quantity
       responses:
         200:
           description: Returns an array of products representing the user's cart.
@@ -140,6 +132,18 @@ paths:
     post:
       summary: Add item to cart
       description: Use this endpoint to add items to the logged in user's cart
+      parameters:
+      - name: accessToken
+        in: path
+        required: true
+        description: Access token for user account, received after successful login.
+        type: string
+      - name: itemToAdd
+        in: body
+        required: true
+        description: Product ID and quantity to be added to the user's cart.
+        schema:
+          $ref: '#/definitions/CartItem'
       tags:
         - Cart
       responses:
@@ -268,3 +272,6 @@ definitions:
         type: string
       fields:
         type: object
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /Project-Shift8/Sunglasses.io/1.0.0

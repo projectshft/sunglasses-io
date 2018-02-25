@@ -25,7 +25,7 @@ const DEFAULT_HEADERS = { ...CORS_HEADERS, ...JSON_HEADERS };
 
 //Helper function to check whether a user already has a record in the accessTokens array. Use this to avoid creating multiple tokens for one user on login. 
 const findTokenByUsername = (username) => {
-  let userAccessToken = accessTokens.find( (token) => {
+  let userAccessToken = accessTokens.find((token) => {
     return token.username === username;
   })
 }
@@ -38,8 +38,8 @@ const verifyTokenFromRequest = (request) => {
   if (query.accessToken) {
     //check if token exists in database and has not expired. 
     let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token === query.accessToken 
-      && new Date() - accessToken.lastUpdated < SESSION_LENGTH;
+      return accessToken.token === query.accessToken
+        && new Date() - accessToken.lastUpdated < SESSION_LENGTH;
     });
     // if valid token found, update its lastUpdated property and return the token object. If not, return value will be undefined. 
     if (currentAccessToken) {
@@ -49,6 +49,17 @@ const verifyTokenFromRequest = (request) => {
   }
 }
 
+const findUserByUsername = (username) => {
+  return users.find((user) => {
+    return user.login.username === username;
+  });
+}
+
+const findCartItemByProductId = (cart, productId) => {
+  return cart.find( (cartItem) => {
+    return cartItem.product.id === productId;
+  });
+}
 
 
 //setup router
@@ -150,14 +161,14 @@ http.createServer(function (request, response) {
       //use CORS_HEADERS only, as response will be text, not JSON
       response.writeHead(200, CORS_HEADERS);
       //check to see if user already has token. If so, update its "last updated" property. If not, create a new token for the user.
-    let currentAccessToken = findTokenByUsername(request.body.username);
-    
-    //Declare a newAccessToken variable. This will be the token string that gets sent back to the user.
-    let newAccessToken = null;
+      let currentAccessToken = findTokenByUsername(request.body.username);
+
+      //Declare a newAccessToken variable. This will be the token string that gets sent back to the user.
+      let newAccessToken = null;
       if (currentAccessToken) {
         newAccessToken = currentAccessToken.token;
-        currentAccessToken.lastUpdated = new Date ();
-      } else { 
+        currentAccessToken.lastUpdated = new Date();
+      } else {
         newAccessToken = uid(16);
         accessTokens.push({
           username: request.body.username,
@@ -181,27 +192,95 @@ http.createServer(function (request, response) {
       response.writeHead(401, "Invalid access token");
       return response.end();
     } else {
-    //if token is valid, send cart for logged in user.
-      let loggedInUser = users.find( (user) => {
-        return user.login.username === validToken.username;
-      });      
+      //if token is valid, send cart for logged in user.
+      let loggedInUser = findUserByUsername(validToken.username)
       response.writeHead(200, DEFAULT_HEADERS);
-      return response.end(JSON.stringify(loggedInUser.cart)); 
+      return response.end(JSON.stringify(loggedInUser.cart));
     }
   });
 
-  // request to add item to cart. user must be logged in and send a valid token.
-  myRouter.post('/api/me/cart/:productId', (request, response) => {
+//request to add item to cart. user must be logged in and send a valid token.
+myRouter.post('/api/me/cart', (request, response) => {
+  //first, verify user's access token. if invalid token, send 401 error.
+    let validToken = verifyTokenFromRequest(request);
+    if (!validToken) {
+      response.writeHead(401, "Invalid access token");
+      return response.end();
+    }
+     //check that body contains a product Id and quantity. if not, send 400 error.
+     if (!request.body.productId || !request.body.quantity){
+       response.writeHead(400, "Request body must have a product ID and quantity");
+       return response.end();
+     }
+     //check that quantity is a whole number greater than 0. if not, send 400 error.
+    if (!Number.isInteger(request.body.quantity) || request.body.quantity < 1) {
+      response.writeHead(400, "Quantity must be a whole number greater than zero.")
+      return response.end();   
+    }
 
+     //check that product ID matches a valid product. if not, send 401 error.
+     let requestedProduct = products.find((product) => {
+       return product.id == request.body.productId;
+     });
+
+     if (!requestedProduct) {
+       response.writeHead(401, "Invalid product ID.")
+       return response.end();
+     }
+
+    //If we've made it this far, successful request!
+     response.writeHead(200, DEFAULT_HEADERS)
+    
+    //check whether item is already in user's cart. if so, increase quantity by amount specified in request.
+
+    let loggedInUser = findUserByUsername(validToken.username);
+
+    let requestedItemInCart = findCartItemByProductId(loggedInUser.cart, requestedProduct.id)
+
+    if (requestedItemInCart) {
+      requestedItemInCart.quantity += request.body.quantity;
+    } else {
+    //if item is NOT already in user's cart, add it.
+      loggedInUser.cart.push({
+        product: requestedProduct,
+        quantity: request.body.quantity
+      });
+    }
+      return response.end(JSON.stringify(loggedInUser.cart));
   });
 
-  // request to delete item from cart. user must be logged in and send a valid token. user should confirm that they are sure they want to delete the item.
-  myRouter.delete('/api/me/cart/:productId', (request, response) => {
+// request to delete item from cart. user must be logged in and send a valid token. user should have confirmed on the front end that they are sure they want to delete the item.
 
-  });
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  //first, verify user's access token. if invalid token, send 401 error.
+  let validToken = verifyTokenFromRequest(request);
+  if (!validToken) {
+    response.writeHead(401, "Invalid access token");
+    return response.end();
+  }
+
+  //verify that product to be deleted exists in user's cart. if not, send 401 error.
+  let loggedInUser = findUserByUsername(validToken.username);
+  let productToDelete = findCartItemByProductId(loggedInUser.cart, request.params.productId);
+  if (!productToDelete) {
+    response.writeHead(401, "Product not found in cart.");
+    return response.end();
+  }
+  //Success! Remove item from user's cart and send updated cart in response.
+  let deleteIndex = loggedInUser.cart.indexOf(productToDelete);
+  loggedInUser.cart.splice(deleteIndex, 1);
+
+  response.writeHead(200, DEFAULT_HEADERS);
+  return response.end(JSON.stringify(loggedInUser.cart))
+});
+
+// request to update quantity of item in cart. user must be logged in and send a valid token.
+myRouter.post('/api/me/cart/:productId', (request, response) => {
+
+});
 
 }).listen(PORT, (error) => {
   if (error) {
     return console.log('Error on Server Startup: ', error)
   }
-}); //add error handler here?
+});
