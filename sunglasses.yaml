@@ -1,0 +1,171 @@
+swagger: '2.0'
+
+info: 
+  version: 1.0.0
+  title: Sunglasses.io API
+  description: An API for viewing and buying swanky sunglasses on sunglasses.io
+  
+schemes: 
+  - https
+# host: sunglasses.io
+# basePath: /api
+
+consumes:
+  - application/json
+  
+produces: 
+  - application/json
+
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The brands endpoint allows users to see a list of brands.
+      tags: 
+        - Brands
+      responses:
+        200:
+          description: An array of sunglasses brands.
+          schema:
+            type: array
+            items: 
+              $ref: '#definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Products for a given brand
+      description: |
+        Shows users a list of products for the brand whose ID is passed into the URL.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      tags: 
+        - Brands
+        - Products
+      responses: 
+        200: 
+          description: An array of products belonging to the requested brand.
+          schema:
+            type: array
+            items: 
+              $ref: '#definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get: 
+      summary: Products
+      description: | 
+        The products endpoint allows users to retrieve products matching a given search term.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      tags: 
+        - Products
+      responses: 
+        200: 
+          description: An array of products matching the search query.
+          schema:
+            type: array
+            items: 
+              $ref: '#definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Login
+      description: |
+        Use this endpoint to log in with a username and password.
+      parameters: 
+        - name: login
+          in: body
+          description: user's login information
+          schema:
+            required:
+              - username
+              - password
+      tags: 
+        -  Login
+      responses:
+        200:
+          description: Returns an access token to the user
+        400:
+          description: Request body missing required parameters.
+        401: 
+          description: Invalid username or password.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific sunglasses brand
+      name:
+        type: string
+        description: Name of sunglasses brand
+  Product: 
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific product
+      categoryId: 
+        type: string
+        description: Brief description of the product
+      price: 
+        type: number
+        description: Price of the product in US dollars
+      imageUrls: 
+        type: array
+        items: 
+          required: 
+            - imageUrl
+  Products:
+    type: array
+    items:
+      $ref: '#/definitions/Product'
+  Brands: 
+    properties: 
+      id: 
+        type: array
+        items:
+          $ref: '#/definitions/Brand'
+  User:
+    properties:
+      gender:
+        type: string
+        description: User's gender
+      cart: 
+        type: array
+        $ref: '#/definitions/Cart'
+  Cart:
+    properties:
+      id: 
+        type: string
+      
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: object
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /Project-Shift8/Sunglasses.io/1.0.0
