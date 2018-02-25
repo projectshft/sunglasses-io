@@ -8,7 +8,7 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
-//set session length for access tokens
+//set session length for access tokens to 15 minutes
 const SESSION_LENGTH = 15 * 60 * 1000;
 
 let brands = [];
@@ -16,30 +16,40 @@ let products = [];
 let users = [];
 let accessTokens = [];
 
+
 //setup boilerplate headers to be used for composing response headers
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Authentication" };
 const JSON_HEADERS = { "Content-Type": 'application/json' };
 const DEFAULT_HEADERS = { ...CORS_HEADERS, ...JSON_HEADERS };
 
 
-//helper function to check whether a user has a record in the accessTokens array. 
+//Helper function to check whether a user already has a record in the accessTokens array. Use this to avoid creating multiple tokens for one user on login. 
 const findTokenByUsername = (username) => {
   let userAccessToken = accessTokens.find( (token) => {
     return token.username === username;
   })
 }
 
-//helper function to check whether a user has passed a valid access token.
-const checkTokenFromUrlRequest = (request) => {
+//Helper function to check whether a user has passed a valid access token and to renew user's session if so. Use this to process requests for user's cart.
+
+const verifyTokenFromRequest = (request) => {
   //get token from url 
   let query = queryString.parse(request._parsedUrl.query);
   if (query.accessToken) {
-    //check if token exists in database and has not expired. if valid token found, return it. Otherwise return value will be undefined. 
-    return accessTokens.find((accessToken) => {
-      return accessToken.token === query.accessToken && new Date() - accessToken.lastUpdated > SESSION_LENGTH;
+    //check if token exists in database and has not expired. 
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token === query.accessToken 
+      && new Date() - accessToken.lastUpdated < SESSION_LENGTH;
     });
+    // if valid token found, update its lastUpdated property and return the token object. If not, return value will be undefined. 
+    if (currentAccessToken) {
+      currentAccessToken.lastUpdated = new Date();
+      return currentAccessToken;
+    }
   }
 }
+
+
 
 //setup router
 
@@ -141,6 +151,8 @@ http.createServer(function (request, response) {
       response.writeHead(200, CORS_HEADERS);
       //check to see if user already has token. If so, update its "last updated" property. If not, create a new token for the user.
     let currentAccessToken = findTokenByUsername(request.body.username);
+    
+    //Declare a newAccessToken variable. This will be the token string that gets sent back to the user.
     let newAccessToken = null;
       if (currentAccessToken) {
         newAccessToken = currentAccessToken.token;
@@ -163,7 +175,19 @@ http.createServer(function (request, response) {
 
   // request to view cart. user must be logged in and send a valid token.
   myRouter.get('/api/me/cart', (request, response) => {
-
+    //first, verify user's access token. if invalid token, send 401 error.
+    let validToken = verifyTokenFromRequest(request);
+    if (!validToken) {
+      response.writeHead(401, "Invalid access token");
+      return response.end();
+    } else {
+    //if token is valid, send cart for logged in user.
+      let loggedInUser = users.find( (user) => {
+        return user.login.username === validToken.username;
+      });      
+      response.writeHead(200, DEFAULT_HEADERS);
+      return response.end(JSON.stringify(loggedInUser.cart)); 
+    }
   });
 
   // request to add item to cart. user must be logged in and send a valid token.

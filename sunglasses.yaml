@@ -7,11 +7,13 @@ info:
   
 schemes: 
   - https
-# host: sunglasses.io
-# basePath: /api
+
+host: sunglasses.io
+basePath: /api
 
 consumes:
   - application/json
+  - application/x-www-form-urlencoded
   
 produces: 
   - application/json
@@ -28,9 +30,7 @@ paths:
         200:
           description: An array of sunglasses brands.
           schema:
-            type: array
-            items: 
-              $ref: '#definitions/Brand'
+            $ref: '#definitions/Brands'
         default:
           description: Unexpected error
           schema:
@@ -76,9 +76,7 @@ paths:
         200: 
           description: An array of products matching the search query.
           schema:
-            type: array
-            items: 
-              $ref: '#definitions/Product'
+            $ref: '#definitions/Products'
         default:
           description: Unexpected error
           schema:
@@ -105,6 +103,108 @@ paths:
           description: Request body missing required parameters.
         401: 
           description: Invalid username or password.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: User's cart
+      description: The logged in user can use this endpoint to see the items in their cart.
+      tags:
+        - Cart  
+      parameters:
+        - name: accessToken
+          in: path
+          required: true
+          description: Access token for user account, received after successful login.
+          type: string
+        - name: itemToAdd
+          in: body
+          description: Product ID and quantity to be added to the user's cart.
+          schema:
+            required:
+              - productId
+              - quantity
+      responses:
+        200:
+          description: Returns an array of products representing the user's cart.
+          schema: 
+            $ref: '#/definitions/Cart'
+        401:
+          description: Invalid access token. Please log in again.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add item to cart
+      description: Use this endpoint to add items to the logged in user's cart
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Returns an array of products representing the user's cart, updated with the newly added item.
+          schema:
+            $ref: '#/definitions/Cart'
+  /me/cart/{productId}:
+    delete:
+      summary: Remove item from cart
+      description: |
+        Use this endpoint to remove an item from the user's cart. This will remove all instances of the given item, regardless of quantity.
+      parameters: 
+        - name: productId
+          in: path
+          required: true
+          type: string
+        - name: accessToken
+          in: path
+          required: true
+          description: Access token for user account, received after successful login.
+          type: string
+      tags: 
+        - Cart
+      responses: 
+        200:
+          description: Returns an array of products representing the user's cart.
+          schema: 
+            $ref: '#/definitions/Cart'
+        401:
+          description: Invalid access token. Please log in again.
+        404: 
+          description: Item not found in cart.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Update quantity of item in cart
+      description: Use this endpoint to update the quantity of a product in the user's cart.
+      parameters: 
+        - name: productId
+          in: path
+          required: true
+          type: string
+        - name: accessToken
+          in: path
+          required: true
+          description: Access token for user account, received after successful login.
+          type: string
+        - name: quantity
+          in: formData
+          required: true
+          type: integer
+      tags: 
+        - Cart
+      responses: 
+        200:
+          description: Returns an array of products representing the user's cart.
+          schema: 
+            $ref: '#/definitions/Cart'
+        401:
+          description: Invalid access token. Please log in again.
+        404: 
+          description: Item not found in cart.
         default:
           description: Unexpected error
           schema:
@@ -146,16 +246,18 @@ definitions:
           $ref: '#/definitions/Brand'
   User:
     properties:
-      gender:
-        type: string
-        description: User's gender
       cart: 
-        type: array
         $ref: '#/definitions/Cart'
   Cart:
+    type: array
+    items:
+      $ref: '#/definitions/CartItem'
+  CartItem:
     properties:
-      id: 
-        type: string
+      productId:
+        $ref: '#/definitions/Product/properties/id'
+      quantity:
+        type: integer
       
   Error:
     properties:
@@ -166,6 +268,3 @@ definitions:
         type: string
       fields:
         type: object
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-basePath: /Project-Shift8/Sunglasses.io/1.0.0
