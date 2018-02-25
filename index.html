@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Sunglasses-io</title>
+  <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css"></link>
+  <link rel="stylesheet" href="style.css"></link>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-4 mt-3">
+        <h1>Sunglasses.io</h1>
+      </div>
+      <div class="col-md-4 mt-3 text-center">
+        <img class="img-fluid top-image" src="https://cdn.shopify.com/s/files/1/0148/9585/products/sunglasses-savanna-rocket-1_2000x.jpg?v=1502379611">
+      </div>
+      <div class="col-md-4 mt-3 text-right">
+        <h2>000-666-6666</h2>
+        <p>Free delivery! Call to Order!</p>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end mr-3">
+      <input id="search" placeholder="Search Brands">
+      <button class="btn btn-primary btn-sm" id="submitSearch" type="button">Search</button>
+    </div>
+
+    <nav class="navbar navbar-expand-sm bg-light">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Shop</a>
+        </li>
+        <li class="nav-item seperator">|</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Delivery</a>
+        </li>
+        <li class="nav-item seperator">|</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Articles</a>
+        </li>
+        <li class="nav-item seperator">|</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">News</a>
+        </li>
+      </ul>
+      <form class="form-inline" action="/action_page.php">
+        <input class="mr-sm-2" id="username" value="yellowleopard753" placeholder="Username">
+        <input class="mr-sm-2" id="password" type="password" value="jonjon" placeholder="Password">
+        <button class="btn btn-primary btn-sm" id="submitLoginInfo" type="button">Login</button>
+      </form>
+    </nav>
+    <div class="row">
+      <div id="loginResponse" class="col-md-4">
+        <!-- Login Response populates here -->
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- list of brands goes here -->
+      <div class="col-md-3 placeholder">
+        <ul class="brands"></ul>
+      </div>
+
+      <div class="col-md-6 placeholder">
+        Oakley > Superglasses
+        <div class="row">
+          <!-- seleected item picture goes here -->
+          <div class="col-md-6 placeholder">
+            hi
+          </div>
+
+          <!-- seleected item picture goes here -->
+          <div class="col-md-6 placeholder">
+            hi
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 placeholder">
+        <h3>Cart
+          <button class="btn btn-primary btn-sm" id="get-cart" onclick="getCart()">View Cart</button>
+        </h3>
+
+        <ul class="cart"></ul>
+        <button class="btn btn-danger btn-sm" onclick="deleteCart()">Empty Cart</button>
+      </div>
+    </div>
+
+
+
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>
