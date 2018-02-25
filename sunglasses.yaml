@@ -1,41 +1,28 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
+  description: "Sunglasses.io API"
   version: "1.0.0"
   title: "Sunglasses.io"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 host: "localhost:3001"
-basePath: "/api"
-tags:
-- name: "brands"
-  description: "Access products by brand"
-- name: "products"
-  description: "Access individual products"
-- name: "me"
-  description: "User actions"
-- name: "login"
-  description: "login"
 schemes:
 - "http"
+basePath: "/api"
+produces:
+  - "application/json"
 paths:
   /brands:
     get:
       tags:
       - "brands"
-      summary: "Get list of available brands"
-      description: ""
-      operationId: "getBrands"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/xml"
-      - "application/json"
+      summary: "Get available brands"
+      description: "Get a list of all available brands"
+      parameters:
+        - name: "limit"
+          in: "query"
+          description: "The number of results to return"
+          required: false
+          type: "number"
+          format: "int32"
       responses:
         200:
           description: "successful operation"
@@ -43,231 +30,294 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Brand"
-        500:
-          description: "Internal Server Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
   /brands/{id}/products:
     get:
       tags:
       - "brands"
       summary: "Get products by brand"
-      operationId: "getProductsByBrand"
-      produces:
-      - "application/xml"
-      - "application/json"
       parameters:
       - name: "id"
         in: "path"
         description: "ID of brand to return"
         required: true
-        type: "integer"
-        format: "int64"
+        type: "number"
       responses:
         200:
           description: "successful operation"
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/Brand"
-        400:
-          description: "Invalid status value"
+              $ref: "#/definitions/Product"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
   /products:
     get:
       tags:
       - "products"
       summary: "Search products by name"
-      operationId: "findProductsByName"
-      produces:
-      - "application/xml"
-      - "application/json"
       parameters:
       - name: "search term"
         in: "query"
-        description: "Search term to filter by"
+        description: "Search term to filter products by"
         required: true
         type: "string"
-        format: "string"
       responses:
         200:
           description: "successful operation"
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/Products"
-        404:
-          description: "No products found that match your search"
+              $ref: "#/definitions/Product"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []    
+      - apiKey: []
   /login:
     post:
       tags:
       - "login"
       summary: "User login"
       description: "Logs a user in"
-      operationId: "loginUser"
-      produces:
-      - "application/xml"
-      - "application/json"
       parameters:
-      - in: "body"
-        name: "User login info"
-        description: "User login object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - in: "body"
+          name: "user"
+          description: "Send an object containing a username and password and receive an access token"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              username:
+                type: "string"
+              password:
+                type: "string"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Brand"
-        400:
-          description: "Invalid ID supplied"
+            type: "string"
         404:
-          description: "Pet not found"
+          description: "Invalid username or password."
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
+  /me/:
+    get:
+      tags:
+      - "me"
+      summary: "Get user information"
+      description: "Receive an array of products representing the current cart."
+      parameters:
+      - name: "accessToken"
+        in: "query"
+        description: "The access token you received from the login call"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        403:
+          description: "You must be logged in to access your cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - apiKey: []
   /me/cart/:
     get:
       tags:
       - "me"
       summary: "Get cart contents"
-      description: ""
-      operationId: "getCart"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
+      description: "Receive an array of products representing the current cart."
+      parameters:
+      - name: "accessToken"
+        in: "query"
+        description: "The access token you received from the login call"
+        required: true
+        type: "string"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Brand"
-        404:
-          description: "Cart not found"
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        403:
+          description: "You must be logged in to access your cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
     post:
       tags:
       - "me"
-      summary: "Add a product to the cart"
-      description: ""
-      operationId: "addProductToCart"
-      produces:
-      - "application/json"
-      parameters: []
+      summary: "Update quantity of an existing item in the cart" 
+      description: "Send a product ID and the new quantity and recieve the updated cart."
+      parameters:
+      - name: "Product ID and new quantity"
+        in: "body"
+        description: "Send an object containing a productId and quantity and receive the updated cart"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            productId:
+              type: "number"
+            quantity:
+              type: "number"
       responses:
         200:
           description: "successful operation"
           schema:
-            type: "object"
-            additionalProperties:
-              type: "integer"
-              format: "int32"
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        400:
+          description: "Invalid product ID supplied"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
   /me/cart/{productId}:
     delete:
       tags:
       - "me"
       summary: "Delete a product from the cart"
-      description: ""
-      operationId: "placeOrder"
-      produces:
-      - "application/xml"
-      - "application/json"
+      description: "Send a product ID to remove from the cart and recieve the updated cart."
       parameters:
       - name: "productId"
         in: "path"
         description: "ID of product to delete"
         required: true
-        type: "integer"
-        format: "int64"
+        type: "number"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Brand"
-        404:
-          description: "Item not found"
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        403:
+          description: "You must be logged in to modify your cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
     post:
       tags:
       - "me"
-      summary: "Edit cart contents" 
-      description: "Update quantity of an existing item in the cart"
-      operationId: "editCartById"
-      produces:
-      - "application/xml"
-      - "application/json"
+      summary: "Add a product to the cart"
+      description: "Send a product ID to add to the cart and recieve the updated cart."
       parameters:
       - name: "productId"
         in: "path"
-        description: "ID of the cart item to be updated."
+        description: "ID of product add to cart"
         required: true
-        type: "integer"
-        maximum: 10.0
-        minimum: 1.0
-        format: "int64"
+        type: "number"
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Brand"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Item not found"
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        403:
+          description: "You must be logged in to modify your cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
       security:
-      - api_key: []
+      - apiKey: []
 securityDefinitions:
-  api_key:
+  apiKey:
     type: "apiKey"
-    name: "api_key"
     in: "header"
+    name: "X-Authentication"
 definitions:
   Brand:
     type: "object"
     properties:
       id:
-        type: "integer"
-        format: "int64"
-    xml:
-      name: "Brand"
-  Products:
+        type: "number"
+      name:
+        type: "string"
+  Product:
     type: "object"
     properties:
       id:
-        type: "integer"
-        format: "int64"
+        type: "number"
+      categoryId:
+        type: "number"
       name:
         type: "string"
-    xml:
-      name: "Category"
+      description:
+        type: "string"
+      price:
+        type: "number"
+      imageUrls:
+        type: "array"
+        items:
+          type: "string"
   User:
     type: "object"
     properties:
-      id:
-        type: "integer"
-        format: "int64"
-      username:
-        type: "string"
-      firstName:
-        type: "string"
-      lastName:
-        type: "string"
+      cart:
+        type: "array"
+        items:
+          $ref: "#/definitions/Product"
+      name:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          first:
+            type: "string"
+          last:
+            type: "string"
+      location:
+        type: "object"
+        properties:
+          street:
+            type: "string"
+          city:
+            type: "string"
+          state:
+            type: "string"
+          postcode:
+            type: "number"
       email:
         type: "string"
-      password:
-        type: "string"
-      phone:
-        type: "string"
-      userStatus:
+  Error:
+    type: "object"
+    properties:
+      code:
         type: "integer"
         format: "int32"
-        description: "User Status"
-    xml:
-      name: "User"
+      message:
+        type: "string"
+      fields:
+        type: "string"
