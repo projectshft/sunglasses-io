@@ -7,6 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Sunglasses-io</title>
   <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css"></link>
+  <link href="node_modules/open-iconic/font/css/open-iconic-bootstrap.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css"></link>
 </head>
 
@@ -17,7 +18,7 @@
         <h1>Sunglasses.io</h1>
       </div>
       <div class="col-md-4 mt-3 text-center">
-          <img class="img-fluid top-image" src="assets/unicorn_glasses.png">
+        <img class="img-fluid top-image" src="assets/unicorn_glasses.png">
       </div>
       <div class="col-md-4 mt-3 text-right">
         <h2>000-666-6666</h2>
@@ -54,19 +55,34 @@
       </form>
     </nav>
     <div class="row">
-      <div id="loginResponse" class="col-md-4">
+      <div id="loginResponse" class="col-md-4 ml-auto">
         <!-- Login Response populates here -->
       </div>
     </div>
 
     <div class="row">
       <!-- list of brands goes here -->
-      <div class="col-md-3 placeholder">
-        <h4>Brands</h4>
-        <ul class="brands"></ul>
+      <div class="col-md-3 placeholder mt-3">
+        <div class="row d-flex justify-content-center">
+          <ul class="list-group brands">
+            <li class="list-group-item">Cras justo odio</li>
+            <li class="list-group-item">Dapibus ac facilisis in</li>
+            <li class="list-group-item">Morbi leo risus</li>
+            <li class="list-group-item">Porta ac consectetur ac</li>
+            <li class="list-group-item">Vestibulum at eros</li>
+          </ul>
+        </div>
+        <div class="row d-flex justify-content-center mt-3">
+          <ul class="text-center list-group articles">
+            <li class="list-group-item">Delivery</li>
+            <li class="list-group-item">How to choose sunglasses</li>
+            <li class="list-group-item">How to care for your sunglasses</li>
+            <li class="list-group-item">all articles ></li>
+          </ul>
+        </div>
       </div>
 
-      <div class="col-md-6 placeholder">
+      <div class="col-md-6 placeholder mt-3">
         Oakley > Superglasses
         <div class="row">
           <!-- seleected item picture goes here -->
@@ -75,20 +91,26 @@
           </div>
 
           <!-- seleected item picture goes here -->
-          <div class="col-md-6 placeholder">
+          <div class="col-md-6 placeholder mt-3">
             hi
           </div>
         </div>
       </div>
 
-      <div class="col-md-3 placeholder">
-        <h4>Cart
+      <div class="col-md-3 placeholder mt-3">
+        <h4 class="text-center">
           <button class="btn btn-primary btn-sm" id="get-cart" onclick="getCart()">View Cart</button>
         </h4>
-
-        <ul class="cart"></ul>
-        <button class="btn btn-danger btn-sm" onclick="deleteCart()">Empty Cart</button>
+          <ul class="list-group cart">
+            </ul>
       </div>
+    </div>
+    <div class="row footer">
+      <hr>
+      <div class="col-md-3">Sunglasses.io</div>
+      <div class="col-md-3">Brands</div>
+      <div class="col-md-3">News</div>
+      <div class="col-md-3">Articles</div>
     </div>
 
 

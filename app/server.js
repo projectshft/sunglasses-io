@@ -57,7 +57,7 @@ myRouter.post('/api/login', function(request, response) {
 
   // Make sure there is a username and password in the request
   if (!request.body.username || !request.body.password) {
-    response.writeHead(401, "please enter both your username and password", CORS_HEADERS)
+    response.writeHead(400, "please enter both your username and password", CORS_HEADERS)
     return response.end()
   }
 
@@ -188,9 +188,15 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
     const product = products.find((product) => {
       return product.id == request.params.productId
     })
-    authUser.cart.push(product)
-    response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
-    return response.end(JSON.stringify(authUser.cart))
+    if (product) {
+      authUser.cart.push(product)
+      response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
+      return response.end(JSON.stringify(authUser.cart))
+    }
+    else {
+    response.writeHead(404, "Invalid Product Id", CORS_HEADERS)
+    return response.end()
+    }
   } 
 });
 
@@ -210,10 +216,14 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
     })
     if (deletedProductIndex != -1) {
       authUser.cart.splice(deletedProductIndex,1)
+      response.writeHead(200, {...CORS_HEADERS, 'Access-Control-Allow-Headers': '*'});
+      return response.end(JSON.stringify(authUser.cart))
     }
-    response.writeHead(200, {...CORS_HEADERS, 'Access-Control-Allow-Headers': '*'});
-    return response.end(JSON.stringify(authUser.cart))
-  } 
+    else {
+      response.writeHead(404, "Invalid Product Id", CORS_HEADERS)
+      return response.end()
+    }
+  }
 });
 
 //lets a user delete all items from their cart

@@ -46,9 +46,10 @@ function renderCart() {
 	let $container = $('.cart')
 		let cart = state.cart.map((item,index) => {
 			return `
-				<li id="${index}"> ${item.name} - ${item.price} <button id="delete-${index}" onclick="deleteItem(${index})" class="btn btn-danger btn-sm">delete</button></li>
+				<li class="list-group-item" id="${index}"> ${item.name} - $${item.price}.00 <a class="text-danger" href="#" id="delete-${index}" onclick="deleteItem(${index})"><span class="oi oi-x text-danger ml-4" title="x" aria-hidden="true"></span></a></li>
 			`
 		})
+		cart = cart + `<button class="btn btn-danger btn-sm mt-3" onclick="deleteCart()">Empty Cart</button>`
 		$container.html(cart)
 }
 

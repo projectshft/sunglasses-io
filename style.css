@@ -2,6 +2,17 @@
   font-size: x-large;
 }
 
-.placeholder {
-  border: 1px solid red
+
+.articles {
+  font-size: 11px;
+  border: 0.5px solid gray;
+  margin-top: 3px;
+}
+
+.brands {
+  border: 0.5px solid gray
+}
+
+.cart {
+  font-size: 11px;
 }
