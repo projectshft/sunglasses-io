@@ -16,7 +16,6 @@ var products = [];
 var users = [];
 var accessTokens = [];
 
-
 // Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());

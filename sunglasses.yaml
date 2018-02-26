@@ -30,6 +30,11 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Brand"
+      responses:
+        404:
+          description: "Brands not found."
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
@@ -54,6 +59,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
+        404:
+          description: "No matching products found"
+          schema:
+            $ref: '#/definitions/Error
         default:
           description: "Unexpected error"
           schema:
@@ -78,6 +87,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
+        404:
+          description: "No matching products found"
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
@@ -107,33 +120,14 @@ paths:
           description: "successful operation"
           schema:
             type: "string"
-        404:
-          description: "Invalid username or password."
-        default:
-          description: "Unexpected error"
+        401:
+          description: "Invalid username or password"
           schema:
             $ref: '#/definitions/Error'
-      security:
-      - apiKey: []
-  /me/:
-    get:
-      tags:
-      - "me"
-      summary: "Get user information"
-      description: "Receive an array of products representing the current cart."
-      parameters:
-      - name: "accessToken"
-        in: "query"
-        description: "The access token you received from the login call"
-        required: true
-        type: "string"
-      responses:
-        200:
-          description: "successful operation"
+        400:
+          description: "Incorrectly formatted response"
           schema:
-            $ref: "#/definitions/User"
-        403:
-          description: "You must be logged in to access your cart"
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
@@ -159,8 +153,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
-        403:
+        401:
           description: "You must be logged in to access your cart"
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
@@ -191,8 +187,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
-        400:
-          description: "Invalid product ID supplied"
+        401:
+          description: "You must be logged in to modify your cart"
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
@@ -218,8 +216,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
-        403:
+        401:
           description: "You must be logged in to modify your cart"
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
@@ -244,8 +244,14 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
-        403:
+        404:
+          description: "The product was not found, no changes have been made to the cart"
+          schema:
+            $ref: '#/definitions/Error'
+        401:
           description: "You must be logged in to modify your cart"
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
           schema:
