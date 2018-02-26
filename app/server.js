@@ -6,6 +6,8 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+// var url = require('url');
+
 const PORT = 3001;
 // Setup router
 var router = Router();
@@ -35,41 +37,89 @@ http.createServer(function (req, res) {
 }).listen(PORT);
 console.log("Server is listening...");
 
-router.get('/api/products', (request, response) => {
-  console.log(products)
-  response.end(JSON.stringify(products));
+router.get('/api/products', (req, res) => {
+
+  var params = queryString.parse(req._parsedUrl.query);
+  var queryLimit = parseInt(params.limit);
+  var searchedTerm = params.product;
+
+  var limit;
+  if(isNaN(queryLimit)) {
+    console.log('No limit param')
+    limit = 5
+  } else {
+    limit = queryLimit
+  }
+
+  
+  var foundProducts;
+  if(!searchedTerm) {
+    foundProducts = JSON.stringify(products.slice(0, limit));
+    
+  } else {
+    foundProducts = JSON.stringify(
+      products.find((product) => {
+        return product.name.toLowerCase() === searchedTerm.toLowerCase()
+      })
+    );
+  }
+  if(!foundProducts) {
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    res.end('The server has not found anything matching the Request,\n query parameter product is not valid or does not exist.\n');
+  } else {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(foundProducts);
+  }
+
 });
 
-router.get('/api/brands', (request, response) => {
+router.get('/api/brands', (req, res) => {
+  var params = queryString.parse(req._parsedUrl.query);
+  var queryLimit = parseInt(params.limit);
+
+  var brandsResponse = (limit) => {
+    var brandsFound = JSON.stringify(brands.slice(0, limit));
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(brandsFound);
+  }
+  
+  var limit;
+  if(isNaN(queryLimit)) {
+    console.log('No limit param')
+    limit = 5
+    brandsResponse(limit);
+  } else {
+    limit = queryLimit
+    brandsResponse(limit);
+  }
+  
+});
+
+router.get('/api/brands/:id/products', (req, res) => {
   console.log(brands)
-  response.end(JSON.stringify(brands));
+  res.end(JSON.stringify(brands));
 });
 
-router.get('/api/brands/:id/products', (request, response) => {
-  console.log(brands)
-  response.end(JSON.stringify(brands));
+router.post('/api/login', (req, res) => {
+
+  res.end('Logged in');
 });
 
-router.post('/api/login', (request, response) => {
-
-  response.end('Logged in');
-});
-
-router.get('/api/me/cart', (request, response) => {
+router.get('/api/me/cart', (req, res) => {
   console.log(users[0].cart)
-  response.end(JSON.stringify(users[0].cart));
+  res.end(JSON.stringify(users[0].cart));
 });
 
-router.post('/api/me/cart', (request, response) => {
-  response.end("Cart sent to checkout");
+router.post('/api/me/cart', (req, res) => {
+  res.end("Cart sent to checkout");
   
 });
-router.delete('/api/me/cart/:productId', (request, response) => {
+router.delete('/api/me/cart/:productId', (req, res) => {
   
-  response.end("Product deleted from cart");
+  res.end("Product deleted from cart");
 });
 
-router.post('/api/me/cart/:productId', (request, response) => {
-  response.end("Product added to cart");
+router.post('/api/me/cart/:productId', (req, res) => {
+  res.end("Product added to cart");
   
 });
