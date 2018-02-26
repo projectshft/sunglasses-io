@@ -10,6 +10,7 @@ var urlParse = require('url').parse;
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 const DEFAULT_NUMBER_OF_BRANDS = 4; // Based on wireframe
+const VALID_PRODUCT_PROPERTIES = ['id', 'categoryId', 'name', 'description', 'price', 'imageUrls'];
 
 // Created with https://www.uuidgenerator.net/
 const VALID_API_KEY = '1740208b-7533-4b0a-af7e-6b1828a5955a';
@@ -177,39 +178,63 @@ var getValidTokenFromRequest = function(request) {
 };
 
 // The shopping cart cannot be seen unless a user logs in
-myRouter.get('/api/me/cart', function(request,response) {
+myRouter.get('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, 'You need to have access to this call to continue', CORS_HEADERS);
-    response.end();
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue.
+    errorResponse(401, 'You need to have access to this call to continue');
   } else {
-    const parsedUrlQuery = urlParse(request.url, true).query;
-    currentUser = users.find( (user) => {
+    const currentUser = users.find( (user) => {
+      return user.email === currentAccessToken.username;
+    });
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end(JSON.stringify(currentUser.cart));
+  }
+});
+
+// Cannot add to the shopping cart unless a user logs in
+myRouter.post('/api/me/cart', function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue.
+    errorResponse(401, 'You need to have access to this call to continue');
+  } else {
+    const currentUser = users.find( (user) => {
+      return user.email === currentAccessToken.username;
+    });
+    // Get enumerable properties of request body to ensure all product properties are present.
+    const requestBodyProperties = Object.getOwnPropertyNames(request.body);
+    const isValidProduct = VALID_PRODUCT_PROPERTIES.every( (propertyName, index) => {
+      return propertyName === requestBodyProperties[index];
+    });
+    if (!isValidProduct) {
+      errorResponse(400, 'Incorrectly formatted request');
+    }
+    currentUser.cart = [ ...currentUser.cart, request.body ];
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end(JSON.stringify(currentUser.cart));
+  }
+});
+
+// Cannot update unless a user has logged in
+myRouter.post('/api/me/cart/:productId', function(request, response) {
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    errorResponse(401, 'You need to have access to this call to continue');
+  } else {    
+    const currentUser = users.find( (user) => {
       return user.email === currentAccessToken.username;
     });
 
-    if (parseUrlQuery.query) {
+    let validProductInCart = currentUser.cart.find( (product) => {
+      return product.id === request.params.id;
+    })
 
-      
-      // If there's a query, match it and return based on match
-      // Handle filter even if there's no query 
-
-
-      // If there isn't a store with that id, then return a 404
-      response.writeHead(404, 'That store cannot be found', CORS_HEADERS);
-      response.end();
-      return;
-    } else {
-      // Only if the user has access to that store do we return the issues from the store
-      if (currentUser.storeIds.includes(request.params.storeId)) {
-        response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-        response.end(JSON.stringify(store.issues));
-      } else {
-        response.writeHead(403, 'You don\'t have access to that store', CORS_HEADERS);
-        response.end();
-        return;
-      }
+    if (!validProductInCart) {
+      errorResponse(404, 'This resource does not exist.');
     }
+    validProductInCart.quantity += 1;
+
+
   }
 });

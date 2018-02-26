@@ -117,29 +117,13 @@ paths:
       summary: Get a user's shopping cart 
       description: |
         This endpoint allows a logged in user to get a list of all the items in his/her shopping cart.
-      parameters:
-        - name: query
-          in: query
-          description: A string by which to search for items in the shopping car
-          required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - name
-              - price
       tags:
         - Shopping Cart
       responses:
         '200':
           description: A list of products in a user's shopping cart
-        '400':
-          description: Improperly formatted query
+        '401':
+          description: You need to have access to continue.
           schema:
             $ref: '#/definitions/Error'
     post:
@@ -153,6 +137,10 @@ paths:
           description: Successful addition to shopping cart
         '401':
           description: You need to have access to continue.
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: Bad request format
           schema:
             $ref: '#/definitions/Error'
   /me/cart/{productId}:
