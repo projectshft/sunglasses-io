@@ -101,9 +101,7 @@ myRouter.get('/api/products', (request, response) => {
         var parsedUrl = require('url').parse(request.url,true);
         if (parsedUrl.query.search) {
             let searchedProducts = products.filter((product) => {
-                if (product.name.toUpperCase().includes(parsedUrl.query.search.toUpperCase())) {
-                    return product.name;
-                };
+                return product.name.toUpperCase().includes(parsedUrl.query.search.toUpperCase())
             });
             response.end(JSON.stringify(searchedProducts));
         } else {
@@ -164,13 +162,8 @@ myRouter.get('/api/me/cart', (request, response) => {
        let user = users.find((user) => {
            return user.login.username == currentAccessToken.username;
        });
-       if (user.cart.length > 0) {
-           response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
-           response.end(JSON.stringify(user.cart));
-       } else {
-           response.writeHead(404, "Your cart is empty", CORS_HEADERS);
-           response.end();
-       }
+        response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
+        response.end(JSON.stringify(user.cart));
    } else {
        response.writeHead(401, "You must be logged in to continue", CORS_HEADERS);
        response.end();
@@ -183,17 +176,12 @@ myRouter.post('/api/me/cart', (request, response) => {
         let user = users.find((user) => {
             return user.login.username == currentAccessToken.username;
         });
-        if (user.cart.length > 0) {
-            user.cart.forEach((product) => {
-                user.purchasedCart.push(product);
-            });
-            user.cart = [];
-            response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
-            response.end(JSON.stringify(user.purchasedCart));
-        } else {
-            response.writeHead(404, "Your cart is empty", CORS_HEADERS);
-            response.end();
-        }
+        user.cart.forEach((product) => {
+            user.purchasedCart.push(product);
+        });
+        user.cart = [];
+        response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
+        response.end(JSON.stringify(user.purchasedCart));
     } else {
         response.writeHead(401, "You must be logged in to continue", CORS_HEADERS);
         response.end();
@@ -251,7 +239,7 @@ myRouter.post('/api/me/cart/:id', (request, response) => {
                 user.cart[index].amount++;
             }
             response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
-            response.end(JSON.stringify(product));
+            response.end(JSON.stringify(user.cart));
         } else {
             response.writeHead(404, "That product cannot be found", CORS_HEADERS);
             response.end();
