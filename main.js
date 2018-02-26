@@ -7,7 +7,9 @@ let state = {
 		password: ''
 	},
 	token: '',
-	cart: []
+	cart: [],
+	products: [],
+	brands: []
 }
 
 function userLogin(url, data) {
@@ -15,7 +17,6 @@ function userLogin(url, data) {
 		method: 'POST',
 		body: JSON.stringify(data),
 		headers: {
-			"x-authentication": "hi",
 			'content-type': 'application/json'
 		}
 	})
@@ -44,13 +45,15 @@ function renderToken() {
 
 function renderCart() {
 	let $container = $('.cart')
-		let cart = state.cart.map((item,index) => {
+	let cartItems = ""
+	cartItems = state.cart.map((item, index) => {
 			return `
 				<li class="list-group-item" id="${index}"> ${item.name} - $${item.price}.00 <a class="text-danger" href="#" id="delete-${index}" onclick="deleteItem(${index})"><span class="oi oi-x text-danger ml-4" title="x" aria-hidden="true"></span></a></li>
 			`
 		})
-		cart = cart + `<button class="btn btn-danger btn-sm mt-3" onclick="deleteCart()">Empty Cart</button>`
-		$container.html(cart)
+		cartItems.forEach((item) => $container.append(item))
+		const emptyCartButton = `<button class="btn btn-danger btn-sm mt-3" onclick="deleteCart()">Empty Cart</button>`
+		$container.append(emptyCartButton)
 }
 
 function getCart() {
@@ -100,3 +103,46 @@ function deleteCart() {
 		.then(() => getCart())
 		.catch(err => console.log(err))
 }
+
+function getProducts() {
+	let url = `${BASEURL}/api/products`
+	return fetch(url, {
+		method: 'GET',
+		headers: {
+			'content-type': 'application/json'
+		}
+	})
+		.then(response => response.json())
+		.then(data => {
+			state.products = data
+			renderProducts()
+		})
+		.catch(err => console.log(err))
+}
+
+function getBrands() {
+	let url = `${BASEURL}/api/brands`
+	return fetch(url, {
+		method: 'GET',
+		headers: {
+			'content-type': 'application/json'
+		}
+	})
+		.then(response => response.json())
+		.then(data => {
+			state.brands = data
+			renderBrands()
+		})
+		.catch(err => console.log(err))
+}
+
+function renderProducts () {
+	return
+}
+
+function renderBrands () {
+	return
+}
+
+getProducts()
+getBrands()
