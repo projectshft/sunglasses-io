@@ -22,7 +22,6 @@ paths:
           description: "The number of results to return"
           required: false
           type: "number"
-          format: "int32"
       responses:
         200:
           description: "successful operation"
@@ -30,15 +29,10 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Brand"
-      responses:
         404:
           description: "Brands not found."
-          schema:
-            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
   /brands/{id}/products:
@@ -61,12 +55,8 @@ paths:
               $ref: "#/definitions/Product"
         404:
           description: "No matching products found"
-          schema:
-            $ref: '#/definitions/Error
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
   /products:
@@ -89,12 +79,8 @@ paths:
               $ref: "#/definitions/Product"
         404:
           description: "No matching products found"
-          schema:
-            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
   /login:
@@ -120,18 +106,12 @@ paths:
           description: "successful operation"
           schema:
             type: "string"
-        401:
-          description: "Invalid username or password"
-          schema:
-            $ref: '#/definitions/Error'
         400:
           description: "Incorrectly formatted response"
-          schema:
-            $ref: '#/definitions/Error'
+        401:
+          description: "Invalid username or password"
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
   /me/cart/:
@@ -155,12 +135,8 @@ paths:
               $ref: "#/definitions/Product"
         401:
           description: "You must be logged in to access your cart"
-          schema:
-            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
     post:
@@ -189,12 +165,8 @@ paths:
               $ref: "#/definitions/Product"
         401:
           description: "You must be logged in to modify your cart"
-          schema:
-            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
   /me/cart/{productId}:
@@ -218,12 +190,8 @@ paths:
               $ref: "#/definitions/Product"
         401:
           description: "You must be logged in to modify your cart"
-          schema:
-            $ref: '#/definitions/Error'
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
     post:
@@ -244,18 +212,12 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Product"
-        404:
-          description: "The product was not found, no changes have been made to the cart"
-          schema:
-            $ref: '#/definitions/Error'
         401:
           description: "You must be logged in to modify your cart"
-          schema:
-            $ref: '#/definitions/Error'
+        404:
+          description: "The product was not found, no changes have been made to the cart"
         default:
           description: "Unexpected error"
-          schema:
-            $ref: '#/definitions/Error'
       security:
       - apiKey: []
 securityDefinitions:
@@ -316,14 +278,4 @@ definitions:
           postcode:
             type: "number"
       email:
-        type: "string"
-  Error:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      message:
-        type: "string"
-      fields:
         type: "string"
