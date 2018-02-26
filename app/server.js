@@ -59,14 +59,9 @@ http.createServer(function (request, response) {
 
 const getBrands = (numberOfBrands) => {
   return brands.filter( (brand, index) => {
-    return index <= numberOfBrands;
+    return index < numberOfBrands;
   })
 }
-
-const errorResponse = (errorCode, errorMessage) => {
-  response.writeHead(errorCode, errorMessage);
-  return response.end();
-};
 
 // Public route - all users of API can access brands
 myRouter.get('/api/brands', function(request, response) {
@@ -81,23 +76,41 @@ myRouter.get('/api/brands', function(request, response) {
     }
     return response.end(JSON.stringify(getBrands(maxResults)));
   } else {
-    errorResponse(400, 'Improperly formatted request');
+    response.writeHead(400, 'Improperly formatted request');
+    return response.end();
   }
 });
 
 // Public route
-myRouter.get('api/brands/:brandId/products', function(request, response) {
+myRouter.get('/api/brands/:brandId/products', function(request, response) {
   isValidBrandId = brands.find( brand => brand.id === request.params.brandId);
 
   if (!isValidBrandId) {
-    errorResponse(404, 'Brand not found');
+    response.writeHead(404, 'Brand not found');
+    return response.end();
   }
 
-  const productsByBrandId = products.filter( product => {
+  const productsFilteredByBrandId = products.filter( product => {
     return product.categoryId === request.params.brandId;
   });
   response.writeHead(200, 'List of products for a given brand');
-  response.end(JSON.stringify(productsByBrandId));
+  response.end(JSON.stringify(productsFilteredByBrandId));
+});
+
+// Public route - search for products
+myRouter.get('/api/products', function(request, response) {
+  const searchQuery = urlParse(request.url, true).query.query;
+  // User should not be able to search for an empty string
+  if (!searchQuery || !searchQuery.trim()) {
+    response.writeHead(400, 'Improperly formatted request');
+    return response.end();
+  }
+  const queryExpression = new RegExp(searchQuery, 'i');
+  productsFilteredBySearchQuery = products.filter( (product) => {
+    return product.name.match(queryExpression);
+  });
+  response.writeHead(200, {'Content-Type': 'application/json'});
+  response.end(JSON.stringify(productsFilteredBySearchQuery));
 });
 
 // Login call
@@ -109,20 +122,27 @@ myRouter.post('/api/login', function(request, response) {
     let validUser = users.find((user)=>{
       return user.email == request.body.username;
     });
+
+    if (!validUser) {
+      response.writeHead(401, 'Invalid username or password');
+      return response.end();
+    }
+
     if (!validUser.loginAttempts) {
       validUser.loginAttempts = 0;
     }
     if (validUser.loginAttempts >= 3) {
-      errorResponse(403, 'Exceeded maximum number of attempts', CORS_HEADERS);
+      response.writeHead(403, 'Exceeded maximum number of attempts');
+      return response.end();
     }
   
     // See if there is a user that has that username and password 
     let user = users.find((user)=>{
-      return user.login.username == request.body.username && user.login.password == request.body.password;
+      return user.email == request.body.username && user.login.password == request.body.password;
     });
     if (user) {
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+      response.writeHead(200, {'Content-Type': 'application/json'});
   
       user.loginAttempts = 0;
   
@@ -151,11 +171,13 @@ myRouter.post('/api/login', function(request, response) {
         validUser.loginAttempts += 1;
       }
       // When a login fails, tell the client in a generic way that either the username or password was wrong
-      errorResponse(401, 'Invalid username or password');
+      response.writeHead(401, 'Invalid username or password');
+      return response.end();
     }
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-    errorResponse(400, 'Incorrectly formatted response');
+    response.writeHead(400, 'Incorrectly formatted request');
+    return response.end();
   }
 });
 
@@ -182,7 +204,8 @@ myRouter.get('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue.
-    errorResponse(401, 'You need to have access to this call to continue');
+    response.writeHead(401, 'You need to have access to continue.');
+    response.end();
   } else {
     const currentUser = users.find( (user) => {
       return user.email === currentAccessToken.username;
@@ -197,7 +220,8 @@ myRouter.post('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue.
-    errorResponse(401, 'You need to have access to this call to continue');
+    response.writeHead(401, 'You need to have access to continue.');
+    response.end();
   } else {
     const currentUser = users.find( (user) => {
       return user.email === currentAccessToken.username;
@@ -208,33 +232,75 @@ myRouter.post('/api/me/cart', function(request, response) {
       return propertyName === requestBodyProperties[index];
     });
     if (!isValidProduct) {
-      errorResponse(400, 'Incorrectly formatted request');
+      response.writeHead(400, 'Incorrectly formatted request');
+      response.end();
     }
-    currentUser.cart = [ ...currentUser.cart, request.body ];
+    const itemAlreadyInCart = currentUser.cart.find( (product) => {
+      return product.name === request.body.name;
+    });
+    if (!itemAlreadyInCart) {
+      currentUser.cart = [ ...currentUser.cart, request.body ];
+    }
     response.writeHead(200, {'Content-Type': 'application/json'});
-    response.end(JSON.stringify(currentUser.cart));
+    response.end(JSON.stringify(request.body));
   }
 });
 
-// Cannot update unless a user has logged in
+// Cannot update a product's quantity unless a user has logged in
 myRouter.post('/api/me/cart/:productId', function(request, response) {
   const currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    errorResponse(401, 'You need to have access to this call to continue');
+    response.writeHead(401, 'You need to have access to continue.');
+    response.end();
   } else {    
     const currentUser = users.find( (user) => {
       return user.email === currentAccessToken.username;
     });
 
     let validProductInCart = currentUser.cart.find( (product) => {
-      return product.id === request.params.id;
+      return product.id === request.params.productId;
     })
 
     if (!validProductInCart) {
-      errorResponse(404, 'This resource does not exist.');
+      response.writeHead(404, 'This resource does not exist.');
+      return response.end();
     }
-    validProductInCart.quantity += 1;
+    const quantityInQuery = urlParse(request.url, true).query.quantity;
+    if (!quantityInQuery || !parseInt(quantityInQuery)) {
+      response.writeHead(400, 'Incorrectly formatted request');
+      return response.end();
+    }
+    validProductInCart.quantity = parseInt(quantityInQuery);
+    response.writeHead(200, 'Successfully updated cart item');
+    response.end();
 
+  }
+});
+
+// Cannot delete a product unless a user has logged in
+myRouter.delete('/api/me/cart/:productId', function(request, response) {
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, 'You need to have access to continue.');
+    response.end();
+  } else {    
+    const currentUser = users.find( (user) => {
+      return user.email === currentAccessToken.username;
+    });
+
+    let validProductInCart = currentUser.cart.find( (product) => {
+      return product.id === request.params.productId;
+    })
+
+    if (!validProductInCart) {
+      response.writeHead(404, 'This resource does not exist.');
+      return response.end();
+    }
+    currentUser.cart = currentUser.cart.filter( (product) => {
+      return product.id !== request.params.productId;
+    });
+    response.writeHead(200, 'Successfully deleted cart item');
+    response.end();
 
   }
 });

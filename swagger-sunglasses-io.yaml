@@ -1,7 +1,8 @@
 swagger: '2.0'
 info:
   title: Sunglasses.io API
-  description: An API for sunglasses.io
+  description: An API for sunglasses.io that allows users to browse brands and
+  products as well as add/update/remove items in the shopping cart.
   version: 0.1 BETA
 host: localhost:3001
 schemes:
@@ -26,7 +27,7 @@ paths:
         - Brands
       responses:
         '200':
-          description: Array of brands
+          description: Success; return an array of brands
           schema:
             type: array
             items:
@@ -64,30 +65,20 @@ paths:
     get:
       summary: Get a list of products in the store.
       description: |
-        This endpoint allows you to search for products matching a search query and/or sorted by select filters.
+        This endpoint allows you to search for products matching a search query.
       parameters:
         - name: query
           in: query
           description: A string by which to search for products
-          required: false
+          required: true
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - name
-              - price
       tags:
         - Products
       responses:
         '200':
           description: Successful product search
         '400':
-          description: Improperly formatted query
+          description: Improperly formatted request
           schema:
             $ref: '#/definitions/Error'
   /login:
@@ -102,7 +93,7 @@ paths:
           description: Successful login
         '403':
           description: Exceeded maximum number of attempts
-          scheme:
+          schema:
             $ref: '#/definitions/Error'
         '401':
           description: Invalid username or password
@@ -140,7 +131,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         '400':
-          description: Bad request format
+          description: Incorrectly formatted request
           schema:
             $ref: '#/definitions/Error'
   /me/cart/{productId}:
@@ -155,6 +146,12 @@ paths:
           required: true
           type: number
           format: int32
+        - name: quantity
+          in: query
+          description: Updated quantity value for a product in a user's shopping cart.
+          required: true
+          type: number
+          format: int32
       tags:
         - Shopping Cart
       responses:
@@ -166,6 +163,10 @@ paths:
             $ref: '#/definitions/Error'
         '404':
           description: This resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: Incorrectly formatted request
           schema:
             $ref: '#/definitions/Error'
     delete:
@@ -275,9 +276,9 @@ definitions:
           sha256:
             type: string
       dob:
-        type: date
+        type: string
       registered:
-        type: date
+        type: string
       phone:
         type: string
       cell:

@@ -1,5 +1,9 @@
-## Sunglasses.io Server Starter
+## Sunglasses<span>.</span>io Server Starter &#x1f576;
 
-This project is a starter for the Sunglasses.io eval.  
+If using VS Code, use the Sunglasses<span>.</span>io debugger launch configuration in the Debug panel to start the test server for the API.
 
-Don't forget to update this file with helpful hints on how to run the application.
+Alternately, use `npm start` to run the server from a terminal window.
+
+Using Postman will allow you to test the available endpoints. All endpoints require a valid API key. See swagger-sunglasses-io.yaml for full documentation of the API.
+
+Happy hackings!
