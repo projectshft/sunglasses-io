@@ -8,8 +8,8 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 // Setup router
-var myRouter = Router();
-myRouter.use(bodyParser.json());
+var router = Router();
+router.use(bodyParser.json());
 
 var brands;
 fs.readFile('brands.json', (err, data) => {
@@ -31,7 +31,45 @@ fs.readFile('users.json', (err, data) => {
 });
 
 http.createServer(function (req, res) {
-  myRouter(req, res, finalHandler(req, res));
+  router(req, res, finalHandler(req, res));
 }).listen(PORT);
 console.log("Server is listening...");
 
+router.get('/api/products', (request, response) => {
+  console.log(products)
+  response.end(JSON.stringify(products));
+});
+
+router.get('/api/brands', (request, response) => {
+  console.log(brands)
+  response.end(JSON.stringify(brands));
+});
+
+router.get('/api/brands/:id/products', (request, response) => {
+  console.log(brands)
+  response.end(JSON.stringify(brands));
+});
+
+router.post('/api/login', (request, response) => {
+
+  response.end('Logged in');
+});
+
+router.get('/api/me/cart', (request, response) => {
+  console.log(users[0].cart)
+  response.end(JSON.stringify(users[0].cart));
+});
+
+router.post('/api/me/cart', (request, response) => {
+  response.end("Cart sent to checkout");
+  
+});
+router.delete('/api/me/cart/:productId', (request, response) => {
+  
+  response.end("Product deleted from cart");
+});
+
+router.post('/api/me/cart/:productId', (request, response) => {
+  response.end("Product added to cart");
+  
+});
