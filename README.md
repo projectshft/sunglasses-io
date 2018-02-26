@@ -1,5 +1,5 @@
-## Sunglasses.io Server Starter
+## Sunglasses.io Server
 
-This project is a starter for the Sunglasses.io eval.  
+This project creates an API for the Sunglasses.io eval. 
 
-Don't forget to update this file with helpful hints on how to run the application.
+Please read [the sunglasses.yaml file](/sunglasses.yaml) for details on using the API.
