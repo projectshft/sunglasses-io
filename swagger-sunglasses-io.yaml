@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: Sunglasses.io API
   description: An API for sunglasses.io
-  version: 1.0.0
+  version: 0.1 BETA
 host: localhost:3001
 schemes:
   - http
@@ -26,7 +26,7 @@ paths:
         - Brands
       responses:
         '200':
-          description: An array of brand objects with the id and name of each brand.
+          description: Array of brands
           schema:
             type: array
             items:
@@ -100,12 +100,16 @@ paths:
       responses:
         '200':
           description: Successful login
+        '403':
+          description: Exceeded maximum number of attempts
+          scheme:
+            $ref: '#/definitions/Error'
         '401':
           description: Invalid username or password
           schema:
             $ref: '#/definitions/Error'
         '400':
-          description: Improperly formatted request
+          description: Incorrectly formatted request
           schema:
             $ref: '#/definitions/Error'
   /me/cart:
