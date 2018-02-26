@@ -1,0 +1,306 @@
+swagger: "2.0"
+info:
+  description: "Sunglasses.io API"
+  version: "1.0.0"
+  title: "Sunglasses.io"
+host: "localhost:3001"
+schemes:
+- "http"
+basePath: "/api"
+produces:
+  - "application/json"
+paths:
+  /brands:
+    get:
+      tags:
+      - "brands"
+      summary: "Get available brands"
+      description: "Get a list of all available brands"
+      parameters:
+        - name: "limit"
+          in: "query"
+          description: "The number of results to return"
+          required: false
+          type: "number"
+      responses:
+        200:
+          description: "successful operation"
+          schema: 
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        404:
+          description: "Brands not found."
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+  /brands/{id}/products:
+    get:
+      tags:
+      - "brands"
+      summary: "Get products by brand"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of brand to return"
+        required: true
+        type: "number"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: "No matching products found"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+  /products:
+    get:
+      tags:
+      - "products"
+      summary: "Search products by name"
+      parameters:
+      - name: "search term"
+        in: "query"
+        description: "Search term to filter products by"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: "No matching products found"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+  /login:
+    post:
+      tags:
+      - "login"
+      summary: "User login"
+      description: "Logs a user in"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "Send an object containing a username and password and receive an access token"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              username:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        400:
+          description: "Incorrectly formatted response"
+        401:
+          description: "Invalid username or password"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+  /me/:
+    get:
+      tags:
+      - "me"
+      summary: "Get user info"
+      description: "Receive an object containing user info."
+      parameters:
+      - name: "accessToken"
+        in: "query"
+        description: "The access token you received from the login call"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        401:
+          description: "You must be logged in to access your account"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+  /me/cart/:
+    get:
+      tags:
+      - "me"
+      summary: "Get cart contents"
+      description: "Receive an array of products representing the current cart."
+      parameters:
+      - name: "accessToken"
+        in: "query"
+        description: "The access token you received from the login call"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        401:
+          description: "You must be logged in to access your cart"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+    post:
+      tags:
+      - "me"
+      summary: "Update quantity of an existing item in the cart" 
+      description: "Send a product ID and the new quantity and recieve the updated cart."
+      parameters:
+      - name: "Product ID and new quantity"
+        in: "body"
+        description: "Send an object containing a productId and quantity and receive the updated cart"
+        required: true
+        schema:
+          type: "object"
+          properties:
+            productId:
+              type: "number"
+            quantity:
+              type: "number"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        401:
+          description: "You must be logged in to modify your cart"
+        404:
+          description: "The specified product was not found"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+  /me/cart/{productId}:
+    delete:
+      tags:
+      - "me"
+      summary: "Delete a product from the cart"
+      description: "Send a product ID to remove from the cart and recieve the updated cart."
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "ID of product to delete"
+        required: true
+        type: "number"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        401:
+          description: "You must be logged in to modify your cart"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+    post:
+      tags:
+      - "me"
+      summary: "Add a product to the cart"
+      description: "Send a product ID to add to the cart and recieve the updated cart."
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "ID of product add to cart"
+        required: true
+        type: "number"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        401:
+          description: "You must be logged in to modify your cart"
+        404:
+          description: "The product was not found, no changes have been made to the cart"
+        default:
+          description: "Unexpected error"
+      security:
+      - apiKey: []
+securityDefinitions:
+  apiKey:
+    type: "apiKey"
+    in: "header"
+    name: "X-Authentication"
+definitions:
+  Brand:
+    type: "object"
+    properties:
+      id:
+        type: "number"
+      name:
+        type: "string"
+  Product:
+    type: "object"
+    properties:
+      id:
+        type: "number"
+      categoryId:
+        type: "number"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      price:
+        type: "number"
+      imageUrls:
+        type: "array"
+        items:
+          type: "string"
+  User:
+    type: "object"
+    properties:
+      cart:
+        type: "array"
+        items:
+          $ref: "#/definitions/Product"
+      name:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          first:
+            type: "string"
+          last:
+            type: "string"
+      location:
+        type: "object"
+        properties:
+          street:
+            type: "string"
+          city:
+            type: "string"
+          state:
+            type: "string"
+          postcode:
+            type: "number"
+      email:
+        type: "string"
