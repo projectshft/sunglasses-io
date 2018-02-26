@@ -17,7 +17,7 @@ let users = [];
 let accessTokens = [];
 
 
-//setup boilerplate headers to be used for composing response headers
+//setup boilerplate headers to be used for composing response headers. Deal with CORS, just in case I create a front end.
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Authentication" };
 const JSON_HEADERS = { "Content-Type": 'application/json' };
 const DEFAULT_HEADERS = { ...CORS_HEADERS, ...JSON_HEADERS };
@@ -105,7 +105,7 @@ http.createServer(function (request, response) {
     let requestedProducts = products.filter((product) => {
       //in products array, categoryId represents brand. use that to filter products.
       return product.categoryId === request.params.brandId;
-    })
+    });
 
     //if a brand is found matching requested brand id, return a list of products of that brand. otherwise, return error.
     if (requestedProducts.length) {
@@ -131,11 +131,9 @@ http.createServer(function (request, response) {
           || product.description.toLowerCase().includes(searchTerm);
       });
 
-      let responseContent = productsMatchingSearchTerm.length
-        ? JSON.stringify(productsMatchingSearchTerm)
-        : JSON.stringify(`Sorry, none of our products matched your search for '${searchTerm}'`);
+    //if no products match search term, an empty array will be returned. Front end is responsible for conveying to user that no products matched the search term.
 
-      return response.end(responseContent);
+      return response.end(JSON.stringify(productsMatchingSearchTerm));
 
     } else {
       response.writeHead(400, "you must provide a search term");

@@ -7,12 +7,11 @@ info:
   
 schemes: 
   - https
-# host: sunglasses.io
-# basePath: /api
+host: sunglasses.io
+basePath: /api
 
 consumes:
   - application/json
-  - application/x-www-form-urlencoded
   
 produces: 
   - application/json
@@ -76,6 +75,8 @@ paths:
           description: An array of products matching the search query.
           schema:
             $ref: '#definitions/Products'
+        400:
+          description: You must provide a search term.
         default:
           description: Unexpected error
           schema:
@@ -99,7 +100,7 @@ paths:
         200:
           description: Returns an access token to the user
         400:
-          description: Request body missing required parameters.
+          description: Request body missing required parameters, username and password.
         401: 
           description: Invalid username or password.
         default:
@@ -114,7 +115,7 @@ paths:
         - Cart  
       parameters:
         - name: accessToken
-          in: path
+          in: query
           required: true
           description: Access token for user account, received after successful login.
           type: string
@@ -134,7 +135,7 @@ paths:
       description: Use this endpoint to add items to the logged in user's cart
       parameters:
       - name: accessToken
-        in: path
+        in: query
         required: true
         description: Access token for user account, received after successful login.
         type: string
@@ -143,12 +144,16 @@ paths:
         required: true
         description: Product ID and quantity to be added to the user's cart.
         schema:
-          $ref: '#/definitions/CartItem'
+          $ref: '#/definitions/ItemToAdd'
       tags:
         - Cart
       responses:
         200:
           description: Returns an array of products representing the user's cart, updated with the newly added item.
+        400: 
+          description: Bad request. Request body must have a product ID and quantity.
+        401: 
+          description: Invalid access token or invalid product ID.
           schema:
             $ref: '#/definitions/Cart'
   /me/cart/{productId}:
@@ -162,7 +167,7 @@ paths:
           required: true
           type: string
         - name: accessToken
-          in: path
+          in: query
           required: true
           description: Access token for user account, received after successful login.
           type: string
@@ -174,9 +179,7 @@ paths:
           schema: 
             $ref: '#/definitions/Cart'
         401:
-          description: Invalid access token. Please log in again.
-        404: 
-          description: Item not found in cart.
+          description: Invalid access token or item not found in cart.
         default:
           description: Unexpected error
           schema:
@@ -190,14 +193,14 @@ paths:
           required: true
           type: string
         - name: accessToken
-          in: path
+          in: query
           required: true
           description: Access token for user account, received after successful login.
           type: string
         - name: quantity
-          in: formData
+          in: query
           required: true
-          type: integer
+          type: string
       tags: 
         - Cart
       responses: 
@@ -206,9 +209,7 @@ paths:
           schema: 
             $ref: '#/definitions/Cart'
         401:
-          description: Invalid access token. Please log in again.
-        404: 
-          description: Item not found in cart.
+          description: Invalid access token, product not found in cart, or inappropriate quantity.
         default:
           description: Unexpected error
           schema:
@@ -258,11 +259,16 @@ definitions:
       $ref: '#/definitions/CartItem'
   CartItem:
     properties:
-      productId:
+      product:
+        $ref: '#/definitions/Product'
+      quantity:
+        type: integer
+  ItemToAdd:
+    properties:
+      productId: 
         $ref: '#/definitions/Product/properties/id'
       quantity:
         type: integer
-      
   Error:
     properties:
       code:
@@ -272,6 +278,3 @@ definitions:
         type: string
       fields:
         type: object
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-basePath: /Project-Shift8/Sunglasses.io/1.0.0
