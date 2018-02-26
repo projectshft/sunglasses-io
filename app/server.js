@@ -188,38 +188,39 @@ myRouter.post('/api/me/cart', (request, response) => {
     let productId = request.body.productId;
     let newQuantity = request.body.quantity;
     let currentQuantity = user.cart.filter(product => product.id == productId).length;
-    
-    // We are either INCREASING the current quantity...
-    if (currentQuantity < newQuantity) {
-      let productToAdd = products.filter(product => product.id == productId);
-      //verify that the product exists.
-      if (productToAdd.length > 0) {
+    let productToModify = products.filter(product => product.id == productId);
+    //verify the product ID
+    if (productToModify.length > 0) {
+      // We are either INCREASING the current quantity...
+      if (currentQuantity < newQuantity) {
         //set the number by which to modify the quantity.
         let diff = newQuantity - currentQuantity
         //add the product to the cart until diff is 0.
         while (diff > 0) {
-          user.cart.push(productToAdd[0]);
+          user.cart.push(productToModify[0]);
           diff--;
         }
-      }
-    //... or we are DECREASING the current quantity.
-      } else if (currentQuantity > newQuantity) {
-        //set the number by which to modify the quantity.
-        let diff = currentQuantity - newQuantity;
-        //Iterate through cart. When a match occurs, delete it until diff = 0.
-        for (let i = 0; i < user.cart.length; i++) {
-          let currentItem = user.cart[i];
-          if (currentItem.id == productId) {
-            while (diff > 0) {
-              user.cart.splice(i, 1);
-              diff--;
+      //... or we are DECREASING the current quantity.
+        } else if (currentQuantity > newQuantity) {
+          //set the number by which to modify the quantity.
+          let diff = currentQuantity - newQuantity;
+          //Iterate through cart. When a match occurs, delete it until diff = 0.
+          for (let i = 0; i < user.cart.length; i++) {
+            let currentItem = user.cart[i];
+            if (currentItem.id == productId) {
+              while (diff > 0) {
+                user.cart.splice(i, 1);
+                diff--;
+              }
             }
           }
         }
-      }
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    return response.end(JSON.stringify(user.cart));
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(user.cart));
     }
+    response.writeHead(404, "The specified product was not found")
+    return response.end();
+  }
   response.writeHead(401, "You must be logged in to modify your cart")
   return response.end();
 });

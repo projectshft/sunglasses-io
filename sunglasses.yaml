@@ -188,6 +188,8 @@ paths:
               $ref: "#/definitions/Product"
         401:
           description: "You must be logged in to modify your cart"
+        404:
+          description: "The specified product was not found"
         default:
           description: "Unexpected error"
       security:
