@@ -16,13 +16,10 @@ const VALID_PRODUCT_PROPERTIES = ['id', 'categoryId', 'name', 'description', 'pr
 const VALID_API_KEY = '1740208b-7533-4b0a-af7e-6b1828a5955a';
 
 var accessTokens = [];
-
-// State variables
 var brands = [];
 var products = [];
 var users = [];
 
-// Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -63,11 +60,10 @@ const getBrands = (numberOfBrands) => {
   })
 }
 
-// Public route - all users of API can access brands
 myRouter.get('/api/brands', function(request, response) {
   const maxResults = urlParse(request.url, true).query.maxResults
   if (!maxResults) {
-    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.writeHead(200, 'Success; return an array of brands', {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(getBrands(DEFAULT_NUMBER_OF_BRANDS)));
   } else if (maxResults >= 0) {
     response.writeHead(200, {'Content-Type': 'application/json'});
@@ -81,7 +77,6 @@ myRouter.get('/api/brands', function(request, response) {
   }
 });
 
-// Public route
 myRouter.get('/api/brands/:brandId/products', function(request, response) {
   isValidBrandId = brands.find( brand => brand.id === request.params.brandId);
 
@@ -93,11 +88,10 @@ myRouter.get('/api/brands/:brandId/products', function(request, response) {
   const productsFilteredByBrandId = products.filter( product => {
     return product.categoryId === request.params.brandId;
   });
-  response.writeHead(200, 'List of products for a given brand');
+  response.writeHead(200, 'List of products for a given brand', {'Content-Type': 'application/json'});
   response.end(JSON.stringify(productsFilteredByBrandId));
 });
 
-// Public route - search for products
 myRouter.get('/api/products', function(request, response) {
   const searchQuery = urlParse(request.url, true).query.query;
   // User should not be able to search for an empty string
@@ -109,7 +103,7 @@ myRouter.get('/api/products', function(request, response) {
   productsFilteredBySearchQuery = products.filter( (product) => {
     return product.name.match(queryExpression);
   });
-  response.writeHead(200, {'Content-Type': 'application/json'});
+  response.writeHead(200, 'Successful product search', {'Content-Type': 'application/json'});
   response.end(JSON.stringify(productsFilteredBySearchQuery));
 });
 
@@ -142,7 +136,7 @@ myRouter.post('/api/login', function(request, response) {
     });
     if (user) {
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.writeHead(200, 'Successful login token', {'Content-Type': 'application/json'});
   
       user.loginAttempts = 0;
   
@@ -181,11 +175,9 @@ myRouter.post('/api/login', function(request, response) {
   }
 });
 
-// Helper method to process access token
 var getValidTokenFromRequest = function(request) {
   var parsedUrlQuery = urlParse(request.url,true).query;
   if (parsedUrlQuery.accessToken) {
-    // Verify the access token to make sure it's valid and unexpired
     let currentAccessToken = accessTokens.find((accessToken) => {
       return accessToken.token == parsedUrlQuery.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
@@ -199,27 +191,23 @@ var getValidTokenFromRequest = function(request) {
   }
 };
 
-// The shopping cart cannot be seen unless a user logs in
 myRouter.get('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue.
     response.writeHead(401, 'You need to have access to continue.');
     response.end();
   } else {
     const currentUser = users.find( (user) => {
       return user.email === currentAccessToken.username;
     });
-    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.writeHead(200, 'A list of products in a user\'s shopping cart', {'Content-Type': 'application/json'});
     response.end(JSON.stringify(currentUser.cart));
   }
 });
 
-// Cannot add to the shopping cart unless a user logs in
 myRouter.post('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue.
     response.writeHead(401, 'You need to have access to continue.');
     response.end();
   } else {
@@ -241,7 +229,7 @@ myRouter.post('/api/me/cart', function(request, response) {
     if (!itemAlreadyInCart) {
       currentUser.cart = [ ...currentUser.cart, request.body ];
     }
-    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.writeHead(200, 'Successful addition to shopping cart', {'Content-Type': 'application/json'});
     response.end(JSON.stringify(request.body));
   }
 });
@@ -266,7 +254,9 @@ myRouter.post('/api/me/cart/:productId', function(request, response) {
       return response.end();
     }
     const quantityInQuery = urlParse(request.url, true).query.quantity;
-    if (!quantityInQuery || !parseInt(quantityInQuery)) {
+    // Make sure that the quantity is a defined, positive integer because cart items should have only positive quantity values.
+    // Instead of setting a quantity to 0, the delete endpoint should be used to 'remove' an item from the cart.
+    if (!quantityInQuery || !parseInt(quantityInQuery) || quantityInQuery < 1) {
       response.writeHead(400, 'Incorrectly formatted request');
       return response.end();
     }

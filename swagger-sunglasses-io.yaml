@@ -1,8 +1,7 @@
 swagger: '2.0'
 info:
   title: Sunglasses.io API
-  description: An API for sunglasses.io that allows users to browse brands and
-  products as well as add/update/remove items in the shopping cart.
+  description: An API for sunglasses.io that allows users to browse brands and products as well as add/update/remove items in the shopping cart.
   version: 0.1 BETA
 host: localhost:3001
 schemes:
@@ -17,6 +16,11 @@ paths:
       description: >
         The brands endpoint allows you to access all the of brands in the store.
       parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
         - name: maxResults
           in: query
           description: Integer value specifying the maximum number of brands to return. If maxResults exceeds the number of brands, returns all brands. (Default number is 4 based on wireframe.)
@@ -42,6 +46,11 @@ paths:
       description: >-
         This endpoint returns a list of products associated with a chosen brand ID.
       parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
         - name: brandId
           in: path
           description: Brand ID of products to return
@@ -67,6 +76,11 @@ paths:
       description: |
         This endpoint allows you to search for products matching a search query.
       parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
         - name: query
           in: query
           description: A string by which to search for products
@@ -77,6 +91,10 @@ paths:
       responses:
         '200':
           description: Successful product search
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
         '400':
           description: Improperly formatted request
           schema:
@@ -86,11 +104,17 @@ paths:
       summary: Allow a user to login.
       description: |
         This endpoint handles user authentication. Upon logging in, a user can access the shopping cart functionality.
+      parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
       tags:
         - User
       responses:
         '200':
-          description: Successful login
+          description: Successful login token
         '403':
           description: Exceeded maximum number of attempts
           schema:
@@ -108,6 +132,17 @@ paths:
       summary: Get a user's shopping cart 
       description: |
         This endpoint allows a logged in user to get a list of all the items in his/her shopping cart.
+      parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: A valid access token from a logged-in user must be included to access this endpoint.
+          required: true
+          type: string
       tags:
         - Shopping Cart
       responses:
@@ -121,6 +156,17 @@ paths:
       summary: Add an item to the cart.
       description: |
         This endpoint allows products to be added to a user's shopping cart.
+      parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: A valid access token from a logged-in user must be included to access this endpoint.
+          required: true
+          type: string
       tags:
         - Shopping Cart
       responses:
@@ -133,19 +179,29 @@ paths:
         '400':
           description: Incorrectly formatted request
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error' 
   /me/cart/{productId}:
     post:
       summary: Update quantity of an item in the cart
       description: |
         Update the quantity of a product already in the shopping cart.
       parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
         - name: productId
           in: path
           description: The ID for the product to be updated in the cart.
           required: true
           type: number
           format: int32
+        - name: accessToken
+          in: query
+          description: A valid access token from a logged-in user must be included to access this endpoint.
+          required: true
+          type: string
         - name: quantity
           in: query
           description: Updated quantity value for a product in a user's shopping cart.
@@ -174,12 +230,22 @@ paths:
       description: |
         Remove a product with the specified product ID if it exists in the shopping cart.
       parameters:
+        - name: x-authentication
+          in: header
+          description: A valid API key must be sent in the header to access this endpoint.
+          required: true
+          type: string
         - name: productId
           in: path
           description: The ID for the product to be updated in the cart.
           required: true
           type: number
           format: int32
+        - name: accessToken
+          in: query
+          description: A valid access token from a logged-in user must be included to access this endpoint.
+          required: true
+          type: string
       tags:
         - Shopping Cart
       responses:
@@ -259,22 +325,6 @@ definitions:
             format: int32
       email:
         type: string
-      login:
-        type: object
-        description: User login credentials.
-        properties:
-          username:
-            type: string
-          password:
-            type: string
-          salt:
-            type: string
-          md5:
-            type: string
-          sha1:
-            type: string
-          sha256:
-            type: string
       dob:
         type: string
       registered:
@@ -300,6 +350,4 @@ definitions:
         type: integer
         format: int32
       message:
-        type: string
-      fields:
         type: string
