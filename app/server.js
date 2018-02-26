@@ -148,6 +148,24 @@ myRouter.post('/api/login', (request, response) => {
   }
 });
 
+myRouter.get('/api/me/', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (currentAccessToken) {
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username | null;
+    });
+    let userInfo = {}
+    userInfo.cart = user.cart;
+    userInfo.name = user.name;
+    userInfo.location = user.location;
+    userInfo.email = user.email;
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(userInfo));
+  }
+  response.writeHead(401, "You must be logged in to access your account")
+  return response.end();
+});
+
 myRouter.get('/api/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (currentAccessToken) {
