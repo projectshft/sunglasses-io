@@ -69,17 +69,16 @@ myRouter(request, response, finalHandler(request, response))
 
 // API call for all brands
 myRouter.get('/api/brands', (request, response) => {
-    response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
     if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
         response.writeHead(401, "You need to have a valid API key to use this API", CORS_HEADERS);
         response.end();
     }
+    response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
     response.end(JSON.stringify(brands));
 });
 
 // API call for products specified by associated brand
 myRouter.get('/api/brands/:id/products', (request, response) => {
-    response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
     if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
         response.writeHead(401, "You need to have a valid API key to use this API", CORS_HEADERS);
         response.end();
@@ -87,27 +86,30 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
     let productsByBrand = products.filter((product) => {
         return product.categoryId == request.params.id;
     });
+    response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
     response.end(JSON.stringify(productsByBrand));
 })
 
 // API call for all products
 myRouter.get('/api/products', (request, response) => {
-    response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type':'application/json'}));
     if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
         response.writeHead(401, "You need to have a valid API key to use this API", CORS_HEADERS);
         response.end();
+    } else {
+        response.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type':'application/json'}));
+        // User can search for products by product's name
+        var parsedUrl = require('url').parse(request.url,true);
+        if (parsedUrl.query.search) {
+            let searchedProducts = products.filter((product) => {
+                if (product.name.toUpperCase().includes(parsedUrl.query.search.toUpperCase())) {
+                    return product.name;
+                };
+            });
+            response.end(JSON.stringify(searchedProducts));
+        } else {
+            response.end(JSON.stringify(products));
+        };
     };
-    // User can search for products by product's name
-    var parsedUrl = require('url').parse(request.url,true);
-    if (parsedUrl.query.search) {
-        let searchedProducts = products.filter((product) => {
-            if (product.name.toUpperCase().includes(parsedUrl.query.search.toUpperCase())) {
-                return product.name;
-            };
-        });
-        response.end(JSON.stringify(searchedProducts));
-    }
-    response.end(JSON.stringify(products));
 });
 
 // User login
