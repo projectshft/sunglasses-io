@@ -70,9 +70,11 @@ var getValidTokenFromRequest = function (request) {
 };
 
 myRouter.get('/api/brands', (request, response) => {
+  limit = request._parsedUrl.query;
+  brandList = brands.slice(0, limit)
   if (brands) {
     response.writeHead(200, { 'Content-Type': 'application/json' });
-    return response.end(JSON.stringify(brands));
+    return response.end(JSON.stringify(brandList));
   }
   response.writeHead(404, "Brands not found.")
   return response.end();
@@ -120,12 +122,12 @@ myRouter.post('/api/login', (request, response) => {
       response.writeHead(200, { 'Content-Type': 'application/json' });
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
+        tokenObject.username == user.login.username;
       });
       // Update the last updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
-        response.end(JSON.stringify(currentAccessToken.token));
+        return response.end(JSON.stringify(currentAccessToken.token));
       } else {
         // Create a new token with the user value and a "random" token
         let newAccessToken = {
@@ -134,18 +136,17 @@ myRouter.post('/api/login', (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        response.end(JSON.stringify(newAccessToken.token));
+        return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
       // When a login fails, tell the client in a generic way that either the username or password was wrong
       response.writeHead(401, "Invalid username or password");
-      response.end();
+      return response.end();
     }
-  } else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-    response.writeHead(400, "Incorrectly formatted response");
-    response.end();
   }
+  // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+  response.writeHead(400, "Incorrectly formatted response");
+  response.end();
 });
 
 myRouter.get('/api/me/', (request, response) => {
@@ -154,11 +155,13 @@ myRouter.get('/api/me/', (request, response) => {
     let user = users.find((user) => {
       return user.login.username == currentAccessToken.username | null;
     });
+    //create an object containing only the user info that we want to send.
     let userInfo = {}
     userInfo.cart = user.cart;
     userInfo.name = user.name;
     userInfo.location = user.location;
     userInfo.email = user.email;
+
     response.writeHead(200, { 'Content-Type': 'application/json' });
     return response.end(JSON.stringify(userInfo));
   }
@@ -189,7 +192,7 @@ myRouter.post('/api/me/cart', (request, response) => {
     let newQuantity = request.body.quantity;
     let currentQuantity = user.cart.filter(product => product.id == productId).length;
     let productToModify = products.filter(product => product.id == productId);
-    //verify the product ID
+    //verify that the product ID matches one of our products
     if (productToModify.length > 0) {
       // We are either INCREASING the current quantity...
       if (currentQuantity < newQuantity) {
@@ -201,20 +204,20 @@ myRouter.post('/api/me/cart', (request, response) => {
           diff--;
         }
       //... or we are DECREASING the current quantity.
-        } else if (currentQuantity > newQuantity) {
-          //set the number by which to modify the quantity.
-          let diff = currentQuantity - newQuantity;
-          //Iterate through cart. When a match occurs, delete it until diff = 0.
-          for (let i = 0; i < user.cart.length; i++) {
-            let currentItem = user.cart[i];
-            if (currentItem.id == productId) {
-              while (diff > 0) {
-                user.cart.splice(i, 1);
-                diff--;
-              }
+      } else if (currentQuantity > newQuantity) {
+        //set the number by which to modify the quantity.
+        let diff = currentQuantity - newQuantity;
+        //Iterate through cart. When a match occurs, delete it until diff = 0.
+        for (let i = 0; i < user.cart.length; i++) {
+          let currentItem = user.cart[i];
+          if (currentItem.id == productId) {
+            while (diff > 0) {
+              user.cart.splice(i, 1);
+              diff--;
             }
           }
         }
+      }
       response.writeHead(200, { 'Content-Type': 'application/json' });
       return response.end(JSON.stringify(user.cart));
     }
