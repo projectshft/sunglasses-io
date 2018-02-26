@@ -48,6 +48,20 @@ http.createServer(function (request, response) {
   console.log(`Server is listening on ${PORT}`);
 });
 
+// All users may access this information
+myRouter.get('/api/brands', function(request,response) {
+    response.end(JSON.stringify(brands));
+});
+// All users may access this information
+myRouter.get('/api/brands/:id/products', function(request,response) {
+    response.end(JSON.stringify(products[request.params.categoryId]));
+});
+// All users may access this information
+myRouter.get('/api/products', function(request,response) {
+    response.end(JSON.stringify(products));
+});
+ 
+// User's must login to use and change the cart
 myRouter.post('/api/login', function(request,response) {
     // Make sure there is a username and password in the request
     if (request.body.username && request.body.password) {
@@ -110,4 +124,17 @@ myRouter.get('/api/me/cart', function(request,response) {
 // Only logged in users can update a shopping cart
 myRouter.post('/api/me/cart', function(request,response) {
     response.end();
-})
+});
+
+// Only logged in users can update a shopping cart 
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
+    cart.splice(cart[request.params.productId],1);
+    response.end();
+});
+
+// Only logged in users can update a shopping cart
+myRouter.post('/api/me/cart/:productId', function(request,response) {
+    cart[request.params.productId].push(request.body); 
+    response.end();
+});
+  

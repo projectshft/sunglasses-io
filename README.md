@@ -1,5 +1,3 @@
 ## Sunglasses.io Server Starter
 
-This project is a starter for the Sunglasses.io eval.  
-
-Don't forget to update this file with helpful hints on how to run the application.
+Please take a look at the swagger (2).yaml file for the most clear documentation for the Sunglasses.io API.  
