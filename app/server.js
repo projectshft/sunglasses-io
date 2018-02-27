@@ -6,8 +6,8 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
-// var url = require('url');
-
+var accessTokens = [];
+var currentUser = {};
 const PORT = 3001;
 // Setup router
 var router = Router();
@@ -17,19 +17,16 @@ var brands;
 fs.readFile('brands.json', (err, data) => {
   if (err) throw err;
   brands = JSON.parse(data);
-  // brand = brands[0];
 });
 var products;
 fs.readFile('products.json', (err, data) => {
   if (err) throw err;
   products = JSON.parse(data);
-  // brand = brands[0];
 });
 var users;
 fs.readFile('users.json', (err, data) => {
   if (err) throw err;
   users = JSON.parse(data);
-  // brand = brands[0];
 });
 
 http.createServer(function (req, res) {
@@ -45,7 +42,6 @@ router.get('/api/products', (req, res) => {
 
   var limit;
   if(isNaN(queryLimit)) {
-    console.log('No limit param')
     limit = 5
   } else {
     limit = queryLimit
@@ -65,7 +61,7 @@ router.get('/api/products', (req, res) => {
   }
   if(!foundProducts) {
     res.writeHead(404, {'Content-Type': 'text/plain'});
-    res.end('The server has not found anything matching the Request,\n query parameter product is not valid or does not exist.\n');
+    res.end('The server has not found anything matching the req,\n query parameter product is not valid or does not exist.\n');
   } else {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(foundProducts);
@@ -79,10 +75,14 @@ router.get('/api/brands', (req, res) => {
 
   var brandsResponse = (limit) => {
     var brandsFound = JSON.stringify(brands.slice(0, limit));
+    if (!brandsFound) {
+      res.writeHead(404, {'Content-Type': 'text/plain'});
+      return res.end('Server has not found anything matching the Request,\n parameter id of category is not valid or does not exist.\n');  
+    }
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(brandsFound);
   }
-  
+
   var limit;
   if(isNaN(queryLimit)) {
     console.log('No limit param')
@@ -95,31 +95,194 @@ router.get('/api/brands', (req, res) => {
   
 });
 
-router.get('/api/brands/:id/products', (req, res) => {
-  console.log(brands)
-  res.end(JSON.stringify(brands));
+router.get('/api/brands/:categoryId/products', (req, res) => {
+  let productsByBrand = products.filter( (product) => {
+    return product.categoryId === req.params.categoryId
+  })
+
+  if(!productsByBrand.length){
+    res.writeHead(404, {'Content-Type': 'text/plain'});
+    return res.end('Server has not found anything matching the Request,\n parameter id of category is not valid or does not exist.\n');
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  });
+  res.end(JSON.stringify(productsByBrand));
+
 });
 
 router.post('/api/login', (req, res) => {
+  if (req.body.username && req.body.password) {
 
-  res.end('Logged in');
+    let validUser = users.find((user) => {
+      return user.login.username === req.body.username
+    });
+
+    if (!validUser.loginAttempts) {
+      validUser.loginAttempts = 0;
+    }
+
+    if (validUser.loginAttempts > 2) {
+      res.writeHead(403, 'Exceeded maximum login attempts');
+      return res.end();
+    }
+
+    // See if there is a user that has that username and password 
+    let user = users.find((user) => {
+      return user.login.username == req.body.username && user.login.password == req.body.password;
+    });
+    if (user) {
+      // Write the header because we know we will be returning successful at this point and that the response will be json
+      res.writeHead(200, {'Content-Type': 'application/json'});
+
+      user.loginAttempts = 0;
+
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username === user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        res.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        currentUser.name = user.name;
+        currentUser.username = user.login.username;
+        currentUser.location = user.location;
+        currentUser.cart = user.cart;
+        accessTokens.push(newAccessToken);
+        res.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+
+      if (validUser) {
+        validUser.loginAttempts += 1;
+      }
+
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      res.writeHead(401, "Invalid username or password");
+      res.end();
+    }
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    res.writeHead(400, "Incorrectly formatted response");
+    res.end();
+  }
 });
 
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+  const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  // var parsedUrl = require('url').parse(request.url, true)
+  var params = queryString.parse(request._parsedUrl.query);
+  if (params.accessToken) {
+    // Verify the access token to make sure its valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token === params.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+var accessTokenMissingResponse = (response) => {
+  // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+  response.writeHead(401, "You need to have access for this call to continue");
+  response.end();
+}
 router.get('/api/me/cart', (req, res) => {
-  console.log(users[0].cart)
-  res.end(JSON.stringify(users[0].cart));
+  var currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    accessTokenMissingResponse(res);
+  } else {
+    let currentLoggedUser = users.find((user) => {
+      return user.login.username === currentAccessToken.username
+    });
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.end(JSON.stringify(currentUser.cart));
+    // TODO: 
+  }
 });
 
 router.post('/api/me/cart', (req, res) => {
-  res.end("Cart sent to checkout");
-  
+  var currentAccessToken = getValidTokenFromRequest(req);
+
+  if (!currentAccessToken) {
+    accessTokenMissingResponse(res);
+  } else {
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+
+    res.end(currentUser.cart);
+  }
 });
 router.delete('/api/me/cart/:productId', (req, res) => {
+  var currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    accessTokenMissingResponse(res);
+  } else {
+    
+    let selectedProduct = currentUser.cart.find((product) => {
+      return product.id === req.params.productId;
+    });
+    let selectedProductId = currentUser.cart.find((product) => {
+      return req.params.productId;
+    });
   
-  res.end("Product deleted from cart");
+    if (!selectedProduct) {
+      // If there isn't a product with that id, then return a 404
+      res.writeHead(404, "The product id cannot be found");
+      return res.end();
+    }
+  
+    // JSON.stringify(obj1) !== JSON.stringify(obj2);
+    var remove = (array, element) => array.filter((e) => JSON.stringify(e) !== JSON.stringify(element));
+    var arrayAfterDelete = remove(currentUser.cart, selectedProductId);
+    currentUser.cart = arrayAfterDelete;
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.end(JSON.stringify(arrayAfterDelete));
+    // TODO: Check nuances with delete
+  }
+
 });
 
 router.post('/api/me/cart/:productId', (req, res) => {
-  res.end("Product added to cart");
+  var currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    accessTokenMissingResponse(res);
+  } else {
+    let selectedProduct = products.find((product) => {
+      return product.id === req.params.productId;
+    });
+    if (!selectedProduct) {
+      // If there isn't a product with that id, then return a 404
+      res.writeHead(404, "The product id cannot be found");
+      return res.end();
+    }
+    currentUser.cart.push(selectedProduct);
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    });
+    res.write(`Product ${selectedProduct.name} added to cart.`)
+    res.end(JSON.stringify(selectedProduct));
+  }
+  
   
 });
