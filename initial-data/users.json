@@ -2,6 +2,7 @@
     {
         "gender": "female",
         "cart":[],
+        "purchasedCart":[],
         "name": {
             "title": "mrs",
             "first": "susanna",
@@ -36,6 +37,7 @@
     {
         "gender": "male",
         "cart":[],
+        "purchasedCart":[],
         "name": {
             "title": "mr",
             "first": "salvador",
@@ -70,6 +72,7 @@
     {
         "gender": "female",
         "cart":[],
+        "purchasedCart":[],
         "name": {
             "title": "mrs",
             "first": "natalia",

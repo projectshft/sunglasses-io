@@ -1,0 +1,217 @@
+swagger: '2.0'
+info:
+  title: Sunglass.IO API
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands of glasses.
+      description: |
+        The Brands endpoint returns various brands of glasses.
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Products associated with a particular brand.
+      description: >-
+        The Products endpoint returns a pair of glasses and information about that pair of glasses.
+      parameters:
+        - name: id
+          in: path
+          description: the id of the brand associated with the chosen product
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: All Products of glasses
+      description: |
+        The Products endpoint returns all available glasses
+      parameters:
+        - name: search
+          in: query
+          description: The name of the product
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: User Login
+      description: |
+        This endpoint allows a user to login
+      parameters:
+        - name: username
+          in: query
+          description: The username of the user
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password of the user
+          required: true
+          type: string
+      tags:
+        - Login
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Cart of products chosen by the user
+      description: |
+        The Cart endpoint returns the user's cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of products chosen by the user
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: buy products in cart, I think
+      description: |
+        This endpoint allows you to buy the products already added to your cart, maybe..???
+      tags:
+        - User
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      summary: delete product from cart
+      description: >
+        Categories define groupings of goals for browsing.
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product being removed from cart
+          required: true
+          type: string
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: add product to cart
+      description: >
+        This endpoint allows a user to add a product to their cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product being added to the cart.
+          required: true
+          type: string
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of a brand.
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the product
+      categoryId:
+        type: string
+        description: The unique identifier given to the brand associated with the chosen product
+      name:
+        type: string
+        description: The name of a product
+      description:
+        type: string
+        description: The description of a product
+      price:
+        type: integer
+        description: The price of a product
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: The images of the product.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
