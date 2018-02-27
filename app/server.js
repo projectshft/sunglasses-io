@@ -109,7 +109,7 @@ myRouter.post('/api/login', function(request, response) {
 myRouter.get('/api/products', function(request,response) {
   response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
   let productNames = products.map( (product) => {
-    return {"name": product.name, "id": product.id, "price":product.price}
+    return product
   })
   response.end(JSON.stringify(productNames));
 })
@@ -161,14 +161,15 @@ const getValidTokenFromRequest = (request) => {
 //lets a user view their cart
 myRouter.get('/api/me/cart', function(request,response) {
   let validToken = getValidTokenFromRequest(request)
-  let authUser = users.find((user) => {
-    return validToken.user === user.login.username
-  })
+  
   if (!validToken){
     response.writeHead(401, "Session Expired, please login again", CORS_HEADERS)
     return response.end()
   }
   else {
+    let authUser = users.find((user) => {
+      return validToken.user === user.login.username
+    })
     response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
     return response.end(JSON.stringify(authUser.cart))
   } 
@@ -177,14 +178,14 @@ myRouter.get('/api/me/cart', function(request,response) {
 //lets a user add an item to their cart
 myRouter.post('/api/me/cart/:productId', function(request,response) {
   let validToken = getValidTokenFromRequest(request)
-  let authUser = users.find((user) => {
-    return validToken.user === user.login.username
-  })
   if (!validToken){
     response.writeHead(401, "Session Expired, please login again", CORS_HEADERS)
     return response.end()
   }
   else {
+    let authUser = users.find((user) => {
+      return validToken.user === user.login.username
+    })
     const product = products.find((product) => {
       return product.id == request.params.productId
     })
