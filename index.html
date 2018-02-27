@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Sunglasses-io</title>
+  <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css"></link>
+  <link href="node_modules/open-iconic/font/css/open-iconic-bootstrap.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"></link>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-4 mt-3">
+        <h1>Sunglasses.io</h1>
+      </div>
+      <div class="col-md-4 mt-3 text-center">
+        <img class="img-fluid top-image" src="assets/unicorn_glasses.png">
+      </div>
+      <div class="col-md-4 mt-3 text-right">
+        <h2>000-666-6666</h2>
+        <p>Free delivery! Call to Order!</p>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end mr-3">
+      <input id="search" placeholder="Search Brands">
+      <button class="btn btn-primary btn-sm" id="submitSearch" type="button">Search</button>
+    </div>
+
+    <nav class="navbar navbar-expand-sm bg-light">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Shop</a>
+        </li>
+        <li class="nav-item seperator">|</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Delivery</a>
+        </li>
+        <li class="nav-item seperator">|</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Articles</a>
+        </li>
+        <li class="nav-item seperator">|</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">News</a>
+        </li>
+      </ul>
+      <form class="form-inline" action="/action_page.php">
+        <input class="mr-sm-2" id="username" value="yellowleopard753" placeholder="Username">
+        <input class="mr-sm-2" id="password" type="password" value="jonjon" placeholder="Password">
+        <button class="btn btn-primary btn-sm" id="submitLoginInfo" type="button">Login</button>
+      </form>
+    </nav>
+    <div class="row">
+      <div id="loginResponse" class="col-md-4 ml-auto">
+        <!-- Login Response populates here -->
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- list of brands goes here -->
+      <div class="col-md-3 placeholder mt-3">
+        <div class="row d-flex justify-content-center">
+          <ul class="list-group brands">
+              <li class="list-group-item list-group-item-action" id="brand-all"><a href="#"> All Brands </a></li>
+          </ul>
+        </div>
+        <div class="row d-flex justify-content-center mt-3">
+          <ul class="text-center list-group articles">
+            <li class="list-group-item list-group-item-action">
+              <a href="#">Delivery</a>
+            </li>
+            <li class="list-group-item list-group-item-action">
+              <a href="#">How to choose sunglasses</a>
+            </li>
+            <li class="list-group-item list-group-item-action">
+              <a href="#">How to care for your sunglasses</a>
+            </li>
+            <li class="list-group-item list-group-item-action">
+              <a href="#">all articles ></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-6 mt-3">
+        <div class="selected-brand"></div>
+        <!-- selected brand goes here -->
+        <div class="row products">
+        <!-- list of products goes here -->
+        </div>
+      </div>
+
+      <div class="col-md-3 cart-container mt-3">
+        <ul class="list-group cart">
+          <button class="btn btn-primary btn-sm" id="get-cart" onclick="getCart()">View Cart</button>
+        </ul>
+      </div>
+    </div>
+    <hr>
+    <div class="row footer mb-5">
+
+      <div class="col-md-3">Sunglasses.io</div>
+      <div class="col-md-3">
+        <a href="#">Brands</a>
+      </div>
+      <div class="col-md-3">
+        <a href="#">News</a>
+      </div>
+      <div class="col-md-3">
+        <a href="#">Articles</a>
+      </div>
+    </div>
+
+
+
+  </div>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>
