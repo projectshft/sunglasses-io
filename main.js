@@ -31,17 +31,9 @@ $('#submitLoginInfo').on('click', () => {
 	userLogin(`${BASEURL}/api/login`, state.login)
 		.then(data => {
 			state.token = data
-			renderToken()
 		})
 		.catch(err => err)
 })
-
-function renderToken() {
-	let $container = $('#loginResponse')
-	let error = `<p style='color: red'>${state.token}</p>`
-	let success = `<p>${state.token}</p>`
-	state.token === 'Invalid username or password' ? $container.html(error) : $container.html(success)
-}
 
 function renderCart() {
 	const $container = $('.cart')
@@ -152,11 +144,24 @@ function getBrands() {
 		.catch(err => console.log(err))
 }
 
-function renderProducts() {
+function renderProducts(brandId) {
+	const $brandNameContainer = $('.selected-brand')
 	const $container = $('.products')
-	const productCards = state.products.map((item, index) => {
+	let displayBrandName = "All Brands"
+	$container.html("")
+	let productList = []
+	if (!brandId) {
+		productList = state.products
+	}
+	else {
+		productList = state.products.filter( product => product.categoryId == brandId )
+		displayBrandName = state.brands.find(brand => brand.id==brandId).name
+	}
+	$brandNameContainer.html(displayBrandName)
+	const productCards = productList.map((item, index) => {
+		let brandName = state.brands.find(brand => brand.id==item.categoryId).name
 		return `
-				<div class="col-md-6 mb-3 product-card" id="product-${index}"><div><img class="img-fluid" src="${item.imageUrls[0]}"></div><div class="text-center">${item.name}<button class="btn btn-outline-primary product-item mb-1" onclick="addProductToCart(${item.id})">Add to cart<br>$${item.price}.00</button></div></div>
+				<div class="col-md-6 mb-3 product-card" id="product-${index}"><div><img class="img-fluid" src="${item.imageUrls[0]}"></div><div class="text-center">${item.name} (${brandName})<button class="btn btn-outline-primary product-item mb-1" onclick="addProductToCart(${item.id})">Add to cart<br>$${item.price}.00</button></div></div>
 			`
 	})
 	productCards.forEach(product => $container.append(product))
@@ -164,9 +169,11 @@ function renderProducts() {
 
 function renderBrands() {
 	const $container = $('.brands')
+	const allBrands = `<li class="list-group-item list-group-item-action" id="brand-all"><a href="#" onclick="renderProducts()"> All Brands </a></li>`
+	$container.html(allBrands)
 	const brandItems = state.brands.map((item, index) => {
 		return `
-				<li class="list-group-item list-group-item-action" id="brand-${index}"><a href="#"> ${item.name} </a></li>
+				<li class="list-group-item list-group-item-action" id="brand-${index}"><a href="#" onclick="renderProducts(${item.id})"> ${item.name} </a></li>
 			`
 	})
 	brandItems.forEach((item) => $container.append(item))
@@ -186,7 +193,6 @@ function addProductToCart(productId) {
 		return
 	}
 	let url = `${BASEURL}/api/me/cart/${productId}?accessToken=${accessToken}`
-	console.log(url)
 	return fetch(url, {
 		method: 'POST',
 		headers: {
@@ -201,5 +207,5 @@ function addProductToCart(productId) {
 		.catch(err => console.log(err))
 }
 
-getProducts()
 getBrands()
+getProducts()
