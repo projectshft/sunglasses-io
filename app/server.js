@@ -40,15 +40,20 @@ router.get('/api/products', (req, res) => {
   var queryLimit = parseInt(params.limit);
   var searchedTerm = params.product;
 
+  // Limit the response to return 5 elements if there's no limit on query
   var limit;
   if(isNaN(queryLimit)) {
     limit = 5
   } else {
+    // restrain to return only 50 elements at the time.
+    if (limit > 50) {
+      limit = 50
+    }
     limit = queryLimit
   }
-
   
   var foundProducts;
+  // If there's no search term, return the first 5 elements
   if(!searchedTerm) {
     foundProducts = JSON.stringify(products.slice(0, limit));
     
@@ -61,7 +66,7 @@ router.get('/api/products', (req, res) => {
   }
   if(!foundProducts) {
     res.writeHead(404, {'Content-Type': 'text/plain'});
-    res.end('The server has not found anything matching the req,\n query parameter product is not valid or does not exist.\n');
+    res.end('The server has not found anything matching the request,\n query parameter product is not valid or does not exist.\n');
   } else {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(foundProducts);
@@ -77,7 +82,7 @@ router.get('/api/brands', (req, res) => {
     var brandsFound = JSON.stringify(brands.slice(0, limit));
     if (!brandsFound) {
       res.writeHead(404, {'Content-Type': 'text/plain'});
-      return res.end('Server has not found anything matching the Request,\n parameter id of category is not valid or does not exist.\n');  
+      return res.end('Server has not found anything matching the request,\n parameter id of category is not valid or does not exist.\n');  
     }
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(brandsFound);
@@ -89,6 +94,9 @@ router.get('/api/brands', (req, res) => {
     limit = 5
     brandsResponse(limit);
   } else {
+    if (limit > 50) {
+      limit = 50
+    }
     limit = queryLimit
     brandsResponse(limit);
   }
@@ -207,14 +215,10 @@ router.get('/api/me/cart', (req, res) => {
   if (!currentAccessToken) {
     accessTokenMissingResponse(res);
   } else {
-    let currentLoggedUser = users.find((user) => {
-      return user.login.username === currentAccessToken.username
-    });
-    res.writeHead(200, {
-      'Content-Type': 'application/json'
-    });
+
+    res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify(currentUser.cart));
-    // TODO: 
+
   }
 });
 
@@ -224,13 +228,13 @@ router.post('/api/me/cart', (req, res) => {
   if (!currentAccessToken) {
     accessTokenMissingResponse(res);
   } else {
-    res.writeHead(200, {
-      'Content-Type': 'application/json'
+    res.writeHead(201, {
+      'Content-Type': 'text/plain'
     });
-
-    res.end(currentUser.cart);
+    res.end(`Product ${selectedProduct.name} added to cart.`);
   }
 });
+
 router.delete('/api/me/cart/:productId', (req, res) => {
   var currentAccessToken = getValidTokenFromRequest(req);
   if (!currentAccessToken) {
@@ -240,9 +244,6 @@ router.delete('/api/me/cart/:productId', (req, res) => {
     let selectedProduct = currentUser.cart.find((product) => {
       return product.id === req.params.productId;
     });
-    let selectedProductId = currentUser.cart.find((product) => {
-      return req.params.productId;
-    });
   
     if (!selectedProduct) {
       // If there isn't a product with that id, then return a 404
@@ -250,15 +251,14 @@ router.delete('/api/me/cart/:productId', (req, res) => {
       return res.end();
     }
   
-    // JSON.stringify(obj1) !== JSON.stringify(obj2);
+    // JSON.stringify(obj1) !== JSON.stringify(obj2); compare objects
     var remove = (array, element) => array.filter((e) => JSON.stringify(e) !== JSON.stringify(element));
-    var arrayAfterDelete = remove(currentUser.cart, selectedProductId);
+    var arrayAfterDelete = remove(currentUser.cart, selectedProduct);
     currentUser.cart = arrayAfterDelete;
     res.writeHead(200, {
       'Content-Type': 'application/json'
     });
     res.end(JSON.stringify(arrayAfterDelete));
-    // TODO: Check nuances with delete
   }
 
 });
@@ -277,12 +277,10 @@ router.post('/api/me/cart/:productId', (req, res) => {
       return res.end();
     }
     currentUser.cart.push(selectedProduct);
-    res.writeHead(200, {
-      'Content-Type': 'application/json'
+    res.writeHead(201, {
+      'Content-Type': 'text/plain'
     });
-    res.write(`Product ${selectedProduct.name} added to cart.`)
-    res.end(JSON.stringify(selectedProduct));
+    // res.write(`Product ${selectedProduct.name} added to cart.`)
+    res.end(`Product ${selectedProduct.name} added to cart.`);
   }
-  
-  
 });
