@@ -280,7 +280,6 @@ router.post('/api/me/cart/:productId', (req, res) => {
     res.writeHead(201, {
       'Content-Type': 'text/plain'
     });
-    // res.write(`Product ${selectedProduct.name} added to cart.`)
     res.end(`Product ${selectedProduct.name} added to cart.`);
   }
 });
