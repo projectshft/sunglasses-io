@@ -112,30 +112,26 @@ paths:
         - User
       summary: Logs user into the system
       description: ''
-      operationId: loginUser
       produces:
         - application/json
       parameters:
-        - name: username
-          in: query
-          description: The user name for login
+        - in: body
+          name: login
           required: true
-          type: string
-        - name: password
-          in: query
-          description: The password for login in clear text
-          required: true
-          type: string
+          schema:
+            $ref: '#/definitions/UserLogin'
       responses:
         200:
-          description: successful operation
-          schema:
-            type: string
           headers:
             X-Expires-After:
               type: string
               format: date-time
               description: date in UTC when token expires
+          description: Token(s) successfully created
+          schema:
+            $ref: '#/definitions/CreateToken'
+        400:
+          description: Bad request
         401:
           description: Invalid username/password supplied
   /me/cart:
@@ -147,10 +143,13 @@ paths:
         - User
       responses:
         200:
-          description: Profile information for a user
+          description: Success, returned array of products in cart
           schema:
-            $ref: '#/definitions/Profile'
-        
+            $ref: '#/definitions/Product'
+        400:
+          description: Bad request
+        401:
+          $ref: '#/responses/401'
         default:
           description: Unexpected error
           schema:
@@ -171,11 +170,13 @@ paths:
           required: true
           type: integer
       responses:
-        '201':
+        201:
           description: Created
-        '400':
+        401:
+          $ref: '#/responses/401'
+        400:
           description: Invalid product id supplied
-        '404':
+        404:
           description: product not found
   /me/cart/{productId}:
     delete:
@@ -193,6 +194,12 @@ paths:
           required: true
           type: integer
       responses:
+        200:
+          description: Success, delete product from cart array.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
         400:
           $ref: '#/responses/400'
         401:
@@ -225,6 +232,21 @@ responses:
     schema:
       $ref: "#/definitions/Error"
 definitions:
+  UserLogin:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      accountCode:
+        type: string
+      password:
+        type: string
+  CreateToken:
+    type: object
+    properties:
+      token:
+        type: string
   Product:
     type: object
     properties:
