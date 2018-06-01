@@ -15,7 +15,7 @@ paths:
     get:
       summary: Brands
       description: |
-        The Brands endpoint allows selection of brands as parameter for search
+        The Brands endpoint returns each brand from the api
       tags:
         - Brands
       responses:
