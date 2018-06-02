@@ -1,0 +1,289 @@
+
+swagger: '2.0'
+info:
+  title: Sunglasses.io API
+  description: Put glasses on your face
+  version: "1.0.0"
+# the domain of the service
+host: sunglasses.io
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Fetch all brands of sunglasses
+      description: |
+        The brands endpoint returns the name and associated brand ID of all available brands.
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/brands/:id/products:
+    get:
+      summary: This endpoint returns all products of corresponding brand ID provided.
+      description: |
+        This endpoint will return all products of a given brand. 
+      parameters:
+        - name: id
+          in: path
+          description: ID of desired brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of products of the provided brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/products:
+    get:
+      summary: Search for products by name or brand by name.
+      description: Allows user to search for products by product name or brand by brand name. Will return an object with a property products with a value an array of products and a property of brands with a value of array of brands
+      parameters:
+        - name: query
+          in: query
+          description: user input of searched value (name of product or brand)
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        200:
+          description: An object containing an array of products and an array of brands
+          schema:
+              $ref: '#/definitions/SearchResponse'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/login:
+    post:
+      summary: Login to user account or create new account if one does not already exist.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: Login Info
+          description: The user to create.
+          schema:
+            type: object
+            required:
+              - userName
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      tags:
+        - Login
+      responses:
+        200:
+          description: Success token returned
+          schema:
+            $ref: '#/definitions/Token'
+        201:
+          description: new account created and token returned
+          schema:
+            $ref: '#/definitions/Token'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/me/cart:
+    get:
+      summary: returns array of product objects in users cart
+      description: This endpoint returns all of the items currently in the users cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: accessToken included in response from login post
+          required: true
+          type: string
+        - in: body
+          name: product id
+          description: The id of the product to add
+          schema:
+            type: object
+            required:
+              - productId
+            properties:
+              id:
+                type: string
+      tags:
+        - Cart
+      responses:
+        200:
+          description: array of product items in cart
+          schema:
+              type: array
+              items:  
+                $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post: 
+      summary: This post endpoint adds one item of the associated Id to the users cart. 
+      description: This endpoint adds one item to the cart of the current user
+      parameters:
+        - name: accessToken
+          in: query
+          description: accessToken included in response from login post
+          required: true
+          type: string
+        - in: body
+          name: the item Id
+          description: The cart index of manipulated item and the new quantity
+          schema:
+            type: object
+            required: 
+              - userName
+            properties:
+              id:
+                type: string
+      tags:
+        - Cart
+      responses:
+        200:
+          description: item added successfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/me/cart/:cartIndex:
+    post: 
+      summary: This post endpoint manipulates an item in the cart by passing in the cart index.  
+      description: This endpoint updates a product in the users cart. 
+      parameters:
+        - name: accessToken
+          in: query
+          description: accessToken included in response from login post
+          required: true
+          type: string
+        - in: body
+          name: The Cart index and Quanitity
+          description: The cart index of manipulated item and the new quantity
+          schema:
+            type: object
+            required: 
+              - userName
+            properties:
+              cartIndex:
+                type: string
+              quantity:
+                type: number
+      tags:
+        - Cart
+      responses:
+        200:
+          description: success product modified
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+    delete:
+      summary: "Deletes an item from cart"
+      description: "This endpoint deletes an item from the cart using the cartIndex"
+      parameters:
+        - name: accessToken
+          in: query
+          description: accessToken included in response from login post
+          required: true
+          type: string
+        - in: body
+          name: The Cart index and Quanitity
+          description: The cart index of manipulated item and the new quantity
+          schema:
+            type: object
+            required: 
+              - userName
+            properties:
+              cartIndex:
+                type: string
+              quantity:
+                type: number
+      tags:
+        - Cart
+      responses:
+        200: 
+          description: Success product deleted
+      
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific brand.
+      name:
+        type: string
+        description: name of brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique ID for each product
+      categoryId:
+        type: string
+        description: Non-unique product Category ID corresponds to a brand ID. Associates products with a particular brand 
+      name:
+        type: string
+        description: name of product.
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: number
+        description: The price for the associated product
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Source image for associated product
+  SearchResponse:
+    type: object
+    properties:
+      products:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+        description: Product objects matching search query.
+      brands:
+        type: array
+        items:
+          $ref: '#/definitions/Brand'
+        description: Last name of the Uber user.
+  Token:
+    type: string
+    description: Access token needed for updating or seeing cart.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
