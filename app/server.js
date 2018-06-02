@@ -159,14 +159,14 @@ myRouter.post('/api/login', function(request, response){
       //return error if the username or password do not match
       else {
         failedLogins[submittedUsername] ++
-        response.writeHead(400, 'Username or password invalid');
-        return response.end();
+        response.writeHead(400, FAILURE_HEADER);
+        return response.end(JSON.stringify({code: 400, message: 'Username or password invalid'}));
       }
   }
   //return error if username and password are not provided
   else {
-    response.writeHead(400, 'Username or password not provided');
-      return response.end();
+    response.writeHead(400, FAILURE_HEADER);
+      return response.end(JSON.stringify({code: 400, message: 'Username or password not provided'}));
   }
 });
 
@@ -189,21 +189,21 @@ myRouter.get('/api/me/cart', function(request, response){
       }
       else {
         //if user cannot be found return error user not found 
-        response.writeHead(400,'Associated User cannot be found');
+        response.writeHead(400, FAILURE_HEADER);
         //does this header bad for security?
-        return response.end()
+        return response.end(JSON.stringify({code: 400, message:'Associated User cannot be found'}));
       }
     }
     else {
       //tell user they must log back in if invalid token
-      response.writeHead(400, 'Token not valid or expired. Please sign in again')
-        return response.end();
+      response.writeHead(400, FAILURE_HEADER)
+        return response.end(JSON.stringify({code: 400, message:'Token not valid or expired. Please sign in again'}));
     }
   }
   //send back error that accessToken was not sent 
   else {
-    response.writeHead(400, "Access Token not sent");
-    return response.end();
+    response.writeHead(400, FAILURE_HEADER);
+    return response.end(JSON.stringify({code: 400, message: "Access Token not sent"}));
   }
 });
 
@@ -246,27 +246,27 @@ myRouter.post('/api/me/cart', function(request, response){
         }
         //if product id does not match send back error that product does not exist
         else{
-          response.writeHead(400, 'Product does not exist')
-            return response.end();
+          response.writeHead(400, FAILURE_HEADER)
+            return response.end(JSON.stringify({code: 400, message: 'Product does not exist'}));
         }
       }
       else {
         //if user cannot be found return error user not found 
-        response.writeHead(400,'Associated User cannot be found');
+        response.writeHead(400, FAILURE_HEADER);
         //does this header bad for security?
-        return response.end()
+        return response.end(JSON.stringify({code: 400, message:'Associated User cannot be found'}))
       }
     }
     else {
       //tell user they must log back in if invalid token
-      response.writeHead(400, 'Token not valid or expired. Please sign in again')
-        return response.end();
+      response.writeHead(400, FAILURE_HEADER)
+        return response.end(JSON.stringify({code: 400, message:'Token not valid or expired. Please sign in again'}));
     }
   }
   //send back error that product Id or accessToken was not sent 
   else {
-    response.writeHead(400, "Product Id or Token not sent");
-    return response.end();
+    response.writeHead(400, FAILURE_HEADER);
+    return response.end(JSON.stringify({code: 400, message:"Product Id or Token not sent"}));
   }
 });
 
@@ -294,27 +294,27 @@ myRouter.post('/api/me/cart/:cartIndex', function(request, response){
             return response.end(JSON.stringify(foundProduct));
         }
         else {
-          response.writeHead(400, 'product not found in users cart');
-          return response.end();
+          response.writeHead(400, FAILURE_HEADER);
+          return response.end(JSON.stringify({code: 400, message: 'product not found in users cart'}));
         }
 
       }
       //if negative or not int send back error
       else{
-        response.writeHead(400, "quantity is a negative number or not an integer")
-        return response.end();
+        response.writeHead(400, FAILURE_HEADER)
+        return response.end(JSON.stringify({code: 400, message: "quantity is a negative number or not an integer"}));
       }
     }
     //if not valid send back error
     else{
-      response.writeHead(400, 'token not valid please sign in again')
-      return response.end();
+      response.writeHead(400, FAILURE_HEADER)
+      return response.end(JSON.stringify({code: 400, message: 'token not valid please sign in again'}));
     }
   }
   //if accessToken and CartIndex and Quantity were not sent send back error
   else {
-    response.writeHead(400, 'Token, productId, or quantity not sent')
-    return response.end();
+    response.writeHead(400, FAILURE_HEADER)
+    return response.end(JSON.stringify({code: 400, message: 'Token, productId, or quantity not sent'}));
   }
 
 });
@@ -341,21 +341,20 @@ myRouter.delete('/api/me/cart/:cartIndex', function(request, response){
       }
       else{     
       //if there is no product at the index return error
-      response.writeHead(400, 'Product in cart was not found')
-      return response.end();
-
+      response.writeHead(400, FAILURE_HEADER)
+      return response.end(JSON.stringify({code: 400, message: 'Product in cart was not found'}));
       }
     }
     else {
       //if token not valid send error
-      response.writeHead(400, 'Token invalid please sign in again')
-      return response.end();
+      response.writeHead(400, FAILURE_HEADER)
+      return response.end(JSON.stringify({code: 400, message:'Token invalid please sign in again'}));
     }
   }
   else {
     //if not send respond back an error
-    response.writeHead(400, 'cartIndex or token not sent')
-      return response.end();
+    response.writeHead(400, FAILURE_HEADER)
+      return response.end(JSON.stringify({code: 400, message: 'cartIndex or token not sent'}));
   }
 });
 

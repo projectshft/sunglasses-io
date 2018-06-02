@@ -102,10 +102,6 @@ paths:
           description: Success token returned
           schema:
             $ref: '#/definitions/Token'
-        201:
-          description: new account created and token returned
-          schema:
-            $ref: '#/definitions/Token'
         default:
           description: Unexpected error
           schema:
@@ -120,16 +116,6 @@ paths:
           description: accessToken included in response from login post
           required: true
           type: string
-        - in: body
-          name: product id
-          description: The id of the product to add
-          schema:
-            type: object
-            required:
-              - productId
-            properties:
-              id:
-                type: string
       tags:
         - Cart
       responses:
@@ -144,8 +130,8 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     post: 
-      summary: This post endpoint adds one item of the associated Id to the users cart. 
-      description: This endpoint adds one item to the cart of the current user
+      summary: This post endpoint adds one of the item of the associated Id to the users cart. 
+      description: This endpoint adds one of the item to the cart of the current user. Use for add to cart button
       parameters:
         - name: accessToken
           in: query
@@ -166,7 +152,9 @@ paths:
         - Cart
       responses:
         200:
-          description: item added successfully
+          description: item added and updated product returned
+          schema:
+            $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
@@ -176,6 +164,11 @@ paths:
       summary: This post endpoint manipulates an item in the cart by passing in the cart index.  
       description: This endpoint updates a product in the users cart. 
       parameters:
+        - name: cartIndex
+          in: query
+          description: index of the item manipulated in the cart
+          required: true
+          type: string
         - name: accessToken
           in: query
           description: accessToken included in response from login post
@@ -189,15 +182,15 @@ paths:
             required: 
               - userName
             properties:
-              cartIndex:
-                type: string
               quantity:
                 type: number
       tags:
         - Cart
       responses:
         200:
-          description: success product modified
+          description: success product modified and returned updated product obk
+          schema:
+            $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
@@ -212,23 +205,18 @@ paths:
           description: accessToken included in response from login post
           required: true
           type: string
-        - in: body
-          name: The Cart index and Quanitity
-          description: The cart index of manipulated item and the new quantity
-          schema:
-            type: object
-            required: 
-              - userName
-            properties:
-              cartIndex:
-                type: string
-              quantity:
-                type: number
+        - name: cartIndex
+          in: query
+          description: index of item to be deleted in cart
+          required: true
+          type: string
       tags:
         - Cart
       responses:
         200: 
-          description: Success product deleted
+          description: Success product deleted and rest of cart returned
+          schema:
+            $ref: '#/definitions/Product'
       
 definitions:
   Brand:
