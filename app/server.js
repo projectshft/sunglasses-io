@@ -1,27 +1,27 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var url = require('url');
-var uid = require('rand-token').uid;
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const url = require('url');
+const uid = require('rand-token').uid;
 
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 // State holding variables
-var products = [];
-var brands = [];
-var users = [];
-var accessTokens = [];
-var failedLoginAttempts = {};
+let products = [];
+let brands = [];
+let users = [];
+let accessTokens = [];
+let failedLoginAttempts = {};
 
 // Setup router
-var myRouter = Router();
+const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+http.createServer( (request, response) => {
   myRouter(request, response, finalHandler(request, response));
 }).listen(PORT, (error) => {
   if (error) {
@@ -29,17 +29,17 @@ http.createServer(function (request, response) {
   }
   // read data from initial data files and set state variables
   // equal to the data from cooresponding files
-  fs.readFile('./initial-data/brands.json', 'utf8', function (error, data) {
+  fs.readFile('./initial-data/brands.json', 'utf8', (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
     console.log(`Server setup: ${brands.length} brands loaded`);
   });
-  fs.readFile('./initial-data/users.json', 'utf8', function (error, data) {
+  fs.readFile('./initial-data/users.json', 'utf8', (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
     console.log(`Server setup: ${users.length} users loaded`);
   });
-  fs.readFile('./initial-data/products.json', 'utf8', function (error, data) {
+  fs.readFile('./initial-data/products.json', 'utf8', (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
     console.log(`Server setup: ${products.length} products loaded`);
@@ -48,223 +48,228 @@ http.createServer(function (request, response) {
 });
 
 // GET a list of brands
-myRouter.get('/api/brands', function (request, response) {
+myRouter.get('/api/brands', (request, response) => {
   response.writeHead(200);
   return response.end(JSON.stringify(brands));
 });
 
 // GET products for specific brand by id
-myRouter.get('/api/brands/:id/products', function (request, response) {
+myRouter.get('/api/brands/:id/products', (request, response) => {
+  // check if the brand exists
   const brandId = request.params.id;
   const brandExists = brands.find(brand => brand.id === brandId);
 
-  // check if the brand exists
   if (brandExists) {
-    // if the brand exists, send all products from the requested brand
+    // write a successful header and send all products from the requested brand
+    response.writeHead(200);
     const brandProducts = products.filter(product => product.categoryId === brandId);
 
-    response.writeHead(200);
     return response.end(JSON.stringify(brandProducts));
   } else {
+    // respond with an error, and let user know the brand was not found
     response.writeHead(404, 'Brand not found');
     return response.end();
   }
 });
 
 // GET products that match query string provided by user
-myRouter.get('/api/products', function (request, response) {
+myRouter.get('/api/products', (request, response) => {
+  // verify that a query value was provided
   const query = url.parse(request.url, true).query.query;
-  // check for query
+
   if (query !== '') {
+    // write a successful header and search products for a match in the products name value
     response.writeHead(200);
-    // if query provided, search products for match in name
     const queryResults = products.filter((product) => {
       return product.name.toLowerCase().includes(query.toLowerCase());
     });
+
+    // return the results to the user (may be an empty array)
     return response.end(JSON.stringify(queryResults));
   } else {
-    // if no query is provided respond with Bad Request
+    // respond with Bad Request, and let the user know a search value is required
     response.writeHead(400, 'Bad Request, search value required');
     return response.end();
   }
 });
 
 // POST user login
-myRouter.post('/api/login', function (request, response) {
+myRouter.post('/api/login', (request, response) => {
+  // verify there is a username and password in the request
   const {email, password} = request.body;
-  // Make sure there is a username and password in the request
+
   if (email && password) {
-    // if the username doesn't have 3 or more failed login attempts, proceeed
+    // verify the user doesn't have 3 or more failed login attempts
     if (!failedLoginAttempts[email] || failedLoginAttempts[email] <= 3) {
-      // See if there is a user that has that username and password 
+      // verify there is a user that has that username and password 
       if (users.find(user => user.email === email).login.password === password) {
-        // Write the header because we know we will be returning successful at this point and that the response will be json
+        // write a successful header and check if the user already has a valid token
         response.writeHead(200)
-        // If we already have an existing access token, use that
         let currentAccessToken = accessTokens.find((accessToken) => {
           return (accessToken.email === email && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT);
         });
-        // Update the last updated value of the existing token so we get another time period before expiration
-        if (currentAccessToken) {
-          currentAccessToken.lastUpdated = new Date();
 
+        if (currentAccessToken) {
+          // update the last updated value of the current access token and send it to user
+          currentAccessToken.lastUpdated = new Date();
           return response.end(JSON.stringify(currentAccessToken.token));
         } else {
-          // Create a new token with the user value and a "random" token
+          // create a new token with the user value and a "random" token
           let newAccessToken = {
             email: email,
             lastUpdated: new Date(),
             token: uid(16)
           };
 
+          // add new token to accessTokens object and send the token to the user
           accessTokens.push(newAccessToken);
           return response.end(JSON.stringify(newAccessToken.token));
         }
       } else {
-      // if login fails, tell the client either the email or password was wrong
+      // respond with an error and tell the client either the email or password was wrong
       response.writeHead(401, 'Incorrect username or password');
-      // check if the user exists in users list
-      if (users.find(user => user.email === email)) {
-        // if username is in failedLoginAttempts, increment username value
-        if (failedLoginAttempts[email]) {
-          failedLoginAttempts[email] += 1;
-        } else {
-          // if the email is not in failedLoginAttempts, add email key and set equal to 1 
-          failedLoginAttempts[email] = 1;
-        }
+
+      // update failedLoginAttempts object with failure. if the email is already in the
+      // failedLoginAttempts, increment the value, otherwise add a new key(email) to keep track of
+      if (failedLoginAttempts[email]) {
+        failedLoginAttempts[email] += 1;
+      } else {
+        failedLoginAttempts[email] = 1;
       }
       return response.end();
       }
     } else {
+      // respond with an error and let the user know they had too many failed login attempts
       response.writeHead(401, 'Too many failed login attempts');
       return response.end();
     }
   } else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    // respond with an error and tell client to provide an email and password
     response.writeHead(400, 'Please enter email and password');
     return response.end();
   }
 });
 
 // GET users shopping cart
-myRouter.get('/api/me/cart', function (request, response) {
+myRouter.get('/api/me/cart', (request, response) => {
+  // verify user has valid access token
   const currentToken = getValidTokenFromRequest(request);
 
-  // check for valid access token
   if (currentToken) {
+    // write a successful header and send the users's cart to the user
     response.writeHead(200);
-    // if the token is valid, return the user's cart
     const currentUser = getTokenUser(currentToken);
+
     response.end(JSON.stringify(currentUser.cart))
   } else {
-    // if the token is not valid, respond with an error
-    response.writeHead(401, "Invalid token", CORS_HEADERS);
+    // respond with an error and tell client that the token is invalid
+    response.writeHead(401, "Invalid token");
     return response.end();
   }
 });
 
-// POST item to the cart
-myRouter.post('/api/me/cart', function (request, response) {
-  // check for valid access token
+// POST - add an item to the cart
+myRouter.post('/api/me/cart', (request, response) => {
+  // verify user has a valid access token
   const currentToken = getValidTokenFromRequest(request);
 
   if (currentToken) {
-    // if the token is valid, varify product exists
+    // verify the product exists
     const currentProduct = getProductFromRequest(request);
     if (currentProduct) {
-      // if the product does exist, write successful header 
-      // and check if item is already in cart
+      // write a successful header and check if item is already in cart
       response.writeHead(200);
       const currentUser = getTokenUser(currentToken);
       const cartItem = currentUser.cart.find((item) => {
         return item.id === currentProduct.id;
       });
+
       if (cartItem) {
-        // if the item is already in the cart, incerement quantity by 1
+        // incerement the cart items quantity by 1
         cartItem.quantity++;
       } else {
-        // if the item is not in the cart create a new object to add to cart
+        // create a new object and add it to the cart
         let newCartItem = Object.assign({}, currentProduct);
+
         newCartItem.quantity = 1;
         currentUser.cart.push(newCartItem);
       }
-      // update users.json to reflect change
-      updatedUsersFile();
+      // update users.json to reflect change and send the user's cart to the user
+      updateUsersFile();
       return response.end(JSON.stringify(currentUser.cart));
     } else {
-      // if product does not exist, respond with an error letting client know
-      // that the product does not exist
+      // respond with an error and tell the client that the product does not exist
       response.writeHead(404, "Product not found");
       return response.end();
     }
   } else {
-    // if the token is not valid, respond with an error
+    // respond with an error and tell client that the token is invalid
     response.writeHead(401, "Invalid token");
     return response.end();
   }
 });
 
 // DELETE all items in cart that match product id
-myRouter.delete('/api/me/cart/:productId', function (request, response) {
-  // check that valid accessToken has been provided
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  // verify user has a valid access token
   const currentToken = getValidTokenFromRequest(request);
 
   if (currentToken) {
-    // if a valid accessToken has been provided, check that product id has been provided
+    // verify that a product id has been provided
     const productId = request.params.productId;
 
     if (productId) {
-      // if a product id has been provided, check that item is in users cart
+      // verify that the item is in users cart
       const currentCart = getTokenUser(currentToken).cart;
       const cartItem = currentCart.find((item) => {
         return item.id === productId;
       });
 
       if (cartItem) {
-        // if the item is in the users cart, write a successful header and delete it
+        // write a successful header and delete the item from the user's cart
         response.writeHead(200);
         currentCart.splice(currentCart.indexOf(cartItem), 1);
-        // update users.json file to reflect changes
-        updatedUsersFile();
+        // update users.json to reflect change and send the user's cart to the user
+        updateUsersFile();
         return response.end(JSON.stringify(currentCart));
       } else {
-        // if the item is not in the users cart, respond with error
+        // respond with an error and tell client that the product is not in the cart
         response.writeHead(404,'Product not found in cart');
         return response.end();
       }
     } else {
-      // if a product id has not been provided, respond with error
+      // respond with an error and tell client that a product id is required
       response.writeHead(400, 'Product id needed');
       return response.end();
     }
   } else {
-    // if no valid token has been provided, respond with an error
+    // respond with an error and tell client that the token is invalid
     response.writeHead(401, "Invalid token");
     return response.end();
   }
 });
 
-// POST /api/me/cart/:productId ###### TODO user must be logged in
-myRouter.post('/api/me/cart/:productId', function (request, response) {
-  // check that valid accessToken has been provided
+// POST - updates the quantity of the item in cart
+myRouter.post('/api/me/cart/:productId', (request, response) => {
+  // verify user has a valid access token
   const currentToken = getValidTokenFromRequest(request);
 
   if (currentToken) {
-    // if a valid accessToken has been provided, check that product id has been provided
+    // verify that a product id has been provided
     const productId = request.params.productId;
 
     if (productId) {
-      // if a product id has been provided, check that item is in users cart
+      // verify that the item is in users cart
       const currentCart = getTokenUser(currentToken).cart;
       const cartItem = currentCart.find((item) => {
         return item.id === productId;
       });
 
       if (cartItem) {
-        // if the item is in the users cart, check that a quantity has been provided
-        const newQuantity = getProductQuantityFromRequest(request);
+        // verify that a quantity has been provided
+        const newQuantity = url.parse(request.url, true).query.quantity;
         if (newQuantity) {
-          // if quantity provided write a successful header and update quantity
+          // write a successful header and update quantity
           response.writeHead(200);
           // if the quantity it not 0, update the quantity
           if (newQuantity != 0) {
@@ -274,25 +279,25 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
             currentCart.splice(currentCart.indexOf(cartItem), 1);
           }
           // update users.json file to reflect changes
-          updatedUsersFile();
+          updateUsersFile();
           return response.end(JSON.stringify(currentCart));
         } else {
-          // if no quantity provided, respond with an error
-          response.writeHead(400, 'Quantity needed to update car');
+          // respond with an error and tell client a quantity is required
+          response.writeHead(400, 'Quantity needed to update cart');
           return response.end();
         }
       } else {
-        // if the item is not in the users cart, respond with error
+        // respond with error and tell client the product is not in the cart
         response.writeHead(404,'Product not found in cart');
         return response.end();
       }
     } else {
-      // if a product id has not been provided, respond with error
+      // respond with error and tell client a product id is required
       response.writeHead(400, 'Product id needed');
       return response.end();
     }
   } else {
-    // if no valid token has been provided, respond with an error
+    // respond with an error and tell client that the token is invalid
     response.writeHead(401, "Invalid token");
     return response.end();
   }
@@ -300,11 +305,11 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
 
 // Helper method to process access token
 const getValidTokenFromRequest = (request) => {
-  const  parsedUrl = url.parse(request.url, true)
-  if (parsedUrl.query.accessToken) {
+  const  query = url.parse(request.url, true).query
+  if (query.accessToken) {
     // Verify the access token to make sure it's valid and not expired
     let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken;
+      return (accessToken.token == query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT);
     });
     if (currentAccessToken) {
       return currentAccessToken;
@@ -316,17 +321,20 @@ const getValidTokenFromRequest = (request) => {
   }
 };
 
+// helper method to find user from token
 const getTokenUser = (token) => {
   return users.find(user => user.email === token.email)
 };
 
+// helper method to get the product from the request when product id
+// is passed via query
 const getProductFromRequest = (request) => {
-  const parsedUrl = url.parse(request.url, true)
+  const{ productId } = url.parse(request.url, true).query
   // verify a product id was provided by client
-  if (parsedUrl.query.productId) {
+  if (productId) {
     // if product id provided, find the product
     let currentProduct = products.find((product) => {
-      return product.id === parsedUrl.query.productId;
+      return product.id === productId;
     });
     if (currentProduct) {
       // if the product exists, return it
@@ -339,13 +347,8 @@ const getProductFromRequest = (request) => {
   }
 }
 
-const getProductQuantityFromRequest = (request) => {
-  const parsedUrl = url.parse(request.url, true);
-
-  return parsedUrl.query.quantity;
-}
-
-const updatedUsersFile = () => {
+// update the users file (after changes have been made)
+const updateUsersFile = () => {
   fs.writeFile('./initial-data/users.json', JSON.stringify(users), (error) => {
     if (error) {
       throw error;
