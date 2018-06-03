@@ -1,5 +1,11 @@
-## Sunglasses.io Server Starter
+# Sunglasses.io Server Project
 
-This project is a starter for the Sunglasses.io eval.  
+This is an API for a sunglasses store
 
-Don't forget to update this file with helpful hints on how to run the application.
+## Getting started
+
+You will need to run  ```` npm install ````
+
+## Things to know
+
+No servers are utilized in this project.
