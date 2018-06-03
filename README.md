@@ -1,14 +1,22 @@
 # Sunglasses.io Server Project
 
-This is an API for a sunglasses store
+This is an API for an imaginary sunglasses store.
 
 ## Getting started
 
-You will need to run  ```` npm install ````
+You will need to run  
+
+```bash
+npm install
+npm start
+```
+
+Server is set to run on Port 3001
+
 
 ## API documentation
 
-[Swagger](https://editor.swagger.io/) API documentation has been included and can be found [here](https://github.com/roykim79/sunglasses-io/blob/master/swagger.yaml)
+[Swagger](https://editor.swagger.io/) API documentation has been included - [swagger.yaml](https://github.com/roykim79/sunglasses-io/blob/master/swagger.yaml)
 
 ## Things to know
 
