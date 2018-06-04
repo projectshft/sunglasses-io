@@ -40,6 +40,7 @@ module.exports = {
     return user;
   },
 
+  // User gets new token on login
   getNewToken(userObject){
     let newAccessToken = {
       username: userObject.username,
@@ -74,13 +75,15 @@ module.exports = {
   },
 
   // Using token to find username, and return user's cart.
+  // Token must be validated before using this function.
   getUserCart(token){
     let username = accessTokens.find(accessToken => accessToken.token == token).username;
     let cart = users.find(user => user.login.username == username).cart;
     return cart;
   },
   
-  // Adds product to user's cart
+  // Adds product to user's cart.
+  // Token must be validated before using this function.
   addProduct(request){
     let username = accessTokens.find(accessToken => accessToken.token == request.headers.token).username;
     let product = productUtils.getProduct(request.body.productId);
@@ -90,6 +93,7 @@ module.exports = {
   },
 
   // remove product from user's cart completely
+  // Token must be validated before using this function.
   removeProduct(request){
     let username = accessTokens.find(accessToken => accessToken.token == request.headers.token).username;
     let cartItem = productUtils.getProduct(request.body.productId);
@@ -105,6 +109,7 @@ module.exports = {
   },
 
   // update product amount, but if it is less than or equal 0, remove from cart.
+  // Token must be validated before using this function.
   updateProduct(request){
     let username = accessTokens.find(accessToken => accessToken.token == request.headers.token).username;
     let cartItem = productUtils.getProduct(request.body.productId);

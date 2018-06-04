@@ -132,16 +132,15 @@ myRouter.post('/api/me/cart', function(request, response){
   response.writeHead(200,Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
   let token = myValidationUtils.checkValidToken(request.headers);
   let productId = productUtils.checkProductAvailability(request.body.productId);
-  let updateAmount = request.body.amount;
-
-  // checks if it's the whole integer
-  if(request.body.amount % 1 != 0){
-    response.writeHead(400,"Invalid Amount", CORS_HEADERS);
-    response.end();
-  }
+  let updateAmount = parseFloat(request.body.amount);
 
   // If access token exist, then return user's cart
   if(token && productId && updateAmount){
+      // checks if it's the whole integer
+    if(updateAmount % 1 != 0){
+      response.writeHead(400,"Invalid Amount", CORS_HEADERS);
+      response.end();
+    }
     myValidationUtils.updateProduct(request);
     let userCart = myValidationUtils.getUserCart(request.headers.token);
 

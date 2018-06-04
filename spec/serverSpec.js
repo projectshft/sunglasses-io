@@ -86,7 +86,7 @@ describe("Brands", function() {
         });
         
         // checks if all brand is in the response
-        it("returns an array", function(done) {
+        it("returns an array of brands", function(done) {
             request.get(options, function(error, response, body) {
                 let parsed = JSON.parse(response.body);
                 expect(parsed).toEqual(fullBrands);
@@ -191,7 +191,7 @@ describe("Products", function() {
         });
 
         // Return queried list if query (sunglasses) sent, regardless of upper/lower cases.
-        it("returns queried products", function(done) {
+        it("returns queried products (case insensitive)", function(done) {
             request.get(productQuery, function(error, response, body) {
                 let filteredProducts = [];
                 filteredProducts = fullProducts.filter(product => product.name.toLowerCase().includes('sunglasses'));
@@ -201,7 +201,7 @@ describe("Products", function() {
         });
         
         // Return queried brand product list if query (dkny) sent, regardless of upper/lower cases.
-        it("returns queried brand products", function(done) {
+        it("returns queried brand products (case insensitive)", function(done) {
             request.get(brandQuery, function(error, response, body) {
                 let filteredProducts = [];
                 let brand = fullBrands.find(brand => brand.name.toLowerCase() == "dkny")
@@ -254,6 +254,7 @@ describe("Login", function() {
 });
 
 // /me/cart API calls
+// probably better idea to seperate these calls into individual tests.
 describe("Cart", function() {
     let badTokenLogin = {
         url: base_url+"/me/cart",
@@ -273,7 +274,7 @@ describe("Cart", function() {
         });
 
         // Returns 401 with bad token
-        it("returns status code 401", function(done) {
+        it("returns status code 401 when invalid token", function(done) {
             request.get(badTokenLogin, function(error, response, body) {
                 expect(response.statusCode).toBe(401);
                 done();
@@ -281,7 +282,7 @@ describe("Cart", function() {
         });
 
         // then GET me/cart with the new token
-        it("returns array of products", function(done) {        
+        it("returns array of products with valid token", function(done) {        
             let tokenLogin = {
                 url: base_url+"/me/cart",
                 headers: {
@@ -297,8 +298,8 @@ describe("Cart", function() {
             });
         });
 
-        // then POST me/cart with the new token to add a product
-        it("returns array of products in cart", function(done) {        
+        // add/remove/update the me/cart with the new token
+        it("changes the cart and returns array of products in cart", function(done) {        
             let Product1 = {
                 url: base_url+"/me/cart",
                 headers: {
@@ -354,6 +355,18 @@ describe("Cart", function() {
                 body: JSON.stringify({
                     'productId': "2",
                     'amount': "-50"
+                })
+            }
+            let updateProduct3 = {
+                url: base_url+"/me/cart",
+                headers: {
+                    'x-authentication': apiKey,
+                    'content-type': "application/json",
+                    'token': token
+                },
+                body: JSON.stringify({
+                    'productId': "2",
+                    'amount': "5.5"
                 })
             }
             // User's Cart containing 1 item
@@ -442,6 +455,10 @@ describe("Cart", function() {
                     "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
                     "amount": 50
                 }]));
+            });
+
+            request.post(updateProduct3, function(error, response, body) {
+                expect(response.statusCode).toBe(400);
             });
 
 
