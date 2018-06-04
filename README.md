@@ -20,7 +20,7 @@ Server is set to run on Port 3001
 
 ## Things to know
 
-No servers are utilized in this project. All requests read from and write to the following JSON files:
+No databases are utilized in this project. All requests read from and write to the following JSON files:
 * [brands.json](https://github.com/roykim79/sunglasses-io/blob/master/initial-data/brands.json)
 * [products.json](https://github.com/roykim79/sunglasses-io/blob/master/initial-data/products.json)
 * [users.json](https://github.com/roykim79/sunglasses-io/blob/master/initial-data/users.json)
