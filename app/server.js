@@ -20,7 +20,8 @@ http.createServer(function (request, response) {
     if (request.url.includes('api')) {
         myRouter(request, response, finalHandler(request, response))
     } else {
-        serve(request, response, finalHandler(request, response))
+        response.writeHeader(404, "Invalid Call");
+        response.end();
     }
 
 }).listen(PORT);
