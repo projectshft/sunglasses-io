@@ -98,12 +98,11 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: body
-          name: login
-          description: User's login detail
+        - name: token
+          in: header
+          description: Access Token from login.
           required: true
-          schema:
-            $ref: '#/definitions/Login'
+          type: string
       responses:
         '200':
           description: Successful Login
@@ -127,7 +126,7 @@ paths:
         - application/json
       parameters:
         - name: token
-          in: path
+          in: header
           description: Access Token from login.
           required: true
           type: string
@@ -150,6 +149,14 @@ paths:
         Allows users to add product to cart
       consumes:
         - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: header
+          description: Access Token from login.
+          required: true
+          type: string
       responses:
         '200':
           description: An array of products in cart.
@@ -161,22 +168,16 @@ paths:
           description: Unexpected error.
           schema:
             $ref: '#/definitions/Error'
-            
-  /me/cart/{productId}:
+  
+  /me/cart/:
     delete:
       tags:
         - Cart
       summary: Remove Product
       parameters:
-        - name: productId
-          in: path
+        - in: body
+          name: productId
           description: The id of the product.
-          required: true
-          type: string
-        - name: token
-          in: path
-          description: Access Token from login.
-          required: true
           type: string
       description: |
         Allow users to remove product from their cart
@@ -192,15 +193,20 @@ paths:
     post:
       tags:
         - Cart
-      summary: Remove Product
+      summary: Update Product Amount
       parameters:
         - name: productId
-          in: path
+          in: body
           description: The id of the product.
           required: true
           type: string
+        - name: amount
+          in: body
+          description: The amount of the product in cart.
+          required: true
+          type: string
         - name: token
-          in: path
+          in: header
           description: Access Token from login.
           required: true
           type: string
