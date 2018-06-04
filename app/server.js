@@ -6,8 +6,8 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 var url = require('url');
-var SUCCESS_HEADER = {'Content-Type':'application/json'}
-var FAILURE_HEADER = {'Content-Type':'application/json'}
+var SUCCESS_HEADER = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication", 'Content-Type':'application/json'}
+var FAILURE_HEADER = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication", 'Content-Type':'application/json'}
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 var brands = [];
 var users = [];
@@ -284,8 +284,8 @@ myRouter.post('/api/me/cart/:cartIndex', function(request, response){
       return user.login.username == validToken.username;
     });
     if(validToken && currentUser){
-      //see if quantity is not negative and whole
-      if(requestedQuantity > 0 && Number.isInteger(requestedQuantity)){
+      //see if quantity is not negative or 0 and whole
+      if(requestedQuantity > 1 && Number.isInteger(requestedQuantity)){
         //make sure product at that index exists
         let foundProduct = currentUser.cart[indexInt];
         if(foundProduct){

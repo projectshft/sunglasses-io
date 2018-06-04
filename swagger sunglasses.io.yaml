@@ -5,12 +5,11 @@ info:
   description: Put glasses on your face
   version: "1.0.0"
 # the domain of the service
-host: sunglasses.io
+host: localhost:3001
 # array of all schemes that your API supports
 schemes:
-  - https
+  - http
 # will be prefixed to all paths
-basePath: /v1
 produces:
   - application/json
 paths:
@@ -32,7 +31,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /api/brands/:id/products:
+  /api/brands/{id}/products:
     get:
       summary: This endpoint returns all products of corresponding brand ID provided.
       description: |
@@ -159,13 +158,13 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /api/me/cart/:cartIndex:
+  /api/me/cart/{cartIndex}:
     post: 
       summary: This post endpoint manipulates an item in the cart by passing in the cart index.  
       description: This endpoint updates a product in the users cart. 
       parameters:
         - name: cartIndex
-          in: query
+          in: path
           description: index of the item manipulated in the cart
           required: true
           type: string
@@ -206,7 +205,7 @@ paths:
           required: true
           type: string
         - name: cartIndex
-          in: query
+          in: path
           description: index of item to be deleted in cart
           required: true
           type: string
