@@ -134,6 +134,12 @@ myRouter.post('/api/me/cart', function(request, response){
   let productId = productUtils.checkProductAvailability(request.body.productId);
   let updateAmount = request.body.amount;
 
+  // checks if it's the whole integer
+  if(request.body.amount % 1 != 0){
+    response.writeHead(400,"Invalid Amount", CORS_HEADERS);
+    response.end();
+  }
+
   // If access token exist, then return user's cart
   if(token && productId && updateAmount){
     myValidationUtils.updateProduct(request);
