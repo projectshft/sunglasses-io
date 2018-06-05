@@ -3,19 +3,18 @@ info:
   title: Goalworthy API
   description: An API to support the goalworthy platform
   version: 1.0.0
-host: api.goalworthy.com
+host: localhost:3001
 schemes:
   - https
 basePath: /api
 produces:
   - application/json
-  
 paths:
   /brands:
     get:
       summary: Brands
       description: |
-        The Brands endpoint returns each brand from the api
+        The Brands endpoint allows selection of brands as parameter for search
       tags:
         - Brands
       responses:
@@ -87,6 +86,12 @@ paths:
         The User Profile endpoint returns information about the user
       tags:
         - User
+      parameters:
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
       responses:
         '200':
           description: Profile information for a user
@@ -104,6 +109,12 @@ paths:
         The User Cart endpoint returns information on what items exist in the users cart
       tags:
         - User
+      parameters:
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
       responses:
         '200':
           description: Profile information for a user
@@ -138,6 +149,11 @@ paths:
           description: The id of the product to add to cart
           required: true
           type: string
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
       responses:
         '200':
           description: Acceptance is successful
@@ -153,7 +169,12 @@ paths:
       parameters:
         - name: productId
           in: path
-          description: The id of the product to add to cart
+          description: The id of the product to delete from cart
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: uses token to verify user
           required: true
           type: string
       responses:
@@ -180,6 +201,27 @@ paths:
         - name: password
           in: header
           description: password of user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+            
+  /logout:
+    post:
+      summary: User Logout
+      description: |
+        This endpoint allows you achieve a given goal
+      tags:
+      - Logout
+      parameters:
+        - name: token
+          in: query
+          description: uses token to log user out
           required: true
           type: string
       responses:
