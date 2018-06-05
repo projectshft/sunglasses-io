@@ -146,8 +146,12 @@ myRouter.get("/api/me/cart", function (request, response) {
         var user = users.find(function (u) {
             return u.login.username == token.username;
         });
-        response.writeHead(200, { "Content-Type": "application/json" });
-        response.end(JSON.stringify(user.cart));
+        if (user) {
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(user.cart));
+        } else {
+            response.writeHead(404, "User not found");
+        }
     } else {
         response.writeHead(401, "You must be logged in to perform this action.")
         response.end();
@@ -161,22 +165,26 @@ myRouter.post("/api/me/cart", function (request, response) {
         var user = users.find(function (u) {
             return u.login.username == token.username;
         });
-        var alreadyInCart = user.cart.find(function (item) {
-            return item.product.productId == request.body.productId;
-        });
-        if (alreadyInCart) {
-            response.writeHeader(400, "Item already in cart");
-            return response.end();
-        } else {
-            var product = products.find(function (item) {
-                return item.id == request.body.productId;
+        if (user) {
+            var alreadyInCart = user.cart.find(function (item) {
+                return item.product.productId == request.body.productId;
             });
-            var cartItem = {
-                product: product,
-                quantity: 1
+            if (alreadyInCart) {
+                response.writeHead(400, "Item already in cart");
+                return response.end();
+            } else {
+                var product = products.find(function (item) {
+                    return item.id == request.body.productId;
+                });
+                var cartItem = {
+                    product: product,
+                    quantity: 1
+                }
+                user.cart.push(cartItem);
+                response.end();
             }
-            user.cart.push(cartItem);
-            response.end();
+        } else {
+            response.writeHead(404, "User not found");
         }
     } else {
         response.writeHead(401, "You must be logged in to perform this action.")
@@ -214,7 +222,7 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
                     }
                 }
             }
-            else{
+            else {
                 response.writeHead(400, "Invalid quantity");
                 return response.end();
             }
@@ -231,10 +239,15 @@ myRouter.delete("/api/me/cart/:productId", function (request, response) {
         var user = users.find(function (u) {
             return u.login.username == token.username;
         });
-        user.cart = user.cart.filter(function (item) {
-            return item.product.id != request.params.productId;
-        });
-        response.end();
+        if (!user) {
+            response.writeHead(404, "User not found");
+            response.end();
+        } else {
+            user.cart = user.cart.filter(function (item) {
+                return item.product.id != request.params.productId;
+            });
+            response.end();
+        }
     } else {
         response.writeHead(401, "You must be logged in to perform this action.");
         response.end();
