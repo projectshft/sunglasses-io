@@ -1,5 +1,13 @@
 ## Sunglasses.io Server Starter
+You can start this server multiple ways. You can start it throught the vscode debugger. Also in your command line you can type in: 
+node app/server.js   
+this will start the server up.
 
-This project is a starter for the Sunglasses.io eval.  
+Only the backend is complete. There is currently not a working client side available.
 
-Don't forget to update this file with helpful hints on how to run the application.
+Please do an npm install. I added some npm installs that were not native to the original sunglasses-io node-modules
+npm install should do the trick 
+
+two NPMs that i installed are
+npm install express
+npm install parseurl
