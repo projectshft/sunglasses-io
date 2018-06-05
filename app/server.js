@@ -306,18 +306,32 @@ myRouter.post('/api/login', function(request,response) {
         // verify password
         else if (user.login.password == request.body.password) {
             response.writeHead(200, CORS_HEADERS);
+
+            // look to see if user already has accessToken
+            let accessToken = accessTokens.find((accessToken)=>{
+                return accessToken.accessToken == user.token.uid
+            }) 
+
+            if(accessToken){
+                accessToken = accessToken.accessToken
+            }
+
             
-            // create an accessToken and store it within user and accessTokens array
-            const accessToken = uid(6);
-            user.token.uid = accessToken
-            user.token.lastUpdated = new Date()
-            accessTokens.push({
-                accessToken:accessToken,
-                user: user,
-                lastUpdated: new Date()
-            })
+
+            if(!accessToken || hasTokenExpired(user)){
+                // create an accessToken and store it within user and accessTokens array
+                accessToken = uid(6);
+                user.token.uid = accessToken
+                user.token.lastUpdated = new Date()
+                accessTokens.push({
+                    accessToken:accessToken,
+                    user: user,
+                    lastUpdated: new Date()
+                })
+            }
             // respond to client with token
             response.end(JSON.stringify(accessToken));
+
         } else {
             // if password fails, keep track of failed attempts
             user.temporaryStatus.failedAttempts += 1
