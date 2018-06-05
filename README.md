@@ -11,3 +11,5 @@ npm install should do the trick
 two NPMs that i installed are
 npm install express
 npm install parseurl
+
+Also the sunglasses.yaml file can be pasted into the swagger editor to utilize it for examples.
