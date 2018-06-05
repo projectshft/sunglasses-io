@@ -1,0 +1,269 @@
+swagger: '2.0'
+info: 
+  version: 1.0.0
+  title: Sunglasses.io API
+  description: This is an API to support the Sunglasses platform. 
+schemes: 
+  - https
+host: sunglasses.io
+basePath: /api
+consumes:
+  - application/json
+produces: 
+  - application/json
+paths:
+  /brands:
+    get:
+      tags: 
+        - Brands
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to see a list of the brands
+      responses:
+        200:
+          description: An array of sunglasses brands.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      tags: 
+        - Brands
+      summary: Products for a brand
+      description: |
+        The brands/products endpoint lets the user see a list of products for a particular brand
+      parameters:
+        - name: id
+          required: true
+          in: path
+          type: string
+
+      responses: 
+        200: 
+          description: product search success
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get: 
+      tags: 
+        - Products
+      summary: Products
+      description: | 
+        The Products endpoint lets you search sunglasses by name
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      responses: 
+        200: 
+          description: Returns an array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        400:
+          description: Search term required
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Login
+      tags: 
+        -  Login
+      description: |
+        The login endpont lets the user login
+      parameters: 
+        - name: login
+          in: body
+          description: | 
+            the user login credentials
+          schema:
+            required:
+              - username
+              - password
+      responses:
+        200:
+          description: Login successful
+        400:
+          description: Parameters missing username or password
+        401: 
+          description: Please use a valid email or password
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/me/cart:
+    get:
+      summary: User's cart
+      tags:
+        - Cart  
+      description: | 
+        This is the user's cart endpoint. Allows the user to see what is in the cart
+      parameters:
+        - name: accessToken
+          required: true
+          in: query
+          description: Current user's access token
+          type: string
+      responses:
+        200:
+          description: Returns an array of the user's products in the cart
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        401:
+          description: Invalid access token
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add item to cart
+      tags:
+        - Cart
+      description: |
+        The cart/post endpoint adds items to the user's cart
+      parameters:
+      - name: accessToken
+        required: true
+        in: query
+        description: Current user's access token
+        type: string
+      - name: itemToAdd
+        in: body
+        required: true
+        description: The product ID of the item added to cart
+        schema:
+          $ref: '#/definitions/ItemToAdd'
+
+      responses:
+        200:
+          description: Item added to cart.
+        401: 
+          description: Invalid access token
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Cart'
+  /api/me/cart/{productId}:
+    delete:
+      tags: 
+        - Cart
+      summary: Remove item from cart
+      description: |
+        The delete endpoint removes an an item or items from the cart that matches the ID
+      parameters: 
+        - name: productId
+          required: true
+          in: path
+          type: string
+          description: The item that will be removed
+        - name: accessToken
+          required: true
+          in: query
+          description: The current access token of user
+          type: string
+      responses: 
+        200:
+          description: Item deleted. Returns new array
+          schema: 
+            $ref: '#/definitions/Cart'
+        401:
+          description: Invalid access token
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags: 
+        - Cart
+      summary: Allows user to add items to cart
+      description: |
+        The post/cart endpont allws the user to add items to the cart
+      parameters: 
+        - name: productId
+          required: true
+          in: path
+          type: string
+          description: The item that will be added to cart
+        - name: accessToken
+          in: query
+          required: true
+          description: current access token
+          type: string
+        - name: quantity
+          in: query
+          required: true
+          type: string
+          description: The amount of the desired item
+      responses: 
+        200:
+          description: Item in cart added
+          schema: 
+            $ref: '#/definitions/Cart'
+        401:
+          description: Invalid access token
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a  brand
+      name:
+        type: string
+        description: Name of sunglasses brand
+  Product: 
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific product
+      categoryId: 
+        type: string
+        description: The ID for the category
+      price: 
+        type: number
+        description: Item price
+      imageUrls: 
+        type: array
+        items: 
+          type: string
+          description: image url
+  Cart:
+    type: array
+    items:
+      $ref: '#/definitions/CartItem'
+  CartItem:
+    properties:
+      product:
+        $ref: '#/definitions/Product'
+      quantity:
+        type: integer
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: object

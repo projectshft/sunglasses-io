@@ -11,8 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "express": "^4.16.3",
     "finalhandler": "latest",
     "http": "latest",
+    "parseurl": "^1.3.2",
     "querystring": "^0.2.0",
     "rand-token": "^0.4.0",
     "router": "^1.3.2"
