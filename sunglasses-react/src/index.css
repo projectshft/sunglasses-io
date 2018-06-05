@@ -1,0 +1,211 @@
+.text-center{
+  margin: auto;
+}
+
+.right{
+  position: absolute;
+  right: 10px
+}
+
+.left{
+  position: absolute;
+  left: 10px
+}
+
+.input-quantity{
+  width: 40px;
+}
+
+.submit-quanity{
+  width: 100%;
+  margin-top: 5px;
+  border: solid gray 1px;
+  border-radius: 5%;
+  /* font-size-adjust: auto; */
+  /* margin:auto; */
+  background-color: lightgray;
+}
+
+.products-background{
+  /* background-color: gray; */
+}
+
+.glasses-image{
+  width:75%;
+}
+
+.main-padding{
+  padding-left: 215px;
+  padding-top: 200px
+}
+
+.bottom-padding{
+  /* height:300px */
+}
+
+.center{
+  margin: auto;
+}
+
+.bottom{
+  position: absolute;
+  bottom: 0;
+  right: 15px
+}
+
+.tiny-thumbnail{
+  height: 45px;
+  width: 45px;
+  object-fit: cover;
+}
+
+.text-yellow{
+  color: yellow !important;
+  font-family: serif;
+}
+
+.default-img{
+  height: 175px;
+  width: 175px;
+  object-fit: cover;
+}
+
+.text-black{
+  color: black;
+  font-style: none;
+}
+
+
+
+.box-center{
+  width: 20%;
+  padding: 30px;
+  background-color: lightgray;
+}
+
+.btn-options{
+  background-color: #349;
+  color: white;
+  border-radius: .25rem;
+  width: 63px
+}
+
+.btn-gray{
+  background-color: #349;
+  color: white;
+  height: 40px;
+  margin-top: 5px;
+  width: 150px;
+}
+
+.bg-gray{
+  background-color: lightgray
+}
+
+.App-logo {
+  /* animation: App-logo-spin infinite 20s linear; */
+  height: 75px;
+}
+
+.App-header {
+  /* position: fixed; */
+  background-color: #222;
+  height: auto;
+  padding: 8px;
+  color: white;
+}
+.side-nav-buttons{
+  background-color: #332;
+  padding: 10px 0 10px 0;
+  border: #221 1px solid
+}
+.side-nav-buttons:hover{
+  background-color: #443;
+}
+
+.side-nav-item{
+  /* height:60px; */
+}
+
+.side-nav {
+  background-color: #443;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  width: 150px
+}
+
+.add-to-cart{
+  color: black;
+  font-weight: bold;
+  background-color: #886;
+  padding: 10px 0 10px 0;
+  border: #221 1px solid
+}
+.add-to-cart:hover{
+  background-color: #997;
+}
+
+.item{
+  background-color: #443;
+  border: #221 1px solid
+}
+
+.product-name{
+  color: black;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+.right-options{
+  width:200px;
+  /* float: right; */
+}
+
+.search-glasses{
+
+}
+.search-all{
+  float:right;
+  margin-right: 10px;
+}
+
+.content-right{
+
+}
+
+.login{
+  float:right;
+  margin-right: 3px;
+  width: 30%;
+  font-size: 11px
+}
+
+.image-sunglasses{
+  margin: auto
+}
+
+.main-sizing{
+  width: calc(99vw - 155px);
+  margin: 5px
+}​
+
+p{
+  font-size: 10px
+}
+
+h5{
+  font-size: 10px
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
