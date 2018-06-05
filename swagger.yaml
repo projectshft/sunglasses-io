@@ -1,0 +1,321 @@
+swagger: "2.0"
+info:
+  description: "This is an API for the Sunglasses-io project"
+  version: "1.0.0"
+  title: "Sunglasses-io"
+basePath: "/api"
+tags:
+- name: "products"
+  description: "Details of products"
+- name: "user"
+  description: "Operations about user"
+- name: "brands"
+  description: "Brand details"
+- name: "cart"
+  description: "Cart info and operations"
+schemes:
+- "http"
+paths:
+  /products:
+    get:
+      tags:
+        - "products"
+      summary: "Get all products"
+      responses:
+        200:
+          description: "success"
+          schema: 
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+  /products/{productId}:
+    get:
+      tags:
+      - "products"
+      summary: "Find product by ID"
+      description: "Returns a single product"
+      operationId: "getProductById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "ID of product to return"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Product"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Product not found"
+      security:
+      - api_key: []
+  /brands:
+    get:
+      tags:
+        - "brands"
+      summary: "Get all brands"
+      responses:
+        200:
+          description: "success"
+          schema: 
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+  /brands/{brandId}/products:
+    get:
+      tags:
+      - "products"
+      summary: "Get products by brand"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "brandId"
+          in: "path"
+          description: "ID of product to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        200:
+          description: "success"
+          schema: 
+            $ref: "#/definitions/Product"
+  /login:
+    post:
+      tags:
+      - "user"
+      summary: "Log in"
+      parameters:
+        - name: "username"
+          in: "header"
+          description: "login information"
+          required: true
+          type: "string"
+        - name: "password"
+          in: "header"
+          type: "string"
+      responses:
+        200:
+          description: "success"
+          schema:
+            type: "string"
+  /me/cart:
+    get:
+      tags:
+      - "cart"
+      summary: "Get all items in cart"
+      parameters:
+        - name: "token"
+          in: "header"
+          description: "Access token; generated upon login"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "success"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                item:
+                  $ref: "#/definitions/Product"
+                quantity:
+                  type: "integer"
+                  format: "int64"
+    post:
+      tags:
+      - "cart"
+      summary: "Add an item to the cart"
+      parameters:
+      - name: "token"
+        in: "header"
+        type: "string"
+        required: true
+      - name: productId
+        in: "header"
+        type: "integer"
+        required: true
+      responses:
+        200:
+          description: "success"
+  /me/cart/{productId}:
+    post:
+      tags:
+      - "cart"
+      summary: "Change the quantity of an item in the cart"
+      parameters:
+        - name: "token"
+          in: "header"
+          type: "string"
+          required: true
+        - name: "productId"
+          in: "path"
+          type: "integer"
+          required: true
+        - name: "quantity"
+          in: "header"
+          type: "integer"
+          required: true
+      responses:
+        200:
+          description: "success"
+    delete:
+      tags:
+      - "cart"
+      summary: "Delete an item from the cart"
+      parameters:
+        - name: "token"
+          in: "header"
+          type: "string"
+          required: true
+        - name: "productId"
+          in: "path"
+          type: "integer"
+          required: true
+      responses:
+        200:
+          description: "success"
+
+            
+
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Order:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      petId:
+        type: "integer"
+        format: "int64"
+      quantity:
+        type: "integer"
+        format: "int32"
+      shipDate:
+        type: "string"
+        format: "date-time"
+      status:
+        type: "string"
+        description: "Order Status"
+        enum:
+        - "placed"
+        - "approved"
+        - "delivered"
+      complete:
+        type: "boolean"
+        default: false
+    xml:
+      name: "Order"
+  Product:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      categoryId:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      price:
+        type: "integer"
+        format: "int64"
+      imageUrls:
+        type: "array"
+        items:
+          type: "string"
+  User:
+    type: "object"
+    properties:
+      gender:
+        type: "string"
+      cart:
+        type: "array"
+        items:
+          type: "integer"
+          format: "int64"
+      name:
+        type: "object"
+        required:
+        - "title"
+        - "first"
+        - "last"
+      location:
+        type: "object"
+        required:
+        - "street"
+        - "city"
+        - "state"
+        - "postcode"
+      email:
+        type: "string"
+        format: "email"
+      login:
+        type: "object"
+        required: 
+        - "username"
+        - "password"
+        - "salt"
+        - "md5"
+        - "sha1"
+        - "sha256"
+      dob:
+        type: "string"
+        format: "date"
+      registered:
+        type: "string"
+      phone:
+        type: "string"
+      cell:
+        type: "string"
+      picture:
+        type: "object"
+        required:
+        - "large"
+        - "medium"
+      nat:
+        type: "string"
+  Brand:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+
+
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
