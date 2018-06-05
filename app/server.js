@@ -185,21 +185,39 @@ myRouter.post("/api/me/cart", function (request, response) {
 });
 
 //takes in a token in the header and a quantity in the body
-myRouter.post("/api/me/cart/:productId", function(request, response){
+//Error handling: checks to make sure the request has a valid token and a positive integer quantity property, that the user associated with the token exists, and if the item doesn't exist in the cart
+myRouter.post("/api/me/cart/:productId", function (request, response) {
     var token = getValidTokenFromRequest(request);
-    if(token){
-        var user = users.find(function(u){
-            return u.login.username == token.username;
-        });
-        var cartItem = user.cart.find(function(item){
-            return item.product.id == request.params.productId;
-        });
-        if(cartItem){
-            cartItem.quantity = request.body.quantity;
-            response.end();
+    if (token) {
+        if (!request.body.quantity) {
+            response.writeHead(400, "Quantity not specified");
+            return response.end();
         } else {
-            response.writeHead(400, "Item not found in cart.")
-            response.end();
+            //test if quantity is a positive integer
+            if (/^\+?[1-9][\d]*$/.test(request.body.quantity)) {
+                var user = users.find(function (u) {
+                    return u.login.username == token.username;
+                });
+                if (!user) {
+                    response.writeHead(404, "User not found");
+                    return response.end();
+                } else {
+                    var cartItem = user.cart.find(function (item) {
+                        return item.product.id == request.params.productId;
+                    });
+                    if (cartItem) {
+                        cartItem.quantity = request.body.quantity;
+                        response.end();
+                    } else {
+                        response.writeHead(400, "Item not found in cart.")
+                        response.end();
+                    }
+                }
+            }
+            else{
+                response.writeHead(400, "Invalid quantity");
+                return response.end();
+            }
         }
     } else {
         response.writeHead(401, "You must be logged in to perform this action.");
@@ -207,13 +225,13 @@ myRouter.post("/api/me/cart/:productId", function(request, response){
     }
 });
 
-myRouter.delete("/api/me/cart/:productId", function(request, response){
+myRouter.delete("/api/me/cart/:productId", function (request, response) {
     var token = getValidTokenFromRequest(request);
-    if(token){
-        var user = users.find(function(u){
+    if (token) {
+        var user = users.find(function (u) {
             return u.login.username == token.username;
         });
-        user.cart = user.cart.filter(function(item){
+        user.cart = user.cart.filter(function (item) {
             return item.product.id != request.params.productId;
         });
         response.end();
