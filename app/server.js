@@ -26,9 +26,11 @@ myRouter.use(bodyParser.json());
 http.createServer( (req, res) => {
   myRouter(req, res, finalHandler(req, res));
 }).listen(PORT, (error) => {
+  //error if there is a problem on server startup
   if (error) {
     return console.log('Error on Server Startup: ', error)
   }
+  //these are the local files to for database
   fs.readFile('./initial-data/brands.json', 'utf8', (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
@@ -135,13 +137,14 @@ myRouter.get('/api/products', (req, res) => {
   }
 });
 
+//login request
 myRouter.post('/api/login', (req, res) => {
   //checks if username ans password are present
   if (!request.body.username || !request.body.password) {
     response.writeHead(400, "To log in, please submit a username and password.")
     return response.end();
   }
-
+  //look into database and see if credentials match database
   let validUser = users.find((user) => {
     return user.login.username === req.body.username
       && user.login.password === req.body.password;
@@ -168,20 +171,17 @@ myRouter.post('/api/login', (req, res) => {
     res.writeHead(401, "Invalid username or password");
     return res.end();
   }
-  if (!req.body.username || !req.body.password) {
-    
-      res.writeHead(400, "Username and password needed to login")
-      return res.end();
-    }
-
 });
 
+//view cart. user must be logged in
 myRouter.get('/api/me/cart', (req, res) => {
+  //check user token if valid
   let validToken = verifyToken(req);
   if (!validToken) {
     res.writeHead(401, "Invalid token");
     return res.end();
   } else {
+    //if the token is valid the user can see cart
     let loggedInUser = findUsername(validToken.username)
     res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
     return res.end(JSON.stringify(loggedInUser.cart));
