@@ -23,8 +23,8 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer( (request, response) => {
-  myRouter(request, response, finalHandler(request, response));
+http.createServer( (req, res) => {
+  myRouter(req, res, finalHandler(req, res));
 }).listen(PORT, (error) => {
   if (error) {
     return console.log('Error on Server Startup: ', error)
@@ -48,219 +48,219 @@ http.createServer( (request, response) => {
 });
 
 // GET a list of brands
-myRouter.get('/api/brands', (request, response) => {
-  response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-  return response.end(JSON.stringify(brands));
+myRouter.get('/api/brands', (req, res) => {
+  res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  return res.end(JSON.stringify(brands));
 });
 
-  //helper functions below
-  //find specific cart item by id
-  const CartItemByProductId = (cart, productId) => {
-      return cart.find((cartItem) => {
-        return cartItem.product.id === productId;
-      });
-  }
-
-  const findUsername = (username) => {
-      return users.find((user) => {
-        return user.login.username === username;
-      });
-  }
-
-  //Checks accessTokens if the user already has a token or not 
-  const findTokenByUsername = (username) => {
-      return accessTokens.find((token) => {
-        return token.username === username;
-      })
-  }
-    
-  //checks for valid token or to renew it.
-  const verifyToken = (req) => {
-      //get token from url 
-      let urlParse = url.parse(request.url, true).query;
-      if (urlParse.accessToken) {
-        //checks to see if token has expired 
-        let currentAccessToken = accessTokens.find((accessToken) => {
-          return accessToken.token === query.accessToken
-            && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
-        });
-        //will update its time if valid token found
-        if (currentAccessToken) {
-          currentAccessToken.lastUpdated = new Date();
-          return currentAccessToken;
-        }
-      }
-  }
-
-    //get the list for brands
-  myRouter.get('/api/brands', (req, res) => {
-      res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-      return res.end(JSON.stringify(brands))
-  })
-
-    //get a brand's particular product with its ID
-  myRouter.get('/api/brands/:brandId/products', (req, res) => {
-
-      let ItemsRequested = products.filter((product) => {
-        return product.categoryId === req.params.brandId;
-      });
-      //On success get the products from that brand
-      if (ItemsRequested.length) {
-        res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-        return res.end(JSON.stringify(ItemsRequested));
-      } else {
-        //if not found get error
-        res.writeHead(401, "The brand was not found");
-        return res.end();
-      }
-  });
-
-
-  myRouter.get('/api/products', (req, res) => {
-    let urlParse = url.parse(request.url, true).query
-    if (urlParse.search) {
-      let queryItem = urlParse.search.toLowerCase();
-      res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-      //lowercase to make it easier to search
-      let productsMatchingQuery = products.filter((product) => {
-        return product.name.toLowerCase().includes(queryItem)
-          || product.description.toLowerCase().includes(queryItem);
-      });
-
-
-      return res.end(JSON.stringify(productsMatchingQuery));
-
-    } else {
-      res.writeHead(400, "Search term required");
-      return res.end();
-    }
-  });
-
-  myRouter.post('/api/login', (req, res) => {
-    
-    let validUser = users.find((user) => {
-      return user.login.username === req.body.username
-        && user.login.password === req.body.password;
+//helper functions below
+//find specific cart item by id
+const CartItemByProductId = (cart, productId) => {
+    return cart.find((cartItem) => {
+      return cartItem.product.id === productId;
     });
+}
 
-    if (validUser) {
-      res.writeHead(200, CORS_HEADERS);
-      let currentAccessToken = findTokenByUsername(req.body.username);
+const findUsername = (username) => {
+    return users.find((user) => {
+      return user.login.username === username;
+    });
+}
 
-      let newAccessToken = null;
+//Checks accessTokens if the user already has a token or not 
+const findTokenByUsername = (username) => {
+    return accessTokens.find((token) => {
+      return token.username === username;
+    })
+}
+  
+//checks for valid token or to renew it.
+const verifyToken = (req) => {
+    //get token from url 
+    let urlParse = url.parse(req.url, true).query;
+    if (urlParse.accessToken) {
+      //checks to see if token has expired 
+      let currentAccessToken = accessTokens.find((accessToken) => {
+        return accessToken.token === query.accessToken
+          && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
+      });
+      //will update its time if valid token found
       if (currentAccessToken) {
-        newAccessToken = currentAccessToken.token;
         currentAccessToken.lastUpdated = new Date();
-      } else {
-        newAccessToken = uid(16);
-        accessTokens.push({
-          username: req.body.username,
-          token: newAccessToken,
-          lastUpdated: new Date()
-        })
+        return currentAccessToken;
       }
-      return res.end(newAccessToken);
-    } else {
-      res.writeHead(401, "Invalid username or password");
-      return res.end();
     }
-    if (!req.body.username || !req.body.password) {
-      
-        res.writeHead(400, "Username and password needed to login")
-        return res.end();
-      }
+}
 
-  });
+  //get the list for brands
+myRouter.get('/api/brands', (req, res) => {
+    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    return res.end(JSON.stringify(brands))
+})
 
-  myRouter.get('/api/me/cart', (req, res) => {
-    let validToken = verifyToken(req);
-    if (!validToken) {
-      res.writeHead(401, "Invalid token");
-      return res.end();
-    } else {
-      let loggedInUser = findUsername(validToken.username)
+  //get a brand's particular product with its ID
+myRouter.get('/api/brands/:brandId/products', (req, res) => {
+
+    let ItemsRequested = products.filter((product) => {
+      return product.categoryId === req.params.brandId;
+    });
+    //On success get the products from that brand
+    if (ItemsRequested.length) {
       res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-      return res.end(JSON.stringify(loggedInUser.cart));
-    }
-  });
-
-  myRouter.post('/api/me/cart', (req, res) => {
-    let validToken = verifyToken(req);
-    if (!validToken) {
-      res.writeHead(401, "Invalid token");
+      return res.end(JSON.stringify(ItemsRequested));
+    } else {
+      //if not found get error
+      res.writeHead(401, "The brand was not found");
       return res.end();
     }
-    let itemRequested = products.find((product) => {
-      return product.id == req.body.productId;
+});
+
+
+myRouter.get('/api/products', (req, res) => {
+  let urlParse = url.parse(req.url, true).query
+  if (urlParse.search) {
+    let queryItem = urlParse.search.toLowerCase();
+    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    //lowercase to make it easier to search
+    let productsMatchingQuery = products.filter((product) => {
+      return product.name.toLowerCase().includes(queryItem)
+        || product.description.toLowerCase().includes(queryItem);
     });
 
-    if (!itemRequested) {
-      res.writeHead(401, "Invalid product ID")
-      return res.end();
-    }
 
-    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}))
+    return res.end(JSON.stringify(productsMatchingQuery));
 
+  } else {
+    res.writeHead(400, "Search term required");
+    return res.end();
+  }
+});
 
-    let loggedInUser = findUsername(validToken.username);
+myRouter.post('/api/login', (req, res) => {
+  
+  let validUser = users.find((user) => {
+    return user.login.username === req.body.username
+      && user.login.password === req.body.password;
+  });
 
-    let requestedItemInCart = CartItemByProductId(loggedInUser.cart, itemRequested.id)
+  if (validUser) {
+    res.writeHead(200, CORS_HEADERS);
+    let currentAccessToken = findTokenByUsername(req.body.username);
 
-    if (requestedItemInCart) {
-      requestedItemInCart.quantity += req.body.quantity;
+    let newAccessToken = null;
+    if (currentAccessToken) {
+      newAccessToken = currentAccessToken.token;
+      currentAccessToken.lastUpdated = new Date();
     } else {
-      loggedInUser.cart.push({
-        product: requestedProduct,
-        quantity: req.body.quantity
-      });
+      newAccessToken = uid(16);
+      accessTokens.push({
+        username: req.body.username,
+        token: newAccessToken,
+        lastUpdated: new Date()
+      })
     }
+    return res.end(newAccessToken);
+  } else {
+    res.writeHead(401, "Invalid username or password");
+    return res.end();
+  }
+  if (!req.body.username || !req.body.password) {
+    
+      res.writeHead(400, "Username and password needed to login")
+      return res.end();
+    }
+
+});
+
+myRouter.get('/api/me/cart', (req, res) => {
+  let validToken = verifyToken(req);
+  if (!validToken) {
+    res.writeHead(401, "Invalid token");
+    return res.end();
+  } else {
+    let loggedInUser = findUsername(validToken.username)
+    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
     return res.end(JSON.stringify(loggedInUser.cart));
+  }
+});
+
+myRouter.post('/api/me/cart', (req, res) => {
+  let validToken = verifyToken(req);
+  if (!validToken) {
+    res.writeHead(401, "Invalid token");
+    return res.end();
+  }
+  let itemRequested = products.find((product) => {
+    return product.id == req.body.productId;
   });
 
-  //delete items in the cart that match ID
-  myRouter.delete('/api/me/cart/:productId', (req, res) => {
-    let validToken = verifyToken(req);
-    if (!validToken) {
-      res.writeHead(401, "Invalid token");
-      return res.end();
-    }
+  if (!itemRequested) {
+    res.writeHead(401, "Invalid product ID")
+    return res.end();
+  }
 
-    let loggedInUser = findUsername(validToken.username);
-    let itemDelete = CartItemByProductId(loggedInUser.cart, req.params.productId);
-    if (!itemDelete) {
-      res.writeHead(401, "Product not valid");
-      return res.end();
-    }
-    let deleteItembyIndex = loggedInUser.cart.indexOf(itemDelete);
-    loggedInUser.cart.splice(deleteItembyIndex, 1);
+  res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}))
 
-    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-    return res.end(JSON.stringify(loggedInUser.cart))
-  });
 
-  myRouter.post('/api/me/cart/:productId', (req, res) => {
-    let validToken = verifyToken(req);
-    if (!validToken) {
-      res.writeHead(401, "Invalid token");
-      return res.end();
-    }
+  let loggedInUser = findUsername(validToken.username);
 
-    let urlParse = url.parse(request.url, true).query
-    let itemsToAdd = urlParse.quantity;
+  let requestedItemInCart = CartItemByProductId(loggedInUser.cart, itemRequested.id)
 
-    let loggedInUser = findUsername(validToken.username);
-    let updateProduct = CartItemByProductId(loggedInUser.cart, req.params.productId);
-    if (!updateProduct) {
-      res.writeHead(401, "Product was not found");
-      return res.end();
-    }
-    let newQuantity = parseInt(itemsToAdd) + updateProduct.quantity;
-    if (newQuantity < 1) {
-      res.writeHead(401, "amount of items must be greater than zero")
-    }
+  if (requestedItemInCart) {
+    requestedItemInCart.quantity += req.body.quantity;
+  } else {
+    loggedInUser.cart.push({
+      product: requestedProduct,
+      quantity: req.body.quantity
+    });
+  }
+  return res.end(JSON.stringify(loggedInUser.cart));
+});
 
-    updateProduct.quantity = newQuantity;
+//delete items in the cart that match ID
+myRouter.delete('/api/me/cart/:productId', (req, res) => {
+  let validToken = verifyToken(req);
+  if (!validToken) {
+    res.writeHead(401, "Invalid token");
+    return res.end();
+  }
 
-    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-    return res.end(JSON.stringify(loggedInUser.cart))
-  });
+  let loggedInUser = findUsername(validToken.username);
+  let itemDelete = CartItemByProductId(loggedInUser.cart, req.params.productId);
+  if (!itemDelete) {
+    res.writeHead(401, "Product not valid");
+    return res.end();
+  }
+  let deleteItembyIndex = loggedInUser.cart.indexOf(itemDelete);
+  loggedInUser.cart.splice(deleteItembyIndex, 1);
+
+  res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  return res.end(JSON.stringify(loggedInUser.cart))
+});
+
+myRouter.post('/api/me/cart/:productId', (req, res) => {
+  let validToken = verifyToken(req);
+  if (!validToken) {
+    res.writeHead(401, "Invalid token");
+    return res.end();
+  }
+
+  let urlParse = url.parse(req.url, true).query
+  let itemsToAdd = urlParse.quantity;
+  //checks if the item in cart exists in the cart
+  let loggedInUser = findUsername(validToken.username);
+  let updateProduct = CartItemByProductId(loggedInUser.cart, req.params.productId);
+  if (!updateProduct) {
+    res.writeHead(401, "Product was not found");
+    return res.end();
+  }
+  let newQuantity = parseInt(itemsToAdd) + updateProduct.quantity;
+  if (newQuantity < 1) {
+    res.writeHead(401, "amount of items must be greater than zero")
+  }
+  //updates quantity of the cart
+  updateProduct.quantity = newQuantity;
+
+  res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  return res.end(JSON.stringify(loggedInUser.cart))
+});
