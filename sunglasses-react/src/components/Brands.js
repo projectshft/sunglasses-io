@@ -12,6 +12,7 @@ class Brands extends Component {
 
   componentDidMount() {
     this.props.fetchBrands()
+    console.log(this.props)
   }
 
   clickHandler (id) {

@@ -13,6 +13,13 @@ export const POST_LOGOUT = "post_logout";
 
 const ROOT_URL = "http://localhost:3001/api";
 
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+}
+
 export function fetchBrands(){
 
   const request = axios.get(`${ROOT_URL}/brands/`)
@@ -57,12 +64,14 @@ export function postLogin(loginData){
 			'content-type': 'application/json'
 	  }
 	})
+  .then(handleErrors)
   .then(response => {
-  return response.ok ? response.json() : response.statusText
+    return response.ok ? response.json() : response.statusText
   })
   .then(data => {
     return data
   })
+  .catch(err => null)
 
   console.log(request)
   return {
@@ -70,6 +79,16 @@ export function postLogin(loginData){
     payload: request,
   };
 }
+
+// TODO:
+// export function userLogin(loginData, token){
+//   return function(dispatch) {
+//     Promise.all([
+//       postLogin(loginData),
+//       fetchCart(token)
+//     ])
+//   }
+// }
 
 export function fetchCart(token){
 
@@ -99,6 +118,7 @@ export function postToCart(id, token){
     console.log(data)
     return data
   })
+  .catch(err => null)
 
   console.log(request)
 
@@ -167,11 +187,9 @@ export function postLogout(token){
 	  }
 	})
   .then(response => {
-  return response.ok ? response.json() : response.statusText
+    return response.ok ? response.json() : response.statusText
   })
   .then(data => {
-
-    console.log(data)
     return data
   })
 

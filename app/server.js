@@ -11,6 +11,7 @@ const CORS_HEADERS = {
     "Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication",
     "Access-Control-Allow-Methods":"GET, POST, DELETE"
   };
+  
 const PORT = 3001;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -137,12 +138,9 @@ myRouter.get('/api/brands', function(request,response) {
 
 //create handler for GET api/brands/:id/products
 myRouter.get('/api/brands/:id/products', function(request,response) {
-    //find target brand
-    const targetBrand = brands.find((brand)=>{
-        return brand.id == request.params.id
-    })
-    // find products associated with target brand
-    const targetProducts = products.filter(product => product.categoryId == targetBrand.id)
+
+    // find products associated with brand id
+    const targetProducts = products.filter(product => product.categoryId == request.params.id)
 
     // return products associated with target brand
     response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
@@ -209,17 +207,27 @@ myRouter.post('/api/me/cart', function(request,response) {
         let product = products.find((product)=>{
             return productId == product.id
         })
-    // TODO: check to see if product is already in the cart before pushing it
+
+        // define reference to existing product if it already exists in cart
         let alreadyExistingProduct = user.cart.find((item)=>{
             return item.id == productId
-            
         })
-        if(!alreadyExistingProduct){
+        
+        // check to see if a product was found
+        if(!product){
+            response.writeHead(400, "not a valid product id", CORS_HEADERS);
+        }
+
+        // check if user already has product in cart       
+        else if(!alreadyExistingProduct){
             // add product to users cart
             user.cart.push({product:product, id:product.id, amount:1})
             response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
             response.end(JSON.stringify(user.cart))
+
         } else {
+            // else add one quantity of product to cart
+            alreadyExistingProduct.amount++
             response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
             response.end(JSON.stringify(user.cart))
         }
@@ -243,8 +251,9 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
             return productId == product.id
         })
         product.amount = request.body.quantity
+
         response.writeHead(200, {...CORS_HEADERS, 'Content-Type': 'application/json'});
-        console.log(JSON.stringify(product))
+
         response.end(JSON.stringify(user.cart))
         // update amount of product in user cart
     } else {
@@ -264,11 +273,20 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
         let product = user.cart.find((product)=>{
             return productId == product.id
         })
-        let productIndex = user.cart.indexOf(product)
-        if (productIndex != -1){
-            // delete product from user cart if valid product id
-            user.cart.splice(productIndex, 1)
+
+        // check if product then success, else error
+        if (product){
+            response.writeHead(200, CORS_HEADERS);
+            let productIndex = user.cart.indexOf(product)
+            if (productIndex != -1){
+                // delete product from user cart if valid product id
+                user.cart.splice(productIndex, 1)
+            }
+        } else {
+            response.writeHead(400, "not a valid product id", CORS_HEADERS);
         }
+        
+        
         
         // return new cart back to client
         response.end(JSON.stringify(user.cart))
@@ -287,7 +305,7 @@ myRouter.post('/api/login', function(request,response) {
         //find user and set user as value to variable user
         let user = users.find((user)=>{
             return user.login.username == request.body.username
-            
+
           })
         // reset tempoary status if it has expired
         if (hasTemporaryStatusExpired(user)) {
@@ -299,7 +317,7 @@ myRouter.post('/api/login', function(request,response) {
         }
         // check if user is blocked. if expired, reset failed attempts
         if (user.temporaryStatus.blocked) {
-            response.writeHead(401, "Too many failed login attempts", CORS_HEADERS);
+            response.writeHead(401, "Too many failed login attempts, try again later", CORS_HEADERS);
             response.end()
         }
 
@@ -316,8 +334,7 @@ myRouter.post('/api/login', function(request,response) {
                 accessToken = accessToken.accessToken
             }
 
-            
-
+            // check to see if user already has an accessToken or if accessToken has expired
             if(!accessToken || hasTokenExpired(user)){
                 // create an accessToken and store it within user and accessTokens array
                 accessToken = uid(6);
@@ -340,6 +357,7 @@ myRouter.post('/api/login', function(request,response) {
                 // if failed attempts is more than 3, block user
                 user.temporaryStatus.blocked = true
               }
+              response.writeHead(401, "Incorrect Password", CORS_HEADERS);
         }
 
     }
@@ -350,15 +368,19 @@ myRouter.post('/api/login', function(request,response) {
 
 //create a handler to logout
 myRouter.post('/api/logout', function(request,response) {
-    response.writeHead(200, CORS_HEADERS);
     const token = require('url').parse(request.url,true).query.accessToken
     const accessToken = accessTokens.find((accessToken)=>{
         return accessToken.accessToken == token
     })
 
-    tokenIndex = accessTokens.indexOf(accessToken)
-    accessTokens.splice(tokenIndex, 1)
+    if(!accessToken){
+        response.writeHead(400, "query does not contain an existing token", CORS_HEADERS);
+    } else {
+        response.writeHead(200, CORS_HEADERS);
+        tokenIndex = accessTokens.indexOf(accessToken)
+        accessTokens.splice(tokenIndex, 1)
+    }
 
-    response.end(JSON.stringify({}));
+    response.end(JSON.stringify(accessToken));
 
 })

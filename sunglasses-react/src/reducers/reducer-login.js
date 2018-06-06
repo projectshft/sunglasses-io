@@ -4,6 +4,11 @@ import {
 } from "../actions";
 
 export default function(state = '', action) {
+
+  if(action.payload){
+    console.log(action.payload.message)
+  }
+
   switch (action.type) {
 
     case POST_LOGIN:
@@ -11,7 +16,7 @@ export default function(state = '', action) {
       return action.payload
 
     case POST_LOGOUT:
-      return '';
+      return null;
 
     default:
       return state;

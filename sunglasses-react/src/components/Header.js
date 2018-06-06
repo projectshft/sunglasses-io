@@ -84,13 +84,21 @@ class Header extends Component {
 
 
   render() {
+    console.log("\nXXXXXXXXXXXXXXXXXXXXXXXX")
+    console.log(this.props.brands)
+    console.log(this.props.token)
+    console.log(this.props.products)
+    console.log(this.props.cart)
+    console.log(this.loggedIn)
+    console.log("XXXXXXXXXXXXXXXXXXXXXXXX\n")
+    console.log(Boolean(this.props.token))
 
-      if(Boolean(this.props.token)){
-        this.loggedIn = true
-        if(Boolean(!this.props.cart)){
-          this.props.fetchCart(this.props.token)
-        }
+    if(Boolean(this.props.token)){
+      this.loggedIn = true
+      if(Boolean(!this.props.cart)){
+        this.props.fetchCart(this.props.token)
       }
+    }
 
     return (
       <div className = "container-fluid">
@@ -149,7 +157,7 @@ class Header extends Component {
 }
 function mapStateToProps(state) {
 
-  return {token: state.token, cart: state.cart};
+  return {token: state.token, cart: state.cart, products: state.products, brands: state.brands};
 }
 
 function mapDispatchToProps(dispatch) {

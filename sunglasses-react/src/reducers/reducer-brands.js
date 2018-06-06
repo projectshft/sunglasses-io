@@ -5,6 +5,10 @@ import {
 } from "../actions";
 
 export default function(state = {}, action) {
+  
+  if(action.payload){
+    console.log(action.payload.message)
+  }
 
   switch (action.type) {
 
