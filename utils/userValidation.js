@@ -124,14 +124,8 @@ module.exports = {
       }
       users.find(user => user.login.username == username).cart = newCart;
       return true;
-    } else{
-      let newCart = cart.filter(item => item.id != cartItem.id);
-      if(updateAmount > 0){
-        updatedItem = Object.assign(cartItem, {"amount":updateAmount});
-        newCart.push(updatedItem);
-      }
-      users.find(user => user.login.username == username).cart = newCart;
-      return true;
+    } else {
+      return false;
     }
   }
 }
