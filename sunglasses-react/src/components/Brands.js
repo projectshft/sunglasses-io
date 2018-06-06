@@ -12,7 +12,7 @@ class Brands extends Component {
 
   componentDidMount() {
     this.props.fetchBrands()
-    console.log(this.props)
+
   }
 
   clickHandler (id) {
@@ -37,8 +37,7 @@ class Brands extends Component {
   }
 
   render() {
-    // console.log(this.props)
-    // TODO: render DOM that will contain an element that calls renderCharacters().
+
     return(
       <div>
       <div className="text-xs-right">

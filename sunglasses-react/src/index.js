@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import promise from "redux-promise";
+import thunk from "redux-thunk";
 import reducers from "./reducers";
 
 import Header from './components/Header.js';
@@ -15,7 +16,7 @@ import './index.css'
 import 'bootstrap/dist/css/bootstrap.css'
 
 
-const createStoreWithMiddleware = applyMiddleware(promise)(createStore);
+const createStoreWithMiddleware = applyMiddleware(promise, thunk)(createStore);
 
 
 const Home = () => (

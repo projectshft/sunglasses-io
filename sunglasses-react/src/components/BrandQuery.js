@@ -15,7 +15,7 @@ class BrandQuery extends Component {
   }
 
   addCartHandler(id) {
-    console.log(id)
+
     if (this.props.token){
       this.props.postToCart(id, this.props.token)
     } else {
@@ -69,7 +69,7 @@ class BrandQuery extends Component {
 }
 
 function mapStateToProps(state) {
-  // console.log(state)
+
   return {products: state.products, token: state.token};
 }
 

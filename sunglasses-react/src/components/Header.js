@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import './App.css';
 
-import { postLogin, postLogout, fetchProducts, fetchCart } from "../actions"
+import { postLogin, postLogout, fetchProducts, fetchCart, userLogin } from "../actions"
 
 class Header extends Component {
   constructor(props){
@@ -66,7 +66,6 @@ class Header extends Component {
               onChange={event => {
                 let password = event.target.value;
                 this.setState({password: password})
-                // console.log(this.state.password)
               }}
               placeholder="Password"/>
 
@@ -84,20 +83,12 @@ class Header extends Component {
 
 
   render() {
-    console.log("\nXXXXXXXXXXXXXXXXXXXXXXXX")
-    console.log(this.props.brands)
-    console.log(this.props.token)
-    console.log(this.props.products)
-    console.log(this.props.cart)
-    console.log(this.loggedIn)
-    console.log("XXXXXXXXXXXXXXXXXXXXXXXX\n")
-    console.log(Boolean(this.props.token))
 
     if(Boolean(this.props.token)){
       this.loggedIn = true
-      if(Boolean(!this.props.cart)){
-        this.props.fetchCart(this.props.token)
-      }
+      // if(Boolean(!this.props.cart)){
+      //   this.props.fetchCart(this.props.token)
+      // }
     }
 
     return (
@@ -161,7 +152,7 @@ function mapStateToProps(state) {
 }
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({fetchProducts, postLogin, postLogout, fetchCart}, dispatch);
+  return bindActionCreators({fetchProducts, postLogin, postLogout, fetchCart, userLogin}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

@@ -7,10 +7,6 @@ import {
 
 export default function(state = {}, action) {
 
-  if(action.payload){
-    console.log(action.payload.message)
-  }
-  
   switch (action.type) {
 
     case FETCH_PRODUCTS_BY_BRAND:

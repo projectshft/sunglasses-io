@@ -9,10 +9,6 @@ import { postCartQuantity, deleteItemfromCart } from "../actions"
 
 class Cart extends Component {
 
-  componentDidMount() {
-    // console.log(this.props)
-
-  }
 
   handleQuantity (id, quantity) {
     if (quantity > 0){
@@ -20,7 +16,7 @@ class Cart extends Component {
         productId: id,
         quantity: quantity
       }
-      console.log(data)
+
       this.props.postCartQuantity(data, this.props.token)
     }
   }
@@ -77,7 +73,6 @@ class Cart extends Component {
 
   render() {
 
-    console.log(Boolean(this.props.cart))
     if(this.props.cart){
       return (
         <ul>

@@ -81,14 +81,16 @@ export function postLogin(loginData){
 }
 
 // TODO:
-// export function userLogin(loginData, token){
-//   return function(dispatch) {
-//     Promise.all([
-//       postLogin(loginData),
-//       fetchCart(token)
-//     ])
-//   }
-// }
+export function userLogin(loginData, token){
+  return function(dispatch) {
+    console.log(loginData)
+    console.log(token)
+    Promise.all([
+      postLogin(loginData),
+      fetchCart(token)
+    ])
+  }
+}
 
 export function fetchCart(token){
 
@@ -115,13 +117,13 @@ export function postToCart(id, token){
   return response.ok ? response.json() : response.statusText
   })
   .then(data => {
-    console.log(data)
+
     return data
   })
   .catch(err => null)
 
-  console.log(request)
 
+  console.log(request)
   return {
     type: POST_TO_CART,
     payload: request,
@@ -129,7 +131,7 @@ export function postToCart(id, token){
 }
 
 export function postCartQuantity(cartData, token){
-  // console.log(cartData)
+
   const request = fetch(`http://localhost:3001/api/me/cart/${cartData.productId}?accessToken=${token}`, {
 		method: 'POST',
 		body: JSON.stringify(cartData),
@@ -141,7 +143,7 @@ export function postCartQuantity(cartData, token){
   return response.ok ? response.json() : response.statusText
   })
   .then(data => {
-    console.log(data)
+
     return data
   })
 
@@ -166,7 +168,7 @@ export function deleteItemfromCart(cartData, token){
   return response.ok ? response.json() : response.statusText
   })
   .then(data => {
-    console.log(data)
+
     return data
   })
 
