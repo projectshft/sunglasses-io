@@ -115,7 +115,7 @@ myRouter.get('/api/brands/:brandId/products', (req, res) => {
     }
 });
 
-
+//search for products
 myRouter.get('/api/products', (req, res) => {
   let urlParse = url.parse(req.url, true).query
   if (urlParse.search) {
@@ -127,7 +127,6 @@ myRouter.get('/api/products', (req, res) => {
         || product.description.toLowerCase().includes(queryItem);
     });
 
-
     return res.end(JSON.stringify(productsMatchingQuery));
 
   } else {
@@ -137,7 +136,12 @@ myRouter.get('/api/products', (req, res) => {
 });
 
 myRouter.post('/api/login', (req, res) => {
-  
+  //checks if username ans password are present
+  if (!request.body.username || !request.body.password) {
+    response.writeHead(400, "To log in, please submit a username and password.")
+    return response.end();
+  }
+
   let validUser = users.find((user) => {
     return user.login.username === req.body.username
       && user.login.password === req.body.password;
@@ -184,7 +188,9 @@ myRouter.get('/api/me/cart', (req, res) => {
   }
 });
 
+//adds item to cart
 myRouter.post('/api/me/cart', (req, res) => {
+  //checks if the access token is valid
   let validToken = verifyToken(req);
   if (!validToken) {
     res.writeHead(401, "Invalid token");
@@ -201,9 +207,7 @@ myRouter.post('/api/me/cart', (req, res) => {
 
   res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}))
 
-
   let loggedInUser = findUsername(validToken.username);
-
   let requestedItemInCart = CartItemByProductId(loggedInUser.cart, itemRequested.id)
 
   if (requestedItemInCart) {
@@ -225,6 +229,7 @@ myRouter.delete('/api/me/cart/:productId', (req, res) => {
     return res.end();
   }
 
+  //check if the product that will be deleted is in the cart. sends error otherwise
   let loggedInUser = findUsername(validToken.username);
   let itemDelete = CartItemByProductId(loggedInUser.cart, req.params.productId);
   if (!itemDelete) {
@@ -238,6 +243,7 @@ myRouter.delete('/api/me/cart/:productId', (req, res) => {
   return res.end(JSON.stringify(loggedInUser.cart))
 });
 
+//update the items in cart, submit/save
 myRouter.post('/api/me/cart/:productId', (req, res) => {
   let validToken = verifyToken(req);
   if (!validToken) {
@@ -247,6 +253,7 @@ myRouter.post('/api/me/cart/:productId', (req, res) => {
 
   let urlParse = url.parse(req.url, true).query
   let itemsToAdd = urlParse.quantity;
+
   //checks if the item in cart exists in the cart
   let loggedInUser = findUsername(validToken.username);
   let updateProduct = CartItemByProductId(loggedInUser.cart, req.params.productId);
