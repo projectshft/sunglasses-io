@@ -4,6 +4,7 @@ var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
+var url = require('url');
 var uid = require('rand-token').uid;
 
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Authentication" };
@@ -15,7 +16,6 @@ let users = [];
 let failedLoginAttempts = [];
 let accessTokens = [];
 
-
 //15min timer till user needs new token
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; 
 
@@ -23,94 +23,103 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (req, res) {
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200, CORS_HEADERS);
-    return res.end();
+http.createServer( (request, response) => {
+  myRouter(request, response, finalHandler(request, response));
+}).listen(PORT, (error) => {
+  if (error) {
+    return console.log('Error on Server Startup: ', error)
   }
-  //data from local files
   fs.readFile('./initial-data/brands.json', 'utf8', (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-  });
-  fs.readFile('./initial-data/products.json', 'utf8', (error, data) => {
-    if (error) throw error;
-    products = JSON.parse(data);
+    console.log(`Server setup: ${brands.length} brands loaded`);
   });
   fs.readFile('./initial-data/users.json', 'utf8', (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
+    console.log(`Server setup: ${users.length} users loaded`);
   });
-
-myRouter(req, res, finalHandler(req, res))
-
-//helper functions below
-//find specific cart item by id
-const CartItemByProductId = (cart, productId) => {
-    return cart.find((cartItem) => {
-      return cartItem.product.id === productId;
-    });
-}
-
-const findUsername = (username) => {
-    return users.find((user) => {
-      return user.login.username === username;
-    });
-}
-
-//Checks accessTokens if the user already has a token or not 
-const findTokenByUsername = (username) => {
-    return accessTokens.find((token) => {
-      return token.username === username;
-    })
-}
-  
-//checks for valid token or to renew it.
-const verifyToken = (req) => {
-    //get token from url 
-    let query = queryString.parse(req._parsedUrl.query);
-    if (query.accessToken) {
-      //checks to see if token has expired 
-      let currentAccessToken = accessTokens.find((accessToken) => {
-        return accessToken.token === query.accessToken
-          && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
-      });
-      //will update its time if valid token found
-      if (currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
-        return currentAccessToken;
-      }
-    }
-}
-
-  //get the list for brands
-myRouter.get('/api/brands', (req, res) => {
-    res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-    return res.end(JSON.stringify(brands))
-})
-
-  //get a brand's particular product with its ID
-myRouter.get('/api/brands/:brandId/products', (req, res) => {
-
-    let ItemsRequested = products.filter((product) => {
-      return product.categoryId === req.params.brandId;
-    });
-    //On success get the products from that brand
-    if (ItemsRequested.length) {
-      res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}))
-      return res.end(JSON.stringify(ItemsRequested));
-    } else {
-      //if not found get error
-      res.writeHead(401, "The brand was not found");
-      return res.end();
-    }
+  fs.readFile('./initial-data/products.json', 'utf8', (error, data) => {
+    if (error) throw error;
+    products = JSON.parse(data);
+    console.log(`Server setup: ${products.length} products loaded`);
+  });
+  console.log(`Server is listening on ${PORT}`);
 });
+
+// GET a list of brands
+myRouter.get('/api/brands', (request, response) => {
+  response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  return response.end(JSON.stringify(brands));
+});
+
+  //helper functions below
+  //find specific cart item by id
+  const CartItemByProductId = (cart, productId) => {
+      return cart.find((cartItem) => {
+        return cartItem.product.id === productId;
+      });
+  }
+
+  const findUsername = (username) => {
+      return users.find((user) => {
+        return user.login.username === username;
+      });
+  }
+
+  //Checks accessTokens if the user already has a token or not 
+  const findTokenByUsername = (username) => {
+      return accessTokens.find((token) => {
+        return token.username === username;
+      })
+  }
+    
+  //checks for valid token or to renew it.
+  const verifyToken = (req) => {
+      //get token from url 
+      let urlParse = url.parse(request.url, true).query;
+      if (urlParse.accessToken) {
+        //checks to see if token has expired 
+        let currentAccessToken = accessTokens.find((accessToken) => {
+          return accessToken.token === query.accessToken
+            && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
+        });
+        //will update its time if valid token found
+        if (currentAccessToken) {
+          currentAccessToken.lastUpdated = new Date();
+          return currentAccessToken;
+        }
+      }
+  }
+
+    //get the list for brands
+  myRouter.get('/api/brands', (req, res) => {
+      res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+      return res.end(JSON.stringify(brands))
+  })
+
+    //get a brand's particular product with its ID
+  myRouter.get('/api/brands/:brandId/products', (req, res) => {
+
+      let ItemsRequested = products.filter((product) => {
+        return product.categoryId === req.params.brandId;
+      });
+      //On success get the products from that brand
+      if (ItemsRequested.length) {
+        res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+        return res.end(JSON.stringify(ItemsRequested));
+      } else {
+        //if not found get error
+        res.writeHead(401, "The brand was not found");
+        return res.end();
+      }
+  });
 
 
   myRouter.get('/api/products', (req, res) => {
-    let query = queryString.parse(req._parsedUrl.query);
-    if (query.search) {
-      let queryItem = query.search.toLowerCase();
+    let urlParse = url.parse(request.url, true).query
+    if (urlParse.search) {
+      let queryItem = urlParse.search.toLowerCase();
       res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
       //lowercase to make it easier to search
       let productsMatchingQuery = products.filter((product) => {
@@ -236,8 +245,8 @@ myRouter.get('/api/brands/:brandId/products', (req, res) => {
       return res.end();
     }
 
-    let query = queryString.parse(req._parsedUrl.query);
-    let itemsToAdd = query.quantity;
+    let urlParse = url.parse(request.url, true).query
+    let itemsToAdd = urlParse.quantity;
 
     let loggedInUser = findUsername(validToken.username);
     let updateProduct = CartItemByProductId(loggedInUser.cart, req.params.productId);
@@ -255,9 +264,3 @@ myRouter.get('/api/brands/:brandId/products', (req, res) => {
     res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
     return res.end(JSON.stringify(loggedInUser.cart))
   });
-
-}).listen(PORT, (error) => {
-  if (error) {
-    return console.log('Error on Server Startup: ', error)
-  }
-});

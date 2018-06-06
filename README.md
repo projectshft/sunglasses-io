@@ -5,11 +5,6 @@ this will start the server up.
 
 Only the backend is complete. There is currently not a working client side available.
 
-Please do an npm install. I added some npm installs that were not native to the original sunglasses-io node-modules
-npm install should do the trick 
-
-two NPMs that i installed are
-npm install express
-npm install parseurl
+Please do an npm install.
 
 Also the sunglasses.yaml file can be pasted into the swagger editor to utilize it for examples.
