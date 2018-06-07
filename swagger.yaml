@@ -1,0 +1,341 @@
+swagger: '2.0'
+info:
+  title: Goalworthy API
+  description: An API to support the goalworthy platform
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows selection of brands as parameter for search
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands with ids
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /brands/{id}/products:
+    get:
+      summary: Products by selected brand
+      description: |
+        This endpoint gets products based on brand id
+      tags:
+        - Brands
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand being queried
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products as objects with given brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint does a query search to return glasses by name
+      tags:
+        - Products
+      parameters:
+        - name: search
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of products as objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the user
+      tags:
+        - User
+      parameters:
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /me/cart:
+    get:
+      summary: User Cart
+      description: >-
+        The User Cart endpoint returns information on what items exist in the users cart
+      tags:
+        - User
+      parameters:
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: User Cart
+      description: sends cart to server
+      tags:
+        - User
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /me/cart/{productId}:
+    post:
+      summary: Add Product to Cart
+      description: This endpoint allows you to add a product to your cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to add to cart
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+    delete:
+      summary: Remove Product from Cart
+      description: This endpoint allows you to remove a product from your cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to delete from cart
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: uses token to verify user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+
+  /login:
+    post:
+      summary: User Login
+      description: |
+        This endpoint allows you achieve a given goal
+      tags:
+      - Login
+      parameters:
+        - name: username
+          in: header
+          description: username of user
+          required: true
+          type: string
+        - name: password
+          in: header
+          description: password of user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+            
+  /logout:
+    post:
+      summary: User Logout
+      description: |
+        This endpoint allows you achieve a given goal
+      tags:
+      - Logout
+      parameters:
+        - name: token
+          in: query
+          description: uses token to log user out
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: Name of brand
+        
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: Unique identifier for associated brand
+      name:
+        type: string
+        description: Name of Product
+      description:
+        type: string
+        description: Description of Product
+      price:
+        type: number
+        description: price of product
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: image url
+        description: an array of image urls
+        
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: user gender
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: title
+          first:
+            type: string
+            description: first name
+          last:
+            type: string
+            description: last name
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: street address
+          city:
+            type: string
+            description: city
+          state:
+            type: string
+            description: state
+          postcode:
+            type: string
+            description: postal code
+      email:
+        type: string
+        description: Email address of the user
+      login:
+        type: object
+      dob:
+        type: string
+        description: dt_txt
+      registered:
+        type: string
+        description: date registered
+      phone:
+        type: string
+        description: home number
+      cell:
+        type: string
+        description: mobile number
+      picture:
+        type: object
+        description: object of user images
+      nat:
+        type: string
+        description: no idea
+        
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
