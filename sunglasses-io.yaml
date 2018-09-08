@@ -1,0 +1,271 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Available brands
+      tags:
+        - Brands
+      description: >-
+        The Brands endpoint returns the brand requested in the query.
+      parameters:
+        - name: brandName
+          in: query
+          description: brandName parameter allows for searching of brandname in the query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Show brand requested
+          schema:
+            $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: Brand not found
+          schema:
+            $ref: '#/definitions/Error'
+  '/api/brands/{id}/products':
+    get:
+      summary: View the products of a brand
+      tags:
+        - Brands
+      description: |
+        This endpoint allows you view all the products of a brand based on ID number provided in path.
+      parameters:
+        - name: id
+          in: path
+          description: Search for a brand's products
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Showing requested products of a brand
+          schema:
+            $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: Brand not found
+          schema:
+            $ref: '#/definitions/Error'
+  /api/products:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the Uber user that
+        has authorized with the application.
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/login:
+    post:
+      summary: User Login
+      tags: 
+        - Login
+      description: >-
+        User login endpoint 
+      parameters:
+        - name: username
+          in: body # should be in body?
+          description: correct user email and password return access token
+          required: true
+          type: string  
+        - name: password
+          in: body # should be in body?
+          description: correct user email and password return access token
+          required: true
+          type: string  
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/Login'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/me/cart:
+    get:
+      summary: Return contents of the cart
+      tags:
+        - User
+      description: |
+        This endpoint allows you achieve a given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error 
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Post to the cart
+      tags:
+        - User
+      description: |
+        This endpoint allows you challenge a user for given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/api/me/cart/{productId}':
+    delete:
+      summary: Gift a Goal
+      tags:
+        - User
+      description: |
+        This endpoint allows you gift a given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to gift
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to gift the goal to
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Achievement is successful
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Gift a Goal
+      tags:
+        - User
+      description: |
+        This endpoint allows you gift a given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to gift
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to gift the goal to
+          required: true
+          type: string
+
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      brandName:
+        type: string
+        description: Unique identifier for a brand.
+      id:
+        type: string
+        description: ID of brand.
+  Product:
+    type: object
+    properties:
+      limit:
+        type: integer
+        description: Limits number of returned products
+      id:
+        type: string
+        description: Unique identifier for a product.
+      description:
+        type: string
+        description: Description of product.
+      imageURL:
+        type: string
+        description: The URL for the image representing the product
+      price:
+        type: number
+        description: Price of product
+  Login:
+    type: object
+    properties:
+    
+      username:
+        type: string
+        description: Username
+      password:
+        type: string
+        description: Password
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the Uber user.
+      last_name:
+        type: string
+        description: Last name of the Uber user.
+      email:
+        type: string
+        description: Email address of the Uber user
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+
