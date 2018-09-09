@@ -13,8 +13,6 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 var brands = [];
 var products = [];
 var users = [];
-
-//possibly adding tokens
 var failedLoginAttempts = {};
 var uid = require('rand-token').uid;
 var accessTokens = [];
@@ -75,6 +73,51 @@ myRouter.get('/api/products', (request, response) => {
     response.end(JSON.stringify(products));
 }); 
 // Only logged in users can access
+//Login call
+myRouter.post('/api/login', function(request,response) {
+  // Make sure there is a username and password in the request
+  if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
+    // See if there is a user that has that username and password 
+    let user = users.find((user)=>{
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+    if (user) {
+      // Write the header because we know we will be returning successful at this point and that the response will be json
+      response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+      setNumberOfFailedLoginRequestsForUsername(request.body.username,0);
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((accessToken) => {
+        return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+      });
+  
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
+      setNumberOfFailedLoginRequestsForUsername(request.body.username,numFailedForUser++);
+      response.writeHead(401, "Invalid username or password");
+      response.end();
+    }
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    response.writeHead(400, "Incorrectly formatted response");
+    response.end();
+  }
+  });
+
 /*
 // example using authentication
 myRouter.get('/api/products', (request, response) => {
