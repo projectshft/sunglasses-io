@@ -62,3 +62,11 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
   });
   response.end(JSON.stringify(productsSortedByBrand));
 });
+
+//for the search bar, GET/api/products will return all products
+//*** TODO *** since very large inventories would not want to send back all products, it may be good here to add in some optional search parameters ****
+myRouter.get('/api/products', (request, response) => {
+  response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }));
+  response.end(JSON.stringify(products));
+});
+
