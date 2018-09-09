@@ -3,16 +3,16 @@ info:
   title: Sunglasses.io API
   description: Sunglasses.io web store API
   version: 0.0.1
-host: localhost:8080
+host: 'localhost:8080'
 schemes:
-  - https
+  - http
 basePath: /api
 produces:
   - application/json
 paths:
   /products:
     get:
-      summary: Product Types
+      summary: All products
       description: |
         Returns an array of available product types.
       parameters:
@@ -23,7 +23,7 @@ paths:
           type: string
           format: string
       tags:
-        - Products
+        - products
       responses:
         '200':
           description: An array of products
@@ -37,18 +37,17 @@ paths:
             $ref: '#/definitions/Error'
   /brands:
     get:
-      summary: Brand Names
+      summary: All brands
       description: |
         Returns an array of available brands.
       parameters:
-        - name: brand
+        - name: brandName
           in: query
           description: An array of brands
           required: true
           type: string
-          format: string
       tags:
-        - Brands
+        - brands
       responses:
         '200':
           description: An array of brands
@@ -56,48 +55,156 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '400':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /brands/:id/products:
+  '/brands/{id}/products':
     get:
-      summary: Product listing for a specific ID
+      summary: All products for a given brand
       description: |
-        Returns data for a specific product.
+        Returns all products for a given brand.
+      operationId: getProductsByBrand
       parameters:
-        - name: productId
-          in: query
-          description: ProductId
+        - name: id
+          in: path
+          description: ID of brand
           required: true
-          type: number
-          format: integer
+          type: integer
+          format: int64
       tags:
-        - ProductId
+        - brands
       responses:
         '200':
-          description: An object 
+          description: An object
           schema:
             type: object
             items:
-              $ref: '#/definitions/ProductId'
+              $ref: '#/definitions/Brand'
+        '400':
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me:
-    get:
-      summary: User Profile
+  /login:
+    post:
+      summary: User login
       description: >-
-        The User Profile endpoint returns information about the user that
-        has authorized with the application.
+        The User Login endpoint allows an existing user to sign in.
+      operationId: userLogin
+      parameters: 
+      - name: username
+        in: query
+        description: username and pw return access token
+        required: true
+        type: string
+      - name: password
+        in: query
+        description: username and pw return access token
+        required: true
+        type: string
       tags:
-        - User
+        - login
       responses:
         '200':
-          description: Profile information for a user
+          description: successful operation
           schema:
-            $ref: '#/definitions/Profile'
+            $ref: '#/definitions/Login'
+        default:
+          description: invalid username/password
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: View a user's cart
+      operationId: getCart
+      description: >-
+        The cart endpoint allows fetching of a user's cart.
+      tags:
+        - cart
+      parameters: 
+      - name: id
+        in: path
+        description: the id of the user's cart to retrieve
+        required: true
+        type: string
+      responses:
+        '200':
+          description: cart information for a user
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add a user's cart
+      operationId: postCart
+      description: >-
+        The cart post endpoint allows adding a user's cart.
+      tags:
+        - cart
+      responses:
+        '200':
+          description: cart information for a user
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/me/cart/{productId}':
+    delete:
+      summary: Remove product from a user's cart
+      description: |
+        Remove a product from a user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: ID of a product to remove
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - cart
+      responses:
+        '200':
+          description: An object
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add product to a user's cart
+      description: |
+        Add a product to a user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: ID of a product to remove
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - cart
+      responses:
+        '200':
+          description: An object
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
@@ -106,81 +213,50 @@ definitions:
   Product:
     type: object
     properties:
-      product_id:
+      productName:
         type: string
-        description: >-
-          Unique identifier representing a specific product for a given latitude
-          & longitude. For example, uberX in San Francisco will have a different
-          product_id than uberX in Los Angeles.
-      description:
+        description: unique product name
+      id: 
+        type: integer
+        description: unique product ID
+      description: 
         type: string
-        description: Description of product.
-      display_name:
+        description: description of the product
+      price: 
+        type: integer
+        description: price of product
+      imageUrl: 
         type: string
-        description: Display name of product.
-      capacity:
-        type: string
-        description: 'Capacity of product. For example, 4 people.'
-      image:
-        type: string
-        description: Image URL representing the product.
+        description: location of the product image
   Brand:
     type: object
     properties:
-      product_id:
+      brandName: 
         type: string
-        description: >-
-          Unique identifier representing a specific product for a given latitude
-          & longitude. For example, uberX in San Francisco will have a different
-          product_id than uberX in Los Angeles
-      currency_code:
-        type: string
-        description: '[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code.'
-      display_name:
-        type: string
-        description: Display name of product.
-      estimate:
-        type: string
-        description: >-
-          Formatted string of estimate in local currency of the start location.
-          Estimate could be a range, a single number (flat rate) or "Metered"
-          for TAXI.
-      low_estimate:
-        type: number
-        description: Lower bound of the estimated price.
-      high_estimate:
-        type: number
-        description: Upper bound of the estimated price.
-      surge_multiplier:
-        type: number
-        description: >-
-          Expected surge multiplier. Surge is active if surge_multiplier is
-          greater than 1. Price estimate already factors in the surge
-          multiplier.
-  Profile:
+        description: unique brand name
+      id:
+        type: integer
+        description: uniquie brand id
+  Login:
     type: object
     properties:
-      first_name:
+      username:
         type: string
-        description: First name of the Uber user.
-      last_name:
+        description: username
+      password:
         type: string
-        description: Last name of the Uber user.
-      email:
-        type: string
-        description: Email address of the Uber user
-      picture:
-        type: string
-        description: Image URL of the Uber user.
-      promo_code:
-        type: string
-        description: Promo code of the Uber user.
-  ProductId:
+        description: password
+  Cart:
     type: object
     properties:
-      uuid:
-        type: string
-        description: Unique identifier for the activity
+      quantity:
+        type: integer
+        description: number of items in the cart
+      contents:
+        type: array
+        items: 
+          $ref: '#/definitions/Product'
+        description: array of the contents of the cart
   Error:
     type: object
     properties:

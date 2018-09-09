@@ -1,0 +1,297 @@
+---
+swagger: "2.0"
+info:
+  description: "Sunglasses.io web store API"
+  version: "0.0.1"
+  title: "Sunglasses.io API"
+host: "localhost:8080"
+basePath: "/api"
+schemes:
+- "http"
+produces:
+- "application/json"
+paths:
+  /products:
+    get:
+      tags:
+      - "products"
+      summary: "All products"
+      description: "Returns an array of available product types.\n"
+      operationId: "productsGET"
+      parameters:
+      - name: "product"
+        in: "query"
+        description: "Product query"
+        required: true
+        type: "string"
+        format: "string"
+      responses:
+        200:
+          description: "An array of products"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Products"
+  /brands:
+    get:
+      tags:
+      - "brands"
+      summary: "All brands"
+      description: "Returns an array of available brands.\n"
+      operationId: "brandsGET"
+      parameters:
+      - name: "brandName"
+        in: "query"
+        description: "An array of brands"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "An array of brands"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        400:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Brands"
+  /brands/{id}/products:
+    get:
+      tags:
+      - "brands"
+      summary: "All products for a given brand"
+      description: "Returns all products for a given brand.\n"
+      operationId: "getProductsByBrand"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of brand"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "An object"
+          schema:
+            type: "object"
+            properties: {}
+        400:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Brands"
+  /login:
+    post:
+      tags:
+      - "login"
+      summary: "User login"
+      description: "The User Login endpoint allows an existing user to sign in."
+      operationId: "userLogin"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "username and pw return access token"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "username and pw return access token"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Login"
+        default:
+          description: "invalid username/password"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Login"
+  /me/cart:
+    get:
+      tags:
+      - "cart"
+      summary: "View a user's cart"
+      description: "The cart endpoint allows fetching of a user's cart."
+      operationId: "getCart"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "the id of the user's cart to retrieve"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "cart information for a user"
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: "unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+    post:
+      tags:
+      - "cart"
+      summary: "Add a user's cart"
+      description: "The cart post endpoint allows adding a user's cart."
+      operationId: "postCart"
+      parameters: []
+      responses:
+        200:
+          description: "cart information for a user"
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+  /me/cart/{productId}:
+    post:
+      tags:
+      - "cart"
+      summary: "Add product to a user's cart"
+      description: "Add a product to a user's cart\n"
+      operationId: "meCartProductIdPOST"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "ID of a product to remove"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "An object"
+          schema:
+            type: "object"
+            properties: {}
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+    delete:
+      tags:
+      - "cart"
+      summary: "Remove product from a user's cart"
+      description: "Remove a product from a user's cart\n"
+      operationId: "meCartProductIdDELETE"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "ID of a product to remove"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "An object"
+          schema:
+            type: "object"
+            properties: {}
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+definitions:
+  Product:
+    type: "object"
+    properties:
+      productName:
+        type: "string"
+        description: "unique product name"
+      id:
+        type: "integer"
+        description: "unique product ID"
+      description:
+        type: "string"
+        description: "description of the product"
+      price:
+        type: "integer"
+        description: "price of product"
+      imageUrl:
+        type: "string"
+        description: "location of the product image"
+    example:
+      price: 6
+      imageUrl: "imageUrl"
+      description: "description"
+      id: 0
+      productName: "productName"
+  Brand:
+    type: "object"
+    properties:
+      brandName:
+        type: "string"
+        description: "unique brand name"
+      id:
+        type: "integer"
+        description: "uniquie brand id"
+    example:
+      brandName: "brandName"
+      id: 0
+  Login:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+        description: "username"
+      password:
+        type: "string"
+        description: "password"
+    example:
+      password: "password"
+      username: "username"
+  Cart:
+    type: "object"
+    properties:
+      quantity:
+        type: "integer"
+        description: "number of items in the cart"
+      contents:
+        type: "array"
+        description: "array of the contents of the cart"
+        items:
+          $ref: "#/definitions/Product"
+    example:
+      quantity: 0
+      contents:
+      - price: 6
+        imageUrl: "imageUrl"
+        description: "description"
+        id: 0
+        productName: "productName"
+      - price: 6
+        imageUrl: "imageUrl"
+        description: "description"
+        id: 0
+        productName: "productName"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
