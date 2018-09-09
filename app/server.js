@@ -51,16 +51,18 @@ myRouter.get('/api/me/cart', function(request, response){
     response.end(JSON.stringify(users[0].cart));
 });
 
-myRouter.get('/api/brands/:id/products', function(request, response){
-    response.writeHead(200, {'Context-Type':'application/json'});
-    let brand = brands.find((brand) => {
-        return brand.id === request.params.brandId
-    })
-    let brandProducts = products.find((categoryId) => {
-        return brandProducts = request.params.categoryId
-    })
-    respond.end(JSON.stringify(brandProducts));
-});
+myRouter.get('/api/brands/:brandId/products', function(request, response){
+    brandProducts = brands.find( brand => brand.id === request.params.brandId);
+    if (!brandProducts) {
+        response.statusCode = 400;
+        return response.end("No product with that brand was found.");    
+   }
+    const productsByBrand = products.filter( product => {
+     return product.categoryId === request.params.brandId;
+   });
+   response.writeHead(200, 'List of products for a given brand');
+   response.end(JSON.stringify(productsByBrand));
+  });
 
 myRouter.post('/api/login', function(request, response){
     response.writeHead(200, {'Context:Type': 'application/json'});
