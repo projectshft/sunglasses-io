@@ -16,7 +16,12 @@ var myRouter = Router();
 myRouter.use(bodyParser.json());
 
 http.createServer(function (request, response) {
-    myRouter(request, response, finalHandler(request, response))
+    if (request.url.includes('api')) {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        myRouter(request, response, finalHandler(request, response))
+      } else {
+        serve(request,response, finalHandler(request,response))
+      }
 }).listen(PORT);
 
 // read brands json file
