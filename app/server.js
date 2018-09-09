@@ -8,7 +8,11 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
-//if it isn't reading the file might have to reference the folder
+//State holding needed variables
+var brands = [];
+var products = [];
+var user = {};
+
 fs.readFile("./initial-data/brands.json", 'utf8', (err, data) => {
     if (err) throw err;
     brands = JSON.parse(data);
@@ -24,11 +28,6 @@ fs.readFile("./initial-data/brands.json", 'utf8', (err, data) => {
     users = JSON.parse(data);
   });
 
-//State holding needed variables
-var brands = [];
-var products = [];
-var user = {};
-
 //Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -37,7 +36,37 @@ http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response))
 }).listen(PORT);
 
-myRouter.get('api/brands', function(request, reponse){
+myRouter.get('/api/brands', function(request, response){
     response.writeHead(200, {'Context-Type':'application/json'});
     response.end(JSON.stringify(brands));
+});
+
+myRouter.get('/api/products', function(request, response){
+    response.writeHead(200, {'Context-Type':'application/json'});
+    response.end(JSON.stringify(products));
+});
+
+myRouter.get('/api/me/cart', function(request, response){
+    response.writeHead(200, {'Context-Type':'application/json'});
+    response.end(JSON.stringify(users[0].cart));
+});
+
+myRouter.get('/api/brands/:id/products', function(request, response){
+    response.writeHead(200, {'Context-Type':'application/json'});
+    let brand = brands.find((brand) => {
+        return brand.id === request.params.brandId
+    })
+    let brandProducts = products.find((categoryId) => {
+        return brandProducts = request.params.categoryId
+    })
+    respond.end(JSON.stringify(brandProducts));
+});
+
+myRouter.post('/api/login', function(request, response){
+    response.writeHead(200, {'Context:Type': 'application/json'});
+    if (request.body.username && request.body.password) {
+        let user = users.find((user)=> {
+            return user.login.username == request.body.username && user.login.password == request.body.password;
+        });
+    }
 });
