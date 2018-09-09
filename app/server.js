@@ -54,3 +54,11 @@ myRouter.get('/api/brands', (request, response) => {
   response.end(JSON.stringify(brands));
 });
 
+//when a user sends a brand id as a parameter, the server will copy the products array and filter out products whose categoryid does not match the brand id
+myRouter.get('/api/brands/:id/products', (request, response) => {
+  response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }));
+  let productsSortedByBrand = products.filter((product) => {
+    return product.categoryId == request.params.id;
+  });
+  response.end(JSON.stringify(productsSortedByBrand));
+});
