@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="master.css">
+  </head>
+  <body>
+    <section>
+      <div class="container">
+        <h3>Valid Keys:</h3>
+        <p>88312679-04c9-4351-85ce-3ed75293b449</p>
+        <p>1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7</p>
+      </div>
+
+      <div class="container">
+        <h1>API KEY</h1>
+        <input id="apiKey" type="text" name="" value="88312679-04c9-4351-85ce-3ed75293b449">
+        <button id="submitApiKey">Submit Key</button>
+      </div>
+
+      <div class="container">
+        <h3>Stores:</h3>
+        <div id="apiKeyResponse">
+          <!-- Response form server goes here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Login Section -->
+    <section>
+      <div class="container">
+        <h1>LOGIN</h1>
+        <input id="username" value="greenlion235" placeholder="Username"> <br>
+        <input id="password" type="password" value="waters" placeholder="Password">
+        <button id="submitLoginInfo">Submit Login</button>
+        <p id="loginResponse"></p>
+      </div>
+
+
+    <!-- Auth Level Section -->
+
+      <div class="container" id="storeIssues">
+
+      </div>
+    </section>
+
+
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
