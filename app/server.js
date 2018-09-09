@@ -8,6 +8,12 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
+// State holding variables
+var products = [];
+var brands = [];
+var users = [];
+
+
 http.createServer(function (request, response) {
 
 }).listen(PORT);
