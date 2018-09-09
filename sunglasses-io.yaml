@@ -75,7 +75,7 @@ paths:
           description: The number of results to limit the search to
           required: false
           type: number
-          format: int32
+          format: integer
       responses:
         '200':
           description: An array of products
@@ -93,23 +93,21 @@ paths:
       description: >-
         User login endpoint 
       parameters:
-        - name: username
-          in: body # should be in body?
+        - name: loginData
+          in: body 
           description: correct user email and password return access token
           required: true
-          type: string  
-        - name: password
-          in: body # should be in body?
-          description: correct user email and password return access token
-          required: true
-          type: string  
+          schema:
+            $ref: '#/definitions/Login-params'
       responses:
         '200':
           description: Profile information for a user
-          schema:
-            $ref: '#/definitions/Login'
         default:
           description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: Username or password incorrect
           schema:
             $ref: '#/definitions/Error'
   /api/me/cart:
@@ -121,10 +119,10 @@ paths:
         This endpoint allows you achieve a given goal
       parameters:
         - name: id
-          in: path
+          in: query
           description: The id of the goal to achieve
           required: true
-          type: string
+          type: integer
       responses:
         '200':
           description: Achievement is successful
@@ -156,7 +154,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  '/api/me/cart/{productId}':
+  '/api/me/cart/{productId}': // getting an error here. 
     delete:
       summary: Gift a Goal
       tags:
@@ -209,6 +207,14 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 definitions:
+  Login-params:
+    properties:
+      userEmail:
+        type: string
+        description: user email serving as username for login
+      password:
+        type: string
+        description: user password
   Brand:
     type: object
     properties:
@@ -236,16 +242,8 @@ definitions:
       price:
         type: number
         description: Price of product
-  Login:
-    type: object
-    properties:
-    
-      username:
-        type: string
-        description: Username
-      password:
-        type: string
-        description: Password
+  Cart:
+    type: // make cart to remove error on line 157
   User:
     type: object
     properties:
@@ -268,4 +266,3 @@ definitions:
         type: string
       fields:
         type: string
-
