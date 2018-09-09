@@ -63,16 +63,15 @@ paths:
             $ref: '#/definitions/Error'
   /api/products:
     get:
-      summary: User Profile
+      summary: Products
       description: >-
-        The User Profile endpoint returns information about the Uber user that
-        has authorized with the application.
+        The products of a given brand
       tags:
         - Products
       parameters:
         - name: limit
           in: query
-          description: The number of results to limit the search to
+          description: The number of results to limit the search to a certain number
           required: false
           type: number
           format: integer
@@ -116,16 +115,16 @@ paths:
       tags:
         - User
       description: |
-        This endpoint allows you achieve a given goal
+        This endpoint returns the contents of the cart
       parameters:
-        - name: id
+        - name: inCart
           in: query
-          description: The id of the goal to achieve
+          description: All of the products in a user's cart
           required: true
           type: integer
       responses:
         '200':
-          description: Achievement is successful
+          description: Cart contents returned successfully
         default:
           description: Unexpected error 
           schema:
@@ -135,46 +134,48 @@ paths:
       tags:
         - User
       description: |
-        This endpoint allows you challenge a user for given goal
+        Post to the user's cart
       parameters:
         - name: id
           in: path
-          description: The id of the goal to achieve
+          description: Id of the product to post
           required: true
           type: string
-        - name: userId
+        # - name: productName
+        #   in: path
+        #   description: Name of the product to post
+        #   required: true
+        #   type: string
+        - name: price
           in: path
-          description: The id user to challenge
+          description: Price of the product to post
           required: true
           type: string
       responses:
         '200':
-          description: Challenge is successful
+          description: Post to cart is successful
+          schema:
+            $ref: '#/definitions/User'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
   '/api/me/cart/{productId}': // getting an error here. 
     delete:
-      summary: Gift a Goal
+      summary: Delete a product from the cart
       tags:
         - User
       description: |
-        This endpoint allows you gift a given goal
+        This endpoint allows you to delete a product from the cart
       parameters:
-        - name: id
+        - name: productId
           in: path
-          description: The id of the goal to gift
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user to gift the goal to
+          description: Product id
           required: true
           type: string
       responses:
         '200':
-          description: Achievement is successful
+          description: Product deleted
           schema:
             $ref: '#/definitions/User'
         default:
@@ -182,26 +183,20 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     post:
-      summary: Gift a Goal
+      summary: post a product to the cart
       tags:
         - User
       description: |
-        This endpoint allows you gift a given goal
+        Post a product to the cart
       parameters:
-        - name: id
+        - name: productId
           in: path
-          description: The id of the goal to gift
+          description: Post a product to the cart
           required: true
           type: string
-        - name: userId
-          in: path
-          description: The id user to gift the goal to
-          required: true
-          type: string
-
       responses:
         '200':
-          description: Achievement is successful
+          description: Posted product to cart
         default:
           description: Unexpected error
           schema:
@@ -241,21 +236,21 @@ definitions:
         description: The URL for the image representing the product
       price:
         type: number
-        description: Price of product
-  Cart:
-    type: // make cart to remove error on line 157
   User:
     type: object
     properties:
+      productId: // this should not be here!!! ???
+        type: integer
+        description: The contents of a user's cart
       first_name:
         type: string
-        description: First name of the Uber user.
+        description: User firstname
       last_name:
         type: string
-        description: Last name of the Uber user.
+        description: User lastname
       email:
         type: string
-        description: Email address of the Uber user
+        description: User email
   Error:
     type: object
     properties:
