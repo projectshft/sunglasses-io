@@ -8,6 +8,12 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
+
+
+// Create the server
 http.createServer(function (request, response) {
 
-}).listen(PORT);
+}).listen(PORT, (error) => {
+  
+  console.log(`Server is listening on ${PORT}`);
+  });
