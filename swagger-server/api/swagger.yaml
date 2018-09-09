@@ -130,12 +130,7 @@ paths:
       summary: "View a user's cart"
       description: "The cart endpoint allows fetching of a user's cart."
       operationId: "getCart"
-      parameters:
-      - name: "id"
-        in: "path"
-        description: "the id of the user's cart to retrieve"
-        required: true
-        type: "string"
+      parameters: []
       responses:
         200:
           description: "cart information for a user"
