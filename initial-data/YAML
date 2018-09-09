@@ -1,0 +1,302 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to display brands based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.  
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - brandNames
+              - dateCreated
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Products of a given brand
+      description: |
+        This endpoint helps you identify a given product
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to accept
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+     summary: User Login
+     description: Where the user logs in
+     tags:
+      schema:
+      - $ref: '#/definitions/user.login'
+     responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Users Shopping Cart
+      description: >-
+        The User shopping cart endpoint returns information about the user that
+        has products saved in their cart.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Creates new shopping cart for user
+      parameters:
+        - in: body
+          name: id
+          description: The id of the product to match id of product in cart
+          schema: 
+            $ref: "#/definitions/User"
+          required: true
+      responses:
+        '200':
+          description: Product is added
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productid}:
+    post:
+      summary: Product ID in the shopping cart
+      description: |
+        Gives the ability to see a specific product in the cart
+      parameters:
+        - name: productid
+          in: path
+          description: The id of the product to in the cart
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Product id found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete Product
+      description: |
+        Delete a specific product with id from users shopping cart
+      parameters:
+        - name: productid
+          in: path
+          description: The id of the product to delete
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Delete is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Products
+      description: >
+        Products for each brand
+      tags:
+        - Products
+      responses:
+        '200':
+          description: A product object
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand this product belongs to.
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the product
+      categoryId:
+        type: string
+        description: The category the product is in
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: Describes the details of the sunglasses
+      price: 
+        type: integer
+        description: The price of the sunglasses
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: url to images of glasses
+          
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the application user.
+      cart:
+        type: array
+        items: 
+          $ref: '#/definitions/Brands'
+        description: List of items specific to the user in the shopping cart
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+        description: Title of user
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: The name of the street of the user
+          city:
+            type: string
+            description: The city name of the users residence
+          state:
+            type: string
+            description: The state name where the user lives
+          postcode:
+            type: string
+            description: The postal code of where the user lives
+      email:
+        type: string
+        description: The email of the application user
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: Username of the user that is logging in
+          password: 
+            type: string
+            description: Password of the user logging in
+          salt: 
+            type: string
+            description: unique identifier for users password
+          md5:
+            type: string
+            description: something
+          sha1:
+            type: string
+            description: something
+          sha256:
+            type: string
+            description: something
+      dob:
+        type: string
+        description: The date of birth of user
+      registered:
+        type: string
+        description: The date and time when the user registered for an account
+      phone:
+        type: string
+        description: Users phone number
+      cell:
+        type: string
+        description: Users cell phone number
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: URL link to users large photo
+          medium:
+            type: string
+            description: URL link to users medium size photo
+          thumbnail:
+            type: string
+            description: URL link to thunmbnail picture
+      nat:
+        type: string
+        description: something
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
