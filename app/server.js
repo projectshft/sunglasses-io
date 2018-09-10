@@ -20,11 +20,20 @@ var products = [];
 var accessTokens = [];
 var failedLoginAttempts = {};
 
+
 var TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000
 
 // Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
+
+
+// Helper to create shoppingCartOrder objects that will be pushed to the user's cart array
+var ShoppingCartOrder = function (product, quantity) {
+  this.product = product;
+  this.quantity = quantity
+};
+
 
 // Helper method to process access token
 var getValidTokenFromRequest = function (request) {
@@ -175,8 +184,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
   if (!validToken) {
     response.writeHead(401, "Session Expired, please login again")
     return response.end()
-  }
-  else {
+  } else {
     // Verify that the user exists to know if we should continue processing
     let me = users.find((me) => {
       return me.id == request.params.id;
@@ -184,16 +192,16 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     //Verify that the product exists
     const product = products.find((product) => {
       return product.id == request.params.productId
-    })
-    if (product) {
-      me.cart.push(product)
+    });
+    if (product) { 
+      me.cart.push(product);
       response.writeHead(200, { 'Content-Type': 'application/json' });
       return response.end(JSON.stringify(me.cart))
-    }
-    else {
+    } else {
       // If there isn't a product with that id, then return a 404
       response.writeHead(404, "The product ID doesn't exist")
       return response.end()
     }
   }
 });
+
