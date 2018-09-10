@@ -24,6 +24,24 @@ var failedLoginAttempts = {};
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+  var parsedUrl = require('url').parse(request.url, true)
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 //create server and set it to listen to the port variable value
 http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
@@ -88,15 +106,15 @@ if (request.body.username && request.body.password && failedLoginAttempts[reques
     if (user) {
       // Reset our counter of failed logins
       failedLoginAttempts[request.body.username] = 0;
-    
+
       // Write the header because we know we will be returning  successful at this point and that the response will be json
       response.writeHead(200, Object.assign({ 'Content-Type':   'application/json' }));
-    
+
     // We have a successful login, if we already have an existing   access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
       });
-    
+
       // Update the last updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
@@ -123,3 +141,55 @@ if (request.body.username && request.body.password && failedLoginAttempts[reques
     }
   }
 }); 
+
+//GET/api/me/cart returns cart array for logged in users
+myRouter.get('/api/me/cart', function (request, response) {
+  //use helper function to validate/process access token
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let me = users.find((user) => {
+      return user.id == request.params.id;
+    });
+    if (!me) {
+      // If there isn't a user with that id, then return a 404
+      response.writeHead(404, "That user cannot be found");
+      response.end();
+      return;
+    } else {
+      response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }));
+      response.end(JSON.stringify(me.cart));
+    }
+  }
+});
+
+//POST/api/me/cart allows logged in users to add products to cart
+myRouter.post('/api/me/cart/:productId', function (request, response) {
+  let validToken = getValidTokenFromRequest(request)
+  if (!validToken) {
+    response.writeHead(401, "Session Expired, please login again", CORS_HEADERS)
+    return response.end()
+  }
+  else {
+    let me = users.find((user) => {
+      return validToken.user === user.login.username
+    })
+    const product = products.find((product) => {
+      return product.id == request.params.productId
+    })
+    if (product) {
+      me.cart.push(product)
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(me.cart))
+    }
+    else {
+      // If there isn't a product with that id, then return a 404
+      response.writeHead(404, "The product ID doesn't exist")
+      return response.end()
+    }
+  }
+});
