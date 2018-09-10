@@ -20,6 +20,8 @@ var products = [];
 var accessTokens = [];
 var failedLoginAttempts = {};
 
+var TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000
+
 // Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -152,8 +154,8 @@ myRouter.get('/api/me/cart', function (request, response) {
     response.end();
   } else {
     // Verify that the user exists to know if we should continue processing
-    let me = users.find((user) => {
-      return user.id == request.params.id;
+    let me = users.find((me) => {
+      return me.id == request.params.id;
     });
     if (!me) {
       // If there isn't a user with that id, then return a 404
@@ -167,17 +169,19 @@ myRouter.get('/api/me/cart', function (request, response) {
   }
 });
 
-//POST/api/me/cart allows logged in users to add products to cart
+//POST/api/me/cart/:productId allows logged in users to add products to cart
 myRouter.post('/api/me/cart/:productId', function (request, response) {
   let validToken = getValidTokenFromRequest(request)
   if (!validToken) {
-    response.writeHead(401, "Session Expired, please login again", CORS_HEADERS)
+    response.writeHead(401, "Session Expired, please login again")
     return response.end()
   }
   else {
-    let me = users.find((user) => {
-      return validToken.user === user.login.username
-    })
+    // Verify that the user exists to know if we should continue processing
+    let me = users.find((me) => {
+      return me.id == request.params.id;
+    });
+    //Verify that the product exists
     const product = products.find((product) => {
       return product.id == request.params.productId
     })
