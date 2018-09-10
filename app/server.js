@@ -45,16 +45,28 @@ http.createServer(function (request, response) {
 
 // list main endpoints
 myRouter.get('/api/products', function(request,response) {
-    response.end(JSON.stringify(products));
+  response.writeHead(200, {'Content-Type':'application/json'});
+  response.end(JSON.stringify(products));
   });
 
 myRouter.get('/api/brands', function(request,response) {
+  response.writeHead(200, {'Content-Type':'application/json'});
   response.end(JSON.stringify(brands));
 });
+
+myRouter.get('/api/brands/:brandId/products', function(request,response) {
+  var brandId = request.params.brandId;
+  var foundProducts = products.filter(product => product.categoryId == brandId);
+  response.writeHead(200, {'Content-Type':'application/json'});
+  response.end(JSON.stringify(foundProducts));
+});
+
 
 myRouter.get('/api/me', function(request,response) {
   response.end(JSON.stringify(user));
 });
+
+
 
 // See how i'm not having to build up the raw data in the body... body parser just gives me the whole thing as an object.
 // See how the router automatically handled the path value and extracted the value for me to use?  How nice!
