@@ -27,13 +27,13 @@ var TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-
 // Helper to create shoppingCartOrder objects that will be pushed to the user's cart array
 var ShoppingCartOrder = function (product, quantity) {
-  this.product = product;
-  this.quantity = quantity
+  return {
+  product,
+  quantity:1
+  }
 };
-
 
 // Helper method to process access token
 var getValidTokenFromRequest = function (request) {
@@ -147,7 +147,7 @@ if (request.body.username && request.body.password && failedLoginAttempts[reques
       } else {
         failedLoginAttempts[request.body.username] = 0
       }
-      response.writeHead(401, "Invalid username or password");
+      response.writeHead(400, "Invalid username or password");
       response.end();
     }
   }
@@ -159,7 +159,7 @@ myRouter.get('/api/me/cart', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue");
+    response.writeHead(401, "Session expired, please try again");
     response.end();
   } else {
     // Verify that the user exists to know if we should continue processing
@@ -193,15 +193,79 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     const product = products.find((product) => {
       return product.id == request.params.productId
     });
-    if (product) { 
-      me.cart.push(product);
+    if (product) {
+      shoppingCartOrder = me.cart.find((order) => {
+        return order.product.id == product.id
+      })
+      //if the product is already in the cart, increase the quantity otherwise add the product to the cart and set the quantity to 1
+      if(shoppingCartOrder){
+        shoppingCartOrder.quantity += 1;
+      } else {
+      shoppingCartOrder = ShoppingCartOrder(product);
+      me.cart.push(shoppingCartOrder);
+      }
+
       response.writeHead(200, { 'Content-Type': 'application/json' });
       return response.end(JSON.stringify(me.cart))
-    } else {
+      }  else {
       // If there isn't a product with that id, then return a 404
       response.writeHead(404, "The product ID doesn't exist")
       return response.end()
     }
+  }
+});
+
+myRouter.delete('/api/me/cart/:id', (request, response) => {
+  let validToken = getValidTokenFromRequest(request)
+  if (!validToken) {
+    response.writeHead(401, "Session Expired, please login again")
+    return response.end()
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let me = users.find((me) => {
+      return me.id == request.params.id;
+    });
+    //Verify that the product exists
+    const product = products.find((product) => {
+      return product.id == request.params.productId
+    });
+  if (product) {
+    let productId = product.id
+    me.cart.find((shoppingCartOrder) => {
+      return shoppingCartOrder.product.id == product.id
+    })
+    if (shoppingCartOrder.quantity > 1) {
+     shoppingCartOrder.quantity -= 1;
+     } else if (shoppingCartOrder == 1) {
+    shoppingCartOrder.splice(1)
+  }
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(me.cart));
+  }
+  } 
+});
+
+myRouter.post('/api/me/cart', (request, response) => {
+  let validToken = getValidTokenFromRequest(request)
+  if (!validToken) {
+    response.writeHead(401, "Session Expired, please login again")
+    return response.end()
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let me = users.find((me) => {
+      return me.id == request.params.id;
+    });
+    //check that cart is not empty then push cart items to the checkout cart array to be sent to the register
+    if (me.cart.length > 0) {
+      me.cart.forEach((shoppingCartOrder) => {
+          return order.product.id == product.id
+        });
+        me.checkoutCart.push(order);
+      //empty out cart
+      me.cart = [];
+      response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }));
+      response.end(JSON.stringify(user.purchasedCart));
+    } 
   }
 });
 
