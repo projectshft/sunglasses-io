@@ -6,43 +6,37 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+const Products = require('../initial-data/products.json');
+const Brands = require('../initial-data/brands.json');
+const Users = require('../initial-data/users.json');
+
 const PORT = 3001;
-const BASEURL = 'http://localhost:8080'
+
+const myRouter = Router();
+myRouter.use(bodyParser.json());
 
 let state = {
     login: {
         username: '',
         password: ''
     },
-    products: [],
-    brands: [],
     cart: []
 }
 
 http.createServer(function (request, response) {
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    myRouter(request, response, finalHandler(request, response))
+	}).listen(PORT, (error) => {
+    	if (error) {
+        console.log(error)
+    	}
+    	console.log(`Server is listening on port ${PORT} `)
+});
 
-}).listen(PORT);
+myRouter.get('/api/brands', function (request, response) {
+    response.end(JSON.stringify(Brands))
+})
 
-fs.readFile("../initial-data/products.json", 'utf8', (err, data)) => {
-    if (err) throw err;
-    state.products.push(data);
-}
-
-function productsGET() {
-	let url = `${BASEURL}/api/products`
-	return fetch(url, {
-		method: 'GET',
-		headers: {
-			'content-type': 'application/json'
-	  }
-	})
-	.then(response => {
-		return response.ok ? response.json() : response.statusText
-	})
-	.then(data => {
-		state.products.push(data)
-		renderIssues(state)
-		// render data
-	})
-	.catch(err => console.log(err))
-}
+myRouter.get('/api/products', function (request, response) {
+    response.end(JSON.stringify(Products))
+})
