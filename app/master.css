@@ -8,27 +8,29 @@
 .search {
     padding: 14px 16px;
 }
+
 .left-top-container {
     float: left;
     width: 20%;
     padding: 16px 16px;
 }
+
 .right-top-container {
-    float:left;
-    width:20%;
+    float: left;
+    width: 20%;
     padding: 16px 16px;
 }
 
 .center-container {
     float: left;
-    width: 60%;
+    width: 50%;
     padding: 16px 16px;
 }
-   ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
+ul {
+   list-style-type: none;
+   margin: 0;
+   padding: 0;
+   overflow: hidden;
 }
 
 li {

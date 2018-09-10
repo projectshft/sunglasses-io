@@ -5,10 +5,8 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-
+var accessTokens = [];
 const PORT = 3001;
-
-//State holding needed variables
 var brands = [];
 var products = [];
 var user = {};
@@ -28,7 +26,6 @@ fs.readFile("./initial-data/brands.json", 'utf8', (err, data) => {
     users = JSON.parse(data);
   });
 
-//Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -70,5 +67,41 @@ myRouter.post('/api/login', function(request, response){
         let user = users.find((user)=> {
             return user.login.username == request.body.username && user.login.password == request.body.password;
         });
+    if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        response.end(JSON.stringify(currentAccessToken.token));
+    } else {
+        let newAccessToken = {
+            username: user.login.username,
+            lastUpdated: new Date(),
+            token: uid(16)
+            }
+        accessTokens.push(newAccessToken);
+        response.end(JSON.stringify(newAccessToken.token));
+     }
+    } else {
+          response.writeHead(401, "Invalid username or password");
+          response.end();
     }
 });
+
+myRouter.post('/api/me/cart', function(request, response){
+    cart.push(request.body);
+    response.end();
+})
+
+myRouter.post('/api/me/cart/:productId', function(request, response){
+    let products = products.find((id)=> {
+        return products.id == request.params.productId
+    })
+    let user = users.find((user)=> {
+        return user.id == request.params.productId
+    })
+    user.cart.push(id)
+    responde.end();
+});
+
+myRouter.delete('/api/me/cart/:productId', function(request, response){
+    cart.splice(cart[request.params.productId], 1)
+    response.end();
+})
