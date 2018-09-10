@@ -11,7 +11,7 @@ let state = {
     cart: []
 }
 //Button used for search bar
-$('$submitSearch').on('click', () => {
+$('#submitSearch').on('click', () => {
     state.searchBar = $('#searchQuery').val()
     setProducts(`${BASEURL}/api/search`, state.searchBar)
         .then(data => {

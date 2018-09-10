@@ -1,9 +1,9 @@
 #main_wrapper {
-    background-size: 100% 100%;  // or cover like Ben Dyer states
+    background-size: 100% 100%;
     background-repeat: no-repeat;
     float: left;
     width: 100%;
-   }
+}
 
 .search {
     padding: 14px 16px;
@@ -17,15 +17,16 @@
 
 .right-top-container {
     float: left;
-    width: 20%;
+    width: 40%;
     padding: 16px 16px;
 }
 
 .center-container {
     float: left;
-    width: 50%;
+    width: 20%;
     padding: 16px 16px;
 }
+
 ul {
    list-style-type: none;
    margin: 0;
@@ -47,7 +48,6 @@ li a {
     text-decoration: none;
 }
 
-/* Change the link color to #111 (black) on hover */
 li a:hover {
     background-color: pink;
 }

@@ -9,7 +9,7 @@ var accessTokens = [];
 const PORT = 3001;
 var brands = [];
 var products = [];
-var user = {};
+var users = {};
 
 fs.readFile("./initial-data/brands.json", 'utf8', (err, data) => {
     if (err) throw err;
@@ -49,6 +49,7 @@ myRouter.get('/api/me/cart', function(request, response){
 });
 
 myRouter.get('/api/brands/:brandId/products', function(request, response){
+    response.writeHead(200, {'Context-Type':'application/json'});
     brandProducts = brands.find( brand => brand.id === request.params.brandId);
     if (!brandProducts) {
         response.statusCode = 400;
@@ -62,7 +63,6 @@ myRouter.get('/api/brands/:brandId/products', function(request, response){
   });
 
 myRouter.post('/api/login', function(request, response){
-    response.writeHead(200, {'Context:Type': 'application/json'});
     if (request.body.username && request.body.password) {
         let user = users.find((user)=> {
             return user.login.username == request.body.username && user.login.password == request.body.password;
@@ -85,23 +85,28 @@ myRouter.post('/api/login', function(request, response){
     }
 });
 
-myRouter.post('/api/me/cart', function(request, response){
-    cart.push(request.body);
+myRouter.post('/api/me/cart', function(request, response) {
+    let selectedBody = request.body.id;
+    if (users[0].cart = []) {
+        response.writeHead(404, "No products have been selected.");
+    } else {
+    users[0].cart.push(request.selectedBody);
     response.end();
+    }
 })
 
 myRouter.post('/api/me/cart/:productId', function(request, response){
-    let products = products.find((id)=> {
-        return products.id == request.params.productId
+    let product = products.find((id)=> {
+        return product.id == request.params.productId
     })
-    let user = users.find((user)=> {
-        return user.id == request.params.productId
-    })
-    user.cart.push(id)
-    responde.end();
+    user[0].cart.push(productId)
+    response.end();
 });
 
 myRouter.delete('/api/me/cart/:productId', function(request, response){
-    cart.splice(cart[request.params.productId], 1)
+    let product = products.find((id)=> {
+        return product.id == request.params.productId
+    })
+    user[0].cart.splice(user.cart[request.params.productId], 1)
     response.end();
 })
