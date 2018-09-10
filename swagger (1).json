@@ -1,0 +1,505 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a sample server for an online sunglasses shop.",
+    "version": "1.0.0",
+    "title": "Sunglasses Store",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "email": "email@email.com"
+    },
+    "license": {
+      "name": "license",
+      "url": "http://www.example.com"
+    }
+  },
+  "host": "localhost:3001",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/api/login": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Log in with an existing username and password.",
+        "description": "Exisiting users can log in with username and password to interact with the cart.",
+        "operationId": "userLogin",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "login",
+            "in": "body",
+            "description": "An object that contains the user's username and password",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Invalid username/password"
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "products"
+        ],
+        "summary": "Returns an inventory of all sunglasses for sale.",
+        "description": "An array of all sunglasses products",
+        "operationId": "getProducts",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Products"
+            }
+          }
+        }
+      }
+    },
+    "/api/brands": {
+      "get": {
+        "tags": [
+          "brands"
+        ],
+        "summary": "Returns all product brands available in the shop",
+        "description": "An array of all brands\n",
+        "operationId": "getBrands",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Brands"
+            }
+          }
+        }
+      }
+    },
+    "/brands/{id}/products": {
+      "get": {
+        "summary": "Products mapped to each brand id",
+        "description": "All the products in the store for a given brand\n",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The brand id to search and match with values in the product categoryId property to indicate that the product is made by that particular brand.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "brands"
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of products filtered by a given brand id",
+            "schema": {
+              "$ref": "#/definitions/Products"
+            }
+          }
+        }
+      }
+    },
+    "/api/me/cart": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "The cart array on the user model holds all active, shipped, and closed carts, which represent an order.  This endpoint returns .",
+        "description": "Get shopping cart for the logged in user\n",
+        "operationId": "getCart",
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "query",
+            "description": "accessToken for logged in user",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Users"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "After making the POST/api/me/cart call, the logged in user's cart will be saved to a new checkoutCart array and the cart array is emptied and returned in the response",
+        "operationId": "postToCart",
+        "produces": [
+          "application/JSON"
+        ],
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "body",
+            "description": "An unqiue token that validates logged in user's credentials and session",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cart",
+            "description": "The current contents of the logged in users' cart",
+            "schema": {
+              "$ref": "#/definitions/Products"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "You must be logged in to access this endpoint"
+          }
+        }
+      }
+    },
+    "/api/me/cart/:productId": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Returns the logged in user's cart array as confirmation that a given product has been added to the cart",
+        "operationId": "postToCart",
+        "produces": [
+          "application/JSON"
+        ],
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "body",
+            "description": "An unqiue token that validates logged in user's credentials and session",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "An value associated with a product Id that represents the product user is adding to cart",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "products": {
+                  "$ref": "#/definitions/Products"
+                },
+                "quantity": {
+                  "type": "number",
+                  "description": "the number of each product the user wishes to purchase"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You must be logged in to access this endpoint"
+          }
+        }
+      }
+    },
+    "/api/me/cart:productId": {
+      "delete": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Returns the logged in user's cart array as confirmation that a given product has been deleted from the cart",
+        "operationId": "deleteItemFromCart",
+        "produces": [
+          "application/JSON"
+        ],
+        "parameters": [
+          {
+            "name": "accessToken",
+            "in": "body",
+            "description": "An unqiue token that validates logged in user's credentials and session",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "An value associated with a product Id that represents the product user is deleting",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "products": {
+                  "$ref": "#/definitions/Product"
+                },
+                "quantity": {
+                  "type": "number",
+                  "description": "the number of each product the user wishes to purchase"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "You must be logged in to access this endpoint"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Products": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Product"
+      }
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "unique string identifying the product"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "a string that matches the brand id for the product"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the product"
+        },
+        "description": {
+          "type": "string",
+          "description": "Summary of product"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int32",
+          "description": "an integer that represents the monetary value for the product"
+        },
+        "imageUrls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Image URLs of the Product"
+          }
+        }
+      }
+    },
+    "Brands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique identifier for brands"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of a brand"
+          }
+        }
+      }
+    },
+    "Users": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "object",
+          "properties": {
+            "gender": {
+              "type": "string",
+              "description": "The user's gender"
+            },
+            "cart": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Order"
+              }
+            },
+            "name": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "first": {
+                  "type": "string"
+                },
+                "last": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "postcode": {
+              "type": "integer"
+            }
+          }
+        },
+        "email": {
+          "type": "string"
+        },
+        "login": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            },
+            "salt": {
+              "type": "string"
+            },
+            "md5": {
+              "type": "string"
+            },
+            "sha1": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "dob": {
+          "type": "string"
+        },
+        "registered": {
+          "type": "string",
+          "format": "date"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "cell": {
+          "type": "string"
+        },
+        "picture": {
+          "type": "object",
+          "properties": {
+            "large": {
+              "type": "string"
+            },
+            "medium": {
+              "type": "string"
+            },
+            "thumbnail": {
+              "type": "string"
+            }
+          }
+        },
+        "nat": {
+          "type": "string"
+        }
+      }
+    },
+    "Order": {
+      "type": "object",
+      "properties": {
+        "cart_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "cart_status": {
+          "type": "string"
+        },
+        "products": {
+          "type": "object",
+          "properties": {
+            "product": {
+              "$ref": "#/definitions/Products"
+            },
+            "quantity": {
+              "type": "number"
+            }
+          }
+        },
+        "subtotal": {
+          "type": "number"
+        },
+        "tax_rate": {
+          "type": "number"
+        },
+        "shipping_rate": {
+          "type": "number"
+        },
+        "discount": {
+          "type": "number"
+        }
+      }
+    },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
