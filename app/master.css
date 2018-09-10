@@ -1,0 +1,57 @@
+#main_wrapper {
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    float: left;
+    width: 100%;
+}
+
+.search {
+    padding: 14px 16px;
+}
+
+.left-top-container {
+    float: left;
+    width: 20%;
+    padding: 16px 16px;
+}
+
+.right-top-container {
+    float: left;
+    width: 40%;
+    padding: 16px 16px;
+}
+
+.center-container {
+    float: left;
+    width: 20%;
+    padding: 16px 16px;
+}
+
+ul {
+   list-style-type: none;
+   margin: 0;
+   padding: 0;
+   overflow: hidden;
+}
+
+li {
+    float: left;
+}
+
+/* The difference between this example (horizontal navbar) and a vertical one is that the ul class is given a float property as seen above. */
+
+li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    background-color: pink;
+}
+
+.active {
+    background-color: pink;
+}

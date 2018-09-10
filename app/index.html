@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="master.css">
+  </head>
+  <body>
+    <section>
+      <div id="main_wrapper">
+       <p style="text-align:left;"><h1>Sunglasses <span style="float:right;">000-666-6666</span></h1></p>
+       <span class="search" style="float:right"><input id="searchQuery" type=text placeholder="search sunglasses 8)"><button id="submitSearch">Search</button></span>
+       <br>
+       <br>
+       <br>
+       <ul>
+            <li style="float:left"><a class="active" href="#About">Shop</a></li>
+            <li><a href="#Home">Delivery</a></li>
+            <li><a href="#News">Articles</a></li>
+            <li><a href="#Contact">News</a></li>
+            <span class="search" style="float:right"><input type=text placeholder="email"><input type="password" placeholder="password"><button>Login</button></span>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <div class="left-top-container">
+        <ul>
+            <li><a href="#About">Oakley</a></li>
+            <li><a href="#Home">Rayband</a></li>
+            <li><a href="#News">Levi's</a></li>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <div class="center-container">
+        <h3><a href="#brand">{selectedBrand}</a> > {productName}</h3>
+        <div>
+          <p>{mainSunglassImg}<span style="float:right">
+              {sunglassDescription}
+              <button>Add to Cart + </button>
+             </span></p>
+          <p>{secondSunglassImg}</p>
+          <p>{thirdSunglassImg}</p>
+
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="right-top-container">
+          <div id="cart">
+              <h1>CART</h1>
+              <ul>
+                <li><a href="#About"></a>item 1</a></li>
+                <li><a href="#About"></a>item 2</a></li>
+              </ul>
+          </div>
+
+
+
+      </div>
+
+
+    <!-- Auth Level Section -->
+
+      <div class="container" id="storeIssues">
+
+      </div>
+    </section>
+
+
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
