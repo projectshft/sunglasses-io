@@ -1,0 +1,273 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglass platform
+  version: 1.0.0
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint allows you to search products based on different filters such as brand and price as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.  
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - price
+              - name
+              - brand
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Obtain a user's cart
+      description: >-
+        The User Cart endpoint returns information about the user's cart.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the products
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Cart information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Updates a user's cart
+      description: |
+        This endpoint allows you update user's cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the products
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description:  Update for user's cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{id}:
+    post:
+      summary: Adds a product
+      description: |
+        This endpoint allows you add a product to the user's cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the products
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Adding product to cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete a product
+      description: |
+        This endpoint allows you delete a product from the user's cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the products
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Deleting product from cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/login:
+    post:
+      summary: Login for user
+      description: |
+        This endpoint allows you login to sunglasses website
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user
+          required: true
+          type: string
+        - name: password
+          in: path
+          description: The password of the user
+          required: true
+          type: string   
+        - name: currentAccessToken
+          in: path
+          description: The current access token for user
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Login is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      summary: Brands
+      description: >
+        Brands define groupings of products for browsing.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Brands in Category
+      description: >
+        All the products in a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for products in.
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products in the brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: name of product.  
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of a given product
+      imageURLs:
+        type: array
+        items:
+          type: string
+        description: The URL for the images representing the product
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the sunglasses user.
+      last_name:
+        type: string
+        description: Last name of the sunglasses user.
+      email:
+        type: string
+        description: Email address of the sunglasses user
+      username:
+        type: string
+        description: Username of the sunglasses user
+      password:
+        type: string
+        description: Username of the sunglasses user
+      currentAccessToken:
+        type: string
+        description: access token that is generated
+      cart:
+        items:
+          $ref: '#/definitions/Product'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
