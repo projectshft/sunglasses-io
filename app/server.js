@@ -72,8 +72,8 @@ myRouter.post('/api/login', (request, response) => {
         let newAccessToken = {
             userName: user.login.username,
             lastUpdated: new Date(),
-            token: "ABC"
-            // token: uid(16)
+            // token: "ABC"
+            token: uid(16)
         } 
         accessTokens.push(newAccessToken)
         return response.end(JSON.stringify(newAccessToken))
