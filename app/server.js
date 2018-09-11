@@ -64,12 +64,9 @@ myRouter.get('/api/brands/:brandId/products', function(request,response) {
 
 myRouter.get('/api/me', function(request,response) {
   response.end(JSON.stringify(user));
+  response.writeHead(200, {'Content-Type':'application/json'});
 });
 
-
-
-// See how i'm not having to build up the raw data in the body... body parser just gives me the whole thing as an object.
-// See how the router automatically handled the path value and extracted the value for me to use?  How nice!
 myRouter.post('/api/me/products/:productId/add', function(request,response) {
     let product = products.find((product)=> {
       return product.id == request.params.productId
