@@ -13,9 +13,6 @@ var products = [];
 var user = {};
 var users = [];
 var brands = [];
-var cart = [];
-
-
 
 // file system
 fs.readFile(__dirname + '/../initial-data/products.json', 'utf8', (err, data) => {
@@ -63,16 +60,16 @@ myRouter.get('/api/brands/:brandId/products', function(request,response) {
 });
 
 
-myRouter.get('/api/me', function(request,response) {
-  response.end(JSON.stringify(user));
-  response.writeHead(200, {'Content-Type':'application/json'});
+myRouter.get('/api/me/cart', function(request,response) {
+  response.writeHead(200, {'Content-Type':'application/json'});  
+  response.end(JSON.stringify(user.cart));
 });
 
-myRouter.post('/api/me/products/:productId/add', function(request,response) {
+myRouter.post('/api/me/cart/:productId', function(request,response) {
     let product = products.find((product)=> {
-      return product.id == request.params.productId
+        return product.id == request.params.productId
     })
-    user.addedProducts.push(product); 
+    user.cart.push(product); 
     response.end();
 });
 
