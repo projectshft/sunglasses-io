@@ -16,17 +16,17 @@ var accessTokens = [];
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-// function tokenCheck(token) {
-//     currentToken = accessTokens.find(tokenObject =>{
-//         return tokenObject.token == token
-//     })
-//     if(currentToken){
-//         var user = users.find(person => {
-//             return person.login.username == currentToken.userName
-//         })
-//     }
-//     return user
-// }
+function tokenCheck(token) {
+    currentToken = accessTokens.find(tokenObject =>{
+        return tokenObject.token == token
+    })
+    if(currentToken){
+        var user = users.find(person => {
+            return person.login.username == currentToken.userName
+        })
+    }
+    return user
+}
 
 http.createServer(function (request, response) {
     response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -48,10 +48,10 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
     selected_products = products.filter((product) => product.categoryId == brandID)
     response.end(JSON.stringify(selected_products))
 })
-myRouter.get('/api/time', (request, response) =>{
-    var token = uid(10);
-    response.end(JSON.stringify(token))
-} )
+// myRouter.get('/api/time', (request, response) =>{
+//     var token = uid(10);
+//     response.end(JSON.stringify(token))
+// } )
 myRouter.post('/api/login', (request, response) => {
     if(request.body.username && request.body.password){
         var user = users.find((user) => {
@@ -85,26 +85,26 @@ myRouter.get('/api/me/cart', function (request, response) {
     // if current token is valid, find user that the token belong to
     // user = users array find user that is the same as currentToken.username
     // return user.cart
+    console.log('Hi')
+    user = tokenCheck(request.headers.token)
 
-    // user = tokenCheck(request.headers.token)
-
-    // if (user) {
-    //     return response.end(user.card)
-    // } else
-    //     return response.writeHead(401).end()
-    // }
-
-    currentToken = accessTokens.find(tokenObject =>{
-        return tokenObject.token == request.headers.token
-    })
-    if(currentToken){
-        var user = users.find(person => {
-            return person.login.username == currentToken.userName
-        })
+    if (user) {
         return response.end(JSON.stringify(user.cart))
     } else {
-        response.writehead(401, 'User does not exist')
+        return response.writeHead(401).end()
     }
+
+    // currentToken = accessTokens.find(tokenObject =>{
+    //     return tokenObject.token == request.headers.token
+    // })
+    // if(currentToken){
+    //     var user = users.find(person => {
+    //         return person.login.username == currentToken.userName
+    //     })
+    //     return response.end(JSON.stringify(user.cart))
+    // } else {
+    //     response.writehead(401, 'User does not exist')
+    // }
 })
 
 myRouter.post('/api/me/cart', function (request, response) {
@@ -118,45 +118,56 @@ myRouter.post('/api/me/cart', function (request, response) {
         response.writehead(400, 'This product does not exist')
         return response.end();
     }
-    if(request.headers.token && product){
-        var currentToken = accessTokens.find(existingToken =>{
-            return existingToken.token == request.headers.token
-        })
+    user = tokenCheck(request.headers.token)
+    if(user && product){
+        
+        //     var currentToken = accessTokens.find(existingToken =>{
+    //         return existingToken.token == request.headers.token
+    //     })
+    // } else {
+    //    return response.writehead(401, 'user not logged in').end()
+    // }
+    // if(currentToken){
+    //     var user = users.find(person =>{
+    //         return person.login.username == currentToken.userName
+    //     })
+    // } else {
+    //     return response.writehead(401, 'User not found').end();
+    // }
+    let existingItem = user.cart.find(order =>{
+        return order.id == request.body.productId
+    })
+    if(existingItem) {
+        existingItem.quantity += 1
     } else {
-       return response.writehead(401, 'user not logged in').end()
+        var addProduct = Object.assign({}, product)
+        addProduct.quantity = request.body.quantity || 1
+        user.cart.push(addProduct)
     }
-    if(currentToken){
-        var user = users.find(person =>{
-            return person.login.username == currentToken.userName
-        })
-    } else {
-        return response.writehead(401, 'User not found').end();
-    }
-    
-    var addProduct = Object.assign({}, product)
-    addProduct.quantity = request.body.quantity || 1
-    user.cart.push(addProduct)
     response.end(JSON.stringify(user.cart))
+    } else {
+        return response.writeHead(401).end()
+    }
 })
 
 myRouter.post('/api/me/cart/:productid', function (request, response) {
     //use product id to find the product in user's cart
-    if(request.headers.token){
-        var currentToken = accessTokens.find(existingToken =>{
-            return existingToken.token == request.headers.token
-        })
-    } else {
-       return response.writehead(401, 'user not logged in').end()
-    }
-    if(currentToken){
-        var user = users.find(person =>{
-            return person.login.username == currentToken.userName
-        })
-    } else {
-        return response.writehead(401, 'User not found').end();
-    }
-
-    if(request.body.quantity && request.body.quantity > 0) {
+    // if(request.headers.token){
+    //     var currentToken = accessTokens.find(existingToken =>{
+    //         return existingToken.token == request.headers.token
+    //     })
+    // } else {
+    //    return response.writehead(401, 'user not logged in').end()
+    // }
+    // if(currentToken){
+    //     var user = users.find(person =>{
+    //         return person.login.username == currentToken.userName
+    //     })
+    // } else {
+    //     return response.writehead(401, 'User not found').end();
+    // }
+    user = tokenCheck(request.headers.token)
+    if(user && request.body.quantity && request.body.quantity > 0) {
         user.cart.forEach(cartProduct =>{
             if(cartProduct.id == request.params.productid){
                 cartProduct.quantity = request.body.quantity
@@ -172,26 +183,29 @@ myRouter.delete('/api/me/cart/:productid', function (request, response) {
     //Use user cart to get productid to match the params.product.id
     //filter out the produc that i do not want
     //reassign the new array to user cart
-    if(request.headers.token){
-        var currentToken = accessTokens.find(existingToken =>{
-            return existingToken.token == request.headers.token
-        })
-    } else {
-       return response.writehead(401, 'user not logged in').end()
-    }
-    if(currentToken){
-        var user = users.find(person =>{
-            return person.login.username == currentToken.userName
-        })
-    } else {
-        return response.writehead(401, 'User not found').end();
-    }
+    // if(request.headers.token){
+    //     var currentToken = accessTokens.find(existingToken =>{
+    //         return existingToken.token == request.headers.token
+    //     })
+    // } else {
+    //    return response.writehead(401, 'user not logged in').end()
+    // }
+    // if(currentToken){
+    //     var user = users.find(person =>{
+    //         return person.login.username == currentToken.userName
+    //     })
+    // } else {
+    //     return response.writehead(401, 'User not found').end();
+    // }
+    user = tokenCheck(request.headers.token)
+    if(user){
     var newCart = user.cart.filter(cartItem =>{
         return cartItem.id != request.params.productid
     })
     user.cart = newCart
 
     response.end(JSON.stringify(user.cart))
+}
 })
 myRouter.get('/api/products', (request, response) => {
     console.log('Hi!')
