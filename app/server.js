@@ -13,6 +13,7 @@ var products = [];
 var user = {};
 var users = [];
 var brands = [];
+var cart = [];
 
 
 
@@ -73,5 +74,41 @@ myRouter.post('/api/me/products/:productId/add', function(request,response) {
     })
     user.addedProducts.push(product); 
     response.end();
-  });
+});
+
+// Only managers can update a store's issues
+myRouter.post('/api/stores/:storeId/issues', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.end();
+  } else {
+    // Verify that the store exists to know if we should continue processing
+    let store = stores.find((store) => {
+      return store.id == request.params.storeId;
+    });
+    if (!store) {
+      // If there isn't a store with that id, then return a 404
+      response.writeHead(404, "That store cannot be found", CORS_HEADERS);
+      response.end();
+      return;
+    }
+
+    // Check if the current user has access to the store
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+    // Only if the user has access to that store do we return the issues from the store
+    if (user.storeIds.includes(request.params.storeId) && (user.role == "ADMIN" || user.role == "MANAGER" )) {
+      store.issues = request.body;
+      response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+      response.end();
+    } else {
+      response.writeHead(403, "You don't have access to that store", CORS_HEADERS);
+      response.end();
+      return;
+    }
+  }
+});
   
