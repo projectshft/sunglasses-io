@@ -89,7 +89,12 @@ myRouter.get('/brands', function(request, response){
 });
 
 //get all the products 
-
+myRouter.get('/products', function(request,response){
+  response.writeHead(200, {'Content-type': 'text/plain/n'});
+  response.write('These are our products\n');
+  response.write(`products: ${productNames}\n`);
+  response.end('Thank you for shopping with us.');
+});
 
 //sign in page
 
