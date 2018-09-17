@@ -1,4 +1,4 @@
-var https = require('https');
+var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
@@ -8,6 +8,7 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 const defaultProductReturnCount = 10;
+const defaultCountOfCartItem = 1;
 var brands = [];
 var products = {};
 var users = [];
@@ -17,7 +18,7 @@ let user = {};
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-https.createServer(function (request, response) {
+http.createServer(function (request, response) {
     response.writeHead(200, { 'Content-Type': 'application/json' });
     myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, (error) => {
@@ -73,31 +74,36 @@ myRouter.get('/api/brands/:id/products', function(request,response) {
 
 // return all items in user's cart
 myRouter.get('/api/me/cart', function(request,response) {
-    response.end(JSON.stringify(user.cart_items));
+    response.end(JSON.stringify(user.cart));
 });
 
 // post all items to cart?
 myRouter.post('/api/me/cart', function(request,response) {
-    // ?????
+    let addProduct = products.find((product)=> {
+        return product.id == request.params.productId
+      })
+      // add item with correct productId to user's cart
+      user.cart.push(addProduct); 
+      response.end();
 });
 
 myRouter.delete('/api/me/cart/:productId', function(request,response) {
     let deleteProduct = products.find((product)=> {
         return product.id == request.params.productId
       })
-      // remove the 'deleteProduct' from cart_items
-      user.cart_items.splice(1, deleteProduct); //remove one item, deleteProduct
+      // remove the 'deleteProduct' from cart
+      user.cart.splice(1, deleteProduct); //remove one item, deleteProduct
       response.end();
 });
 
 // find product in products array and add to user's cartItems
 myRouter.post('/api/me/cart/:productId', function(request,response) {
-    let addProduct = products.find((product)=> {
-        return product.id == request.params.productId
-      })
-      // add item with correct productId to user's cart
-      user.cart_items.push(addProduct); 
-      response.end();
+    let userCart = users.find((user) => {
+        let userCartItems = user.cart
+
+        return userCart
+    })
+
 });
 
 // Login call

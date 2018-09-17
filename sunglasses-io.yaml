@@ -125,6 +125,8 @@ paths:
       responses:
         '200':
           description: Cart contents returned successfully
+          schema:
+            $ref: '#/definitions/User'
         default:
           description: Unexpected error 
           schema:
@@ -136,7 +138,7 @@ paths:
       description: |
         Post to the user's cart
       parameters:
-        - name: id
+        - name: cart_items
           in: path
           description: Id of the product to post
           required: true
@@ -239,9 +241,9 @@ definitions:
   User:
     type: object
     properties:
-      productId: // this should not be here!!! ???
-        type: integer
-        description: The contents of a user's cart
+      cart_items: 
+        type: array
+        description: array of items in user's cart
       first_name:
         type: string
         description: User firstname
