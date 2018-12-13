@@ -34,13 +34,13 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /glasses/{id}:
+  /glasses/{productId}:
     get:
       summary: Individual sunglasses
       description: | 
         The Sunglasses endpoint allows you to access a list of sunglasses, and hopeully will let you query based on category or other properties
       parameters: 
-        - name: id
+        - name: productId
           in: path
           required: true
           type: integer
@@ -67,13 +67,13 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Category'
-  /categories/{id}:
+  /categories/{categoryId}:
     get:
       summary: Individual category object
       description: |
         Allows you to access an individual category/brand name
       parameters: 
-        - name: id
+        - name: categoryId
           type: integer
           format: int32
           required: true
@@ -81,7 +81,6 @@ paths:
           description: Unique Category ID
       tags:
         - Categories
-
       responses:
         '200':
           description: A single category object
@@ -91,13 +90,13 @@ paths:
           description: Unexpected Error
           schema: 
             $ref: '#/definitions/Error'
-  /categories/{id}/products:
+  /categories/{categoryId}/products:
     get: 
       summary: An array of sunglasses of a certain category
       description: |
         Allows you to retrieve a list of suglasses according to a specific category/brand name
       parameters:
-        - name: id
+        - name: categoryId
           type: integer
           format: int32
           required: true
@@ -116,114 +115,72 @@ paths:
           description: Unexpected Error
           schema:
             $ref: '#/definitions/Error'
-            
-  /me:
+  /me/cart:
     get:
-      summary: User Profile
-      description: >-
-        The User Profile endpoint returns information about the Uber user that
-        has authorized with the application.
-      tags:
-        - User
-      responses:
-        '200':
-          description: Profile information for a user
-          schema:
-            $ref: '#/definitions/User'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me/goals/{id}/accept:
-    post:
-      summary: Accept a Goal
+      summary: User Cart
       description: |
-        This endpoint allows you accept a given goal
-      parameters:
-        - name: id
-          in: path
-          description: The id of the goal to accept
-          required: true
-          type: string
+        Returns the users cart as an array of products
       tags:
-        - User
+        - Cart
       responses:
         '200':
-          description: Acceptance is successful
+          description: Cart information for the signed in user
+          schema:
+            $ref: '#/definitions/Cart'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/goals/{id}/achieve:
-    post:
-      summary: Achieve a Goal
+    post: 
+      summary: Add to cart
       description: |
-        This endpoint allows you achieve a given goal
-      parameters:
-        - name: id
-          in: path
-          description: The id of the goal to achieve
-          required: true
-          type: string
-      tags:
-        - User
+        Allows a user to add a product into their cart 
+      tags: 
+        - Cart
       responses:
         '200':
-          description: Achievement is successful
+          description: Item has been added to the user's cart
         default:
-          description: Unexpected error
+          description: An unexpected error has occured
           schema:
             $ref: '#/definitions/Error'
-  /me/goals/{id}/challenge/{userId}:
+  /me/cart/{productID}:
     post:
-      summary: Challenge a Goal
+      summary: Update cart item
       description: |
-        This endpoint allows you challenge a user for given goal
+        Allows a user to update quantities in the cart
+      tags: 
+        - Cart
       parameters:
-        - name: id
-          in: path
-          description: The id of the goal to achieve
+        - name: productID
+          description: Unique Identifier for the product
           required: true
-          type: string
-        - name: userId
+          type: integer
+          format: int32
           in: path
-          description: The id user to challenge
-          required: true
-          type: string
-      tags:
-        - User
       responses:
-        '200':
-          description: Challenge is successful
+        200:
+          description: Quantity has been updated
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me/goals/{id}/gift/{userId}:
-    post:
-      summary: Gift a Goal
+          description: an unexpected error has occured
+    delete: 
+      summary: Remove cart item
       description: |
-        This endpoint allows you gift a given goal
+        Allows the user to remove the item from the cart
+      tags: 
+        - Cart
       parameters:
-        - name: id
-          in: path
-          description: The id of the goal to gift
+        - name: productID
+          description: Unique Identifier for the product
           required: true
-          type: string
-        - name: userId
+          type: integer
+          format: int32
           in: path
-          description: The id user to gift the goal to
-          required: true
-          type: string
-      tags:
-        - User
       responses:
-        '200':
-          description: Achievement is successful
+        200:
+          description: Item has been removed successfully
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          description: an unexpected error has occured
 definitions:
   Sunglasses:
     type: object
@@ -262,30 +219,19 @@ definitions:
       name:
         type: string
         description: The name of the category (brand name)
-  User:
-    type: object
-    properties:
-      first_name:
-        type: string
-        description: First name of the Uber user.
-      last_name:
-        type: string
-        description: Last name of the Uber user.
-      email:
-        type: string
-        description: Email address of the Uber user
-      acceptedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      achievedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      giftedGoals:
-        items:
-          $ref: '#/definitions/Goal'    
-      challengedGoals:
-        items:
-          $ref: '#/definitions/Goal'        
+  Cart:
+    type: array
+    items:
+      type: object
+      properties:
+        product:
+          type: object
+          $ref: '#/definitions/Sunglasses'
+        quantity:
+          type: integer
+          format: int32
+          description: Quantity of product in cart (max 1000)
+          example: 50
   Error:
     type: object
     properties:
