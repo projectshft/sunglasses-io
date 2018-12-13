@@ -1,0 +1,339 @@
+swagger: '2.0'
+info:
+  title: Sunglasses I/O API
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Products
+      description: |
+        The Products endpoint allows you to search products based on different filters such as brand as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to search specific brands of sunglasses.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404':
+          description: Brand not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{brandId}/products:
+    get:
+      tags:
+        - Brands
+      summary: Brand products
+      description: |
+        This endpoint allows you to search specific products by brand.
+      parameters:
+        - name: brandId
+          in: path
+          description: Unique identifier of sunglasses brand
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: An array of products by brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '401':
+          description: Invalid brand ID
+        '404':
+          description: No products found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+        - Login
+      consumes: [multipart/form-data]
+      summary: Login a user
+      description: |
+        The login endpoint authenticates a user to use the application.
+      parameters: 
+        - name: username
+          in: formData
+          description: User's username
+          required: true
+          type: string
+        - name: password
+          in: formData
+          description: User's password
+          required: true
+          type: string
+      responses:
+        '200':
+          description: User successfully logged in
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Invalid username or password
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      tags:
+        - Cart
+      summary: User cart
+      description: |
+        This endpoint allows you to access an authenticated user's cart.
+      responses:
+        '200':
+          description: User cart success
+        '400':
+          description: User not logged in
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - Cart
+      summary: Add to Cart
+      description: |
+        This endpoint allows you to add products to an authenticated user's cart
+      parameters:
+        - name: productId
+          in: query
+          description: Unique identifier of product user would like to add to cart.
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Successfully added product to cart
+        '400':
+          description: User not logged in
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    post:
+      tags: 
+        - Cart
+      consumes: [multipart/form-data]
+      summary: Increase Product Quantity
+      description: |
+        This endpoint allows you to increase the quantity of a product within an authenticated user's cart.
+      parameters:
+        - name: productId
+          in: path
+          description: Unique identifier of product
+          required: true
+          type: integer
+          format: int32
+        - name: quantity
+          in: formData
+          description: The quantity of product a user would like
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Achievement is successful
+        '400':
+          description: User not logged in
+        '401':
+          description: Invalid product ID
+        '404':
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Cart
+      summary: Delete Product
+      description: |
+        This endpoint allows you to increase the quantity of a product within an authenticated user's cart.
+      parameters:
+        - name: productId
+          in: path
+          description: Unique identifier of product
+          required: true
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Invalid product ID
+        '404':
+          description: Product not found
+          
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Unique identifier for the product.
+      brandId:
+        type: integer
+        format: int32
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of the product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the product.
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Pictures of the product.
+  Brand:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Unique identifier given to the brand.
+      name:
+        type: string
+        description: The name of the brand.
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the user.
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+        description: Shopping cart of the user.
+      name:
+        description: The user's name.
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        description: The user's location.
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: string
+      email:
+        type: string
+        description: Email address of the user
+      login:
+        description: The user's login information. THIS WOULD NOT BE OK IN A REAL-WORLD APPLICATION!!!
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        description: The user's date of birth.
+      registered:
+        type: string
+        description: The date/time when the user registered.
+      phone:
+        type: string
+        description: The user's main phone number.
+      cell:
+        type: string
+        description: The user's cellular phone number.
+      picture:
+        description: Pictures of the user
+        type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+        description: The user's nationality.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
