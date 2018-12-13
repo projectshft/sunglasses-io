@@ -1,0 +1,378 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is an API to support sunglasses.io.
+  version: 1.0.0
+  title: Sunglasses Store
+  contact:
+    email: sunglassesarecool@sunglasses.io
+host: sunglasses.io
+basePath: /api
+schemes:
+  - http
+produces:
+  - application/json
+paths:
+  '/brands':
+    get:
+      tags:
+        - Brands
+      summary: Get a list of all brands in the store.
+      description: 'returns an array of all brands in the store'
+      operationId: getBrands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/brands/{id}/products':  
+     get:
+      tags:
+        - Brands
+      summary: Get a list of all products by brand.
+      description: 'Returns an array of all products in the store in a specific brand.'
+      operationId: getProductsByBrand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to display products from
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products by brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/products':  
+     get:
+      tags:
+        - Products
+      summary: Get a list of all products.
+      description: 'Returns all products in the store. Can be limited by a query string or a return limit. Default order is by increasing price.'
+      operationId: getProducts
+      parameters:
+        - name: search
+          in: query
+          description: A query string to match against the product name.
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Limits the number of returned results to the provided number.
+          required: false
+          type: number
+          format: int32
+        - name: offset
+          in: query
+          description: Offsets the returned results by the given number. Useful in conjunction with limit.
+          required: false
+          type: number
+          format: int32
+      responses:
+        '200':
+          description: An array of products.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/login':  
+     post:
+      tags:
+        - Login
+      summary: Login a user.
+      description: 'Takes the user information and authenticates them.'
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user's username.
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The user's password in clear text
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: calls per hour allowed by the user
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+        '400':
+          description: Invalid username/password supplied
+  '/me/cart':  
+    get:
+      tags:
+        - Cart
+      summary: Get current items in logged in user's cart.
+      description: 'Returns an array of all of the products currently in the user cart, along with their quantities.'
+      operationId: getCartItems
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Authentication:
+              type: string
+              description: User's access token
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+      security:
+        - api_key: []
+    post:
+      tags:
+        - Cart
+      summary: Adds a new item to the user's cart.
+      description: 'Adds a new item to the user cart'
+      operationId: addCartItem
+      parameters:
+        - name: id
+          in: query
+          description: The id of the product that the user wants to add to the cart.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Authentication:
+              type: string
+              description: User's access token
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+      security:
+        - api_key: []
+  '/me/cart/{productId}':
+    delete:
+      tags:
+        - Cart
+      summary: Delete an item from the user's cart.
+      description: 'Delete the selected item from the user cart'
+      operationId: deleteCartItem
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product that the user wants to delete.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Authentication:
+              type: string
+              description: User's access token
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+      security:
+        - api_key: []
+    post:
+      tags:
+        - Cart
+      summary: Update an item quantity in the user's cart.
+      description: 'Update the item quantity in the user cart'
+      operationId: updateCartItem
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product that the user wants to update.
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          description: The requested new quantity of the item.
+          required: true
+          type: number
+          format: int32
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Authentication:
+              type: string
+              description: User's access token
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+      security:
+        - api_key: []
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      brandId:
+        type: string
+        description: The id of the brand this product belongs to.
+      description:
+        type: string
+        description: Description of product.
+      name:
+        type: string
+        description: The name of the product
+      price:
+        type: integer
+        format: int32
+        description: Price of the product.
+      imageURL:
+        type: array
+        items: 
+          type: string
+          description: URLs for multiple images
+        description: An array of image URLs
+      quantity:
+        type: integer
+        format: int32
+        description: Null if product is not in user's cart. Otherwise, tracks the total quantity of the item in the cart. 
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the user.
+      cart:
+        type: array
+        items: 
+          $ref: '#/definitions/Product'
+        description: Items in the user's cart.
+      name:
+        type: object
+        properties: 
+          title: 
+            type: string
+            description: User's title.
+          first: 
+            type: string
+            description: User's first name.
+          last:
+            type: string
+            description: User's last name.
+      location: 
+        type: object 
+        properties:
+          street:
+            type: string
+            description: User's street address.
+          city:
+            type: string
+            description: User's city.
+          state:
+            type: string
+            description: User's state.
+          postcode:
+            type: string
+            description: User's postcode.
+      email:
+        type: string
+        description: User's email.
+      login:
+        type: object
+        properties:
+          username:
+            type: string 
+            description: User's username
+          password: 
+            type: string 
+            description: User's password
+          salt:
+            type: string 
+            description: User's salt
+          md5:
+            type: string 
+            description: User's md5
+          sha1:
+            type: string 
+            description: User's sha1
+          sha256:
+            type: string 
+            description: User's sha256
+      dob: 
+        type: string
+        description: User's date of birth in format YYYY-MM-DD HH:MM:SS.
+      phone: 
+        type: string
+        description: User's phone in format ###-###-####.
+      cell: 
+        type: string
+        description: User's cell in format ###-###-####.
+      picture: 
+        type: object
+        properties:
+          large:
+            type: string
+            description: Large photo URL.
+          medium: 
+            type: string
+            description: Medium photo URL.
+          thumbnail: 
+            type: string
+            description: Thumbnail photo URL.
+      nat:
+        type: string
+        description: Two-letter country code indicating user's nationality.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
