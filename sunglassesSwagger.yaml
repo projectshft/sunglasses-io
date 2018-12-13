@@ -1,0 +1,298 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io
+  description: Finally fix that ugly mug
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /glasses:
+    get:
+      summary: List of sunglasses
+      description: |
+         The Sunglasses endpoint allows you to access a list of sunglasses, and hopeully will let you query based on category or other properties
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Glasses
+      responses:
+        '200':
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sunglasses'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /glasses/{id}:
+    get:
+      summary: Individual sunglasses
+      description: | 
+        The Sunglasses endpoint allows you to access a list of sunglasses, and hopeully will let you query based on category or other properties
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int32
+          description: Unique sunglasses identifier
+      tags: 
+      - Glasses
+      responses:
+        '200':
+          description: A single sunglasses object
+          schema:
+            $ref: '#/definitions/Sunglasses'
+  /categories:
+    get: 
+      summary: List of categories for sunglasses
+      description: |
+        The categories endpoint allows you to access a list of categories of sunglasses
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: An array of sunglasses categories
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+  /categories/{id}:
+    get:
+      summary: Individual category object
+      description: |
+        Allows you to access an individual category/brand name
+      parameters: 
+        - name: id
+          type: integer
+          format: int32
+          required: true
+          in: path
+          description: Unique Category ID
+      tags:
+        - Categories
+
+      responses:
+        '200':
+          description: A single category object
+          schema:
+            $ref: '#/definitions/Category'
+        default:
+          description: Unexpected Error
+          schema: 
+            $ref: '#/definitions/Error'
+  /categories/{id}/products:
+    get: 
+      summary: An array of sunglasses of a certain category
+      description: |
+        Allows you to retrieve a list of suglasses according to a specific category/brand name
+      parameters:
+        - name: id
+          type: integer
+          format: int32
+          required: true
+          in: path
+          description: Unique category ID
+      tags:
+        - Glasses
+      responses: 
+        '200':
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sunglasses'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the Uber user that
+        has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/goals/{id}/accept:
+    post:
+      summary: Accept a Goal
+      description: |
+        This endpoint allows you accept a given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to accept
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/goals/{id}/achieve:
+    post:
+      summary: Achieve a Goal
+      description: |
+        This endpoint allows you achieve a given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/goals/{id}/challenge/{userId}:
+    post:
+      summary: Challenge a Goal
+      description: |
+        This endpoint allows you challenge a user for given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/goals/{id}/gift/{userId}:
+    post:
+      summary: Gift a Goal
+      description: |
+        This endpoint allows you gift a given goal
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to gift
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to gift the goal to
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Sunglasses:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Unique identifier for a pair of sunglasses.
+        example: 1
+      categoryId:
+        type: string
+        description: The id of the category/brand the sunglasses belong to.
+        example: 3
+      description:
+        type: string
+        description: Description of product.
+        example: The best glasses in the world
+      price:
+        type: integer
+        format: int32
+        description: The price of the pair of sunglasses (in $)
+        example: 50
+      imageURLs:
+        type: array
+        items:
+          type: string
+          example: https://image.sunglasses.io
+        description: A collection of URLs for the glasses
+  Category:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the category
+      name:
+        type: string
+        description: The name of the category (brand name)
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the Uber user.
+      last_name:
+        type: string
+        description: Last name of the Uber user.
+      email:
+        type: string
+        description: Email address of the Uber user
+      acceptedGoals:
+        items:
+          $ref: '#/definitions/Goal'
+      achievedGoals:
+        items:
+          $ref: '#/definitions/Goal'
+      giftedGoals:
+        items:
+          $ref: '#/definitions/Goal'    
+      challengedGoals:
+        items:
+          $ref: '#/definitions/Goal'        
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
