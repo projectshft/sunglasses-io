@@ -16,7 +16,16 @@ let user = [] //also may be the cart, unsure just yet
 fs.readFile('./initial-data/products.json', 'utf-8', (error, data) => {
   if(error) throw error;
   sunglasses = JSON.parse(data)
+});
+
+fs.readFile('./initial-data/brands.json', 'utf-8', (error, data) => {
+  if (error) throw error;
+  categories = JSON.parse(data)
 })
+fs.readFile("./initial-data/users.json", "utf-8", (error, data) => {
+  if (error) throw error;
+  users = JSON.parse(data);
+});
 
 //set up the router
 
@@ -41,8 +50,38 @@ myRouter.get('/', (req,res) => {
 })
 
 myRouter.get('/v1/sunglasses', (req, res) => {
-  res.writeHead(200, {'Content-type': 'application/json'})
-  res.end(JSON.stringify(sunglasses))
+  res.writeHead(200, { 'Content-type': 'application/json' })
+  res.end(JSON.stringify(sunglasses))  
+})
+
+myRouter.get('/v1/sunglasses/:id', (req,res) => {
+  let { id } = req.params
+  let product = sunglasses.find(products => {
+    return products.id == id
+  })
+  if(product){
+    res.writeHead(200, { "Content-type": "application/json" });
+    res.end(JSON.stringify(product))
+  } else {
+    res.writeHead(404, 'Sorry, no product was found matching that ID')
+    res.end()
+  }  
+})
+
+myRouter.get('/v1/categories', (req,res) => {
+  res.writeHead(200, { "Content-type": "application/json" });
+  res.end(JSON.stringify(categories))
+})
+myRouter.get('/v1/categories/:id', (req,res) => {
+  let { id } = req.params
+  let category = categories.find(catObjs => catObjs.id === id)
+  if(!category){
+    res.writeHead(404 ,'The requested resource does not exist')
+    res.end()
+  } else {
+    res.writeHead(200, { "Content-type": "application/json" })
+    res.end(JSON.stringify(category))
+  }
 })
 
 module.exports = server;
