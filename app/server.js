@@ -19,28 +19,26 @@ const router = Router();
 router.use(bodyParser.json());
 
 const server = http.createServer((request, response) => {
-   res.writeHead(200);
-   router(req, res, finalHandler(req, res));
+   response.writeHead(200);
+   router(request, response, finalHandler(request, response));
 });
 
 server.listen(PORT, err => {
-   if (err) throw err;
-   console.log(`server running on port ${PORT}`);
-   //populate brands
-   fs.readFile("initial-data/brands.json", "utf-8", (err, data) => {
-     if (err) throw err;
-     brands = JSON.parse(data);
-   });
-   //populate products
-   fs.readFile("initial-data/products.json", "utf-8", (err, data) => {
-     if (err) throw err;
-     products = JSON.parse(data);
-   });
-   //populate users
-   fs.readFile("initial-data/users.json", "utf-8", (err, data) => {
-     if (err) throw err;
-     users = JSON.parse(data);
-     //hardcoded user
-     user = users[0];
-   });
-})
+    if (err) throw err;
+    console.log(`server running on port ${PORT}`);
+    //populate brands
+    brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf8"));
+    //populate products
+    products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf8"));
+    //populate users
+    users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf8"));
+    //hardcoded user
+    user = users[0];
+});
+
+router.get("/api/brands", (request, response) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(JSON.stringify(brands));
+});
+
+module.exports = server
