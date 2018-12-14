@@ -5,6 +5,7 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 const fs = require('fs');
+const url = require('url');
 const CONTENT_HEADERS = {"Content-Type": "application/json"};
 const PORT = 3001;
 
@@ -52,9 +53,30 @@ myRouter.get('/api/brands/:id/products', (req,res) => {
   }
 }) 
 
+//account for different cases
 myRouter.get('/api/products', (req,res) => {
-  res.writeHead(200, CONTENT_HEADERS);
-  res.end(JSON.stringify(products));
+  const parsedUrl = url.parse(req.originalUrl);
+  let { search } = queryString.parse(parsedUrl.query);
+  let productsToReturn = [];
+  if (search === undefined || search === "") {
+    productsToReturn  = products;
+    res.writeHead(200, CONTENT_HEADERS);
+    res.end(JSON.stringify(productsToReturn));
+  } else {
+      search = search.toUpperCase();
+      productsToReturn = products.filter(product => {
+        let productName = product.name.toUpperCase();
+        let productDescription = product.description.toUpperCase();
+        return (productName.includes(search) || productDescription.includes(search));
+      });
+    if (!productsToReturn) {
+      res.writeHead(404, "No products were found with that search");
+      res.end();
+    } else {
+      res.writeHead(200, CONTENT_HEADERS);
+      res.end(JSON.stringify(productsToReturn));
+    }
+  } 
 }) 
 
 myRouter.post('/api/login', (req,res) => {

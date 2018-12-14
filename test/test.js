@@ -75,25 +75,60 @@ describe('GET /api/products', () => {
     })
      it('should limit results to those with a query string', (done) => {
         chai.request(server)
-        .get('api/products?search=sugar')
+        .get('/api/products?search=Black')
         .end((err, res) => {
             res.should.have.status(200)
-
-        }
+            res.body.should.be.an('array')
+            res.body.length.should.be.eql(1)
+            done();
+        })
      })
 
-//     it('returns all products if query is missing', done => {
+    it('returns all products if query is empty', done => {
+    chai.request(server)
+    .get('/api/products?search=')
+    .end((err, res) => {
+        res.should.have.status(200)
+        res.body.should.be.an('array')
+        res.body.length.should.be.eql(testProducts.length)
+        done();
+    })
+    })
+
+    it('allows search to be made in different letter casing', done => {
+        chai.request(server)
+        .get('/api/products?search=BLAck')
+        .end((err, res) => {
+            res.should.have.status(200)
+            res.body.should.be.an('array')
+            res.body.length.should.be.eql(1)
+            done();
+        })
+        })
+    })
+
+describe('POST /api/login', () => {
+    it('should POST a login given an accurate username and password', done => {
+        
+    })
+
+    it('should require both username and password before attempting to log in', done => {
+        
+    })
+
+    it('should not allow login with an inaccurate name and password', done => {
+        
+    })
+
+})
+    
+
+
+// describe('GET /api/me/cart', () => {
+//     it('should GET all the products in the logged in user\'s cart with their quantities' , (done) => {  
 
 //     })
 // })
-
-// // 
-
-// // describe('GET /api/me/cart', () => {
-// //     it('should GET all the products in the logged in user\'s cart with their quantities' , (done) => {  
-
-// //     })
-// // })
 
 
 // // describe('POST /api/me/cart', () => {
@@ -105,7 +140,7 @@ describe('GET /api/products', () => {
 
 // //     })
 
-// //     it('should adjust the quanitity on that item to 1' , (done) => {  
+// //     it('should adjust the quantity on that item to 1' , (done) => {  
 
 // //     })
 // // })
