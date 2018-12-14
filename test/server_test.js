@@ -40,4 +40,15 @@ describe("/GET brands", () => {
         done();
       });
     });
+    it("should return 404 error code for invalid brand request", done => {
+      chai
+        .request(server)
+        .get('/api/brands/6/products')
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(404);
+          expect("Content-Type", "application/json");
+          done();
+        });
+      });
   });
