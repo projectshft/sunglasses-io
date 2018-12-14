@@ -22,6 +22,9 @@ const initialData = () => {
             };
         } 
 
+const compare = (a,b) => a.price > b.price;
+
+
 
 module.exports = {initialData};
 

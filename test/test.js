@@ -6,6 +6,9 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
+const compare = (a,b) => a.price > b.price;
+
+
 describe('GET /api/brands', () => {
     it('should GET all the brands', (done) => {
         let testBrands;
@@ -42,11 +45,23 @@ describe('GET /api/brands/:id/products', () => {
     })
 })
 
-// describe('GET /api/products', () => {
-//     it('should GET all the products in order by decreasing price', (done) => {  
-
-//     })
-// })
+describe('GET /api/products', () => {
+    it('should GET all the products', (done) => {  
+        let testProducts;
+        fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
+            if (error) throw error;
+            testProducts = JSON.parse(data).sort(compare);
+        });
+        chai.request("http://localhost:3001")
+        .get('/api/products')
+        .end((err, res) => {
+         res.should.have.status(200)
+         res.body.should.be.an('array')
+         res.body.length.should.be.eql(testProducts.length);
+        done();
+      })
+    })
+})
 
 // describe('POST /api/login', () => {
 //     it('should POST a username and password and allow login if valid', (done) => {  

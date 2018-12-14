@@ -12,8 +12,16 @@ const PORT = 3001;
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-//
+//initial state variables
 let brands, products, users;
+
+//for sorting products by price
+const compare = (a,b) => {
+  console.log('first price', a.price);
+  console.log('second price', b.price);
+  return Number(a.price) > Number(b.price);
+}
+
 
 http.createServer(function (req, res) {
   myRouter(req, res, finalHandler(req, res))
@@ -51,7 +59,8 @@ myRouter.get('/api/brands/:id/products', (req,res) => {
 }) 
 
 myRouter.get('/api/products', (req,res) => {
-
+  res.writeHead(200, CONTENT_HEADERS);
+  res.end(JSON.stringify(products));
 }) 
 
 myRouter.post('/api/login', (req,res) => {
