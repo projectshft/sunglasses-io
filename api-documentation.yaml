@@ -60,7 +60,7 @@ paths:
       tags:
         - Products
       summary: Get a list of all products.
-      description: 'Returns all products in the store. Can be limited by a query string or a return limit. Default order is by increasing price.'
+      description: 'Returns all products in the store. Can be limited by a query string or a return limit. Default order is by decreasing price.'
       operationId: getProducts
       parameters:
         - name: search
