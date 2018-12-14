@@ -22,28 +22,17 @@ const compare = (a,b) => {
   return Number(a.price) > Number(b.price);
 }
 
-
-http.createServer(function (req, res) {
+const server = http.createServer(function (req, res) {
   myRouter(req, res, finalHandler(req, res))
-}).listen(PORT, error => {
+});
+
+server.listen(PORT, error => {
   if (error) {
     return console.log("Error on Server Startup: ", error);
   }
-  fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
-    if (error) throw error;
-    brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded`);
-  });
-  fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
-    if (error) throw error;
-    users = JSON.parse(data);
-    console.log(`Server setup: ${users.length} users loaded`);
-  });
-  fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
-    if (error) throw error;
-    products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} products loaded`);
-    });
+  brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf8"));
+  users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf8"));
+  products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf8"));
   console.log(`Server is listening on ${PORT}`);
 });
 
@@ -53,9 +42,14 @@ myRouter.get('/api/brands', (req,res) => {
 }) 
 
 myRouter.get('/api/brands/:id/products', (req,res) => {
-  res.writeHead(200, CONTENT_HEADERS);
   const productsByBrand = products.filter(product => product.brandId == req.params.id);
-  res.end(JSON.stringify(productsByBrand));
+  if (productsByBrand.length > 0) {
+    res.writeHead(200, CONTENT_HEADERS);
+    res.end(JSON.stringify(productsByBrand));
+  } else {
+    res.writeHead(404, "Brand ID not found");
+    res.end();
+  }
 }) 
 
 myRouter.get('/api/products', (req,res) => {
@@ -83,4 +77,4 @@ myRouter.post('/api/me/cart/:productId', (req,res) => {
 
 })
 
-module.exports = myRouter;
+module.exports = server;
