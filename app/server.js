@@ -30,24 +30,8 @@ const server = http.createServer((req, res) => {
 
 
 router.get("/api/brands", (req, res) => {
-    const parsedUrl = url.parse(request.originalUrl);
-    const { query, sort } = querystring.parse(parsedUrl.query);
-    let brandsToReturn = [];
-    if (query !== undefined) {
-        brandsToReturn = brands.filter(brand => brand.description.includes(query));
-
-        if (!brandsToReturn) {
-            res.writeHead(404, "There aren't any brands to return");
-            return res.end();
-        }
-    } else {
-        brandsToReturn = brands;
-    }
-    // if (sort !== undefined) {
-    //     brandsToReturn.sort((a, b) => a[sort] - b[sort]);
-    // }
     res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify(brandsToReturn));
+    return res.end(JSON.stringify(brands));
 })
 
 module.exports = server;
