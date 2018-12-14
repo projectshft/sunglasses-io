@@ -8,6 +8,15 @@ chai.use(chaiHTTP);
 
 //TDD!
 
+let singleGlasses ={
+  "id": "9",
+  "categoryId": "4",
+  "name": "Sugar",
+  "description": "The sweetest glasses in the world",
+  "price": 125,
+  "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}
+
 //Sunglasses endpoints
 describe('sunglasses', () => {
   describe('/get sunglasses' , () => {
@@ -17,6 +26,7 @@ describe('sunglasses', () => {
         .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('array')
+          expect(res.body).to.include.deep.members([singleGlasses])
         done()
       })
     })
@@ -29,11 +39,7 @@ describe('sunglasses', () => {
       .end((err, res) => {
         res.should.have.status(200)
         res.body.should.be.an('object')
-        res.body.should.have.property('id');
-        res.body.should.have.property('categoryId');
-        res.body.should.have.property('price');
-        res.body.should.have.property('description');
-        res.body.should.have.property('imageUrls')
+        res.body.should.have.all.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls')
         done()
       })
     })
@@ -56,6 +62,9 @@ describe('categories', () => {
       .end((err, res) => {
         res.should.have.status(200)
         res.body.should.be.an('array')
+        expect(res.body).to.include.deep.members([{
+          "id": "3",
+          "name": "Levi's"}])
         done()
       })
     })
@@ -66,8 +75,7 @@ describe('categories', () => {
       .get(`/v1/categories/3`)
       .end((err, res) => {
         res.should.be.an('object')
-        res.body.should.have.property('id')
-        res.body.should.have.property('name')
+        res.body.should.have.all.keys('id','name')
         done()
       })
     })
@@ -76,6 +84,22 @@ describe('categories', () => {
       .get(`/v1/categories/notACategory`)
       .end((err,res) => {
         res.should.have.status(404)
+        done()
+      })
+    })
+  })
+  describe('/get/categories/:id/products', () => {
+    it('should return all products matching that category', done => {
+      let id = 4
+      chai.request(server)
+      .get(`/v1/categories/${id}/products`)
+      .end((err,res) => {
+        let results = res.body[0]
+        res.should.have.status(200)
+        res.body.should.be.an('array')
+        results.should.be.an('object')
+        results.should.have.all.keys('id','categoryId','name','description','price','imageUrls')
+        expect(res.body).to.include.deep.members([singleGlasses]);
         done()
       })
     })

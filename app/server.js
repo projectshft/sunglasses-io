@@ -6,6 +6,8 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+const contentTypeJSON = {'Content-Type': 'application/json'}
+
 //variables to act as a 'database'
 let sunglasses = [];
 let categories = [];
@@ -50,7 +52,7 @@ myRouter.get('/', (req,res) => {
 })
 
 myRouter.get('/v1/sunglasses', (req, res) => {
-  res.writeHead(200, { 'Content-type': 'application/json' })
+  res.writeHead(200, contentTypeJSON)
   res.end(JSON.stringify(sunglasses))  
 })
 
@@ -60,7 +62,7 @@ myRouter.get('/v1/sunglasses/:id', (req,res) => {
     return products.id == id
   })
   if(product){
-    res.writeHead(200, { "Content-type": "application/json" });
+    res.writeHead(200, contentTypeJSON);
     res.end(JSON.stringify(product))
   } else {
     res.writeHead(404, 'Sorry, no product was found matching that ID')
@@ -69,7 +71,7 @@ myRouter.get('/v1/sunglasses/:id', (req,res) => {
 })
 
 myRouter.get('/v1/categories', (req,res) => {
-  res.writeHead(200, { "Content-type": "application/json" });
+  res.writeHead(200, contentTypeJSON);
   res.end(JSON.stringify(categories))
 })
 myRouter.get('/v1/categories/:id', (req,res) => {
@@ -79,9 +81,27 @@ myRouter.get('/v1/categories/:id', (req,res) => {
     res.writeHead(404 ,'The requested resource does not exist')
     res.end()
   } else {
-    res.writeHead(200, { "Content-type": "application/json" })
+    res.writeHead(200, contentTypeJSON)
     res.end(JSON.stringify(category))
   }
+})
+
+myRouter.get('/v1/categories/:id/products', (req, res) => {
+  let { id } = req.params
+  //to ensure it is a valid category
+  let category = categories.find(catObjs => catObjs.id === id)
+  if(!category){
+    res.writeHead(404, 'The requested resource does not exist')
+    res.end()
+  }
+  let filteredGlasses = sunglasses.filter(sunglasses => sunglasses.categoryId === id);
+  if(filteredGlasses.length === 0 ){
+    res.writeHead(200, "There are no sunglasses currently for that brand", contentTypeJSON)
+    res.end(JSON.stringify(filteredGlasses))
+  }
+  res.writeHead(200, contentTypeJSON)
+  res.end(JSON.stringify(filteredGlasses))
+
 })
 
 module.exports = server;
