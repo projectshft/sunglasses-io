@@ -109,15 +109,76 @@ describe('GET /api/products', () => {
 
 describe('POST /api/login', () => {
     it('should POST a login given an accurate username and password', done => {
-        
+        testUsername = testUsers[0].login.username;
+        testPassword = testUsers[0].login.password;
+        chai.request(server)
+        .post('/api/login')
+        .send({username: testUsername, password: testPassword})
+        .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.username.should.be.a('string');
+            res.body.token.should.be.a('string');
+            res.body.lastUpdated.should.be.a('string')
+            res.body.token.length.should.be.eql(16);
+            done();
+        })
     })
 
     it('should require both username and password before attempting to log in', done => {
-        
+        chai.request(server)
+        .post('/api/login')
+        .send({username: testUsername})
+        .end((err,res) => {
+            res.should.have.status(400);
+            res.body.should.be.empty;
+            done();
+        })
     })
 
-    it('should not allow login with an inaccurate name and password', done => {
-        
+    it('should not allow login with an inaccurate username', done => {
+        testUsername = testUsers[0].login.username;
+        chai.request(server)
+        .post('/api/login')
+        .send({username: testUsername, password: "Iwillfail"})
+        .end((err,res) => {
+            res.should.have.status(401);
+            res.body.should.be.empty;
+            done();
+        })
+    })
+
+    it('should not allow login with an inaccurate password', done => {
+        testPassword = testUsers[0].login.password;
+        chai.request(server)
+        .post('/api/login')
+        .send({username: "Notauser", password: testPassword})
+        .end((err,res) => {
+            res.should.have.status(401);
+            res.body.should.be.empty;
+            done();
+        })
+    })
+
+    it('works if user has already gotten an access token previously', done => {
+        testUsername = testUsers[0].login.username;
+        testPassword = testUsers[0].login.password;
+        chai.request(server)
+        .post('/api/login')
+        .send({username: testUsername, password: testPassword})
+        .end();
+        chai.request(server)
+        .post('/api/login')
+        .send({username: testUsername, password: testPassword})
+        .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.username.should.be.a('string');
+            res.body.token.should.be.a('string');
+            res.body.lastUpdated.should.be.a('string')
+            res.body.token.length.should.be.eql(16);
+            done();
+        })
     })
 
 })
