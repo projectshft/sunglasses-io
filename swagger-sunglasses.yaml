@@ -47,6 +47,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '404':
+          description: That brand does not exist
 
   /products:
     get:

@@ -6,6 +6,7 @@ var Router = require('router');
 var bodyParser  = require('body-parser');
 const url = require("url");
 var uid = require('rand-token').uid;
+const { findProductOrBrand } = require("./utils");
 
 // State holding variables
 let brands = [];
@@ -36,9 +37,25 @@ server.listen(PORT, err => {
     user = users[0];
 });
 
+//GET all brands from the store
 router.get("/api/brands", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
-  response.end(JSON.stringify(brands));
+  return response.end(JSON.stringify(brands));
+});
+
+//GET all products by brand id from the store
+router.get("/api/brands/:brandId/products", (request, response) => {
+  const { brandId } = request.params;
+  const brand = findProductOrBrand(brandId, brands);
+  if (!brand) {
+    response.writeHead(404, "That brand does not exist");
+    return response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const brandProducts = products.filter(
+    product => product.categoryId === brandId
+  );
+  return response.end(JSON.stringify(brandProducts));
 });
 
 module.exports = server
