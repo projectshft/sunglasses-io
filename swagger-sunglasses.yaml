@@ -1,0 +1,242 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: localhost:3001
+basePath: /api
+schemes:
+  - https
+securityDefinitions:
+  basicAuth:
+    type: basic
+paths:
+  /brands:
+    get:
+      tags:
+      - Brands
+      summary: An array of all brands in the store.
+      description: |
+        The Brands endpoint allows you to get all brands found in the store.
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/Brands'
+        '404':
+          description: Not found
+        
+  /brands/{id}/products:
+    get:
+      tags:
+      - Brands
+      summary: All the sunglasses for a brand.
+      description:
+        All of the sunglasses from a brand, where
+        the brand is matched by the "id" url parameter.
+      parameters:
+      - name: id
+        in: path
+        description: The brand id to select products only from that particular brand.
+        required: true
+        type: string
+      responses:
+        '200':
+          description: An array of product objects from a particular brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+
+  /products:
+    get:
+      tags:
+      - Products
+      summary: All products
+      description:
+        This endpoint allows you to search all sunglasses in the store.
+      parameters:
+      - name: query
+        in: query
+        description: Search query string
+        required: false
+        type: string
+      responses:
+        '200':
+          description: An array of products from the store.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+  /login:
+    post:
+      tags:
+      - User
+      security:
+      - basicAuth: []
+      description: Logs the user in.
+      parameters:
+        - name: email
+          in: query
+          description: The email for the user is used as a user name
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for login
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Authentication:
+              type: string
+              description: authentication token
+        '400':
+          description: Invalid username/password supplied
+  /me/cart:
+    get:
+      tags:
+      - User
+      security:
+      - basicAuth: []
+      summary: User's cart
+      description: |
+        Returns products from the logged-in user's cart.
+      responses:
+        '200':
+          description: Items and quantity stored in the cart.
+          schema:
+            $ref: '#/definitions/Cart'
+    post:
+      tags:
+      - User
+      security:
+      - basicAuth: []
+      summary: Add to User's cart
+      description: |
+        Adds a product to the user's cart by the products id.
+      parameters:
+        - name: productId
+          in: query
+          description: Product id
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: Product to be added to the cart.
+          required: true
+          schema:
+            $ref: '#/definitions/ProductInCart'
+      responses:
+       '405':
+        description: Invalid input       
+  /me/cart/{productId}:
+    delete:
+      tags:
+      - User
+      security:
+      - basicAuth: []
+      summary: Delete product from cart
+      description: |
+        Delete a product from the user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: Product id to delete
+          required: true
+          type: string
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Product not found
+    post:
+      tags:
+      - User
+      security:
+      - basicAuth: []
+      summary: Updates a product in cart
+      description: |
+        Updates the quantity of the product in the user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: Product id of the product in the cart.
+          required: true
+          type: string
+      responses:
+       '405':
+          description: Invalid input
+definitions:
+  Brands:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The brand id.
+        name:
+          type: string
+          description: The brand name.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a pair of sunglasses
+      categoryId:
+        type: string
+        description: The id of the category of sunglasses.
+      name:
+        type: string
+        description: The model name of the sunglasses.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the sunglasses in USD
+      imageURL:
+        type: array
+        items:
+          type: string
+          description: urls of the sunglasse's images
+  ProductInCart:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The specific id of the product.
+      name: 
+        type: string
+        description: The model name of the product.
+      price:
+        type: number
+        format: float
+        description: The price of the product
+      quantity:
+        type: number
+        format: int32
+        description: The quantity of the product selected to buy.
+  Cart:
+    type: array
+    items:
+      $ref: '#/definitions/ProductInCart'
+  User:
+    type: object
+    properties:
+      email:
+        type: string
+        description: Email address of the user, which as serves as the username.
+      password:
+        type: string
+        description: Password for logging in.
+      token:
+        type: string
+        description: The authentication token of the logged in user.
+      cart:
+        $ref: '#/definitions/Cart'
