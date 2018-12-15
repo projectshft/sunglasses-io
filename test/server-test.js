@@ -1,6 +1,7 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('../app/server');
+let server = require('../app/server').server;
+let currentUser = require('../app/server').currentUser;
 
 let should = chai.should();
 
@@ -113,6 +114,52 @@ describe('Sunglasses', () => {
         .send({})
         .end((err, res) => {
           res.should.have.status(401);
+          done();
+        });
+    });
+  });
+
+  describe('/POST cart/:productId', () => {
+    before(done => {
+      currentUser.cart = [
+        {
+          id: '1',
+          brandId: '1',
+          name: 'Superglasses',
+          description: 'The best glasses in the world',
+          price: 150,
+          imageUrls: [
+            'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+            'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+            'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+          ],
+          quantity: 2
+        }
+      ];
+      done();
+    });
+
+    // Update product quantity
+    it("should POST update to product in user's cart", done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/1')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .send({ quantity: 25 })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        });
+    });
+
+    it("should DELETE product in user's cart", done => {
+      chai
+        .request(server)
+        .del('/api/me/cart/1')
+        .end((err, res) => {
+          res.should.have.status(200);
           done();
         });
     });

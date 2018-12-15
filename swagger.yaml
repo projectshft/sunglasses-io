@@ -98,7 +98,7 @@ paths:
       summary: Login a user
       description: |
         The login endpoint authenticates a user to use the application.
-      parameters: 
+      parameters:
         - name: username
           in: formData
           description: User's username
@@ -160,7 +160,7 @@ paths:
             $ref: '#/definitions/Error'
   /me/cart/{productId}:
     post:
-      tags: 
+      tags:
         - Cart
       consumes: [multipart/form-data]
       summary: Increase Product Quantity
@@ -212,18 +212,16 @@ paths:
           description: Invalid product ID
         '404':
           description: Product not found
-          
+
 definitions:
   Product:
     type: object
     properties:
       id:
-        type: integer
-        format: int32
+        type: string
         description: Unique identifier for the product.
       brandId:
-        type: integer
-        format: int32
+        type: string
         description: The id of the brand this product belongs to.
       name:
         type: string
@@ -240,6 +238,10 @@ definitions:
         items:
           type: string
         description: Pictures of the product.
+      quantity:
+        type: integer
+        format: int32
+        description: Quantity of product in user's cart
   Brand:
     type: object
     properties:

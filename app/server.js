@@ -10,6 +10,7 @@ const uid = require('rand-token').uid;
 let brands = [];
 let products = [];
 let users = [];
+let currentUser = {};
 let accessTokens = [];
 const PORT = 3001;
 
@@ -111,8 +112,47 @@ router.post('/api/me/cart', (req, res) => {
     res.end();
   } else {
     currentUser.cart.push(product);
-    res.writeHead(200, { 'Content-Type': 'application:json' });
+
     res.end(JSON.stringify(product)); // return product added to cart
+  }
+});
+
+router.post('/api/me/cart/:productId', (req, res) => {
+  // Grab product from cart
+  let product = currentUser.cart.filter(
+    item => item.id === req.params.productId
+  );
+
+  if (!product) {
+    res.writeHead(401, 'No product selected');
+    res.end();
+  } else {
+    // Update user's cart
+    currentUser.cart.map(item => {
+      if (product.id === item.id) {
+        item.quantity = req.body.quantity;
+        return item;
+      }
+    });
+    res.writeHead(200, { 'Content-Type': 'application:json' });
+    res.end(JSON.stringify(product)); // Updated product
+  }
+});
+
+router.delete('/api/me/cart/:productId', (req, res) => {
+  // Grab product from cart
+  let product = currentUser.cart.filter(
+    item => item.id === req.params.productId
+  );
+
+  if (!product) {
+    res.writeHead(401, 'No product selected');
+    res.end();
+  } else {
+    // Delete product from cart
+    currentUser.cart.splice(currentUser.cart[req.params.productId], 1);
+    res.writeHead(200, { 'Content-Type': 'application:json' });
+    res.end();
   }
 });
 
@@ -175,4 +215,4 @@ router.post('/api/login', (req, res) => {
   }
 });
 
-module.exports = server;
+module.exports = { server, currentUser };
