@@ -41,8 +41,13 @@ const server = http
   .listen(PORT);
 
 router.get('/api/brands', (req, res) => {
-  res.writeHead(200, { 'Content-Type': 'application:json' });
+  res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(brands));
+});
+
+router.get('/api/products', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(products));
 });
 
 module.exports = server;
