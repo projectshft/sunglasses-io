@@ -77,4 +77,34 @@ describe('Sunglasses', () => {
         });
     });
   });
+
+  // Login
+  describe('/POST login', () => {
+    it('should login an existing user', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .send({ username: 'yellowleopard753', password: 'jonjon' })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('string'); // access token
+          done();
+        });
+    });
+
+    it('should NOT login a user with incorrect credentials', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .send({ username: 'yellowleopard753', password: 'wrongpassword' })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+  });
 });

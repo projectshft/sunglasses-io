@@ -13,6 +13,7 @@ let users = [];
 let accessTokens = [];
 const PORT = 3001;
 
+// Setup state
 fs.readFile('initial-data/brands.json', 'utf-8', (err, data) => {
   if (err) throw err;
   brands = JSON.parse(data);
@@ -28,6 +29,35 @@ fs.readFile('initial-data/users.json', 'utf-8', (err, data) => {
   users = JSON.parse(data);
   currentUser = users[0];
 });
+
+const failedLogins = {}; // username: 0
+
+const getFailedLogins = username => {
+  let numFails = failedLogins[username];
+  return numFails ? numFails : 0;
+};
+
+const setFailedLogins = (username, numFails) => {
+  failedLogins[username] = numFails;
+};
+
+const getValidTokenFromRequest = req => {
+  let parsedURL = require('url').parse(req.url, true);
+
+  if (parsedURL.query.accessToken) {
+    const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+    let accessToken = accessTokens.find(token => {
+      return (
+        token.token == parsedURL.query.accessToken &&
+        new Date() - token.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+
+    return accessToken ? accessToken : null;
+  } else {
+    return null;
+  }
+};
 
 // Setup router
 const router = Router();
@@ -72,6 +102,65 @@ router.get('/api/products', (req, res) => {
 router.get('/api/me/cart', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(currentUser.cart));
+});
+
+// Login route
+router.post('/api/login', (req, res) => {
+  // Make sure there is a username and password in the request
+  if (
+    req.body.username &&
+    req.body.password &&
+    getFailedLogins(req.body.username) < 3
+  ) {
+    // See if there is a user that has that username and password
+    let user = users.find(user => {
+      return (
+        user.login.username === req.body.username &&
+        user.login.password === req.body.password
+      );
+    });
+
+    if (user) {
+      // Reset number of fails
+      setFailedLogins(user.login.username, 0);
+
+      // Write the header because we know we will be returning successful at this point and that the response will be json
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+
+      // If we already have an existing access token, use that
+      let accessToken = accessTokens.find(token => {
+        return token.username === user.login.username;
+      });
+
+      if (accessToken) {
+        // Update the last updated value of the existing token so we get another time period before expiration
+        accessToken.lastUpdated = new Date();
+        res.end(JSON.stringify(accessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newToken = {
+          lastUpdated: new Date(),
+          token: uid(16),
+          username: user.login.username
+        };
+
+        accessTokens.push(newToken);
+        res.end(JSON.stringify(newToken.token));
+      }
+    } else {
+      // Increase number of failed logins
+      let currentFails = getFailedLogins(req.body.username);
+      setFailedLogins(req.body.username, (currentFails += 1));
+
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      res.writeHead(401, 'Invalid username or password');
+      res.end();
+    }
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    res.writeHead(400, 'Incorrectly formatted response');
+    res.end();
+  }
 });
 
 module.exports = server;
