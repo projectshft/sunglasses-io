@@ -188,7 +188,7 @@ paths:
         '401':
           description: 'Unable to access with current authentication - must log in again' 
         '404': 
-          description: Product id not found.
+          description: Cart id not found.
         default:
           description: Unexpected error
           schema:
@@ -206,7 +206,7 @@ paths:
           required: true
           type: string
         - name: quantity
-          in: query
+          in: body
           description: The requested new quantity of the item.
           required: true
           type: number
@@ -216,6 +216,8 @@ paths:
           description: successful operation
           schema:
             type: string
+        '400': 
+          description: 'Bad request, unable to process without a product ID being provided'
         '401':
           description: 'Unable to access with current authentication - must log in again' 
         '404':

@@ -233,26 +233,28 @@ describe('sunglasses.io tests for', () => {
       //add a product and then make sure it's there in the callback
       it('should GET all the products in the logged in user\'s cart' , done => {
         chai.request(server)
-        .post('/api/me/cart?productId=1')
+        .post('/api/me/cart')
         .set('x-authentication', accessToken)
+        .send({productId: 5})
         .then( () => { 
-        chai.request(server)
-        .get('/api/me/cart')
-        .set('x-authentication', accessToken)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.an('array')
-          res.body.length.should.eql(1);
-          done();
+          chai.request(server)
+          .get('/api/me/cart')
+          .set('x-authentication', accessToken)
+          .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array')
+            res.body.length.should.eql(1);
+            done();
+          })
         })
-      })
       })   
     })
 
     describe('POST /api/me/cart', () => {
       it('should fail to post if the request does not send a token in the headers' , (done) => {  
         chai.request(server)
-        .post('/api/me/cart?productId=1')
+        .post('/api/me/cart')
+        .send({productId: 5})
         .end((err,res) => {
           res.should.have.status(401);
           res.body.should.be.empty;
@@ -262,7 +264,8 @@ describe('sunglasses.io tests for', () => {
 
       it('should fail to post if the request sends an inaccurate access token' , (done) => {  
         chai.request(server)
-        .post('/api/me/cart?productId=1')
+        .post('/api/me/cart')
+        .send({productId: 5})
         .set("x-authentication", 'Iamafailingtoken')
         .end((err,res) => {
           res.should.have.status(401);
@@ -273,7 +276,8 @@ describe('sunglasses.io tests for', () => {
 
       it('should POST a selected product to the cart with quantity 1', done => {  
         chai.request(server)
-        .post('/api/me/cart?productId=1')
+        .post('/api/me/cart')
+        .send({productId: 5})
         .set("x-authentication", accessToken)
         .end((err,res) => {
           expect(err).to.be.null;
@@ -289,13 +293,15 @@ describe('sunglasses.io tests for', () => {
       it('should allow multiples of the same product, each with their own quantity' , (done) => {  
         let firstCartId;
         chai.request(server)
-        .post('/api/me/cart?productId=1')
+        .post('/api/me/cart')
+        .send({productId: 5})
         .set("X-Authentication",accessToken)
         .end((err,res) => {
             firstCartId = res.body.cartId;
         })
         chai.request(server)
-        .post('/api/me/cart?productId=1')
+        .post('/api/me/cart')
+        .send({productId: 5})
         .set("X-Authentication",accessToken)
         .end((err,res) => {
             res.should.have.status(200);
@@ -308,7 +314,8 @@ describe('sunglasses.io tests for', () => {
 
       it('should fail if the product ID cannot be found' , (done) => {  
         chai.request(server)
-        .post('/api/me/cart?productId=NotAProductId')
+        .post('/api/me/cart')
+        .send({productId: "Notaproductid"})
         .set("X-Authentication",accessToken)
         .end((err,res) => {
             res.should.have.status(404);
@@ -317,12 +324,12 @@ describe('sunglasses.io tests for', () => {
         })
       })
 
-      it('should fail if no productID is sent as a query' , (done) => {  
+      it('should fail if no productID is sent' , (done) => {  
         chai.request(server)
         .post('/api/me/cart')
         .set("X-Authentication",accessToken)
         .end((err,res) => {
-            res.should.have.status(404);
+            res.should.have.status(400);
             res.body.should.be.empty;
             done();
         })
@@ -330,25 +337,124 @@ describe('sunglasses.io tests for', () => {
     
     })
 
-// describe('DELETE /api/me/cart/:cartId', () => {
-//     it('should DELETE a selected product from the logged in user\'s cart' , done => {  
+    describe('DELETE /api/me/cart/:cartId', () => {
 
-//     })
+      it('should fail to delete if the request does not send a token in the headers' , (done) => {  
+        chai.request(server)
+        .delete('/api/me/cart/1')
+        .end((err,res) => {
+          res.should.have.status(401);
+          res.body.should.be.empty;
+          done();
+        })
+      })
 
-//     it('should leave all other items in the cart untouched' , done => {  
+      it('should fail to delete if the request sends an inaccurate access token' , (done) => {  
+        chai.request(server)
+        .delete('/api/me/cart/1')
+        .set("x-authentication", 'Iamafailingtoken')
+        .end((err,res) => {
+          res.should.have.status(401);
+          res.body.should.be.empty;
+          done();
+        })
+      })
 
-//     })
-// })
+      it('should DELETE a selected product from the logged in user\'s cart' , done => {  
+        chai.request(server)
+        .post('/api/me/cart')
+        .send({productId : 1})
+        .set('x-authentication', accessToken)
+        .then( postRes => {
+          let idToDelete = postRes.body.cartId;
+          chai.request(server)
+          .delete(`/api/me/cart/${idToDelete}`)
+          .set('x-authentication', accessToken)
+          .end((err,res) => {
+            res.should.have.status(200);
+            res.body.cartId.should.eql(idToDelete);
+            done();
+          })
+        })
+      })   
 
-// // describe('POST /api/me/cart/:cartId', () => {
-// //     it('should POST a selected product\'s quantity to update it in the logged in user\'s cart' , (done) => {  
+      it('should leave all other items in the cart untouched' , done => {  
+        //first get the previous cart length
+        chai.request(server)
+        .get('/api/me/cart')
+        .set('x-authentication', accessToken)
+        .then( getPostRes => {
+          let previousLength = getPostRes.body.length;
+          //then add a new item
+          chai.request(server)
+          .post('/api/me/cart')
+          .send({productId : 1})
+          .set('x-authentication', accessToken)
+          //then delete that item
+          .then( postRes => {
+            let idToDelete = postRes.body.cartId;
+            chai.request(server)
+            .delete(`/api/me/cart/${idToDelete}`)
+            .set('x-authentication', accessToken)
+            //then confirm that the length is the same as it was before adding & deleting
+            .then( () => {
+              chai.request(server)
+              .get('/api/me/cart')
+              .set('x-authentication', accessToken)
+              .end((err,res) => {
+                res.should.have.status(200);
+                res.body.length.should.eql(previousLength);
+                done();
+              })
+            })
+          })
+        })
+      })
 
-// //     })
+      it('should return an error when an incorrect id is given', done => {
+        chai.request(server)
+        .delete(`/api/me/cart/FakeId`)
+        .set('x-authentication', accessToken)
+        .end((err,res) => {
+          res.should.have.status(404);
+          res.body.should.be.empty;
+          done();
+        })
+      })
+    })
 
-// //     it('should leave all other items in the cart untouched' , (done) => {  
+    describe('POST /api/me/cart/:cartId', () => {
+      it('should fail to update if the request does not send a token in the headers' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart/1')
+        .send("5")
+        .end((err,res) => {
+          res.should.have.status(401);
+          res.body.should.be.empty;
+          done();
+        })
+      })
 
-// //     })
-// // })
+      it('should fail to update if the request sends an inaccurate access token' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart/1')
+        .send("5")
+        .set("x-authentication", 'Iamafailingtoken')
+        .end((err,res) => {
+          res.should.have.status(401);
+          res.body.should.be.empty;
+          done();
+        })
+      })
+
+    // it('should POST a selected product\'s quantity to update it in the logged in user\'s cart' , (done) => {  
+
+    // })
+
+    // it('should leave all other items in the cart untouched' , (done) => {  
+
+    // })
+})
 
 })
 })

@@ -157,36 +157,69 @@ myRouter.get('/api/me/cart', (req,res) => {
 myRouter.post('/api/me/cart', (req,res) => {
     //if there's a valid token, move forward with processing the request
     if (checkValidityOfToken(req)) {
-      //make sure that a product was sent as a query
-      const parsedUrl = url.parse(req.originalUrl);
-      let { productId } = queryString.parse(parsedUrl.query);
-      let productToAdd = products.find(product => product.id == productId);
+      //make sure that a product was sent in the body
+      if (req.body.productId) {
+        let { productId } = req.body;
+        let productToAdd = products.find(product => product.id == productId);
       //if there's a valid product, then add it to the cart with a unique cart ID and quantity 1 
-      if (productToAdd) {
-        productToAdd.cartId = cartId;
-        cartId++;
-        productToAdd.quantity = 1;
-        users[currentUserIndex].cart.push(productToAdd);
-        res.writeHead(200, CONTENT_HEADERS);
-        res.end(JSON.stringify(productToAdd));
-        //if the product ID doesn't exist, tell the user
+        if (productToAdd) {
+          productToAdd.cartId = cartId;
+          cartId++;
+          productToAdd.quantity = 1;
+          //make a copy so that the cart IDs actually change
+          let newProduct = {...productToAdd}
+          users[currentUserIndex].cart.push(newProduct);
+          res.writeHead(200, CONTENT_HEADERS);
+          res.end(JSON.stringify(productToAdd));
+          //if the product ID doesn't exist, tell the user
+        } else {
+          res.writeHead(404, "Product ID not found");
+          res.end();
+        }
+        //no product ID sent in the body of the request
       } else {
-        res.writeHead(404, "Product ID not found");
+        res.writeHead(400, "Bad request, a product ID is required") ;
+        res.end();
+      } 
+      //if the login is expired (or if an invalid token was sent), tell the user
+      } else {
+        res.writeHead(401, "Your authentication is invalid, please log in again");
         res.end();
       }
-     //if the login is expired (or if an invalid token was sent), tell the user
+  })
+
+
+myRouter.delete('/api/me/cart/:cartId', (req,res) => {
+  //if a valid user is logged in
+  if (checkValidityOfToken(req)) {
+    //find the cartId of the item to delete
+    let productToDelete = users[currentUserIndex].cart.find(product => product.cartId == req.params.cartId);
+    if (productToDelete){
+      //filter that item out
+      let newCart = users[currentUserIndex].cart.filter(product => product.cartId != productToDelete.cartId);
+      //spread that filtered cart over the original to replace it
+      users[currentUserIndex].cart = [...newCart];
+      //send the deleted prodcut in the response as confirmation
+      res.writeHead(200, CONTENT_HEADERS);
+      res.end(JSON.stringify(productToDelete));
     } else {
-      res.writeHead(401, "Your authentication is invalid, please log in again");
-      res.end();
-    }
+      res.writeHead(404, "Cart ID not found");
+      res.end(); 
+    } 
+  } else {
+    res.writeHead(401, "Your authentication is invalid, please log in again");
+    res.end();
+  }
 }) 
 
-myRouter.delete('/api/me/cart/:productId', (req,res) => {
-
-}) 
-
-myRouter.post('/api/me/cart/:productId', (req,res) => {
-
+myRouter.post('/api/me/cart/:cartId', (req,res) => {
+  if (checkValidityOfToken(req)) {
+    res.writeHead(200, CONTENT_HEADERS);
+    res.end();
+  } else {
+    res.writeHead(401, "Your authentication is invalid, please log in again");
+    res.end();
+  }
 })
 
 module.exports = server;
