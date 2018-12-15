@@ -10,7 +10,7 @@ const { findProductOrBrand } = require("./utils");
 
 // State holding variables
 let brands = [];
-let products = {};
+let products = [];
 let users = [];
 
 const PORT = 3001;
@@ -56,6 +56,13 @@ router.get("/api/brands/:brandId/products", (request, response) => {
     product => product.categoryId === brandId
   );
   return response.end(JSON.stringify(brandProducts));
+});
+
+//GET products from the store based on a query string
+
+router.get('/api/products', (request, response) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(products))
 });
 
 module.exports = server
