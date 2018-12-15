@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node app/server.js"
+    "start": "nodemon app/server.js",
+    "test": "mocha --timeout 5000 --watch"
   },
   "keywords": [],
   "author": "",
