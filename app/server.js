@@ -47,10 +47,6 @@ server.listen(PORT, error => {
   console.log(`Running on port ${PORT}`);
 });
 
-myRouter.get('/', (req,res) => {
-  res.end("hi")
-})
-
 myRouter.get('/v1/sunglasses', (req, res) => {
   res.writeHead(200, contentTypeJSON)
   res.end(JSON.stringify(sunglasses))  
@@ -101,7 +97,25 @@ myRouter.get('/v1/categories/:id/products', (req, res) => {
   }
   res.writeHead(200, contentTypeJSON)
   res.end(JSON.stringify(filteredGlasses))
+})
 
+myRouter.post('/v1/me/login', (req, res) =>{
+  let {username, password} = req.body;
+  if(username && password){
+    let user = users.find((user) => {
+      return user.login.username == username && user.login.password == password;
+    });
+    if(user){
+      res.writeHead(200, contentTypeJSON)
+      res.end()
+    } else {
+      res.writeHead(403 , 'Password and username do not match')
+      res.end()
+    }
+  } else {
+    res.writeHead(401, 'Incorrect or missing credentials')
+    res.end()
+  }
 })
 
 module.exports = server;
