@@ -1,10 +1,11 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require("http");
+const fs = require("fs");
+const finalHandler = require("finalhandler");
+const queryString = require("querystring");
+const Router = require("router");
+const bodyParser   = require("body-parser");
+const uid = require("rand-token").uid;
+const url = require("url");
 const { findObject } = require("./utils");
 
 //state holding variables
@@ -16,7 +17,7 @@ let products = [];
 let users = [];
 //i think you need to add a user object that hold the login info for a specific user. This will probably be necessary when it comes to authorization
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 //Router setup
 const router = Router();
@@ -24,11 +25,10 @@ router.use(bodyParser.json());
 
 //Server setup
 const server = http.createServer((req, res) => {
-    res.writeHead(200);
+    //res.writeHead(200);
     router(req, res, finalHandler(req, res))
-});
-
-server.listen(PORT, err => {
+})
+.listen(PORT, err => {
     if (err) throw err;
     console.log(`server running on port ${PORT}`);
 //populate brands
@@ -42,14 +42,28 @@ server.listen(PORT, err => {
         user = users[0];
 });
 
-router.get("/v1/brands", (req, res) => {
-        if(!brands) {
-            res.writeHead(404, "That brand cannot be found")
+router.get("/api/brands", (req, res) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    const { query } = querystring.parse(parsedUrl.query);
+
+    if(!brands) {
+        res.writeHead(404, "That brand cannot be found")
+        return res.end();
+    }
+    
+    let brandsToReturn = [];
+    if (query !== undefined) {
+        brandsToReturn = brands.filter(brand => brand.name.includes(query));
+
+        if (!brandsToReturn) {
+            res.writeHead(404, "That brand does not exist");
             return res.end();
         }
-
-        res.writeHead(200, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify(brands));
+    } else {
+        brandsToReturn = brands;
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(brandsToReturn));
     });
 
      
