@@ -185,7 +185,7 @@ describe('POST /api/login', () => {
 
 //send the right headers with access token
 
-describe('route requiring a logged in user', () => {
+describe('route requiring an authenticated user', () => {
 
     beforeEach(function(done) {
         testUsername = testUsers[0].login.username;
@@ -194,82 +194,105 @@ describe('route requiring a logged in user', () => {
         .post('/api/login')
         .send({username: testUsername, password: testPassword})
         .end((err,res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('object');
-            res.body.username.should.be.a('string');
-            res.body.token.should.be.a('string');
-            res.body.lastUpdated.should.be.a('string')
-            res.body.token.length.should.be.eql(16);
             accessToken = res.body.token;
             done();
         })
-        done();
+        
     })
-
     
-describe('POST /api/me/cart', () => {
-    it('should POST a selected product and add it to the logged in user\'s cart' , (done) => {  
-        chai.request(server)
-        .post('/api/me/cart')
-        .send(testProducts[0])
-        .end();
-        chai.request(server)
-        .post('/api/me/cart')
-        .send(testProducts[0])
-        .end();
-        chai.request(server)
-        .get('/api/me/cart')
-        .end((err,res) => {
-            res.should.have.status(200);
-            done();
-    })
-})
-
-    it('should allow multiples of the same product, each with their own quantity' , (done) => {  
-        chai.request(server)
-        .post('/api/me/cart')
-        .send(testProducts[0])
-        .end((err,res) => {
-            res.should.have.status(200);
-            done();
-    })
-    })
-
-    it('should adjust the quantity on the added item to 1' , (done) => {  
-        chai.request(server)
-        .post('/api/me/cart')
-        .send(testProducts[0])
-        .end((err,res) => {
-            res.should.have.status(200);
-            res.body[0].quantity.should.be.eql(1);
-            done();
-    })
-    })
-})
-
-
-describe('GET /api/me/cart', () => {
-    it('should return an empty cart if no products have been added', done => {
-        chai.request(server)
-        .get('/api/me/cart')
-        .end((err,res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('array')
-            res.body.length.should.be.eql(0)
-            done();
+    describe('POST /api/me/cart', () => {
+        it('should POST a selected product to the cart with quantity 1', done => {  
+            chai.request(server)
+            .post('/api/me/cart?productId=1')
+            .end((err,res) => {
+                expect(err).to.be.null;
+                res.should.have.status(200);
+                res.body.should.be.an('object');
+                res.body.cartId.should.not.be.null;
+                res.body.quantity.should.be.eql(1);
+                done();
+            })
         })
     })
 
-    it('should GET all the products in the logged in user\'s cart' , done => {  
-        chai.request(server)
-        .get('/api/me/cart')
-        .end((err,res) => {
-            res.should.have.status(200);
+//     it('should allow multiples of the same product, each with their own quantity' , (done) => {  
+//         chai.request(server)
+//         .post('/api/me/cart')
+//         .send(testProducts[0])
+//         .end((err,res) => {
+//             res.should.have.status(200);
+//             done();
+//         })
+//     })
 
-            done();
-        })
-    })
-})
+//     it('should fail if the user is not properly authenticated' , (done) => {  
+//         chai.request(server)
+//         .post('/api/me/cart')
+//         .send(testProducts[0])
+//         .end((err,res) => {
+//             res.should.have.status(200);
+//             res.body[0].quantity.should.be.eql(1);
+//             done();
+//         })
+//     })
+
+//     it('should fail if the product ID cannot be found' , (done) => {  
+//         chai.request(server)
+//         .post('/api/me/cart')
+//         .send(testProducts[0])
+//         .end((err,res) => {
+//             res.should.have.status(200);
+//             res.body[0].quantity.should.be.eql(1);
+//             done();
+//         })
+//     })
+
+//     it('should fail if no product is sent' , (done) => {  
+//         chai.request(server)
+//         .post('/api/me/cart')
+//         .send(testProducts[0])
+//         .end((err,res) => {
+//             res.should.have.status(200);
+//             res.body[0].quantity.should.be.eql(1);
+//             done();
+//         })
+//     })
+// })
+
+
+// describe('GET /api/me/cart', () => {
+//     it('should return an empty cart if no products have been added', done => {
+//         chai.request(server)
+//         .get('/api/me/cart')
+//         .end((err,res) => {
+//             res.should.have.status(200);
+//             res.body.should.be.an('array')
+//             res.body.length.should.be.eql(0)
+//             done();
+//         })
+//     })
+
+//     it('should GET all the products in the logged in user\'s cart' , done => {  
+//         chai.request(server)
+//         .get('/api/me/cart')
+//         .end((err,res) => {
+//             res.should.have.status(200);
+
+//             done();
+//         })
+//     })
+
+//     it('should fail if the user is not properly authenticated' , (done) => {  
+//         chai.request(server)
+//         .post('/api/me/cart')
+//         .send(testProducts[0])
+//         .end((err,res) => {
+//             res.should.have.status(200);
+//             res.body[0].quantity.should.be.eql(1);
+//             done();
+//         })
+//     })
+// })
 
 
 

@@ -149,7 +149,7 @@ paths:
       description: 'Adds a new item to the user cart'
       operationId: addCartItem
       parameters:
-        - name: id
+        - name: productId
           in: query
           description: The id of the product that the user wants to add to the cart.
           required: true
@@ -167,7 +167,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'        
-  '/me/cart/{productId}':
+  '/me/cart/{cartId}':
     delete:
       tags:
         - Cart
@@ -175,9 +175,9 @@ paths:
       description: 'Delete the selected item from the user cart'
       operationId: deleteCartItem
       parameters:
-        - name: productId
+        - name: cartId
           in: path
-          description: The id of the product that the user wants to delete.
+          description: The cart id of the product that the user wants to delete.
           required: true
           type: string
       responses:
@@ -200,9 +200,9 @@ paths:
       description: 'Update the item quantity in the user cart'
       operationId: updateCartItem
       parameters:
-        - name: productId
+        - name: cartId
           in: path
-          description: The id of the product that the user wants to update.
+          description: The cart id of the product that the user wants to update.
           required: true
           type: string
         - name: quantity

@@ -16,6 +16,8 @@ myRouter.use(bodyParser.json());
 //initial state variables
 let brands, products, users;
 let accessTokens = [];
+let currentUserIndex = null;
+let cartId = 1;
 
 //for sorting products by price
 const compare = (a,b) => {
@@ -87,6 +89,8 @@ myRouter.post('/api/login', (req,res) => {
           return user.login.username == req.body.username && user.login.password == req.body.password;
       });
       if (user) {
+        //update the state in order to track the currently logged in user
+        currentUserIndex = users.indexOf(user);
         // Write the header because we know we will be returning successful at this point and that the response will be json
         res.writeHead(200, CONTENT_HEADERS);
         // We have a successful login, if we already have an existing access token, use that
@@ -123,8 +127,15 @@ myRouter.get('/api/me/cart', (req,res) => {
 }) 
 
 myRouter.post('/api/me/cart', (req,res) => {
+  const parsedUrl = url.parse(req.originalUrl);
+  let { productId } = queryString.parse(parsedUrl.query);
+  let productToAdd = products.find(product => product.id == productId);
+  productToAdd.cartId = cartId;
+  cartId++;
+  productToAdd.quantity = 1;
+  users[currentUserIndex].cart.push(productToAdd)
   res.writeHead(200, CONTENT_HEADERS);
-  res.end();
+  res.end(JSON.stringify(productToAdd));
 }) 
 
 myRouter.delete('/api/me/cart/:productId', (req,res) => {
