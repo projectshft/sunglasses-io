@@ -66,17 +66,51 @@ server.listen(PORT, err => {
     //if there is an empty query all brands should be returned otherwise
     //the brand returned should be the query in question
     if (query !== undefined) {
-      brandsToReturn = brands.filter(brand => brand.name.includes(query))
+      brandsToReturn = brands.filter(brand => brand.name === query)
+
       if (!brandsToReturn) {
         res.writeHead(404, `ERROR: PRODUCT DOES NOT EXIST`);
-        res.end();
+        return res.end();
       }
-        brandsToReturn = brands;
+    } else { 
+      brandsToReturn = brands;
+        // res.writeHead(200, {'Content-Type': 'application/json'});
+        // return res.end(JSON.stringify(brandsToReturn))
     }
     res.writeHead(200, {'Content-Type': 'application/json'});
-    return res.end(JSON.stringify(brands))
+    return res.end(JSON.stringify(brandsToReturn))
   });
+
+  //GET PRODUCTS ENDPOINT
+  router.get('/v1/products', (req, res) => {
+    const parsedUrl = url.parse(req.originalUrl);
+    const { query } = queryString.parse(parsedUrl.query);
+    let productsToReturn = [];
+    if (query !== undefined) {
+      productsToReturn = products.filter(product => product.description.includes(query));
+
+      if (!productsToReturn) {
+        res.writeHead(404, 'ERROR: Product Not Found!');
+        return res.end();
+      }
+    } else {
+      productsToReturn = products;
+    }
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    return res.end(JSON.stringify(productsToReturn))
+  })
 //REMEMBER ACCESS FOR SWAGGER DOCUMENTATION
 //SECURITY DEFINITIONS
 
+//GET PRODUCTS WITHIN BRANDS
+
+//POST LOGIN
+
+//GET ME/CART
+
+//POST ME/CART
+
+//DELETE ME/CART/:productId
+
+//POST ME/CART/:productId
 module.exports = server;
