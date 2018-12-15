@@ -22,6 +22,31 @@ describe('Sunglasses', () => {
           });
       });
     });
+
+    describe('/GET brands/:id/products', () => {
+      it('should GET all products by brand', done => {
+        chai
+          .request(server)
+          .get('/api/brands/1/products')
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(3);
+            done();
+          });
+      });
+
+      it('should NOT return any products for a brand that does not exist', done => {
+        chai
+          .request(server)
+          .get('/api/brands/123/products')
+          .end((err, res) => {
+            res.body.should.be.empty;
+            res.should.have.status(401);
+            done();
+          });
+      });
+    });
   });
 
   // Products

@@ -41,16 +41,34 @@ const server = http
   })
   .listen(PORT);
 
+// Brands routes
 router.get('/api/brands', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(brands));
 });
 
+router.get('/api/brands/:id/products', (req, res) => {
+  let brandId = req.params.id;
+  let brandProducts = products.filter(product => {
+    return product.brandId === brandId;
+  });
+
+  if (brandProducts.length === 0) {
+    res.writeHead(401, 'No products with that brand found');
+    res.end();
+  }
+
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(brandProducts));
+});
+
+// Products routes
 router.get('/api/products', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(products));
 });
 
+// Users's cart routes
 router.get('/api/me/cart', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(currentUser.cart));
