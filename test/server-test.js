@@ -39,6 +39,17 @@ describe('Sunglasses', () => {
     });
   });
 
-  // Users
-  describe('', () => {});
+  // Cart
+  describe('/GET cart', () => {
+    it("should GET a user's cart", done => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+  });
 });

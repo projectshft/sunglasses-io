@@ -26,6 +26,7 @@ fs.readFile('initial-data/products.json', 'utf-8', (err, data) => {
 fs.readFile('initial-data/users.json', 'utf-8', (err, data) => {
   if (err) throw err;
   users = JSON.parse(data);
+  currentUser = users[0];
 });
 
 // Setup router
@@ -48,6 +49,11 @@ router.get('/api/brands', (req, res) => {
 router.get('/api/products', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(products));
+});
+
+router.get('/api/me/cart', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(currentUser.cart));
 });
 
 module.exports = server;
