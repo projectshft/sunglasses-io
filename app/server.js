@@ -27,6 +27,28 @@ const compare = (a,b) => {
   return Number(a.price) > Number(b.price);
 }
 
+const checkValidityOfToken = req => {
+  //get the token from the headers
+  let sentToken = req.headers["x-authentication"];
+  //if there is a token, then see if the token is in the valid list and make sure it hasn't timed out
+  if (sentToken) {
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token == sentToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    })
+    //if there's a valid token, then update the current user state and return true
+    if (currentAccessToken) {
+      let currentUser = users.find(user => user.login.username == currentAccessToken.username);
+      currentUserIndex = users.indexOf(currentUser);
+      return true;
+      //if the token is invalid or if none was sent, then return false
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
 const server = http.createServer(function (req, res) {
   myRouter(req, res, finalHandler(req, res))
 });
@@ -123,20 +145,18 @@ myRouter.post('/api/login', (req,res) => {
 
 
 myRouter.get('/api/me/cart', (req,res) => {
-  res.writeHead(200, CONTENT_HEADERS);
-  res.end();
+  if (checkValidityOfToken(req)) {
+    res.writeHead(200, CONTENT_HEADERS);
+    res.end(JSON.stringify(users[currentUserIndex].cart));
+  } else {
+    res.writeHead(401, "Your authentication is invalid, please log in again");
+    res.end();
+  }
 }) 
 
 myRouter.post('/api/me/cart', (req,res) => {
-  //get the token from the headers
-  let sentToken = req.headers["x-authentication"];
-  //if there is a token, then see if the token is in the valid list and make sure it hasn't timed out
-  if (sentToken) {
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == sentToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-    });
     //if there's a valid token, move forward with processing the request
-    if (currentAccessToken) {
+    if (checkValidityOfToken(req)) {
       //make sure that a product was sent as a query
       const parsedUrl = url.parse(req.originalUrl);
       let { productId } = queryString.parse(parsedUrl.query);
@@ -146,7 +166,7 @@ myRouter.post('/api/me/cart', (req,res) => {
         productToAdd.cartId = cartId;
         cartId++;
         productToAdd.quantity = 1;
-        users[currentUserIndex].cart.push(productToAdd)
+        users[currentUserIndex].cart.push(productToAdd);
         res.writeHead(200, CONTENT_HEADERS);
         res.end(JSON.stringify(productToAdd));
         //if the product ID doesn't exist, tell the user
@@ -159,11 +179,6 @@ myRouter.post('/api/me/cart', (req,res) => {
       res.writeHead(401, "Your authentication is invalid, please log in again");
       res.end();
     }
-    //if the user didn't send a token at all, tell them to login
-  } else {
-    res.writeHead(401, "Login is required");
-    res.end();
-  }
 }) 
 
 myRouter.delete('/api/me/cart/:productId', (req,res) => {
