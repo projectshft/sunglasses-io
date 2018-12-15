@@ -74,6 +74,7 @@ describe('sunglasses', () => {
     it('should retrieve one sunglasses object if an ID is supplied', done => {
       sunglassesResponse.should.have.status(200)
       sunglassesResponse.body.should.be.an('object')
+      sunglassesResponse.body.should.not.be.an('array')
       sunglassesResponse.body.should.have.all.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls')
       done()
     })
@@ -171,7 +172,7 @@ describe('categories', () => {
     })
   })
 })
-//users endpoints (for the cart functionality)
+//user login endpoints 
 describe('user information', () => {
   describe("/me/login", () => {
     beforeEach(() => {
@@ -190,13 +191,32 @@ describe('user information', () => {
       userResponse.should.have.status(200);
       done()
     });
+    it('should return an access Token for later use', done => {
+      userResponse.body.should.be.an('object')
+      userResponse.body.should.have.all.keys('token','issued','user')
+      done()
+    })
+    it('should return a refreshed token', done => {
+      chai.request(server)
+      .post('/v1/me/login')
+      .send({ 'username': 'yellowleopard753', 'password': 'jonjon' })
+      .end((err, res) => {
+        res.body.should.be.an('object')
+        res.body.should.have.all.keys('token','user','issued')
+        expect(res.body.token).to.equal(userResponse.body.token)
+        expect(res.body.user).to.equal(userResponse.body.user);
+        expect(res.body.issued).to.not.equal(userResponse.body.issued)
+        done()
+      })
+      
+    })
     it("should not allow a user to sign in without credentials", done => {
       chai
         .request(server)
         .post("/v1/me/login")
         .send({ username: "", password: "" })
         .end((err, res) => {
-          res.should.have.status(401);
+          res.should.have.status(400);
           done();
         });
     });
@@ -206,18 +226,48 @@ describe('user information', () => {
         .post("/v1/me/login")
         .send({ username: "yellowleopard753", password: "wrong" })
         .end((err, res) => {
-          res.should.have.status(403);
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it("should not return a token with incorrect credentials", done => {
+      chai
+        .request(server)
+        .post("/v1/me/login")
+        .send({ username: "yellowleopard753", password: "wrong" })
+        .end((err, res) => {
+          expect(res.body).to.deep.equal({})
+          res.should.have.status(401);
           done();
         });
     });
   });
 })
-//cart information
-// describe('cart endpoints', () => {
-//   describe('me/cart', () => {
-//     it('should get the current cart for the signed in user', done => {
 
-//     })
-
-//   })
-// })
+let accessToken = ''
+// cart information
+describe('cart endpoints', () => {
+  describe('me/cart', () => {
+    beforeEach(() => {
+      return new Promise(resolve => {
+        chai
+          .request(server)
+          .post("/v1/me/login")
+          .send({ 'username': 'yellowleopard753', 'password': 'jonjon' })
+          .end((err, res) => {
+            accessToken = res.body.token
+            resolve();
+          });
+      });
+    });
+    it('should return a cart ', done => {
+      chai.request(server)
+        .get(`/v1/me/cart?query=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array')
+          done()
+        })
+    })
+  })
+})

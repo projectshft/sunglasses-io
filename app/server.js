@@ -1,10 +1,12 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+let http = require('http');
+let fs = require('fs');
+let finalHandler = require('finalhandler');
+let queryString = require("querystring");
+const url = require("url");
+
+let Router = require('router');
+let bodyParser   = require('body-parser');
+let uid = require('rand-token').uid;
 
 const contentTypeJSON = {'Content-Type': 'application/json'}
 
@@ -12,6 +14,7 @@ const contentTypeJSON = {'Content-Type': 'application/json'}
 let sunglasses = [];
 let categories = [];
 let user = [] //also may be the cart, unsure just yet
+let activeTokens = []
 
 //read the files so I actually have data to work with
 
@@ -107,13 +110,50 @@ myRouter.post('/v1/me/login', (req, res) =>{
     });
     if(user){
       res.writeHead(200, contentTypeJSON)
-      res.end()
+
+      let userToken = activeTokens.find(tokens => tokens.user === username)
+
+      //first check to see if the user has a token in their name
+      if(userToken){
+        userToken.issued = new Date()
+        res.end(JSON.stringify(userToken))
+        //refresh their token and return a new one
+      } else {
+      //make a new token
+      let newToken = {
+        token: uid(16),
+        user: username,
+        issued: new Date()
+      }
+      activeTokens.push(newToken)
+      res.end(JSON.stringify(newToken))
+    }
     } else {
-      res.writeHead(403 , 'Password and username do not match')
+      res.writeHead(401 , 'Password and username do not match')
       res.end()
     }
   } else {
-    res.writeHead(401, 'Incorrect or missing credentials')
+    res.writeHead(400, 'Incorrect or missing credentials')
+    res.end()
+  }
+})
+
+myRouter.get('/v1/me/cart', (req,res) => {
+ let parsedUrl = url.parse(req.url,true)
+ let tokenId = parsedUrl.query.query //accessing the token string ID
+  if(tokenId){
+    let thisUsersToken = activeTokens.find(tokenObj => tokenObj.token === tokenId);
+    if(thisUsersToken){
+      //use the user info associated with the token to get the right cart
+      let thisUser = users.find(userObjs => userObjs.login.username === thisUsersToken.user)
+      res.writeHead(200, contentTypeJSON)
+      res.end(JSON.stringify(thisUser.cart))
+    } else {
+      res.writeHead(404, 'User not found')
+      res.end()
+    }
+  } else {
+    res.writeHead(403, 'Invalid access token')
     res.end()
   }
 })
