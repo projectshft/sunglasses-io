@@ -183,27 +183,51 @@ describe('POST /api/login', () => {
 
 })
 
-//send the right headers with access token
-
 describe('route requiring an authenticated user', () => {
 
-    beforeEach(function(done) {
-        testUsername = testUsers[0].login.username;
-        testPassword = testUsers[0].login.password;
-        chai.request(server)
-        .post('/api/login')
-        .send({username: testUsername, password: testPassword})
-        .end((err,res) => {
-            accessToken = res.body.token;
-            done();
-        })
-        
-    })
-    
     describe('POST /api/me/cart', () => {
+
+        it('should fail to post if the request does not send a token in the headers' , (done) => {  
+            chai.request(server)
+            .post('/api/me/cart?productId=1')
+            .end((err,res) => {
+                expect(err).to.be.null;
+                res.should.have.status(401);
+                res.body.should.be.empty;
+                done();
+            })
+        })
+
+        it('should fail to post if the request sends an inaccurate access token' , (done) => {  
+            chai.request(server)
+            .post('/api/me/cart?productId=1')
+            .set("x-authentication", 'Iamafailingtoken')
+            .end((err,res) => {
+                expect(err).to.be.null;
+                res.should.have.status(401);
+                res.body.should.be.empty;
+                done();
+            })
+        })
+
+        beforeEach(function(done) {
+            testUsername = testUsers[0].login.username;
+            testPassword = testUsers[0].login.password;
+            chai.request(server)
+            .post('/api/login')
+            .send({username: testUsername, password: testPassword})
+            .end((err,res) => {
+                accessToken = res.body.token;
+                done();
+            })
+            
+        })
+    
+
         it('should POST a selected product to the cart with quantity 1', done => {  
             chai.request(server)
             .post('/api/me/cart?productId=1')
+            .set("x-authentication", accessToken)
             .end((err,res) => {
                 expect(err).to.be.null;
                 res.should.have.status(200);
@@ -213,51 +237,51 @@ describe('route requiring an authenticated user', () => {
                 done();
             })
         })
+ 
+
+    //ensure that 2 identical products can be sent and that they both have quantity 1 and unique IDs
+    it('should allow multiples of the same product, each with their own quantity' , (done) => {  
+        let firstCartId;
+        chai.request(server)
+        .post('/api/me/cart?productId=1')
+        .set("X-Authentication",accessToken)
+        .end((err,res) => {
+            firstCartId = res.body.cartId;
+        })
+        chai.request(server)
+        .post('/api/me/cart?productId=1')
+        .set("X-Authentication",accessToken)
+        .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.cartId.should.not.eql(firstCartId)
+            res.body.quantity.should.be.eql(1);
+            done();
+        })
     })
 
-//     it('should allow multiples of the same product, each with their own quantity' , (done) => {  
-//         chai.request(server)
-//         .post('/api/me/cart')
-//         .send(testProducts[0])
-//         .end((err,res) => {
-//             res.should.have.status(200);
-//             done();
-//         })
-//     })
+    it('should fail if the product ID cannot be found' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart?productId=NotAProductId')
+        .set("X-Authentication",accessToken)
+        .end((err,res) => {
+            res.should.have.status(404);
+            res.body.should.be.empty;
+            done();
+        })
+    })
 
-//     it('should fail if the user is not properly authenticated' , (done) => {  
-//         chai.request(server)
-//         .post('/api/me/cart')
-//         .send(testProducts[0])
-//         .end((err,res) => {
-//             res.should.have.status(200);
-//             res.body[0].quantity.should.be.eql(1);
-//             done();
-//         })
-//     })
-
-//     it('should fail if the product ID cannot be found' , (done) => {  
-//         chai.request(server)
-//         .post('/api/me/cart')
-//         .send(testProducts[0])
-//         .end((err,res) => {
-//             res.should.have.status(200);
-//             res.body[0].quantity.should.be.eql(1);
-//             done();
-//         })
-//     })
-
-//     it('should fail if no product is sent' , (done) => {  
-//         chai.request(server)
-//         .post('/api/me/cart')
-//         .send(testProducts[0])
-//         .end((err,res) => {
-//             res.should.have.status(200);
-//             res.body[0].quantity.should.be.eql(1);
-//             done();
-//         })
-//     })
-// })
+    it('should fail if no productID is sent as a query' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart')
+        .set("X-Authentication",accessToken)
+        .end((err,res) => {
+            res.should.have.status(404);
+            res.body.should.be.empty;
+            done();
+        })
+    })
+})
 
 
 // describe('GET /api/me/cart', () => {

@@ -9,15 +9,16 @@ const url = require('url');
 const CONTENT_HEADERS = {"Content-Type": "application/json"};
 const PORT = 3001;
 
-// Setup router
-var myRouter = Router();
-myRouter.use(bodyParser.json());
-
 //initial state variables
 let brands, products, users;
 let accessTokens = [];
 let currentUserIndex = null;
 let cartId = 1;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+// Setup router
+var myRouter = Router();
+myRouter.use(bodyParser.json());
 
 //for sorting products by price
 const compare = (a,b) => {
@@ -127,15 +128,42 @@ myRouter.get('/api/me/cart', (req,res) => {
 }) 
 
 myRouter.post('/api/me/cart', (req,res) => {
-  const parsedUrl = url.parse(req.originalUrl);
-  let { productId } = queryString.parse(parsedUrl.query);
-  let productToAdd = products.find(product => product.id == productId);
-  productToAdd.cartId = cartId;
-  cartId++;
-  productToAdd.quantity = 1;
-  users[currentUserIndex].cart.push(productToAdd)
-  res.writeHead(200, CONTENT_HEADERS);
-  res.end(JSON.stringify(productToAdd));
+  //get the token from the headers
+  let sentToken = req.headers["x-authentication"];
+  //if there is a token, then see if the token is in the valid list and make sure it hasn't timed out
+  if (sentToken) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == sentToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    //if there's a valid token, move forward with processing the request
+    if (currentAccessToken) {
+      //make sure that a product was sent as a query
+      const parsedUrl = url.parse(req.originalUrl);
+      let { productId } = queryString.parse(parsedUrl.query);
+      let productToAdd = products.find(product => product.id == productId);
+      //if there's a valid product, then add it to the cart with a unique cart ID and quantity 1 
+      if (productToAdd) {
+        productToAdd.cartId = cartId;
+        cartId++;
+        productToAdd.quantity = 1;
+        users[currentUserIndex].cart.push(productToAdd)
+        res.writeHead(200, CONTENT_HEADERS);
+        res.end(JSON.stringify(productToAdd));
+        //if the product ID doesn't exist, tell the user
+      } else {
+        res.writeHead(404, "Product ID not found");
+        res.end();
+      }
+     //if the login is expired (or if an invalid token was sent), tell the user
+    } else {
+      res.writeHead(401, "Your authentication is invalid, please log in again");
+      res.end();
+    }
+    //if the user didn't send a token at all, tell them to login
+  } else {
+    res.writeHead(401, "Login is required");
+    res.end();
+  }
 }) 
 
 myRouter.delete('/api/me/cart/:productId', (req,res) => {

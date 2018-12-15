@@ -160,7 +160,7 @@ paths:
           schema:
             type: string
         '401':
-          description: 'Unable to access with current authentication - must log in again' 
+          description: 'Unable to access with current authentication - must log in' 
         '404':
           description: Product id not found
         default:
