@@ -42,7 +42,7 @@ const server = http.createServer((req, res) => {
         user = users[0];
 });
 
-router.get("/api/brands", (req, res) => {
+router.get("/api/brands", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query } = querystring.parse(parsedUrl.query);
 
@@ -65,6 +65,24 @@ router.get("/api/brands", (req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(brandsToReturn));
     });
+
+router.get("/api/goals", (request, response) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    const { query }= querystring.parse(parsedUrl.query);
+    let productsToReturn = [];
+    if (query !== undefined) {
+        productsToReturn = products.filter(product => product.name.includes(query));
+
+        if(!productsToReturn) {
+            response.writeHead(404, "No products to return");
+            return response.end();
+        }
+    } else {
+        productsToReturn = products;
+    }
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end(JSON.stringify(productsToReturn));
+});   
 
      
 
