@@ -8,7 +8,9 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Sunglasses', () => {
-  // Brands
+  // ********************* BRANDS ********************* //
+
+  // GET all brands
   describe('Brands', () => {
     describe('/GET brands', () => {
       it('should GET all brands', done => {
@@ -24,6 +26,7 @@ describe('Sunglasses', () => {
       });
     });
 
+    // GET products by brand
     describe('/GET brands/:id/products', () => {
       it('should GET all products by brand', done => {
         chai
@@ -50,7 +53,7 @@ describe('Sunglasses', () => {
     });
   });
 
-  // Products
+  // ********************* PRODUCTS ********************* //
   describe('/GET products', () => {
     it('should GET all products', done => {
       chai
@@ -65,7 +68,9 @@ describe('Sunglasses', () => {
     });
   });
 
-  // Cart
+  // ********************* USER'S CART ********************* //
+
+  // GET user's cart
   describe('/GET cart', () => {
     it("should GET a user's cart", done => {
       chai
@@ -79,6 +84,7 @@ describe('Sunglasses', () => {
     });
   });
 
+  // Add to user's cart
   describe('/POST cart', () => {
     it("should POST to a user's cart", done => {
       chai
@@ -119,6 +125,7 @@ describe('Sunglasses', () => {
     });
   });
 
+  // Edit users's cart
   describe('/POST cart/:productId', () => {
     before(done => {
       currentUser.cart = [
@@ -139,7 +146,7 @@ describe('Sunglasses', () => {
       done();
     });
 
-    // Update product quantity
+    // Update product quantity in user's cart
     it("should POST update to product in user's cart", done => {
       chai
         .request(server)
@@ -154,6 +161,7 @@ describe('Sunglasses', () => {
         });
     });
 
+    // Delete product from user's cart
     it("should DELETE product in user's cart", done => {
       chai
         .request(server)
@@ -165,7 +173,7 @@ describe('Sunglasses', () => {
     });
   });
 
-  // Login
+  // ********************* LOGIN ********************* //
   describe('/POST login', () => {
     it('should login an existing user', done => {
       chai
