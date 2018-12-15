@@ -108,6 +108,23 @@ describe('/GET products', () => {
     })
   })
 })
+
+//GET ME/Cart test
+describe('/GET /me/cart', () => {
+  it.only(`should GET the currently logged-in user's cart`, done => {
+    chai
+    .request(server)
+    .get('/v1/me/cart')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(200);
+      expect('Content-Type', 'application/json');
+      done();
+    })
+  })
+})
+
 //GET brands/:id/products test
 // describe('/GET products', () => {
 //   it.only('should GET all products from a specific brand', done => {
@@ -121,7 +138,7 @@ describe('/GET products', () => {
 
 //   })
 // })
-// //GET api/me/cart test
+//GET api/me/cart test
 // describe('/GET cart', () => {
 //   it.only("should GET the currently logged in user's current cart", done => {
 

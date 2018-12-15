@@ -11,13 +11,18 @@ const url = require('url');
 
 //make 400 404 and 401 Error
 
+const findObject = (objId, state) => {
+  const item = state.find(obj => obj.id === objId);
+  return !item ? null : item;
+};
+
 const PORT = process.env.PORT || 3005;
 
 //State holding variables
 let brands = [];
 let products = [];
 let users = [];
-let user = {};
+let me = {};
 
 //router set up
 const router = Router();
@@ -34,31 +39,18 @@ server.listen(PORT, err => {
   console.log(`Server running on ${PORT}`);
   //populate brands
    brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf8"));
-  // console.log(brands)
-  // console.log(brands.length);
-  // fs.readFile("./initial-data/brands.json", 'utf-8', (err, data) => {
-  //   if (err) throw err;
-  //   brands = JSON.parse(data);
-  // });
 
   //populate products
   products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf8'));
-  // fs.readFile('./initial-data/products.json', 'utf-8', (err, data) => {
-  //   if (err) throw err;
-  //   products = JSON.parse(data);
-  // });
 
   //populate users
   users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf8'));
-  // fs.readFile('./initial-data/users.json', 'utf-8', (err, data) => {
-  //   if (err) throw err;
-  //   users = JSON.parse(data);
-  let user = users[0];
+  //declare a variable to represent the current user ('me')
+  me = users[0];
   // });
 });
 
-
-//GET Brands Endpoint
+  //GET Brands Endpoint
   router.get("/v1/brands", (req, res) => {
     const parsedUrl = url.parse(req.originalUrl);
     const { query } = queryString.parse(parsedUrl.query);
@@ -99,15 +91,43 @@ server.listen(PORT, err => {
     res.writeHead(200, {'Content-Type': 'application/json'});
     return res.end(JSON.stringify(productsToReturn))
   })
-//REMEMBER ACCESS FOR SWAGGER DOCUMENTATION
-//SECURITY DEFINITIONS
+  //REMEMBER ACCESS FOR SWAGGER DOCUMENTATION
+  //SECURITY DEFINITIONS
 
-//GET PRODUCTS WITHIN BRANDS
-
+  //GET PRODUCTS WITHIN BRANDS
+  router.get('/v1/brands/:id/products', (req, res) => {
+    const { brandId } = request.params;
+    const brand = findObject(brandId, brands);
+    if (!brand) {
+      res.writeHead(404, 'That brand is not in our store');
+      return res.end();
+    }
+    Response.writeHead(200, { 'Content-Type': 'application/json'});
+    const productsWithinBrand = products.filter(product => product.categoryId === brandId);
+    return Response.end(JSON.stringify(productsWithinBrand))
+  })
 //POST LOGIN
 
-//GET ME/CART
+  //GET ME
+  // router.get('/v1/me', (req, res) => {
+  //   if (!me) {
+  //     res.writeHead(404, 'User does not exist. Please make an account');
+  //     return res.end();
+  //   }
+  //   res.writeHead(200, {'Content-Type': 'application/json'});
+  //   return res.end(JSON.stringify(me));
+  // })
 
+  //GET ME/CART
+  router.get('/v1/me/cart', (req, res) => {
+    // if (!me) {
+    //   res.writeHead(404, 'User does not exist. Please make an account');
+    //   return res.end();
+    // }
+    cart = me.cart;
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    return res.end(JSON.stringify(cart));
+  })
 //POST ME/CART
 
 //DELETE ME/CART/:productId
