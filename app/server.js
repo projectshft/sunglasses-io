@@ -104,6 +104,18 @@ router.get('/api/me/cart', (req, res) => {
   res.end(JSON.stringify(currentUser.cart));
 });
 
+router.post('/api/me/cart', (req, res) => {
+  let product = req.body;
+  if (Object.keys(product).length === 0) {
+    res.writeHead(401, 'No product selected');
+    res.end();
+  } else {
+    currentUser.cart.push(product);
+    res.writeHead(200, { 'Content-Type': 'application:json' });
+    res.end(JSON.stringify(product)); // return product added to cart
+  }
+});
+
 // Login route
 router.post('/api/login', (req, res) => {
   // Make sure there is a username and password in the request

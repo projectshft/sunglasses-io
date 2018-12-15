@@ -78,6 +78,46 @@ describe('Sunglasses', () => {
     });
   });
 
+  describe('/POST cart', () => {
+    it("should POST to a user's cart", done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .send({
+          id: 1,
+          brandId: 1,
+          name: 'Superglasses',
+          description: 'The best glasses in the world',
+          price: 150,
+          imageUrls: [
+            'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+            'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+            'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+          ]
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        });
+    });
+
+    it('should NOT POST an empty product', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('Accept', 'application/json')
+        .set('Content-Type', 'application/json')
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+  });
+
   // Login
   describe('/POST login', () => {
     it('should login an existing user', done => {
