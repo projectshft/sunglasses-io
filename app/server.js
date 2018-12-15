@@ -1,7 +1,6 @@
 const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
-const queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
 const uid = require('rand-token').uid;
@@ -42,24 +41,6 @@ const setFailedLogins = (username, numFails) => {
   failedLogins[username] = numFails;
 };
 
-const getValidTokenFromRequest = req => {
-  let parsedURL = require('url').parse(req.url, true);
-
-  if (parsedURL.query.accessToken) {
-    const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
-    let accessToken = accessTokens.find(token => {
-      return (
-        token.token == parsedURL.query.accessToken &&
-        new Date() - token.lastUpdated < TOKEN_VALIDITY_TIMEOUT
-      );
-    });
-
-    return accessToken ? accessToken : null;
-  } else {
-    return null;
-  }
-};
-
 // Setup router
 const router = Router();
 router.use(bodyParser.json());
@@ -72,12 +53,15 @@ const server = http
   })
   .listen(PORT);
 
-// Brands routes
+// ********************* BRANDS ROUTES ********************* //
+
+// GET all brands
 router.get('/api/brands', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(brands));
 });
 
+// GET products by brand
 router.get('/api/brands/:id/products', (req, res) => {
   let brandId = req.params.id;
   let brandProducts = products.filter(product => {
@@ -93,18 +77,23 @@ router.get('/api/brands/:id/products', (req, res) => {
   res.end(JSON.stringify(brandProducts));
 });
 
-// Products routes
+// ********************* PRODUCTS ROUTES ********************* //
+
+// GET all products
 router.get('/api/products', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(products));
 });
 
-// Users's cart routes
+// ********************* USER'S CART ROUTES ********************* //
+
+// GET user cart
 router.get('/api/me/cart', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(currentUser.cart));
 });
 
+// POST (Add) to cart
 router.post('/api/me/cart', (req, res) => {
   let product = req.body;
   if (Object.keys(product).length === 0) {
@@ -117,6 +106,7 @@ router.post('/api/me/cart', (req, res) => {
   }
 });
 
+// Update product (quantity) in cart
 router.post('/api/me/cart/:productId', (req, res) => {
   // Grab product from cart
   let product = currentUser.cart.filter(
@@ -139,6 +129,7 @@ router.post('/api/me/cart/:productId', (req, res) => {
   }
 });
 
+// Delete product from cart
 router.delete('/api/me/cart/:productId', (req, res) => {
   // Grab product from cart
   let product = currentUser.cart.filter(
@@ -149,14 +140,14 @@ router.delete('/api/me/cart/:productId', (req, res) => {
     res.writeHead(401, 'No product selected');
     res.end();
   } else {
-    // Delete product from cart
+    // Delete product
     currentUser.cart.splice(currentUser.cart[req.params.productId], 1);
     res.writeHead(200, { 'Content-Type': 'application:json' });
     res.end();
   }
 });
 
-// Login route
+// ********************* LOGIN ROUTE ********************* //
 router.post('/api/login', (req, res) => {
   // Make sure there is a username and password in the request
   if (
