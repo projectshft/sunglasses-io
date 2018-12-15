@@ -118,11 +118,13 @@ myRouter.post('/api/login', (req,res) => {
 
 
 myRouter.get('/api/me/cart', (req,res) => {
-
+  res.writeHead(200, CONTENT_HEADERS);
+  res.end();
 }) 
 
 myRouter.post('/api/me/cart', (req,res) => {
-
+  res.writeHead(200, CONTENT_HEADERS);
+  res.end();
 }) 
 
 myRouter.delete('/api/me/cart/:productId', (req,res) => {

@@ -60,7 +60,7 @@ paths:
       tags:
         - Products
       summary: Get a list of all products.
-      description: 'Returns all products in the store. Can be limited by a query string or a return limit. Default order is by decreasing price.'
+      description: Returns all products in the store. Can be limited by a query string. 
       operationId: getProducts
       parameters:
         - name: search
@@ -68,29 +68,19 @@ paths:
           description: A query string to match against the product name.
           required: false
           type: string
-        - name: limit
-          in: query
-          description: Limits the number of returned results to the provided number.
-          required: false
-          type: number
-          format: int32
-        - name: offset
-          in: query
-          description: Offsets the returned results by the given number. Useful in conjunction with limit.
-          required: false
-          type: number
-          format: int32
       responses:
-        '200':
+       '200':
           description: An array of products.
           schema:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '404':
+            description: No products found.
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'        
   '/login':  
      post:
       tags:
@@ -113,18 +103,25 @@ paths:
         '200':
           description: successful operation
           schema:
-            type: string
-          headers:
-            X-Rate-Limit:
-              type: integer
-              format: int32
-              description: calls per hour allowed by the user
-            X-Expires-After:
-              type: string
-              format: date-time
-              description: date in UTC when token expires
+            type: object
+          properties:
+                username:
+                  type: string
+                  description: Username of user associated with this login request
+                lastUpdated:  
+                  type: string
+                  description: Represents the last time that this user submitted their login info and refreshed their access token
+                token: 
+                  type: string
+                  description: Access token to be sent in the headers of subsequent requests by this user to access protected routes 
         '400':
-          description: Invalid username/password supplied
+          description: Username and password must both be supplied.
+        '401': 
+          description: Either username or password is invalid.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
   '/me/cart':  
     get:
       tags:
@@ -134,19 +131,17 @@ paths:
       operationId: getCartItems
       responses:
         '200':
-          description: successful operation
+          description: An array of products in the user's cart.
           schema:
-            type: string
-          headers:
-            X-Authentication:
-              type: string
-              description: User's access token
-            X-Expires-After:
-              type: string
-              format: date-time
-              description: date in UTC when token expires
-      security:
-        - api_key: []
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '401':
+          description: 'Unable to access with current authentication - must log in again' 
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
     post:
       tags:
         - Cart
@@ -164,16 +159,14 @@ paths:
           description: successful operation
           schema:
             type: string
-          headers:
-            X-Authentication:
-              type: string
-              description: User's access token
-            X-Expires-After:
-              type: string
-              format: date-time
-              description: date in UTC when token expires
-      security:
-        - api_key: []
+        '401':
+          description: 'Unable to access with current authentication - must log in again' 
+        '404':
+          description: Product id not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
   '/me/cart/{productId}':
     delete:
       tags:
@@ -192,16 +185,14 @@ paths:
           description: successful operation
           schema:
             type: string
-          headers:
-            X-Authentication:
-              type: string
-              description: User's access token
-            X-Expires-After:
-              type: string
-              format: date-time
-              description: date in UTC when token expires
-      security:
-        - api_key: []
+        '401':
+          description: 'Unable to access with current authentication - must log in again' 
+        '404': 
+          description: Product id not found.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
     post:
       tags:
         - Cart
@@ -225,21 +216,14 @@ paths:
           description: successful operation
           schema:
             type: string
-          headers:
-            X-Authentication:
-              type: string
-              description: User's access token
-            X-Expires-After:
-              type: string
-              format: date-time
-              description: date in UTC when token expires
-      security:
-        - api_key: []
-securityDefinitions:
-  api_key:
-    type: apiKey
-    name: api_key
-    in: header
+        '401':
+          description: 'Unable to access with current authentication - must log in again' 
+        '404':
+          description: Product id not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
 definitions:
   Product:
     type: object
@@ -270,6 +254,9 @@ definitions:
         type: integer
         format: int32
         description: Null if product is not in user's cart. Otherwise, tracks the total quantity of the item in the cart. 
+      cartId: 
+        type: string
+        description: Null if product is not in user's cart. Otherwise, gives a unique identifier to a product in the cart so that multiples of the same product can be added with their own unique quantities.
   Brand:
     type: object
     properties:

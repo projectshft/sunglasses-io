@@ -11,7 +11,7 @@ const assert = chai.assert;
 chai.use(chaiHttp);
 //chai.use(require("chai-sorted"));
 
-let testBrands, testProducts, testUsers;
+let testBrands, testProducts, testUsers, accessToken;
 
 beforeEach(function(done) {
     testBrands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf8"));
@@ -136,7 +136,7 @@ describe('POST /api/login', () => {
         })
     })
 
-    it('should not allow login with an inaccurate username', done => {
+    it('should not allow login with an inaccurate password', done => {
         testUsername = testUsers[0].login.username;
         chai.request(server)
         .post('/api/login')
@@ -148,7 +148,7 @@ describe('POST /api/login', () => {
         })
     })
 
-    it('should not allow login with an inaccurate password', done => {
+    it('should not allow login with an inaccurate username', done => {
         testPassword = testUsers[0].login.password;
         chai.request(server)
         .post('/api/login')
@@ -182,39 +182,106 @@ describe('POST /api/login', () => {
     })
 
 })
+
+//send the right headers with access token
+
+describe('route requiring a logged in user', () => {
+
+    beforeEach(function(done) {
+        testUsername = testUsers[0].login.username;
+        testPassword = testUsers[0].login.password;
+        chai.request(server)
+        .post('/api/login')
+        .send({username: testUsername, password: testPassword})
+        .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.username.should.be.a('string');
+            res.body.token.should.be.a('string');
+            res.body.lastUpdated.should.be.a('string')
+            res.body.token.length.should.be.eql(16);
+            accessToken = res.body.token;
+            done();
+        })
+        done();
+    })
+
     
+describe('POST /api/me/cart', () => {
+    it('should POST a selected product and add it to the logged in user\'s cart' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart')
+        .send(testProducts[0])
+        .end();
+        chai.request(server)
+        .post('/api/me/cart')
+        .send(testProducts[0])
+        .end();
+        chai.request(server)
+        .get('/api/me/cart')
+        .end((err,res) => {
+            res.should.have.status(200);
+            done();
+    })
+})
+
+    it('should allow multiples of the same product, each with their own quantity' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart')
+        .send(testProducts[0])
+        .end((err,res) => {
+            res.should.have.status(200);
+            done();
+    })
+    })
+
+    it('should adjust the quantity on the added item to 1' , (done) => {  
+        chai.request(server)
+        .post('/api/me/cart')
+        .send(testProducts[0])
+        .end((err,res) => {
+            res.should.have.status(200);
+            res.body[0].quantity.should.be.eql(1);
+            done();
+    })
+    })
+})
 
 
-// describe('GET /api/me/cart', () => {
-//     it('should GET all the products in the logged in user\'s cart with their quantities' , (done) => {  
+describe('GET /api/me/cart', () => {
+    it('should return an empty cart if no products have been added', done => {
+        chai.request(server)
+        .get('/api/me/cart')
+        .end((err,res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array')
+            res.body.length.should.be.eql(0)
+            done();
+        })
+    })
+
+    it('should GET all the products in the logged in user\'s cart' , done => {  
+        chai.request(server)
+        .get('/api/me/cart')
+        .end((err,res) => {
+            res.should.have.status(200);
+
+            done();
+        })
+    })
+})
+
+
+
+// describe('DELETE /api/me/cart/:productId', () => {
+//     it('should DELETE a selected product from the logged in user\'s cart' , done => {  
+
+//     })
+
+//     it('should leave all other items in the cart untouched' , done => {  
 
 //     })
 // })
-
-
-// // describe('POST /api/me/cart', () => {
-// //     it('should POST a selected product and add it to the logged in user\'s cart' , (done) => {  
-
-// //     })
-
-// //     it('should allow multiples of the same product, each with their own quantity' , (done) => {  
-
-// //     })
-
-// //     it('should adjust the quantity on that item to 1' , (done) => {  
-
-// //     })
-// // })
-
-// // describe('DELETE /api/me/cart/:productId', () => {
-// //     it('should DELETE a selected product from the logged in user\'s cart' , (done) => {  
-
-// //     })
-
-// //     it('should leave all other items in the cart untouched' , (done) => {  
-
-// //     })
-// // })
 
 // // describe('POST /api/me/cart/:productId', () => {
 // //     it('should POST a selected product\'s quantity to update it in the logged in user\'s cart' , (done) => {  
@@ -226,4 +293,4 @@ describe('POST /api/login', () => {
 // //     })
 // // })
 
-
+})
