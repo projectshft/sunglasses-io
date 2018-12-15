@@ -4,21 +4,26 @@
   "description": "This project has been created by a student at Project Shift, a software engineering fellowship located in Downtown Durham.  The work in this repository is wholly of the student based on a sample starter project that can be accessed by looking at the repository that this project forks.",
   "main": "server.js",
   "scripts": {
-    "start": "node app/server.js"
+    "start": "node app/server.js",
+    "test": "mocha --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "chai-sorted": "^0.2.0",
     "finalhandler": "latest",
     "http": "latest",
     "querystring": "^0.2.0",
     "rand-token": "^0.4.0",
-    "router": "^1.3.2"
+    "router": "^1.3.2",
+    "save-dev": "^2.0.0"
   },
   "devDependencies": {
-    "chai": "^4.2.0"
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.0",
+    "mocha": "^5.2.0"
   },
   "repository": {
     "type": "git",
@@ -27,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/b-wa/sunglasses-io/issues"
   },
-  "homepage": "https://github.com/b-wa/sunglasses-io#readme"
+  "homepage": "https://github.com/b-wa/sunglasses-io#readme",
+  "directories": {
+    "test": "test"
+  }
 }
