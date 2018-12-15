@@ -68,4 +68,18 @@ describe("/GET products", () => {
         done();
       });
   });
+  it("should limit results to those with a query string", done => {
+    chai
+      .request(server)
+      .get("/api/products/?query=Sugar")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(1);
+        done();
+      });
+  });
 });
