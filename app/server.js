@@ -140,4 +140,33 @@ router.get('/api/me/cart', (request, response) => {
     }
 });
 
+//POST cart
+router.post('/api/me/cart', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request, accessTokens);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+      const parsedUrl = url.parse(request.originalUrl);
+      const { productId } = queryString.parse(parsedUrl.query);
+      const productToAdd = findProductOrBrand(productId, products);
+      let cartItemToAdd = {
+        id: productToAdd.id,
+        name: productToAdd.name,
+        price: productToAdd.price,
+        quantity: 1
+      };
+      const productIsInCart = findProductOrBrand(productId, loggedInUser.cart);
+
+      if(!productIsInCart) {
+       loggedInUser.cart.push(cartItemToAdd);
+      }
+
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify(cartItemToAdd));
+    }
+});
+
+
 module.exports = server

@@ -166,3 +166,18 @@ describe("/GET cart", () => {
       });
   });
 });
+
+//POST cart
+describe("/POST cart", () => {
+  it("should return status 200, and item added to cart, if user is authenticated", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart?accessToken=abc123&productId=1")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect(res.body).to.deep.equal({ id: "1", name: "Superglasses", price: 150, quantity: 1 });
+        done();
+    });
+  });
+});
