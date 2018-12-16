@@ -13,7 +13,7 @@ describe('/GET brands', () => {
   it.only('should GET all brands', done => {
     chai
     .request(server)
-    .get('/v1/brands')
+    .get('/api/brands')
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
@@ -27,7 +27,7 @@ describe('/GET brands', () => {
   it.only('should return a single brand corresponding with the query', done => {
     chai
     .request(server)
-    .get('/v1/brands?query=DKNY')
+    .get('/api/brands?query=DKNY')
     .end((err, res) => {
       assert.isNotNull(res.body)
       expect(err).to.be.null;
@@ -41,7 +41,7 @@ describe('/GET brands', () => {
   it.only('returns all brands if query is missing', done => {
     chai
     .request(server)
-    .get('/v1/brands?query=')
+    .get('/api/brands?query=')
     .end((err, res) => {
       expect(err).to.be.null;
       expect(res).to.have.status(200);
@@ -54,7 +54,7 @@ describe('/GET brands', () => {
   it.only('fails when query is an unrecognized property', done => {
     chai
     .request(server)
-    .get('/v1/brands?query=sdtfghjbknm')
+    .get('/api/brands?query=sdtfghjbknm')
     .end((err, res) => {
       expect(res).to.have.status(404);
       done();
@@ -67,7 +67,7 @@ describe('/GET products', () => {
   it.only('should GET all products', done => {
     chai
     .request(server)
-    .get('/v1/products')
+    .get('/api/products')
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
@@ -85,10 +85,10 @@ describe('/GET products', () => {
     //product).
     chai
       .request(server)
-      .get("/v1/products?query=thickest")
+      .get("/api/products?query=thickest")
       .end((err, res) => {
         assert.isNotNull(res.body);
-        // expect(err).to.be.null;
+        expect(err).to.be.null;
         expect(res).to.have.status(200);
         expect("Content-Type", "application/json");
         expect(res.body).to.be.an("array");
@@ -99,7 +99,7 @@ describe('/GET products', () => {
   it.only('should fail when query does not yield a product', done => {
     chai
     .request(server)
-    .get('/v1/products?query=cfgvhjbkjb')
+    .get('/api/products?query=cfgvhjbkjb')
     .end((err, res) => {
       expect(res).to.have.status(404);
       done();
@@ -112,7 +112,7 @@ describe('/GET /brands/:id/products', () => {
   it.only('Should get the products of a given brand', done => {
     chai
     .request(server)
-    .get('/v1/brands/1/products')
+    .get('/api/brands/1/products')
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
@@ -126,7 +126,7 @@ describe('/GET /brands/:id/products', () => {
   it.only('Should fail when brand is invalid', done => {
     chai
     .request(server)
-    .get('/v1/brands/4356789/products')
+    .get('/api/brands/4356789/products')
     .end((err, res) => {
       expect(res).to.have.status(404);
       done();
@@ -134,6 +134,51 @@ describe('/GET /brands/:id/products', () => {
   })
 })
 
+
+//Login tests
+describe('/POST /api/login', () => {
+  it.only('Should log in the user if the user exists', done => {
+    let userCredentials = {
+      "username" : "yellowleopard753",
+      "password": "jonjon"
+    }
+    chai
+    .request(server)
+    .post('/api/login')
+    .send(userCredentials)
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a('string');
+      expect(res.body).to.have.lengthOf(16)
+      done();
+    })
+  })
+  it.only(`Should alert the user if the login credential's formatting is incorrect`, done => {
+    let userCredentials = {};
+    chai
+    .request(server)
+    .post('/api/login')
+    .send(userCredentials)
+    .end((err, res) => {
+      expect(res).to.have.status(400);
+      done();
+    })
+  })
+  it.only('Should alert the user if their username or password is incorrect', done => {
+    let userCredentials = {
+      "username" : "hello",
+      "password": "world"
+    }
+    chai
+    .request(server)
+    .post('/api/login')
+    .send(userCredentials)
+    .end((err, res) => {
+      expect(res).to.have.status(401);
+      done();
+    })
+  })
+})
 //GET /ME Test
 //this test doesn't seem to be explicitly necessary per the instructions, but
 //makes sense to me to include it for verifying the user's identity and information
@@ -143,7 +188,7 @@ describe('/GET /me', () => {
   it.only('Should get the object representing the current user', done => {
     chai
     .request(server)
-    .get('/v1/me')
+    .get('/api/me')
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
@@ -159,7 +204,7 @@ describe('/GET /me/cart', () => {
   it.only(`should GET the currently logged-in user's cart`, done => {
     chai
     .request(server)
-    .get('/v1/me/cart')
+    .get('/api/me/cart')
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
@@ -169,46 +214,23 @@ describe('/GET /me/cart', () => {
       done();
     })
   })
-  // it("should fail if trying to access another user's cart", done => {
-  //   chai
-  //   .request(server)
-  //   .get('/v1/otherUser/cart')
-  //   .end((err, res) => {
-  //     expect(err).to.not.be.null;
-  //     expect(res).to.have.status(404);
-  //     done();
-  //   })
-  // })
 })
 
-//GET brands/:id/products test
-// describe('/GET products', () => {
-//   it.only('should GET all products from a specific brand', done => {
-
-//   })
-// })
-
-// //POST api/login test
-// describe('/POST login', () => {
-//   it.only('should allow a user to login', done => {
-
-//   })
-// })
 //POST /me/cart test
 describe('/POST cart', () => {
   it.only("should POST an item to the cart", done => {
-    let item = {
-      id: "8",
-      categoryId: "4",
-      name: "Coke cans",
-      description: "The thickest glasses in the world",
-      price: 110,
-      imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    let itemToAdd = {
+      "id": "8",
+      "categoryId": "4",
+      "name": "Coke cans",
+      "description": "The thickest glasses in the world",
+      "price": 110,
+      "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
     }
     chai
     .request(server)
-    .post('/v1/me/cart')
-    .send(item)
+    .post('/api/me/cart')
+    .send(itemToAdd)
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
