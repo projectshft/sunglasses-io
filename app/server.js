@@ -62,16 +62,14 @@ server.listen(PORT, err => {
     //if there is an empty query all brands should be returned otherwise
     //the brand returned should be the query in question
     if (query !== undefined) {
-      brandsToReturn = brands.filter(brand => brand.name === query)
+      brandsToReturn = brands.filter(brand => brand.name.includes(query));
 
-      if (!brandsToReturn) {
+      if (brandsToReturn.length === 0) {
         res.writeHead(404, `ERROR: Brand not found!`);
         return res.end();
       }
     } else { 
       brandsToReturn = brands;
-        // res.writeHead(200, {'Content-Type': 'application/json'});
-        // return res.end(JSON.stringify(brandsToReturn))
     }
     res.writeHead(200, {'Content-Type': 'application/json'});
     return res.end(JSON.stringify(brandsToReturn))
@@ -87,7 +85,7 @@ server.listen(PORT, err => {
       //for choosing to limit queries by description as opposed to name or other property
       productsToReturn = products.filter(product => product.description.includes(query));
 
-      if (!productsToReturn) {
+      if (productsToReturn.length === 0) {
         res.writeHead(404, 'ERROR: Product Not Found!');
         return res.end();
       }
@@ -133,14 +131,13 @@ server.listen(PORT, err => {
 //POST ME/CART
   router.post('/v1/me/cart', (req, res) => {
     cart = me.cart;
-    const { id } = request.params;
-    const item = findObject(id, products);
-    //if user is not logged in
-    if (!me) {
-      res.writeHead(404, 'Please log into our system!');
-    return res.end();
+    // const item = findObject(id, products);
+    let item = Object.assign(req.body);
+    if (!item) {
+      res.writeHead(404, 'That product does not exist');
+      return res.end();
     }
-    res.user.writeHead(200);
+    res.writeHead(200);
     cart.push(item);
     return res.end(JSON.stringify(cart))
   })
