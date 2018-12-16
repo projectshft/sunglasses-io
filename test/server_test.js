@@ -234,4 +234,19 @@ describe("/DELETE cart", () => {
           })
       });
   });
+  it("should return status 404 for product not found in cart", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart?accessToken=abc123&productId=1")
+      .end((err, res) => {
+        chai
+          .request(server)
+          .delete("/api/me/cart/2?accessToken=abc123")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(404);
+            done();
+          })
+      });
+  });
 });
