@@ -36,10 +36,6 @@ const server = http.createServer((req, res) => {
 });
 
 
-
-
-
-
 //GET list of all brands
 router.get("/api/brands", (req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -47,13 +43,22 @@ router.get("/api/brands", (req, res) => {
 })
 
 //GET list of all sunglasses made by that brand (by brand id)
-router.get("/api/brands/{id}/products", (req, res) => {
-    const { id } = request.params;
-    const items = findObject(id, products);
-    
+router.get("/api/brands/:id/products", (req, res) => {
+    const { id } = req.params;
+    let items = products.filter(({id}) =>{
+        if ({id} == products[brandId]) {
+            return items;
+        }         
+        // if (!items) {
+        // res.writeHead(404, "We weren't able to find any results");
+        // return res.end();
+    }
+)
     res.writeHead(200, { "Content-Type": "application/json" });
 
     return res.end(JSON.stringify(items));
-})
+    
+    
+});
 
 module.exports = server;

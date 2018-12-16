@@ -29,11 +29,10 @@ describe("/GET products by brandId", () => {
     it('should return a list of sunglasses by brand id', (done) => {
         //act
         chai.request(server)
-            .get("/api/brands/{id}/products")
+            .get("/api/brands/1/products")
         //assert
             .end((err, res) => {
-                expect(res.body).to.have.status(200)
-                assert.exists(res, 'res is neither `null` nor `undefined`')
+                expect(res).to.have.status(200)
                 expect(res.body).to.be.an("array")
                 assert("Content-Type", "application/json")
                 done();
