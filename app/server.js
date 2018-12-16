@@ -69,7 +69,7 @@ router.get('/api/products', (request, response) => {
     queryArray = query.split(' ');
   }
   
-  if (query !== undefined) {
+  if (query !== undefined && query !== ""){
     productsToReturn = findProductsByQueryTerms(queryArray, products);
   } else {
     productsToReturn = products;

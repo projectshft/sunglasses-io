@@ -71,7 +71,7 @@ describe("/GET products", () => {
   it("should limit results to those with a query string", done => {
     chai
       .request(server)
-      .get("/api/products/?query=Sugar")
+      .get("/api/products?query=Sugar")
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
@@ -79,6 +79,20 @@ describe("/GET products", () => {
         expect("Content-Type", "application/json");
         expect(res.body).to.be.an("array");
         expect(res.body).to.have.lengthOf(1);
+        done();
+      });
+  });
+  it("returns all products if query is missing", done => {
+    chai
+      .request(server)
+      //property doesn't exist
+      .get("/api/products?query=")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(11);
         done();
       });
   });
