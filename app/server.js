@@ -151,6 +151,10 @@ router.post('/api/me/cart', function(request,response) {
       const parsedUrl = url.parse(request.originalUrl);
       const { productId } = queryString.parse(parsedUrl.query);
       const productToAdd = findProductOrBrand(productId, products);
+      if (!productToAdd) {
+        response.writeHead(404, "Product not found");
+        response.end();
+      }
       let cartItemToAdd = {
         id: productToAdd.id,
         name: productToAdd.name,

@@ -183,10 +183,20 @@ describe("/POST cart", () => {
   it("should return 401 code if requesting user isn't logged in", done => {
     chai
       .request(server)
-      .get("/api/me/cart?accessToken=abc124&productId=1")
+      .post("/api/me/cart?accessToken=abc124&productId=1")
       .end((err, res) => {
         expect(err).to.be.null;
         expect(res).to.have.status(401);
+        done();
+      });
+  });
+  it("should return 404 code if product not found", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart?accessToken=abc123&productId=12")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(404);
         done();
       });
   });
