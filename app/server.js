@@ -6,7 +6,7 @@ var Router = require('router');
 var bodyParser  = require('body-parser');
 const url = require("url");
 var uid = require('rand-token').uid;
-const { findProductOrBrand } = require("./utils");
+const { findProductOrBrand, findProductsByQueryTerms } = require("./utils");
 
 // State holding variables
 let brands = [];
@@ -63,12 +63,14 @@ router.get("/api/brands/:brandId/products", (request, response) => {
 router.get('/api/products', (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = queryString.parse(parsedUrl.query);
+  let queryArray = [];
   let productsToReturn = [];
-
+  if (query) {
+    queryArray = query.split(' ');
+  }
+  
   if (query !== undefined) {
-    productsToReturn = products.filter(product => {
-      return (product.name.includes(query) || product.description.includes(query))
-    });
+    productsToReturn = findProductsByQueryTerms(queryArray, products);
   } else {
     productsToReturn = products;
   }
