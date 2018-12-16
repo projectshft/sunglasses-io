@@ -189,7 +189,7 @@ router.delete('/api/me/cart/:productId', function(request,response) {
     //valid product to delete from a logged in user
     const newCart = loggedInUser.cart.filter(item => item.id !== itemToDelete.id);
     loggedInUser.cart = newCart;
-    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.writeHead(200, "Operation successful");
     response.end();
   }
 });
