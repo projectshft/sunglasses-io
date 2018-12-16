@@ -116,4 +116,28 @@ describe("/POST, the login function", () => {
         done();
     });
   })
+  it("should return status 400 for incorrectly formatted request", done => {
+    let userCredentials = { user: "susanna.richards@example.com", password: "jonjon" }
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(userCredentials)
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(400);
+        done();
+    });
+  })
+  it("should return status 401 for invalid username/password", done => {
+    let userCredentials = { username: "Jay@example.com", password: "abc123" }
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(userCredentials)
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(401);
+        done();
+    });
+  })
 });
