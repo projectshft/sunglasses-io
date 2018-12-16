@@ -21,8 +21,30 @@ const findProductsByQueryTerms = (queryArray, products) => {
     })
     return productsToReturn
  }
+
+
+ //function to parse token from query parameter, check for valid and current token, and finally returns the current token (or null if not found)
+ const getValidTokenFromRequest = (request, accessTokens) => {
+   const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+   var parsedUrl = require('url').parse(request.url,true)
+   if (parsedUrl.query.accessToken) {
+     // Verify the access token to make sure it's valid and not expired
+     let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+     if (currentAccessToken) {
+       return currentAccessToken;
+     } else {
+       return null;
+     }
+   } else {
+     return null;
+   }
+ }
  
  module.exports = {
    findProductOrBrand,
-   findProductsByQueryTerms
+   findProductsByQueryTerms,
+   getValidTokenFromRequest
  };

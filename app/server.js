@@ -6,14 +6,19 @@ var Router = require('router');
 var bodyParser  = require('body-parser');
 const url = require("url");
 var uid = require('rand-token').uid;
-const { findProductOrBrand, findProductsByQueryTerms } = require("./utils");
+const { findProductOrBrand, findProductsByQueryTerms, getValidTokenFromRequest } = require("./utils");
 
 // State holding variables
 let brands = [];
 let products = [];
 let users = [];
 let loggedInUser = {};
-let accessTokens = [];
+//hard-code first accessToken for testing purposes
+let accessTokens = [{
+  username: "susanna.richards@example.com",
+  lastUpdated: new Date(),
+  token: "abc123"
+}];
 
 const PORT = 3001;
 
@@ -120,6 +125,19 @@ router.post('/api/login', function(request,response) {
     response.writeHead(400, "Incorrectly formatted request");
     response.end();
   }
-  });
+});
+
+//GET cart
+router.get('/me/api/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request, accessTokens);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify(loggedInUser.cart));
+    }
+});
 
 module.exports = server

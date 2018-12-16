@@ -5,11 +5,8 @@ const expect = chai.expect;
 const assert = chai.assert;
 let sinon = require('sinon')
 
-
 chai.use(chaiHTTP);
 chai.use(require("chai-sorted"));
-
-
 
 //GET BRANDS
 describe("/GET brands", () => {
@@ -103,7 +100,7 @@ describe("/GET products", () => {
 
 //POST LOGIN
 describe("/POST, the login function", () => {
-  it("should return status 200 if user is authenticated", done => {
+  it("should return status 200, and a token, if user is authenticated", done => {
     let userCredentials = { username: "susanna.richards@example.com", password: "jonjon" }
     chai
       .request(server)
@@ -140,4 +137,22 @@ describe("/POST, the login function", () => {
         done();
     });
   })
+});
+
+//GET CART
+describe("/GET cart", () => {
+  it("should GET all products in the cart for a logged in user", done => {
+    chai
+      .request(server)
+      .get("/me/api/cart?accessToken=abc123")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(0);
+        done();
+      });
+  });
 });
