@@ -180,4 +180,14 @@ describe("/POST cart", () => {
         done();
     });
   });
+  it("should return 401 code if requesting user isn't logged in", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart?accessToken=abc124&productId=1")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
 });
