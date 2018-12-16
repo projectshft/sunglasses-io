@@ -44,16 +44,23 @@ router.get("/api/brands", (req, res) => {
 
 //GET list of all sunglasses made by that brand (by brand id)
 router.get("/api/brands/:id/products", (req, res) => {
+    //get id parameter (product.brandId = brand.id)
     const { id } = req.params;
-    let items = products.filter(({id}) =>{
-        if ({id} == products[brandId]) {
-            return items;
-        }         
+    const items = [];
+
+    //get all products with that brandId
+    products.forEach(function (product) {
+        if (id == product.brandId) {
+            items.push(product);
+      }
+    }) 
+    
+
         // if (!items) {
         // res.writeHead(404, "We weren't able to find any results");
-        // return res.end();
-    }
-)
+//         // return res.end();
+//     }
+// )
     res.writeHead(200, { "Content-Type": "application/json" });
 
     return res.end(JSON.stringify(items));

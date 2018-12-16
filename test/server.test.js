@@ -26,7 +26,7 @@ describe("/GET brands", () => {
 
 //GET Products by Brand id
 describe("/GET products by brandId", () => {
-    it('should return a list of sunglasses by brand id', (done) => {
+    it('should return a list of sunglasses by brand id', done => {
         //act
         chai.request(server)
             .get("/api/brands/1/products")
