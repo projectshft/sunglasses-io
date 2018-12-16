@@ -109,6 +109,22 @@ describe('/GET products', () => {
   })
 })
 
+//GET /ME Test
+describe('/GET /me', () => {
+  it.only('Should get the object representing the current user', done => {
+    chai
+    .request(server)
+    .get('/v1/me')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(200);
+      expect('Content-Type', 'application/json');
+      expect(res.body).to.be.an("object");
+      done();
+    })
+  })
+})
 //GET ME/Cart test
 describe('/GET /me/cart', () => {
   it.only(`should GET the currently logged-in user's cart`, done => {
@@ -120,9 +136,20 @@ describe('/GET /me/cart', () => {
       expect(err).to.be.null;
       expect(res).to.have.status(200);
       expect('Content-Type', 'application/json');
+      expect(res.body).to.be.an("array");
       done();
     })
   })
+  // it("should fail if trying to access another user's cart", done => {
+  //   chai
+  //   .request(server)
+  //   .get('/v1/otherUser/cart')
+  //   .end((err, res) => {
+  //     expect(err).to.not.be.null;
+  //     expect(res).to.have.status(404);
+  //     done();
+  //   })
+  // })
 })
 
 //GET brands/:id/products test
@@ -135,12 +162,6 @@ describe('/GET /me/cart', () => {
 // //POST api/login test
 // describe('/POST login', () => {
 //   it.only('should allow a user to login', done => {
-
-//   })
-// })
-//GET api/me/cart test
-// describe('/GET cart', () => {
-//   it.only("should GET the currently logged in user's current cart", done => {
 
 //   })
 // })
