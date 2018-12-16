@@ -9,7 +9,7 @@ const assert = chai.assert;
 
 chai.use(chaiHttp);
 
-let testBrands, testProducts, testUsers, accessToken;
+let testBrands, testProducts, testUsers, accessToken, itemToUpdateQty;
 
 describe('sunglasses.io tests for', () => {
   //ensure fresh data for each test
@@ -427,7 +427,7 @@ describe('sunglasses.io tests for', () => {
       it('should fail to update if the request does not send a token in the headers' , (done) => {  
         chai.request(server)
         .post('/api/me/cart/1')
-        .send("5")
+        .send({quantity : 5})
         .end((err,res) => {
           res.should.have.status(401);
           res.body.should.be.empty;
@@ -438,7 +438,7 @@ describe('sunglasses.io tests for', () => {
       it('should fail to update if the request sends an inaccurate access token' , (done) => {  
         chai.request(server)
         .post('/api/me/cart/1')
-        .send("5")
+        .send({quantity : 5})
         .set("x-authentication", 'Iamafailingtoken')
         .end((err,res) => {
           res.should.have.status(401);
@@ -447,14 +447,95 @@ describe('sunglasses.io tests for', () => {
         })
       })
 
-    // it('should POST a selected product\'s quantity to update it in the logged in user\'s cart' , (done) => {  
+      //put an item in the cart and grab it's id so we know we're posting to a brand new one each time
+      beforeEach(function(done) {
+        chai.request(server)
+        .post('/api/me/cart')
+        .send({productId : 1})
+        .set('x-authentication', accessToken)
+        .end((err,res) => {
+          cartIdToUpdate = res.body.cartId;
+          done();
+        })
+      })
 
-    // })
+      it('should POST a selected product\'s quantity to increase it in the logged in user\'s cart' , (done) => {  
+        chai.request(server)
+        .post(`/api/me/cart/${cartIdToUpdate}`)
+        .send({quantityIncrease : 5})
+        .set("x-authentication", accessToken)
+        .end((err,res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.cartId.should.eql(cartIdToUpdate);
+          res.body.quantity.should.eql(6);
+          done();
+        })
+      })
 
-    // it('should leave all other items in the cart untouched' , (done) => {  
+      it('should only update the quantity of the provided item and leave other items untouched', (done) => {  
+        //put a new item in the cart
+        chai.request(server)
+        .post('/api/me/cart')
+        .send({productId : 2})
+        .set('x-authentication', accessToken)
+        .then(newItemRes => {
+          let newItemCartId = newItemRes.body.cartId;
+          chai.request(server)
+          //update another item's quantity to 6
+          .post(`/api/me/cart/${cartIdToUpdate}`)
+          .send({quantityIncrease : 5})
+          .set("x-authentication", accessToken)
+          .then( () => {
+            chai.request(server)
+            //then get the cart again
+            .get('/api/me/cart')
+            .set('x-authentication', accessToken)
+            .end((err,res) => {
+              res.should.have.status(200);
+              let productToTest = res.body.find(product => product.cartId == newItemCartId);
+              //verify that the new item's quantity is still 1
+              productToTest.quantity.should.eql(1);
+              done();
+          })
+        })
+      })
+    })
 
-    // })
-})
+      it('should fail if an invalid cart id is provided' , (done) => {  
+        chai.request(server)
+        .post(`/api/me/cart/FakeId`)
+        .send({quantityIncrease : 5})
+        .set("x-authentication", accessToken)
+        .end((err,res) => {
+          res.should.have.status(404);
+          res.body.should.be.empty;
+          done()
+        })
+      })
 
-})
+      it('should fail if a body is not provided' , (done) => {  
+        chai.request(server)
+        .post(`/api/me/cart/${cartIdToUpdate}`)
+        .set("x-authentication", accessToken)
+        .end((err,res) => {
+          res.should.have.status(400);
+          res.body.should.be.empty;
+          done();
+        })
+      })
+
+      it('should fail if a non-number quantity increase is provided' , (done) => {  
+        chai.request(server)
+        .post(`/api/me/cart/${cartIdToUpdate}`)
+        .send({quantityIncrease : "NotANumber"})
+        .set("x-authentication", accessToken)
+        .end((err,res) => {
+          res.should.have.status(400);
+          res.body.should.be.empty;
+          done();
+        })
+      })
+    })
+  })
 })

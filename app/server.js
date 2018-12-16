@@ -213,9 +213,25 @@ myRouter.delete('/api/me/cart/:cartId', (req,res) => {
 }) 
 
 myRouter.post('/api/me/cart/:cartId', (req,res) => {
+  //if a valid user is logged in
   if (checkValidityOfToken(req)) {
-    res.writeHead(200, CONTENT_HEADERS);
-    res.end();
+    //find the cartId of the item to update
+    let productToUpdate = users[currentUserIndex].cart.find(product => product.cartId == req.params.cartId);
+    if (productToUpdate) {
+      //ensure that the request body was formatted correctly
+      if (req.body.quantityIncrease && Number(req.body.quantityIncrease)) {
+        //because productToUpdate is pointing to the same object, this also updates the user's cart
+        productToUpdate.quantity += req.body.quantityIncrease;   
+        res.writeHead(200, CONTENT_HEADERS);
+        res.end(JSON.stringify(productToUpdate));
+      } else {
+        res.writeHead(400, "Bad request - a valid quantity increase is required");
+        res.end()
+      }
+    } else {
+      res.writeHead(404, "Cart ID not found");
+      res.end();
+    }
   } else {
     res.writeHead(401, "Your authentication is invalid, please log in again");
     res.end();
