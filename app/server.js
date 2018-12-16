@@ -16,16 +16,9 @@ let currentUserIndex = null;
 let cartId = 1;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-// Setup router
+// Set up router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
-
-//for sorting products by price
-const compare = (a,b) => {
-  console.log('first price', a.price);
-  console.log('second price', b.price);
-  return Number(a.price) > Number(b.price);
-}
 
 const checkValidityOfToken = req => {
   //get the token from the headers
@@ -49,6 +42,7 @@ const checkValidityOfToken = req => {
   }
 }
 
+//set up the server and read in the initial data
 const server = http.createServer(function (req, res) {
   myRouter(req, res, finalHandler(req, res))
 });
@@ -69,35 +63,40 @@ myRouter.get('/api/brands', (req,res) => {
 }) 
 
 myRouter.get('/api/brands/:id/products', (req,res) => {
+  //make sure there are products available to return with that brand ID
   const productsByBrand = products.filter(product => product.brandId == req.params.id);
   if (productsByBrand.length > 0) {
     res.writeHead(200, CONTENT_HEADERS);
     res.end(JSON.stringify(productsByBrand));
   } else {
-    res.writeHead(404, "Brand ID not found");
+    res.writeHead(404, "Brand ID not found or no products currently in that brand");
     res.end();
   }
 }) 
 
-//account for different cases
 myRouter.get('/api/products', (req,res) => {
+  //get the searched term out of the URL
   const parsedUrl = url.parse(req.originalUrl);
   let { search } = queryString.parse(parsedUrl.query);
   let productsToReturn = [];
+  //if a search wasn't included or if it was empty, give back all the products
   if (search === undefined || search === "") {
     productsToReturn  = products;
     res.writeHead(200, CONTENT_HEADERS);
     res.end(JSON.stringify(productsToReturn));
   } else {
+      //if a search was included, then match the name or description on existing products
       search = search.toUpperCase();
       productsToReturn = products.filter(product => {
         let productName = product.name.toUpperCase();
         let productDescription = product.description.toUpperCase();
         return (productName.includes(search) || productDescription.includes(search));
       });
-    if (!productsToReturn) {
+    //if there was a search and nothing matched, then tell the user
+    if (productsToReturn.length === 0) {
       res.writeHead(404, "No products were found with that search");
       res.end();
+    //otherwise, return what matched the search
     } else {
       res.writeHead(200, CONTENT_HEADERS);
       res.end(JSON.stringify(productsToReturn));
@@ -137,7 +136,7 @@ myRouter.post('/api/login', (req,res) => {
         res.end();
       }
     } else {
-      // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+      // If they are missing one of the parameters, tell the user that something was wrong in the formatting of the response
       res.writeHead(400, "Incorrectly formatted request: need a username and password");
       res.end();
     }; 

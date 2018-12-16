@@ -1,7 +1,6 @@
 swagger: '2.0'
 info:
-  description: >-
-    This is an API to support sunglasses.io.
+  description: This is an API to support sunglasses.io.
   version: 1.0.0
   title: Sunglasses Store
   contact:
@@ -11,6 +10,8 @@ basePath: /api
 schemes:
   - http
 produces:
+  - application/json
+consumes:
   - application/json
 paths:
   '/brands':
@@ -32,7 +33,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   '/brands/{id}/products':  
-     get:
+    get:
       tags:
         - Brands
       summary: Get a list of all products by brand.
@@ -51,12 +52,14 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '404':
+          description: Brand not found or no products in that brand.
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
   '/products':  
-     get:
+    get:
       tags:
         - Products
       summary: Get a list of all products.
@@ -65,22 +68,22 @@ paths:
       parameters:
         - name: search
           in: query
-          description: A query string to match against the product name.
+          description: A query string to match against the product name or description.
           required: false
           type: string
       responses:
-       '200':
-          description: An array of products.
+        '200':
+          description: An array of products
           schema:
             type: array
             items:
               $ref: '#/definitions/Product'
         '404':
-            description: No products found.
+          description: No products found
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'        
+            $ref: '#/definitions/Error'
   '/login':  
      post:
       tags:
@@ -89,31 +92,35 @@ paths:
       description: 'Takes the user information and authenticates them.'
       operationId: loginUser
       parameters:
-        - name: username
-          in: query
-          description: The user's username.
+        - in: body
+          name: login
           required: true
-          type: string
-        - name: password
-          in: query
-          description: The user's password in clear text
-          required: true
-          type: string
-      responses:
-        '200':
-          description: successful operation
+          description: The username and password of the user logging in.
           schema:
             type: object
-          properties:
-                username:
-                  type: string
-                  description: Username of user associated with this login request
-                lastUpdated:  
-                  type: string
-                  description: Represents the last time that this user submitted their login info and refreshed their access token
-                token: 
-                  type: string
-                  description: Access token to be sent in the headers of subsequent requests by this user to access protected routes 
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: successful operation - returns an access token
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: Username of user associated with this login request
+              lastUpdated:  
+                type: string
+                description: Represents the last time that this user submitted their login info and refreshed their access token
+              token: 
+                type: string
+                description: Access token to be sent in the headers of subsequent requests by this user to access protected routes 
         '400':
           description: Username and password must both be supplied.
         '401': 
@@ -127,7 +134,7 @@ paths:
       tags:
         - Cart
       summary: Get current items in logged in user's cart.
-      description: 'Returns an array of all of the products currently in the user cart, along with their quantities.'
+      description: 'Returns an array of all of the products currently in the user cart, along with their quantities. Requires authentication via a valid access token in the headers: {x-authentication: "16charactertoken"}'
       operationId: getCartItems
       responses:
         '200':
@@ -146,14 +153,20 @@ paths:
       tags:
         - Cart
       summary: Adds a new item to the user's cart.
-      description: 'Adds a new item to the user cart'
+      description: 'Adds a new item to the user cart. Requires authentication via a valid access token in the headers: {x-authentication: "16charactertoken"}'
       operationId: addCartItem
       parameters:
-        - name: productId
-          in: query
-          description: The id of the product that the user wants to add to the cart.
+        - in: body
+          name: productId
           required: true
-          type: string
+          description: The productId of the product that the user wants to add to the cart.
+          schema:
+            type: object
+            required:
+              - productId
+            properties:
+              productId:
+                type: string
       responses:
         '200':
           description: successful operation
@@ -172,7 +185,7 @@ paths:
       tags:
         - Cart
       summary: Delete an item from the user's cart.
-      description: 'Delete the selected item from the user cart'
+      description: 'Delete the selected item from the user cart. Requires authentication via a valid access token in the headers: {x-authentication: "16charactertoken"}'
       operationId: deleteCartItem
       parameters:
         - name: cartId
@@ -197,7 +210,7 @@ paths:
       tags:
         - Cart
       summary: Update an item quantity in the user's cart.
-      description: 'Update the item quantity in the user cart'
+      description: 'Update the item quantity in the user cart. Requires authentication via a valid access token in the headers: {x-authentication: "16charactertoken"}'
       operationId: updateCartItem
       parameters:
         - name: cartId
@@ -205,19 +218,25 @@ paths:
           description: The cart id of the product that the user wants to update.
           required: true
           type: string
-        - name: quantity
-          in: body
-          description: The requested new quantity of the item.
+        - in: body
+          name: quantity increase
           required: true
-          type: number
-          format: int32
+          description: The amount to increase the product's quantity by
+          schema:
+            type: object
+            required:
+              - quantityIncrease
+            properties:
+              quantityIncrease:
+                type: number
+                format: int32
       responses:
         '200':
           description: successful operation
           schema:
             type: string
         '400': 
-          description: 'Bad request, unable to process without a product ID being provided'
+          description: 'Bad request, unable to process without a product ID and valid quantity increase being provided'
         '401':
           description: 'Unable to access with current authentication - must log in again' 
         '404':

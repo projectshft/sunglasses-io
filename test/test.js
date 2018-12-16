@@ -22,7 +22,7 @@ describe('sunglasses.io tests for', () => {
 
 
   describe('GET /api/brands', () => {
-    it('should GET all the brands', (done) => {
+    it('should GET all the brands', done => {
       chai.request(server)
     .get('/api/brands')
     .end((err, res) => {
@@ -36,7 +36,8 @@ describe('sunglasses.io tests for', () => {
   })
 
   describe('GET /api/brands/:id/products', () => {
-    it('should GET all the products of a given brand', (done) => {  
+    it('should GET all the products of a given brand', done => { 
+        //follow the same logic to filter the matching data 
         const productsByBrand = testProducts.filter(product => product.brandId == 1);
         chai.request(server)
        .get('/api/brands/1/products')
@@ -44,14 +45,15 @@ describe('sunglasses.io tests for', () => {
         res.should.have.status(200)
         expect("Content-Type", "application/json");
         res.body.should.be.an('array')
+        //make sure the length matches to verify the process is working correctly given the same brand ID
         res.body.length.should.be.eql(productsByBrand.length);
        done();
      })
     })
 
-    it('shouldn\'t return any products if the brand id is invalid', (done) => {
+    it('shouldn\'t return any products if the brand id is invalid', done => {
         chai.request(server)
-       .get('/api/brands/dsf/products')
+       .get('/api/brands/fakeBrandId/products')
        .end((err, res) => {
         res.should.have.status(404);
         res.body.should.be.empty;
@@ -61,7 +63,7 @@ describe('sunglasses.io tests for', () => {
   })
 
   describe('GET /api/products', () => {
-    it('should GET all the products', (done) => {  
+    it('should GET all the products', done => {  
         chai.request(server)
         .get('/api/products')
         .end((err, res) => {
@@ -73,7 +75,8 @@ describe('sunglasses.io tests for', () => {
       })
     })
 
-    it('should limit results to those with a query string', (done) => {
+     //hardcoded search that we know matches one item right now - this could fail if new data is added that matches the search
+    it('should limit results to those with a query string if one is provided', (done) => {
       chai.request(server)
       .get('/api/products?search=Black')
       .end((err, res) => {
@@ -95,6 +98,7 @@ describe('sunglasses.io tests for', () => {
       })
     })
 
+    //hardcoded search that we know matches one item right now - this could fail if new data is added that matches the search
     it('allows search to be made in different letter casing', done => {
       chai.request(server)
       .get('/api/products?search=BLAck')
@@ -102,6 +106,16 @@ describe('sunglasses.io tests for', () => {
         res.should.have.status(200)
         res.body.should.be.an('array')
         res.body.length.should.be.eql(1)
+        done();
+      })
+    })
+
+    it('fails if no products are found with a given query', done => {
+      chai.request(server)
+      .get('/api/products?search=BadSearchThatDoesNotMatch')
+      .end((err,res) => {
+        res.should.have.status(404);
+        res.body.should.be.empty;
         done();
       })
     })
@@ -125,10 +139,21 @@ describe('sunglasses.io tests for', () => {
       })
     })
 
-    it('should require both username and password before attempting to log in', done => {
+    it('should require a password to be entered', done => {
       chai.request(server)
       .post('/api/login')
       .send({username: testUsername})
+      .end((err,res) => {
+          res.should.have.status(400);
+          res.body.should.be.empty;
+          done();
+      })
+    })
+
+    it('should require a username to be entered', done => {
+      chai.request(server)
+      .post('/api/login')
+      .send({password: testPassword})
       .end((err,res) => {
           res.should.have.status(400);
           res.body.should.be.empty;
@@ -235,7 +260,7 @@ describe('sunglasses.io tests for', () => {
         chai.request(server)
         .post('/api/me/cart')
         .set('x-authentication', accessToken)
-        .send({productId: 5})
+        .send({productId: "5"})
         .then( () => { 
           chai.request(server)
           .get('/api/me/cart')
@@ -254,7 +279,7 @@ describe('sunglasses.io tests for', () => {
       it('should fail to post if the request does not send a token in the headers' , (done) => {  
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId: 5})
+        .send({productId: "5"})
         .end((err,res) => {
           res.should.have.status(401);
           res.body.should.be.empty;
@@ -265,7 +290,7 @@ describe('sunglasses.io tests for', () => {
       it('should fail to post if the request sends an inaccurate access token' , (done) => {  
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId: 5})
+        .send({productId: "5"})
         .set("x-authentication", 'Iamafailingtoken')
         .end((err,res) => {
           res.should.have.status(401);
@@ -277,7 +302,7 @@ describe('sunglasses.io tests for', () => {
       it('should POST a selected product to the cart with quantity 1', done => {  
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId: 5})
+        .send({productId: "5"})
         .set("x-authentication", accessToken)
         .end((err,res) => {
           expect(err).to.be.null;
@@ -294,14 +319,14 @@ describe('sunglasses.io tests for', () => {
         let firstCartId;
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId: 5})
+        .send({productId: "5"})
         .set("X-Authentication",accessToken)
         .end((err,res) => {
             firstCartId = res.body.cartId;
         })
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId: 5})
+        .send({productId: "5"})
         .set("X-Authentication",accessToken)
         .end((err,res) => {
             res.should.have.status(200);
@@ -324,7 +349,7 @@ describe('sunglasses.io tests for', () => {
         })
       })
 
-      it('should fail if no productID is sent' , (done) => {  
+      it('should fail if no product ID is sent' , (done) => {  
         chai.request(server)
         .post('/api/me/cart')
         .set("X-Authentication",accessToken)
@@ -363,7 +388,7 @@ describe('sunglasses.io tests for', () => {
       it('should DELETE a selected product from the logged in user\'s cart' , done => {  
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId : 1})
+        .send({productId : "1"})
         .set('x-authentication', accessToken)
         .then( postRes => {
           let idToDelete = postRes.body.cartId;
@@ -447,11 +472,11 @@ describe('sunglasses.io tests for', () => {
         })
       })
 
-      //put an item in the cart and grab it's id so we know we're posting to a brand new one each time
+      //put an item in the cart and grab its id so we know we're posting to a brand new one each time
       beforeEach(function(done) {
         chai.request(server)
         .post('/api/me/cart')
-        .send({productId : 1})
+        .send({productId : "1"})
         .set('x-authentication', accessToken)
         .end((err,res) => {
           cartIdToUpdate = res.body.cartId;
