@@ -53,19 +53,18 @@ router.get("/api/brands/:id/products", (req, res) => {
         if (id == product.brandId) {
             items.push(product);
       }
-    }) 
-    
-
-        // if (!items) {
-        // res.writeHead(404, "We weren't able to find any results");
-//         // return res.end();
-//     }
-// )
+    })         
     res.writeHead(200, { "Content-Type": "application/json" });
 
     return res.end(JSON.stringify(items));
-    
-    
 });
+
+//GET list of all products from query
+router.get("/api/products", (req, res) => {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(products));
+})
+
+
 
 module.exports = server;
