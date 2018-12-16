@@ -83,7 +83,7 @@ describe('/GET products', () => {
     //for this test, I made the assumption that the user would search for
     //glasses that fit a description of the glasses they wanted (i.e. if
     //I wanted to find a specific style while not knowing the actual model of the 
-    //product)
+    //product).
     chai
       .request(server)
       .get("/v1/products?query=thickest")
@@ -96,7 +96,7 @@ describe('/GET products', () => {
         expect(res.body).to.have.lengthOf(1);
         done();
       });
-  });
+    });
   it.only('should fail when query does not yield a product', done => {
     chai
     .request(server)
@@ -109,7 +109,38 @@ describe('/GET products', () => {
   })
 })
 
+//GET Products within Brand Test
+describe('/GET /brands/:id/products', () => {
+  it.only('Should get the products of a given brand', done => {
+    chai
+      .request(server)
+      .get('/v1/brands/1/products')
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect('Content-Type', 'application/json');
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(3);
+        done();
+    })
+  })
+  it.only('Should fail when brand is invalid', done => {
+    chai
+      .request(server)
+      .get('/v1/brands/4356789/products')
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+      })
+  })
+})
+
 //GET /ME Test
+//this test doesn't seem to be explicitly necessary per the instructions, but
+//makes sense to me to include it for verifying the user's identity and information
+//in a real life situation (i.e. in an expanded version of the application, allowing to 
+//check if the user has outdated information to then eventually update)
 describe('/GET /me', () => {
   it.only('Should get the object representing the current user', done => {
     chai
@@ -165,12 +196,36 @@ describe('/GET /me/cart', () => {
 
 //   })
 // })
-// //POST api/me/cart test
-// describe('/POST cart', () => {
-//   it.only("should POST an item to the cart", done => {
-
-//   })
-// })
+//POST /me/cart test
+describe('/POST cart', () => {
+  it.only("should POST an item to the cart", done => {
+    let item = {
+      id: "8",
+      categoryId: "4",
+      name: "Coke cans",
+      description: "The thickest glasses in the world",
+      price: 110,
+      imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
+    chai
+    .request(server)
+    .post('/v1/me/item/cart')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(200);
+      expect('Content-Type', 'application/json');
+      expect(res.body).to.be.an("object");
+      expect(res.body).to.have.property('id');
+      expect(res.body).to.have.property('categoryId');
+      expect(res.body).to.have.property('name');
+      expect(res.body).to.have.property('description');
+      expect(res.body).to.have.property('price');
+      expect(res.body).to.have.property('imageUrls')
+      done();
+    })
+  })
+})
 // //DELETE api/me/cart/:productId test
 // describe('/DELETE product from cart', () => {
 //   it.only("should DELETE an existing item from the user's cart", done => {

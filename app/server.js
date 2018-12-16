@@ -65,7 +65,7 @@ server.listen(PORT, err => {
       brandsToReturn = brands.filter(brand => brand.name === query)
 
       if (!brandsToReturn) {
-        res.writeHead(404, `ERROR: PRODUCT DOES NOT EXIST`);
+        res.writeHead(404, `ERROR: Brand not found!`);
         return res.end();
       }
     } else { 
@@ -83,6 +83,8 @@ server.listen(PORT, err => {
     const { query } = queryString.parse(parsedUrl.query);
     let productsToReturn = []; //empty search query shows up empty
     if (query !== undefined) {
+      //see comment in server.test.js file and YAML documentation for explanation 
+      //for choosing to limit queries by description as opposed to name or other property
       productsToReturn = products.filter(product => product.description.includes(query));
 
       if (!productsToReturn) {
@@ -99,16 +101,16 @@ server.listen(PORT, err => {
   //SECURITY DEFINITIONS
 
   //GET PRODUCTS WITHIN BRANDS
-  router.get('/v1/brands/:id/products', (req, res) => {
-    const { brandId } = request.params;
+  router.get('/v1/brands/:brandId/products', (req, res) => {
+    const { brandId } = req.params;
     const brand = findObject(brandId, brands);
     if (!brand) {
-      res.writeHead(404, 'That brand is not in our store');
+      res.writeHead(404, 'ERROR: Brand Not Found!');
       return res.end();
     }
-    Response.writeHead(200, { 'Content-Type': 'application/json'});
+    res.writeHead(200, { 'Content-Type': 'application/json'});
     const productsWithinBrand = products.filter(product => product.categoryId === brandId);
-    return Response.end(JSON.stringify(productsWithinBrand))
+    return res.end(JSON.stringify(productsWithinBrand))
   })
 //POST LOGIN
 
@@ -130,7 +132,17 @@ server.listen(PORT, err => {
   })
 //POST ME/CART
   router.post('/v1/me/cart', (req, res) => {
-
+    cart = me.cart;
+    const { id } = request.params;
+    const item = findObject(id, products);
+    //if user is not logged in
+    if (!me) {
+      res.writeHead(404, 'Please log into our system!');
+    return res.end();
+    }
+    res.user.writeHead(200);
+    cart.push(item);
+    return res.end(JSON.stringify(cart))
   })
 //DELETE ME/CART/:productId
   router.delete('/v1/me/cart/:productId', (req, res) => {
