@@ -23,8 +23,6 @@ paths:
           description: Successful operation
           schema:
             $ref: '#/definitions/Brands'
-        '404':
-          description: Not found
         
   /brands/{id}/products:
     get:
@@ -90,12 +88,13 @@ paths:
           type: string
       responses:
         '200':
-          description: successful operation
-          headers:
-            X-Authentication:
-              type: string
-              description: authentication token
+          description: Access token
+          schema:
+            type: string
+            example: 'A0vAPqCfjSmetxzD'
         '400':
+          description: Incorrectly formatted request
+        '401':
           description: Invalid username/password supplied
   /me/cart:
     get:
@@ -228,17 +227,3 @@ definitions:
     type: array
     items:
       $ref: '#/definitions/ProductInCart'
-  User:
-    type: object
-    properties:
-      email:
-        type: string
-        description: Email address of the user, which as serves as the username.
-      password:
-        type: string
-        description: Password for logging in.
-      token:
-        type: string
-        description: The authentication token of the logged in user.
-      cart:
-        $ref: '#/definitions/Cart'

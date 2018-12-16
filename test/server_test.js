@@ -3,9 +3,13 @@ const chaiHTTP = require("chai-http");
 const server = require("../app/server");
 const expect = chai.expect;
 const assert = chai.assert;
+let sinon = require('sinon')
+
 
 chai.use(chaiHTTP);
 chai.use(require("chai-sorted"));
+
+
 
 //GET BRANDS
 describe("/GET brands", () => {
@@ -85,7 +89,6 @@ describe("/GET products", () => {
   it("returns all products if query is missing", done => {
     chai
       .request(server)
-      //property doesn't exist
       .get("/api/products?query=")
       .end((err, res) => {
         expect(err).to.be.null;
@@ -96,4 +99,21 @@ describe("/GET products", () => {
         done();
       });
   });
+});
+
+//POST LOGIN
+describe("/POST, the login function", () => {
+  it("should return status 200 if user is authenticated", done => {
+    let userCredentials = { username: "susanna.richards@example.com", password: "jonjon" }
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(userCredentials)
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.a("string");
+        done();
+    });
+  })
 });
