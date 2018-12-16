@@ -40,7 +40,7 @@ server.listen(PORT, err => {
     products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf8"));
     //populate users
     users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf8"));
-    //hardcoded user
+    //hardcoded a logged in user
     loggedInUser = users[0];
 });
 
@@ -94,9 +94,9 @@ router.post('/api/login', function(request,response) {
       return user.email == request.body.username && user.login.password == request.body.password;
     });
     if (user) {
+      // Successful login. Search for existing access token for user.
+      loggedInUser = user;
       response.writeHead(200, {'Content-Type': 'application/json'});
-  
-      // Successful login, check for existing access token
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.email;
       });
@@ -140,7 +140,7 @@ router.get('/api/me/cart', (request, response) => {
     }
 });
 
-//POST cart
+//POST a product to the user's cart
 router.post('/api/me/cart', function(request,response) {
   let currentAccessToken = getValidTokenFromRequest(request, accessTokens);
   if (!currentAccessToken) {
@@ -172,5 +172,26 @@ router.post('/api/me/cart', function(request,response) {
     }
 });
 
+//DELETE a product from the user's cart
+router.delete('/api/me/cart/:productId', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request, accessTokens);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+    const { productId } = request.params;
+    const itemToDelete = findProductOrBrand(productId, loggedInUser.cart);
+    if(!itemToDelete){
+      response.writeHead(404, "Product not found");
+      response.end();
+    }
+    //valid product to delete from a logged in user
+    const newCart = loggedInUser.cart.filter(item => item.id !== itemToDelete.id);
+    loggedInUser.cart = newCart;
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end();
+  }
+});
 
 module.exports = server

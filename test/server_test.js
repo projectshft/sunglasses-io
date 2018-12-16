@@ -201,3 +201,22 @@ describe("/POST cart", () => {
       });
   });
 });
+
+//DELETE cart
+describe("/DELETE cart", () => {
+  it("should return status 200, and item deleted from cart, if user is authenticated", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart?accessToken=abc123&productId=1")
+      .end((err, res) => {
+        chai
+          .request(server)
+          .delete("/api/me/cart/1?accessToken=abc123")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(200);
+            done();
+          })
+      });
+  });
+});
