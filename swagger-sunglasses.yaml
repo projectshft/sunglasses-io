@@ -110,6 +110,8 @@ paths:
           description: Items and quantity stored in the cart.
           schema:
             $ref: '#/definitions/Cart'
+        '401':
+          description: You need to have access to this call to continue
     post:
       tags:
       - User

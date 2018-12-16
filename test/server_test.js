@@ -144,7 +144,7 @@ describe("/GET cart", () => {
   it("should GET all products in the cart for a logged in user", done => {
     chai
       .request(server)
-      .get("/me/api/cart?accessToken=abc123")
+      .get("/api/me/cart?accessToken=abc123")
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
@@ -152,6 +152,16 @@ describe("/GET cart", () => {
         expect("Content-Type", "application/json");
         expect(res.body).to.be.an("array");
         expect(res.body).to.have.lengthOf(0);
+        done();
+      });
+  });
+  it("should return 401 code if requesting user isn't logged in", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart?accessToken=abc124")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(401);
         done();
       });
   });

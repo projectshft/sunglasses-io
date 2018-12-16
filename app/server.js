@@ -128,7 +128,7 @@ router.post('/api/login', function(request,response) {
 });
 
 //GET cart
-router.get('/me/api/cart', (request, response) => {
+router.get('/api/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request, accessTokens);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
