@@ -1,9 +1,9 @@
 const http = require("http");
 const fs = require("fs");
 const finalHandler = require("finalhandler");
-const queryString = require("querystring");
+const querystring = require("querystring");
 const Router = require("router");
-const bodyParser   = require("body-parser");
+const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 const url = require("url");
 const { findObject } = require("./utils");
@@ -45,30 +45,24 @@ const server = http.createServer((req, res) => {
 router.get("/api/brands", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query } = querystring.parse(parsedUrl.query);
-
-    if(!brands) {
-        res.writeHead(404, "That brand cannot be found")
-        return res.end();
-    }
-    
     let brandsToReturn = [];
     if (query !== undefined) {
         brandsToReturn = brands.filter(brand => brand.name.includes(query));
 
-        if (!brandsToReturn) {
-            res.writeHead(404, "That brand does not exist");
-            return res.end();
+        if(!brandsToReturn) {
+            response.writeHead(404, "No products to return");
+            return response.end();
         }
     } else {
         brandsToReturn = brands;
     }
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(brandsToReturn));
-    });
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end(JSON.stringify(brandsToReturn));
+});   
 
-router.get("/api/goals", (request, response) => {
+router.get("/api/products", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
-    const { query }= querystring.parse(parsedUrl.query);
+    const { query } = querystring.parse(parsedUrl.query);
     let productsToReturn = [];
     if (query !== undefined) {
         productsToReturn = products.filter(product => product.name.includes(query));
