@@ -105,9 +105,15 @@ paths:
       summary: User's cart
       description: |
         Returns products from the logged-in user's cart.
+      parameters:
+      - name: accessToken
+        in: query
+        description: access token
+        required: true
+        type: string
       responses:
         '200':
-          description: Items and quantity stored in the cart.
+          description: Successful operation
           schema:
             $ref: '#/definitions/Cart'
         '401':
@@ -121,20 +127,25 @@ paths:
       description: |
         Adds a product to the user's cart by the products id.
       parameters:
+        - name: accessToken
+          in: query
+          description: access token
+          required: true
+          type: string
         - name: productId
           in: query
           description: Product id
           required: true
           type: string
-        - in: body
-          name: body
-          description: Product to be added to the cart.
-          required: true
+      responses:
+        '200':
+          description: Successful operation. Item added to cart.
           schema:
             $ref: '#/definitions/ProductInCart'
-      responses:
-       '405':
-        description: Invalid input       
+        '404':
+          description: Product not found    
+        '401':
+          description: You need to have access to this call to continue
   /me/cart/{productId}:
     delete:
       tags:
@@ -145,14 +156,21 @@ paths:
       description: |
         Delete a product from the user's cart
       parameters:
+        - name: accessToken
+          in: query
+          description: access token
+          required: true
+          type: string
         - name: productId
           in: path
           description: Product id to delete
           required: true
           type: string
       responses:
-        '400':
-          description: Invalid ID supplied
+        '200':
+          description: Successful operation. Item deleted from cart.
+        '401':
+          description: You need to have access to this call to continue
         '404':
           description: Product not found
     post:
@@ -164,13 +182,24 @@ paths:
       description: |
         Updates the quantity of the product in the user's cart
       parameters:
+        - name: accessToken
+          in: query
+          description: access token
+          required: true
+          type: string
         - name: productId
           in: path
           description: Product id of the product in the cart.
           required: true
           type: string
       responses:
-       '405':
+        '200':
+          description: Successful operation. Item updated to cart.
+          schema:
+            $ref: '#/definitions/ProductInCart'
+        '401':
+          description: You need to have access to this call to continue
+        '405':
           description: Invalid input
 definitions:
   Brands:
