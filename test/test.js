@@ -311,7 +311,10 @@ describe('cart endpoints', () => {
         res.should.have.status(200)
         res.body.should.be.an('array')
         expect(res.body).to.include.deep.members([
-          singleGlasses
+          {
+            "id":"9",
+        "quantity":"1"
+          }
         ]);
         done()
       })
@@ -325,19 +328,11 @@ describe('cart endpoints', () => {
           res.body.should.be.an('array')
           expect(res.body).to.include.deep.members([{
             "id": "9",
-            "categoryId": "4",
-            "name": "Sugar",
-            "description": "The sweetest glasses in the world",
-            "price": 125,
-            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+            "quantity":"1"
           },
             {
               "id": "10",
-              "categoryId": "5",
-              "name": "Peanut Butter",
-              "description": "The stickiest glasses in the world",
-              "price": 103,
-              "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+              "quantity":"1"
             }])
           done()
         })
@@ -367,18 +362,14 @@ describe('cart endpoints', () => {
     it('should correctly add a mixture of correct and incorrect items', done => {
       chai.request(server)
       .post(`/v1/me/cart?query=${accessToken}`)
-      .send({'productId':['1','2','456','500','2']})
+      .send({'productId':['1','2','456','500',]})
       .end((err,res) => {
         //unsure about the correct status code for 'partially correct'
         res.should.have.status(200)
         expect(res.body.cart).to.be.an('array')
         expect(res.body.cart).to.include.deep.members([{
           "id": "1",
-          "categoryId": "1",
-          "name": "Superglasses",
-          "description": "The best glasses in the world",
-          "price": 150,
-          "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          "quantity":"1"
         }])
         expect(res.body.notAdded).to.be.an('array')
         expect(res.body.notAdded).to.include.deep.members(['456','500'])
@@ -418,6 +409,52 @@ describe('cart endpoints', () => {
         .end((err,res) => {
           res.should.have.status(403)
           expect(res.body).to.deep.equal({})
+          done()
+        })
+    })
+  })
+  describe('PUT/me/cart', () => {
+    
+    before(() => {
+      //retrieve an access token to be used for testing 
+      return new Promise(resolve => {
+        chai
+          .request(server)
+          .post(`/v1/me/cart?query=${accessToken}`)
+          .send({ 'productId': ['1', '2'] })
+          .end((err, res) => {
+            res.should.have.status(200)
+            res.body.should.be.an('array')
+            resolve()
+          })
+      });
+    })
+    it('should update the quantity of a specific item', done => {
+      chai.request(server)
+        .post(`/v1/me/cart/1?query=${accessToken}`)
+        .send({"productId":"1","quantity":"57"})
+        .end((err,res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array')
+          expect(res.body).to.include.deep.members([{"id":"1","quantity":"57"}])
+          done()
+        })
+    })
+    it('should not update an item that does not exist', done => {
+      chai.request(server)
+        .post(`/v1/me/cart/1?query=${accessToken}`)
+        .send({ "productId": "DOESNTEXIST", "quantity": "57" })
+        .end((err,res) => {
+          res.should.have.status(404)
+          done()
+        })
+    })
+    it('should not update a product not in the cart', done => {
+      chai.request(server)
+        .post(`/v1/me/cart/WRONG?query=${accessToken}`)
+        .send({ "productId": "1", "quantity": "57" })
+        .end((err,res) => {
+          res.should.have.status(404)
           done()
         })
     })

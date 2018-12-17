@@ -52,7 +52,7 @@ server.listen(PORT, error => {
 
 myRouter.get('/v1/sunglasses', (req, res) => {
   res.writeHead(200, contentTypeJSON)
-  res.end(JSON.stringify(sunglasses))  
+  return res.end(JSON.stringify(sunglasses))  
 })
 
 myRouter.get('/v1/sunglasses/:id', (req,res) => {
@@ -62,26 +62,26 @@ myRouter.get('/v1/sunglasses/:id', (req,res) => {
   })
   if(product){
     res.writeHead(200, contentTypeJSON);
-    res.end(JSON.stringify(product))
+    return res.end(JSON.stringify(product))
   } else {
     res.writeHead(404, 'Sorry, no product was found matching that ID')
-    res.end()
+    return res.end()
   }  
 })
 
 myRouter.get('/v1/categories', (req,res) => {
   res.writeHead(200, contentTypeJSON);
-  res.end(JSON.stringify(categories))
+  return res.end(JSON.stringify(categories))
 })
 myRouter.get('/v1/categories/:id', (req,res) => {
   let { id } = req.params
   let category = categories.find(catObjs => catObjs.id === id)
   if(!category){
     res.writeHead(404 ,'The requested resource does not exist')
-    res.end()
+    return res.end()
   } else {
     res.writeHead(200, contentTypeJSON)
-    res.end(JSON.stringify(category))
+    return res.end(JSON.stringify(category))
   }
 })
 
@@ -91,15 +91,15 @@ myRouter.get('/v1/categories/:id/products', (req, res) => {
   let category = categories.find(catObjs => catObjs.id === id)
   if(!category){
     res.writeHead(404, 'The requested resource does not exist')
-    res.end()
+    return res.end()
   }
   let filteredGlasses = sunglasses.filter(sunglasses => sunglasses.categoryId === id);
   if(filteredGlasses.length === 0 ){
     res.writeHead(200, "There are no sunglasses currently for that brand", contentTypeJSON)
-    res.end(JSON.stringify(filteredGlasses))
+    return res.end(JSON.stringify(filteredGlasses))
   }
   res.writeHead(200, contentTypeJSON)
-  res.end(JSON.stringify(filteredGlasses))
+  return res.end(JSON.stringify(filteredGlasses))
 })
 
 myRouter.post('/v1/me/login', (req, res) =>{
@@ -116,7 +116,7 @@ myRouter.post('/v1/me/login', (req, res) =>{
       //first check to see if the user has a token in their name
       if(userToken){
         userToken.issued = new Date()
-        res.end(JSON.stringify(userToken))
+        return res.end(JSON.stringify(userToken))
         //refresh their token and return a new one
       } else {
       //make a new token
@@ -126,15 +126,15 @@ myRouter.post('/v1/me/login', (req, res) =>{
         issued: new Date()
       }
       activeTokens.push(newToken)
-      res.end(JSON.stringify(newToken))
+      return res.end(JSON.stringify(newToken))
     }
     } else {
       res.writeHead(401 , 'Password and username do not match')
-      res.end()
+      return res.end()
     }
   } else {
     res.writeHead(400, 'Incorrect or missing credentials')
-    res.end()
+    return res.end()
   }
 })
 
@@ -147,14 +147,14 @@ myRouter.get('/v1/me/cart', (req,res) => {
       //use the user info associated with the token to get the right cart
       let thisUser = users.find(userObjs => userObjs.login.username === thisUsersToken.user)
       res.writeHead(200, contentTypeJSON)
-      res.end(JSON.stringify(thisUser.cart))
+      return res.end(JSON.stringify(thisUser.cart))
     } else {
       res.writeHead(403, 'User not found')
-      res.end()
+      return res.end()
     }
   } else {
     res.writeHead(403, 'Invalid access token')
-    res.end()
+    return res.end()
   }
 })
 
@@ -166,7 +166,7 @@ myRouter.post('/v1/me/cart', (req,res) => {
     if (thisUsersToken) {
       //use the user info associated with the token to get the right cart
       let thisUser = users.find(userObjs => userObjs.login.username === thisUsersToken.user)
-      //find the product(s) to add
+      //find the product(s) id(s) to add
       let productId = req.body.productId
       //make a list of failed product requests
       let failedProducts = []
@@ -174,8 +174,12 @@ myRouter.post('/v1/me/cart', (req,res) => {
       productId.forEach(itemToAdd => {
         let productToAdd = sunglasses.find(productObj => productObj.id === itemToAdd);
         if(productToAdd){
+          let cartItem = {
+            id: itemToAdd,
+            quantity:"1"
+          }
           //add and return product
-          thisUser.cart.push(productToAdd);
+          thisUser.cart.push(cartItem);
         } else {
           failedProducts.push(itemToAdd)
         }
@@ -183,17 +187,17 @@ myRouter.post('/v1/me/cart', (req,res) => {
       });
       if(failedProducts.length > 0){
         res.writeHead(200,  contentTypeJSON);
-        res.end(JSON.stringify({cart : thisUser.cart, notAdded:failedProducts}));
+        return res.end(JSON.stringify({cart : thisUser.cart, notAdded:failedProducts}));
       }
       res.writeHead(200, contentTypeJSON,)
-      res.end(JSON.stringify(thisUser.cart))
+      return res.end(JSON.stringify(thisUser.cart))
     } else {
       res.writeHead(403, 'Access token does not match our records, please log in again')
-      res.end()
+      return res.end()
     }
   } else {
     res.writeHead(403, 'Invalid or missing access token')
-    res.end()
+    return res.end()
   }
 })
 
@@ -211,17 +215,50 @@ myRouter.delete('/v1/me/cart/:id', (req,res) => {
       //now filter out all products that match the product ID in the endpoint
       thisUser.cart = thisUser.cart.filter(product => product.id !== id)
       res.writeHead(200, contentTypeJSON);
-      res.end(JSON.stringify(thisUser.cart))
+      return res.end(JSON.stringify(thisUser.cart))
     } else {
       res.writeHead(403, "Access token does not match our records, please log in again");
-      res.end()
+      return res.end()
     }
 
   } else {
     res.writeHead(403,'Invalid or missing access token')
-    res.end()
+    return res.end()
   }
-  
+})
+
+myRouter.post('/v1/me/cart/:id', (req,res) => {
+  let { id } = req.params;
+  //first, verify the access token
+  let parsedUrl = url.parse(req.url, true);
+  let tokenId = parsedUrl.query.query;
+  if (tokenId) {
+    //with an actual token, validate it is accurate
+    let thisUsersToken = activeTokens.find(tokenObj => tokenObj.token === tokenId)
+    if (thisUsersToken) {
+      //now find the specific cart item
+      let thisUser = users.find(userObj => thisUsersToken.user === userObj.login.username);
+      let cartItem = thisUser.cart.find(itemInCart => itemInCart.id === id);
+      if(!cartItem){
+        res.writeHead(404, "Product not found in the users cart")
+        return  res.end()
+      }
+      if(!sunglasses.find(sunglassesObj => sunglassesObj.id === req.body.productId)){
+        res.writeHead(404, "Product not found in the database");
+        return  res.end();
+      }
+      cartItem.quantity = req.body.quantity
+      res.writeHead(200, contentTypeJSON)
+      return res.end(JSON.stringify(thisUser.cart))   
+    } else {
+      res.writeHead(403, "Access token does not match our records, please log in again");
+      return res.end()
+    }
+
+  } else {
+    res.writeHead(403, 'Invalid or missing access token')
+    return res.end()
+  }
 })
 
 module.exports = server;
