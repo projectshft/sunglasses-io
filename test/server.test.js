@@ -43,16 +43,25 @@ describe("/GET products by brandId", () => {
 //GET Product list from search bar
 describe("/GET products by query", () => {
     it("should GET all products", done => {
-        chai
-            .request(server)
+        chai.request(server)
             .get("/api/products")
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(11);
+                done();
+            });
+    });
+    it("should limit results to those with a query string", done => {
+        chai.request(server)
+            .get("/api/products?query=brown")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
                 expect("Content-Type", "application/json");
                 expect(res.body).to.be.an("array");
-                expect(res.body).to.have.lengthOf(11);
                 done();
             });
     });

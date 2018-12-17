@@ -1,9 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
-const queryString = require('querystring');
+const querystring = require('querystring');
+const url = require("url");
 const Router = require('router');
-const bodyParser   = require('body-parser');
+const bodyParser = require('body-parser');
 const uid = require('rand-token').uid;
 const { findObject } = require("./utils");
 
@@ -52,8 +53,8 @@ router.get("/api/brands/:id/products", (req, res) => {
     products.forEach(function (product) {
         if (id == product.brandId) {
             items.push(product);
-      }
-    })         
+        }
+    })
     res.writeHead(200, { "Content-Type": "application/json" });
 
     return res.end(JSON.stringify(items));
@@ -61,9 +62,49 @@ router.get("/api/brands/:id/products", (req, res) => {
 
 //GET list of all products from query
 router.get("/api/products", (req, res) => {
+    //get query parameter 
+    const parsedUrl = url.parse(req.originalUrl);
+    const { query } = querystring.parse(parsedUrl.query);
+    let itemsToReturn = [];
+
+    if (query !== undefined) {
+        itemsToReturn = products.filter(product => product.description.includes(query));
+
+        // if (!itemsToReturn) {
+        //     res.writeHead(404, "There aren't any products to return");
+        //     return res.end();
+        // }
+    } else {
+        itemsToReturn = products;
+    }
     res.writeHead(200, { "Content-Type": "application/json" });
-    return res.end(JSON.stringify(products));
-})
+    return res.end(JSON.stringify(itemsToReturn));
+});
+
+
+    //get all products with that term in their name or description
+
+    // function findQueryMatches(product) {
+    //     return (query == product.name.includes(query) || query == product.description.includes(query));
+    // }
+
+    // itemsToReturn = products.filter(findQueryMatches);
+        // if (query !== undefined && (Object.values(this.product.description).includes(query) || Object.values(this.product.name).includes(query))) {
+ 
+        // if (query == product.name.includes(query) || query == product.description.includes(query)) {
+        //     itemsToReturn.push(product);
+        // } else {
+        //     console.log('no matches');
+        // }
+        //     itemsToReturn = products;
+        // }
+        
+    // })
+//     console.log("itemsToReturn are: ", itemsToReturn);
+//     res.writeHead(200, { "Content-Type": "application/json" });
+
+//     return res.end(JSON.stringify(products));
+// })
 
 
 
