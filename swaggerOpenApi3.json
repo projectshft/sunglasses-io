@@ -1,0 +1,415 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Sunglasses.io API",
+    "description": "More to come",
+    "version": "1.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://api.sunglasses.com"
+    }
+  ],
+  "paths": {
+    "/api/brands": {
+      "get": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Returns a list of brands of sunglasses that we carry",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "brand",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brands"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/brands/{id}/products": {
+      "get": {
+        "tags": [
+          "Brands"
+        ],
+        "summary": "Get a list of sunglasses by brand id.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "the brand id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Products"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Returns a list of matching sunglasses",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "products",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Products"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "allow a specific user access to the cart",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "username",
+                  "password"
+                ]
+              },
+              "encoding": {
+                "password": {
+                  "allowReserved": true
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized user"
+          }
+        }
+      }
+    },
+    "/api/me/cart": [
+      {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Show the current cart",
+          "parameters": [
+            {
+              "in": "header",
+              "name": "access token",
+              "schema": {
+                "type": "string",
+                "format": "uid",
+                "required": true
+              }
+            }
+          ],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Users"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized user"
+            }
+          }
+        }
+      },
+      {
+        "post": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Add an item to the user's cart.",
+          "parameters": null,
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Products"
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Products"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized user"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        }
+      }
+    ],
+    "/api/me/cart/{id}": [
+      {
+        "delete": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Delete a specific item in the cart",
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "description": "the product id",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Users"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized user"
+            }
+          }
+        }
+      },
+      {
+        "post": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Update the quantity of a specific item in the cart",
+          "parameters": [
+            {
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/Products"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Products"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized user"
+            },
+            "404": {
+              "description": "User not found"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "components": {
+    "schemas": {
+      "securitySchemes": [
+        {
+          "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "rand-token uid"
+          }
+        }
+      ],
+      "Brands": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Products": {
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "brandId": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer"
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Users": {
+        "properties": {
+          "gender": {
+            "type": "string"
+          },
+          "cart": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "first": {
+                "type": "string"
+              },
+              "last": {
+                "type": "string"
+              }
+            }
+          },
+          "email": {
+            "type": "string"
+          },
+          "login": {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
