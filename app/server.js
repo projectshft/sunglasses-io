@@ -160,6 +160,29 @@ router.get("/api/me", (request, response) => {
     return response.end();
   });
 
+//Delete more pairs of the same sunglasses
+router.delete("/api/me/cart/:productId", (request, response) => {
+    const { productId } = request.params;
+    const product = findObject(productId, products);
+    if (!product) {
+      response.writeHead(404, "That product does not exist");
+      return response.end();
+    }
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end();
+  });
+
+  //Add different pair of sunglasses to the cart
+ router.post("/api/me/cart/:productId", (request, response) => {
+    const { productId } = request.params;
+    const product = findObject(productId, products);
+    if (!product) {
+      response.writeHead(404, "That product does not exist");
+      return response.end();
+    }
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end();
+  });
 
           
 

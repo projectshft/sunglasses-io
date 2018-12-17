@@ -155,4 +155,34 @@ describe("/POST increase pair of specific sunglasses in cart", () => {
             done();
         });
     });
- });      
+ }); 
+ 
+ describe("/DELETE the number of specific sunglasses pairs in the cart", () => {
+    it.only("should DELETE the number of sunglasses pairs", done => {
+        chai
+        .request(server)
+        .delete("/api/me/cart/1")
+        .end((err, res) => {
+            assert.isNotNull(res.body);
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect("Content-Type", "application/json");
+            done();
+        });
+    });
+});
+
+describe("/POST add different pair of sunglasses to cart", () => {
+    it.only("should POST new pair of sunglasses to cart", done => {
+      chai
+        .request(server)
+        .post("/api/me/cart/3")
+        .end((err, res) => {
+          assert.isNotNull(res.body);
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect("Content-Type", "application/json");
+          done();
+        });
+    });
+  });
