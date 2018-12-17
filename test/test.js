@@ -9,22 +9,6 @@ chai.use(chaiHTTP);
 
 //TDD!
 
-//Starting information to be used in testing
-
-// let users = fs.readFileSync("./initial-data/users.json", "utf-8", (error, data) => {
-//   if (error) throw error;
-//   return JSON.parse(data);
-// });
-
-// let sunglasses = fs.readFileSync('./initial-data/products.json', 'utf-8', (error, data) => {
-//   if (error) throw error;
-//   return JSON.parse(data)
-// });
-
-// let categories = fs.readFileSync('./initial-data/brands.json', 'utf-8', (error, data) => {
-//   if (error) throw error;
-//   return JSON.parse(data)
-// })
 
 let singleGlasses = {
   "id": "9",
@@ -180,7 +164,7 @@ describe('user information', () => {
         chai
           .request(server)
           .post("/v1/me/login")
-          .send({ 'username':'yellowleopard753', 'password':'jonjon'})
+          .send({ 'username': 'yellowleopard753', 'password': 'jonjon' })
           .end((err, res) => {
             userResponse = res;
             resolve();
@@ -193,22 +177,22 @@ describe('user information', () => {
     });
     it('should return an access Token for later use', done => {
       userResponse.body.should.be.an('object')
-      userResponse.body.should.have.all.keys('token','issued','user')
+      userResponse.body.should.have.all.keys('token', 'issued', 'user')
       done()
     })
     it('should return a refreshed token', done => {
       chai.request(server)
-      .post('/v1/me/login')
-      .send({ 'username': 'yellowleopard753', 'password': 'jonjon' })
-      .end((err, res) => {
-        res.body.should.be.an('object')
-        res.body.should.have.all.keys('token','user','issued')
-        expect(res.body.token).to.equal(userResponse.body.token)
-        expect(res.body.user).to.equal(userResponse.body.user);
-        expect(res.body.issued).to.not.equal(userResponse.body.issued)
-        done()
-      })
-      
+        .post('/v1/me/login')
+        .send({ 'username': 'yellowleopard753', 'password': 'jonjon' })
+        .end((err, res) => {
+          res.body.should.be.an('object')
+          res.body.should.have.all.keys('token', 'user', 'issued')
+          expect(res.body.token).to.equal(userResponse.body.token)
+          expect(res.body.user).to.equal(userResponse.body.user);
+          expect(res.body.issued).to.not.equal(userResponse.body.issued)
+          done()
+        })
+
     })
     it("should not allow a user to sign in without credentials", done => {
       chai
@@ -216,7 +200,7 @@ describe('user information', () => {
         .post("/v1/me/login")
         .send({ username: "", password: "" })
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           done();
         });
     });
@@ -290,7 +274,7 @@ describe('cart endpoints', () => {
   })
   describe('POST /me/cart', () => {
     before(() => {
-    //retrieve an access token to be used for testing 
+      //retrieve an access token to be used for testing 
       return new Promise(resolve => {
         chai
           .request(server)
@@ -305,35 +289,35 @@ describe('cart endpoints', () => {
     it('should allow a user to add to their cart', done => {
       chai.request(server)
         .post(`/v1/me/cart?query=${accessToken}`)
-      //same as 'singleGlasses' the api will need just an ID, not the whole object
-      .send({'productId':['9']})
-      .end((err,res) => {
-        res.should.have.status(200)
-        res.body.should.be.an('array')
-        expect(res.body).to.include.deep.members([
-          {
-            "id":"9",
-        "quantity":"1"
-          }
-        ]);
-        done()
-      })
+        //same as 'singleGlasses' the api will need just an ID, not the whole object
+        .send({ 'productId': ['9'] })
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array')
+          expect(res.body).to.include.deep.members([
+            {
+              "id": "9",
+              "quantity": "1"
+            }
+          ]);
+          done()
+        })
     })
     it('should allow a user to add multiple items to their cart', done => {
       chai.request(server)
         .post(`/v1/me/cart?query=${accessToken}`)
-        .send({'productId':['9','10']})
-        .end((err,res) => {
+        .send({ 'productId': ['9', '10'] })
+        .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('array')
           expect(res.body).to.include.deep.members([{
             "id": "9",
-            "quantity":"1"
+            "quantity": "1"
           },
-            {
-              "id": "10",
-              "quantity":"1"
-            }])
+          {
+            "id": "10",
+            "quantity": "1"
+          }])
           done()
         })
     })
@@ -341,7 +325,7 @@ describe('cart endpoints', () => {
       chai.request(server)
         .post(`/v1/me/cart?query=incorrectToken123456`)
         .send({ 'productId': ['9', '10'] })
-        .end((err,res) => {
+        .end((err, res) => {
           res.should.have.status(403)
           expect(res.body).to.deep.equal({})
           done()
@@ -351,51 +335,51 @@ describe('cart endpoints', () => {
       chai.request(server)
         .post(`/v1/me/cart?query=${accessToken}`)
         .send({ 'productId': ['900', '100'] })
-        .end((err,res) => {
+        .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('object');
-          res.body.should.have.all.keys('cart','notAdded')
+          res.body.should.have.all.keys('cart', 'notAdded')
           expect(res.body.notAdded).to.be.an('array')
           done()
         })
     })
     it('should correctly add a mixture of correct and incorrect items', done => {
       chai.request(server)
-      .post(`/v1/me/cart?query=${accessToken}`)
-      .send({'productId':['1','2','456','500',]})
-      .end((err,res) => {
-        //unsure about the correct status code for 'partially correct'
-        res.should.have.status(200)
-        expect(res.body.cart).to.be.an('array')
-        expect(res.body.cart).to.include.deep.members([{
-          "id": "1",
-          "quantity":"1"
-        }])
-        expect(res.body.notAdded).to.be.an('array')
-        expect(res.body.notAdded).to.include.deep.members(['456','500'])
-        done()
-      })
+        .post(`/v1/me/cart?query=${accessToken}`)
+        .send({ 'productId': ['1', '2', '456', '500',] })
+        .end((err, res) => {
+          //unsure about the correct status code for 'partially correct'
+          res.should.have.status(200)
+          expect(res.body.cart).to.be.an('array')
+          expect(res.body.cart).to.include.deep.members([{
+            "id": "1",
+            "quantity": "1"
+          }])
+          expect(res.body.notAdded).to.be.an('array')
+          expect(res.body.notAdded).to.include.deep.members(['456', '500'])
+          done()
+        })
     })
   })
   describe('DELETE me/cart', () => {
     //will use the same access token as the POST tests
     it(`should remove all products of that type from the cart`, done => {
-      
+
       //Not ideal but I am using the previous post requests to use for my delete request
       //multiple chai.request(server)s cause a socket timeout, and the priority is to get it working and then
       //clean up my testing  
       chai.request(server)
-      .del(`/v1/me/cart/9?query=${accessToken}`)
-      .end((err,res) => {
-        res.should.have.status(200)
-        res.body.should.be.an('array');
-        expect(res.body).to.not.include.deep.members([singleGlasses])
-        done()
-      })
+        .del(`/v1/me/cart/9?query=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array');
+          expect(res.body).to.not.include.deep.members([singleGlasses])
+          done()
+        })
     })
-    it('should not remove an item that is not present in the cart' , done => {
+    it('should not remove an item that is not present in the cart', done => {
       chai.request(server)
-      //until this point item 5 has not been added. again, not ideal
+        //until this point item 5 has not been added. again, not ideal
         .del(`/v1/me/cart/5?query=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200)
@@ -406,7 +390,7 @@ describe('cart endpoints', () => {
     it('should not remove anything without a valid token', done => {
       chai.request(server)
         .del(`/v1/me/cart/1?query=WRONGTOKEN`)
-        .end((err,res) => {
+        .end((err, res) => {
           res.should.have.status(403)
           expect(res.body).to.deep.equal({})
           done()
@@ -414,7 +398,7 @@ describe('cart endpoints', () => {
     })
   })
   describe('PUT/me/cart', () => {
-    
+
     before(() => {
       //retrieve an access token to be used for testing 
       return new Promise(resolve => {
@@ -432,11 +416,11 @@ describe('cart endpoints', () => {
     it('should update the quantity of a specific item', done => {
       chai.request(server)
         .post(`/v1/me/cart/1?query=${accessToken}`)
-        .send({"productId":"1","quantity":"57"})
-        .end((err,res) => {
+        .send({ "productId": "1", "quantity": "57" })
+        .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('array')
-          expect(res.body).to.include.deep.members([{"id":"1","quantity":"57"}])
+          expect(res.body).to.include.deep.members([{ "id": "1", "quantity": "57" }])
           done()
         })
     })
@@ -444,7 +428,7 @@ describe('cart endpoints', () => {
       chai.request(server)
         .post(`/v1/me/cart/1?query=${accessToken}`)
         .send({ "productId": "DOESNTEXIST", "quantity": "57" })
-        .end((err,res) => {
+        .end((err, res) => {
           res.should.have.status(404)
           done()
         })
@@ -453,8 +437,19 @@ describe('cart endpoints', () => {
       chai.request(server)
         .post(`/v1/me/cart/WRONG?query=${accessToken}`)
         .send({ "productId": "1", "quantity": "57" })
-        .end((err,res) => {
+        .end((err, res) => {
           res.should.have.status(404)
+          done()
+        })
+    })
+    it('should not update anything for an incorrect token' ,done => {
+      chai
+        .request(server)
+        .post(`/v1/me/cart/1?query=WRONG`)
+        .send({" productId": "1", "quantity": "57" })
+        .end((err,res) => {
+          res.should.have.status(403)
+          res.body.should.deep.equal({})
           done()
         })
     })
