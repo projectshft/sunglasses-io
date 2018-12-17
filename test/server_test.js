@@ -207,6 +207,7 @@ describe("/DELETE cart", () => {
   it("should return status 200 if user is authenticated, and product was removed", done => {
     chai
       .request(server)
+      //First add an item to the cart with productId = 1
       .post("/api/me/cart?accessToken=abc123&productId=1")
       .end((err, res) => {
         chai
@@ -245,6 +246,27 @@ describe("/DELETE cart", () => {
           .end((error, response) => {
             expect(error).to.be.null;
             expect(response).to.have.status(404);
+            done();
+          })
+      });
+  });
+});
+
+//POST update quantity in cart
+describe("/POST cart, {productId}", () => {
+  it("should return status 200, and item quantity updated in cart, if user is authenticated", done => {
+    chai
+      .request(server)
+      //First add an item to the cart with productId = 1
+      .post("/api/me/cart?accessToken=abc123&productId=1")
+      .end((err, res) => {
+        chai
+          .request(server)
+          .post("/api/me/cart/1?accessToken=abc123&amount=5")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(200);
+            expect(response.body).to.deep.equal({ id: "1", name: "Superglasses", price: 150, quantity: 5 });
             done();
           })
       });

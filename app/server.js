@@ -163,8 +163,15 @@ router.post('/api/me/cart', function(request,response) {
       };
       const productIsInCart = findProductOrBrand(productId, loggedInUser.cart);
 
+      //Product does not already exist in the user's cart.
       if(!productIsInCart) {
        loggedInUser.cart.push(cartItemToAdd);
+      }
+
+      //Product already exists in user's cart. Will increment quantity by 1, up to  a 1000 limit
+      if(productIsInCart && loggedInUser.cart[index].quantity < 1000) {
+        let index = loggedInUser.cart.indexOf(productIsInCart);
+        loggedInUser.cart[index].quantity += 1;
       }
 
       response.writeHead(200, {'Content-Type': 'application/json'});
@@ -191,6 +198,38 @@ router.delete('/api/me/cart/:productId', function(request,response) {
     loggedInUser.cart = newCart;
     response.writeHead(200, "Operation successful");
     response.end();
+  }
+});
+
+//POST to update quantity of items for a particular product in the user's cart, up to 1000 pieces.
+router.post('/api/me/cart/:productId', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request, accessTokens);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+    const { productId } = request.params;
+    const parsedUrl = url.parse(request.url,true)
+    let amount = parseInt(parsedUrl.query.amount);
+    let itemToUpdate = findProductOrBrand(productId, loggedInUser.cart);
+    const index = loggedInUser.cart.indexOf(itemToUpdate);
+
+    //There is no matching product in the cart, or the amount passed in is negative
+    if (!itemToUpdate || amount < 0) {
+      response.writeHead(405, "Invalid input");
+      response.end();
+    }
+
+    //Enforce a 1000 piece limit for products in the cart
+    if (amount > 1000) {
+      amount = 1000;
+    }
+
+    loggedInUser.cart[index].quantity = amount;
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(loggedInUser.cart[index]));
   }
 });
 
