@@ -3,6 +3,7 @@ const chaiHTTP = require('chai-http');
 const server = require('../app/server');
 const expect = chai.expect;
 const assert = chai.assert;
+let users = require('../initial-data/users.json')
 
 
 chai.use(chaiHTTP);
@@ -56,6 +57,7 @@ describe('/GET brands', () => {
     .request(server)
     .get('/api/brands?query=sdtfghjbknm')
     .end((err, res) => {
+      expect(err).to.be.null;
       expect(res).to.have.status(404);
       done();
     })
@@ -101,6 +103,7 @@ describe('/GET products', () => {
     .request(server)
     .get('/api/products?query=cfgvhjbkjb')
     .end((err, res) => {
+      expect(err).to.be.null;
       expect(res).to.have.status(404);
       done();
     })
@@ -128,6 +131,7 @@ describe('/GET /brands/:id/products', () => {
     .request(server)
     .get('/api/brands/4356789/products')
     .end((err, res) => {
+      expect(err).to.be.null;
       expect(res).to.have.status(404);
       done();
     })
@@ -147,6 +151,7 @@ describe('/POST /api/login', () => {
     .post('/api/login')
     .send(userCredentials)
     .end((err, res) => {
+      expect(err).to.be.null;
       expect(res).to.have.status(200);
       expect(res.body).to.be.a('string');
       expect(res.body).to.have.lengthOf(16)
@@ -160,6 +165,7 @@ describe('/POST /api/login', () => {
     .post('/api/login')
     .send(userCredentials)
     .end((err, res) => {
+      expect(err).to.be.null;
       expect(res).to.have.status(400);
       done();
     })
@@ -174,6 +180,7 @@ describe('/POST /api/login', () => {
     .post('/api/login')
     .send(userCredentials)
     .end((err, res) => {
+      expect(err).to.be.null;
       expect(res).to.have.status(401);
       done();
     })
@@ -185,20 +192,6 @@ describe('/POST /api/login', () => {
 //in a real life situation (i.e. in an expanded version of the application, allowing to 
 //check if the user has outdated information to then eventually update)
 describe('/GET /me', () => {
-  it.only(`Should provide the current user's information`, done => {
-    chai
-    .request(server)
-    .get('/api/me')
-    .send(user)
-    .end((err, res) => {
-      assert.isNotNull(res.body);
-      expect(err).to.be.null;
-      expect(res).to.have.status(200);
-      expect('Content-Type', 'application/json');
-      expect(res.body).to.be.an("object");
-      done();
-    })
-  })
   it.only('Should deny permission to view user information if not logged in', done => {
     chai
     .request(server)
@@ -210,22 +203,26 @@ describe('/GET /me', () => {
       done();
     })
   })
+  before(() => {
+    let user = users[0];
+    it.only(`Should provide the current user's information`, done => {
+      chai
+      .request(server)
+      .get('/api/me')
+      .send(user)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect('Content-Type', 'application/json');
+        expect(res.body).to.be.an("object");
+        done();
+      })
+    })
+  })
 })
 //GET ME/Cart test
 describe('/GET /me/cart', () => {
-  it.only(`should GET the currently logged-in user's cart`, done => {
-    chai
-    .request(server)
-    .get('/api/me/cart')
-    .end((err, res) => {
-      assert.isNotNull(res.body);
-      expect(err).to.be.null;
-      expect(res).to.have.status(200);
-      expect('Content-Type', 'application/json');
-      expect(res.body).to.be.an("array");
-      done();
-    })
-  })
   it.only('Should deny permission to view cart if not logged-in', done => {
     chai
     .request(server)
@@ -237,36 +234,56 @@ describe('/GET /me/cart', () => {
       done();
     })
   })
+  before(() => {
+    let user = users[0];
+    it.only(`should GET the currently logged-in user's cart`, done => {
+      chai
+      .request(server)
+      .get('/api/me/cart')
+      .send(user)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect('Content-Type', 'application/json');
+        expect(res.body).to.be.an("array");
+        done();
+      })
+    })
+  })
 })
 
 //POST /me/cart test
 describe('/POST cart', () => {
-  it.only("should POST an item to the cart", done => {
-    let itemToAdd = {
-      "id": "8",
-      "categoryId": "4",
-      "name": "Coke cans",
-      "description": "The thickest glasses in the world",
-      "price": 110,
-      "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-    }
-    chai
-    .request(server)
-    .post('/api/me/cart')
-    .send(itemToAdd)
-    .end((err, res) => {
-      assert.isNotNull(res.body);
-      expect(err).to.be.null;
-      expect(res).to.have.status(200);
-      expect('Content-Type', 'application/json');
-      expect(res.body).to.be.an("object");
-      expect(res.body).to.have.property('id');
-      expect(res.body).to.have.property('categoryId');
-      expect(res.body).to.have.property('name');
-      expect(res.body).to.have.property('description');
-      expect(res.body).to.have.property('price');
-      expect(res.body).to.have.property('imageUrls')
-      done();
+  before(() => {
+    let user = users[0];
+    it.only("should POST an item to the cart", done => {
+      let itemToAdd = {
+        "id": "8",
+        "categoryId": "4",
+        "name": "Coke cans",
+        "description": "The thickest glasses in the world",
+        "price": 110,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai
+      .request(server)
+      .post('/api/me/cart')
+      .send(itemToAdd)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect('Content-Type', 'application/json');
+        expect(res.body).to.be.an("object");
+        expect(res.body).to.have.property('id');
+        expect(res.body).to.have.property('categoryId');
+        expect(res.body).to.have.property('name');
+        expect(res.body).to.have.property('description');
+        expect(res.body).to.have.property('price');
+        expect(res.body).to.have.property('imageUrls')
+        done();
+      })
     })
   })
 })
@@ -286,9 +303,17 @@ describe('/DELETE product from cart', () => {
   // it.only("should DELETE an existing item from the user's cart", done => {
   //   })
 })
-// //POST api/me/cart/:productId test
-// describe('POST product to cart', () => { 
-//   it.only("should update the product amount in the cart", done => {
-
-//   })
-// })
+//POST api/me/cart/:productId test
+describe('POST product to cart', () => { 
+  it.only("should not let the user update items in the cart if not logged in", done => {
+    chai
+    .request(server)
+    .post('/api/me/cart/2')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(400);
+      done();
+    })
+  })
+})
