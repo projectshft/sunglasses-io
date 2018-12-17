@@ -22,6 +22,7 @@ let users = [];
 let failedLoginAttempts = {};
 let accessTokens = [];
 let user;
+let currentAccessToken;
 
 
 //server set up
@@ -118,7 +119,7 @@ router.post('/api/login', (req, res) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
 
     // We have a successful login, if we already have an existing access token, use that
-    let currentAccessToken = accessTokens.find((tokenObject) => {
+    currentAccessToken = accessTokens.find((tokenObject) => {
       return tokenObject.username == user.login.username;
     });
     // Update the last updated value so we get another time period
@@ -132,6 +133,7 @@ router.post('/api/login', (req, res) => {
         lastUpdated: new Date(),
         token: uid(16)
       }
+      currentAccessToken = newAccessToken.token;
       accessTokens.push(newAccessToken);
       res.end(JSON.stringify(newAccessToken.token));
     }
@@ -147,7 +149,6 @@ router.post('/api/login', (req, res) => {
     res.end();
     }
   } else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
     res.writeHead(400, "Incorrectly formatted request");
     res.end();
   }
@@ -155,82 +156,114 @@ router.post('/api/login', (req, res) => {
 
 //GET ME
 router.get('/api/me', (req, res) => {
+  const parsedUrl = url.parse(req.originalUrl);
+  const { token } = queryString.parse(parsedUrl.query);
+
   if (!user) {
     res.writeHead(401, 'Please log into our services to view your information');
     return res.end();
   }
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  return res.end(JSON.stringify(user));
+  if (token === currentAccessToken) {
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      return res.end(JSON.stringify(user));
+    }
+    res.writeHead(403, `You May Not View Another User's Information`);
+    return res.end();
 })
-
+  
 //GET ME/CART
 router.get('/api/me/cart', (req, res) => {
+  const parsedUrl = url.parse(req.originalUrl);
+  const { token } = queryString.parse(parsedUrl.query);
+
   if (!user) {
     res.writeHead(401, 'Please log into our services to view your information');
     return res.end();
   }
-  let cart = user.cart;
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  return res.end(JSON.stringify(cart));
+  if (token === currentAccessToken) {
+    let cart = user.cart;
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    return res.end(JSON.stringify(cart));
+  }
+  res.writeHead(403, `You May Not Access Another User's Cart`)
+  return res.end();
 })
 
 //POST ME/CART
 router.post('/api/me/cart', (req, res) => {
+  const parsedUrl = url.parse(req.originalUrl);
+  const { token } = queryString.parse(parsedUrl.query);
   if (!user) {
     res.writeHead(401, 'Please log into our services to add an item to your cart');
     return res.end();
   }
-  let cart = user.cart;
-  let item = Object.assign(req.body);
-  item.count = 1;
-  if (!item) {
-    res.writeHead(400, 'No item was selected to add to the cart');
-    return res.end();
+  if (token === currentAccessToken) {
+    let cart = user.cart;
+    let item = Object.assign(req.body);
+    item.count = 1;
+    if (!item) {
+      res.writeHead(400, 'No item was selected to add to the cart');
+      return res.end();
+    }
+    res.writeHead(200);
+    cart.push(item);
+    return res.end(JSON.stringify(cart))
   }
-  res.writeHead(200);
-  cart.push(item);
-  return res.end(JSON.stringify(cart))
+  res.writeHead(403, `You May Not Access Another User's Cart`)
+  return res.end();
 })
 
 //DELETE ME/CART/:productId
 router.delete('/api/me/cart/:productId', (req, res) => {
+  const parsedUrl = url.parse(req.originalUrl);
+  const { token } = queryString.parse(parsedUrl.query);
   if (!user) {
     res.writeHead(401, 'Please log into our services to view your information');
     return res.end();
   }
-  let cart = user.cart;
-  let { productId } = req.params;
-  let updatedCart = [];
-  updatedCart = cart.filter(item => item.id !== productId);
-  if (updatedCart === cart) {
-    res.writeHead(400, `You cannot remove and item from your cart if you haven't added it in the first place!`);
-    return res.end();
+  if (token === currentAccessToken) {
+    let cart = user.cart;
+    let { productId } = req.params;
+    let updatedCart = [];
+    updatedCart = cart.filter(item => item.id !== productId);
+    if (updatedCart === cart) {
+      res.writeHead(400, `You cannot remove and item from your cart if you haven't added it in the first place!`);
+      return res.end();
+    }
+    cart = updatedCart;
+    res.writeHead(200);
+    return res.end(JSON.stringify(cart));
   }
-  cart = updatedCart;
-  res.writeHead(200);
-  return res.end(JSON.stringify(cart));
+  res.writeHead(403, `You May Not Access Another User's Cart`)
+  return res.end();
 })
 
 //POST ME/CART/:productId
 router.post('/api/me/cart/:productId', (req, res) => {
+  const parsedUrl = url.parse(req.originalUrl);
+  const { token } = queryString.parse(parsedUrl.query);
   if (!user) {
     res.writeHead(401, 'Please log into our services to add items to your cart');
     return res.end();
   }
-  let cart = user.cart;
-  const { productId } = req.params;
-  let itemToUpdate;
-  let updatedCart =[];
-  itemToUpdate = cart.find(item => item.id === productId);
-  updatedCart = cart.filter(item => item.id !== productId);
-  if (!itemToUpdate) {
-    res.writeHead(400, `You cannot add additional orders of an item unless you add it to your cart in the first place`);
-    return res.end();
+  if (token === currentAccessToken) {
+    let cart = user.cart;
+    const { productId } = req.params;
+    let itemToUpdate;
+    let updatedCart =[];
+    itemToUpdate = cart.find(item => item.id === productId);
+    updatedCart = cart.filter(item => item.id !== productId);
+    if (!itemToUpdate) {
+      res.writeHead(400, `You cannot add additional orders of an item unless you add it to your cart in the first place`);
+      return res.end();
+    }
+    itemToUpdate.count++;
+    updatedCart.push(itemToUpdate);
+    res.writeHead(200);
+    return res.end(JSON.stringify(cart));
   }
-  itemToUpdate.count++;
-  updatedCart.push(itemToUpdate);
-  res.writeHead(200);
-  return res.end(JSON.stringify(cart));
+  res.writeHead(403, `You May Not Access Another User's Cart`)
+  return res.end();
 })
 
 module.exports = server;

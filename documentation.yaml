@@ -50,6 +50,8 @@ paths:
           description: Successfully obtain user information
         401:
           description: Permission denied due to not logging-in
+        403:
+          description: User unauthorized to access other user's account information
           schema:
             $ref: '#/definitions/User'
         default:
@@ -155,6 +157,8 @@ paths:
               $ref: '#/definitions/Cart'
         401:
           description: Cannot access cart due to not being logged in
+        403:
+          description: User unauthorized to access other user's cart
         default:
           description: Unexpected error
           schema:
@@ -205,6 +209,8 @@ paths:
           description: Operation failed due to user not being logged into system
         400:
           description: Operation failed due to not having item in cart
+        403:
+          description: User unauthorized to access other user's cart
         default:
           description: Unexpected error
           schema:
@@ -232,6 +238,8 @@ paths:
           description: Operation failed due to user not being logged into system
         400:
           description: Operation failed due to not having item in cart
+        403:
+          description: User unauthorized to access other user's cart
         default:
           description: Unexpected error
           schema:
