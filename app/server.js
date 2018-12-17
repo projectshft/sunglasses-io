@@ -41,16 +41,16 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, err => {
   if (err) throw err;
-  console.log(`Server running on ${PORT}`);
-  //populate brands
-   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf8"));
+    console.log(`Server running on ${PORT}`);
+    //populate brands
+    brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf8"));
 
-  //populate products
-  products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf8'));
+    //populate products
+    products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf8'));
 
-  //populate users
-  users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf8'));
-});
+    //populate users
+    users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf8'));
+  });
 
   //GET Brands Endpoint
   router.get("/api/brands", (req, res) => {
@@ -107,7 +107,7 @@ server.listen(PORT, err => {
     return res.end(JSON.stringify(productsWithinBrand))
   })
 
-//POST LOGIN
+  //POST LOGIN
   router.post('/api/login', (req, res) => {
     if (!failedLoginAttempts[req.body.username]){
       failedLoginAttempts[req.body.username] = 0;
@@ -178,14 +178,14 @@ server.listen(PORT, err => {
     res.writeHead(200, {'Content-Type': 'application/json'});
     return res.end(JSON.stringify(cart));
   })
-//POST ME/CART
+
+  //POST ME/CART
   router.post('/api/me/cart', (req, res) => {
     let cart = user.cart;
-    // const count = 1;
-    // const item = findObject(id, products);
-    let item = Object.assign({}, req.body);
+    let item = Object.assign(req.body);
+    item.count = 1;
     if (!item) {
-      res.writeHead(404, 'No item was selected to add to the cart');
+      res.writeHead(400, 'No item was selected to add to the cart');
       return res.end();
     }
     res.writeHead(200);
@@ -194,8 +194,21 @@ server.listen(PORT, err => {
   })
 //DELETE ME/CART/:productId
   router.delete('/api/me/cart/:productId', (req, res) => {
-    // let cart = me.cart;
-    // let { productId } = request.params;
+    if (!user) {
+      res.writeHead(401, 'Please log into our services to view your information');
+      return res.end();
+    }
+    let cart = user.cart;
+    let { productId } = req.params;
+    let updatedCart = [];
+    updatedCart = cart.filter(item => item.id !== productId);
+    if (updatedCart === cart) {
+      res.writeHead(400, `You cannot remove and item from your cart if you haven't added it in the first place!`);
+      return res.end();
+    }
+    cart = updatedCart;
+    res.writeHead(200);
+    return res.end(JSON.stringify(cart));
   })
 
   // function deleteBook(req, res) {
@@ -204,6 +217,9 @@ server.listen(PORT, err => {
   // };
 //POST ME/CART/:productId
   router.post('/api/me/cart/:productId', (req, res) => {
-
+  // let cart = user.cart;
+  // const { productId } = req.params;
+  // let item = findObject(productId, cart);
+    //item.count++;
   })
 module.exports = server;

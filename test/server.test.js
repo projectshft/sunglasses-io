@@ -185,10 +185,11 @@ describe('/POST /api/login', () => {
 //in a real life situation (i.e. in an expanded version of the application, allowing to 
 //check if the user has outdated information to then eventually update)
 describe('/GET /me', () => {
-  it.only('Should get the object representing the current user', done => {
+  it.only(`Should provide the current user's information`, done => {
     chai
     .request(server)
     .get('/api/me')
+    .send(user)
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
