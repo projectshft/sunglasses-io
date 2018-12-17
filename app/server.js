@@ -70,41 +70,19 @@ router.get("/api/products", (req, res) => {
     if (query !== undefined) {
         itemsToReturn = products.filter(product => product.description.includes(query));
 
-        // if (!itemsToReturn) {
-        //     res.writeHead(404, "There aren't any products to return");
-        //     return res.end();
-        // }
+        if (!itemsToReturn) {
+            res.writeHead(404, "Product not found");
+            return res.end();
+        }
     } else {
         itemsToReturn = products;
     }
+    console.log("itemsToReturn are: ", itemsToReturn);
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(itemsToReturn));
 });
 
 
-    //get all products with that term in their name or description
-
-    // function findQueryMatches(product) {
-    //     return (query == product.name.includes(query) || query == product.description.includes(query));
-    // }
-
-    // itemsToReturn = products.filter(findQueryMatches);
-        // if (query !== undefined && (Object.values(this.product.description).includes(query) || Object.values(this.product.name).includes(query))) {
- 
-        // if (query == product.name.includes(query) || query == product.description.includes(query)) {
-        //     itemsToReturn.push(product);
-        // } else {
-        //     console.log('no matches');
-        // }
-        //     itemsToReturn = products;
-        // }
-        
-    // })
-//     console.log("itemsToReturn are: ", itemsToReturn);
-//     res.writeHead(200, { "Content-Type": "application/json" });
-
-//     return res.end(JSON.stringify(products));
-// })
 
 
 

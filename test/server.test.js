@@ -65,4 +65,16 @@ describe("/GET products by query", () => {
                 done();
             });
     });
+    it("should return all products if query is missing", done => {
+        chai.request(server)
+            .get("/api/products?query=")
+            .end((err, res) => {
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(11);
+                done();
+            });
+    });
 })
