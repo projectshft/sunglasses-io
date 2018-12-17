@@ -397,7 +397,7 @@ describe('cart endpoints', () => {
         })
     })
   })
-  describe('PUT/me/cart', () => {
+  describe('POST/me/cart', () => {
 
     before(() => {
       //retrieve an access token to be used for testing 

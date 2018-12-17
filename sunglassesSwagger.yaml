@@ -15,12 +15,6 @@ paths:
       summary: List of sunglasses
       description: |
          The Sunglasses endpoint allows you to access a list of sunglasses, and hopeully will let you query based on category or other properties
-      parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
-          type: string
       tags:
         - Glasses
       responses:
@@ -33,10 +27,10 @@ paths:
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error404'
   /glasses/{productId}:
     get:
-      summary: Individual sunglasses
+      summary: Individual sunglasses by ID
       description: | 
         The Sunglasses endpoint allows you to access a list of sunglasses, and hopeully will let you query based on category or other properties
       parameters: 
@@ -53,6 +47,10 @@ paths:
           description: A single sunglasses object
           schema:
             $ref: '#/definitions/Sunglasses'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error404'
   /categories:
     get: 
       summary: List of categories for sunglasses
@@ -67,6 +65,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Category'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error404'
   /categories/{categoryId}:
     get:
       summary: Individual category object
@@ -89,10 +91,10 @@ paths:
         default:
           description: Unexpected Error
           schema: 
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error404'
   /categories/{categoryId}/products:
     get: 
-      summary: An array of sunglasses of a certain category
+      summary: An array of sunglasses of a certain brand
       description: |
         Allows you to retrieve a list of suglasses according to a specific category/brand name
       parameters:
@@ -104,6 +106,7 @@ paths:
           description: Unique category ID
       tags:
         - Glasses
+        - Categories
       responses: 
         '200':
           description: An array of sunglasses
@@ -114,7 +117,50 @@ paths:
         default:
           description: Unexpected Error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error404'
+  /me/login:
+    post:
+      summary: User login
+      description: | 
+        A user can log in to access their cart information
+      tags: 
+        - User
+      parameters:
+        - in: body
+          name: user
+          description: The user login information
+          schema:
+            type: object
+            required:
+              - userName
+            properties:
+              userName:
+                type: string
+              password:
+                type: string
+          
+      responses:
+        '200':
+          description: Successful login
+          schema: 
+            type: object
+            properties: 
+              token:
+                type: string
+                example: abcde1234
+        '401':
+          description: Invalid login information
+          schema:
+            $ref: '#/definitions/Error401'
+        '403':
+          description: Unauthorized request
+          schema:
+            $ref: '#/definitions/Error403'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error404'
+        
   /me/cart:
     get:
       summary: User Cart
@@ -122,28 +168,66 @@ paths:
         Returns the users cart as an array of products
       tags:
         - Cart
+      parameters:
+        - in: query
+          name: token
+          description: The user token information
+          type: string
+          required: true
       responses:
         '200':
           description: Cart information for the signed in user
           schema:
             $ref: '#/definitions/Cart'
+        '401':
+          description: Invalid login information
+          schema:
+            $ref: '#/definitions/Error401'
+        '403':
+          description: Unauthorized request
+          schema:
+            $ref: '#/definitions/Error403'
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error404'
     post: 
       summary: Add to cart
       description: |
         Allows a user to add a product into their cart 
       tags: 
         - Cart
+      parameters:
+        - in: query
+          name: token
+          description: The user token information
+          type: string
+          required: true
+          
+        - in: body
+          name: product
+          description: The product ID
+          schema:
+            type: object
+            properties:
+              productId:
+                type: string
+              
       responses:
         '200':
           description: Item has been added to the user's cart
-        default:
-          description: An unexpected error has occured
+        '401':
+          description: Invalid login information
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error401'
+        '403':
+          description: Unauthorized request
+          schema:
+            $ref: '#/definitions/Error403'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error404'
   /me/cart/{productID}:
     post:
       summary: Update cart item
@@ -158,11 +242,38 @@ paths:
           type: integer
           format: int32
           in: path
+          
+
+        - in: query
+          name: token
+          description: The user token information
+          type: string
+          required: true
+          
+        - in: body
+          name: quantity
+          description: The product quantity in cart
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: integer
+                example: 45
       responses:
         200:
           description: Quantity has been updated
+        '401':
+          description: Invalid login information
+          schema:
+            $ref: '#/definitions/Error401'
+        '403':
+          description: Unauthorized request
+          schema:
+            $ref: '#/definitions/Error403'
         default:
-          description: an unexpected error has occured
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error404'
     delete: 
       summary: Remove cart item
       description: |
@@ -176,11 +287,28 @@ paths:
           type: integer
           format: int32
           in: path
+          
+
+        - in: query
+          name: token
+          description: The user token information
+          type: string
+          required: true
       responses:
         200:
           description: Item has been removed successfully
+        '401':
+          description: Invalid login information
+          schema:
+            $ref: '#/definitions/Error401'
+        '403':
+          description: Unauthorized request
+          schema:
+            $ref: '#/definitions/Error403'
         default:
-          description: an unexpected error has occured
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error404'
 definitions:
   Sunglasses:
     type: object
@@ -224,21 +352,44 @@ definitions:
     items:
       type: object
       properties:
-        product:
-          type: object
-          $ref: '#/definitions/Sunglasses'
+        productId:
+          type: integer
+          format: int32
+          example: 3
         quantity:
           type: integer
           format: int32
           description: Quantity of product in cart (max 1000)
           example: 50
-  Error:
+      
+  Error404:
     type: object
     properties:
       code:
         type: integer
         format: int32
+        example: 404
       message:
         type: string
-      fields:
+        example: Resource not found
+  Error401:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+        example: 401
+      message:
         type: string
+        example: Invalid login credentials
+  Error403:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+        example: 403
+      message:
+        type: string
+        example: Unauthorized Access
+
