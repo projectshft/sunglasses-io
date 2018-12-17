@@ -108,4 +108,16 @@ describe("/POST login", () => {
             })
 
     })
+    it("should return an access token", done => {
+        chai.request(server)
+            .post("/api/login")
+            .send({
+                'username': 'greenlion235',
+                'password': 'waters'
+            })
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                done();
+            })
+    })
 })

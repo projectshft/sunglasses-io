@@ -6,12 +6,14 @@ const url = require("url");
 const Router = require('router');
 const bodyParser = require('body-parser');
 const uid = require('rand-token').uid;
+
 const { findObject } = require("./utils");
 
 // State holding variables
 let brands = [];
 let users = [];
 let products = [];
+let accessTokens = [];
 
 const PORT = 3001;
 
@@ -79,7 +81,6 @@ router.get("/api/products", (req, res) => {
     } else {
         itemsToReturn = products;
     }
-    console.log("itemsToReturn are: ", itemsToReturn);
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(itemsToReturn));
 });
@@ -88,19 +89,39 @@ router.get("/api/products", (req, res) => {
 router.post("/api/login", (req, res) => {
     //make sure the username and password are in the request
     if (req.body.username && req.body.password) {
+
         //check that user with those exists
         let user = users.find((user) => {
             return user.login.username === req.body.username && user.login.password === req.body.password;
         })
+
         if (user) {
             res.writeHead(200);
+            
+            //if we already have an existing access token, use that
+            let currentAccessToken = accessTokens.find((tokenObject) => {
+                return tokenObject.username == user.login.username;
+            });
+
+            // Update the last updated value so we get another time period
+            if (currentAccessToken) {
+                currentAccessToken.lastUpdated = new Date();
+                res.end(JSON.stringify(currentAccessToken.token));
+            } else {
+                // Create a new token with the user value and a "random" token
+                let newAccessToken = {
+                    username: user.login.username,
+                    lastUpdated: new Date(),
+                    token: uid(16)
+                }
+                accessTokens.push(newAccessToken);
+                res.end(JSON.stringify(newAccessToken.token));
+            }
+        } else {
+            res.writeHead(401, "Unauthorized user");
+            return res.end();
         }
-    } else {
-        res.writeHead(401, "Unauthorized user");
-        return res.end();
     }
-   
-    // return res.end();
 })
 
 
