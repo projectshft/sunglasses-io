@@ -35,8 +35,38 @@ describe("/GET brands", () => {
             expect(res.body).to.have.lengthOf(1);
             done();
         });
+    });   
+
+    it.only("should return all brands if query is missing", done => {
+        chai
+        .request(server)
+        .get("/api/brands?query=")
+        .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect("Content-Type", "application/json");
+            expect(res.body).to.be.an("array");
+            expect(res.body).to.have.lengthOf(5);
+            done();
+            });
+        });
+});
+
+//GET specific brand of a specific pair of sunglasses
+
+describe("/GET specific brand of a specific pair of sunglasses", () => {
+    it.only("should GET the specific brand of a certain pair of sunglasses", done => {
+        chai
+        .request(server)
+        .get("/api/brands/:id/products")
+        .end((err, res) => {
+            expect(res).to.have.status(200);
+            expect("Content-Type", "application/json");
+            expect(res.body).to.be.an("array");
+            done();
+        });      
     });
-})
+});
 
 //GET Products
 describe("/GET products", () => {

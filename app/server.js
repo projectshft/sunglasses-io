@@ -8,14 +8,14 @@ const uid = require("rand-token").uid;
 const url = require("url");
 const { findObject } = require("./utils");
 
+
 //state holding variables
 
 let brands = [];
 let user = {};
-let product = {};
 let products = [];
 let users = [];
-//i think you need to add a user object that hold the login info for a specific user. This will probably be necessary when it comes to authorization
+let accessToken = [];
 
 const PORT = process.env.PORT || 3000;
 
@@ -42,6 +42,8 @@ const server = http.createServer((req, res) => {
         user = users[0];
 });
 
+//Public Route ... all users of API can access
+//view list of sunglasses brand
 router.get("/api/brands", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query } = querystring.parse(parsedUrl.query);
@@ -58,7 +60,24 @@ router.get("/api/brands", (request, response) => {
     }
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(brandsToReturn));
-});   
+});
+
+//Public route...all users of API can access
+//
+
+router.get("/api/brands/:id/products", (request, response) => {
+    const { id } = request.params;
+    const similarProducts = products.filter(product => product.categoryId === id);
+    if(!similarProducts) {
+        response.writeHead(404, "No products found that match your search");
+        response.end();
+    }
+    response.writeHead(200, {"Content-Type": "application/json"});
+    response.end(JSON.stringify(similarProducts));
+})
+
+//Public route...all users of API can access
+//View brand for a specific pair of sunglasses
 
 router.get("/api/products", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
@@ -76,8 +95,48 @@ router.get("/api/products", (request, response) => {
     }
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(productsToReturn));
-});   
+});  
 
+//login call
+router.post("/api/login", (request, response) => {
+    if(request.body.username && request.body.password) {
+        let user = users.find((user) => {
+            return user.login.username == request.body.username && user.login.password == request.body.password;
+        });
+
+        if(user) {
+            response.writeHead(200, {"Content-Type": "application/JSON"});
+
+            let currentAccessToken = accessToken.find((tokenObject) => {
+                return tokenObject.username == user.login.username;
+              });
+        
+              //update the last updated value so we get another time period
+              if (currentAccessToken) {
+                currentAccessToken.lastUpdated = new Date();
+                response.end(JSON.stringify(currentAccessToken.token));
+              } else {
+                //create a new token with the user value and a "random" token
+                let newAccessToken = {
+                  username: user.login.username,
+                  lastUpdated: new Date(),
+                  token: uid(16)
+                }
+                accessToken.push(newAccessToken);
+                response.end(JSON.stringify(newAccessToken.token));
+              } 
+            } else {
+              //When a login fails, inform the client that either the username or password was wrong
+              response.writeHead(401, "Invalid username or password");
+              response.end();
+            }
+          } else {
+            // If they are missing a parameter, inform the client that the response formatting is wrong
+            response.writeHead(400, "Incorrectly formatted response");
+            response.end();
+          }
+        });
+    
      
 
 module.exports = server;
