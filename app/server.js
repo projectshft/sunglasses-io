@@ -14,6 +14,7 @@ const { findObject } = require("./utils");
 let brands = [];
 let user = {};
 let products = [];
+let product = {};
 let users = [];
 let accessToken = [];
 
@@ -43,7 +44,7 @@ const server = http.createServer((req, res) => {
 });
 
 //Public Route ... all users of API can access
-//view list of sunglasses brand
+//view list of all sunglasses brand
 router.get("/api/brands", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query } = querystring.parse(parsedUrl.query);
@@ -63,7 +64,7 @@ router.get("/api/brands", (request, response) => {
 });
 
 //Public route...all users of API can access
-//
+//View the brand of a particular pair of sunglasses
 
 router.get("/api/brands/:id/products", (request, response) => {
     const { id } = request.params;
@@ -77,7 +78,7 @@ router.get("/api/brands/:id/products", (request, response) => {
 })
 
 //Public route...all users of API can access
-//View brand for a specific pair of sunglasses
+//View all the sunglasses
 
 router.get("/api/products", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
@@ -99,14 +100,16 @@ router.get("/api/products", (request, response) => {
 
 //login call
 router.post("/api/login", (request, response) => {
+    //check for username and password in request
     if(request.body.username && request.body.password) {
+        //is there a user that matches the given username and password?
         let user = users.find((user) => {
             return user.login.username == request.body.username && user.login.password == request.body.password;
         });
 
         if(user) {
             response.writeHead(200, {"Content-Type": "application/JSON"});
-
+            //checks for access token after successful login
             let currentAccessToken = accessToken.find((tokenObject) => {
                 return tokenObject.username == user.login.username;
               });
@@ -136,7 +139,30 @@ router.post("/api/login", (request, response) => {
             response.end();
           }
         });
-    
+router.get("/api/me", (request, response) => {
+    if (!user) {
+        response.writeHead(404, "That user does not exist");
+        return response.end();
+    }
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user));
+ });
+
+ //Add more pairs of the same sunglasses
+ router.post("/api/me/cart/:productId", (request, response) => {
+    const { productId } = request.params;
+    const product = findObject(productId, products);
+    if (!product) {
+      response.writeHead(404, "That product does not exist");
+      return response.end();
+    }
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end();
+  });
+
+
+          
+
      
 
 module.exports = server;

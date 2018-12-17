@@ -113,4 +113,46 @@ describe("/GET products", () => {
                 done();
                 });
             });
-    }); 
+    });
+    
+    describe("/POST login user", () => {
+        it.only("should login the user", done => {
+          chai
+            .request(server)
+            .post("/api/login")
+            .end((err, res) => {
+              assert.isNull(err);
+              expect(res).to.have.status(200);
+              expect(res.body).to.be.lengthOf(16);
+              expect(res.body).to.be.a("string");
+              done();
+            });
+        });
+      });
+
+//Increase the pairs of sunglasses of an already existing pair in the cart
+describe("/POST increase pair of specific sunglasses in cart", () => {
+    it.only("should POST addition of already existing pair of sunglasses", done => {
+        chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .end((err, res) => {
+            assert.isNotNull(res.body);
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect("Content-Type", "application/json");
+            done();
+        });
+    });
+    it.only("should not let you accept a pair of sunglasses that doesn't already exist in cart", done => {
+        chai
+        .request(server)
+        .post("/api/me/cart/2")
+        .end((err, res) => {
+            expect(res.body).to.be.null;
+            expect(err).to.be.not.null;
+            expect(res).to.have.status(404);
+            done();
+        });
+    });
+ });      
