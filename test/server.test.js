@@ -199,50 +199,51 @@ chai.use(require('chai-sorted'));
         done();
       })
     })
-  })
-    // it.only(`Should provide the current user's information`, done => {
-      // let userCredentials = {
-      //   "username" : "yellowleopard753",
-      //   "password": "jonjon"
-      // }
-      // chai
-      // .request(server)
-      // .post('/api/login')
-      // .send(userCredentials)
-      // .end((err, res) => {
-      //   let currentAccessToken = res.body;
-        // chai
-        // .request(server)
-        // .get(`/api/me?token=1234`)
-        // .end((err, res) => {
-        //   assert.isNotNull(res.body);
-        //   expect(err).to.be.null;
-        //   expect(res).to.have.status(200);
-        //   expect('Content-Type', 'application/json');
-        //   expect(body).to.be.an("object");
-        //   done(); 
-          // expect(body).to.have.property('gender');
-          // expect(res.body).to.have.property('cart');
-          // expect(res.body).to.have.property('name');
-          // expect(res.body).to.have.property('location');
-          // expect(res.body).to.have.property('email');
-          // expect(res.body).to.have.property('login');
-          // expect(res.body).to.have.property('dob');
-          // expect(res.body).to.have.property('registered');
-          // expect(res.body).to.have.property('phone');
-          // expect(res.body).to.have.property('cell');
-          // expect(res.body).to.have.property('picture')
-      //   })
-      // }) 
-    // })
-  // });
+  // })
+    it.only(`Should provide the current user's information`, done => {
+      let userCredentials = {
+        "username" : "yellowleopard753",
+        "password": "jonjon"
+      }
+      chai
+      .request(server)
+      .post('/api/login')
+      .send(userCredentials)
+      .end((err, res) => {
+        let currentAccessToken = res.body;
+        chai
+        .request(server)
+        .get(`/api/me?token=${currentAccessToken}`)
+        .end((err, res) => {
+          assert.isNotNull(res.body);
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect('Content-Type', 'application/json');
+          expect(body).to.be.an("object");
+          expect(body).to.have.property('gender');
+          expect(res.body).to.have.property('cart');
+          expect(res.body).to.have.property('name');
+          expect(res.body).to.have.property('location');
+          expect(res.body).to.have.property('email');
+          expect(res.body).to.have.property('login');
+          expect(res.body).to.have.property('dob');
+          expect(res.body).to.have.property('registered');
+          expect(res.body).to.have.property('phone');
+          expect(res.body).to.have.property('cell');
+          expect(res.body).to.have.property('picture')
+          
+        })
+      }) 
+      done();
+    })
+  });
 
   //GET ME/Cart test
   describe('/GET /me/cart', () => {
     it.only('Should deny permission to view cart if not logged-in', done => {
       chai
       .request(server)
-      .get('/api/me')
+      .get('/api/me?token=94802480')
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
@@ -251,42 +252,52 @@ chai.use(require('chai-sorted'));
       })
     })
     it.only(`should GET the currently logged-in user's cart`, done => {
-      chai
-      .request(server)
-      .get('/api/me/cart')
-      .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect(res).to.have.status(200);
-        expect('Content-Type', 'application/json');
-        expect(res.body).to.be.an("array");
+        let userCredentials = {
+          "username" : "yellowleopard753",
+          "password": "jonjon"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(userCredentials)
+        .end((err, res) => {
+        let currentAccessToken = res.body;
+        chai
+        .request(server)
+        .get(`/api/me/cart?token=${currentAccessToken}`)
+        .end((err, res) => {
+          assert.isNotNull(res.body);
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect('Content-Type', 'application/json');
+          expect(res.body).to.be.an("array");
+        })
         done();
       })
     })
-    // it.only(`should not allow the user to access other user's carts`, done => {
-    //   let userCredentials = {
-    //     "username" : "yellowleopard753",
-    //     "password": "jonjon"
-    //   }
-    //   chai
-    //   .request(server)
-    //   .post('/api/login')
-    //   .send(userCredentials)
-    //   .end((err, res) => {
-    //     let currentAccessToken = res.body;
-    //     chai
-    //     .request(server)
-    //     .get('/api/me/cart?=fdknfnp')
-    //     .end((err, res) => {
-    //       assert.isNotNull(res.body);
-    //       expect(err).to.be.null;
-    //       expect(res).to.have.status(403);
-        
-    //     })
-    //   })
-    // done();
+    it.only(`should not allow the user to access other user's carts`, done => {
+        let userCredentials = {
+          "username" : "yellowleopard753",
+          "password": "jonjon"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(userCredentials)
+        .end((err, res) => {
+          let currentAccessToken = res.body;
+          chai
+          .request(server)
+          .get('/api/me/cart')
+          .end((err, res) => {
+            assert.isNotNull(res.body);
+            expect(err).to.be.null;
+            expect(res).to.have.status(403);
+          })
+        })
+      done();
+    })
   })
-  // })
 
   //POST /me/cart test
   describe('/POST cart', () => {
@@ -329,12 +340,6 @@ chai.use(require('chai-sorted'));
         expect(res).to.have.status(200);
         expect('Content-Type', 'application/json');
         expect(res.body).to.be.an("object");
-        expect(res.body).to.have.property('id');
-        expect(res.body).to.have.property('categoryId');
-        expect(res.body).to.have.property('name');
-        expect(res.body).to.have.property('description');
-        expect(res.body).to.have.property('price');
-        expect(res.body).to.have.property('imageUrls')
         done();
       })
     })
