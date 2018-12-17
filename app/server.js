@@ -147,7 +147,7 @@ router.post('/api/login', (req, res) => {
     }
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-    res.writeHead(400, "Incorrectly formatted response");
+    res.writeHead(400, "Incorrectly formatted request");
     res.end();
   }
 });
@@ -175,6 +175,10 @@ router.get('/api/me/cart', (req, res) => {
 
 //POST ME/CART
 router.post('/api/me/cart', (req, res) => {
+  if (!user) {
+    res.writeHead(401, 'Please log into our services to add an item to your cart');
+    return res.end();
+  }
   let cart = user.cart;
   let item = Object.assign(req.body);
   item.count = 1;
@@ -209,7 +213,7 @@ router.delete('/api/me/cart/:productId', (req, res) => {
 //POST ME/CART/:productId
 router.post('/api/me/cart/:productId', (req, res) => {
   if (!user) {
-    res.writeHead(400, 'Please log into our services to add items to your cart');
+    res.writeHead(401, 'Please log into our services to add items to your cart');
     return res.end();
   }
   let cart = user.cart;

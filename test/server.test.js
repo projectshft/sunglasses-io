@@ -138,7 +138,6 @@ describe('/GET /brands/:id/products', () => {
   })
 })
 
-
 //Login tests
 describe('/POST /api/login', () => {
   it.only('Should log in the user if the user exists', done => {
@@ -186,6 +185,7 @@ describe('/POST /api/login', () => {
     })
   })
 })
+
 //GET /ME Test
 //this test doesn't seem to be explicitly necessary per the instructions, but
 //makes sense to me to include it for verifying the user's identity and information
@@ -312,7 +312,7 @@ describe('POST product to cart', () => {
     .end((err, res) => {
       assert.isNotNull(res.body);
       expect(err).to.be.null;
-      expect(res).to.have.status(400);
+      expect(res).to.have.status(401);
       done();
     })
   })

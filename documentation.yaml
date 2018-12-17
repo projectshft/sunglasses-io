@@ -1,0 +1,319 @@
+swagger: "2.0"
+info:
+  title: 'Sunglasses.io API'
+  description: 'An API to support Singlasses.io. The hottest new sunglasses shopping experience'
+  version: 1.0.0
+host: 'api.sunglasses.io'
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Get brands
+      description: |
+        The Brands endpoint allows you to search through the various different brands for said that we have to offer. 
+      parameters:
+        - name: query
+          in: query
+          description: Status values to be considered for filtering results
+          required: false
+          type: string
+      tags:
+        - Brands
+      responses:
+        200:
+          description:
+           Successful Operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        404:
+          description: 
+            Brand Not Found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: Get User Profile
+      description: >-
+        The User Profile endpoint returns information about the Sunglasses.io user that has made an acount with the operation.
+      tags:
+        - User
+      responses:
+        200:
+          description: Successfully obtain user information
+        401:
+          description: Permission denied due to not logging-in
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /brands/{id}/products:
+    get:
+      summary: View the specific brand's line of products
+      description: |
+        This endpoint allows you to view the specific products that you may want to purchase
+      parameters:
+        - name: id
+          in: path
+          description: The id of product
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        200:
+          description: Successfully get products of the brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        404:
+          description: Brand was not found in API
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: A complete list of products available in our application regardless of brand
+      description: |
+        This endpoint allows you to view all the products currently available in our store
+      parameters:
+       - name: query
+         in: query
+         description:  The query that represents a word within the description of the item the user searches for
+         required: false
+         type: string
+      tags:
+        - Products
+      responses:
+        200:
+          description: Succesfully get  products specified by the query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        404:
+          description: Products not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: allow the User to Log into the system
+      description: |
+        Produces a specifc access token for the user and allows the user to log into our application
+      parameters:
+        - name: username
+          in: query
+          description: The user's username
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The user's password
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: Login is successful
+        401: 
+          description: Password or Username is invalid
+        400: 
+          description: Incorrectly formatted username or password
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Allows the User to View Cart
+      description: |
+        This endpoint allows the user to view all the items currently in their cart
+      parameters: []
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Successfully get current user's cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        401:
+          description: Cannot access cart due to not being logged in
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post: 
+      summary: Add a New Item to the User's Cart
+      description: |
+        Add a New Item to the User's Cart
+      parameters: []
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Successfully added new item to cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        401:
+          description: Operation failed due to user not being logged into system
+        400:
+          description: Operation failed due to item not being selected
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    post:
+      summary: Add an Item in User's Cart 
+      description: >
+        Adds an additional order of an existing item in the user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to place another order of.
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Successfully add another order of existing item in cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        401:
+          description: Operation failed due to user not being logged into system
+        400:
+          description: Operation failed due to not having item in cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete an Item in User's Cart 
+      description: >
+        Deletes an Item in the User's Cart
+      parameters:
+        - name: productId
+          in: path
+          description:  The id of the product to cancel order of.
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Successfully remove item from cart item in cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        401:
+          description: Operation failed due to user not being logged into system
+        400:
+          description: Operation failed due to not having item in cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a goal.
+      name:
+        type: string
+        description: The name of a Brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier given to the product
+      name:
+        type: string
+        description: The name of the category
+      categoryId: 
+        type: string
+        description: The unique identifier given for each brand to distinguish what the manufacturer of the product is
+      description: 
+        type: string
+        description: The description of the product
+      price: 
+        type: integer
+        format: int64
+  User:
+    type: object
+    properties:
+      gender: 
+        type: string
+        description: The user's gender
+      cart: 
+        $ref: '#/definitions/Cart'
+      name:
+        type: object
+        description: The title, first and last name of a user
+        properties:
+          title: 
+            type: string
+          first: 
+           type: string
+          last: 
+           type: string
+      email:
+        type: string
+        description: Email address of the Sunglasses.io customer
+      dob:
+        type: string
+        format: date-time
+        description: The date-of-birth of the user
+      registered:
+        type: string
+        format: date-time
+        description: The date that the user registered his or her account
+      phone:
+        type: string
+        description: The user's primary phone number
+      cell:
+        type: string
+        description: The user's cell phone number
+      nat:
+        type: string
+        description: The user's nationality
+  Cart: 
+    type: array
+    items: 
+      $ref: '#/definitions/Product'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+        
