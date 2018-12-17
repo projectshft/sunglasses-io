@@ -121,3 +121,14 @@ describe("/POST login", () => {
             })
     })
 })
+
+//GET cart
+describe("/GET current cart of a user", () => {
+    it("should check that user has access token", done => {
+        chai.request(server)
+            .get("/api/me/cart")
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+            })
+    } )
+})

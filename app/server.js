@@ -124,6 +124,28 @@ router.post("/api/login", (req, res) => {
     }
 })
 
+//GET cart
+router.get("/api/me/cart", (req, res) => {
+    const getValidTokenFromRequest = function (req) {
+        const parsedUrl = url.parse(req.url, true)
+        if (parsedUrl.query.accessToken) {
+            // Verify the access token to make sure it's valid and not expired
+            let currentAccessToken = accessTokens.find((accessToken) => {
+                return accessToken.token == parsedUrl.query.accessToken;
+            });
+            if (currentAccessToken) {
+                return currentAccessToken;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    };
+    res.writeHead(200);
+    return res.end();
+})
+
 
 
 
