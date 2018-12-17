@@ -270,12 +270,22 @@ describe('/POST cart', () => {
     })
   })
 })
-// //DELETE api/me/cart/:productId test
-// describe('/DELETE product from cart', () => {
-//   it.only("should DELETE an existing item from the user's cart", done => {
-
-//   })
-// })
+//DELETE api/me/cart/:productId test
+describe('/DELETE product from cart', () => {
+  it.only('Should alert the user if not logged in', done => {
+    chai
+    .request(server)
+    .delete('/api/me/cart/2')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(401);
+      done();
+    })
+  })
+  // it.only("should DELETE an existing item from the user's cart", done => {
+  //   })
+})
 // //POST api/me/cart/:productId test
 // describe('POST product to cart', () => { 
 //   it.only("should update the product amount in the cart", done => {
