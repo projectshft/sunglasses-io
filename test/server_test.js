@@ -287,4 +287,20 @@ describe("/POST cart, {productId}", () => {
           })
       });
   });
+  it("should return status 401 for unauthorized access", done => {
+    chai
+      .request(server)
+      //First add an item to the cart with productId = 1
+      .post("/api/me/cart?accessToken=abc123&productId=1")
+      .end((err, res) => {
+        chai
+          .request(server)
+          .post("/api/me/cart/1?accessToken=abc124&amount=5")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(401);
+            done();
+          })
+      });
+  });
 });
