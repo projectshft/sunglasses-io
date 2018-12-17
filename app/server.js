@@ -18,7 +18,7 @@ router.use(bodyParser.json());
 const server = http.createServer(function (req, res) {
     res.writeHead(200);
     router(req, res, finalHandler(req, res));
-})
+});
 
 server.listen(PORT, err => {
     if (err) throw err;
@@ -40,14 +40,47 @@ fs.readFile("initial-data/products.json", "utf-8", (err, data) => {
 });
 
 router.get("/api/brands", (request, response) => {
-  response.writeHead(200, { "Content-Type": "application/json"});
-  return response.end(JSON.stringify(brands))
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query, sort } = queryString.parse(parsedUrl.query);
+  let brandsToReturn = []
+  
+  if (query !== undefined) {
+    brandsToReturn = brands.filter(brand => brand.name.includes(query));
+  
+  if(!brandsToReturn){
+    response.writeHead(404, 'We do not have that brand');
+    return response.end();
+  }
+}
+if (sort !== undefined) {
+  brandsToReturn.sort((a, b) => a[sort] - b[sort]);
+}
+response.writeHead(200, { "Content-Type": "application/json" });
+return response.end(JSON.stringify(brandsToReturn));
 });
 
-router.get("/api/brands/:id/products", (request, response) => {
-    response.writeHead(200, {"Content-Type": "application/json"} )
-    return response.end(JSON.stringify(users))
-  })
+router.get("/v1/products", (request, response) => {
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query, sort } = querystring.parse(parsedUrl.query);
+  let productsToReturn = [];
+  if (query !== undefined) {
+    productsToReturn = products.filter(product =>
+      product.name.includes(query)
+    );
+
+    if (!productsToReturn) {
+      response.writeHead(404, "There aren't any goals to return");
+      return response.end();
+    }
+  } else {
+    productsToReturn = products;
+  }
+  if (sort !== undefined) {
+    productsToReturn.sort((a, b) => a[sort] - b[sort]);
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(productsToReturn));
+});
 
 router.get("/api/login", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json"});
