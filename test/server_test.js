@@ -271,4 +271,20 @@ describe("/POST cart, {productId}", () => {
           })
       });
   });
+  it("should return status 405 for invalid input", done => {
+    chai
+      .request(server)
+      //First add an item to the cart with productId = 1
+      .post("/api/me/cart?accessToken=abc123&productId=1")
+      .end((err, res) => {
+        chai
+          .request(server)
+          .post("/api/me/cart/1?accessToken=abc123&amount=-1")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(405);
+            done();
+          })
+      });
+  });
 });
