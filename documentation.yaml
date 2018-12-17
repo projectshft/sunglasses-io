@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title: 'Sunglasses.io API'
-  description: 'An API to support Singlasses.io. The hottest new sunglasses shopping experience'
+  description: 'An API to support Sunglasses.io. The hottest new sunglasses shopping experience'
   version: 1.0.0
 host: 'api.sunglasses.io'
 schemes:
@@ -14,11 +14,11 @@ paths:
     get:
       summary: Get brands
       description: |
-        The Brands endpoint allows you to search through the various different brands for said that we have to offer. 
+        The brands endpoint allows you to view the brands available on the Sunglasses.io application
       parameters:
         - name: query
           in: query
-          description: Status values to be considered for filtering results
+          description: Status value to be considered for filtering results by specific brand
           required: false
           type: string
       tags:
@@ -57,16 +57,16 @@ paths:
           schema:
             $ref: '#/definitions/Error'
             
-  /brands/{id}/products:
+  /brands/{brandId}/products:
     get:
       summary: View the specific brand's line of products
       description: |
         This endpoint allows you to view the specific products that you may want to purchase
       parameters:
-        - name: id
+        - name: brandId
           in: path
-          description: The id of product
-          required: true
+          description: Status value for the brand that you would like the see the products available of
+          required: false
           type: string
       tags:
         - Brands

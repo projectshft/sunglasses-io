@@ -23,15 +23,16 @@ let failedLoginAttempts = {};
 let accessTokens = [];
 let user;
 
-//router set up
-const router = Router();
-router.use(bodyParser.json());
 
 //server set up
 const server = http.createServer((req, res) => {
   res.writeHead(200);
   router(req, res, finalHandler(req, res));
 });
+
+//router set up
+const router = Router();
+router.use(bodyParser.json());
 
 server.listen(PORT, err => {
   if (err) throw err;
