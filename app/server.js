@@ -149,13 +149,79 @@ myRouter.get('/v1/me/cart', (req,res) => {
       res.writeHead(200, contentTypeJSON)
       res.end(JSON.stringify(thisUser.cart))
     } else {
-      res.writeHead(404, 'User not found')
+      res.writeHead(403, 'User not found')
       res.end()
     }
   } else {
     res.writeHead(403, 'Invalid access token')
     res.end()
   }
+})
+
+myRouter.post('/v1/me/cart', (req,res) => {
+  let parsedUrl = url.parse(req.url, true)
+  let tokenId = parsedUrl.query.query //accessing the token string ID
+  if (tokenId) {
+    let thisUsersToken = activeTokens.find(tokenObj => tokenObj.token === tokenId);
+    if (thisUsersToken) {
+      //use the user info associated with the token to get the right cart
+      let thisUser = users.find(userObjs => userObjs.login.username === thisUsersToken.user)
+      //find the product(s) to add
+      let productId = req.body.productId
+      //make a list of failed product requests
+      let failedProducts = []
+      
+      productId.forEach(itemToAdd => {
+        let productToAdd = sunglasses.find(productObj => productObj.id === itemToAdd);
+        if(productToAdd){
+          //add and return product
+          thisUser.cart.push(productToAdd);
+        } else {
+          failedProducts.push(itemToAdd)
+        }
+        
+      });
+      if(failedProducts.length > 0){
+        res.writeHead(200,  contentTypeJSON);
+        res.end(JSON.stringify({cart : thisUser.cart, notAdded:failedProducts}));
+      }
+      res.writeHead(200, contentTypeJSON,)
+      res.end(JSON.stringify(thisUser.cart))
+    } else {
+      res.writeHead(403, 'Access token does not match our records, please log in again')
+      res.end()
+    }
+  } else {
+    res.writeHead(403, 'Invalid or missing access token')
+    res.end()
+  }
+})
+
+myRouter.delete('/v1/me/cart/:id', (req,res) => {
+  let { id } = req.params;
+  //first, verify the access token
+  let parsedUrl = url.parse(req.url, true);
+  let tokenId = parsedUrl.query.query;
+  if(tokenId){
+    //with an actual token, validate it is accurate
+    let thisUsersToken = activeTokens.find(tokenObj => tokenObj.token === tokenId)
+    if(thisUsersToken){
+      //now find the user object to access the cart
+      let thisUser = users.find(userObj => thisUsersToken.user === userObj.login.username)
+      //now filter out all products that match the product ID in the endpoint
+      thisUser.cart = thisUser.cart.filter(product => product.id !== id)
+      res.writeHead(200, contentTypeJSON);
+      res.end(JSON.stringify(thisUser.cart))
+    } else {
+      res.writeHead(403, "Access token does not match our records, please log in again");
+      res.end()
+    }
+
+  } else {
+    res.writeHead(403,'Invalid or missing access token')
+    res.end()
+  }
+  
 })
 
 module.exports = server;

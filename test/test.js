@@ -38,7 +38,7 @@ let singleGlasses = {
 //state holding variables, for the beforeEach calls
 let sunglassesResponse;
 let categoriesResponse;
-let userResponse
+let userResponse;
 
 //Sunglasses endpoints
 describe('sunglasses', () => {
@@ -236,7 +236,7 @@ describe('user information', () => {
         .post("/v1/me/login")
         .send({ username: "yellowleopard753", password: "wrong" })
         .end((err, res) => {
-          expect(res.body).to.deep.equal({})
+          expect(res.body).to.deep.equal({}) //to ensure no data is returned
           res.should.have.status(401);
           done();
         });
@@ -247,8 +247,9 @@ describe('user information', () => {
 let accessToken = ''
 // cart information
 describe('cart endpoints', () => {
-  describe('me/cart', () => {
-    beforeEach(() => {
+  describe('get me/cart', () => {
+    before(() => {
+      //retrieve an access token to be used in testing
       return new Promise(resolve => {
         chai
           .request(server)
@@ -260,12 +261,163 @@ describe('cart endpoints', () => {
           });
       });
     });
-    it('should return a cart ', done => {
+    it('should return a cart for a correct token ', done => {
       chai.request(server)
         .get(`/v1/me/cart?query=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('array')
+          done()
+        })
+    })
+    it('should not return a cart for incorrect token', done => {
+      chai.request(server)
+        .get(`/v1/me/cart?query=WRONG`)
+        .end((err, res) => {
+          res.should.have.status(403)
+          done()
+        })
+    })
+    it("should not return a cart for a missing token", done => {
+      chai.request(server)
+        .get(`/v1/me/cart?query=`)
+        .end((err, res) => {
+          res.should.have.status(403);
+          expect(res.body).to.deep.equal({})
+          done();
+        });
+    });
+  })
+  describe('POST /me/cart', () => {
+    before(() => {
+    //retrieve an access token to be used for testing 
+      return new Promise(resolve => {
+        chai
+          .request(server)
+          .post("/v1/me/login")
+          .send({ 'username': 'yellowleopard753', 'password': 'jonjon' })
+          .end((err, res) => {
+            accessToken = res.body.token
+            resolve();
+          });
+      });
+    })
+    it('should allow a user to add to their cart', done => {
+      chai.request(server)
+        .post(`/v1/me/cart?query=${accessToken}`)
+      //same as 'singleGlasses' the api will need just an ID, not the whole object
+      .send({'productId':['9']})
+      .end((err,res) => {
+        res.should.have.status(200)
+        res.body.should.be.an('array')
+        expect(res.body).to.include.deep.members([
+          singleGlasses
+        ]);
+        done()
+      })
+    })
+    it('should allow a user to add multiple items to their cart', done => {
+      chai.request(server)
+        .post(`/v1/me/cart?query=${accessToken}`)
+        .send({'productId':['9','10']})
+        .end((err,res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array')
+          expect(res.body).to.include.deep.members([{
+            "id": "9",
+            "categoryId": "4",
+            "name": "Sugar",
+            "description": "The sweetest glasses in the world",
+            "price": 125,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          },
+            {
+              "id": "10",
+              "categoryId": "5",
+              "name": "Peanut Butter",
+              "description": "The stickiest glasses in the world",
+              "price": 103,
+              "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+            }])
+          done()
+        })
+    })
+    it('should not allow a user to add with an incorrect token', done => {
+      chai.request(server)
+        .post(`/v1/me/cart?query=incorrectToken123456`)
+        .send({ 'productId': ['9', '10'] })
+        .end((err,res) => {
+          res.should.have.status(403)
+          expect(res.body).to.deep.equal({})
+          done()
+        })
+    })
+    it('should not add a product that does not exist', done => {
+      chai.request(server)
+        .post(`/v1/me/cart?query=${accessToken}`)
+        .send({ 'productId': ['900', '100'] })
+        .end((err,res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('object');
+          res.body.should.have.all.keys('cart','notAdded')
+          expect(res.body.notAdded).to.be.an('array')
+          done()
+        })
+    })
+    it('should correctly add a mixture of correct and incorrect items', done => {
+      chai.request(server)
+      .post(`/v1/me/cart?query=${accessToken}`)
+      .send({'productId':['1','2','456','500','2']})
+      .end((err,res) => {
+        //unsure about the correct status code for 'partially correct'
+        res.should.have.status(200)
+        expect(res.body.cart).to.be.an('array')
+        expect(res.body.cart).to.include.deep.members([{
+          "id": "1",
+          "categoryId": "1",
+          "name": "Superglasses",
+          "description": "The best glasses in the world",
+          "price": 150,
+          "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }])
+        expect(res.body.notAdded).to.be.an('array')
+        expect(res.body.notAdded).to.include.deep.members(['456','500'])
+        done()
+      })
+    })
+  })
+  describe('DELETE me/cart', () => {
+    //will use the same access token as the POST tests
+    it(`should remove all products of that type from the cart`, done => {
+      
+      //Not ideal but I am using the previous post requests to use for my delete request
+      //multiple chai.request(server)s cause a socket timeout, and the priority is to get it working and then
+      //clean up my testing  
+      chai.request(server)
+      .del(`/v1/me/cart/9?query=${accessToken}`)
+      .end((err,res) => {
+        res.should.have.status(200)
+        res.body.should.be.an('array');
+        expect(res.body).to.not.include.deep.members([singleGlasses])
+        done()
+      })
+    })
+    it('should not remove an item that is not present in the cart' , done => {
+      chai.request(server)
+      //until this point item 5 has not been added. again, not ideal
+        .del(`/v1/me/cart/5?query=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array');
+          done()
+        })
+    })
+    it('should not remove anything without a valid token', done => {
+      chai.request(server)
+        .del(`/v1/me/cart/1?query=WRONGTOKEN`)
+        .end((err,res) => {
+          res.should.have.status(403)
+          expect(res.body).to.deep.equal({})
           done()
         })
     })
