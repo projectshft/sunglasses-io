@@ -198,6 +198,17 @@ describe('/GET /me', () => {
       done();
     })
   })
+  it.only('Should deny permission to view user information if not logged in', done => {
+    chai
+    .request(server)
+    .get('/api/me')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(401);
+      done();
+    })
+  })
 })
 //GET ME/Cart test
 describe('/GET /me/cart', () => {
@@ -211,6 +222,17 @@ describe('/GET /me/cart', () => {
       expect(res).to.have.status(200);
       expect('Content-Type', 'application/json');
       expect(res.body).to.be.an("array");
+      done();
+    })
+  })
+  it.only('Should deny permission to view cart if not logged-in', done => {
+    chai
+    .request(server)
+    .get('/api/me')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(401);
       done();
     })
   })

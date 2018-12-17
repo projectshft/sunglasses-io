@@ -161,7 +161,7 @@ server.listen(PORT, err => {
   //GET ME
   router.get('/api/me', (req, res) => {
     if (!user) {
-      res.writeHead(404, 'Please log into our services to view your information');
+      res.writeHead(401, 'Please log into our services to view your information');
       return res.end();
     }
     res.writeHead(200, {'Content-Type': 'application/json'});
@@ -171,7 +171,7 @@ server.listen(PORT, err => {
   //GET ME/CART
   router.get('/api/me/cart', (req, res) => {
     if (!user) {
-      res.writeHead(404, 'Please log into our services to view your information');
+      res.writeHead(401, 'Please log into our services to view your information');
       return res.end();
     }
     let cart = user.cart;
