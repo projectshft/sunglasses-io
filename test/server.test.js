@@ -95,4 +95,17 @@ describe("/POST login", () => {
 
             })
     })
+    it("return error for incorrect username or password", done => {
+        chai.request(server)
+            .post("/api/login")
+            .send({
+                'username': 'greenlion235',
+                'password': 'water'
+            })
+            .end((err, res) => {
+                expect(res).to.have.status(401);
+                done();
+            })
+
+    })
 })

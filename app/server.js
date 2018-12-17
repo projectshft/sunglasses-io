@@ -90,11 +90,17 @@ router.post("/api/login", (req, res) => {
     if (req.body.username && req.body.password) {
         //check that user with those exists
         let user = users.find((user) => {
-            return user.login.username ==req.body.username && user.login.password == req.body.password;
+            return user.login.username === req.body.username && user.login.password === req.body.password;
         })
+        if (user) {
+            res.writeHead(200);
+        }
+    } else {
+        res.writeHead(401, "Unauthorized user");
+        return res.end();
     }
-    res.writeHead(200);
-    return res.end();
+   
+    // return res.end();
 })
 
 
