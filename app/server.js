@@ -33,7 +33,9 @@ const server = http.createServer((req, res) => {
     products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf8"));
 
     //populate users
-    // users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf8"));
+    users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf8"));
+    //hardcoded user
+    user = users[2];
 });
 
 
@@ -68,7 +70,7 @@ router.get("/api/products", (req, res) => {
     let itemsToReturn = [];
 
     if (query !== undefined) {
-        itemsToReturn = products.filter(product => product.description.includes(query));
+        itemsToReturn = products.filter(product => product.name.includes(query));
 
         if (!itemsToReturn) {
             res.writeHead(404, "Product not found");
@@ -81,6 +83,19 @@ router.get("/api/products", (req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(itemsToReturn));
 });
+
+//POST username and password
+router.post("/api/login", (req, res) => {
+    //make sure the username and password are in the request
+    if (req.body.username && req.body.password) {
+        //check that user with those exists
+        let user = users.find((user) => {
+            return user.login.username ==req.body.username && user.login.password == req.body.password;
+        })
+    }
+    res.writeHead(200);
+    return res.end();
+})
 
 
 

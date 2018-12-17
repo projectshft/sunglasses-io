@@ -30,7 +30,7 @@ describe("/GET products by brandId", () => {
         //act
         chai.request(server)
             .get("/api/brands/1/products")
-        //assert
+            //assert
             .end((err, res) => {
                 expect(res).to.have.status(200)
                 expect(res.body).to.be.an("array")
@@ -55,7 +55,7 @@ describe("/GET products by query", () => {
     });
     it("should limit results to those with a query string", done => {
         chai.request(server)
-            .get("/api/products?query=brown")
+            .get("/api/products?query='brown'")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -77,4 +77,22 @@ describe("/GET products by query", () => {
                 done();
             });
     });
+})
+
+//POST login
+describe("/POST login", () => {
+    it("should send username and password to /path", done => {
+        chai.request(server)
+            .post("/api/login")
+            .send({
+                'username': 'greenlion235',
+                'password': 'waters'
+            })
+            .end((err, res) => {
+                expect(res).to.have.status(200);
+                expect("Content-Type", "text/plain");
+                done();
+
+            })
+    })
 })
