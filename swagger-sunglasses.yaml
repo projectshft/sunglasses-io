@@ -192,6 +192,11 @@ paths:
           description: Product id of the product in the cart.
           required: true
           type: string
+        - name: amount
+          in: query
+          description: sets the quantity of items in the user's cart to this amount
+          required: true
+          type: string
       responses:
         '200':
           description: Successful operation. Item updated to cart.
