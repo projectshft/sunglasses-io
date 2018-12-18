@@ -1,0 +1,259 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses ecommerce platform.
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+       The  Brands endpoint allows you to search for sunglasses according to their brand names
+      parameters:
+        - name: limit
+          in: query
+          description: The number of brands to limit the sunglasses search to
+          required: false
+          type: number
+          format: int32
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Sunglasses in each brand
+      description: >-
+        All the sunglasses for a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for sunglasses in.
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Products
+      description: >- 
+        The products endpoint provides specific/more detailed  information for a given pair of sunglasses
+      tags:
+        - Products
+      responses:
+        '200':
+          description: More specific information on a given pair of sunglasses
+          schema:
+            $ref: '#/definitions/Products'
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Login
+      description: |
+        The login endpoint informs you of the necessary information needed to log in into the sunglasses store
+      parameters:
+      - name: username
+        in: path
+        description: login information of the user
+        required: true
+        type: string  
+      tags:
+        - Login
+      responses:
+        '200':
+      schema:
+        $ref: '#/definitions/Login'
+        default: 
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the customer logged into their account
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/productId:
+    post:
+      summary: Add another pair of sunglasses with the same product id to the cart
+      description: |
+        This endpoint allows you to add another pair of sunglasses to the cart using the product id
+      parameters:
+        - name: id
+          in: path
+          description: The id of the sunglasses to add
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Sunglasses successfully added
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/productId:
+    post:
+      summary: Add a new pair of sunglasses to the cart
+      description: |
+        This endpoint allows to add a new pair of sunglasses to the cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the new pair of sunglasses to add
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: New pair of sunglasses has been added
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:            
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to each brand
+      name:
+        type: string
+        description: The name of the brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The id of a specific pair of sunglasses
+      categoryId:
+        type: string
+        description: The id of the brand a pair of sunglasses belongs to
+      name:
+        type: string
+        description: The name of a particular pair of sunglasses
+      desription:
+        type: string
+        description: Description of a pair of sunglasses
+      price:
+        type: string
+        description: The cost of a pair of sunglasses
+      imageUrl:
+        type: string
+        description: The URL for the image representing the sunglasses
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username
+      password:
+        type: string
+        description: Password
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of user
+      cart:
+        type: array
+        description: Will populate items in cart
+      name:
+        type: object
+        description: Title, first and last name of user
+      location:
+      type: object
+      description: Address of user
+    email: 
+      type: string
+      description: Email address of user
+    login:
+      type: object
+      description: login information of user
+    Dob:
+      type: string
+      description: Date of birth of user
+    Registered:
+      type: string
+      description: Date account was created
+    Phone:
+      type: string
+      description: Phone number of user
+    Cell:
+      type: string
+      description: Cell phone number of user
+    Picture:
+      type: object
+      description: Image of user
+    Nat:
+      type: string
+      description: Nationality of user
+      cart:
+        items:
+          $ref: '#/definitions/User'
+      name:
+        items:
+          $ref: '#/definitions/User'
+      location:
+        items:
+          $ref: '#/definitions/User'  
+      login:
+        items:
+          $ref: '#/definitions/User' 
+      picture:
+        items:
+          $ref: '#/definitions/User'     
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
