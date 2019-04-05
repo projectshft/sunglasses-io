@@ -12,14 +12,14 @@ produces:
 paths:
   /brands:
     get:
-      summary: Brands
+      summary: All available brands
       description: |
         The Brands endpoint returns all of the available brands of sunglasses
       tags:
         - Brands
       responses:
         '200':
-          description: An array of brands
+          description: An array of brand objects
           schema:
             type: array
             items:
@@ -28,16 +28,40 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /brands/:id/products:
+    get:
+      summary: All products of a specific brand
+      description: |
+        This endpoint returns all of the available products for a specified brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to return products for
+          required: true
+          type: string    
+      tags:
+        - Brands / Products
+      responses:
+        '200':
+          description: An array of product objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'          
   /products:
     get:
-      summary: Products
+      summary: All available products
       description: |
         The Products endpoint returns all of the available products for sale
       tags:
         - Products
       responses:
         '200':
-          description: An array of products
+          description: An array of product objects
           schema:
             type: array
             items:
