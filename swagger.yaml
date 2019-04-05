@@ -1,0 +1,185 @@
+swagger: "2.0"
+info:
+  title: "Sunglasses.io API"
+  description: "API definition for Sunglasses.io"
+  version: "1.0.0"
+host: "localhost:3001"
+basePath: "/api"
+schemes:
+- "http"
+produces:
+  - "application/json"
+tags:
+  - name: Brands
+    description: "Access to Brands information."
+  - name: Products
+    description: "Access to Product information."
+  - name: Cart
+    description: "Operations for the shopping cart."
+  - name: Login
+    description: "Operations for user login."
+paths:
+  /brands:
+    get:
+      tags:
+      - Brands
+      summary: "Retrieve all sunglasses brands."
+      description: |
+        "This endpoint returns information on all Sunglasses.io brands."
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items: 
+              type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/:id/products:
+    get:
+      tags: 
+        - Brands
+      summary: "Sunglasses by brand id"
+      description: |
+        "This endpoint returns all sunglasses by a specific brand id."
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items: 
+              type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      tags: 
+        - Products
+      summary: "Sunglasses products"
+      description: |
+        "This endpoint returns information on all Sunglasses.io products."
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items: 
+              type: "object"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+        - Login
+      summary: "User login to the store."
+      description: ''
+      parameters:
+        - name: username
+          in: header
+          description: "The user name for login"
+          required: true
+          type: string
+        - name: password
+          in: header
+          description: "The password of the user."
+          required: true
+          type: string
+      responses:
+        '200':
+          description: "OK"
+        '401':
+          description: "Invalid username or password."
+  /me/cart:
+    get:
+      tags:
+         - Cart
+      summary: "User cart"
+      description: |
+        "This endpoint returns information on all items in the user cart."
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items: 
+              type: "object"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+         - Cart
+      summary: "This endpoint allows updating of cart contents."
+      description: ''
+      parameters:
+        - name: itemid
+          in: header
+          description: "Id of the item to update"
+          required: true
+          type: string
+        - name: quantity
+          in: header
+          description: "Quantity to update the item to."
+          required: true
+          type: string
+      responses:
+        '200':
+          description: "OK"
+  /me/cart/:productId:
+    delete:
+      tags:
+         - Cart
+      summary: "Delete cart item by product id."
+      description: ""
+      parameters:
+        - name: productId
+          in: path
+          description: "ID of the item that needs to be deleted"
+          required: true
+          type: string
+      responses:
+        '400':
+          description: "Invalid ID supplied"
+    post:
+      tags:
+         - Cart
+      summary: "Add an item to the cart by product id"
+      description: ''
+      parameters:
+        - name: itemId
+          in: header
+          description: "Item id to add to cart"
+          required: true
+          type: string
+      responses:
+        '200':
+          description: "successful operation."
+        '400':
+          description: "Invalid item id."
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: "Brand id value"
+      name:
+        type: string
+        description: "Brand name"
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
