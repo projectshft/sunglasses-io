@@ -15,6 +15,12 @@ paths:
       summary: All available brands
       description: |
         The Brands endpoint returns all of the available brands of sunglasses
+      parameters:
+        - name: query
+          in: path
+          description: The search query from a user
+          required: true
+          type: string     
       tags:
         - Brands
       responses:
@@ -40,7 +46,7 @@ paths:
           required: true
           type: string    
       tags:
-        - Brands / Products
+        - Products
       responses:
         '200':
           description: An array of product objects
@@ -57,6 +63,12 @@ paths:
       summary: All available products
       description: |
         The Products endpoint returns all of the available products for sale
+      parameters:
+        - name: query
+          in: path
+          description: The search query from a user
+          required: true
+          type: string       
       tags:
         - Products
       responses:
@@ -69,7 +81,104 @@ paths:
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'             
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Logs user into the system
+      description: |
+        Logs user into the system with a username and password
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for login
+          required: true
+          type: string  
+      tags:
+        - Login
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid username/password supplied
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /me/cart:
+    get:
+      summary: The users shopping cart
+      description: |
+        This endpoint returns all of the products in a users cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of cart objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'    
+    put:
+      summary: Update quantity of cart
+      description: |
+        This endpoint allows a user to change the quantity of items in their cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Successfully updated cart          
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/:productId:
+    post:
+      summary: Add item to cart
+      description: |
+        This endpoint adds a product to a users cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to add to the cart
+          required: true
+          type: string    
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Add item to cart succesfull          
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+    delete:
+      summary: Delete item from cart
+      description: |
+        This endpoint removes a product from a users cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to remove from the cart
+          required: true
+          type: string    
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item deleted from cart succesfully          
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'                                                                    
 definitions:
   Brand:
     type: object
@@ -100,7 +209,25 @@ definitions:
         description: The sale price of a product
       imageUrls:
         type: string
-        description: URLs for images of the product   
+        description: URLs for images of the product
+  Cart:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: Identifier for the brand of the product, this should match the brand id value
+      name:
+        type: string
+        description: The name of the product      
+      price:
+        type: number
+        description: The sale price of a product
+      quantity:
+        type: number
+        description: The amount of the product in the cart         
   Error:
     type: object
     properties:
