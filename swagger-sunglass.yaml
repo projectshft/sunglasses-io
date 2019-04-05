@@ -1,0 +1,363 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io API
+  description: An API to support the Sunglasses.io e-commerce site
+  version: 1.0.0
+host: sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+securityDefinitions:
+  AccessToken:
+    type: apiKey
+    in: header
+    name: x-access-token
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows the user to retrieve a list of all available brands.
+      parameters:
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+        - name: sort
+          in: query
+          description: The sort type on the response.  
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - ascending
+              - descending
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'             
+  /brands/:brandId/products:
+    get:
+      summary: Show all products of specified brand id
+      description: |
+        This endpoint allows the user to retrieve a list of all of the products of the provided brand id.
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.  
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - name
+              - price          
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not found.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'             
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint allows a user to search the entire list of products based on a search query parameter. If blank, all products will be returned.
+      parameters:
+        - name: query
+          in: query
+          description: The search term 
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Unable to find products matching search criteria.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'             
+  /login:
+    post:
+      summary: Login
+      description: |
+        This endpoint allows a user to login with his email and password.
+      tags:
+        - Login
+      parameters:
+        - name: user
+          in: body
+          description: The user's email address and password.
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: Login successful
+        '400':
+          description: Missing username or password.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid username or password.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'             
+  /me/cart:
+    get:
+      summary: Display User's Shopping Cart
+      description: |
+        Returns all items in the currently logged in user's shopping cart.
+      security:
+        - AccessToken: []
+      tags:
+        - Shopping Cart
+      responses:
+        '200':
+          description: An array of products in the current user's cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CartItem'
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Must be logged in to access the cart.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'          
+  /me/cart/edit:
+    post:
+      summary: Edit Shopping Cart
+      description: |
+        This endpoint allows the currently logged in user to edit the quantity of an item already in the shopping cart.
+      security:
+        - AccessToken: []
+      parameters:
+        - name: productId
+          in: query
+          description: The id of the product to edit
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          description: The number of products
+          required: true
+          type: number
+      tags:
+        - Shopping Cart
+      responses:
+        '200':
+          description: Quantity succesfully updated
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CartItem'
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Must be logged in to access the cart.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /me/cart/:productId/add:
+    post:
+      summary: Add an Item
+      description: |
+        This endpoint allows the currently logged in user to add an item to the shopping cart.
+      security:
+        - AccessToken: []      
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to add
+          required: true
+          type: string
+      tags:
+        - Shopping Cart
+      responses:
+        '200':
+          description: Quantity succesfully updated
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CartItem'
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Must be logged in to access the cart.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /me/cart/:productId/delete:
+    delete:
+      summary: Delete an Item
+      description: |
+        This endpoint allows the currently logged in user to delete an item from the shopping cart.
+      security:
+        - AccessToken: []      
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to delete
+          required: true
+          type: string
+      tags:
+        - Shopping Cart
+      responses:
+        '200':
+          description: Item successfully deleted
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CartItem'          
+        '400':
+          description: Incorrectly formatted request.
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Must be logged in to access the cart.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'             
+definitions:
+  Brand:
+    type: object
+    properties:
+      name:
+        type: string
+        description: |
+          Name of the brand.
+      id:
+        type: string
+        description: |
+          Unique id number for the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: number
+        description: |
+          The unique identifier given to the product
+      brandId:
+        type: number
+        description: |
+          The unique identifier given to the brand of the product
+      name:
+        type: string
+        description: |
+          The name of the product
+      description:
+        type: string
+        description: |
+          The product description
+      price:
+        type: number
+        description: |
+          The price of the product
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: |
+          An array of image URLs for the product
+  CartItem:
+    type: object
+    properties:
+      quantity:
+        type: number
+        description: |
+          The quantity of the item in the cart.
+      product:
+        $ref: '#/definitions/Product'        
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
