@@ -25,10 +25,38 @@ const server = http
       brands = JSON.parse(data)
       console.log(`Server setup: ${brands.length} brands loaded`)
     })
+    fs.readFile('initial-data/products.json', 'utf8', (error, data) => {
+      if (error) throw error
+      products = JSON.parse(data)
+      console.log(`Server setup: ${products.length} products loaded`)
+    })
   })
+
+//get all brands
 myRouter.get('/brands', (request, response) => {
   response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
   response.end(JSON.stringify(brands))
+})
+//get products by productName
+myRouter.get('/products', (request, response) => {
+  let query = queryString.parse(request.url.substring(10))
+
+  if (Object.keys(query).length == 0) {
+    response.writeHead(401, 'Please enter a product')
+    response.end()
+    return
+  }
+  let product = products.find(product => {
+    return product.productName === query.productName
+  })
+  if (!product) {
+    response.writeHead(403, 'The product does not exist')
+    response.end()
+    return
+  }
+  response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
+  response.end(JSON.stringify(product))
+  return
 })
 
 module.exports = server
