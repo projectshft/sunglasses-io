@@ -12,6 +12,9 @@ const PORT = 3001; // Port for server to listen on
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 // Setup router
 const myRouter = Router();
@@ -59,6 +62,40 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
   }
   response.writeHead(200, { "Content-Type": "application/json" });
   response.end(JSON.stringify(productsByBrand));
+});
+
+// POST /api/login (User Login)
+myRouter.post("/api/login", (request,response) => {
+  response.writeHead(200, {'Content-Type': 'application/json'});
+  if (request.body.username && request.body.password) {
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+    if (user) {
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+      
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+        response.writeHead(401, "Invalid username or password");
+        response.end();
+    }
+  } else {
+    response.writeHead(400, "Incorrectly formatted credentials");
+    response.end();
+  }    
 });
 
 module.exports = server;

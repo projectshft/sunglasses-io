@@ -69,3 +69,26 @@ describe("/GET products by brand ID", () => {
       });
   });
 });
+
+// Tests for /api/login endpoint
+
+const userCredentials = {
+  username: 'greenlion235', 
+  password: 'waters'
+}
+
+describe("/POST login a user", () => {
+  it.only("should login the user", done => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(userCredentials)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(200);
+        chai.expect(response.body).to.be.lengthOf(16);
+        chai.expect(response.body).to.be.a("string");
+        done();
+      });
+  });
+});
