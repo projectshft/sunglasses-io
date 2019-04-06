@@ -58,9 +58,9 @@ router.get('/api/brands', (request, response) => {
   }
 
   const URL = request.url;
-  const { query } = url.parse(URL);
-  const queryObj = queryString.parse(query);
-  const { limit } = queryObj;
+  let { query } = url.parse(URL);
+  query = queryString.parse(query);
+  const { limit } = query;
 
   if (!limit && limit !== undefined) {
     response.writeHead(400, 'Incorrectly formatted request', HEADERS);
@@ -73,7 +73,7 @@ router.get('/api/brands', (request, response) => {
   }
 
   if (limit && Number.isInteger(Number(limit))) {
-    const brandsRequested = brands.filter(brand => brands.indexOf(brand) < queryObj.limit);
+    const brandsRequested = brands.filter(brand => brands.indexOf(brand) < Number(limit));
 
     response.writeHead(200, HEADERS);
     return response.end(JSON.stringify(brandsRequested));
@@ -91,18 +91,35 @@ router.get('/api/brands/:brandId/products', (request, response) => {
     return response.end();
   }
 
-  const productsOfBrand = products.filter(product => product.brandId === brandId);
+  const result = products.filter(product => product.brandId === brandId);
 
-  if (productsOfBrand.length === 0) {
+  if (result.length === 0) {
     response.writeHead(404, 'No products with that brand ID found.', HEADERS);
     return response.end();
   }
 
   response.writeHead(200, HEADERS);
-  response.end(JSON.stringify(productsOfBrand));
+  response.end(JSON.stringify(result));
 });
 
 router.get('/api/products', (request, response) => {
+  const URL = request.url;
+  let { query } = url.parse(URL);
+  query = queryString.parse(query);
+  const { search } = query;
+
+  if (search) {
+    // check to see if search term is a brand name
+    const brand = brands.find(b => b.name.toLowerCase() === search.toLowerCase());
+
+    if (brand) {
+      const result = products.filter(product => product.brandId === brand.id);
+
+      response.writeHead(200, HEADERS);
+      return response.end(JSON.stringify(result));
+    }
+  }
+
   response.writeHead(200, HEADERS);
   response.end(JSON.stringify(products));
 });

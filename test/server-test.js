@@ -77,6 +77,9 @@ describe('BRANDS', () => {
         });
     });
   });
+});
+
+describe('PRODUCTS', () => {
   describe('GET /api/products', () => {
     it('should return all products when there is no search criteria', done => {
       // arrange
@@ -92,11 +95,19 @@ describe('BRANDS', () => {
           done();
         });
     });
-    it('should return all products matching the given search query', done => {
-      // arrange
+    it('should return all products matching the given search term', done => {
+      // arrange: search=Oakley (brand case)
       // act
-      // assert
-      done();
+      chai
+        .request(server)
+        .get('/api/products?search=Oakley')
+        .end((error, response) => {
+          // assert
+          response.status.should.equal(200);
+          response.body.should.be.an('array');
+          response.body.should.have.length(3);
+          done();
+        });
     });
   });
 });

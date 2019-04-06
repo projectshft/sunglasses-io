@@ -74,7 +74,7 @@ paths:
       description: |
         The Products endpoint allows a user to search the entire list of products based on a search query parameter. If blank, all products will be returned.
       parameters:
-        - name: query
+        - name: search
           in: query
           description: The search term 
           required: false
