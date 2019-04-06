@@ -20,7 +20,7 @@ const server = http
   })
   .listen(PORT, error => {
     if (error) {
-      throw error
+      return console.log('Error on Server Startup: ', error)
     }
 
     brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf8'))
@@ -42,6 +42,7 @@ const server = http
 myRouter.get('/brands', (request, response) => {
   response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
   response.end(JSON.stringify(brands))
+  return
 })
 //get all products by brandID
 myRouter.get('/brands/:brandId/products', (request, response) => {
@@ -50,12 +51,15 @@ myRouter.get('/brands/:brandId/products', (request, response) => {
     return product.brandId == request.params.brandId
   })
   //if there are no products with the brand Id, a 401 error should be thrown
-  if (!brandProducts) {
+  if (brandProducts == false) {
     response.writeHead(401, 'No products with that brand Id found.')
+    response.end()
+    return
   }
   //if there are products with the brandId, send them
   response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
   response.end(JSON.stringify(brandProducts))
+  return
 })
 //get products by productName
 myRouter.get('/products', (request, response) => {
