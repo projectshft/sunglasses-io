@@ -21,6 +21,8 @@ paths:
         - in: query 
           name: product_name
           type: string
+          description: |
+            Searches for product by name (optional)
       responses:
         '200':
           description: An array of brands
@@ -28,8 +30,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected error please try again
+        '404':
+          description: No products found
           schema:
             $ref: '#/definitions/Error'
   /brands/{brandId}/products:
@@ -78,18 +80,13 @@ paths:
       description: Login endpoing
       consumes:
         - application/json
-        - multipart/form-data
       parameters:
-        - name: email
-          in: formData
-          type: string
-          required: true
-          description: user email
-        - name: password
-          in: formData
-          type: string
-          required: true
-          description: user passoword
+        - in: body
+          name: user
+          description: |
+            User email and password needed to login
+          schema:
+            $ref: '#/definitions/User'
       responses:
         '200':
           description: 'Sucessful login'
@@ -242,48 +239,14 @@ definitions:
   User:
     type: object
     properties:
-      gender: 
-        type: string
-        description: The gender for a user, 'male' or 'female'
-      cart: 
-        description: an array of products
-        type: array
-        items:
-          $ref: '#/definitions/Product'
-      name: 
-        description: Full name for a user
-        type: object
-        properties:
-          title: 
-            type: string
-            description: Title for a user
-          first:
-            type: string
-            description: User first name
-          last: 
-            type: string
-            description: User last name
       email: 
         type: string
-        description: User email
-      dob:
+        description: |
+          User email
+      password: 
+        description: |
+          User password
         type: string
-        description: User date of birth
-      picture: 
-        type: object
-        properties:
-          large: 
-            type: string
-            description: Url for large image
-          medium: 
-            type: string
-            description: Url for medium image
-          thumbnail: 
-            type: string
-            description: Url for small image  
-      phone: 
-        type: string
-        description: User phone number
   Error:
     type: object
     properties:

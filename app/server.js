@@ -5,6 +5,7 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
+const url = require('url');
 
 const PORT = 3001;
 
@@ -52,6 +53,21 @@ const server = http.createServer(function (request, response) {
 // Route to get every brand type
 myRouter.get('/brands', (request, response) => {
   response.setHeader('Content-Type', 'application/json');
+  // if there is query param, use it to search products by name
+  // and return JSON data
+  const query = url.parse(request.url).query;
+  const queryObj = queryString.parse(query);
+  if (queryObj['product_name']) {
+    const foundProduct = products.find(product => product.name === queryObj.product_name);
+    if (!foundProduct) {
+      response.writeHead(404, CORS_HEADERS);
+      console.log('pros sdfs', foundProduct);
+      return response.end(JSON.stringify({ message: 'No products found' }));
+    }
+    response.writeHead(200, CORS_HEADERS);
+    return response.end(JSON.stringify(foundProduct))
+  }
+
   response.writeHead(200, CORS_HEADERS);
   response.end(JSON.stringify(brands));
 });
@@ -62,6 +78,7 @@ myRouter.get('/brands/:brandId/products', (request, response) => {
 
   // return every product for a single brand by using the id
   product = products.filter((product => product.categoryId == request.params.brandId));
+  // If there are no posts return not found and error message
   if (product.length === 0) {
     response.writeHead(404, CORS_HEADERS);
     return response.end(JSON.stringify({ message: 'No products found' }));
@@ -69,6 +86,7 @@ myRouter.get('/brands/:brandId/products', (request, response) => {
   response.writeHead(200, CORS_HEADERS);
   response.end(JSON.stringify(product));
 });
+
 
 myRouter.get('/products', (request, response) => {
   response.setHeader('Content-Type', 'application/json');
