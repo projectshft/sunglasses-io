@@ -38,16 +38,10 @@ paths:
               $ref: '#/definitions/Brand'
         '400':
           description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
         '404':
           description: Not found.
-          schema:
-            $ref: '#/definitions/Error'
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'             
+          description: Unexpected error            
   /brands/:brandId/products:
     get:
       summary: Show all products of specified brand id
@@ -69,17 +63,11 @@ paths:
             items:
               $ref: '#/definitions/Product'
         '400':
-          description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
+          description: Invalid request.
         '404':
-          description: Not found.
-          schema:
-            $ref: '#/definitions/Error'
+          description: No products with that brand ID found.
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'             
+          description: Unexpected error             
   /products:
     get:
       summary: Products
@@ -102,16 +90,10 @@ paths:
               $ref: '#/definitions/Product'
         '400':
           description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
         '404':
           description: Unable to find products matching search criteria.
-          schema:
-            $ref: '#/definitions/Error'
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'             
+          description: Unexpected error             
   /login:
     post:
       summary: Login

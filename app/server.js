@@ -46,7 +46,7 @@ const server = http
     console.log(`Server setup: ${brands.length} brands loaded`);
 
     products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf8'));
-    console.log(`Server setup: ${products.length} users loaded`);
+    console.log(`Server setup: ${products.length} products loaded`);
 
     console.log(`Server is listening on port ${PORT}...`);
   });
@@ -84,8 +84,27 @@ router.get('/api/brands', (request, response) => {
 });
 
 router.get('/api/brands/:brandId/products', (request, response) => {
+  const { brandId } = request.params;
+
+  if (!brandId) {
+    response.writeHead(400, 'Invalid request.', HEADERS);
+    return response.end();
+  }
+
+  const productsOfBrand = products.filter(product => product.brandId === brandId);
+
+  if (productsOfBrand.length === 0) {
+    response.writeHead(404, 'No products with that brand ID found.', HEADERS);
+    return response.end();
+  }
+
   response.writeHead(200, HEADERS);
-  response.end();
+  response.end(JSON.stringify(productsOfBrand));
+});
+
+router.get('/api/products', (request, response) => {
+  response.writeHead(200, HEADERS);
+  response.end(JSON.stringify(products));
 });
 
 module.exports = server;

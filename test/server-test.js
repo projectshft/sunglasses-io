@@ -56,11 +56,47 @@ describe('BRANDS', () => {
       chai
         .request(server)
         .get('/api/brands/1/products')
-        .get((error, response) => {
+        .end((error, response) => {
           // assert
           response.status.should.equal(200);
+          response.body.should.be.an('array');
+          response.body.should.have.length(3);
           done();
         });
+    });
+    it('should return an error if no products are found with that brandId', done => {
+      // arrange: brandId = bob
+      // act
+      chai
+        .request(server)
+        .get('/api/brands/bob/products')
+        .end((error, response) => {
+          // assert
+          response.status.should.equal(404);
+          done();
+        });
+    });
+  });
+  describe('GET /api/products', () => {
+    it('should return all products when there is no search criteria', done => {
+      // arrange
+      // act
+      chai
+        .request(server)
+        .get('/api/products')
+        .end((error, response) => {
+          // assert
+          response.status.should.equal(200);
+          response.body.should.be.an('array');
+          response.body.should.have.length(11);
+          done();
+        });
+    });
+    it('should return all products matching the given search query', done => {
+      // arrange
+      // act
+      // assert
+      done();
     });
   });
 });
