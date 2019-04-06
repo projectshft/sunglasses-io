@@ -1,0 +1,291 @@
+swagger: '2.0'
+info:
+  title: Sunglasses-io API
+  description: An API to support the goalworthy platform
+  version: 1.0.0
+host: api.sunglasses-io.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Get available brands
+      description: |
+        The Brands endpoint gets all the brands that are currently available
+      parameters:
+        - in: query 
+          name: product_name
+          type: string
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error please try again
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{brandId}/products:
+    get:
+      tags:
+        - Brands
+      summary: Get products by brand ID
+      description: |
+        Gets all of the products for a brand
+      parameters: 
+        - name: brandId
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products for a brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: No products found
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get all products for all brands 
+      description: |
+        Gets all of currently available products
+      responses:
+        '200':
+          description: An array of every product avaliable
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+  /login:
+    post:
+      tags:
+        - Login
+      summary: User login  
+      description: Login endpoing
+      consumes:
+        - application/json
+        - multipart/form-data
+      parameters:
+        - name: email
+          in: formData
+          type: string
+          required: true
+          description: user email
+        - name: password
+          in: formData
+          type: string
+          required: true
+          description: user passoword
+      responses:
+        '200':
+          description: 'Sucessful login'
+        '401':
+          description: 'Invalid email or password'
+          schema:
+            $ref: '#/definitions/Error'
+        '400': 
+          description: 'Failed login, empty fields'
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      tags:
+        - User
+      summary: Get cart
+      description: |
+        The cart can only be accessed by a logged in user
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                productName:
+                  type: string
+                productQuantity: 
+                  type: integer
+        '401':
+          description: 'Unauthorized user, must be logged in'
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - User
+      summary: Checkout cart
+      description: |
+        Only logged can checkout cart
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Order to be procesed
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                productName:
+                  type: string
+                productQuantity: 
+                  type: integer
+      responses:
+        '200':
+          description: successfuly placed order
+        '401':
+          description: 'Must be logged in'
+        '404': 
+          description: Order not found
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      tags: 
+        - User
+      summary: Remove product from cart 
+      description: | 
+        Deletes an item from the user's cart
+      parameters:
+      - name: productId
+        in: path
+        type: string
+        required: true
+        description: The product Id  
+      responses:
+        '200':
+          description: Succesfuly removed product
+        '404': 
+          description: product not found
+          schema:
+            $ref: '#/definitions/Error'
+        '400': 
+          description: Invalid product Id
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags: 
+        - User
+      summary: Add product to cart
+      description: | 
+        Only logged in users can add items to cart
+      parameters:
+      - name: productId
+        in: path
+        type: string
+        required: true
+        description: The product Id  
+      responses:
+        '200':
+          description: Succesfuly added product
+        '404': 
+          description: product not found
+          schema:
+            $ref: '#/definitions/Error'
+        '400': 
+          description: Invalid product Id
+          schema:
+            $ref: '#/definitions/Error'        
+        
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: Title of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a sunglasses product
+      brandId: 
+        type: string
+        description: The id of the brand this product belogs to
+      name: 
+        type: string
+        description: Name of sunglasses product
+      price: 
+        type: integer
+        description: The price for a sunglasses
+      description:
+        type: string
+        description: Description for a sunglasses
+      imageUrls:
+        description: An array of URL's for the sunglasses images
+        type: array
+        items:
+          description: Url string
+          type: string
+  User:
+    type: object
+    properties:
+      gender: 
+        type: string
+        description: The gender for a user, 'male' or 'female'
+      cart: 
+        description: an array of products
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+      name: 
+        description: Full name for a user
+        type: object
+        properties:
+          title: 
+            type: string
+            description: Title for a user
+          first:
+            type: string
+            description: User first name
+          last: 
+            type: string
+            description: User last name
+      email: 
+        type: string
+        description: User email
+      dob:
+        type: string
+        description: User date of birth
+      picture: 
+        type: object
+        properties:
+          large: 
+            type: string
+            description: Url for large image
+          medium: 
+            type: string
+            description: Url for medium image
+          thumbnail: 
+            type: string
+            description: Url for small image  
+      phone: 
+        type: string
+        description: User phone number
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
