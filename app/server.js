@@ -22,31 +22,43 @@ const server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response));
 })
 .listen(PORT, error => {
-  if (error) {
-    // return console.log("Error on Server Startup: ", error);
-  }
+  if (error) throw error;
   fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded`);
   });
   fs.readFile("initial-data/products.json", "utf8", (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
-    // console.log(`Server setup: ${products.length} products loaded`);
   });
   fs.readFile("initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
-    // console.log(`Server setup: ${users.length} users loaded`);
   });
-  // console.log(`Server is listening on ${PORT}`);
 });
 
 // GET /api/brands (Public)
 myRouter.get("/api/brands", (request, response) => {
-  response.writeHead(200, {"Content-Type": "application/json" });
+  response.writeHead(200, {"Content-Type": "application/json"});
   response.end(JSON.stringify(brands));
+});
+
+// GET /api/products (Public)
+myRouter.get("/api/products", (request, response) => {
+  response.writeHead(200, {"Content-Type": "application/json"});
+  response.end(JSON.stringify(products));
+});
+
+// GET /api/brands/:id/products (Public specific category/brand of product)
+myRouter.get("/api/brands/:id/products", (request, response) => {
+  const { id } = request.params;
+  const productsByBrand = products.filter(product => product.categoryId === id);
+  if (productsByBrand.length === 0) {
+    response.writeHead(404, "No products found for that brand ID");
+    response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(JSON.stringify(productsByBrand));
 });
 
 module.exports = server;
