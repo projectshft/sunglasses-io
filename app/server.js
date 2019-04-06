@@ -62,17 +62,21 @@ router.get('/api/brands', (request, response) => {
   const queryObj = queryString.parse(query);
   const { limit } = queryObj;
 
-  if (limit && parseInt(limit)) {
-    const brandsRequested = brands.filter(
-      brand => brands.indexOf(brand) < parseInt(queryObj.limit)
-    );
-    response.writeHead(200, HEADERS);
-    return response.end(JSON.stringify(brandsRequested));
-  }
-
-  if (limit && !parseInt(limit)) {
+  if (!limit && limit !== undefined) {
     response.writeHead(400, 'Incorrectly formatted request', HEADERS);
     return response.end();
+  }
+
+  if (limit && !Number.isInteger(Number(limit))) {
+    response.writeHead(400, 'Incorrectly formatted request', HEADERS);
+    return response.end();
+  }
+
+  if (limit && Number.isInteger(Number(limit))) {
+    const brandsRequested = brands.filter(brand => brands.indexOf(brand) < queryObj.limit);
+
+    response.writeHead(200, HEADERS);
+    return response.end(JSON.stringify(brandsRequested));
   }
 
   response.writeHead(200, HEADERS);

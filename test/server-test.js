@@ -36,7 +36,7 @@ describe('BRANDS', () => {
           done();
         });
     });
-    it('should return an error if the query is NaN', done => {
+    it('should return an error if the query is incorrectly formatted', done => {
       // arrange: "limit=boogers"
       // act
       chai
