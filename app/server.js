@@ -14,9 +14,6 @@ const HEADERS = {
     'Origin, X-Requested-With, Content-Type, Accept, X-Authentication',
   'Content-Type': 'application/json'
 };
-const myURL = 'https://www.sunglasses.io/products?test=true&another_test=false';
-const parsedURL = url.parse(myURL).query;
-console.log(queryString.parse(parsedURL));
 
 let users = [];
 let brands = [];
@@ -58,8 +55,7 @@ router.get('/api/brands', (request, response) => {
   }
 
   const URL = request.url;
-  let { query } = url.parse(URL);
-  query = queryString.parse(query);
+  const { query } = url.parse(URL, true);
   const { limit } = query;
 
   if (!limit && limit !== undefined) {
@@ -104,20 +100,45 @@ router.get('/api/brands/:brandId/products', (request, response) => {
 
 router.get('/api/products', (request, response) => {
   const URL = request.url;
-  let { query } = url.parse(URL);
-  query = queryString.parse(query);
+  const { query } = url.parse(URL, true);
   const { search } = query;
 
   if (search) {
+    let result = [];
     // check to see if search term is a brand name
     const brand = brands.find(b => b.name.toLowerCase() === search.toLowerCase());
 
     if (brand) {
-      const result = products.filter(product => product.brandId === brand.id);
+      const resultFromBrandSearch = products.filter(product => product.brandId === brand.id);
+
+      result = [...result, ...resultFromBrandSearch];
 
       response.writeHead(200, HEADERS);
       return response.end(JSON.stringify(result));
     }
+    // Check to see if search term is in product name
+    const resultFromNameSearch = products.filter(product =>
+      product.name.toLowerCase().includes(search)
+    );
+
+    if (resultFromNameSearch.length !== 0) {
+      result = [...result, ...resultFromNameSearch];
+    }
+    // Check to see if search term is in description
+    const resultFromDescSearch = products.filter(product =>
+      product.description.toLowerCase().includes(search)
+    );
+
+    if (resultFromDescSearch.length !== 0) {
+      result = [...result, ...resultFromDescSearch];
+    }
+
+    if (!result) {
+      response.writeHead(404, 'Unable to find products matching search criteria.', HEADERS);
+    }
+
+    response.writeHead(200, HEADERS);
+    return response.end(JSON.stringify(result));
   }
 
   response.writeHead(200, HEADERS);

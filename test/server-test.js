@@ -95,19 +95,52 @@ describe('PRODUCTS', () => {
           done();
         });
     });
-    it('should return all products matching the given search term', done => {
+    it('should return all products matching the given search term (brand)', () => {
       // arrange: search=Oakley (brand case)
       // act
       chai
         .request(server)
         .get('/api/products?search=Oakley')
-        .end((error, response) => {
+        .then(response => {
           // assert
           response.status.should.equal(200);
           response.body.should.be.an('array');
           response.body.should.have.length(3);
+        })
+        .catch(error => console.log(error));
+    });
+    it('should return all products matching the given search term (name)', done => {
+      // arrange: search=qdogs
+      // act
+      chai
+        .request(server)
+        .get('/api/products?search=qdogs')
+        .end((error, response) => {
+          // assert
+          response.status.should.equal(200);
+          response.body.should.be.an('array');
+          response.body.should.have.length(1);
           done();
         });
+    });
+    it('should return all products matching the given search term (description)', done => {
+      // arrange: search=
+      // act
+      chai
+        .request(server)
+        .get('/api/products?search=best')
+        .end((error, response) => {
+          // assert
+          response.status.should.equal(200);
+          response.body.should.be.an('array');
+          response.body.should.have.length(4);
+          done();
+        });
+    });
+  });
+  describe('LOGIN', () => {
+    describe('POST /api/login', () => {
+      it('should allow the user to login with an email and password');
     });
   });
 });

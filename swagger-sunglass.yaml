@@ -88,8 +88,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
-        '400':
-          description: Incorrectly formatted request.
         '404':
           description: Unable to find products matching search criteria.
         default:
