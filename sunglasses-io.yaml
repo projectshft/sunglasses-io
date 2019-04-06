@@ -14,13 +14,7 @@ paths:
     get:
       summary: All available brands
       description: |
-        The Brands endpoint returns all of the available brands of sunglasses
-      parameters:
-        - name: query
-          in: path
-          description: The search query from a user
-          required: true
-          type: string     
+        This endpoint returns all of the available brands of sunglasses
       tags:
         - Brands
       responses:
@@ -38,7 +32,7 @@ paths:
     get:
       summary: All products of a specific brand
       description: |
-        This endpoint returns all of the available products for a specified brand
+        This endpoint returns all of the available products for a specified brand ID
       parameters:
         - name: id
           in: path
@@ -54,6 +48,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '404':
+          description: No products found for that brand ID      
         default:
           description: Unexpected error
           schema:
