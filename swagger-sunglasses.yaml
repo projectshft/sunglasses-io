@@ -3,7 +3,7 @@ info:
   title: Sunglasses API
   description: For access to Sunglasses.io data.
   version: 1.0.0
-host: api
+host:
 schemes:
   - https
 produces:
@@ -20,12 +20,6 @@ paths:
           description: Search query string
           required: false
           type: string
-        - name: limit
-          in: query
-          description: The number of results to limit the search to
-          required: false
-          type: number
-          format: int32
       tags:
         - Products
       responses:

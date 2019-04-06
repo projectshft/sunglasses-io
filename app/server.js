@@ -28,16 +28,13 @@ let server = http
     products = JSON.parse(fs.readFileSync('./initial-data/products.json'));
   });
 
-myRouter.get('/brands', function(request, response) {
-  response.end(JSON.stringify(brands));
-});
-
 myRouter.get('/products', function(request, response) {
   //is there a query param?
   const myURL = request.url;
   const myQuery = url.parse(myURL).query;
   //if there is, return the relevant products
   if (myQuery) {
+    //-------------add toUppercase if you have time----------------
     //user querystring to turn the query into an object
     const queryObject = queryString.parse(myQuery);
     //get the array for the products matching the query param
@@ -54,6 +51,21 @@ myRouter.get('/products', function(request, response) {
   }
   response.writeHead(200, { 'Content-Type': 'application/json' });
   response.end(JSON.stringify(products));
+});
+
+myRouter.get('/brands', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  response.end(JSON.stringify(brands));
+});
+
+myRouter.get('/brands/:brandId/products', function(request, response) {
+  //filter the products according to the brand argument
+  const brandProductsByParam = products.filter(index => {
+    return index.brandId === request.params.brandId;
+  });
+
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  response.end(JSON.stringify(brandProductsByParam));
 });
 
 //export http.createserver().listen() for testing
