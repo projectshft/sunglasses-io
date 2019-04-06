@@ -12,11 +12,15 @@ const PORT = 3001;
 let brands = [];
 let users = [];
 let products = [];
+let accessTokens = [];
 
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Authentication" };
 
 // Setup router
 var myRouter = Router();
+myRouter.use(bodyParser.urlencoded({
+  extended: true
+}));
 myRouter.use(bodyParser.json());
 
 const server = http.createServer(function (request, response) {
@@ -87,11 +91,35 @@ myRouter.get('/brands/:brandId/products', (request, response) => {
   response.end(JSON.stringify(product));
 });
 
-
 myRouter.get('/products', (request, response) => {
   response.setHeader('Content-Type', 'application/json');
   response.writeHead(200, CORS_HEADERS);
   response.end(JSON.stringify(products));
 });
+
+// Route to login
+myRouter.post('/login', (request, response) => {
+  const { email } = request.body;
+  const { password } = request.body;
+
+  if (email && password) {
+    response.setHeader('Content-Type', 'application/json');
+    let userFound = users.find(
+      (user) => user.email === email && user.login.password === password);
+
+    // validate if user is found
+    if (userFound) {
+      response.writeHead(200, CORS_HEADERS);
+      response.end(JSON.stringify({ message: 'Successful login' }));
+    } else {
+      response.writeHead(401, CORS_HEADERS);
+      response.end(JSON.stringify({ message: 'Invalid username or password' }));
+    }
+  } else {
+    response.setHeader('Content-Type', 'application/json');
+    response.writeHead(400, CORS_HEADERS);
+    response.end(JSON.stringify({ message: 'Failed login, empty fields' }));
+  }
+})
 
 module.exports = server;
