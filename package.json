@@ -15,7 +15,7 @@
     "http": "latest",
     "querystring": "^0.2.0",
     "rand-token": "^0.4.0",
-    "router": "^1.3.2"
+    "router": "^1.3.3"
   },
   "repository": {
     "type": "git",

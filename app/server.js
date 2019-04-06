@@ -1,43 +1,75 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require("http");
+const fs = require("fs");
+const finalHandler = require("finalhandler");
+const queryString = require("querystring");
+const Router = require("router");
+const bodyParser = require("body-parser");
+const uid = require("rand-token").uid;
 
-const PORT = 3001;
+const PORT = 8080;
+
 //state variables
 let brands = [];
 let products = [];
 let users = [];
 
 // router setup
-var myRouter = Router();
+const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-
-http.createServer((request, response) =>{
-    router(request, response, finalHandler(request, response));
-})
-.listen(PORT, error =>{
-    if (error) {
-        return console.log("Error on Server Startup: ", error);
-      }
-      console.log(`Server is listening on ${PORT}`);
-});
-
-router.get("/", (request, response) =>{
-    response.end("Nothing to see here")
-});
-
-//have to configure routes
-
-// get /api/brands
-router.get("/api/brands", (request, response) =>{
-    fs.readFile("initial-data/brands.json", (error, data) =>{
-        if(error) throw error;
-        brands = JSON.parse(data);
-        response.end(JSON.stringify(brands));
+const server = http
+  .createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    myRouter(req, res, finalHandler(req, res));
+  })
+  .listen(PORT, err => {
+    if (err) throw err;
+    console.log(`server runnin on port ${PORT}`);
+    //populate brands
+    fs.readFile("initial-data/brands.json", "utf-8", (err, data) => {
+      if (err) throw err;
+      brands = JSON.parse(data);
     });
+    //populate products
+    fs.readFile("initial-data/products.json", "utf-8", (err, data) => {
+      if (err) throw err;
+      products = JSON.parse(data);
+    });
+  });
+
+
+// have to configure routes
+
+// get /api/brands 
+myRouter.get("/api/brands", (req, res) => {
+  res.end(JSON.stringify(brands));
 });
+
+// get /api/products/:id 
+// one product
+myRouter.get("/api/products/:id", (req, res) => {
+  fs.readFile("initial-data/products.json", "utf-8", (err, data) => {
+    if (err) throw err;
+    const { id } = req.params;
+    res.end(JSON.stringify(products[id]));
+  });
+});
+
+// get /api/products 
+// all products
+myRouter.get("/api/products", (req, res) => {
+  res.end(JSON.stringify(products));
+});
+
+// get /api/brands/:id/products 
+// specific brand
+myRouter.get("/api/brands/:id/products", (req, res) => {
+  const { id } = req.params;
+  const relatedProducts = products.filter(product => product.categoryId === id);
+  res.end(JSON.stringify(relatedProducts));
+});
+
+// post /api/login
+myRouter.post("/api/login", (req, res) => {});
+
+module.exports = server;
