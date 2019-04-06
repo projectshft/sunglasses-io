@@ -20,7 +20,7 @@ const server = http
   })
   .listen(PORT, error => {
     if (error) {
-      return console.log('Error on Server Startup: ', error)
+      throw error
     }
 
     brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf8'))
@@ -90,5 +90,30 @@ myRouter.get('/products', (request, response) => {
   return
 })
 
+// post the user's login information
+myRouter.post('/login', (request, response) => {
+  //Make sure there is an email and password in the request
+  if (request.body.email && request.body.password) {
+    //See if there is a user that has the username and password
+    let user = users.find(user => {
+      return (
+        user.email == request.body.email &&
+        user.login.password == request.body.password
+      )
+    })
+    if (user) {
+      response.writeHead(
+        200,
+        Object.assign({ 'Content-Type': 'application/json' })
+      )
+      response.end(JSON.stringify(user))
+      return
+    }
+    // When a login fails, tell the client in a generic way that either the username or password was wrong
+    response.writeHead(401, 'Invalid username or password')
+    response.end()
+    return
+  }
+})
 //export the server so that tests can be written
 module.exports = server

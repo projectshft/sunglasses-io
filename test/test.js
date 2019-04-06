@@ -3,6 +3,7 @@ let chaiHttp = require('chai-http')
 let server = require('../app/server')
 
 let should = chai.should()
+let expect = chai.expect
 
 chai.use(chaiHttp)
 
@@ -82,4 +83,30 @@ describe('Products', () => {
         })
     })
   })
+})
+
+function postLoginInfo(callback) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      callback('done!')
+    }, 100)
+  })
+}
+describe('/POST login', () => {
+  it('should post the users email and password', () => {
+    postLoginInfo(result => {
+      expect(result).to.equal('done!')
+    })
+  })
+  //   it('should post the users email and password', done => {
+  //     chai
+  //       .request(server)
+  //       .post('/login')
+  //       .end((error, response) => {
+  //         response.body.should.have.status(200)
+  //         response.body.should.be.an('object')
+  //         response.body.should.have.property('email')
+  //         response.body.should.have.property('password')
+  //       })
+  //   })
 })
