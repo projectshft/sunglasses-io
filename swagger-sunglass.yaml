@@ -27,16 +27,6 @@ paths:
           required: false
           type: number
           format: int32
-        - name: sort
-          in: query
-          description: The sort type on the response.  
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - ascending
-              - descending
       tags:
         - Brands
       responses:
@@ -68,17 +58,7 @@ paths:
           in: path
           description: The id of the brand
           required: true
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.  
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - name
-              - price          
+          type: string       
       tags:
         - Brands
       responses:
