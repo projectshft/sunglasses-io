@@ -10,8 +10,8 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000 // 15 minutes
 const PORT = 3001
 let brands = []
 let products = []
-//let accessTokens = []
-let accessTokens = [{ token: 'rmWW5pRG9sGMgWkk', username: 'lazywolf342' }]
+let accessTokens = []
+//let accessTokens = [{ token: 'qswWsnJLHJlcIHoY', username: 'lazywolf342' }]
 let failedLoginAttempts = {}
 
 // Helpers to get/set our number of failed requests per username
@@ -220,11 +220,6 @@ myRouter.get('/me/cart', (request, response) => {
       console.log(user)
       return user.login.username == currentAccessToken.username
     })
-    if (user.cart.length === 0) {
-      response.writeHead(408, 'Your cart is empty.')
-      response.end()
-      return
-    }
     response.writeHead(
       200,
       Object.assign({

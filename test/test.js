@@ -4,6 +4,7 @@ let server = require('../app/server')
 
 let should = chai.should()
 let expect = chai.expect
+let accessToken = ''
 
 chai.use(chaiHttp)
 
@@ -119,7 +120,7 @@ describe('Login', () => {
         .end((error, response) => {
           response.should.have.status(200)
           response.type.should.equal('application/json')
-          accessToken = response.header.newAccessToken
+          accessToken = response.body
           should.not.exist(error)
           done()
         })
@@ -130,13 +131,13 @@ describe('Login', () => {
 describe('Cart', () => {
   describe('/GET cart', () => {
     it('it should allow a user to access their cart if they are logged in', done => {
-      console.log(accessToken)
       chai
         .request(server)
         .get('/me/cart')
-        .set('xauth', 'accessToken')
+        .set('xauth', accessToken)
         .end((error, response) => {
           response.should.have.status(200)
+          response.body.should.be.an('array')
           done()
         })
     })
