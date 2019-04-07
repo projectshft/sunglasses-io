@@ -13,6 +13,9 @@ const PORT = 3001;
 var products = [];
 var users = [];
 var brands = [];
+let accessTokens = [
+  // { token: 'qswWsnJLHJlcIHoY', username: 'yellowleopard753' }
+];
 
 // Setup router
 var myRouter = Router();
@@ -63,9 +66,56 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
   const brandProductsByParam = products.filter(index => {
     return index.brandId === request.params.brandId;
   });
+  //define variable to check if brand ID exists
+  const doesBrandExist = brands.filter(index => {
+    return index.brandId === request.params.brandId;
+  });
+  //check if brand exists
+  if (doesBrandExist.length === 0) {
+    response.writeHead(404, 'The brand ID is not valid');
+    response.end();
+  }
 
   response.writeHead(200, { 'Content-Type': 'application/json' });
   response.end(JSON.stringify(brandProductsByParam));
+});
+
+myRouter.post('/login', function(request, response) {
+  // Make sure there is a username and password in the request
+  if (request.body.username && request.body.password) {
+    // See if there is a user that has that username and password
+    const user = users.find(user => {
+      return (
+        user.login.username == request.body.username &&
+        user.login.password == request.body.password
+      );
+    });
+    if (user) {
+      //assign the user's acccess token to a variable if they have one
+      let currentAccessToken = accessTokens.find(tokenObject => {
+        return tokenObject.username == user.login.username;
+      });
+      //if there is a current token for the user, update the time
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        //create a new token with the user value
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        };
+        accessTokens.push(newAccessToken);
+        response.end(JSON.stringify(newAccessToken.token));
+      }
+    }
+    response.writeHead(401, 'Invalid username or password');
+    response.end();
+  }
+  //If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+  response.writeHead(400, 'Incorrectly formatted response');
+  response.end();
 });
 
 //export http.createserver().listen() for testing

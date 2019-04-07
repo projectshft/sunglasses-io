@@ -3,6 +3,7 @@ let chaiHttp = require('chai-http');
 let server = require('./server');
 
 let should = chai.should();
+let accessToken = '';
 
 chai.use(chaiHttp);
 
@@ -86,6 +87,99 @@ describe('Brands', () => {
             done();
           });
       });
+      it('should return 404 if the brand ID does not exist', done => {
+        chai
+          .request(server)
+          .get('/brands/7/products')
+          .end((error, response) => {
+            response.should.have.status(404);
+            done();
+          });
+      });
     });
+  });
+});
+
+//describe the login
+describe('Login POST', () => {
+  //describe with a valid username/pw
+  describe('with a valid username and password', () => {
+    //should create a new acces token if none exist
+    it('should create a new access token if none exist', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({ username: 'yellowleopard753', password: 'jonjon' })
+        .end((error, response) => {
+          response.should.have.status(200);
+          accessToken = response.body;
+          done();
+        });
+    });
+    //should use an old access token if one exists
+    it('should use an old access token if one exists', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({ username: 'yellowleopard753', password: 'jonjon' })
+        .end((error, response) => {
+          response.should.have.status(200);
+          accessToken = response.body;
+          done();
+        });
+    });
+  });
+  //it for what should happen if username is left blank
+  it('should return 400 if username is left blank', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: '', password: 'jonjon' })
+      .end((error, response) => {
+        response.should.have.status(400);
+        done();
+      });
+  });
+  //it for what should happen if password is left blank
+  it('should return 400 if password is left blank', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: 'yellowleopard753', password: '' })
+      .end((error, response) => {
+        response.should.have.status(400);
+        done();
+      });
+  });
+  //it for what should happen if the username is wrong
+  it('should return 401 if username is wrong', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: 'ye', password: 'jonjon' })
+      .end((error, response) => {
+        response.should.have.status(401);
+        done();
+      });
+  });
+  //it for what should happen if the password is wrong
+  it('should return 401 if password is wrong', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: 'yellowleopard753', password: 'w' })
+      .end((error, response) => {
+        response.should.have.status(401);
+        done();
+      });
+  });
+});
+
+//describe the /me/cart
+describe('/me/cart', () => {
+  //describe the car GEt
+  describe('GET cart', () => {
+    //what should happen
+    it('should return the cart of the current user', done => {});
   });
 });
