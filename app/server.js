@@ -15,6 +15,25 @@ let products = [];
 let accessTokens = [];
 
 const CORS_HEADERS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, X-Authentication" };
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+// Helper method to process access token
+const getValidTokenFromRequest = function (request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.token) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 // Setup router
 var myRouter = Router();
@@ -109,8 +128,24 @@ myRouter.post('/login', (request, response) => {
 
     // validate if user is found
     if (userFound) {
-      response.writeHead(200, CORS_HEADERS);
-      response.end(JSON.stringify({ message: 'Successful login' }));
+
+      let tokenObj = accessTokens.find((token) => {
+        return token.username == userFound.login.username;
+      });
+      // Check for an access token
+      if (tokenObj) {
+        currentAccessToken.lastUpdated = new Date();
+      } else {
+        // if no token then create one
+        let newAccessToken = {
+          email: userFound.email,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        response.writeHead(200, CORS_HEADERS);
+        response.end(JSON.stringify({ token: newAccessToken.token }));
+      }
     } else {
       response.writeHead(401, CORS_HEADERS);
       response.end(JSON.stringify({ message: 'Invalid username or password' }));
@@ -119,6 +154,26 @@ myRouter.post('/login', (request, response) => {
     response.setHeader('Content-Type', 'application/json');
     response.writeHead(400, CORS_HEADERS);
     response.end(JSON.stringify({ message: 'Failed login, empty fields' }));
+  }
+});
+
+// Route to view carts need to validate with token
+myRouter.get('/me/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  response.setHeader('Content-Type', 'application/json');
+  console.log("token is", currentAccessToken);
+  // if there is no token on the request, show error message
+  if (!currentAccessToken) {
+    response.writeHead(401, CORS_HEADERS);
+    response.end(JSON.stringify({ message: 'Unauthorized user, must be logged in' }));
+  } else {
+    // Find the user cart with currentAccessToken provided
+    console.log('acs is ', currentAccessToken);
+    let userFound = users.find(
+      (user) => user.email === currentAccessToken.email
+    );
+    response.writeHead(200, CORS_HEADERS);
+    response.end(JSON.stringify(userFound.cart));
   }
 })
 

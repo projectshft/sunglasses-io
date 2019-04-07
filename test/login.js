@@ -20,7 +20,7 @@ describe('login', () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.message.should.be.eql('Successful login');
+          res.body.token.should.be.a('string');
           done();
         });
     });
