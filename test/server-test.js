@@ -90,6 +90,18 @@ describe("/POST login a user", () => {
         done();
       });
   });
+  it.only("should return a 401 error if an invalid username or password is sent", done => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .set({username: 'wronguser', password: 'wrongpass'})
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(401);
+        chai.expect("Content-Type", "application/json");
+        done();
+      });
+  });
 });
 
 // Tests for /api/me/cart GET endpoint
@@ -106,6 +118,28 @@ describe("/GET a users cart", () => {
         chai.expect("Content-Type", "application/json");        
         chai.expect(response.body).to.be.an("array");
         chai.expect(response.body).to.be.lengthOf(2);
+        done();
+      });
+  });
+});
+
+// Tests for /api/me/cart PUT endpoint
+
+describe("/PUT a users cart", () => {
+  it.only("updates the quantities of a users cart", done => {
+    chai
+      .request(server)
+      .put("/api/me/cart")
+      .set("token", token)
+      .set('updatedQuantities', '20, 25')
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");        
+        chai.expect(response.body).to.be.an("array");
+        chai.expect(response.body).to.be.lengthOf(2);
+        chai.expect(response.body[0].quantity).to.eql(20);
+        chai.expect(response.body[1].quantity).to.eql(25);
         done();
       });
   });

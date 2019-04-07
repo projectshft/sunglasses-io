@@ -40,9 +40,15 @@ const server = http.createServer(function (request, response) {
   });
 });
 
-// GET /api/brands (Public)
+/* GET /api/brands (Publicly Available)
+ This endpoint gives the user all of the available brands as JSON. */
+
 myRouter.get("/api/brands", (request, response) => {
-  response.writeHead(200, {"Content-Type": "application/json"});
+  if (brands.length === 0) {
+    response.writeHead(404, "No brands available");
+    response.end();
+  }
+  response.writeHead(200, "Successfully retrieved brands", {"Content-Type": "application/json"});
   response.end(JSON.stringify(brands));
 });
 
@@ -98,7 +104,7 @@ myRouter.post("/api/login", (request,response) => {
   }    
 });
 
-// GET /api/me/cart (User specific cart)
+// GET /api/me/cart (Get User specific cart)
 myRouter.get("/api/me/cart", (request, response) => {
   let validAccessToken = getValidTokenFromRequest(request);
   if (!validAccessToken) {
@@ -116,6 +122,34 @@ myRouter.get("/api/me/cart", (request, response) => {
       response.end();
       return;
     } else {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.end(JSON.stringify(user.cart));
+    }
+  }
+});
+
+// PUT /api/me/cart (Update quantities in cart)
+myRouter.put("/api/me/cart", (request, response) => {
+  let validAccessToken = getValidTokenFromRequest(request);
+  if (!validAccessToken) {
+    response.writeHead(401, "You need to have access to this endpoint to continue");
+    response.end();
+  } else {
+      let userAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.token == request.headers.token;
+        });
+      let user = users.find((user) => {
+        return user.login.username == userAccessToken.username;
+      });    
+    if (!user) {
+      response.writeHead(404, "That user cannot be found");
+      response.end();
+      return;
+    } else {
+        const updatedQuantities = JSON.parse("[" + request.headers.updatedquantities + "]");
+          user.cart.forEach((item, index) => {
+          item.quantity = updatedQuantities[index];
+        })
         response.writeHead(200, {'Content-Type': 'application/json'});
         response.end(JSON.stringify(user.cart));
     }
