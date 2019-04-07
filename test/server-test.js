@@ -51,7 +51,7 @@ describe("/GET products", () => {
         done();
       });
   });
-  it.only("should give 404 error on query with no matches", done => {
+  it.only("should receive a 404 error on query with no matches", done => {
     chai
       .request(server)
       .get("/api/products?query=holybatman")
@@ -79,7 +79,7 @@ describe("/GET products by brand ID", () => {
         done();
       });
   });
-  it.only("should GET 404 error for no matches to brand ID", done => {
+  it.only("should receive a 404 error for no matches to brand ID", done => {
     chai
       .request(server)
       .get("/api/brands/6/products")
@@ -111,7 +111,7 @@ describe("/POST login a user", () => {
         done();
       });
   });
-  it.only("should return a 401 error if an invalid username or password is sent", done => {
+  it.only("should receive a 401 error if an invalid username or password is sent", done => {
     chai
       .request(server)
       .post("/api/login")
@@ -119,6 +119,17 @@ describe("/POST login a user", () => {
       .end((error, response) => {
         chai.assert.isNull(error);
         chai.expect(response).to.have.status(401);
+        done();
+      });
+  });
+  it.only("should receive a 400 error if incorrectly formatted credentials", done => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .set({username: 'baduser'})
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(400);
         done();
       });
   });
@@ -138,6 +149,17 @@ describe("/GET a users cart", () => {
         chai.expect("Content-Type", "application/json");        
         chai.expect(response.body).to.be.an("array");
         chai.expect(response.body).to.be.lengthOf(2);
+        done();
+      });
+  });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(401);
         done();
       });
   });
@@ -163,6 +185,17 @@ describe("/PUT a users cart", () => {
         done();
       });
   });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .put("/api/me/cart")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(401);
+        done();
+      });
+  });
 });
 
 // Tests for /api/me/cart/:productId DELETE endpoint
@@ -182,7 +215,7 @@ describe("/DELETE a product", () => {
         done();
       });
   });
-  it.only("receives 400 error if product Id is invalid", done => {
+  it.only("should receive a 400 error if product Id is invalid", done => {
     chai
       .request(server)
       .post("/api/me/cart/18")
@@ -191,6 +224,17 @@ describe("/DELETE a product", () => {
         chai.assert.isNull(error);
         chai.expect(response).to.have.status(400);
         chai.expect("Content-Type", "application/json");
+        done();
+      });
+  });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/3")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(401);
         done();
       });
   });
@@ -228,7 +272,7 @@ describe("/POST a product", () => {
         done();
       });
   });
-  it.only("receives 400 error if product Id is invalid", done => {
+  it.only("should receive a 400 error if product Id is invalid", done => {
     chai
       .request(server)
       .post("/api/me/cart/15")
@@ -237,6 +281,17 @@ describe("/POST a product", () => {
         chai.assert.isNull(error);
         chai.expect(response).to.have.status(400);
         chai.expect("Content-Type", "application/json");
+        done();
+      });
+  });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/3")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(401);
         done();
       });
   });

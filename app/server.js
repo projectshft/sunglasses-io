@@ -86,9 +86,10 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
   response.end(JSON.stringify(productsByBrand));
 });
 
-// POST /api/login (User Login)
-myRouter.post("/api/login", (request,response) => {
-  response.writeHead(200, {'Content-Type': 'application/json'});
+/* POST /api/login (User Login)
+ This endpoint allows a user to login and supplies them their access token. */
+
+myRouter.post("/api/login", (request,response) => {  
   if (request.headers.username && request.headers.password) {
     let user = users.find((user) => {
       return user.login.username == request.headers.username && user.login.password == request.headers.password;
@@ -100,6 +101,7 @@ myRouter.post("/api/login", (request,response) => {
       
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
+        response.writeHead(200, "Successful Login", {'Content-Type': 'application/json'});
         response.end(JSON.stringify(currentAccessToken.token));
       } else {
         let newAccessToken = {
@@ -108,6 +110,7 @@ myRouter.post("/api/login", (request,response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
+        response.writeHead(200, "Successful Login", {'Content-Type': 'application/json'});
         response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
@@ -120,7 +123,9 @@ myRouter.post("/api/login", (request,response) => {
   }    
 });
 
-// GET /api/me/cart (Get User specific cart)
+/* GET /api/me/cart (Access Token Required)
+ This endpoint gives the user all of the products in their cart. */
+
 myRouter.get("/api/me/cart", (request, response) => {
   let validAccessToken = getValidTokenFromRequest(request);
   if (!validAccessToken) {
@@ -138,13 +143,15 @@ myRouter.get("/api/me/cart", (request, response) => {
       response.end();
       return;
     } else {
-        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.writeHead(200, "Successfully retrieved a users cart", {'Content-Type': 'application/json'});
         response.end(JSON.stringify(user.cart));
     }
   }
 });
 
-// PUT /api/me/cart (Update quantities in cart)
+/* PUT /api/me/cart (Access Token Required)
+ This endpoint allows the user to update the quantities of the products in their cart. */
+
 myRouter.put("/api/me/cart", (request, response) => {
   let validAccessToken = getValidTokenFromRequest(request);
   if (!validAccessToken) {
@@ -172,7 +179,9 @@ myRouter.put("/api/me/cart", (request, response) => {
   }
 });
 
-// DELETE /api/me/cart/:productId (Delete product from cart)
+/* DELETE /api/me/cart/:productId (Access Token Required)
+ This endpoint allows the user to delete a product from their cart. */
+
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
   let validAccessToken = getValidTokenFromRequest(request);
   if (!validAccessToken) {
@@ -198,7 +207,10 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
   }
 });
 
-// POST /api/me/cart/:productId (Add a product to cart)
+/* POST /api/me/cart/:productId (Access Token Required)
+ This endpoint allows the user to add a product to their cart.
+ If that product is already in their cart it increments the quantity instead */
+
 myRouter.post("/api/me/cart/:productId", (request, response) => {
   let validAccessToken = getValidTokenFromRequest(request);
   if (!validAccessToken) {
@@ -236,7 +248,9 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
   }
 });
 
-const getValidTokenFromRequest = function(request) {
+// This function checks whether a supplied access token is valid and not expired
+
+const getValidTokenFromRequest = (request) => {
   if (request.headers.token) {
     let currentAccessToken = accessTokens.find((accessToken) => {
       return accessToken.token == request.headers.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
