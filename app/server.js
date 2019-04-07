@@ -1,10 +1,11 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser = require('body-parser');
+const url = require("url");
+const uid = require('rand-token').uid;
 
 const PORT = 3001; // Port for server to listen on
 
@@ -26,18 +27,9 @@ const server = http.createServer(function (request, response) {
 })
 .listen(PORT, error => {
   if (error) throw error;
-  fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
-    if (error) throw error;
-    brands = JSON.parse(data);
-  });
-  fs.readFile("initial-data/products.json", "utf8", (error, data) => {
-    if (error) throw error;
-    products = JSON.parse(data);
-  });
-  fs.readFile("initial-data/users.json", "utf8", (error, data) => {
-    if (error) throw error;
-    users = JSON.parse(data);
-  });
+  brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8"));
+  products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));    
+  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));    
 });
 
 /* GET /api/brands (Publicly Available)
@@ -52,13 +44,37 @@ myRouter.get("/api/brands", (request, response) => {
   response.end(JSON.stringify(brands));
 });
 
-// GET /api/products (Public)
+/* GET /api/products (Publicly Available)
+ This endpoint gives the user all of the available products based on a query. 
+ It returns all available products if the query is empty */
+
 myRouter.get("/api/products", (request, response) => {
-  response.writeHead(200, {"Content-Type": "application/json"});
-  response.end(JSON.stringify(products));
+  const parsedUrl = url.parse(request.url);
+  const { query } = queryString.parse(parsedUrl.query);
+  if (products.length === 0) {
+    response.writeHead(400, "Products are not available");
+    response.end();
+  }
+
+  let productsBySearch = [];
+  if (query !== undefined) {
+    productsBySearch = products.filter(product => 
+      product.name.includes(query) || product.description.includes(query));
+
+    if (productsBySearch.length === 0) {
+      response.writeHead(404, "There are no products matching that query");
+      return response.end();
+    }
+  } else {
+    productsBySearch = products;
+  }
+  response.writeHead(200, "Successfully returned searched products", { "Content-Type": "application/json" });
+  response.end(JSON.stringify(productsBySearch));
 });
 
-// GET /api/brands/:id/products (Public specific category/brand of product)
+/* GET /api/brands/:id/products (Publicly Available)
+ This endpoint gives the user all of the available products for a specific brand ID. */
+
 myRouter.get("/api/brands/:id/products", (request, response) => {
   const { id } = request.params;
   const productsByBrand = products.filter(product => product.categoryId === id);
@@ -66,7 +82,7 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
     response.writeHead(404, "No products found for that brand ID");
     response.end();
   }
-  response.writeHead(200, { "Content-Type": "application/json" });
+  response.writeHead(200, "Successfully retrieved products by brand ID", { "Content-Type": "application/json" });
   response.end(JSON.stringify(productsByBrand));
 });
 

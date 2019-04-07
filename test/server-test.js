@@ -4,7 +4,7 @@ const server = require("../app/server");
 
 chai.use(chaiHTTP);
 
-// Tests for /api/brands endpoint
+// Tests for GET /api/brands endpoint
 
 describe("/GET brands", () => {
   it.only("should GET all brands", done => {
@@ -16,19 +16,19 @@ describe("/GET brands", () => {
         chai.expect(response).to.have.status(200);
         chai.expect("Content-Type", "application/json");
         chai.expect(response.body).to.be.an("array");
-        //chai.expect(response.body).to.have.lengthOf(5);
+        chai.expect(response.body).to.have.lengthOf(5);
         done();
       });
   });
 });
 
-// Tests for /api/products endpoint
+// Tests for GET /api/products endpoint
 
 describe("/GET products", () => {
-  it.only("should GET all products", done => {
+  it.only("should GET all products on empty query", done => {
     chai
       .request(server)
-      .get("/api/products")
+      .get("/api/products?query=")
       .end((error, response) => {
         chai.assert.exists(response.body);
         chai.expect(response).to.have.status(200);
@@ -38,9 +38,32 @@ describe("/GET products", () => {
         done();
       });
   });
+  it.only("should GET all matching products based on user query", done => {
+    chai
+      .request(server)
+      .get("/api/products?query=sweetest")
+      .end((error, response) => {
+        chai.assert.exists(response.body);
+        chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");
+        chai.expect(response.body).to.be.an("array");
+        chai.expect(response.body).to.have.lengthOf(1);
+        done();
+      });
+  });
+  it.only("should give 404 error on query with no matches", done => {
+    chai
+      .request(server)
+      .get("/api/products?query=holybatman")
+      .end((error, response) => {
+        chai.assert.exists(response.body);
+        chai.expect(response).to.have.status(404);
+        done();
+      });
+  });
 });
 
-// Tests for /api/brands/:id/products endpoint
+// Tests for GET /api/brands/:id/products endpoint
 
 describe("/GET products by brand ID", () => {
   it.only("should GET all products for a brand ID", done => {
@@ -63,14 +86,12 @@ describe("/GET products by brand ID", () => {
       .end((error, response) => {
         chai.assert.exists(response.body);
         chai.expect(response).to.have.status(404);
-        chai.expect("Content-Type", "application/json");
-        chai.expect(response.body).to.be.an("object");
         done();
       });
   });
 });
 
-// Tests for /api/login endpoint
+// Tests for POST /api/login endpoint
 
 let token = null;
 
@@ -98,7 +119,6 @@ describe("/POST login a user", () => {
       .end((error, response) => {
         chai.assert.isNull(error);
         chai.expect(response).to.have.status(401);
-        chai.expect("Content-Type", "application/json");
         done();
       });
   });
