@@ -6,9 +6,63 @@ var Router = require('router')
 var bodyParser = require('body-parser')
 var uid = require('rand-token').uid
 
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000 // 15 minutes
 const PORT = 3001
 let brands = []
 let products = []
+//let accessTokens = []
+let accessTokens = [{ token: 'rmWW5pRG9sGMgWkk', username: 'lazywolf342' }]
+let failedLoginAttempts = {}
+
+// Helpers to get/set our number of failed requests per username
+var getNumberOfFailedLoginRequestsForUsername = function(username) {
+  let currentNumberOfFailedRequests = failedLoginAttempts[username]
+  if (currentNumberOfFailedRequests) {
+    return currentNumberOfFailedRequests
+  } else {
+    return 0
+  }
+}
+
+var setNumberOfFailedLoginRequestsForUsername = function(username, numFails) {
+  failedLoginAttempts[username] = numFails
+}
+
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  console.log(request.headers.xauth)
+  if (request.headers.xauth) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find(accessToken => {
+      console.log(accessToken.token)
+      return accessToken.token == request.headers.xauth
+    })
+    console.log(currentAccessToken)
+    if (currentAccessToken) {
+      return currentAccessToken
+    } else {
+      return null
+    }
+  } else {
+    return null
+  }
+}
+// var getValidTokenFromRequest = function(request) {
+//   var parsedUrl = require('url').parse(request.url, true)
+//   if (parsedUrl.query.accessToken) {
+//     // Verify the access token to make sure it's valid and not expired
+//     let currentAccessToken = accessTokens.find(accessToken => {
+//       return accessToken.token == parsedHeader.query.accessToken
+//     })
+//     if (currentAccessToken) {
+//       return currentAccessToken
+//     } else {
+//       return null
+//     }
+//   } else {
+//     return null
+//   }
+// }
 
 // Setup router
 var myRouter = Router()
@@ -26,16 +80,8 @@ const server = http
     brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf8'))
 
     products = JSON.parse(fs.readFileSync('initial-data/products.json', 'utf8'))
-    // fs.readFile('initial-data/brands.json', 'utf8', (error, data) => {
-    //   if (error) throw error
-    //   brands = JSON.parse(data)
-    //   console.log(`Server setup: ${brands.length} brands loaded`)
-    // })
-    // fs.readFile('initial-data/products.json', 'utf8', (error, data) => {
-    //   if (error) throw error
-    //   products = JSON.parse(data)
-    //   console.log(`Server setup: ${products.length} products loaded`)
-    // })
+
+    users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf8'))
   })
 
 //get all brands
@@ -93,27 +139,102 @@ myRouter.get('/products', (request, response) => {
 // post the user's login information
 myRouter.post('/login', (request, response) => {
   //Make sure there is an email and password in the request
-  if (request.body.email && request.body.password) {
+  if (request.body.username && request.body.password) {
+    console.log(request.body)
     //See if there is a user that has the username and password
     let user = users.find(user => {
+      console.log(user)
       return (
-        user.email == request.body.email &&
-        user.login.password == request.body.password
+        user.login.username == request.body.username &&
+        user.login.password == request.body.password &&
+        getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3
       )
     })
+    console.log(user)
     if (user) {
+      // If we found a user, reset our counter of failed logins
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, 0)
+
+      //when successful, return json header
       response.writeHead(
         200,
-        Object.assign({ 'Content-Type': 'application/json' })
+        Object.assign({
+          'Content-Type': 'application/json'
+        })
       )
-      response.end(JSON.stringify(user))
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find(accessToken => {
+        return (
+          accessToken.token == parsedUrl.query.accessToken &&
+          new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+        )
+      })
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date()
+        response.end(JSON.stringify(currentAccessToken.token))
+        return
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken)
+        console.log(accessTokens)
+        response.end(JSON.stringify(newAccessToken.token))
+        return
+      }
+    } else {
+      // Update the number of failed login attempts
+      let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(
+        request.body.username
+      )
+      setNumberOfFailedLoginRequestsForUsername(
+        request.body.username,
+        numFailedForUser++
+      )
+
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      response.writeHead(406, 'Invalid username or password')
+      response.end()
       return
     }
-    // When a login fails, tell the client in a generic way that either the username or password was wrong
-    response.writeHead(401, 'Invalid username or password')
+  } else {
+    //if there was no username or password in the request, throw a 405
+    response.writeHead(405, 'You must enter your username and password')
     response.end()
     return
   }
 })
+myRouter.get('/me/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request)
+  console.log(currentAccessToken)
+  if (!currentAccessToken) {
+    response.writeHead(407, 'You must be logged in to access your cart.')
+    response.end()
+    return
+  } else {
+    let user = users.find(user => {
+      console.log(user)
+      return user.login.username == currentAccessToken.username
+    })
+    if (user.cart.length === 0) {
+      response.writeHead(408, 'Your cart is empty.')
+      response.end()
+      return
+    }
+    response.writeHead(
+      200,
+      Object.assign({
+        'Content-Type': 'application/json'
+      })
+    )
+    response.end(JSON.stringify(user.cart))
+    return
+  }
+})
+
 //export the server so that tests can be written
 module.exports = server

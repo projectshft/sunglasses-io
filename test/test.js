@@ -85,28 +85,60 @@ describe('Products', () => {
   })
 })
 
-function postLoginInfo(callback) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      callback('done!')
-    }, 100)
-  })
-}
-describe('/POST login', () => {
-  it('should post the users email and password', () => {
-    postLoginInfo(result => {
-      expect(result).to.equal('done!')
+describe('Login', () => {
+  describe('/POST login', () => {
+    it('it should return an error if the user submits no username or password', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({ username: '', password: '' })
+        .end((error, response) => {
+          response.should.have.status(405)
+          response.should.not.have.property('password')
+          response.should.not.have.property('username')
+          done()
+        })
+    })
+    it('it should return an error if the user submits an incorrect password or username', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({ username: 'madeline', password: '342623q' })
+        .end((error, response) => {
+          response.should.have.status(406)
+          response.should.not.have.property('password')
+          response.should.not.have.property('username')
+          done()
+        })
+    })
+    it('it should return an access token if the user submits a valid username and password', done => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({ username: 'yellowleopard753', password: 'jonjon' })
+        .end((error, response) => {
+          response.should.have.status(200)
+          response.type.should.equal('application/json')
+          accessToken = response.header.newAccessToken
+          should.not.exist(error)
+          done()
+        })
     })
   })
-  //   it('should post the users email and password', done => {
-  //     chai
-  //       .request(server)
-  //       .post('/login')
-  //       .end((error, response) => {
-  //         response.body.should.have.status(200)
-  //         response.body.should.be.an('object')
-  //         response.body.should.have.property('email')
-  //         response.body.should.have.property('password')
-  //       })
-  //   })
+})
+
+describe('Cart', () => {
+  describe('/GET cart', () => {
+    it('it should allow a user to access their cart if they are logged in', done => {
+      console.log(accessToken)
+      chai
+        .request(server)
+        .get('/me/cart')
+        .set('xauth', 'accessToken')
+        .end((error, response) => {
+          response.should.have.status(200)
+          done()
+        })
+    })
+  })
 })
