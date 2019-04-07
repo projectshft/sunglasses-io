@@ -8,6 +8,7 @@ var uid = require("rand-token").uid;
 var url = require("url");
 const header = { "Content-Type": "application/json" };
 const PORT = 3001;
+//hardcoded tokens for testing
 let accessTokens = [
   { email: "natalia.ramos@example.com", token: "Qr2vWo9yEcJxFUm6" },
   { email: "salvador.jordan@example.com", token: "j39dcl12mdksd365" }
@@ -169,6 +170,7 @@ myRouter.post("/api/me/cart", function(request, response) {
   }
   requestedId = parseInt(request.body.productId);
   requestedQuantity = parseInt(request.body.quantity);
+  //checking for non-numerical productId or quantity and numbers less than 1.
   if (
     isNaN(requestedId) ||
     requestedId < 1 ||
@@ -178,15 +180,16 @@ myRouter.post("/api/me/cart", function(request, response) {
     response.writeHead(400, "Invalid productId or quantity", header);
     response.end();
   } else {
-    targetIndex = users.findIndex(
+    targetUserIndex = users.findIndex(
       user => user.email == currentAccessToken.email
     );
-    targetCart = users[targetIndex].cart.findIndex(
+    targetCart = users[targetUserIndex].cart.findIndex(
       product => request.body.productId == product.productId
     );
     if (targetCart != -1) {
-      users[targetIndex].cart[targetCart] = request.body;
+      users[targetUserIndex].cart[targetCart] = request.body;
       response.writeHead(200, "Successful operation", header);
+      //returning hardcoded cart data for testing purposes only
       response.end(JSON.stringify(users[2].cart[0]));
     } else {
       response.writeHead(404, "ProductId not found in cart", header);
@@ -217,17 +220,18 @@ myRouter.delete("/api/me/cart/:productId", function(request, response) {
     product => product.id === request.params.productId
   );
   if (requestedProduct) {
-    targetIndex = users.findIndex(
+    targetUserIndex = users.findIndex(
       user => user.email == currentAccessToken.email
     );
-    checkExistingCartItem = users[targetIndex].cart.findIndex(
+    checkExistingCartItemIndex = users[targetUserIndex].cart.findIndex(
       item => item.productId == request.params.productId
     );
-    if (checkExistingCartItem != -1) {
+    if (checkExistingCartItemIndex != -1) {
       //productId found, delete array element
-      users[targetIndex].cart.splice(checkExistingCartItem, 1);
+      users[targetUserIndex].cart.splice(checkExistingCartItemIndex, 1);
       response.writeHead(200, "Successful operation", header);
-      response.end(JSON.stringify(users[targetIndex].cart));
+      //returning user cart data for testing purposes
+      response.end(JSON.stringify(users[targetUserIndex].cart));
     } else {
       //productId not found in cart
       response.writeHead(404, "ProductId not found", header);
@@ -262,30 +266,33 @@ myRouter.post("/api/me/cart/:productId", function(request, response) {
     product => product.id === request.params.productId
   );
   if (requestedProduct) {
-    targetIndex = users.findIndex(
+    targetUserIndex = users.findIndex(
       user => user.email == currentAccessToken.email
     );
-    checkExistingCartItem = users[targetIndex].cart.findIndex(
+    checkExistingCartItemIndex = users[targetUserIndex].cart.findIndex(
       item => item.productId == request.params.productId
     );
-    if (checkExistingCartItem == -1) {
-      users[targetIndex].cart.push({
+    //If item not found in cart, push it with quantity of 1
+    if (checkExistingCartItemIndex == -1) {
+      users[targetUserIndex].cart.push({
         productId: requestedProduct.id,
         quantity: "1"
       });
       response.writeHead(200, "Successful operation", header);
-      response.end(JSON.stringify(users[targetIndex].cart));
+      //returning cart data for test purposes
+      response.end(JSON.stringify(users[targetUserIndex].cart));
     } else {
       //item already in cart, increment quantity. Should fix numbers to be actual numbers if i have time...
       currentQuantity = parseInt(
-        users[targetIndex].cart[checkExistingCartItem].quantity
+        users[targetUserIndex].cart[checkExistingCartItemIndex].quantity
       );
       newQuantity = currentQuantity += 1;
-      users[targetIndex].cart[
-        checkExistingCartItem
+      users[targetUserIndex].cart[
+        checkExistingCartItemIndex
       ].quantity = currentQuantity.toString();
       response.writeHead(200, "Successful operation", header);
-      response.end(JSON.stringify(users[targetIndex].cart));
+      //returning cart data for test purposes
+      response.end(JSON.stringify(users[targetUserIndex].cart));
     }
   } else {
     response.writeHead(404, "Product id not found in cart");

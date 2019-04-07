@@ -127,7 +127,9 @@ describe("/GET /products", () => {
   it("it should return 400", done => {
     chai
       .request(server)
-      .get("/api/products?query=hellothereiamarealllllllllllllllllllllllylongstring")
+      .get(
+        "/api/products?query=hellothereiamarealllllllllllllllllllllllylongstring"
+      )
       .end((err, res) => {
         res.should.have.status(400);
         done();
@@ -153,8 +155,9 @@ describe("GET /me/cart", () => {
       .get("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6")
       .end((err, res) => {
         res.should.have.status(200);
-        res.body[0].should.have.deep.property("productId", "3")
-        res.body[0].should.have.deep.property("quantity", "25")
+        res.body.should.be.an("array");
+        res.body[0].should.have.deep.property("productId", "3");
+        res.body[0].should.have.deep.property("quantity", "25");
         done();
       });
   });
@@ -172,18 +175,20 @@ describe("GET /me/cart", () => {
 
 describe("/POST /me/cart", () => {
   //POST to cart to update an item quantity while logged in - should return 200 Update successful.
+  //returning user cart for testing
   it("it should update the quantity of an existing cart item", done => {
     update = {
-      productId: '3',
-      quantity: '26'
-    }
+      productId: "3",
+      quantity: "26"
+    };
     chai
       .request(server)
-      .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6").send(update)
+      .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6")
+      .send(update)
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.have.property("productId", "3")
-        res.body.should.have.property("quantity", "26")
+        res.body.should.have.property("productId", "3");
+        res.body.should.have.property("quantity", "26");
         done();
       });
   });
@@ -200,43 +205,46 @@ describe("/POST /me/cart", () => {
   //POST to cart to update an item quantity while logged in, but invalid productId or quantity - should return 400 Invalid product id or quantity.
   it("should return 400", done => {
     update = {
-      productId: 'dog',
-      quantity: '26'
-    }
+      productId: "dog",
+      quantity: "26"
+    };
     chai
       .request(server)
-      .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6").send(update)
+      .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6")
+      .send(update)
       .end((err, res) => {
         res.should.have.status(400);
         done();
       });
   });
-    //POST to cart to update an item quantity while logged in, but productId not in cart - should return 404 ProductId not found in cart.
-    it("should return 404", done => {
-      update = {
-        productId: '27',
-        quantity: '26'
-      }
-      chai
-        .request(server)
-        .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6").send(update)
-        .end((err, res) => {
-          res.should.have.status(404);
-          done();
-        });
-    });
+  //POST to cart to update an item quantity while logged in, but productId not in cart - should return 404 ProductId not found in cart.
+  it("should return 404", done => {
+    update = {
+      productId: "27",
+      quantity: "26"
+    };
+    chai
+      .request(server)
+      .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6")
+      .send(update)
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
 });
 
 describe("/DELETE /me/cart/{productId}", () => {
   //DELETE item from cart successfully - should return 200 Successful operation
+  //Returning user cart for testing
   it("it should delete the item from the user's cart", done => {
     chai
       .request(server)
       .delete("/api/me/cart/2?accessToken=j39dcl12mdksd365")
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.not.have.deep.property("productId", "2")
-        res.body[0].should.have.property("productId", "4")
+        res.body.should.not.have.deep.property("productId", "2");
+        res.body[0].should.have.property("productId", "4");
         done();
       });
   });
@@ -260,28 +268,29 @@ describe("/DELETE /me/cart/{productId}", () => {
         done();
       });
   });
-    //DELETE item from cart - valid productId but not in cart - should return 404 productId not found in cart.
-    it("should return 404", done => {
-      chai
-        .request(server)
-        .delete("/api/me/cart/3?accessToken=j39dcl12mdksd365")
-        .end((err, res) => {
-          res.should.have.status(404);
-          done();
-        });
-    });
+  //DELETE item from cart - valid productId but not in cart - should return 404 productId not found in cart.
+  it("should return 404", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/3?accessToken=j39dcl12mdksd365")
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
 });
 
 describe("/POST /me/cart/{productId}", () => {
   //POST item to cart by productId successfully - should return 200 Successful operation.
+  //returning user cart for testing
   it("it should post an item to the users cart by productId", done => {
     chai
       .request(server)
       .post("/api/me/cart/2?accessToken=Qr2vWo9yEcJxFUm6")
       .end((err, res) => {
         res.should.have.status(200);
-        res.body[1].should.have.deep.property("productId", "2")
-        res.body[1].should.have.deep.property("quantity", "1")
+        res.body[1].should.have.deep.property("productId", "2");
+        res.body[1].should.have.deep.property("quantity", "1");
         done();
       });
   });
@@ -305,48 +314,49 @@ describe("/POST /me/cart/{productId}", () => {
         done();
       });
   });
-    //POST item to cart by productId - productId not in db - should return 404 productId doesn't exist.
-    it("should return 404", done => {
-      chai
-        .request(server)
-        .post("/api/me/cart/213?accessToken=Qr2vWo9yEcJxFUm6")
-        .end((err, res) => {
-          res.should.have.status(404);
-          done();
-        });
-    });
+  //POST item to cart by productId - productId not in db - should return 404 productId doesn't exist.
+  it("should return 404", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/213?accessToken=Qr2vWo9yEcJxFUm6")
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
 });
 
 describe("/POST login", () => {
   //POST user login with email/password - success - should return 200 Login successful.
   it("it should successfully log the user in and return a token", done => {
     const userCredentials = {
-      email: 'susanna.richards@example.com', 
-      password: 'jonjon'
-    }
+      email: "susanna.richards@example.com",
+      password: "jonjon"
+    };
     chai
       .request(server)
-      .post("/api/login").send(userCredentials)
+      .post("/api/login")
+      .send(userCredentials)
       .end((err, res) => {
         res.should.have.status(200);
-        (res.body.token.length).should.equal(16)
+        res.body.token.length.should.equal(16);
         done();
       });
   });
   //POST user login with email/password - fail - should return 401 Invalid username or password.
   it("should return 401", done => {
     const userCredentials = {
-      email: 'bademail@example.com', 
-      password: 'blarg'
-    }
+      email: "bademail@example.com",
+      password: "blarg"
+    };
     chai
       .request(server)
       .post("/api/login")
       .send(userCredentials)
       .end((err, res) => {
         res.should.have.status(401);
-        should.equal(res.body.token, undefined)
+        should.equal(res.body.token, undefined);
         done();
       });
   });
- });
+});

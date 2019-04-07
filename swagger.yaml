@@ -26,15 +26,9 @@ paths:
       summary: "Retrieve all sunglasses brands."
       description: |
         This endpoint returns information on all brands.
-      parameters:
-      - name: query
-        in: query
-        description: "Search query for search bar"
-        required: false
-        type: string
       responses:
         200:
-          description: "successful operation"
+          description: "Successful operation"
           schema:
             $ref: "#/definitions/Brands"
   /brands/{brandId}/products:
@@ -46,36 +40,43 @@ paths:
       parameters:
       - name: "brandId"
         in: "path"
-        description: "Id of brand to return"
+        description: "Id of brand to return greater than or equal to 1. In returned data, categoryId = brandId."
         required: true
         type: "integer"
+        minimum: 1
       responses:
         200:
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Brands"
+            $ref: "#/definitions/Products"
         400:
-          description: "Invalid brand id supplied"
+          description: "Invalid brandId supplied"
         404:
-          description: "Brand id not found"
+          description: "brandId not found"
   /products:
     get:
       tags: 
         - Products
       summary: "Sunglasses products"
       description: |
-        "This endpoint returns information on all Sunglasses.io products."
+        This endpoint returns information on all Sunglasses.io products. If no query string is provided all products will be returned.
       parameters:
       - name: query
         in: query
-        description: "Search query for search bar"
+        description: "Optional search query for search bar. Must be between 1 and 50 characters. If the string is a match for a brand name or product name those results will be returned."
         required: false
         type: string
+        minLength: 1
+        maxLength: 20
       responses:
         200:
           description: "successful operation"
           schema:
             $ref: "#/definitions/Products"
+        400:
+          description: "Invalid search"
+        404:
+          description: "No results found."
   /login:
     post:
       tags:
@@ -83,19 +84,25 @@ paths:
       summary: "User login to the store."
       description: ''
       parameters:
-        - name: email
-          in: header
-          description: "User email address"
-          required: true
-          type: string
-        - name: password
-          in: header
-          description: "User password"
-          required: true
-          type: string
+      - in: body
+        name: email/password
+        description: "Object with user email and password."
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+            password:
+              type: string
       responses:
         '200':
-          description: "OK"
+          description: "Login successful"
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
         '401':
           description: "Invalid username or password."
   /me/cart:
@@ -104,7 +111,13 @@ paths:
          - Cart
       summary: "User cart"
       description: |
-        "This endpoint returns information on all items in the user cart."
+        This endpoint returns information on all items in the user cart. Requires user login.
+      parameters:
+        - name: token
+          in: query
+          description: Token from successful login.
+          required: true
+          type: string
       responses:
         200:
           description: "successful operation"
@@ -117,7 +130,7 @@ paths:
                   type: number
                 quantity:
                  type: number
-        401:
+        403:
           description: "Not authorized. User must login to view cart."
     post:
       tags:
@@ -125,23 +138,31 @@ paths:
       summary: "This endpoint allows updating of cart contents."
       description: ''
       parameters:
-        - name: productId
-          in: header
-          description: "Id of the item to update"
+        - name: token
+          in: query
+          description: Token from successful login.
           required: true
           type: string
-        - name: quantity
-          in: header
-          description: "Quantity to update the item to."
+        - name: productId/quantity
+          in: body
+          description: "Object with productId and quantity."
           required: true
-          type: string
+          schema:
+            type: object
+            properties:
+              productId:
+                type: string
+              quantity:
+                type: string          
       responses:
         '200':
           description: "Update successful"
         '400':
           description: "Invalid product id or quantity."
-        '401':
+        '403':
           description: "Not authorized. User must login to update cart."
+        '404':
+          description: "ProductId not found in cart"
   /me/cart/{productId}:
     delete:
       tags:
@@ -149,69 +170,87 @@ paths:
       summary: "Delete cart item by product id."
       description: ""
       parameters:
+        - name: token
+          in: query
+          description: Token from successful login.
+          required: true
+          type: string
         - name: "productId"
           in: path
-          description: "ID of the item that needs to be deleted"
+          description: "ID of the item to delete."
           required: true
           type: string
       responses:
         '200':
           description: "successful operation."
         '400':
-          description: "Invalid product id."
+          description: "Invalid prouctdId supplied"
         '401':
-          description: "Not authorized. User must login to update cart."
+          description: "Not authorized. User must login to delete items from the cart."
+        '404':
+          description: "ProductId not found."         
     post:
       tags:
          - Cart
       summary: "Add an item to the cart by product id"
       description: ''
       parameters:
+        - name: token
+          in: query
+          description: Token from successful login.
+          required: true
+          type: string
         - name: "productId"
           in: path
-          description: "Item id to add to cart"
+          description: "Item to add to cart. Item will be added with a quantity of 1. Attempting to add an item to the cart that already exists will increment the quantity by 1."
           required: true
           type: string
       responses:
         '200':
           description: "successful operation."
         '400':
-          description: "Invalid product id or quantity."
-        '401':
+          description: "Invalid prouctdId supplied."
+        '403':
           description: "Not authorized. User must login to update cart."
+        '404':
+          description: "Product id not found in cart."
 definitions:
   Brands:
-    type: object
-    properties:
-      id:
-        type: string
-        description: "Brand id value"
-      name:
-        type: string
-        description: "Brand name"
-  Products:
-    type: object
-    properties:
-      id:
-        type: string
-        description: "Product id value"
-      categoryId:
-        type: string
-        description: "Category id value"
-      name:
-        type: string
-        description: "Product name"
-      description:
-        type: string
-        description: "Product description"
-      price:
-        type: number
-        description: "Price"
-      imageUrls:
-        type: array
-        items:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
           type: string
-          description: "Array of product image urls"
+          description: "Brand id value"
+        name:
+          type: string
+          description: "Brand name"
+  Products:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Product id value"
+        categoryId:
+          type: string
+          description: "Category id value"
+        name:
+          type: string
+          description: "Product name"
+        description:
+          type: string
+          description: "Product description"
+        price:
+          type: number
+          description: "Price"
+        imageUrls:
+          type: array
+          items:
+            type: string
+            description: "Array of product image urls"
   Users:
     type: object
     properties:
