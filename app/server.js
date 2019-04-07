@@ -8,7 +8,10 @@ var uid = require("rand-token").uid;
 var url = require("url");
 const header = { "Content-Type": "application/json" };
 const PORT = 3001;
-let accessTokens = [{email: "natalia.ramos@example.com", token: "Qr2vWo9yEcJxFUm6"}];
+let accessTokens = [
+  { email: "natalia.ramos@example.com", token: "Qr2vWo9yEcJxFUm6" },
+  { email: "salvador.jordan@example.com", token: "j39dcl12mdksd365" }
+];
 
 // Setup router
 var myRouter = Router();
@@ -140,7 +143,6 @@ myRouter.post("/api/login", function(request, response) {
       response.end();
     }
   }
-  console.log(accessTokens)
 });
 
 myRouter.get("/api/me/cart", function(request, response) {
@@ -150,7 +152,9 @@ myRouter.get("/api/me/cart", function(request, response) {
     response.writeHead(403, "Not authorized. User must login to view cart.");
     response.end();
   } else {
-    const currentUser = users.find(user => user.email == currentAccessToken.email)
+    const currentUser = users.find(
+      user => user.email == currentAccessToken.email
+    );
     response.writeHead(200, "Successful operation", header);
     response.end(JSON.stringify(currentUser.cart));
   }
@@ -165,16 +169,25 @@ myRouter.post("/api/me/cart", function(request, response) {
   }
   requestedId = parseInt(request.body.productId);
   requestedQuantity = parseInt(request.body.quantity);
-  if (isNaN(requestedId) || requestedId < 1 || isNaN(requestedQuantity) || requestedQuantity < 1) {
+  if (
+    isNaN(requestedId) ||
+    requestedId < 1 ||
+    isNaN(requestedQuantity) ||
+    requestedQuantity < 1
+  ) {
     response.writeHead(400, "Invalid productId or quantity", header);
     response.end();
   } else {
-    targetIndex = users.findIndex(user => user.email == currentAccessToken.email)
-    targetCart = users[targetIndex].cart.findIndex(product => request.body.productId == product.productId)
+    targetIndex = users.findIndex(
+      user => user.email == currentAccessToken.email
+    );
+    targetCart = users[targetIndex].cart.findIndex(
+      product => request.body.productId == product.productId
+    );
     if (targetCart != -1) {
-    users[targetIndex].cart[targetCart] = request.body;
-    response.writeHead(200, "Successful operation", header);
-    response.end(JSON.stringify(users[2].cart[0]));
+      users[targetIndex].cart[targetCart] = request.body;
+      response.writeHead(200, "Successful operation", header);
+      response.end(JSON.stringify(users[2].cart[0]));
     } else {
       response.writeHead(404, "ProductId not found in cart", header);
       response.end();
@@ -182,13 +195,103 @@ myRouter.post("/api/me/cart", function(request, response) {
   }
 });
 
-// myRouter.delete("/api/me/cart/:productId", function(request, response) {
-//   response.end();
-// });
+myRouter.delete("/api/me/cart/:productId", function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(
+      403,
+      "Not authorized. User must login to delete items from the cart."
+    );
+    response.end();
+  }
 
-// myRouter.post("/api/me/cart/:productId", function(request, response) {
-//   response.end();
-// });
+  requestedId = parseInt(request.params.productId);
+  //All valid ids should be capable of being parsed to an int. If the input is NaN we know it's bad input.
+  if (isNaN(requestedId) || requestedId < 1) {
+    response.writeHead(400, "Invalid prouctdId supplied");
+    response.end();
+  }
+  //Checking product data to see if productId exists.
+  requestedProduct = products.find(
+    product => product.id === request.params.productId
+  );
+  if (requestedProduct) {
+    targetIndex = users.findIndex(
+      user => user.email == currentAccessToken.email
+    );
+    checkExistingCartItem = users[targetIndex].cart.findIndex(
+      item => item.productId == request.params.productId
+    );
+    if (checkExistingCartItem != -1) {
+      //productId found, delete array element
+      users[targetIndex].cart.splice(checkExistingCartItem, 1);
+      response.writeHead(200, "Successful operation", header);
+      response.end(JSON.stringify(users[targetIndex].cart));
+    } else {
+      //productId not found in cart
+      response.writeHead(404, "ProductId not found", header);
+      response.end();
+    }
+  } else {
+    //productId not found in db
+    response.writeHead(404, "ProductId not found");
+    response.end();
+  }
+});
+
+myRouter.post("/api/me/cart/:productId", function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(
+      403,
+      "Not authorized. User must login to add items to cart."
+    );
+    response.end();
+  }
+
+  requestedId = parseInt(request.params.productId);
+  //All valid ids should be capable of being parsed to an int. If the input is NaN we know it's bad input.
+  if (isNaN(requestedId) || requestedId < 1) {
+    response.writeHead(400, "Invalid prouctdId supplied");
+    response.end();
+  }
+  //Checking product data to see if productId exists.
+  requestedProduct = products.find(
+    product => product.id === request.params.productId
+  );
+  if (requestedProduct) {
+    targetIndex = users.findIndex(
+      user => user.email == currentAccessToken.email
+    );
+    checkExistingCartItem = users[targetIndex].cart.findIndex(
+      item => item.productId == request.params.productId
+    );
+    if (checkExistingCartItem == -1) {
+      users[targetIndex].cart.push({
+        productId: requestedProduct.id,
+        quantity: "1"
+      });
+      response.writeHead(200, "Successful operation", header);
+      response.end(JSON.stringify(users[targetIndex].cart));
+    } else {
+      //item already in cart, increment quantity. Should fix numbers to be actual numbers if i have time...
+      currentQuantity = parseInt(
+        users[targetIndex].cart[checkExistingCartItem].quantity
+      );
+      newQuantity = currentQuantity += 1;
+      users[targetIndex].cart[
+        checkExistingCartItem
+      ].quantity = currentQuantity.toString();
+      response.writeHead(200, "Successful operation", header);
+      response.end(JSON.stringify(users[targetIndex].cart));
+    }
+  } else {
+    response.writeHead(404, "Product id not found in cart");
+    response.end();
+  }
+});
 
 // Helper method to process access token
 var getValidTokenFromRequest = function(request) {
