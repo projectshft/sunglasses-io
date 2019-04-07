@@ -130,10 +130,56 @@ describe('Login', () => {
 
 describe('Cart', () => {
   describe('/GET cart', () => {
+    it('it should not allow a user to access their cart if they are not logged in', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .end((error, response) => {
+          response.should.have.status(407)
+          response.body.should.be.an('object')
+          done()
+        })
+    })
+  })
+  describe('/GET cart', () => {
     it('it should allow a user to access their cart if they are logged in', done => {
       chai
         .request(server)
         .get('/me/cart')
+        .set('xauth', accessToken)
+        .end((error, response) => {
+          response.should.have.status(200)
+          response.body.should.be.an('array')
+          done()
+        })
+    })
+  })
+  describe('/POST me/cart/:productId', () => {
+    it('if a user is not logged in, they should not be allowed to add a product to their cart', done => {
+      chai
+        .request(server)
+        .post('/me/cart/3')
+        .end((error, response) => {
+          response.should.have.status(408)
+          response.body.should.be.an('object')
+          done()
+        })
+    })
+    it('it should not allow a logged in user to add a product to their cart if the product doesnt exist', done => {
+      chai
+        .request(server)
+        .post('/me/cart/20')
+        .set('xauth', accessToken)
+        .end((error, response) => {
+          response.should.have.status(409)
+          response.body.should.be.an('object')
+          done()
+        })
+    })
+    it('it should allow a user to add a product their cart if they are logged in', done => {
+      chai
+        .request(server)
+        .post('/me/cart/3')
         .set('xauth', accessToken)
         .end((error, response) => {
           response.should.have.status(200)

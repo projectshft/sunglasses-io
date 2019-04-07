@@ -47,22 +47,6 @@ var getValidTokenFromRequest = function(request) {
     return null
   }
 }
-// var getValidTokenFromRequest = function(request) {
-//   var parsedUrl = require('url').parse(request.url, true)
-//   if (parsedUrl.query.accessToken) {
-//     // Verify the access token to make sure it's valid and not expired
-//     let currentAccessToken = accessTokens.find(accessToken => {
-//       return accessToken.token == parsedHeader.query.accessToken
-//     })
-//     if (currentAccessToken) {
-//       return currentAccessToken
-//     } else {
-//       return null
-//     }
-//   } else {
-//     return null
-//   }
-// }
 
 // Setup router
 var myRouter = Router()
@@ -231,5 +215,47 @@ myRouter.get('/me/cart', (request, response) => {
   }
 })
 
+myRouter.post('/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request)
+  if (!currentAccessToken) {
+    response.writeHead(
+      408,
+      'You must be logged in to add products to your cart.'
+    )
+    response.end()
+    return
+  } else {
+    let user = users.find(user => {
+      console.log(user)
+      return user.login.username == currentAccessToken.username
+    })
+
+    //filter for the products with the appropriate product Id
+    let addedProduct = products.find(product => {
+      return product.productId == request.params.productId
+    })
+    console.log('addedProduct:', addedProduct)
+    //if there are no products with the brand Id, a 409 error should be thrown
+    if (!addedProduct) {
+      response.writeHead(409, 'No products with that product Id found.')
+      response.end()
+      return
+    } else {
+      let cartItem = {}
+      cartItem.quantity = '1'
+      cartItem.product = addedProduct
+      user.cart.push(cartItem)
+      console.log('user.cart:', user.cart)
+      response.writeHead(
+        200,
+        Object.assign({
+          'Content-Type': 'application/json'
+        })
+      )
+      response.end(JSON.stringify(user.cart))
+      return
+    }
+  }
+})
 //export the server so that tests can be written
 module.exports = server
