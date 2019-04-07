@@ -14,7 +14,7 @@ var products = [];
 var users = [];
 var brands = [];
 let accessTokens = [
-  // { token: 'qswWsnJLHJlcIHoY', username: 'yellowleopard753' }
+  { token: 'qswWsnJLHJlcIHoY', username: 'yellowleopard753' }
 ];
 
 // Setup router
@@ -115,6 +115,28 @@ myRouter.post('/login', function(request, response) {
   }
   //If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
   response.writeHead(400, 'Incorrectly formatted response');
+  response.end();
+});
+
+myRouter.get('/me/cart', function(request, response) {
+  if (request.headers.xauth) {
+    //find the user of the currently used access token
+    const findTheUserViaCurrentAccessToken = accessTokens.filter(index => {
+      return index.token == request.headers.xauth;
+    });
+    //filter the current user object from the users array
+    let currentUserArray = users.filter(index => {
+      return (
+        index.login.username == findTheUserViaCurrentAccessToken[0].username
+      );
+    });
+
+    let currentUser = currentUserArray[0];
+
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify(currentUser.cart));
+  }
+  response.writeHead(404, 'You must be logged in to view your cart');
   response.end();
 });
 

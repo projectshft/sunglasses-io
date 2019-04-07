@@ -3,7 +3,6 @@ let chaiHttp = require('chai-http');
 let server = require('./server');
 
 let should = chai.should();
-let accessToken = '';
 
 chai.use(chaiHttp);
 
@@ -180,6 +179,35 @@ describe('/me/cart', () => {
   //describe the car GEt
   describe('GET cart', () => {
     //what should happen
-    it('should return the cart of the current user', done => {});
+    it('should return the cart of the current user', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .set('xauth', 'qswWsnJLHJlcIHoY')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an('array');
+          done();
+        });
+    });
+    it('should return an error if there is no access token', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .end((error, response) => {
+          response.should.have.status(404);
+          done();
+        });
+    });
+    it('should return a 500 error if the access token is invalid', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .set('xauth', 'abcdefghijklmnop')
+        .end((error, response) => {
+          response.should.have.status(500);
+          done();
+        });
+    });
   });
 });
