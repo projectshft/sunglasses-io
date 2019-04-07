@@ -72,22 +72,55 @@ describe("/GET products by brand ID", () => {
 
 // Tests for /api/login endpoint
 
-const userCredentials = {
-  username: 'greenlion235', 
-  password: 'waters'
-}
+let token = null;
 
 describe("/POST login a user", () => {
   it.only("should login the user", done => {
     chai
       .request(server)
       .post("/api/login")
-      .send(userCredentials)
+      .set({username: 'greenlion235', password: 'waters'})
       .end((error, response) => {
         chai.assert.isNull(error);
         chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");
         chai.expect(response.body).to.be.lengthOf(16);
         chai.expect(response.body).to.be.a("string");
+        token = response.body;
+        done();
+      });
+  });
+});
+
+describe("/GET a users cart", () => {
+  it.only("get the contents of a users cart", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .set('token', token)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");        
+        chai.expect(response.body).to.be.an("array");
+        chai.expect(response.body).to.be.lengthOf(2);
+        done();
+      });
+  });
+});
+
+describe("/DELETE a product", () => {
+  it.only("deletes a product from a users cart", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/1")
+      .set('token', token)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");        
+        chai.expect(response.body).to.be.a("array");
+        chai.expect(response.body).to.be.lengthOf(1);
         done();
       });
   });

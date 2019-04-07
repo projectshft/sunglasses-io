@@ -67,9 +67,9 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
 // POST /api/login (User Login)
 myRouter.post("/api/login", (request,response) => {
   response.writeHead(200, {'Content-Type': 'application/json'});
-  if (request.body.username && request.body.password) {
+  if (request.headers.username && request.headers.password) {
     let user = users.find((user) => {
-      return user.login.username == request.body.username && user.login.password == request.body.password;
+      return user.login.username == request.headers.username && user.login.password == request.headers.password;
     });
     if (user) {
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -97,5 +97,70 @@ myRouter.post("/api/login", (request,response) => {
     response.end();
   }    
 });
+
+// GET /api/me/cart (User specific cart)
+myRouter.get("/api/me/cart", (request, response) => {
+  let validAccessToken = getValidTokenFromRequest(request);
+  if (!validAccessToken) {
+    response.writeHead(401, "You need to have access to this endpoint to continue");
+    response.end();
+  } else {
+      let userAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.token == request.headers.token;
+        });
+      let user = users.find((user) => {
+        return user.login.username == userAccessToken.username;
+      });    
+    if (!user) {
+      response.writeHead(404, "That user cannot be found");
+      response.end();
+      return;
+    } else {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.end(JSON.stringify(user.cart));
+    }
+  }
+});
+
+// DELETE /api/me/cart/:productId (Delete product from cart)
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+  let validAccessToken = getValidTokenFromRequest(request);
+  if (!validAccessToken) {
+    response.writeHead(401, "You need to have access to this endpoint to continue");
+    response.end();
+  } else {
+      let userAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.token == request.headers.token;
+        });
+      let user = users.find((user) => {
+        return user.login.username == userAccessToken.username;
+      });    
+    if (!user) {
+      response.writeHead(404, "That user cannot be found");
+      response.end();
+      return;
+    } else {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        const { productId } = request.params;
+        const cartAfterDelete = user.cart.filter(product => product.id !== productId);
+        response.end(JSON.stringify(cartAfterDelete));
+    }
+  }
+});
+
+const getValidTokenFromRequest = function(request) {
+  if (request.headers.token) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == request.headers.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 module.exports = server;
