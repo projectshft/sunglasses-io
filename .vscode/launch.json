@@ -8,7 +8,12 @@
             "type": "node",
             "request": "launch",
             "name": "Sunglasses.io",
-            "program": "${workspaceRoot}/app/server.js"
+            "program": "${workspaceRoot}/app/server.js",
+            "skipFiles": [
+                "${workspaceFolder}/node_modules/**/*.js",
+                "${workspaceFolder}/lib/**/*.js",
+                "<node_internals>/**/*.js"
+              ]
         }
     ]
 }
