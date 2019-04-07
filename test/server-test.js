@@ -34,51 +34,13 @@ describe("/GET products", () => {
           expect(response).to.have.status(200);
           expect("Content-Type", "application/json");
           expect(response.body).to.be.an("array");
+          expect(res.body).to.have.lengthOf(11);
           done();
         });
     });
   });
 
-// Get specific products test  
-describe("/GET specific product", () => {
-    it.only("should go get one product at a time", done => {
-      chai
-        .request(server)
-        .get("/api/products/1")
-        .end((error, response) => {
-          expect(response).to.have.status(200);
-          expect("Content-Type", "application/json");
-          expect(response.body).to.have.keys([
-            "id",
-            "categoryId",
-            "name",
-            "description",
-            "price",
-            "imageUrls"
-          ]);
-        expect(response.body)
-          .to.have.property("id")
-          .that.is.a("string");
-        expect(response.body)
-          .to.have.property("categoryId")
-          .that.is.a("string");
-        expect(response.body)
-          .to.have.property("name")
-          .that.is.a("string");
-        expect(response.body)
-          .to.have.property("description")
-          .that.is.a("string");
-        expect(response.body)
-          .to.have.property("price")
-          .that.is.a("number");
-        expect(response.body)
-          .to.have.property("imageUrls")
-          .that.is.an("array")
-          .with.lengthOf(3);
-        done();
-      });
-  });
-});     
+
 
 // specific brand test
 describe("/GET specific category of product", () => {
@@ -94,3 +56,43 @@ describe("/GET specific category of product", () => {
         });
     });
   });
+
+  //login test
+  describe("/POST,login", () => {
+    it("should return status 200 and a token, if it is an authenticated user", done => {
+      let userLoginData = { username: "carson.poe@gmail.com", password: "goheels" }
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(userLoginData)
+        .end((error, response) => {
+          expect(response).to.have.status(200);
+          expect(response.body).to.be.a("string");
+          done();
+      });
+    })
+    it("should return status 400 for incorrect format", done => {
+        userLoginData = { user: "carson.poe@example.com", password: "goheels" }
+        chai
+          .request(server)
+          .post('/api/login')
+          .send(userLoginData)
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(400);
+            done();
+        });
+      })
+      it("should return status 401 for invalid username or password", done => {
+        userLoginData = { username: "invalid@gmail.com", password: "wrong" }
+        chai
+          .request(server)
+          .post('/api/login')
+          .send(userLoginData)
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(401);
+            done();
+        });
+      })
+    });
