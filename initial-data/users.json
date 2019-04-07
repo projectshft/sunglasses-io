@@ -69,7 +69,8 @@
     },
     {
         "gender": "female",
-        "cart":[],
+        "cart":[{"productId": "3",
+                 "quantity":"25"}],
         "name": {
             "title": "mrs",
             "first": "natalia",

@@ -8,7 +8,7 @@ var uid = require("rand-token").uid;
 var url = require("url");
 const header = { "Content-Type": "application/json" };
 const PORT = 3001;
-let accessTokens = [];
+let accessTokens = [{email: "natalia.ramos@example.com", token: "Qr2vWo9yEcJxFUm6"}];
 
 // Setup router
 var myRouter = Router();
@@ -125,7 +125,7 @@ myRouter.post("/api/login", function(request, response) {
 
       // If token already exists, return it
       if (currentAccessToken) {
-        response.end(JSON.stringify({token: currentAccessToken.token}));
+        response.end(JSON.stringify({ token: currentAccessToken.token }));
       } else {
         // Create a new token with the user value and a "random" token
         let newAccessToken = {
@@ -133,29 +133,77 @@ myRouter.post("/api/login", function(request, response) {
           token: uid(16)
         };
         accessTokens.push(newAccessToken);
-        response.end(JSON.stringify({token: newAccessToken.token}));
+        response.end(JSON.stringify({ token: newAccessToken.token }));
       }
     } else {
       response.writeHead(401, "Invalid username or password");
       response.end();
     }
   }
+  console.log(accessTokens)
 });
 
-  // Helper method to process access token
-  var getValidTokenFromRequest = function(request) {
-    var parsedUrl = require('url').parse(request.url, true);
-    if (parsedUrl.query.accessToken) {
-      // Verify the access token to make sure it's valid and not expired
-      let currentAccessToken = accessTokens.find((accessToken) => {
-        return accessToken.token == parsedUrl.query.accessToken;
-      });
-      if (currentAccessToken) {
-        return currentAccessToken;
-      } else {
-        return null;
-      }
+myRouter.get("/api/me/cart", function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(403, "Not authorized. User must login to view cart.");
+    response.end();
+  } else {
+    const currentUser = users.find(user => user.email == currentAccessToken.email)
+    response.writeHead(200, "Successful operation", header);
+    response.end(JSON.stringify(currentUser.cart));
+  }
+});
+
+myRouter.post("/api/me/cart", function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(403, "Not authorized. User must login to update cart.");
+    response.end();
+  }
+  requestedId = parseInt(request.body.productId);
+  requestedQuantity = parseInt(request.body.quantity);
+  if (isNaN(requestedId) || requestedId < 1 || isNaN(requestedQuantity) || requestedQuantity < 1) {
+    response.writeHead(400, "Invalid productId or quantity", header);
+    response.end();
+  } else {
+    targetIndex = users.findIndex(user => user.email == currentAccessToken.email)
+    targetCart = users[targetIndex].cart.findIndex(product => request.body.productId == product.productId)
+    if (targetCart != -1) {
+    users[targetIndex].cart[targetCart] = request.body;
+    response.writeHead(200, "Successful operation", header);
+    response.end(JSON.stringify(users[2].cart[0]));
+    } else {
+      response.writeHead(404, "ProductId not found in cart", header);
+      response.end();
+    }
+  }
+});
+
+// myRouter.delete("/api/me/cart/:productId", function(request, response) {
+//   response.end();
+// });
+
+// myRouter.post("/api/me/cart/:productId", function(request, response) {
+//   response.end();
+// });
+
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require("url").parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token == parsedUrl.query.accessToken;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
     } else {
       return null;
     }
-  };
+  } else {
+    return null;
+  }
+};

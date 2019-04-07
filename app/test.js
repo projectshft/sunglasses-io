@@ -150,9 +150,11 @@ chai.use(chaiHttp);
 //   it("should get user cart contents", done => {
 //     chai
 //       .request(server)
-//       .get("/api/me/cart")
+//       .get("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6")
 //       .end((err, res) => {
 //         res.should.have.status(200);
+//         res.body[0].should.have.deep.property("productId", "3")
+//         res.body[0].should.have.deep.property("quantity", "25")
 //         done();
 //       });
 //   });
@@ -171,11 +173,17 @@ chai.use(chaiHttp);
 // describe("/POST /me/cart", () => {
 //   //POST to cart to update an item quantity while logged in - should return 200 Update successful.
 //   it("it should update the quantity of an existing cart item", done => {
+//     update = {
+//       productId: '3',
+//       quantity: '26'
+//     }
 //     chai
 //       .request(server)
-//       .post("/api/me/cart")
+//       .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6").send(update)
 //       .end((err, res) => {
 //         res.should.have.status(200);
+//         res.body.should.have.property("productId", "3")
+//         res.body.should.have.property("quantity", "26")
 //         done();
 //       });
 //   });
@@ -191,14 +199,32 @@ chai.use(chaiHttp);
 //   });
 //   //POST to cart to update an item quantity while logged in, but invalid productId or quantity - should return 400 Invalid product id or quantity.
 //   it("should return 400", done => {
+//     update = {
+//       productId: 'dog',
+//       quantity: '26'
+//     }
 //     chai
 //       .request(server)
-//       .post("/api/me/cart")
+//       .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6").send(update)
 //       .end((err, res) => {
 //         res.should.have.status(400);
 //         done();
 //       });
 //   });
+//     //POST to cart to update an item quantity while logged in, but productId not in cart - should return 404 ProductId not found in cart.
+//     it("should return 404", done => {
+//       update = {
+//         productId: '27',
+//         quantity: '26'
+//       }
+//       chai
+//         .request(server)
+//         .post("/api/me/cart?accessToken=Qr2vWo9yEcJxFUm6").send(update)
+//         .end((err, res) => {
+//           res.should.have.status(404);
+//           done();
+//         });
+//     });
 // });
 
 // describe("/DELETE /me/cart/{productId}", () => {
@@ -267,36 +293,36 @@ chai.use(chaiHttp);
 //   });
 // });
 
-describe("/POST login", () => {
-  //POST user login with email/password - success - should return 200 Login successful.
-  it("it should successfully log the user in and return a token", done => {
-    const userCredentials = {
-      email: 'susanna.richards@example.com', 
-      password: 'jonjon'
-    }
-    chai
-      .request(server)
-      .post("/api/login").send(userCredentials)
-      .end((err, res) => {
-        res.should.have.status(200);
-        (res.body.token.length).should.equal(16)
-        done();
-      });
-  });
-  //POST user login with email/password - fail - should return 401 Invalid username or password.
-  it("should return 401", done => {
-    const userCredentials = {
-      email: 'bademail@example.com', 
-      password: 'blarg'
-    }
-    chai
-      .request(server)
-      .post("/api/login")
-      .send(userCredentials)
-      .end((err, res) => {
-        res.should.have.status(401);
-        should.equal(res.body.token, undefined)
-        done();
-      });
-  });
- });
+// describe("/POST login", () => {
+//   //POST user login with email/password - success - should return 200 Login successful.
+//   it("it should successfully log the user in and return a token", done => {
+//     const userCredentials = {
+//       email: 'susanna.richards@example.com', 
+//       password: 'jonjon'
+//     }
+//     chai
+//       .request(server)
+//       .post("/api/login").send(userCredentials)
+//       .end((err, res) => {
+//         res.should.have.status(200);
+//         (res.body.token.length).should.equal(16)
+//         done();
+//       });
+//   });
+//   //POST user login with email/password - fail - should return 401 Invalid username or password.
+//   it("should return 401", done => {
+//     const userCredentials = {
+//       email: 'bademail@example.com', 
+//       password: 'blarg'
+//     }
+//     chai
+//       .request(server)
+//       .post("/api/login")
+//       .send(userCredentials)
+//       .end((err, res) => {
+//         res.should.have.status(401);
+//         should.equal(res.body.token, undefined)
+//         done();
+//       });
+//   });
+//  });
