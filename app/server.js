@@ -120,7 +120,7 @@ myRouter.get('/products', (request, response) => {
   return
 })
 
-// post the user's login information
+// login
 myRouter.post('/login', (request, response) => {
   //Make sure there is an email and password in the request
   if (request.body.username && request.body.password) {
@@ -149,7 +149,7 @@ myRouter.post('/login', (request, response) => {
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find(accessToken => {
         return (
-          accessToken.token == parsedUrl.query.accessToken &&
+          accessToken.token == request.headers.xauth &&
           new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
         )
       })
@@ -192,6 +192,7 @@ myRouter.post('/login', (request, response) => {
     return
   }
 })
+//see cart if logged in
 myRouter.get('/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request)
   console.log(currentAccessToken)
@@ -214,7 +215,7 @@ myRouter.get('/me/cart', (request, response) => {
     return
   }
 })
-
+//add products to cart
 myRouter.post('/me/cart/:productId', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request)
   if (!currentAccessToken) {
@@ -231,19 +232,19 @@ myRouter.post('/me/cart/:productId', (request, response) => {
     })
 
     //filter for the products with the appropriate product Id
-    let addedProduct = products.find(product => {
+    let productToAdd = products.find(product => {
       return product.productId == request.params.productId
     })
-    console.log('addedProduct:', addedProduct)
+    console.log('productToAdd:', productToAdd)
     //if there are no products with the brand Id, a 409 error should be thrown
-    if (!addedProduct) {
+    if (!productToAdd) {
       response.writeHead(409, 'No products with that product Id found.')
       response.end()
       return
     } else {
       let cartItem = {}
-      cartItem.quantity = '1'
-      cartItem.product = addedProduct
+      cartItem.quantity = 1
+      cartItem.product = productToAdd
       user.cart.push(cartItem)
       console.log('user.cart:', user.cart)
       response.writeHead(
@@ -253,6 +254,62 @@ myRouter.post('/me/cart/:productId', (request, response) => {
         })
       )
       response.end(JSON.stringify(user.cart))
+      return
+    }
+  }
+})
+//delete products from cart
+myRouter.delete('/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request)
+
+  //if the user is not logged in, a 410 error should be thrown
+  if (!currentAccessToken) {
+    response.writeHead(
+      410,
+      'You must be logged in to delete products from your cart.'
+    )
+    response.end()
+    return
+  } else {
+    let user = users.find(user => {
+      return user.login.username == currentAccessToken.username
+    })
+
+    console.log('user', user)
+    console.log('user.cart:', user.cart)
+
+    //find the product in the cart by productId
+    let productToDelete = user.cart.find(item => {
+      return item.product.productId == request.params.productId
+    })
+    console.log('request.params.productId:', request.params.productId)
+    console.log('productToDelete:', productToDelete)
+
+    //if there are no products with the product Id in the cart, a 411 error should be thrown
+    if (!productToDelete) {
+      response.writeHead(
+        411,
+        'No product with that product Id found in your shopping cart.'
+      )
+      response.end()
+      return
+    } else {
+      //find the index of the product within the user's cart
+      indexOfProductToDelete = user.cart.findIndex(item => {
+        item.product.productId == productToDelete.product.productId
+      })
+      console.log(indexOfProductToDelete)
+
+      //remove the product from the cart
+      let newCart = user.cart.splice(indexOfProductToDelete, 1)
+      console.log('newCart:', newCart)
+      response.writeHead(
+        200,
+        Object.assign({
+          'Content-Type': 'application/json'
+        })
+      )
+      response.end(JSON.stringify(newCart))
       return
     }
   }

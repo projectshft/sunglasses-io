@@ -184,6 +184,93 @@ describe('Cart', () => {
         .end((error, response) => {
           response.should.have.status(200)
           response.body.should.be.an('array')
+          response.body.should.have.deep.members([
+            {
+              quantity: 1,
+              product: {
+                productId: '3',
+                brandId: '1',
+                productName: 'Brown Sunglasses',
+                description: 'The best glasses in the world',
+                price: 50,
+                imageUrls: [
+                  'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                  'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                  'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+                ]
+              }
+            }
+          ])
+
+          done()
+        })
+    })
+  })
+  describe('/DELETE me/cart/:productId', () => {
+    it('if a user is not logged in, they should not be allowed to delete a product from their cart', done => {
+      chai
+        .request(server)
+        .del('/me/cart/3')
+        .end((error, response) => {
+          response.should.have.status(410)
+          response.body.should.be.an('object')
+          done()
+        })
+    })
+    it('it should not allow a logged in user to delete a product from their cart if the product isnt in their cart', done => {
+      chai
+        .request(server)
+        .del('/me/cart/20')
+        .set('xauth', accessToken)
+        .end((error, response) => {
+          response.should.have.status(411)
+          response.body.should.be.an('object')
+          done()
+        })
+    })
+    it('it should allow a logged in user to delete a product from their cart if the product exists', done => {
+      // let cart = [
+      //   {
+      //     quantity: 1,
+      //     product: {
+      //       productId: '3',
+      //       brandId: '1',
+      //       productName: 'Brown Sunglasses',
+      //       description: 'The best glasses in the world',
+      //       price: 50,
+      //       imageUrls: [
+      //         'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+      //         'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+      //         'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+      //       ]
+      //     }
+      //   }
+      // ]
+      chai
+        .request(server)
+        .del('/me/cart/3')
+        .set('xauth', accessToken)
+        // .send(cart)
+        .end((error, response) => {
+          response.should.have.status(200)
+          response.body.should.be.an('array')
+          response.body.should.not.have.deep.members([
+            {
+              quantity: 1,
+              product: {
+                productId: '3',
+                brandId: '1',
+                productName: 'Brown Sunglasses',
+                description: 'The best glasses in the world',
+                price: 50,
+                imageUrls: [
+                  'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                  'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                  'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+                ]
+              }
+            }
+          ])
           done()
         })
     })
