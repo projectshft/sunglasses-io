@@ -296,7 +296,7 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
     } else {
       //find the index of the product within the user's cart
       indexOfProductToDelete = user.cart.findIndex(item => {
-        item.product.productId == productToDelete.product.productId
+        return item.product.productId == request.params.productId
       })
       console.log(indexOfProductToDelete)
 
