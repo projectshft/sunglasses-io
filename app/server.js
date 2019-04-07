@@ -148,6 +148,44 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
   }
 });
 
+// POST /api/me/cart/:productId (Add a product to cart)
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+  let validAccessToken = getValidTokenFromRequest(request);
+  if (!validAccessToken) {
+    response.writeHead(401, "You need to have access to this endpoint to continue");
+    response.end();
+  } else {
+      let userAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.token == request.headers.token;
+        });
+      let user = users.find((user) => {
+        return user.login.username == userAccessToken.username;
+      });    
+    if (!user) {
+      response.writeHead(404, "That user cannot be found");
+      response.end();
+      return;
+    } else {
+        const { productId } = request.params;
+        const validProductId = products.find(product => product.id === productId);
+        if (!validProductId) {
+          response.writeHead(400, "Not a valid product Id");
+          response.end();
+        }
+        const productInCart = user.cart.find(product => product.id === productId);
+        if (!productInCart) {
+        const productToAdd = products.filter(product => product.id === productId);
+        Object.assign(productToAdd[0], {"quantity": 1});
+        user.cart.push(productToAdd[0]);
+        } else {
+          productInCart.quantity += 1;
+        }
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.end(JSON.stringify(user.cart));
+    }
+  }
+});
+
 const getValidTokenFromRequest = function(request) {
   if (request.headers.token) {
     let currentAccessToken = accessTokens.find((accessToken) => {

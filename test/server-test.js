@@ -92,6 +92,8 @@ describe("/POST login a user", () => {
   });
 });
 
+// Tests for /api/me/cart GET endpoint
+
 describe("/GET a users cart", () => {
   it.only("get the contents of a users cart", done => {
     chai
@@ -109,6 +111,8 @@ describe("/GET a users cart", () => {
   });
 });
 
+// Tests for /api/me/cart/:productId DELETE endpoint
+
 describe("/DELETE a product", () => {
   it.only("deletes a product from a users cart", done => {
     chai
@@ -121,6 +125,64 @@ describe("/DELETE a product", () => {
         chai.expect("Content-Type", "application/json");        
         chai.expect(response.body).to.be.a("array");
         chai.expect(response.body).to.be.lengthOf(1);
+        done();
+      });
+  });
+  it.only("receives 400 error if product Id is invalid", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/18")
+      .set('token', token)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(400);
+        chai.expect("Content-Type", "application/json");
+        done();
+      });
+  });
+});
+
+// Tests for /api/me/cart/:productId POST endpoint
+
+describe("/POST a product", () => {
+  it.only("adds a new product to a users cart", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/3")
+      .set('token', token)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");        
+        chai.expect(response.body).to.be.a("array");
+        chai.expect(response.body).to.be.lengthOf(3);
+        done();
+      });
+  });
+  it.only("updates quantity of product in cart if already in cart", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/3")
+      .set('token', token)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(200);
+        chai.expect("Content-Type", "application/json");        
+        chai.expect(response.body).to.be.a("array");
+        chai.expect(response.body).to.be.lengthOf(3);
+        chai.expect(response.body[2].quantity).to.eql(2);
+        done();
+      });
+  });
+  it.only("receives 400 error if product Id is invalid", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/15")
+      .set('token', token)
+      .end((error, response) => {
+        chai.assert.isNull(error);
+        chai.expect(response).to.have.status(400);
+        chai.expect("Content-Type", "application/json");
         done();
       });
   });
