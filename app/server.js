@@ -157,24 +157,96 @@ myRouter.post('/login', (request, response) => {
   }
 });
 
-// Route to view carts need to validate with token
+// Route to view cart, need to validate with token
 myRouter.get('/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
   response.setHeader('Content-Type', 'application/json');
-  console.log("token is", currentAccessToken);
   // if there is no token on the request, show error message
   if (!currentAccessToken) {
     response.writeHead(401, CORS_HEADERS);
     response.end(JSON.stringify({ message: 'Unauthorized user, must be logged in' }));
   } else {
     // Find the user cart with currentAccessToken provided
-    console.log('acs is ', currentAccessToken);
     let userFound = users.find(
       (user) => user.email === currentAccessToken.email
     );
     response.writeHead(200, CORS_HEADERS);
     response.end(JSON.stringify(userFound.cart));
   }
+});
+
+// TODO: route to update product quantity on the user's cart
+myRouter.get('/me/cart')
+
+// Route to add product to cart
+myRouter.post('/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  response.setHeader('Content-Type', 'application/json');
+
+  if (!currentAccessToken) {
+    response.writeHead(401, CORS_HEADERS);
+    response.end(JSON.stringify({ message: 'Unauthorized user, must be logged in' }));
+  } else {
+    let userFound = users.find(
+      (user) => user.email === currentAccessToken.email
+    );
+
+    // [{productName: "cool", productQty: 3}, {}, {}]
+    let productFound = products.find((product) => product.id === request.params.productId);
+    if (!productFound) {
+      response.writeHead(404, CORS_HEADERS);
+      response.end(JSON.stringify({ message: 'Product not found' }));
+    }
+    // Check to see if the product already exists in the user cart  
+    let userProductFound = userFound.cart.find((product) => product.product.name === productFound.name)
+    // if it does not exist create a product item object
+    if (!userProductFound) {
+      let cartItem = {
+        product: productFound,
+        quantity: 1
+      }
+      userFound.cart.push(cartItem);
+      response.writeHead(401, CORS_HEADERS);
+      response.end(JSON.stringify(cartItem));
+    }
+    // if product is found, just update quantity
+    userProductFound.quantity++;
+    response.writeHead(200, CORS_HEADERS);
+    response.end(JSON.stringify(userProductFound));
+  }
+});
+
+// Route to delete product from cart
+myRouter.delete('/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  response.setHeader('Content-Type', 'application/json');
+
+  if (!currentAccessToken) {
+    response.writeHead(401, CORS_HEADERS);
+    response.end(JSON.stringify({ message: 'Unauthorized user, must be logged in' }));
+  } else {
+    let userFound = users.find(
+      (user) => user.email === currentAccessToken.email
+    );
+
+    // find product in the user's cart
+    let productFound = userFound.cart.find(
+      (cartItem) => cartItem.product.id === request.params.productId
+    );
+    // if no product was found return error message    
+    if (!productFound) {
+      response.writeHead(404, CORS_HEADERS);
+      response.end(JSON.stringify({ message: 'Product not found' }));
+    }
+    // update cart to remove selected product
+    let updatedCart = userFound.cart.filter(
+      (cartItem) => cartItem.product.id !== productFound.product.id
+    );
+    userFound.cart = updatedCart;
+    response.writeHead(200, CORS_HEADERS);
+    response.end(JSON.stringify(userFound.cart));
+  }
 })
+
 
 module.exports = server;

@@ -136,9 +136,9 @@ paths:
     post:
       tags:
         - User
-      summary: Checkout cart
+      summary: Update cart
       description: |
-        Only logged can checkout cart
+        Only logged in users can update the quantity of a product in the cart
       consumes:
         - application/json
       produces:
@@ -146,20 +146,21 @@ paths:
       parameters:
         - in: body
           name: body
-          description: Order to be procesed
+          description: |
+            product to be updated
           required: true
           schema:
             type: array
             items:
               type: object
               properties:
-                productName:
-                  type: string
-                productQuantity: 
+                productQuantity:
                   type: integer
+                product:
+                  $ref: '#/definitions/Product'
       responses:
         '200':
-          description: successfuly placed order
+          description: successfuly updated cart
         '401':
           description: 'Must be logged in'
         '404': 
@@ -174,11 +175,15 @@ paths:
       description: | 
         Deletes an item from the user's cart
       parameters:
+      - in: query
+        name: token
+        type: string
+        description: The user token
       - name: productId
         in: path
         type: string
         required: true
-        description: The product Id  
+        description: The product Id 
       responses:
         '200':
           description: Succesfuly removed product
@@ -197,11 +202,15 @@ paths:
       description: | 
         Only logged in users can add items to cart
       parameters:
+      - in: query
+        name: token
+        type: string
+        description: The user token
       - name: productId
         in: path
         type: string
         required: true
-        description: The product Id  
+        description: The product Id 
       responses:
         '200':
           description: Succesfuly added product

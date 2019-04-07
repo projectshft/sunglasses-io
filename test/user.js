@@ -4,11 +4,11 @@ let server = require('../app/server');
 let should = chai.should();
 
 chai.use(chaiHttp);
-
+let token;
 
 describe('User', () => {
 
-  // Test to make sure the get cart route is only accessible by logged in users
+  // Test to make sure the GET cart route is only accessible by logged in users
   describe('/GET get cart', () => {
     it('it should show an error message', done => {
       chai
@@ -39,9 +39,31 @@ describe('User', () => {
             .end((err, res) => {
               res.should.have.status(200);
               res.body.should.be.a('array');
+              res.body.length.should.be.eql(0);
               done();
             })
         });
     })
   });
+
+  // Test sccessfuly updating the quantity of a product in a cart
+
+  // Test successfully adding a product to a users cart
+  describe('/POST product to cart', () => {
+    it('it should add a product to add a product to the user"s cart', () => {
+      chai
+        .request(server)
+        .post('/login')
+        .send({
+          'email': 'susanna.richards@example.com',
+          'password': 'jonjon'
+        })
+        .end((err, res) => {
+          chai
+            .request(server)
+            .post('/')
+        })
+    })
+  })
+
 });
