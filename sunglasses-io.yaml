@@ -19,11 +19,13 @@ paths:
         - Brands
       responses:
         '200':
-          description: An array of brand objects
+          description: Successfully retrieved brands
           schema:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '404':
+          description: No brands available      
         default:
           description: Unexpected error
           schema:
@@ -43,7 +45,7 @@ paths:
         - Products
       responses:
         '200':
-          description: An array of product objects
+          description: Successfully retrieved products by brand ID
           schema:
             type: array
             items:
@@ -58,7 +60,8 @@ paths:
     get:
       summary: All available products
       description: |
-        The Products endpoint returns all of the available products for sale
+        The Products endpoint returns all of the available products based on a user query
+        An empty query returns all of the products
       parameters:
         - name: query
           in: path
@@ -69,11 +72,15 @@ paths:
         - Products
       responses:
         '200':
-          description: An array of product objects
+          description: Successfully returned searched products
           schema:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '400':
+          description: Products are not available  
+        '404':
+          description: There are no products matching that query
         default:
           description: Unexpected error
           schema:
@@ -85,12 +92,12 @@ paths:
         Logs user into the system with a username and password
       parameters:
         - name: username
-          in: query
-          description: The user name for login
+          in: header
+          description: The username for login
           required: true
           type: string
         - name: password
-          in: query
+          in: header
           description: The password for login
           required: true
           type: string  
@@ -98,8 +105,12 @@ paths:
         - Login
       responses:
         '200':
-          description: successful operation
+          description: Successful Login
+          schema:
+            type: string
         '400':
+          description: Incorrectly formatted credentials  
+        '401':
           description: Invalid username/password supplied
         default:
           description: Unexpected error
@@ -110,28 +121,57 @@ paths:
       summary: The users shopping cart
       description: |
         This endpoint returns all of the products in a users cart
+      parameters:
+        - name: accessToken
+          in: header
+          description: The users access token
+          required: true
+          type: string  
       tags:
         - Cart
       responses:
         '200':
-          description: An array of cart objects
+          description: Successfully retrieved a users cart
           schema:
             type: array
             items:
               $ref: '#/definitions/Cart'
+        '401':
+          description: You need to have access to this endpoint to continue
+        '404':
+          description: That user cannot be found        
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'    
     put:
-      summary: Update quantity of cart
+      summary: Update quantities of cart
       description: |
         This endpoint allows a user to change the quantity of items in their cart
+      parameters:
+        - name: accessToken
+          in: header
+          description: The users access token
+          required: true
+          type: string  
+        - name: updatedQuantities
+          in: header
+          description: A comma separated string of updated quantities for each item in cart
+          required: true
+          type: string    
       tags:
         - Cart
       responses:
         '200':
-          description: Successfully updated cart          
+          description: Successfully updated cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '401':
+          description: You need to have access to this endpoint to continue
+        '404':
+          description: That user cannot be found                  
         default:
           description: Unexpected error
           schema:
@@ -146,12 +186,27 @@ paths:
           in: path
           description: The id of the product to add to the cart
           required: true
-          type: string    
+          type: string
+        - name: accessToken
+          in: header
+          description: The users access token
+          required: true
+          type: string      
       tags:
         - Cart
       responses:
         '200':
-          description: Add item to cart succesfull          
+          description: Item added to cart successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '400':
+          description: Invalid product Id  
+        '401':
+          description: You need to have access to this endpoint to continue
+        '404':
+          description: That user cannot be found               
         default:
           description: Unexpected error
           schema:
@@ -165,12 +220,27 @@ paths:
           in: path
           description: The id of the product to remove from the cart
           required: true
-          type: string    
+          type: string
+        - name: accessToken
+          in: header
+          description: The users access token
+          required: true
+          type: string      
       tags:
         - Cart
       responses:
         '200':
-          description: Item deleted from cart succesfully          
+          description: Item removed from cart successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '400':
+          description: Invalid product Id       
+        '401':
+          description: You need to have access to this endpoint to continue
+        '404':
+          description: That user cannot be found        
         default:
           description: Unexpected error
           schema:
@@ -217,10 +287,16 @@ definitions:
         description: Identifier for the brand of the product, this should match the brand id value
       name:
         type: string
-        description: The name of the product      
+        description: The name of the product
+      description:
+        type: string
+        description: The description of the product
       price:
         type: number
         description: The sale price of a product
+      imageUrls:
+        type: string
+        description: URLs for images of the product
       quantity:
         type: number
         description: The amount of the product in the cart         
