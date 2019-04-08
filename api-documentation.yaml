@@ -1,0 +1,276 @@
+# BE CONSISTENT AND STABLE
+# Yaml file might need to be revised as code progresses and programmatic changes are made to methods, response data, errors, etc.
+swagger: '2.0'
+info:
+  title: Sunglasses For Ponies API
+  description: An API to support the bleeding-edge server-side-only Sunglasses For Ponies platform.
+  version: '1.0.0'
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /api
+# Remove this basePath above, and include /api before all the paths below, in order to be consistent with app/server.js specs???
+produces:
+  - application/json
+  # put "produces:.../json" in the individual paths?
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Returns all brands of pony sunglasses in inventory
+      operationId: retrieveBrands
+      responses:
+        '200':
+          description: An array of sunglass-brand objects
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        # '404':
+        #   description: Brands not found.
+        # default:
+        #   description: Unexpected error
+        # schema:
+        # $ref: '#/definitions/Errors'
+  /brands/{id}/products:
+    get:
+      tags:
+        - Products by Brand
+      summary: Returns all products of sunglasses of specified brand
+      operationId: retrieveProductsByBrand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          # or false???
+          description: Identifier of a specific brand
+          type: string
+      responses:
+        '200':
+          description: An array of sunglass products by one brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsByBrand'
+        # '404':
+        #   description: Brand id or products not found.
+        # default:
+        #   description: Unexpected error
+        # schema:
+        # $ref: '#/definitions/Errors'
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Returns all products of sunglasses, by all brands
+      operationId: retrieveProducts
+      responses:
+        '200':
+          description: An array of sunglass products by one brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        # '404':
+        #   description: Products not found
+        # default:
+        #   description: Unexpected error
+        # schema:
+        # $ref: '#/definitions/Errors'
+  /login:
+    post:
+      tags:
+        - User Login
+      summary: Login with username and password
+      operationId: loginUser
+      parameters:
+        - in: query
+          name: username
+          description: Pass a required username
+          required: true
+          type: string
+        - in: query
+          name: password
+          description: Pass a required password
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful login
+  /me/cart:
+    get:
+      tags:
+        - Shopping Cart
+      summary: Retrieve signed-in user's cart
+      operationId: retrieveCart
+      responses:
+        '200':
+          description: An array of sunglass products in the user's cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+    post:
+      tags:
+        - Shopping Cart
+      summary: Edit items in the cart
+      operationId: editCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/definitions/Cart'
+    delete:
+      tags:
+        - Shopping Cart
+      summary: Delete items in the cart
+      operationId: deleteCartItems
+      responses:
+        '200':
+          description: Item successfuly deleted
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/Cart'
+definitions:
+  Brands:
+    type: object
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+        description: Identifier representing a specific brand
+      name:
+        type: string
+        description: The brand name of pony sunglasses
+  ProductsByBrand:
+    type: object
+    required:
+      - id
+      - categoryId
+      - name
+      - description
+      - price
+        # imageUrls not currently required because right now we only have one photo of the same pair of glasses over and over again; to be required after a pony model is secured and we can have a pony photo shoot
+    properties:
+      id:
+        type: string
+        description: Identifier representing one specific model of pony sunglasses
+      categoryId:
+        type: string
+        description: Id of the brand that makes the pony sunglasses product
+      name:
+        type: string
+        description: The model name of the pony sunglasses product
+      description:
+        type: string
+        description: A short description of the model of pony sunglasses
+      price:
+        type: number
+        description: The unit price of the pony sunglasses
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Three urls for jpg photos of the specific model of pony sunglasses (currently all product objects contain the same imageUrl, repeated three times, as a placeholder)
+  Products:
+    type: object
+    required:
+      - id
+      - categoryId
+      - description
+      - name
+      - price
+    # imageUrls not currently required because right now we only have one photo of the same pair of glasses over and over again; to be required after a pony model is secured and we can have a pony photo shoot
+    properties:
+      id:
+        type: string
+        description: Identifier representing one specific model of pony sunglasses
+      categoryId:
+        type: string
+        description: Id of the brand that makes the pony sunglasses product
+      name:
+        type: string
+        description: The model name of the pony sunglasses product
+      description:
+        type: string
+        description: A short description of the model of pony sunglasses
+      price:
+        type: number
+        description: The unit price of the pony sunglasses
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Three urls for jpg photos of the specific model of pony sunglasses (currently all product objects contain the same imageUrl, repeated three times, as a placeholder)
+  # Login:
+  # produces:
+  #   - application/json
+  # Errors:
+  #   description:
+  # '400':
+  #   description: Invalid ID supplied
+  # '404':
+  #   description: Brand not found
+  # '405':
+  #   description: Validation exception
+  #   '200':
+  #     description: An array of brands
+  #     schema:
+  #       type: array
+  #       items:
+  #         # $ref: '#/definitions/Goal'
+  #   default:
+  #     description: Unexpected error
+  #     schema:
+  #       # $ref: '#/definitions/Error'
+  Cart:
+    type: object
+    required:
+      - username
+      - productsInCart
+      - totalPrice
+    # imageUrls not currently required because right now we only have one photo of the same pair of glasses over and over again; to be required after a pony model is secured and we can have a pony photo shoot
+    properties:
+      username:
+        type: string
+        description: Identifier representing the user
+      productsInCart:
+        type: object
+        description: Purchase information of individual items in the cart
+        required:
+          - productId
+          - quantity
+        properties:
+          productId:
+            type: string
+            description: Identifier of the individual item
+          quantity:
+            type: integer
+            description: Number of the individual item in the cart
+      totalPrice:
+        type: number
+        description: The sum total of the price of all items in the cart
+# **********************
+#    All Routes
+#  **********************
+# =========DONE========
+#  GET /api/brands
+#  GET /api/brands/:id/products
+#  GET /api/products
+
+# =======PENDING=======
+#  POST /api/login
+
+# ======ABANDONED======
+#  GET /api/products/:id (Not original path recommended by assignment; abandoned)
+
+# ========TODO=========
+#  GET /api/me/cart
+#  POST /api/me/cart: Edit items already in the cart
+#  DELETE /api/me/cart/:productId
+#  POST /api/me/cart/:productId
