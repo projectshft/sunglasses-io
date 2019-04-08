@@ -242,6 +242,7 @@ describe('/me/cart', () => {
           done();
         });
     });
+    //should update the quantity of the product
     it('should update the quantity based on productId and quantity parameters', done => {
       chai
         .request(server)
@@ -262,6 +263,25 @@ describe('/me/cart', () => {
         .set('xauth', 'qswWsnJLHJlcIHoY')
         .end((error, response) => {
           response.should.have.status(405);
+          done();
+        });
+    });
+  });
+});
+//describe the /me/cart/{productId}
+describe('/me/cart/:productId', () => {
+  //describe the GET
+  describe('GET', () => {
+    //should add the item to the cart if it wasn't there
+    it("should add the item to the user's cart if it was not already there", done => {
+      chai
+        .request(server)
+        .post('/me/cart/2')
+        .set('xauth', 'qswWsnJLHJlcIHoY')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an('array');
+          response.body.should.have.length(2);
           done();
         });
     });

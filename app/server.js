@@ -187,15 +187,43 @@ myRouter.post('/me/cart', function(request, response) {
   response.writeHead(404, 'You must be logged in to edit your cart');
   response.end();
 });
+
+myRouter.post('/me/cart/:productId', function(request, response) {
+  if (request.headers.xauth) {
+    let currentUser = findTheUserOfTheCurrentAccessToken(request.headers.xauth);
+    //find current user's index in users array
+    const currentUserIndexInUsersArray = users.findIndex(
+      index => index === currentUser
+    );
+    //assign productId param to a variable
+    const productId = request.params.productId;
+    //find out if the product is already in the cart
+    const isProductAlreadyInCart = users[
+      currentUserIndexInUsersArray
+    ].cart.filter(index => {
+      return index == productId;
+    });
+    //if it's not, add it
+    if (isProductAlreadyInCart.length == 0) {
+      //find the matching product object
+      const targetProduct = products.find(index => {
+        return index.productId == productId;
+      });
+      //create a new object to add to the cart
+      const newCartItem = {};
+      //format the new object with the product and quantity of 1
+      newCartItem[productId] = {
+        item: targetProduct,
+        quantity: 1
+      };
+      //push the new item to the user's cart
+      users[currentUserIndexInUsersArray].cart.push(newCartItem);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(users[currentUserIndexInUsersArray].cart));
+    }
+  }
+  response.writeHead(404, 'You must be logged in to edit your cart');
+  response.end();
+});
 //export http.createserver().listen() for testing
 module.exports = server;
-
-// let targetProduct = currentUser.cart.filter(index => {
-//   return index.item.title == request.body.item.title;
-// });
-
-// let targetProductObject = targetProduct[0];
-
-// if (targetProductObject) {
-//   targetProductObject.quantity += request.body.quantity;
-// }
