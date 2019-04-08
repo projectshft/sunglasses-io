@@ -6,8 +6,7 @@ var url = require('url');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-// let failedLoginAttempts = {};
-// const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
     // Setup router
 var myRouter = Router();
@@ -52,8 +51,8 @@ const server = http.createServer((request, response) => {
 ********************************************************************/
 
 
-    // Endpoint to obtain list of brands available
-  myRouter.get('/api/brands', function(request, response) {
+// Endpoint to obtain list of brands available
+myRouter.get('/api/brands', function(request, response) {
       
     console.log('BRANDS route: ',request.url)
     let listOfBrands = brands;
@@ -63,8 +62,8 @@ const server = http.createServer((request, response) => {
 
   });
 
-    // Endpoint to search for products under a brand
-  myRouter.get('/api/brands/:id/products', function(request, response) {
+// Endpoint to search for products under a brand
+myRouter.get('/api/brands/:id/products', function(request, response) {
 
       // Verify that there are products under this brand before we should continue processing
       let filteredProducts = products.filter((product) => {
@@ -83,8 +82,8 @@ const server = http.createServer((request, response) => {
       }
     });
 
-    // Endpoint to search for a product with given query
-  myRouter.get('/api/products', function(request, response) {
+// Endpoint to search for a product with given query
+myRouter.get('/api/products', function(request, response) {
  
     let searchTerm = url.parse(request.url).query
         //console.log('query string = ', searchTerm)
@@ -115,8 +114,9 @@ const server = http.createServer((request, response) => {
     }
   });
 
-    // Endpoint to process Login call
-  myRouter.post('/api/login', function(request,response) {
+
+// Endpoint to process user login call
+myRouter.post('/api/login', function(request,response) {
 
         //console.log('REQUEST.BODY: ', request.body)
 
@@ -139,16 +139,16 @@ const server = http.createServer((request, response) => {
     
         // Update the last updated value so we get another time period
           if (currentAccessToken) {
-            //currentAccessToken.lastUpdated = new Date();
+            currentAccessToken.lastUpdated = new Date();
             response.end(JSON.stringify(currentAccessToken.token));
           } else {
         // Create a new token with the user value and a "random" token
             let newAccessToken = {
               email: user.email,
-              //lastUpdated: new Date(),
+              lastUpdated: new Date(),
               token: uid(16)
             }
-                console.log('newAccessToken: ',newAccessToken)
+                //console.log('newAccessToken: ',newAccessToken)
 
             accessTokens.push(newAccessToken);
             response.end(JSON.stringify(newAccessToken.token));
@@ -166,12 +166,12 @@ const server = http.createServer((request, response) => {
       }
     });
 
-/********************************************************************
-********************************************************************/
+/********************************************************************/
 
   // Helper method to process access token
   var getValidTokenFromRequest = function(request) {
     var parsedUrl = require('url').parse(request.url, true);
+    // Verify an access token was passed in with the request
     if (parsedUrl.query.accessToken) {
       // Verify the access token to make sure it's valid and not expired
       let currentAccessToken = accessTokens.find((accessToken) => {
@@ -185,56 +185,162 @@ const server = http.createServer((request, response) => {
     } else {
       return null;
     }
-  };
-/********************************************************************
-********************************************************************/
+  };    // Returns the user's token object that has been generated less than 15 min ago
+/********************************************************************/
 
-  // Endpoint returns contents of the cart of the user that has authorized with the application
+
+// Endpoint returns cart contents of authorized user
 myRouter.get('/api/me/cart', function(request, response) {
 
-// ADJUST THIS CODE PER SUNGLASSES /////////////////////////////////////////
-
-    Console.log('REQUEST.URL: ', request.url)
+        //console.log('CURRENT accessTokens: ', accessTokens)
 
     let currentAccessToken = getValidTokenFromRequest(request);
+
     if (!currentAccessToken) {
+
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+      response.writeHead(401, "You need to have access to this call to continue");
       response.end();
+
     } else {
-      // Verify that the store exists to know if we should continue processing
-      let store = stores.find((store) => {
-        return store.id == request.params.storeId;
-      });
-      if (!store) {
-        // If there isn't a store with that id, then return a 404
-        response.writeHead(404, "That store cannot be found", CORS_HEADERS);
-        response.end();
-        return;
-      }
-    
-      // Check if the current user has access to the store
-      let user = users.find((user) => {
-        return user.login.username == currentAccessToken.username;
-      });
-      // Only if the user has access to that store do we return the issues from the store
-      if (
-        user.storeIds.includes(request.params.storeId) &&
-        (user.role == 'ADMIN' || user.role == 'MANAGER')
-      ) {
-        store.issues = request.body;
-        response.writeHead(
-          200,
-          Object.assign(CORS_HEADERS, { 'Content-Type': 'application/json' })
-        );
-        response.end(JSON.stringify(store));
-      } else {
-        response.writeHead(403, "You don't have access to that store", CORS_HEADERS);
-        response.end();
-        return;
-      }
-    
-    }
+        // Check if the current user has access to the their cart 
+        let user = users.find((user) => {
+        return user.email == currentAccessToken.email;
+        });
+            // Only if user has access then do we return the cart contents
+            if (user) {
+
+                response.writeHead(200, {'Content-Type': 'application/json'});
+                response.end(JSON.stringify(user.cart));
+
+            } else {
+                // If there isn't a cart associated with that user, then return a 404
+                response.writeHead(404, "Cart not found");
+                response.end();
+                return;
+            }
+      }  
+});
+
+
+// Endpoint updates cart contents of authorized user
+myRouter.post('/api/me/cart', function(request, response) {
+                
+    // Verify valid access token
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    if (!currentAccessToken) {
+
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to have access to this call to continue");
+      response.end();
+
+    } else {
+
+        // Check if the current user has access to the their cart 
+        let user = users.find((user) => {
+        return user.email == currentAccessToken.email;
+        });
+
+        // Only if user has access then do we update the cart contents
+        if (user) {
+            // Update the user cart with the contents from request
+            Object.assign(user.cart, req.body);
+            // Return status successful operation
+            response.writeHead(200, {'Content-Type': 'application/json'});
+            response.end();
+
+        } else {
+            // If there isn't a cart associated with that user, then return a 404
+            response.writeHead(404, "Cart not found");
+            response.end();
+            return;
+        }
+    }  
+});
+
+// Endpoint adds a product to cart of authorized user
+myRouter.post('/api/me/cart/{productId}', function(request, response) {
+                
+    // Verify valid access token
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    if (!currentAccessToken) {
+
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to have access to this call to continue");
+      response.end();
+
+    } else {
+
+        // Check if the current user has access to the their cart 
+        let user = users.find((user) => {
+        return user.email == currentAccessToken.email;
+        });
+
+        // Only if user has access then do we add the product to the cart 
+        if (user) {
+            // Find the product to add from list of products
+            let newProduct = products.filter((product) => {
+                return product.id == request.params.productId
+            });
+            // Assign a unique id to the product user wants to add to their cart
+            newProduct.id = currentId;
+            currentId++;
+            user.cart.push(newProduct);
+
+            // Return status successful operation
+            response.writeHead(200, {'Content-Type': 'application/json'});
+            response.end();
+
+        } else {
+            // If there isn't a cart associated with that user, then return a 404
+            response.writeHead(404, "Cart not found");
+            response.end();
+            return;
+        }
+    }  
+});
+
+// Endpoint deletes a product from cart of authorized user
+myRouter.delete('/api/me/cart/{productId}', function(request, response) {
+                
+    // Verify valid access token
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    if (!currentAccessToken) {
+
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to have access to this call to continue");
+      response.end();
+
+    } else {
+
+        // Check if the current user has access to the their cart 
+        let user = users.find((user) => {
+        return user.email == currentAccessToken.email;
+        });
+
+        // Only if user has access then do we add the product to the cart 
+        if (user) {
+            // Find the product to add from list of products
+            let productDelete = products.filter((product) => {
+                return product.id == request.params.productId;
+            });
+       
+            user.cart.remove(productDelete);
+
+            // Return status successful operation
+            response.writeHead(200, {'Content-Type': 'application/json'});
+            response.end();
+
+        } else {
+            // If there isn't a cart associated with that user, then return a 404
+            response.writeHead(404, "Cart not found");
+            response.end();
+            return;
+        }
+    }  
 });
 
 
