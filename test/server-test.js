@@ -1,6 +1,8 @@
 const chai = require("chai");
 const chaiHTTP = require("chai-http");
 const server = require("../app/server");
+const expect = chai.expect;
+const assert = chai.assert;
 
 chai.use(chaiHTTP);
 
@@ -12,11 +14,11 @@ describe("/GET brands", () => {
       .request(server)
       .get("/api/brands")
       .end((error, response) => {
-        chai.assert.exists(response.body);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");
-        chai.expect(response.body).to.be.an("array");
-        chai.expect(response.body).to.have.lengthOf(5);
+        assert.exists(response.body);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(response.body).to.be.an("array");
+        expect(response.body).to.have.lengthOf(5);
         done();
       });
   });
@@ -30,11 +32,11 @@ describe("/GET products", () => {
       .request(server)
       .get("/api/products?query=")
       .end((error, response) => {
-        chai.assert.exists(response.body);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");
-        chai.expect(response.body).to.be.an("array");
-        chai.expect(response.body).to.have.lengthOf(11);
+        assert.exists(response.body);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(response.body).to.be.an("array");
+        expect(response.body).to.have.lengthOf(11);
         done();
       });
   });
@@ -43,11 +45,11 @@ describe("/GET products", () => {
       .request(server)
       .get("/api/products?query=sweetest")
       .end((error, response) => {
-        chai.assert.exists(response.body);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");
-        chai.expect(response.body).to.be.an("array");
-        chai.expect(response.body).to.have.lengthOf(1);
+        assert.exists(response.body);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(response.body).to.be.an("array");
+        expect(response.body).to.have.lengthOf(1);
         done();
       });
   });
@@ -56,8 +58,8 @@ describe("/GET products", () => {
       .request(server)
       .get("/api/products?query=holybatman")
       .end((error, response) => {
-        chai.assert.exists(response.body);
-        chai.expect(response).to.have.status(404);
+        assert.exists(response.body);
+        expect(response).to.have.status(404);
         done();
       });
   });
@@ -71,11 +73,11 @@ describe("/GET products by brand ID", () => {
       .request(server)
       .get("/api/brands/1/products")
       .end((error, response) => {
-        chai.assert.exists(response.body);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");
-        chai.expect(response.body).to.be.an("array");
-        chai.expect(response.body).to.have.lengthOf(3);
+        assert.exists(response.body);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(response.body).to.be.an("array");
+        expect(response.body).to.have.lengthOf(3);
         done();
       });
   });
@@ -84,8 +86,8 @@ describe("/GET products by brand ID", () => {
       .request(server)
       .get("/api/brands/6/products")
       .end((error, response) => {
-        chai.assert.exists(response.body);
-        chai.expect(response).to.have.status(404);
+        assert.exists(response.body);
+        expect(response).to.have.status(404);
         done();
       });
   });
@@ -100,13 +102,13 @@ describe("/POST login a user", () => {
     chai
       .request(server)
       .post("/api/login")
-      .set({username: 'greenlion235', password: 'waters'})
+      .send({username: 'greenlion235', password: 'waters'})
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");
-        chai.expect(response.body).to.be.lengthOf(16);
-        chai.expect(response.body).to.be.a("string");
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(response.body).to.be.lengthOf(16);
+        expect(response.body).to.be.a("string");
         token = response.body;
         done();
       });
@@ -115,10 +117,10 @@ describe("/POST login a user", () => {
     chai
       .request(server)
       .post("/api/login")
-      .set({username: 'wronguser', password: 'wrongpass'})
+      .send({username: 'wronguser', password: 'wrongpass'})
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(401);
+        assert.isNull(error);
+        expect(response).to.have.status(401);
         done();
       });
   });
@@ -126,115 +128,10 @@ describe("/POST login a user", () => {
     chai
       .request(server)
       .post("/api/login")
-      .set({username: 'baduser'})
+      .send({username: 'baduser'})
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(400);
-        done();
-      });
-  });
-});
-
-// Tests for /api/me/cart GET endpoint
-
-describe("/GET a users cart", () => {
-  it.only("get the contents of a users cart", done => {
-    chai
-      .request(server)
-      .get("/api/me/cart")
-      .set('token', token)
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");        
-        chai.expect(response.body).to.be.an("array");
-        chai.expect(response.body).to.be.lengthOf(2);
-        done();
-      });
-  });
-  it.only("should receive a 401 error if supplied a bad token", done => {
-    chai
-      .request(server)
-      .get("/api/me/cart")
-      .set('token', 'badToken')
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(401);
-        done();
-      });
-  });
-});
-
-// Tests for /api/me/cart PUT endpoint
-
-describe("/PUT a users cart", () => {
-  it.only("updates the quantities of a users cart", done => {
-    chai
-      .request(server)
-      .put("/api/me/cart")
-      .set("token", token)
-      .set('updatedQuantities', '20, 25')
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");        
-        chai.expect(response.body).to.be.an("array");
-        chai.expect(response.body).to.be.lengthOf(2);
-        chai.expect(response.body[0].quantity).to.eql(20);
-        chai.expect(response.body[1].quantity).to.eql(25);
-        done();
-      });
-  });
-  it.only("should receive a 401 error if supplied a bad token", done => {
-    chai
-      .request(server)
-      .put("/api/me/cart")
-      .set('token', 'badToken')
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(401);
-        done();
-      });
-  });
-});
-
-// Tests for /api/me/cart/:productId DELETE endpoint
-
-describe("/DELETE a product", () => {
-  it.only("deletes a product from a users cart", done => {
-    chai
-      .request(server)
-      .delete("/api/me/cart/1")
-      .set('token', token)
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");        
-        chai.expect(response.body).to.be.a("array");
-        chai.expect(response.body).to.be.lengthOf(1);
-        done();
-      });
-  });
-  it.only("should receive a 400 error if product Id is invalid", done => {
-    chai
-      .request(server)
-      .post("/api/me/cart/18")
-      .set('token', token)
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(400);
-        chai.expect("Content-Type", "application/json");
-        done();
-      });
-  });
-  it.only("should receive a 401 error if supplied a bad token", done => {
-    chai
-      .request(server)
-      .delete("/api/me/cart/3")
-      .set('token', 'badToken')
-      .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(401);
+        assert.isNull(error);
+        expect(response).to.have.status(400);
         done();
       });
   });
@@ -242,33 +139,98 @@ describe("/DELETE a product", () => {
 
 // Tests for /api/me/cart/:productId POST endpoint
 
-describe("/POST a product", () => {
-  it.only("adds a new product to a users cart", done => {
+describe("/POST add a product to cart", () => {
+  it.only("should add a new product to a users cart", done => {
     chai
       .request(server)
-      .post("/api/me/cart/3")
+      .post("/api/me/cart/1")
       .set('token', token)
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");        
-        chai.expect(response.body).to.be.a("array");
-        chai.expect(response.body).to.be.lengthOf(3);
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");        
+        expect(response.body).to.be.a("array");
+        expect(response.body).to.be.lengthOf(1);
+        expect(response.body).to.deep.equal([
+          {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 1
+          }
+        ]);
         done();
       });
   });
-  it.only("updates quantity of product in cart if already in cart", done => {
+  it.only("should add a new product to a users cart", done => {
     chai
       .request(server)
-      .post("/api/me/cart/3")
+      .post("/api/me/cart/2")
       .set('token', token)
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(200);
-        chai.expect("Content-Type", "application/json");        
-        chai.expect(response.body).to.be.a("array");
-        chai.expect(response.body).to.be.lengthOf(3);
-        chai.expect(response.body[2].quantity).to.eql(2);
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");        
+        expect(response.body).to.be.a("array");
+        expect(response.body).to.be.lengthOf(2);
+        expect(response.body).to.deep.equal([
+          {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 1
+          },
+          {
+            "id": "2",
+            "categoryId": "1",
+            "name": "Black Sunglasses",
+            "description": "The best glasses in the world",
+            "price":100,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 1
+          }
+        ]);
+        done();
+      });
+  });
+  it.only("should update quantity of product in cart if already in cart", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/2")
+      .set('token', token)
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");        
+        expect(response.body).to.be.a("array");
+        expect(response.body).to.be.lengthOf(2);
+        expect(response.body[1].quantity).to.eql(2);
+        expect(response.body).to.deep.equal([
+          {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 1
+          },
+          {
+            "id": "2",
+            "categoryId": "1",
+            "name": "Black Sunglasses",
+            "description": "The best glasses in the world",
+            "price":100,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 2
+          }
+        ]);
         done();
       });
   });
@@ -278,9 +240,9 @@ describe("/POST a product", () => {
       .post("/api/me/cart/15")
       .set('token', token)
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(400);
-        chai.expect("Content-Type", "application/json");
+        assert.isNull(error);
+        expect(response).to.have.status(400);
+        expect("Content-Type", "application/json");
         done();
       });
   });
@@ -290,8 +252,164 @@ describe("/POST a product", () => {
       .post("/api/me/cart/3")
       .set('token', 'badToken')
       .end((error, response) => {
-        chai.assert.isNull(error);
-        chai.expect(response).to.have.status(401);
+        assert.isNull(error);
+        expect(response).to.have.status(401);
+        done();
+      });
+  });
+});
+
+// Tests for /api/me/cart GET endpoint
+
+describe("/GET a users cart", () => {
+  it.only("should get the contents of a users cart", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .set('token', token)
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");        
+        expect(response.body).to.be.an("array");
+        expect(response.body).to.be.lengthOf(2);
+        expect(response.body).to.deep.equal([
+          {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 1
+          },
+          {
+            "id": "2",
+            "categoryId": "1",
+            "name": "Black Sunglasses",
+            "description": "The best glasses in the world",
+            "price":100,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 2
+          }
+        ]);
+        done();
+      });
+  });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(401);
+        done();
+      });
+  });
+});
+
+// Tests for /api/me/cart PUT endpoint
+
+describe("/PUT update quantities of a users cart", () => {
+  it.only("should update the quantities of a users cart", done => {
+    chai
+      .request(server)
+      .put("/api/me/cart")
+      .set("token", token)
+      .send({updatedQuantities: [20, 25]})
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");        
+        expect(response.body).to.be.an("array");
+        expect(response.body).to.be.lengthOf(2);
+        expect(response.body[0].quantity).to.eql(20);
+        expect(response.body[1].quantity).to.eql(25);
+        expect(response.body).to.deep.equal([
+          {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 20
+          },
+          {
+            "id": "2",
+            "categoryId": "1",
+            "name": "Black Sunglasses",
+            "description": "The best glasses in the world",
+            "price":100,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 25
+          }
+        ]);
+        done();
+      });
+  });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .put("/api/me/cart")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(401);
+        done();
+      });
+  });
+});
+
+// Tests for /api/me/cart/:productId DELETE endpoint
+
+describe("/DELETE a product", () => {
+  it.only("should delete a product from a users cart", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/2")
+      .set('token', token)
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(200);
+        expect("Content-Type", "application/json");        
+        expect(response.body).to.be.a("array");
+        expect(response.body).to.be.lengthOf(1);
+        expect(response.body).to.deep.equal([
+          {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            "quantity": 20
+          }
+        ]);
+        done();
+      });
+  });
+  it.only("should receive a 400 error if product Id is invalid", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/18")
+      .set('token', token)
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(400);
+        expect("Content-Type", "application/json");
+        done();
+      });
+  });
+  it.only("should receive a 401 error if supplied a bad token", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/3")
+      .set('token', 'badToken')
+      .end((error, response) => {
+        assert.isNull(error);
+        expect(response).to.have.status(401);
         done();
       });
   });
