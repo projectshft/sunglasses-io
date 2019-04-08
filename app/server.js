@@ -293,25 +293,22 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
       )
       response.end()
       return
-    } else {
-      //find the index of the product within the user's cart
-      indexOfProductToDelete = user.cart.findIndex(item => {
-        return item.product.productId == request.params.productId
-      })
-      console.log(indexOfProductToDelete)
-
-      //remove the product from the cart
-      let newCart = user.cart.splice(indexOfProductToDelete, 1)
-      console.log('newCart:', newCart)
-      response.writeHead(
-        200,
-        Object.assign({
-          'Content-Type': 'application/json'
-        })
-      )
-      response.end(JSON.stringify(newCart))
-      return
     }
+    //filter out the product that the user wants to delete
+    let newCart = user.cart.filter(item => {
+      return item.product.productId !== request.params.productId
+    })
+
+    console.log('newCart', newCart)
+
+    response.writeHead(
+      200,
+      Object.assign({
+        'Content-Type': 'application/json'
+      })
+    )
+    response.end(JSON.stringify(newCart))
+    return
   }
 })
 //export the server so that tests can be written
