@@ -12,6 +12,8 @@ const PORT = 8080;
 let brands = [];
 let products = [];
 let users = [];
+let currentUser={};
+
 
 
 //test token
@@ -176,17 +178,18 @@ myRouter.post('/api/login', function(request,response) {
     response.end();
   }
     })
-});
+};
 
 // get cart route
 myRouter.get('/api/me/cart', (request, response) => {
-    let runningAccessToken = newValidToken(request, accessTokens);
+    let runningAccessToken = newValidToken(request, accessToken);
     if (!runningAccessToken) {
       response.writeHead(401, "You don't have valid access for this action.");
       response.end();
     } else {
         response.writeHead(200, {'Content-Type': 'application/json'});
-        response.end(JSON.stringify(loggedInUser.cart));
+        response.end(JSON.stringify(currentUser.cart));
       }
   });
-  module.exports = server
+})
+  module.exports = server;

@@ -127,4 +127,14 @@ describe("/GET products", () => {
           done();
         });
     });
-});
+    it("should be a 401 code if a user has not had a valid login", done => {
+        chai
+          .request(server)
+          .get("/api/me/cart?accessToken=wrong123")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(401);
+            done();
+          });
+      });
+    });
