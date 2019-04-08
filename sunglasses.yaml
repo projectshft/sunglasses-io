@@ -21,14 +21,14 @@ paths:
           schema:
             $ref: '#/definitions/Brands'
         
-  /brands/{id}/products:
+  /brands/:brandId/products:
     get:
       tags:
       - Brands
       summary: All the sunglasses that are available for a specific brand.
       description:
         All the sunglasses available for a particular brand. The
-        brand is identified by the id in the url parameter.
+        brand is identified by the brand id in the url parameter.
       parameters:
       - name: id
         in: path

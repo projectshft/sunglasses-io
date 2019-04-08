@@ -38,7 +38,34 @@ describe("/GET products", () => {
           done();
         });
     });
-  });
+    it("should filter to the products that have a query string", done => {
+        chai
+          .request(server)
+          .get("/api/products?query=oakley")
+          .end((error, response) => {
+            assert.isNotNull(response.body);
+            expect(error).to.be.null;
+            expect(response).to.have.status(200);
+            expect("Content-Type", "application/json");
+            expect(response.body).to.be.an("array");
+            expect(response.body).to.have.lengthOf(1);
+            done();
+          });
+      });
+      it("if query is blank it should return all of the products", done => {
+        chai
+          .request(server)
+          .get("/api/products?query=")
+          .end((error, response) => {
+            expect(error).to.be.null;
+            expect(response).to.have.status(200);
+            expect("Content-Type", "application/json");
+            expect(response.body).to.be.an("array");
+            expect(response.body).to.have.lengthOf(11);
+            done();
+          });
+      });
+    });
 
 
 
@@ -47,7 +74,7 @@ describe("/GET specific category of product", () => {
     it.only("should go get one specific product category", done => {
       chai
         .request(server)
-        .get("/api/brands/:id/products")
+        .get("/api/brands/:brandId/products")
         .end((error, response) => {
           expect(response).to.have.status(200);
           expect("Content-Type", "application/json");
