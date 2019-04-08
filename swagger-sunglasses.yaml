@@ -103,6 +103,17 @@ paths:
       summary: Edit quantities of items in cart
       description: |
         This Cart POST endpoint allows you to edit the quantity of the items in the cart
+      parameters:
+        - name: productId
+          in: query
+          description: Search query string
+          required: true
+          type: integer
+        - name: quantity
+          in: query
+          description: Search query string
+          required: true
+          type: integer
       tags:
         - User
       responses:

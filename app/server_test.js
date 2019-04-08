@@ -3,6 +3,25 @@ let chaiHttp = require('chai-http');
 let server = require('./server');
 
 let should = chai.should();
+let cartUpdateTest = [
+  {
+    '1': {
+      item: {
+        productId: '1',
+        brandId: '1',
+        title: 'Superglasses',
+        description: 'The best glasses in the world',
+        price: 150,
+        imageUrls: [
+          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+        ]
+      },
+      quantity: 3
+    }
+  }
+];
 
 chai.use(chaiHttp);
 
@@ -123,7 +142,6 @@ describe('Login POST', () => {
         .send({ username: 'yellowleopard753', password: 'jonjon' })
         .end((error, response) => {
           response.should.have.status(200);
-          accessToken = response.body;
           done();
         });
     });
@@ -190,6 +208,7 @@ describe('/me/cart', () => {
           done();
         });
     });
+    //what should happn if there's no access token
     it('should return an error if there is no access token', done => {
       chai
         .request(server)
@@ -199,6 +218,7 @@ describe('/me/cart', () => {
           done();
         });
     });
+    //what should happen if there is an incorrect access token
     it('should return a 500 error if the access token is invalid', done => {
       chai
         .request(server)
@@ -206,6 +226,42 @@ describe('/me/cart', () => {
         .set('xauth', 'abcdefghijklmnop')
         .end((error, response) => {
           response.should.have.status(500);
+          done();
+        });
+    });
+  });
+  //describe the /me/cart PUSH
+  describe('PUSH cart', () => {
+    //should check that user is logged in
+    it('should return error if user is not logged in', done => {
+      chai
+        .request(server)
+        .post('/me/cart')
+        .end((error, response) => {
+          response.should.have.status(404);
+          done();
+        });
+    });
+    it('should update the quantity based on productId and quantity parameters', done => {
+      chai
+        .request(server)
+        .post('/me/cart?productId=1&quantity=2')
+        .set('xauth', 'qswWsnJLHJlcIHoY')
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an('array');
+          response.body.should.be.eql(cartUpdateTest);
+          done();
+        });
+    });
+    //should return an error if this item is not currently in the cart
+    it('should return 405 error if the item is not currenlty in the cart', done => {
+      chai
+        .request(server)
+        .post('/me/cart?productId=7&quantity=2')
+        .set('xauth', 'qswWsnJLHJlcIHoY')
+        .end((error, response) => {
+          response.should.have.status(405);
           done();
         });
     });

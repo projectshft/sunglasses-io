@@ -1,7 +1,25 @@
 [
   {
     "gender": "female",
-    "cart": [],
+    "cart": [
+      {
+        "1": {
+          "item": {
+            "productId": "1",
+            "brandId": "1",
+            "title": "Superglasses",
+            "description": "The best glasses in the world",
+            "price": 150,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          },
+          "quantity": 1
+        }
+      }
+    ],
     "name": {
       "title": "mrs",
       "first": "susanna",

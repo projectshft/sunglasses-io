@@ -16,6 +16,19 @@ var brands = [];
 let accessTokens = [
   { token: 'qswWsnJLHJlcIHoY', username: 'yellowleopard753' }
 ];
+//function to find the user of the currently used access token
+const findTheUserOfTheCurrentAccessToken = xauth => {
+  const findTheUserViaCurrentAccessToken = accessTokens.filter(index => {
+    return index.token == xauth;
+  });
+  //filter the current user object from the users array
+  let currentUserArray = users.filter(index => {
+    return index.login.username == findTheUserViaCurrentAccessToken[0].username;
+  });
+
+  let currentUser = currentUserArray[0];
+  return currentUser;
+};
 
 // Setup router
 var myRouter = Router();
@@ -119,19 +132,9 @@ myRouter.post('/login', function(request, response) {
 });
 
 myRouter.get('/me/cart', function(request, response) {
+  //ensure user is logged in
   if (request.headers.xauth) {
-    //find the user of the currently used access token
-    const findTheUserViaCurrentAccessToken = accessTokens.filter(index => {
-      return index.token == request.headers.xauth;
-    });
-    //filter the current user object from the users array
-    let currentUserArray = users.filter(index => {
-      return (
-        index.login.username == findTheUserViaCurrentAccessToken[0].username
-      );
-    });
-
-    let currentUser = currentUserArray[0];
+    let currentUser = findTheUserOfTheCurrentAccessToken(request.headers.xauth);
 
     response.writeHead(200, { 'Content-Type': 'application/json' });
     response.end(JSON.stringify(currentUser.cart));
@@ -140,5 +143,52 @@ myRouter.get('/me/cart', function(request, response) {
   response.end();
 });
 
+myRouter.post('/me/cart', function(request, response) {
+  //ensure user is logged in
+  if (request.headers.xauth) {
+    let currentUser = findTheUserOfTheCurrentAccessToken(request.headers.xauth);
+    //find current user's index in users array
+    const currentUserIndexInUsersArray = users.findIndex(
+      index => index === currentUser
+    );
+    //extract the params
+    const myURL = request.url;
+    const myQuery = url.parse(myURL).query;
+    const queryObject = queryString.parse(myQuery);
+    const queryProductId = queryObject.productId;
+    //is the item currenty in the cart?
+    const isThisItemCurrentlyInTheCart = currentUser.cart.filter(index => {
+      return index[queryProductId];
+    });
+    //if it is...
+    if (isThisItemCurrentlyInTheCart.length > 0) {
+      //find the cartItem and update the quantity in the users array
+      users[currentUserIndexInUsersArray].cart.map(index => {
+        let parsedQuant = parseInt(queryObject.quantity);
+        index[queryProductId].quantity += parsedQuant;
+      });
+
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(users[0].cart));
+    }
+    response.writeHead(
+      405,
+      'No item matching this ProductID is currently in the cart'
+    );
+    response.end();
+  }
+  response.writeHead(404, 'You must be logged in to edit your cart');
+  response.end();
+});
 //export http.createserver().listen() for testing
 module.exports = server;
+
+// let targetProduct = currentUser.cart.filter(index => {
+//   return index.item.title == request.body.item.title;
+// });
+
+// let targetProductObject = targetProduct[0];
+
+// if (targetProductObject) {
+//   targetProductObject.quantity += request.body.quantity;
+// }
