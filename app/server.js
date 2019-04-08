@@ -6,13 +6,13 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 //state variables
 let brands = [];
 let products = [];
 let users = [];
-let currentUser = {};
+
 
 //test token
 let accessToken = [{
@@ -25,7 +25,7 @@ let accessToken = [{
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-const server = https
+const server = http
   .createServer((request, response) => {
     response.writeHead(200, { "Content-Type": "application/json" });
     myRouter(request, response, finalHandler(request, response));
@@ -153,9 +153,10 @@ myRouter.post('/api/login', function(request,response) {
       } else {
         response.writeHead(401, "Incorrect username or password");
         response.end();
-    }
-  } else {
+        }
+    } else {
     response.writeHead(400, "Incorrect format");
     response.end();
   }
+    })
 });

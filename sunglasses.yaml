@@ -1,0 +1,251 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: localhost:8080
+basePath: /api
+schemes:
+  - https
+paths:
+  /brands:
+    get:
+      tags:
+      - Brands
+      summary: An array of all the brands of sunglasses the store provides
+      description: |
+        The Brands endpoint allows you to get all brands of sunglasses that the store provides for purchase.
+      responses:
+        '200':
+          description: All the brands are provided
+          schema:
+            $ref: '#/definitions/Brands'
+        
+  /brands/{id}/products:
+    get:
+      tags:
+      - Brands
+      summary: All the sunglasses that are available for a specific brand.
+      description:
+        All the sunglasses available for a particular brand. The
+        brand is identified by the id in the url parameter.
+      parameters:
+      - name: id
+        in: path
+        description: Brand id is used to pick products only from that specific brand.
+        required: true
+        type: string
+      responses:
+        '200':
+          description: All products of the specific brand returned.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: That particular brand is not available/found.
+
+  /products:
+    get:
+      tags:
+      - Products
+      summary: All products at the store
+      description:
+        This endpoint allows you to search all sunglasses in the store.
+      parameters:
+      - name: query
+        in: query
+        description: Search query string
+        required: false
+        type: string
+      responses:
+        '200':
+          description: All products at the store returned.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+  /login:
+    post:
+      tags:
+      - User
+      description: Logs a user in.
+      parameters:
+        - name: email
+          in: query
+          description: Have to provide a valid email address as a username.
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: Have to provide a password associated with that specific username.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Access token provided
+          schema:
+            type: string
+        '400':
+          description: Incorrect format
+        '401':
+          description: Incorrect username or password
+  /me/cart:
+    get:
+      tags:
+      - User
+      summary: Current user's cart
+      description: |
+        Gets products from the current user's cart.
+      parameters:
+      - name: accessToken
+        in: query
+        description: access token
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Return was successful
+          schema:
+            $ref: '#/definitions/Cart'
+        '401':
+          description: You don't have valid access for this action.
+    post:
+      tags:
+      - User
+      summary: Add product to current user's cart
+      description: |
+        Adds sunglasses item to the current user's cart by calling the products id.
+      parameters:
+        - name: accessToken
+          in: query
+          description: access token
+          required: true
+          type: string
+        - name: productId
+          in: query
+          description: Product ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Item was added successfully to the cart.
+          schema:
+            $ref: '#/definitions/CartItem'
+        '404':
+          description: Product was not found or does not exist.  
+        '401':
+          description: You don't have valid access for this action.
+  /me/cart/{productId}:
+    delete:
+      tags:
+      - User
+      summary: Delete product from current user's cart
+      description: |
+        Delete a sunglasses item from the current user's cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: access token
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: Product ID 
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Item was successfully deleted from the cart.
+        '401':
+          description: You don't have valid access for this action.
+        '404':
+          description: Product was not found or does not exist.
+    post:
+      tags:
+      - User
+      summary: Updates a product in the current user's cart
+      description: |
+        Provides a refresh to the quantity of the product in the current user's cart.
+      parameters:
+        - name: accessToken
+          in: query
+          description: access token
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: Product ID
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          description:  Quantity of products in the cart.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Item successfully updated to cart.
+          schema:
+            $ref: '#/definitions/CartItem'
+        '401':
+          description: You don't have valid access for this action.
+        '405':
+          description: Invalid input
+definitions:
+  Brands:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The brand ID.
+        name:
+          type: string
+          description: The brand name.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique ID for a pair of sunglasses
+      categoryId:
+        type: string
+        description: The id of the specific category of sunglasses.
+      name:
+        type: string
+        description: The specific name of the sunglasses.
+      description:
+        type: string
+        description: The description of the specific sunglasses.
+      price:
+        type: integer
+        format: int32
+        description: The price of the sunglasses.
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: The url image of the specific sunglasses.
+  CartItem:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique id of the cart item.
+      name: 
+        type: string
+        description: The specific name of the cart item.
+      price:
+        type: number
+        format: float
+        description: The price of the cart item.
+      quantity:
+        type: number
+        format: int32
+        description: The quantity of the cart items.
+  Cart:
+    type: array
+    items:
+      $ref: '#/definitions/CartItem'
