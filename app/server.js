@@ -11,7 +11,6 @@ const PORT = 3001
 let brands = []
 let products = []
 let accessTokens = []
-//let accessTokens = [{ token: 'qswWsnJLHJlcIHoY', username: 'lazywolf342' }]
 let failedLoginAttempts = {}
 
 // Helpers to get/set our number of failed requests per username
@@ -30,14 +29,11 @@ var setNumberOfFailedLoginRequestsForUsername = function(username, numFails) {
 
 // Helper method to process access token
 var getValidTokenFromRequest = function(request) {
-  console.log(request.headers.xauth)
   if (request.headers.xauth) {
     // Verify the access token to make sure it's valid and not expired
     let currentAccessToken = accessTokens.find(accessToken => {
-      console.log(accessToken.token)
       return accessToken.token == request.headers.xauth
     })
-    console.log(currentAccessToken)
     if (currentAccessToken) {
       return currentAccessToken
     } else {
@@ -124,17 +120,14 @@ myRouter.get('/products', (request, response) => {
 myRouter.post('/login', (request, response) => {
   //Make sure there is an email and password in the request
   if (request.body.username && request.body.password) {
-    console.log(request.body)
     //See if there is a user that has the username and password
     let user = users.find(user => {
-      console.log(user)
       return (
         user.login.username == request.body.username &&
         user.login.password == request.body.password &&
         getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3
       )
     })
-    console.log(user)
     if (user) {
       // If we found a user, reset our counter of failed logins
       setNumberOfFailedLoginRequestsForUsername(request.body.username, 0)
@@ -166,7 +159,6 @@ myRouter.post('/login', (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken)
-        console.log(accessTokens)
         response.end(JSON.stringify(newAccessToken.token))
         return
       }
@@ -195,14 +187,13 @@ myRouter.post('/login', (request, response) => {
 //see cart if logged in
 myRouter.get('/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request)
-  console.log(currentAccessToken)
   if (!currentAccessToken) {
     response.writeHead(407, 'You must be logged in to access your cart.')
     response.end()
     return
   } else {
+    // find the user based on login information
     let user = users.find(user => {
-      console.log(user)
       return user.login.username == currentAccessToken.username
     })
     response.writeHead(
@@ -211,6 +202,7 @@ myRouter.get('/me/cart', (request, response) => {
         'Content-Type': 'application/json'
       })
     )
+    //show cart if the user is logged in
     response.end(JSON.stringify(user.cart))
     return
   }
@@ -226,8 +218,8 @@ myRouter.post('/me/cart/:productId', (request, response) => {
     response.end()
     return
   } else {
+    // find user if logged in
     let user = users.find(user => {
-      console.log(user)
       return user.login.username == currentAccessToken.username
     })
 
@@ -235,7 +227,6 @@ myRouter.post('/me/cart/:productId', (request, response) => {
     let productToAdd = products.find(product => {
       return product.productId == request.params.productId
     })
-    console.log('productToAdd:', productToAdd)
 
     //see if the product in already in the cart by productId
     let searchForProduct = user.cart.find(item => {
@@ -258,7 +249,6 @@ myRouter.post('/me/cart/:productId', (request, response) => {
       cartItem.quantity = 1
       cartItem.product = productToAdd
       user.cart.push(cartItem)
-      console.log('user.cart:', user.cart)
       response.writeHead(
         200,
         Object.assign({
@@ -283,19 +273,15 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
     response.end()
     return
   } else {
+    //find the user if logged in
     let user = users.find(user => {
       return user.login.username == currentAccessToken.username
     })
-
-    console.log('user', user)
-    console.log('user.cart:', user.cart)
 
     //find the product in the cart by productId
     let productToDelete = user.cart.find(item => {
       return item.product.productId == request.params.productId
     })
-    console.log('request.params.productId:', request.params.productId)
-    console.log('productToDelete:', productToDelete)
 
     //if there are no products with the product Id in the cart, a 411 error should be thrown
     if (!productToDelete) {
@@ -311,10 +297,9 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
       return item.product.productId !== request.params.productId
     })
 
-    console.log('newCart', newCart)
     //replace the users cart with the new Cart
     user.cart = newCart
-    console.log('user.cart:', user.cart)
+
     response.writeHead(
       200,
       Object.assign({
@@ -328,6 +313,8 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
 //update quantity of products in post
 myRouter.post('/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request)
+
+  //parse the url
   var parsedUrl = require('url').parse(request.url, true)
 
   //if the user is not logged in, a 412 error should be thrown
@@ -343,17 +330,14 @@ myRouter.post('/me/cart', (request, response) => {
       return user.login.username == currentAccessToken.username
     })
 
-    console.log('user', user)
-    console.log('user.cart:', user.cart)
-
-    if (parsedUrl.query.productId) {
+    //if the url has a product Id update, then find the product in the cart
+    if (parsedUrl.query.productId && parsedUrl.query.quantity) {
       //find the product in the cart by productId
       let productToUpdate = user.cart.find(item => {
         return item.product.productId == parsedUrl.query.productId
       })
-      console.log('parsedUrl.query.productId:', parsedUrl.query.productId)
 
-      //if there are no products with the product Id in the cart, a 411 error should be thrown
+      //if there are no products with the product Id in the cart, a 413 error should be thrown
       if (!productToUpdate) {
         response.writeHead(
           413,
@@ -367,13 +351,13 @@ myRouter.post('/me/cart', (request, response) => {
         return item.product.productId !== parsedUrl.query.productId
       })
 
+      let updatedQuantity = parsedUrl.query.quantity
+
       //update the quantity of the product
       productToUpdate.quantity = updatedQuantity
 
       //add the new, updated product to the cart
       newCart.cartItem = productToUpdate
-
-      console.log('newCart', newCart)
 
       //replace the users cart with the newCart
       user.cart = newCart
@@ -384,6 +368,11 @@ myRouter.post('/me/cart', (request, response) => {
         })
       )
       response.end(JSON.stringify(user.cart))
+      return
+    } else {
+      //if the user didn't specify the product Id or quantity in the url, throw a 414 error
+      response.writeHead(414, 'Please specify the id of the product to update.')
+      response.end()
       return
     }
   }

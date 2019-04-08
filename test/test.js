@@ -282,6 +282,17 @@ describe('Cart', () => {
           done()
         })
     })
+    it('if a user is logged in, they must pass in the productId and quantity to update the product', done => {
+      chai
+        .request(server)
+        .post('/me/cart/?productId=&quantity=/4')
+        .set('xauth', accessToken)
+        .end((error, response) => {
+          response.should.have.status(414)
+          response.body.should.be.an('object')
+          done()
+        })
+    })
     it('if a user is logged in, they should be able to update the quantity of products in their cart', done => {
       chai
         .request(server)

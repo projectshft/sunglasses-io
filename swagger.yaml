@@ -120,6 +120,10 @@ paths:
           description: 'No product with that product Id found in your shopping cart.'
           schema:
             type: string
+        '414':
+          description: 'Please specify the id of the product to update.'
+          schema:
+            type: string
   '/me/cart/{productId}':
     post:
       summary: Add Product to Cart
