@@ -18,6 +18,7 @@ myRouter.use(bodyParser.json());
 let brands = [];
 let users = [];
 let products = [];
+let cart = [];
 let accessTokens = [];
 
 var server = http.createServer(function (request, response) {
@@ -78,3 +79,40 @@ myRouter.post('/api/login', function(request,response) {
     }
     } 
 });
+
+
+// Pull all cart items (should be something like this. not functional but here is the shell)
+myRouter.get("/api/me/cart", (request, response) => {
+    response.writeHead(
+        200,
+        { 'Content-Type': 'application/json' }
+      );
+    response.end(JSON.stringify(cart));
+  });
+
+  // update all cart items (should be something like this. not functional but here is the shell)
+myRouter.post("/api/me/cart", (request, response) => {
+    response.writeHead(
+        200,
+        { 'Content-Type': 'application/json' }
+      );
+    response.end(JSON.stringify(cart));
+  });
+
+    // add cart items (should be something like this. not functional but here is the shell)
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+    response.writeHead(
+        200,
+        { 'Content-Type': 'application/json' }
+      );
+    response.end(JSON.stringify(cart));
+  });
+
+    // delete cart items (should be something like this. not functional but here is the shell)
+    myRouter.delete("/api/me/cart/:productId", (request, response) => {
+        response.writeHead(
+            200,
+            { 'Content-Type': 'application/json' }
+          );
+        response.end(JSON.stringify(cart));
+      });
