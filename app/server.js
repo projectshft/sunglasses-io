@@ -90,9 +90,9 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
  This endpoint allows a user to login and supplies them their access token. */
 
 myRouter.post("/api/login", (request,response) => {  
-  if (request.headers.username && request.headers.password) {
+  if (request.body.username && request.body.password) {
     let user = users.find((user) => {
-      return user.login.username == request.headers.username && user.login.password == request.headers.password;
+      return user.login.username == request.body.username && user.login.password == request.body.password;
     });
     if (user) {
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -169,7 +169,7 @@ myRouter.put("/api/me/cart", (request, response) => {
       response.end();
       return;
     } else {
-        const updatedQuantities = JSON.parse("[" + request.headers.updatedquantities + "]");
+        const updatedQuantities = request.body.updatedQuantities;
           user.cart.forEach((item, index) => {
           item.quantity = updatedQuantities[index];
         })
@@ -201,8 +201,8 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
     } else {
         response.writeHead(200, {'Content-Type': 'application/json'});
         const { productId } = request.params;
-        const cartAfterDelete = user.cart.filter(product => product.id !== productId);
-        response.end(JSON.stringify(cartAfterDelete));
+        user.cart = user.cart.filter(product => product.id !== productId);
+        response.end(JSON.stringify(user.cart));
     }
   }
 });
