@@ -219,13 +219,13 @@ describe('/me/cart', () => {
         });
     });
     //what should happen if there is an incorrect access token
-    it('should return a 500 error if the access token is invalid', done => {
+    it('should return a 400 error if the access token is invalid', done => {
       chai
         .request(server)
         .get('/me/cart')
         .set('xauth', 'abcdefghijklmnop')
         .end((error, response) => {
-          response.should.have.status(500);
+          response.should.have.status(400);
           done();
         });
     });

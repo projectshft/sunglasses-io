@@ -134,6 +134,13 @@ myRouter.post('/login', function(request, response) {
 myRouter.get('/me/cart', function(request, response) {
   //ensure user is logged in
   if (request.headers.xauth) {
+    const findTheUserViaCurrentAccessToken = accessTokens.filter(index => {
+      return index.token == request.headers.xauth;
+    });
+    if (findTheUserViaCurrentAccessToken.length == 0) {
+      response.writeHead(400, 'The access token does not exist');
+      response.end();
+    }
     let currentUser = findTheUserOfTheCurrentAccessToken(request.headers.xauth);
 
     response.writeHead(200, { 'Content-Type': 'application/json' });
