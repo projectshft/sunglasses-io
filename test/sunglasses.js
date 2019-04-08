@@ -36,7 +36,7 @@ describe('Products', () => {
                     res.body.should.be.an('array');
                     //returning 11 because that is the total number of products
                     res.body.length.should.be.eql(11);
-                    done();
+                    done(); 
             });
         });
     });
