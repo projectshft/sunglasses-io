@@ -90,17 +90,17 @@ paths:
       summary: Logs user into the system
       description: |
         Logs user into the system with a username and password
+      consumes:
+        - application/json
+      produces:
+        - application/json
       parameters:
-        - name: username
-          in: header
-          description: The username for login
+        - in: body
+          name: login
+          description: User login credentials
           required: true
-          type: string
-        - name: password
-          in: header
-          description: The password for login
-          required: true
-          type: string  
+          schema:
+            $ref: '#/definitions/Login'   
       tags:
         - Login
       responses:
@@ -148,17 +148,22 @@ paths:
       summary: Update quantities of cart
       description: |
         This endpoint allows a user to change the quantity of items in their cart
+      consumes:
+        - application/json
+      produces:
+        - application/json
       parameters:
         - name: accessToken
           in: header
           description: The users access token
           required: true
           type: string  
-        - name: updatedQuantities
-          in: header
-          description: A comma separated string of updated quantities for each item in cart
+        - in: body
+          name: updatedQuantities
+          description: Updated quantities for user cart
           required: true
-          type: string    
+          schema:
+            $ref: '#/definitions/Quantities'  
       tags:
         - Cart
       responses:
@@ -276,6 +281,15 @@ definitions:
       imageUrls:
         type: string
         description: URLs for images of the product
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: username
+      password:
+        type: string
+        description: password         
   Cart:
     type: object
     properties:
@@ -299,7 +313,15 @@ definitions:
         description: URLs for images of the product
       quantity:
         type: number
-        description: The amount of the product in the cart         
+        description: The amount of the product in the cart
+  Quantities:
+    type: object
+    properties:
+      updatedQuantities:
+        type: array
+        items: 
+          type: number
+        description: Array of updated cart quantities    
   Error:
     type: object
     properties:
