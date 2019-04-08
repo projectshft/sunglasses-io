@@ -301,9 +301,10 @@ router.delete('/api/me/cart/:productId/delete', (request, response) => {
 
   // Filter the item from the cart
   currentCart = currentCart.filter(item => item.product.id !== productId);
+  currentUser.cart = currentCart;
 
   response.writeHead(200, 'Item successfully deleted', HEADERS);
-  response.end(JSON.stringify(currentCart));
+  response.end(JSON.stringify(currentUser.cart));
 });
 
 module.exports = { server, HEADERS };
