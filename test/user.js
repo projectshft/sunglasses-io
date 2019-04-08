@@ -46,7 +46,7 @@ describe('User', () => {
     })
   });
 
-  // Test sccessfuly updating the quantity of a product in a cart
+  // Test successfully updating the quantity of a product in a cart
 
   // Test successfully adding a product to a users cart
   describe('/POST product to cart', () => {
