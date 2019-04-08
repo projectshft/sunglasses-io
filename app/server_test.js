@@ -285,5 +285,16 @@ describe('/me/cart/:productId', () => {
           done();
         });
     });
+    //should increase the quantity
+    it('should increase the quantity in the cart by 1 if the product is already there', done => {
+      chai
+        .request(server)
+        .post('/me/cart/1')
+        .set('xauth', 'qswWsnJLHJlcIHoY')
+        .end((error, response) => {
+          response.should.have.status(200);
+          done();
+        });
+    });
   });
 });

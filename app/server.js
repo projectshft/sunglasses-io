@@ -120,6 +120,7 @@ myRouter.post('/login', function(request, response) {
           token: uid(16)
         };
         accessTokens.push(newAccessToken);
+        response.writeHead(200, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify(newAccessToken.token));
       }
     }
@@ -220,6 +221,13 @@ myRouter.post('/me/cart/:productId', function(request, response) {
       users[currentUserIndexInUsersArray].cart.push(newCartItem);
       response.writeHead(200, { 'Content-Type': 'application/json' });
       response.end(JSON.stringify(users[currentUserIndexInUsersArray].cart));
+    }
+    //if the product is already in the cart...
+    if (isProductAlreadyInCart.length > 0) {
+      const targetProduct = products.find(index => {
+        return index.productId == productId;
+      });
+      //Ran out of time....stopping here.
     }
   }
   response.writeHead(404, 'You must be logged in to edit your cart');
