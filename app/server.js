@@ -236,12 +236,24 @@ myRouter.post('/me/cart/:productId', (request, response) => {
       return product.productId == request.params.productId
     })
     console.log('productToAdd:', productToAdd)
+
+    //see if the product in already in the cart by productId
+    let searchForProduct = user.cart.find(item => {
+      return item.product.productId == request.params.productId
+    })
     //if there are no products with the brand Id, a 409 error should be thrown
     if (!productToAdd) {
       response.writeHead(409, 'No products with that product Id found.')
       response.end()
       return
+    } else if (searchForProduct) {
+      // if the product is already in the cart, increase the quantity
+      searchForProduct.quantity += 1
+      response.writeHead(201, 'You have added another product to your cart.')
+      response.end()
+      return
     } else {
+      //if the product is not in the cart, create a new cartItem
       let cartItem = {}
       cartItem.quantity = 1
       cartItem.product = productToAdd
@@ -300,15 +312,80 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
     })
 
     console.log('newCart', newCart)
-
+    //replace the users cart with the new Cart
+    user.cart = newCart
+    console.log('user.cart:', user.cart)
     response.writeHead(
       200,
       Object.assign({
         'Content-Type': 'application/json'
       })
     )
-    response.end(JSON.stringify(newCart))
+    response.end(JSON.stringify(user.cart))
     return
+  }
+})
+//update quantity of products in post
+myRouter.post('/me/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request)
+  var parsedUrl = require('url').parse(request.url, true)
+
+  //if the user is not logged in, a 412 error should be thrown
+  if (!currentAccessToken) {
+    response.writeHead(
+      412,
+      'You must be logged in to update the quantity of products in your cart.'
+    )
+    response.end()
+    return
+  } else {
+    let user = users.find(user => {
+      return user.login.username == currentAccessToken.username
+    })
+
+    console.log('user', user)
+    console.log('user.cart:', user.cart)
+
+    if (parsedUrl.query.productId) {
+      //find the product in the cart by productId
+      let productToUpdate = user.cart.find(item => {
+        return item.product.productId == parsedUrl.query.productId
+      })
+      console.log('parsedUrl.query.productId:', parsedUrl.query.productId)
+
+      //if there are no products with the product Id in the cart, a 411 error should be thrown
+      if (!productToUpdate) {
+        response.writeHead(
+          413,
+          'No product with that product Id found in your shopping cart.'
+        )
+        response.end()
+        return
+      }
+      //filter out the product
+      let newCart = user.cart.filter(item => {
+        return item.product.productId !== parsedUrl.query.productId
+      })
+
+      //update the quantity of the product
+      productToUpdate.quantity = updatedQuantity
+
+      //add the new, updated product to the cart
+      newCart.cartItem = productToUpdate
+
+      console.log('newCart', newCart)
+
+      //replace the users cart with the newCart
+      user.cart = newCart
+      response.writeHead(
+        200,
+        Object.assign({
+          'Content-Type': 'application/json'
+        })
+      )
+      response.end(JSON.stringify(user.cart))
+      return
+    }
   }
 })
 //export the server so that tests can be written
