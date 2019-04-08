@@ -84,7 +84,6 @@ myRouter.get('/brands', (request, response) => {
     const foundProduct = products.find(product => product.name === queryObj.product_name);
     if (!foundProduct) {
       response.writeHead(404, CORS_HEADERS);
-      console.log('pros sdfs', foundProduct);
       return response.end(JSON.stringify({ message: 'No products found' }));
     }
     response.writeHead(200, CORS_HEADERS);
@@ -233,7 +232,7 @@ myRouter.post('/me/cart/:productId', (request, response) => {
         quantity: 1
       }
       userFound.cart.push(cartItem);
-      response.writeHead(401, CORS_HEADERS);
+      response.writeHead(200, CORS_HEADERS);
       response.end(JSON.stringify(cartItem));
     }
     // if product is found, just update quantity
