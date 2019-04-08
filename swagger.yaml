@@ -1,0 +1,249 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses platform
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows a user to see all products of a certain brand
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '401':
+          description: 'No products with that brand Id found.'
+          schema:
+            type: string
+  '/brands/{brandId}/products':
+    get:
+      summary: Products by Brand Id
+      description: This endput allows the user to click on a brand and see the appropriate products
+      tags:
+        - Brands
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand to see products
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Brand'
+        '400':
+          description: ''
+          schema:
+            type: string
+  /login:
+    post:
+      summary: User Login
+      description: The User Login endput allows the user to interact with their cart
+      tags:
+        - Login
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to update
+          required: true
+          type: string
+        - name: quantity
+          in: path
+          description: The id of the product to update
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: calls per hour allowed by the user
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+        '405':
+          description: 'You must enter your username and password.'
+          schema:
+            type: string
+        '406':
+          description: 'Invalid username or password.'
+          schema:
+            type: string
+  '/me/cart':
+    get:
+      summary: User's Cart
+      description: This endpoint allows a user to access their cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '407':
+          description: 'You must be logged in to access your cart.'
+          schema:
+            type: string
+
+    post:
+      summary: Edit Quantity of Products in Cart
+      description: The Cart POST endput allows the user to edit the quantity of items in their cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '412':
+          description: 'You must be logged in to update the quantity of products in your cart.'
+          schema:
+            type: string
+        '413':
+          description: 'No product with that product Id found in your shopping cart.'
+          schema:
+            type: string
+  '/me/cart/{productId}':
+    post:
+      summary: Add Product to Cart
+      description: This endpoint allows the user to add products to their cart if they are logged in
+      tags:
+        - Cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product in the cart
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '201':
+          description: 'You have added another product to your cart.'
+          schema:
+            $ref: '#/definitions/User'
+        '408':
+          description: 'You must be logged in to add products to your cart.'
+          schema:
+            type: string
+        '409':
+          description: 'No products with that product Id found.'
+          schema:
+            type: string
+    delete:
+      summary: Delete Product in Cart
+      description: The end point allows a user to delete products from their cart
+      tags:
+        - Cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product in the cart
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '410':
+          description: 'You must be logged in to delete products from your cart.'
+          schema:
+            type: string
+        '411':
+          description: 'No product with that product Id found in your shopping cart.'
+          schema:
+            type: string
+  /products:
+    get:
+      summary: Product Search
+      description: The Products endput allows the user to search for a product by product name
+      tags:
+        - Product Search
+      parameters:
+        - name: productName
+          in: query
+          description: The name of the product the user is searching for
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Product'
+        '402':
+          description: 'Please enter the name of the product you are searching for.'
+          schema:
+            type: string
+        '403':
+          description: 'The product does not exist'
+          schema:
+            type: string
+definitions:
+  Brand:
+    type: object
+    properties:
+      brandId:
+        type: string
+        description: Unique identifier for the brand.
+      products:
+        type: array
+        items:
+          type: object
+        description: All of the given brand's products
+  Product:
+    type: object
+    properties:
+      productId:
+        type: string
+        description: The unique identifier given to the product
+      brandId:
+        type: string
+        description: The unique identifier of the brand the product belong's to
+      productName:
+        type: string
+        description: The name of the prduct
+      description:
+        type: string
+        description: The description of the product
+      price:
+        type: string
+        description: The price of the product
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: The url of the main image
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username of the cart holder
+      password:
+        type: string
+        description: Password of the cart holder
+      cart:
+        type: array
+        items:
+          type: object
+          description: products in the user's cart

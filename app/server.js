@@ -181,13 +181,13 @@ myRouter.post('/login', (request, response) => {
       )
 
       // When a login fails, tell the client in a generic way that either the username or password was wrong
-      response.writeHead(406, 'Invalid username or password')
+      response.writeHead(406, 'Invalid username or password.')
       response.end()
       return
     }
   } else {
     //if there was no username or password in the request, throw a 405
-    response.writeHead(405, 'You must enter your username and password')
+    response.writeHead(405, 'You must enter your username and password.')
     response.end()
     return
   }
