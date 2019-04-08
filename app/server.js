@@ -192,4 +192,27 @@ myRouter.get('/api/me/cart', (request, response) => {
       }
   });
 })
+
+myRouter.post('/api/me/cart', function(request,response) {
+    let currentAccessToken = newValidToken(request, accessToken);
+    if (!currentAccessToken) {
+      response.writeHead(401, "You don't have valid access for this action" );
+      response.end();
+    } else {
+        const parsedUrl = url.parse(request.originalUrl);
+        const { productId } = queryString.parse(parsedUrl.query);
+        const addProduct = getProductOrBrand(productId, products);
+        if (!addProduct) {
+          response.writeHead(404, "Product was not found or does not exist");
+          response.end();
+        }
+          let addItem = {
+            id: addProduct.id,
+            name: addProduct.name,
+            price: addProduct.price,
+            quantity: 1
+          };
+            const itemAdded = getProductOrBrand(productId, currentUser.cart);
+        }
+    });
   module.exports = server;
