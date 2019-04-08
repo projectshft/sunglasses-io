@@ -59,3 +59,22 @@ myRouter.get("/api/products", (request, response) => {
   });  
 
 module.exports=server;
+
+//Login info
+myRouter.post('/api/login', function(request,response) {
+    if (request.body.email && request.body.password) {
+        let user = users.find((user)=>{
+            return user.email == request.body.email && user.login.password == request.body.password;
+    });
+
+    if (user) {   
+        response.writeHead(200, 
+        {'Content-Type': 'application/json'}
+        );
+    } else {
+      response.writeHead(404, 
+      "Invalid email or password");
+      response.end();
+    }
+    } 
+});
