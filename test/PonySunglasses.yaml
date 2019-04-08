@@ -36,8 +36,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brands'
-        404: 
-          description: Brand not found 
         default:
           description: Unexpected error
           schema:

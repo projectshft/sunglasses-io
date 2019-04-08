@@ -18,32 +18,27 @@ myRouter.use(bodyParser.json());
 let brands = [];
 let users = [];
 let products = [];
+let accessTokens = [];
 
 var server = http.createServer(function (request, response) {
-
     myRouter(request, response, finalHandler(request, response));
-
 })
 .listen(PORT, error => {
-//     // if (error) {
-//     //   return console.log("Error on Server Startup: ", error);
-//     // }
+    if (error) {
+      return console.log("Error on Server Startup: ", error);
+    }
     brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")) 
 
     products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")) 
 
-// //     fs.readFile("users.json", "utf8", (error, data) => {
-// //       if (error) throw error;
-// //       users = JSON.parse(data);
-// //       console.log(`Server setup: ${users.length} users loaded`);
-// //     });
-// //     console.log(`Server is listening on ${PORT}`);
+    users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"))
+
   });
 
 
 
 
-// Public route - all users of API can access
+// Pull all brands
 myRouter.get("/api/brands", (request, response) => {
     response.writeHead(
         200,
@@ -53,15 +48,8 @@ myRouter.get("/api/brands", (request, response) => {
   });
 
 
-myRouter.get("/api/brands", (request, response) => {
-    response.writeHead(
-        200,
-        { 'Content-Type': 'application/json' }
-      );
-    response.end(JSON.stringify(brands));
-  });
 
-
+// pull all products
 myRouter.get("/api/products", (request, response) => {
     response.writeHead(
         200,
