@@ -1,11 +1,17 @@
 const http = require('http');
 const url = require('url');
-const fs = require('fs');
 const finalHandler = require('finalhandler');
-const queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
-const { uid } = require('rand-token');
+
+const {
+  validateLogin,
+  getCurrentToken,
+  getValidTokenFromRequest,
+  getValidUserFromToken,
+  brands,
+  products
+} = require('./helper.js');
 
 const PORT = 3001;
 const HEADERS = {
@@ -14,10 +20,6 @@ const HEADERS = {
     'Origin, X-Requested-With, Content-Type, Accept, X-Authentication',
   'Content-Type': 'application/json'
 };
-
-let users = [];
-let brands = [];
-let products = [];
 
 // Setup router
 const router = Router();
@@ -36,18 +38,10 @@ const server = http
     if (error) {
       return console.log('Error on Server Startup: ', error);
     }
-    users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf8'));
-    console.log(`Server setup: ${users.length} users loaded`);
-
-    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf8'));
-    console.log(`Server setup: ${brands.length} brands loaded`);
-
-    products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf8'));
-    console.log(`Server setup: ${products.length} products loaded`);
-
     console.log(`Server is listening on port ${PORT}...`);
   });
 
+// *** Brands GET
 router.get('/api/brands', (request, response) => {
   if (!brands) {
     response.writeHead(404, 'Not found.', HEADERS);
@@ -78,7 +72,7 @@ router.get('/api/brands', (request, response) => {
   response.writeHead(200, HEADERS);
   response.end(JSON.stringify(brands));
 });
-
+// Brands GET products
 router.get('/api/brands/:brandId/products', (request, response) => {
   const { brandId } = request.params;
 
@@ -97,7 +91,7 @@ router.get('/api/brands/:brandId/products', (request, response) => {
   response.writeHead(200, HEADERS);
   response.end(JSON.stringify(result));
 });
-
+// *** Products GET
 router.get('/api/products', (request, response) => {
   const URL = request.url;
   const { query } = url.parse(URL, true);
@@ -144,40 +138,172 @@ router.get('/api/products', (request, response) => {
   response.writeHead(200, HEADERS);
   response.end(JSON.stringify(products));
 });
+// *** Login POST
+router.post('/api/login', (request, response) => {
+  // Moved validation logic into a function
+  const currentUser = validateLogin(request, response);
 
-module.exports = server;
+  // Write the header because we know we will be returning successful at this point and that the response will be json
 
-// const shoppingCarts = {
-//   userId: [
-//     {
-//       quantity: 1,
-//       product: {
-//         id: '2',
-//         brandId: '1',
-//         name: 'Black Sunglasses',
-//         description: 'The best glasses in the world',
-//         price: 100,
-//         imageUrls: [
-//           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-//           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-//           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
-//         ]
-//       }
-//     },
-//     {
-//       quantity: 1,
-//       product: {
-//         id: '1',
-//         brandId: '1',
-//         name: 'Superglasses',
-//         description: 'The best glasses in the world',
-//         price: 150,
-//         imageUrls: [
-//           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-//           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-//           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
-//         ]
-//       }
-//     }
-//   ]
-// };
+  response.writeHead(200, 'Login successful', HEADERS);
+
+  // If we already have an existing access token, use that
+
+  const currentToken = getCurrentToken(currentUser);
+
+  response.end(JSON.stringify({ token: currentToken.token }));
+});
+
+router.get('/api/me/cart', (request, response) => {
+  const currentToken = getValidTokenFromRequest(request);
+
+  if (!currentToken) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+  // Find user with the provided token
+  const currentUser = getValidUserFromToken(currentToken);
+
+  if (!currentUser) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+
+  const currentCart = currentUser.cart;
+
+  response.writeHead(200, HEADERS);
+  response.end(JSON.stringify(currentCart));
+});
+
+router.post('/api/me/cart/edit', (request, response) => {
+  const URL = request.url;
+  const { query } = url.parse(URL, true);
+  const { productId, quantity } = query;
+
+  if (!productId) {
+    response.writeHead(400, 'Incorrectly formatted request', HEADERS);
+    response.end();
+  }
+  if (!quantity) {
+    response.writeHead(400, 'Incorrectly formatted request', HEADERS);
+    response.end();
+  }
+
+  const currentToken = getValidTokenFromRequest(request);
+
+  if (!currentToken) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+  // Find user with the provided token
+  const currentUser = getValidUserFromToken(currentToken);
+
+  if (!currentUser) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+
+  const currentCart = currentUser.cart;
+
+  // Check if currentCart contains the productId
+  const cartItem = currentCart.find(item => item.product.id === productId);
+
+  if (!cartItem) {
+    response.writeHead(404, 'Product not found', HEADERS);
+    return response.end();
+  }
+
+  cartItem.quantity = parseInt(quantity);
+
+  response.writeHead(200, 'Quantity successfully updated', HEADERS);
+  response.end(JSON.stringify(currentCart));
+});
+
+router.post('/api/me/cart/:productId/add', (request, response) => {
+  const { productId } = request.params;
+  // Check if product ID exists
+  if (!productId) {
+    response.writeHead(400, 'Incorrectly formatted request', HEADERS);
+    return response.end();
+  }
+  const productToAdd = products.find(product => product.id === productId);
+
+  if (!productToAdd) {
+    response.writeHead(404, 'Product not found', HEADERS);
+    return response.end();
+  }
+
+  const currentToken = getValidTokenFromRequest(request);
+
+  if (!currentToken) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+  // Find user with the provided token
+  const currentUser = getValidUserFromToken(currentToken);
+
+  if (!currentUser) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+
+  const currentCart = currentUser.cart;
+
+  // See if item is in the cart already and update the quantity else add the item to the cart
+  let cartItem = currentCart.find(item => item.product.id === productToAdd.id);
+
+  if (cartItem) {
+    cartItem.quantity += 1;
+  }
+
+  if (!cartItem) {
+    cartItem = {
+      quantity: 1,
+      product: productToAdd
+    };
+    currentCart.push(cartItem);
+  }
+
+  response.writeHead(200, 'Product successfully added', HEADERS);
+  response.end(JSON.stringify(currentCart));
+});
+
+router.delete('/api/me/cart/:productId/delete', (request, response) => {
+  const { productId } = request.params;
+  // Check if product ID exists
+  if (!productId) {
+    response.writeHead(400, 'Incorrectly formatted request', HEADERS);
+    return response.end();
+  }
+
+  const currentToken = getValidTokenFromRequest(request);
+
+  if (!currentToken) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+  // Find user with the provided token
+  const currentUser = getValidUserFromToken(currentToken);
+
+  if (!currentUser) {
+    response.writeHead(401, 'Must be logged in to access the cart', HEADERS);
+    return response.end();
+  }
+
+  let currentCart = currentUser.cart;
+
+  // Check if productId is in the user's cart
+  const productToDelete = currentCart.find(item => item.product.id === productId);
+  if (!productToDelete) {
+    response.writeHead(404, 'Product not found', HEADERS);
+    response.end();
+  }
+
+  // Filter the item from the cart
+  currentCart = currentCart.filter(item => item.product.id !== productId);
+
+  response.writeHead(200, 'Item successfully deleted', HEADERS);
+  response.end(JSON.stringify(currentCart));
+});
+
+module.exports = { server, HEADERS };

@@ -114,23 +114,22 @@ paths:
       responses:
         '200':
           description: Login successful
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
         '400':
           description: Missing username or password.
-          schema:
-            $ref: '#/definitions/Error'
         '401':
           description: Invalid username or password.
-          schema:
-            $ref: '#/definitions/Error'
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'             
+          description: Unexpected error           
   /me/cart:
     get:
       summary: Display User's Shopping Cart
       description: |
-        Returns all items in the currently logged in user's shopping cart.
+        Returns all items in the currently logged in user's shopping cart. An access token must be passed in to the request header.
       security:
         - AccessToken: []
       tags:
@@ -144,21 +143,15 @@ paths:
               $ref: '#/definitions/CartItem'
         '400':
           description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
         '401':
           description: Must be logged in to access the cart.
-          schema:
-            $ref: '#/definitions/Error'
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'          
+          description: Unexpected error          
   /me/cart/edit:
     post:
       summary: Edit Shopping Cart
       description: |
-        This endpoint allows the currently logged in user to edit the quantity of an item already in the shopping cart.
+        This endpoint allows the currently logged in user to edit the quantity of an item already in the shopping cart and returns the updated cart. An access token must be passed in to the request header.
       security:
         - AccessToken: []
       parameters:
@@ -183,21 +176,17 @@ paths:
               $ref: '#/definitions/CartItem'
         '400':
           description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
         '401':
           description: Must be logged in to access the cart.
-          schema:
-            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found.
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'  
   /me/cart/:productId/add:
     post:
       summary: Add an Item
       description: |
-        This endpoint allows the currently logged in user to add an item to the shopping cart.
+        This endpoint allows the currently logged in user to add an item to the shopping cart and returns the updated cart. An access token must be passed in to the request header.
       security:
         - AccessToken: []      
       parameters:
@@ -210,28 +199,24 @@ paths:
         - Shopping Cart
       responses:
         '200':
-          description: Quantity succesfully updated
+          description: Product succesfully added
           schema:
             type: array
             items:
               $ref: '#/definitions/CartItem'
         '400':
           description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
         '401':
           description: Must be logged in to access the cart.
-          schema:
-            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found.
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'  
+          description: Unexpected error 
   /me/cart/:productId/delete:
     delete:
       summary: Delete an Item
       description: |
-        This endpoint allows the currently logged in user to delete an item from the shopping cart.
+        This endpoint allows the currently logged in user to delete an item from the shopping cart and returns the updated cart. An access token must be passed in to the request header.
       security:
         - AccessToken: []      
       parameters:
@@ -251,16 +236,12 @@ paths:
               $ref: '#/definitions/CartItem'          
         '400':
           description: Incorrectly formatted request.
-          schema:
-            $ref: '#/definitions/Error'
         '401':
           description: Must be logged in to access the cart.
-          schema:
-            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found.
         default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'             
+          description: Unexpected error          
 definitions:
   Brand:
     type: object
@@ -311,13 +292,3 @@ definitions:
           The quantity of the item in the cart.
       product:
         $ref: '#/definitions/Product'        
-  Error:
-    type: object
-    properties:
-      code:
-        type: integer
-        format: int32
-      message:
-        type: string
-      fields:
-        type: string

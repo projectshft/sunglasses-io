@@ -1,7 +1,23 @@
 [
     {
         "gender": "female",
-        "cart":[],
+        "cart": [
+            {
+                "quantity": 2,
+                "product": {
+                    "id": "11",
+                    "brandId": "5",
+                    "name": "Habanero",
+                    "description": "The spiciest glasses in the world",
+                    "price": 153,
+                    "imageUrls": [
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+                    ]
+                }
+            }
+        ],
         "name": {
             "title": "mrs",
             "first": "susanna",
@@ -35,7 +51,7 @@
     },
     {
         "gender": "male",
-        "cart":[],
+        "cart": [],
         "name": {
             "title": "mr",
             "first": "salvador",
@@ -69,7 +85,38 @@
     },
     {
         "gender": "female",
-        "cart":[],
+        "cart": [
+            {
+                "quantity": 2,
+                "product": {
+                    "id": "7",
+                    "brandId": "3",
+                    "name": "QDogs Glasses",
+                    "description": "They bark",
+                    "price": 1500,
+                    "imageUrls": [
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+                    ]
+                }
+            },
+            {
+                "quantity": 90,
+                "product": {
+                    "id": "8",
+                    "brandId": "4",
+                    "name": "Coke cans",
+                    "description": "The thickest glasses in the world",
+                    "price": 110,
+                    "imageUrls": [
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                        "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+                    ]
+                }
+            }
+        ],
         "name": {
             "title": "mrs",
             "first": "natalia",
