@@ -14,6 +14,7 @@ describe("/GET brands", () =>{
         .get("/api/brands")
         .end((error, response)=>{
             assert.isNotNull(response.body);
+            expect(error).to.be.null;
             expect(response).to.have.status(200);
             expect("Content-Type", "application/json");
             expect(response.body).to.be.an("array");
@@ -31,6 +32,7 @@ describe("/GET products", () => {
       .get("/api/products")
       .end((error, response) => {
           assert.isNotNull(response.body);
+          expect(error).to.be.null;
           expect(response).to.have.status(200);
           expect("Content-Type", "application/json");
           expect(response.body).to.be.an("array");
@@ -68,21 +70,6 @@ describe("/GET products", () => {
     });
 
 
-
-// specific brand test
-describe("/GET specific category of product", () => {
-    it.only("should go get one specific product category", done => {
-      chai
-        .request(server)
-        .get("/api/brands/:brandId/products")
-        .end((error, response) => {
-          expect(response).to.have.status(200);
-          expect("Content-Type", "application/json");
-          expect(response.body).to.be.an("array");
-          done();
-        });
-    });
-  });
 
   //login test
   describe("/POST,login", () => {
@@ -123,3 +110,21 @@ describe("/GET specific category of product", () => {
         });
       })
     });
+
+    //get cart test
+    describe("/GET cart", () => {
+    it("should go get all of the product items in the current user's cart", done => {
+      chai
+        .request(server)
+        .get("/api/me/cart?accessToken=cgp6012")
+        .end((error, response) => {
+          assert.isNotNull(res.body);
+          expect(error).to.be.null;
+          expect(response).to.have.status(200);
+          expect("Content-Type", "application/json");
+          expect(response.body).to.be.an("array");
+          expect(response.body).to.have.lengthOf(0);
+          done();
+        });
+    });
+});

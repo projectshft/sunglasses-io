@@ -6,7 +6,7 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 
-const PORT = process.env.PORT || 8080;
+const PORT = 8080;
 
 //state variables
 let brands = [];
@@ -75,6 +75,23 @@ const getProductOrBrand = (objId, state) => {
      return queryProductsArray
   }
 
+
+  const newValidToken = (request, accessToken) => {
+    //15 min validity timeout
+    const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; 
+ 
+    var parsedUrl = require('url').parse(request.url,true)
+    if (parsedUrl.query.accessToken) {
+      // need to make sure running access token is valid and not expired
+      let runningAccessToken = accessToken.find((accessTokenItem) => {
+       return accessTokenItem.token == parsedUrl.query.accessTokenItem && ((new Date) - accessTokenItem.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+     });
+      if (runningAccessToken) {
+        return runningAccessToken;
+      } else {
+        return null;
+      }
+    } 
 
 // have to configure routes
 
@@ -161,4 +178,15 @@ myRouter.post('/api/login', function(request,response) {
     })
 });
 
-
+// get cart route
+myRouter.get('/api/me/cart', (request, response) => {
+    let runningAccessToken = newValidToken(request, accessTokens);
+    if (!runningAccessToken) {
+      response.writeHead(401, "You don't have valid access for this action.");
+      response.end();
+    } else {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.end(JSON.stringify(loggedInUser.cart));
+      }
+  });
+  module.exports = server
