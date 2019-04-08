@@ -1,0 +1,247 @@
+# this is an example of the Sunglasses API
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: Move your app forward with the Sunglasses API
+  version: "1.0.0"
+# the domain of the service
+host: my.sunglasses.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      tags:
+        - Brands
+      summary: Retrieves all brands
+      description: Returns a list of all the brands available
+      produces:
+        - application/json
+      parameters: []
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+  /api/brands/{id}/products:
+    get:
+      tags:
+        - Products
+      summary: Retrieve products by brand
+      description: Returns all the products under a given brand
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for products in.
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+          schema:
+              $ref: '#/definitions/Products'
+        '404':
+          description: Brand not found
+  /api/products:
+    get:
+      tags:
+        - Products
+      summary: Search all products
+      description: |
+        Search through all the products based on a query
+      produces:
+        - application/json
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      responses:
+        '200':
+          description: operation successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        '404':
+          description: Product not found
+  /api/login:
+    post:
+      tags:
+        - User
+      summary: User login
+      description: Validates user login credentials
+      parameters:
+        - name: email
+          in: query
+          description: The user email for login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+        '400':
+          description: Incorrectly formatted response
+        '404':
+          description: Invalid email or password
+  /api/me/cart:
+    get:
+      tags:
+        - User
+      summary: Retrieve cart 
+      description: Returns cart contents of authorized user
+      parameters:
+        - name: token
+          in: query
+          description: The user access token for authentication
+          required: true
+          type: string
+      responses:
+        '401':
+          description: 'You need to have access to this call to continue'
+        '404':
+          description: 'Cart not found'
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+    post:
+      tags:
+        - User
+      summary: Update cart 
+      description: Updates cart contents of authorized user
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: query
+          description: The user access token for authentication
+          required: true
+          type: string
+        - in: body
+          name: product
+          description: List of product(s) to update
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+      responses:
+        '401':
+          description: 'You need to have access to this call to continue'
+        '404':
+          description: 'Cart not found'
+        '200':
+          description: successful operation
+  /api/me/cart/{productId}:
+    post:
+      tags:
+        - User
+      summary: Add a product to user cart
+      description: Allows authorized user to add a product to their cart.
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: query
+          description: The user access token for authentication
+          required: true
+          type: string
+        - name: productId
+          in: body
+          description: The product object to add
+          required: true
+          schema:
+            $ref: '#/definitions/Products'
+      responses:
+        '401':
+          description: 'You need to have access to this call to continue'
+        '404':
+          description: 'Cart not found'
+        '200':
+          description: successful operation
+    delete:
+      tags:
+        - User
+      summary: Delete a product from user cart
+      description: Allows authorized user to delete a product from their cart.
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: query
+          description: The user access token for authentication
+          required: true
+          type: string
+        - name: productId
+          in: body
+          description: The product object to add
+          required: true
+          schema:
+            $ref: '#/definitions/Products'
+      responses:
+        '401':
+          description: 'You need to have access to this call to continue'
+        '404':
+          description: 'Cart not found'
+        '200':
+          description: successful operation
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price in USD of a given product
+      imageURLs:
+        type: string
+        description: Images representing the product
+  User:
+    type: object
+    properties:
+      cart: 
+        type: array
+        items:
+          $ref: '#/definitions/Products'
+      name:
+        type: string
