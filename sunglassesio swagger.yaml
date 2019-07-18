@@ -1,3 +1,10 @@
+#Layout of swagger file:
+# General information
+# Components
+# Paths
+# Definitions
+
+# General information ###############################################################
 swagger: '2.0'
 info:
   version: 1.0.0
@@ -17,6 +24,9 @@ produces:
   - application/json
 schemes: 
   - https
+# Components ########################################################################
+
+# Paths #############################################################################
 paths:
   /brands:
     get:
@@ -126,8 +136,7 @@ paths:
           description: Unauthorized - Can only get cart if user is logged in, requires authentication token
           schema:
             $ref: '#/definitions/Error'
-      
-              
+# Definitions #######################################################################
 definitions:
   Brand:
     type: object
