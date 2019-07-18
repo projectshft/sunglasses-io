@@ -113,6 +113,19 @@ paths:
     get:
       tags:
         - User
+      summary: Get user's shopping cart
+      description: The /me/cart endpoint allows you to get an array of items in the logged in user's shopping cart
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        401:
+          description: Unauthorized - Can only get cart if user is logged in, requires authentication token
+          schema:
+            $ref: '#/definitions/Error'
       
               
 definitions:
