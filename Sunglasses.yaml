@@ -30,8 +30,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
-        default:
-          description: Unexpected error
+        400:
+          description: Request failed due to error in endpoint
           schema:
             $ref: '#/definitions/Error'
   /brands:
@@ -48,8 +48,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected error
+        '400':
+          description: Request failed due to error in endpoint
           schema:
             $ref: '#/definitions/Error'
   /brands/:id/products:
@@ -64,8 +64,28 @@ paths:
           description: Request was succesful
           schema:
             $ref: '#/definitions/Product'
-        default:
-          description: Unexpected error
+        '400':
+          description: Request failed due to error in endpoint
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: ID of brand not found
+          schema:
+            $ref: '#/definitions/Error'
+  /me/login:
+    post:
+      summary: Allow for User Login
+      description: |
+        This endpoint allows the user to submit a username and password in order to gain access to various data
+      tags:
+        - User
+      responses:
+        '200':
+          description: Request was succesful
+          schema:
+            $ref: '#/definitions/Product'
+        '400':
+          description: Invalid login information
           schema:
             $ref: '#/definitions/Error'
   /me/cart: 
@@ -74,7 +94,7 @@ paths:
       description: |
         This enpoint returns the products currenlty in a specific user's cart. The response includes specific info about the products in the cart including its unique id, name, and the number of each product type the user desires to order.
       tags:
-        - User
+        - Cart
       responses:
         '200':
           description: Request was successful
@@ -82,8 +102,12 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Cart'
-        default:
-          description: Unexpected error
+        '400':
+          description: Request failed due to error in endpoint
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized to access data
           schema:
             $ref: '#/definitions/Error'
     post:
@@ -91,7 +115,7 @@ paths:
       description: |
         This endpoint adds a specific item to a user's cart
       tags:
-        - User
+        - Cart
       responses:
         '200':
           description: Add was successful
@@ -105,12 +129,20 @@ paths:
       description: |
         This endpdint allows the user to modify the quantity of units desired for a specific product
       tags:
-        - User
+        - Cart
       responses:
         '200':
           description: Change in Quantity was successful
-        default:
-          description: Unexpected error
+        '400':
+          description: Request failed due to error in endpoint
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized to access data
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
           schema:
             $ref: '#/definitions/Error'
     delete:
@@ -118,12 +150,20 @@ paths:
       description: |
         This endpoint allows the user to delete a specific item from their cart
       tags:
-        - User
+        - Cart
       responses:
         '200':
           description: Delete was successful
-        default:
-          description: Unexpected error
+        '400':
+          description: Request failed due to error in endpoint
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized to access data
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
           schema:
             $ref: '#/definitions/Error'
 definitions:
