@@ -41,6 +41,29 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: Get products of brand
+      description: The /brands/{id}/products endpoint allows you to get all products of specified brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the selected brand
+          type: string
+          required: true
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
               
 definitions:
   Brand:
@@ -54,7 +77,37 @@ definitions:
         type: string
         description: Name of brand
         example: 'Superglasses'
-        
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+        example: '1'
+      categoryId:
+        type: string
+        description: Unique identifier for a product's brand
+        example: '1'
+      name:
+        type: string
+        description: Product name
+        example: 'Superglasses'
+      description:
+        type: string
+        description: Description of the product
+        example: 'The best glasses in the world'
+      price:
+        type: number
+        description: Price of the product
+        example: 150
+      imageUrls:
+        type: array
+        description: Array of image URLs
+        items:
+          type: string
+          example: 
+            - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+            - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
   Error:
     type: object
     properties:
