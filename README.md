@@ -8,5 +8,6 @@ If you have any questions about this project or the program in general, visit pr
 GENERAL PLAN
 - [ ] Create swagger file with required routes
   - [ ] Check goalworthy/uber/petstore for authentication examples for cart
+  - [ ] post api/me/cart/:productId takes a number of items as path parameter
 - [ ] Write test for each endpoint
 - [ ] Make it work

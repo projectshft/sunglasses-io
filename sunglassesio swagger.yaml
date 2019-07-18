@@ -109,6 +109,11 @@ paths:
           description: Invalid username or password
           schema:
             $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      tags:
+        - User
+      
               
 definitions:
   Brand:
