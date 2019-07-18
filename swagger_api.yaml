@@ -14,12 +14,6 @@ paths:
     get:
       summary: Brands
       description: 'All Brands available within our store.'
-      parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
-          type: string
       tags:
         - Brands
       responses:
@@ -52,6 +46,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        404:
+          description: Brand not found.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -69,6 +67,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        404:
+          description: Product not found.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -103,6 +105,10 @@ paths:
               token:
                 type: string
                 description: The user's session token.
+        400:
+          description: Missing or invalid username or password.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -126,6 +132,10 @@ paths:
           description: Shopping cart information for a user
           schema:
             $ref: '#/definitions/User/properties/cart'
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -135,6 +145,11 @@ paths:
       consumes:
         - application/json
       parameters:
+        - name: token
+          in: query
+          description: Authorized User session token
+          required: true
+          type: string
         - in: body
           name: new Cart item
           description: The User's desired item to purchase
@@ -147,6 +162,10 @@ paths:
           description: Product added to Cart.
           schema:
             $ref: '#/definitions/Product'
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -175,6 +194,10 @@ paths:
           description: Instance of Product removed from Cart.
           schema:
             $ref: '#/definitions/Product'
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -202,6 +225,10 @@ paths:
           description: Instance of Product added to Cart.
           schema:
             $ref: '#/definitions/Product'
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
