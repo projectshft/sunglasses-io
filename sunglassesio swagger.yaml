@@ -64,6 +64,29 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get products
+      description: The /products endpoint allows you to get all available products and search for products by name or description
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          type: string
+          required: false
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
               
 definitions:
   Brand:
