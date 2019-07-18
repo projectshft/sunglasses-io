@@ -87,6 +87,28 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+        - User
+      summary: Logs user into the system
+      description: ''
+      parameters:
+        - name: loginInfo
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        200:
+          description: Login successful - authentication token returned
+          schema:
+            type: string
+            example: '0987sdfgjkh'
+        400:
+          description: Invalid username or password
+          schema:
+            $ref: '#/definitions/Error'
               
 definitions:
   Brand:
@@ -131,6 +153,18 @@ definitions:
           example: 
             - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
             - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+  User:
+    type: object
+    required: 
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        example: 'yellowleopard753'
+      password:
+        type: string
+        example: 'jonjon'
   Error:
     type: object
     properties:
