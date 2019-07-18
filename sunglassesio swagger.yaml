@@ -1,0 +1,70 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Sunglasses.io API
+  description: ''
+  termsOfService: terms
+  contact:
+    name: Daniel Posse
+    url: http://github.com/dposse
+    email: dan.e.posse@gmail.com
+  license:
+    name: MIT
+    url: http://opensource.org/licenses/MIT
+host: sunglasses.io
+basePath: /api
+produces: 
+  - application/json
+schemes: 
+  - https
+paths:
+  /brands:
+    get:
+      tags: 
+        - Brands
+      summary: Get brands
+      description: The /brands endpoint allows you to get all brands sold at Sunglasses.io as well as search brands.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          type: string
+          required: false
+      responses:
+        200: 
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+              
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand's ID
+        example: '1'
+      name:
+        type: string
+        description: Name of brand
+        example: 'Superglasses'
+        
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+        example: 404
+      message:
+        type: string
+        example: 'Brand not found'
+      fields:
+        type: string
+        example: 'query'
