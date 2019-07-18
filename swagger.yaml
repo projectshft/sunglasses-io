@@ -1,0 +1,190 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: Access data direct from sunglasses.io
+  version: 1.0.0
+host: localhost
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: View All Products Available
+      description: |
+        The Products endpoint returns all the products offered through Sunglasses.io. The response includes This endpoint returns the products available for a brand, given a brand ID. The response includes specific info about the product including its categoryid, unique product id, name, description, price, and image.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      summary: Available Brands
+      description: |
+        The Brands endpoint returns the brands offered through Sunglasses.io. The response includes the id and name of each brand.     
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Request was succesful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/:id/products:
+    get:
+      summary: Products Available for a Given Brand
+      description: |
+        This endpoint returns the products available for a brand, given a brand ID. The response includes specific info about the product including its categoryid, unique product id, name, description, price, and image.
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Request was succesful
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart: 
+    get:
+      summary: View Products Currently in Cart
+      description: |
+        This enpoint returns the products currenlty in a specific user's cart. The response includes specific info about the products in the cart including its unique id, name, and the number of each product type the user desires to order.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add an Item to the Cart
+      description: |
+        This endpoint adds a specific item to a user's cart
+      tags:
+        - User
+      responses:
+        '200':
+          description: Add was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/:productId:
+    post:
+      summary: Change the Quantity of a Specific Product in the Cart
+      description: |
+        This endpdint allows the user to modify the quantity of units desired for a specific product
+      tags:
+        - User
+      responses:
+        '200':
+          description: Change in Quantity was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete an Item from the Cart
+      description: |
+        This endpoint allows the user to delete a specific item from their cart
+      tags:
+        - User
+      responses:
+        '200':
+          description: Delete was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of a given product
+      imageURLs:
+        type: string
+        description: The available images for a given prodcut
+  Cart:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of a given product
+      imageURLs:
+        type: string
+        description: The available images for a given prodcut
+      quantity:
+        type: integer
+        format: int32
+        description: The quantity the user desires to order
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      name:
+        type: string
+        description: The name of the brand
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
