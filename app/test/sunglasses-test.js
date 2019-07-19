@@ -129,6 +129,24 @@ describe('User', () => {
     });
   });
 
+  describe('/POST Login time, with incorrect credentials', () => {
+    it('it should POST for a User to login, but return invalid error', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({
+          'email': '',
+          'password': 'tucker'
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(401);
+          done();
+        })
+    });
+  });
+
   //check for login using bad credentials
   //check for login missing credentials
 
