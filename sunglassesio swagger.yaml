@@ -202,6 +202,30 @@ paths:
           description: Product not found
           schema:
             $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - User
+      summary: Delete item
+      description: The /me/cart/:productId DELETE endpoint allows you to delete a product from the logged in user's shopping cart
+      parameters:
+        - name: accessToken
+          in: path
+          description: Access token given to logged in users for authentication
+          type: string
+          required: true
+      responses: 
+        200:
+          description: Copy of product removed from user's cart
+          schema:
+            $ref: '#/definitions/Product'
+        401:
+          description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
 # Definitions #######################################################################
 definitions:
   Brand:
