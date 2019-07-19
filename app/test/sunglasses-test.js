@@ -206,7 +206,7 @@ describe('User', () => {
 
   //our cart GET should check for the token query param, and return an error
   describe('/GET User cart, with missing token parameter', () => {
-    it('it should GET User Cart, if login token is present', done => {
+    it('it should respond with 400 error, if token parameter is not present', done => {
       //arrange
       chai
         .request(server)
@@ -221,7 +221,20 @@ describe('User', () => {
   });
 
   //our cart GET should return an error if the token user is not found
-
+  describe('/GET User cart, with incorrect token parameter', () => {
+    it('it should respond with 404 error, if token parameter is incorrect', done => {
+      //arrange
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .query({ token: 'totallynotrighttoken' })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(401);
+          done();
+        })
+    });
+  });
 
 
 });

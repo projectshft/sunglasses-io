@@ -140,6 +140,10 @@ myRouter.get("/api/me/cart", (request, response) => {
       return authUser.token == token;
     });
     //we should probably return some sort of error if the token isn't found
+    if(!userInfo){
+      response.writeHead(401, "Invalid or expired token");
+      return response.end();
+    }
 
     //but if the token is found, let's find our user
     let user = users.find(user => {
@@ -150,8 +154,8 @@ myRouter.get("/api/me/cart", (request, response) => {
     response.writeHead(200, {
       'content-type': 'application/json'
     });
-    response.end(JSON.stringify(user.cart));
-    
+    return response.end(JSON.stringify(user.cart));
+
   } else {
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
