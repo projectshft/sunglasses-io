@@ -219,5 +219,19 @@ describe('Sunglasses.io API', () => {
           done();
         });
     });
+
+    it('it should search for "ball" and return 404 not found error', done => {
+      chai
+        .request(server)
+        .get('/brands?query=ball')
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.an('object');
+          res.body.code.should.equal(404);
+          res.body.message.should.equal('Brand not found');
+          res.body.fields.should.equal('query');
+          done();
+        });
+    });
   });
 });
