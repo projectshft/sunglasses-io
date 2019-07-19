@@ -22,19 +22,20 @@ const server = module.exports = http.createServer(function (request, response) {
 }).listen(PORT, () => {
     //extract the products data and save it into a  products variable
     //array of objects
-    products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
+    products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf-8'));
     //extract the brands data and save it into a products variable
     //array of objects
-    brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
+    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf-8'));
    //array of objects 
     //extract the user data and savi it into a users variable
-    users = JSON.parse(fs.readFileSync('../initial-data/users.json'), 'utf-8')
+    users = JSON.parse(fs.readFileSync('./initial-data/users.json'), 'utf-8')
     
 
 });
 
 //creater a route for the /products endpoint
 myRouter.get('/api/products', function(request, response) {
+    response.writeHead(200, {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(products));
 })
 
