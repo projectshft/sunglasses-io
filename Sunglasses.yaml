@@ -59,6 +59,12 @@ paths:
         This endpoint returns the products available for a brand, given a brand ID. The response includes specific info about the product including its categoryid, unique product id, name, description, price, and image.
       tags:
         - Brands
+      parameters:
+        - name: id
+          in: path
+          description: 'The id of the brand which offers the products that want to be fetched. Use 1 for testing. '
+          required: true
+          type: string
       responses:
         '200':
           description: Request was succesful
@@ -130,6 +136,12 @@ paths:
         This endpdint allows the user to modify the quantity of units desired for a specific product
       tags:
         - Cart
+      parameters:
+        - name: productId
+          in: path
+          description: 'The id of the card product to have quantity changed. Use 1 for testing. '
+          required: true
+          type: string
       responses:
         '200':
           description: Change in Quantity was successful
@@ -151,6 +163,12 @@ paths:
         This endpoint allows the user to delete a specific item from their cart
       tags:
         - Cart
+      parameters:
+        - name: productId
+          in: path
+          description: 'The id of the cart product to be deleted. Use 1 for testing. '
+          required: true
+          type: string
       responses:
         '200':
           description: Delete was successful
