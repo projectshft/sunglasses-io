@@ -75,5 +75,27 @@ myRouter.get('/brands', (request, response) => {
   }));
 });
 
+myRouter.get('/brands/:categoryId/products', (request, response) => {
+  const { categoryId } = request.params;
+  //validate categoryId
+  //only checking for existence; don't want to let client know how many categories
+  // there are by checking bounds here
+  if (!categoryId) {
+    response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 404,
+      message: 'Brand not found',
+      fields: 'categoryId'
+    }));
+  }
+
+  const productsInCategory = products.filter(product => {
+    return (product.categoryId === categoryId) ? true : false;
+  });
+  
+  response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+  return response.end(JSON.stringify(productsInCategory));
+});
+
 //export for testing
 module.exports = server;
