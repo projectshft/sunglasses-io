@@ -68,8 +68,13 @@ myRouter.get("/api/brands", (request, response) => {
 myRouter.get("/api/brands/:id/products", (request, response) => {
   const { id } = request.params;
   const productsOfSearchedBrand = products.filter(product => {
-    return product.categoryId == id;
+    return product.categoryId === id;
   })
+  //check if brand ID exists
+  if(productsOfSearchedBrand.length === 0){
+    response.writeHead(404, "Brand not found.");
+    return response.end();
+  }
 
   response.writeHead(200, {
     'content-type': 'application/json'
