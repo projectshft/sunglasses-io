@@ -113,8 +113,8 @@ describe('User', () => {
   });
 
   //check for both email and password
-  describe('/POST Login time', () => {
-    it('it should POST for a User to login', done => {
+  describe('/POST Login time, with incorrect credentials', () => {
+    it('it should POST for a User to login, but return invalid error', done => {
       //arrange
       chai
         .request(server)
@@ -127,7 +127,7 @@ describe('User', () => {
         })
         .end((err, res) => {
           //assert
-          res.should.have.status(404);
+          res.should.have.status(401);
           done();
         })
     });

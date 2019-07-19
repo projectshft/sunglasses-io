@@ -101,10 +101,14 @@ myRouter.post("/api/login", (request, response) => {
 
   //find user
   let user = users.find((user) => {
-    return user.email == email && user.login.password == password;
+    return user.email === email && user.login.password === password;
   });
   
-  
+  if(!user){
+    response.writeHead(401, "Invalid username or password");
+    return response.end();
+  }
+
   response.writeHead(200, {
     'content-type': 'application/json'
   });

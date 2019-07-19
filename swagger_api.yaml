@@ -105,8 +105,8 @@ paths:
               token:
                 type: string
                 description: The user's session token.
-        400:
-          description: Missing or invalid username or password.
+        401:
+          description: Invalid username or password.
           schema:
             $ref: '#/definitions/Error'
         default:
