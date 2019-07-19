@@ -121,7 +121,7 @@ paths:
       tags:
         - User
       summary: Get user's shopping cart
-      description: The /me/cart endpoint allows you to get an array of items in the logged in user's shopping cart
+      description: The /me/cart GET endpoint allows you to get an array of items in the logged in user's shopping cart
       parameters:
         - name: accessToken
           in: path
@@ -136,7 +136,36 @@ paths:
             items:
               $ref: '#/definitions/Product'
         401:
-          description: Unauthorized - Missing or invalid accessToken, can only get cart if user is logged in
+          description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - User
+      summary: Add new item to user's shopping cart
+      description: The /me/cart POST endpoint allows you to add an item to the logged in user's shopping cart
+      parameters:
+        - name: accessToken
+          in: path
+          description: Access token given to logged in users for authentication
+          type: string
+          required: true
+        - name: productId
+          in: path
+          description: Unique ID of the product to be added to logged in user's cart
+          type: string
+          required: true
+      responses:
+        200:
+          description: Copy of product added to user's shopping cart
+          schema:
+            $ref: '#/definitions/Product'
+        401:
+          description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Product not found
           schema:
             $ref: '#/definitions/Error'
 # Definitions #######################################################################
