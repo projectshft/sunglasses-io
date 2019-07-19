@@ -67,6 +67,12 @@ myRouter.get("/api/brands", (request, response) => {
 //for this route, id is our brand's, and is referenced as a categoryId string within Product 
 myRouter.get("/api/brands/:id/products", (request, response) => {
   const { id } = request.params;
+  //check id data type is applicable
+  if (!Number.isInteger(parseInt(id))){
+    response.writeHead(404, 'id must be a number.');
+    return response.end();
+  }
+
   const productsOfSearchedBrand = products.filter(product => {
     return product.categoryId === id;
   })

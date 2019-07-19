@@ -58,11 +58,10 @@ describe('Brands', () => {
       //arrange
       chai
         .request(server)
-        .get('/api/brands/{myObject}/products')
+        .get('/api/brands/{8}/products')
         .end((err, res) => {
           //assert
           res.should.have.status(404);
-          res.body.should.be.eql('id must be an integer.');
           done();
         })
     });
