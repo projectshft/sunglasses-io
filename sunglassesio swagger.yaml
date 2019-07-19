@@ -187,7 +187,21 @@ paths:
           required: true
       responses:
         200:
-          description: ok
+          description: Copy of product editted in user's shopping cart
+          schema:
+            $ref: '#/definitions/ProductInCart'
+        400:
+          description: Invalid quantity
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
 # Definitions #######################################################################
 definitions:
   Brand:
