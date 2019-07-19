@@ -39,11 +39,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Oakley');
+          res.body[0].id.should.equal('1');
+          res.body[0].name.should.equal('Oakley');
 
           done();
         });
@@ -58,11 +58,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Oakley');
+          res.body[0].id.should.equal('1');
+          res.body[0].name.should.equal('Oakley');
 
           done();
         });
@@ -77,11 +77,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Ray Ban');
+          res.body[0].id.should.equal('2');
+          res.body[0].name.should.equal('Ray Ban');
 
           done();
         });
@@ -96,11 +96,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Ray Ban');
+          res.body[0].id.should.equal('2');
+          res.body[0].name.should.equal('Ray Ban');
 
           done();
         });
@@ -115,11 +115,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Levi\'s');
+          res.body[0].id.should.equal('3');
+          res.body[0].name.should.equal('Levi\'s');
 
           done();
         });
@@ -134,11 +134,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Levi\'s');
+          res.body[0].id.should.equal('3');
+          res.body[0].name.should.equal('Levi\'s');
 
           done();
         });
@@ -153,11 +153,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('DKNY');
+          res.body[0].id.should.equal('4');
+          res.body[0].name.should.equal('DKNY');
 
           done();
         });
@@ -172,11 +172,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('DKNY');
+          res.body[0].id.should.equal('4');
+          res.body[0].name.should.equal('DKNY');
 
           done();
         });
@@ -191,11 +191,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Burberry');
+          res.body[0].id.should.equal('5');
+          res.body[0].name.should.equal('Burberry');
 
           done();
         });
@@ -210,11 +210,11 @@ describe('Sunglasses.io API', () => {
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
 
-          res.body.should.have.property('id');
-          res.body.should.have.property('name');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('name');
 
-          res.body.id.should.equal('1');
-          res.body.name.should.equal('Burberry');
+          res.body[0].id.should.equal('5');
+          res.body[0].name.should.equal('Burberry');
 
           done();
         });

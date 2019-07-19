@@ -1,10 +1,10 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const uid = require('rand-token').uid;
 
 //server settings
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
@@ -38,9 +38,33 @@ const server = http.createServer(function (request, response) {
   });
 });
 
+//public routes - no access token required
 myRouter.get('/brands', (request, response) => {
-  response.writeHead(200, CORS_HEADERS);
-  return response.end();
+  //substring(8) returns query after the '?'
+  const { query } = queryString.parse(request.url.substring(8));
+  //no search term or empty search, return all brands
+  if (!query) {
+    response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+    response.end(JSON.stringify(brands));
+  }
+
+  //find brands that match search
+  const matchedBrands = brands.filter(brand => {
+    return (brand.name.toLowerCase() === query.toLowerCase()) ? true : false;
+  });
+
+  //send 200 if any brands found, 404 otherwise
+  if (matchedBrands.length > 0) {
+    response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify(matchedBrands));
+  }
+  //else
+  response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+  return response.end(JSON.stringify({
+    code: 404,
+    message: 'Brand not found',
+    fields: 'query'
+  }));
 });
 
 //export for testing
