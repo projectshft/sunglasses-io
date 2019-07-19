@@ -7,6 +7,8 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Brands', () => {
+
+  //basic initial GET for Brands
   describe('/GET brands', () =>{
     it('it should GET all the brands', done => {
       //arrange
@@ -23,7 +25,9 @@ describe('Brands', () => {
     });
   });
 
+  //tests for brands/:id/products
   describe('/GET brands/{id}/products', () => {
+    //grab the initial value to make the test pass
     it('it should GET all the products for brand Id given', done => {
       //arrange
       chai
@@ -37,6 +41,11 @@ describe('Brands', () => {
           done();
         })
     });
+    //test to check that brand Id is an appropriate character type
+
+    //test to check that brand Id actually exists with our initial data
+
+
   });
 
 });

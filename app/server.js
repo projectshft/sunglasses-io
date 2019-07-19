@@ -64,6 +64,19 @@ myRouter.get("/api/brands", (request, response) => {
   response.end(JSON.stringify(brands));
 });
 
+//for this route, id is our brand's, and is referenced as a categoryId string within Product 
+myRouter.get("/api/brands/:id/products", (request, response) => {
+  const { id } = request.params;
+  const productsOfSearchedBrand = products.filter(product => {
+    return product.categoryId == id;
+  })
+
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
+  response.end(JSON.stringify(productsOfSearchedBrand));
+});
+
 myRouter.get("/api/products", (request, response) => {
   response.writeHead(200, {
     'content-type': 'application/json'
