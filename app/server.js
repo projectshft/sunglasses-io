@@ -63,3 +63,10 @@ myRouter.get("/api/brands", (request, response) => {
   });
   response.end(JSON.stringify(brands));
 });
+
+myRouter.get("/api/products", (request, response) => {
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
+  response.end(JSON.stringify(products));
+});
