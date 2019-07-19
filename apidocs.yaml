@@ -89,7 +89,7 @@ paths:
   /login:
     post:
       tags: 
-        - Users
+        - Log In
       summary: Log in user
       description: >
         This endpoint allows you to submit the user's log in credentials.
@@ -102,14 +102,31 @@ paths:
             Object with username/email and password
           required: true
           schema:
-           $ref: '#/definitions/User'
+            type: object
+            properties:
+              email:
+                type: string
+                description: >-
+                  User's email address as requested at log in. 
+              password:
+                type: string
+                description: >-
+                  User's password as requested at log in.  
+              
       responses:
-        default:
-          description: successful operation
+        '200':
+          description: Access Token
+          schema: 
+            type: object
+            properties:
+              token:
+               type: string
+               description: >-
+                Unique token to be used in header for other api requests. 
   /me/cart:
     get:
       tags: 
-        - Users
+        - Me
       summary: View logged-in user's cart
       description: >
         This endpoint can only be accessed by a logged-in user.
@@ -130,7 +147,7 @@ paths:
           description: Invalid or expired access token. 
     post:
       tags:
-        - Users
+        - Me
       summary: Add item to logged-in user's cart
       description: >
         This endpoint adds the product to the logged-in user's cart. 
@@ -158,7 +175,7 @@ paths:
   /me/cart/{productId}:
     delete:
       tags: 
-        - Users
+        - Me
       summary: Delete item in cart by ID
       description: >-
         For valid response use integer IDs with positive integer value.  Negative or non-integer values will generate errors.  
@@ -186,7 +203,7 @@ paths:
           description: Invalid product ID
     post:
       tags:
-        - Users
+        - Me
       summary: Update quantity of item in cart
       description: >-
         This endpoint will update the quantity of an item in the logged in user's cart if the item is present. 
@@ -274,17 +291,6 @@ definitions:
         format: int32
         description: >-
           The quantity of the product in the users cart. 
-  User:
-    type: object
-    properties:
-      email:
-        type: string
-        description: >-
-          User's email address as requested at log in. 
-      password:
-        type: string
-        description: >-
-          User's password as requested at log in.  
   Error:
     type: object
     properties:
