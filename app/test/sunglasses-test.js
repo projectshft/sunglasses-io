@@ -100,8 +100,8 @@ describe('User', () => {
         //assuming we're using a form here
         .type('form')
         .send({
-          'email' : 'known@example.com',
-          'password': '123'
+          'email': 'salvador.jordan@example.com',
+          'password': 'tucker'
         })
         .end((err, res) => {
           //assert
