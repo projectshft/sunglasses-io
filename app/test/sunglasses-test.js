@@ -86,3 +86,33 @@ describe('Products', () => {
     });
   });
 });
+
+//Let's test some User functionality!
+describe('User', () => {
+
+  //check for vanilla known login
+  describe('/POST Login time', () => {
+    it('it should POST for a User to login', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/login')
+        //assuming we're using a form here
+        .type('form')
+        .send({
+          'email' : 'known@example.com',
+          'password': '123'
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        })
+    });
+  });
+
+  //check for login using bad credentials
+  //check for login missing credentials
+
+});

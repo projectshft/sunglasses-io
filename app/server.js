@@ -18,7 +18,7 @@ let AUTH_TOKENS = [];
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-const server = module.exports = http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
 
   myRouter(request, response, finalHandler(request, response));
 
@@ -94,3 +94,6 @@ myRouter.get("/api/products", (request, response) => {
   });
   response.end(JSON.stringify(products));
 });
+
+//For testing, yo.
+module.exports = server;
