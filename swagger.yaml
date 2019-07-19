@@ -1,0 +1,287 @@
+swagger: '2.0'
+info:
+  title: Sunglasses-IO API
+  description: An API for the Best Sunglasses in the World
+  version: 2.0.0
+host: sunglasses.io
+schemes:
+  - https
+basePath: /API
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary:  Brands
+      description:  |
+        The /brands GET endpoint returns a stringified JSON array of Brand Objects.  Each Brand object contains two properties—- id and name.  The content returned is in form of a JSON string.  Response can be filtered by product name or brands provided in the search query.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Brands & Products
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary:  Brand Products
+      description:  |
+        The /brands/{id}/products GET enpoint returns a stringified JSON array of products belonging to the particular brand identified by the {id} parameter.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        
+      tags:
+        - Brands & Products
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary:  Products
+      description: |
+        The /products GET endpoint returns an array of individual sunglasseses objects. Each object contains 6 properties- id, categoryId, name, description, price, and imageUrl.  Response can be filtered by query parameters-- name, brand, maxPrice, minPrice 
+      tags:
+        - Brands & Products
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary:  User Login
+      description: |
+        The /login endpoint POST returns stringifed JSON uid token, to enable the confirmed user to access the shopping cart.  The user must be validated and upon 3 failed login attemps the user will be locked out of the system until the server is reset.
+      tags:
+        - User
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary:  Get User Cart
+      description: |
+        The /me/cart GET endpoint retrieves the user's personal cart of the added items
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary:  Change User Cart Content
+      description: |
+        The /me/cart POST endpoint adds the response.body product object to the user's shoppoing cart.  This request must be accompanies by the user's access token in order to successfully access and update the cart.
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: OK
+  /me/cart/{productId}:
+    delete:
+      summary:  Delete User Cart Product
+      description: |
+        The me/cart/{productId} DELETE endpoint removes the selected product from the user's shopping cart.
+      parameters: 
+        - name: productId
+          in: path
+          type: string
+          required: true
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary:  Change User Cart Quantity
+      description: |
+        The me/cart/{productId} POST endpoint updates the shopping cart quantity of the particular product identified by the {productID} parameter.
+      parameters:
+        - name: productId
+          type: string
+          in: path
+          required: true
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description:  Unique identifier for a brand.
+      name:
+        type: string
+        description:  The name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the product.
+      categoryId:
+        type: string
+        description: The unique identifer of the product's brand.
+      name:
+        type: string
+        description:  The name of the product.
+      description:
+        type: string
+        description:  A brief description of the product.
+      price:
+        type: integer
+        description:  The price of the product
+      imageUrls:
+        description:  Array of image url strings of the product
+        type: array
+        items:
+          type: string
+  User:
+    type: object
+    properties:
+      gender:
+        type: "string"
+      cart:
+        type: "array"
+        items:
+          $ref: '#/definitions/Product'
+      name:
+        type: object
+        properties:
+            title:
+              type: "string"
+            first:
+              type: "string"
+              description: firstname of user
+            last:
+              type: "string"
+              description: lastname of user
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: street Address of user
+          city:
+            type: string
+            description: city of user
+          state:
+            type: string
+            description: state of user
+          postcode:
+            type: integer
+            description: postcode of user
+      email:
+        type: "string"
+        description: email of user
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:  
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+      registered:
+        type: string
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+        description: nation where the user lives
+            
+        
+           
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
