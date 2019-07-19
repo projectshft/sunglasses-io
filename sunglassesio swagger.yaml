@@ -19,6 +19,8 @@ info:
     url: http://opensource.org/licenses/MIT
 host: sunglasses.io
 basePath: /api
+consumes:
+  - application/json
 produces: 
   - application/json
 schemes: 
@@ -174,13 +176,18 @@ paths:
           description: Product not found
           schema:
             $ref: '#/definitions/Error'
-  /me/cart/:productId:
+  /me/cart/{id}:
     put:
       tags:
         - User
       summary: Edit quantity of item
       description: The /me/cart/:productId PUT endpoint allows you to edit the quantity of a product in the logged in user's shopping cart
       parameters:
+        - name: id
+          in: path
+          description: The id of the product in shopping cart
+          type: string
+          required: true
         - name: accessToken
           in: path
           description: Access token given to logged in users for authentication
@@ -220,6 +227,11 @@ paths:
       summary: Delete item
       description: The /me/cart/:productId DELETE endpoint allows you to delete a product from the logged in user's shopping cart
       parameters:
+        - name: id
+          in: path
+          description: The id of the product in shopping cart
+          type: string
+          required: true
         - name: accessToken
           in: path
           description: Access token given to logged in users for authentication
