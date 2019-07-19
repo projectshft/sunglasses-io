@@ -125,5 +125,20 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
+myRouter.get("/me/cart", (request, response) => {
+  //let's grab the query token here
+  //check against our AUTH_USER object to grab the User based on token
+
+  //we should probably return some sort of error if the token isn't found
+
+  //but if the token is found, let's find our user
+
+  //send over our shopping cart
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
+  response.end(JSON.stringify(products));
+});
+
 //For testing, yo.
 module.exports = server;
