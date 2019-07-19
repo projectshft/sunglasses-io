@@ -1,0 +1,139 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: localhost:3001
+schemes: 
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: All Brands
+      description: returns all brands of sunglasses
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Request for brands was successful.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404':
+          description: No brands available
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/brands/:id/products':
+    get:
+      summary: All products of a certain brand
+      description: returns all products of a specific brand by brand ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of the brand for products
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Request for products by brand was successful.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: No products available or brand ID incorrect
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: All Products
+      description: Returns all available products
+      parameters:
+        - name: query
+          in: query
+          description: Search query string from user
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Request for products was successful.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Products not available
+        '404':
+          description: No products that match that query
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Log user into page
+      description: Log user into page requiring username & password
+      tags: 
+        - User
+      responses:
+        '200':
+          description: Request to login was successful.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id for brand
+      name: 
+        type: string
+        description: name of the brand
+  Product:
+    type: object
+    properties:
+        id:
+          type: string
+          description: The id for the product.
+        categoryId:
+          type: string
+          description: The id for the brand of the product.
+        name:
+          type: string
+          description: The name of the product.
+        description:
+          type: string
+          description: A description the product.
+        price:
+          type: number
+          description: The price of the product.
+        imageUrls:
+          type: string
+          description: The URL for the image of a pair of sunglasses.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+    
