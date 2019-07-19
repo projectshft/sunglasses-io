@@ -104,16 +104,19 @@ myRouter.post("/api/login", (request, response) => {
     let user = users.find((user) => {
       return user.email == email && user.login.password == password;
     });
-    
+    //check for user existence, catching username/password errors
     if(!user){
       response.writeHead(401, "Invalid username or password");
       return response.end();
     }
 
+    //hand out a token
+    userToken = uid(16);
+
     response.writeHead(200, {
       'content-type': 'application/json'
     });
-    return response.end(JSON.stringify({}));
+    return response.end(JSON.stringify({token: userToken}));
 
   } else {
 
