@@ -131,7 +131,15 @@ paths:
         200:
           description: Shopping cart information for a user
           schema:
-            $ref: '#/definitions/User/properties/cart'
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
         400:
           description: Missing or invalid token.
           schema:
