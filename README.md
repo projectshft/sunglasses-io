@@ -11,4 +11,6 @@ GENERAL PLAN
   - [X] post api/me/cart/:productId takes a number of items as path parameter
   - [ ] Update brands and products endpoints to have 404 errors
 - [ ] Write test for each endpoint
+  - [ ] /brands
+  
 - [ ] Make it work
