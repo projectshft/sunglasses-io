@@ -23,3 +23,21 @@ describe('Brands', () => {
     });
   });
 });
+
+describe('Products', () => {
+  describe('/GET products', () => {
+    it('it should GET all the products', done => {
+      //arrange
+      chai
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(11);
+          done();
+        })
+    });
+  });
+});
