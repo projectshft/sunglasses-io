@@ -15,10 +15,10 @@ let users = [];
 let AUTH_TOKENS = [];
 
 //Setup router
-var myRouter = Router();
+const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+const server = module.exports = http.createServer(function (request, response) {
 
   myRouter(request, response, finalHandler(request, response));
 
@@ -58,5 +58,8 @@ myRouter.get("/", (request, response) => {
 
 //public routes
 myRouter.get("/api/brands", (request, response) => {
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
   response.end(JSON.stringify(brands));
 });

@@ -5,13 +5,14 @@ let server = require('../server');
 let should = chai.should();
 
 chai.use(chaiHttp);
+
 describe('Brands', () => {
   describe('/GET brands', () =>{
     it('it should GET all the brands', done => {
       //arrange
       chai
         .request(server)
-        .get('/brands')
+        .get('/api/brands')
         .end((err, res) => {
           //assert
           res.should.have.status(200);
