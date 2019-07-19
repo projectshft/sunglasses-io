@@ -44,4 +44,10 @@ server.listen(PORT, err => {
 
 // endpoint handlers: router.get, router.post
 
+// GET ALL BRANDS
+router.get("/api/brands", (request, response) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(brands));
+});
+
 module.exports = server;
