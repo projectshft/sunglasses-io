@@ -50,3 +50,13 @@ http.createServer(function (request, response) {
 
     console.log(`Server is listening on ${PORT}`);
   });
+
+  //base route
+myRouter.get("/", (request, response) => {
+  response.end("There's nothing to see here, please visit /api/brands and carry on.");
+});
+
+//public routes
+myRouter.get("/api/brands", (request, response) => {
+  response.end(JSON.stringify(brands));
+});
