@@ -9,7 +9,6 @@ info:
   version: 1.0.0
   title: Sunglasses.io API
   description: API for Sunglasses.io, an online sunglasses store
-  termsOfService: terms
   contact:
     name: Daniel Posse
     url: http://github.com/dposse
@@ -262,7 +261,7 @@ definitions:
       name:
         type: string
         description: Name of brand
-        example: 'Superglasses'
+        example: 'Oakley'
   Product:
     type: object
     properties:
