@@ -98,8 +98,8 @@ describe('User', () => {
         .request(server)
         .post('/api/login')
         .send({
-          'email': 'salvador.jordan@example.com',
-          'password': 'tucker'
+          email: 'salvador.jordan@example.com',
+          password: 'tucker'
         })
         .end((err, res) => {
           //assert
@@ -119,8 +119,8 @@ describe('User', () => {
         .request(server)
         .post('/api/login')
         .send({
-          'email': 'salvador.jordan@example.com',
-          'password': ''
+          email: 'salvador.jordan@example.com',
+          password: ''
         })
         .end((err, res) => {
           //assert
@@ -137,8 +137,8 @@ describe('User', () => {
         .request(server)
         .post('/api/login')
         .send({
-          'email': '',
-          'password': 'tucker'
+          email: '',
+          password: 'tucker'
         })
         .end((err, res) => {
           //assert
@@ -156,7 +156,7 @@ describe('User', () => {
         .request(server)
         .post('/api/login')
         .send({
-          'email': 'salvador.jordan@example.com',
+          email: 'salvador.jordan@example.com',
         })
         .end((err, res) => {
           //assert
@@ -174,8 +174,8 @@ describe('User', () => {
         .request(server)
         .post('/api/login')
         .send({
-          'email': 'salvador.jordan@example.com',
-          'password': 'tucker'
+          email: 'salvador.jordan@example.com',
+          password: 'tucker'
         })
         .end((err, res) => {
           //assert
