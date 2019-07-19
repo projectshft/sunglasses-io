@@ -130,11 +130,11 @@ paths:
           required: true
       responses:
         200:
-          description: An array of products
+          description: An array of products and their quantities
           schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
+              $ref: '#/definitions/ProductInCart'
         401:
           description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
           schema:
@@ -168,6 +168,26 @@ paths:
           description: Product not found
           schema:
             $ref: '#/definitions/Error'
+  /me/cart/:productId:
+    put:
+      tags:
+        - User
+      summary: Edit quantity of item
+      description: The /me/cart/:productId PUT endpoint allows you to edit the quantity of a product in the logged in user's shopping cart
+      parameters:
+        - name: accessToken
+          in: path
+          description: Access token given to logged in users for authentication
+          type: string
+          required: true
+        - name: quantity
+          in: path
+          description: Change amount of selected product in shopping cart to quantity
+          type: string
+          required: true
+      responses:
+        200:
+          description: ok
 # Definitions #######################################################################
 definitions:
   Brand:
@@ -212,6 +232,14 @@ definitions:
           example: 
             - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
             - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+  ProductInCart:
+    type: object
+    properties:
+      product:
+        $ref: '#/definitions/Product'
+      quantity:
+        type: integer
+        example: 2
   User:
     type: object
     required: 
