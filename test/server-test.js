@@ -27,3 +27,21 @@ describe("/GET brands", () => {
       });
   });
 });
+
+// GET PRODUCTS
+describe("/GET products", () => {
+  it.only("should GET all products", done => {
+    chai
+      .request(server)
+      .get("/api/products")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(11);
+        done();
+      });
+  });
+});

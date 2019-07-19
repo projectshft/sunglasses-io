@@ -50,4 +50,10 @@ router.get("/api/brands", (request, response) => {
   return response.end(JSON.stringify(brands));
 });
 
+// GET ALL PRODUCTS
+router.get("/api/products", (request, response) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(products));
+});
+
 module.exports = server;
