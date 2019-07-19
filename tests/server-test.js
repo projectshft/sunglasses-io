@@ -30,10 +30,19 @@ describe('/GET brands/:id/products', () => {
       .get('/api/brands/1/products')
       .end((err, res) => {
         res.should.have.status(200);
-        console.log(res.body);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(3);
         done();
-      })
-  })
+      });
+  });
+  //test for unsuccessful response when brand id isn't present
+  it('it should GET a 404 response when the id is not found', done => {
+    chai
+      .request(server)
+      .get('/api/brands/8/products')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
 })
