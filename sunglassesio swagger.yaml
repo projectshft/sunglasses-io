@@ -134,7 +134,13 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/ProductInCart'
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  example: 2
         401:
           description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
           schema:
@@ -189,7 +195,13 @@ paths:
         200:
           description: Copy of product editted in user's shopping cart
           schema:
-            $ref: '#/definitions/ProductInCart'
+            type: object
+            properties:
+              product:
+                $ref: '#/definitions/Product'
+              quantity:
+                type: integer
+                example: 2
         400:
           description: Invalid quantity
           schema:
@@ -270,14 +282,6 @@ definitions:
           example: 
             - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
             - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
-  ProductInCart:
-    type: object
-    properties:
-      product:
-        $ref: '#/definitions/Product'
-      quantity:
-        type: integer
-        example: 2
   User:
     type: object
     required: 
