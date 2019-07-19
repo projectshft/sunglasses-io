@@ -111,6 +111,7 @@ describe('User', () => {
   });
 
   //check for both email and password
+  //check for login using bad credentials
   describe('/POST Login time, with incorrect credentials', () => {
     it('it should POST for a User to login, but return invalid error', done => {
       //arrange
@@ -128,8 +129,8 @@ describe('User', () => {
         })
     });
   });
-
-  describe('/POST Login time, with incorrect credentials', () => {
+  //check for login missing credentials
+  describe('/POST Login time, with blank email', () => {
     it('it should POST for a User to login, but return invalid error', done => {
       //arrange
       chai
@@ -147,7 +148,44 @@ describe('User', () => {
     });
   });
 
-  //check for login using bad credentials
-  //check for login missing credentials
+  //should return a 400 error if we're missing parameters
+  describe('/POST Login time, with missing parameter', () => {
+    it('it should POST for a User to login, but return invalid error', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({
+          'email': 'salvador.jordan@example.com',
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(400);
+          done();
+        })
+    });
+  });
+
+  //login function should return a token
+  describe('/POST Login time', () => {
+    it('it should POST for a User to login, and return a token', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({
+          'email': 'salvador.jordan@example.com',
+          'password': 'tucker'
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.token.should.be.a('string');
+          done();
+        })
+    });
+  });
+  
 
 });
