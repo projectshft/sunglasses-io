@@ -99,7 +99,7 @@ myRouter.post("/api/login", (request, response) => {
   //grab info from request body
   const { email, password } = request.body;
   
-  if (request.body.username && request.body.password) {
+  if (email && password) {
     //find user
     let user = users.find((user) => {
       return user.email == email && user.login.password == password;
@@ -115,7 +115,7 @@ myRouter.post("/api/login", (request, response) => {
     });
     response.end(JSON.stringify({}));
   } else {
-    
+
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
   }
