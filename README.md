@@ -12,7 +12,7 @@ GENERAL PLAN
   - [ ] Update brands and products endpoints to have 404 errors
 - [ ] Write test for each endpoint
   - [X] /brands get
-  - [ ] /brands/id/products get
+  - [X] /brands/id/products get
   - [ ] /products get
   - [ ] /login post
   - [ ] /me/cart get
