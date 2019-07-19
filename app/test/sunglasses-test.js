@@ -204,4 +204,24 @@ describe('User', () => {
     });
   });
 
+  //our cart GET should check for the token query param, and return an error
+  describe('/GET User cart, with missing token parameter', () => {
+    it('it should GET User Cart, if login token is present', done => {
+      //arrange
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .query({ hi: 'hello' })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(400);
+          done();
+        })
+    });
+  });
+
+  //our cart GET should return an error if the token user is not found
+
+
+
 });
