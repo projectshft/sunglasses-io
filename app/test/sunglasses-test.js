@@ -193,8 +193,8 @@ describe('User', () => {
       //arrange
       chai
         .request(server)
-        .get('api/me/cart')
-        .query({ accessToken: 'thisismytokenyup' })
+        .get('/api/me/cart')
+        .query({ token: 'thisismytokenyup' })
         .end((err, res) => {
           //assert
           res.should.have.status(200);

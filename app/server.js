@@ -130,9 +130,9 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
-myRouter.get("api/me/cart", (request, response) => {
+myRouter.get("/api/me/cart", (request, response) => {
   //let's grab the query token here
-  const { token } = queryString.parse(request.url.substring(11))
+  const { token } = queryString.parse(request.url.substring(13));
   //check against our AUTH_USER object to grab the User based on token
   let userInfo = AUTH_USERS.find(authUser => {
     return authUser.token == token;
