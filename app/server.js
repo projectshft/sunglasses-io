@@ -98,10 +98,10 @@ myRouter.get("/api/products", (request, response) => {
 myRouter.post("/api/login", (request, response) => {
   //grab info from request body
   const { email, password } = request.body;
-
+  
   //find user
   let user = users.find((user) => {
-    return user.email === email && user.login.password === password;
+    return user.email == email && user.login.password == password;
   });
   
   if(!user){

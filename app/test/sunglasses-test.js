@@ -97,8 +97,6 @@ describe('User', () => {
       chai
         .request(server)
         .post('/api/login')
-        //assuming we're using a form here
-        .type('form')
         .send({
           'email': 'salvador.jordan@example.com',
           'password': 'tucker'
@@ -119,8 +117,6 @@ describe('User', () => {
       chai
         .request(server)
         .post('/api/login')
-        //assuming we're using a form here
-        .type('form')
         .send({
           'email': 'salvador.jordan@example.com',
           'password': ''
