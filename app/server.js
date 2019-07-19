@@ -95,5 +95,21 @@ myRouter.get("/api/products", (request, response) => {
   response.end(JSON.stringify(products));
 });
 
+myRouter.post("/api/login", (request, response) => {
+  //grab info from request body
+  const { email, password } = request.body;
+
+  //find user
+  let user = users.find((user) => {
+    return user.email == email && user.login.password == password;
+  });
+  
+  
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
+  response.end(JSON.stringify({}));
+});
+
 //For testing, yo.
 module.exports = server;

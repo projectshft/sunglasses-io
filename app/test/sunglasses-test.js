@@ -112,6 +112,27 @@ describe('User', () => {
     });
   });
 
+  //check for both email and password
+  describe('/POST Login time', () => {
+    it('it should POST for a User to login', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/login')
+        //assuming we're using a form here
+        .type('form')
+        .send({
+          'email': 'salvador.jordan@example.com',
+          'password': ''
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(404);
+          done();
+        })
+    });
+  });
+
   //check for login using bad credentials
   //check for login missing credentials
 
