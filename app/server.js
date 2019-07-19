@@ -20,12 +20,17 @@ var myRouter = Router();
 myRouter.use(bodyParser.json());
 
 
-http.createServer(function (request, response) {
+const server = module.exports = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, () => {
   //load data from files into server memory
-  brands = JSON.parse(fs.readFileSync('brands.json', 'utf-8'));
-  products = JSON.parse(fs.readFileSync('products.json', 'utf-8'));
-  users = JSON.parse(fs.readFileSync('users.json', 'utf-8'));
+  brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
+  products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('../initial-data/users.json', 'utf-8'));
   user = users[0];
 });
+
+myRouter.get('/api/brands', function(request, response){
+  response.writeHead(200);
+  return response.end(JSON.stringify(brands));
+})
