@@ -8,6 +8,16 @@ chai.use(chaiHttp);
 
 describe('Sunglasses.io API', () => {
   describe('GET /brands', () => {
+    it('it should get a 200 response', done => {
+      chai
+        .request(server)
+        .get('/brands')
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+    
     it('it should get all brands in sunglasses store', done => {
       chai
         .request(server)
