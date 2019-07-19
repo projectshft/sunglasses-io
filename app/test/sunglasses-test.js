@@ -187,5 +187,21 @@ describe('User', () => {
     });
   });
   
+  //GET cart for logged-in User
+  describe('/GET User cart', () => {
+    it('it should GET User Cart, if login token is present', done => {
+      //arrange
+      chai
+        .request(server)
+        .get('/me/cart')
+        .query({ accessToken: 'thisismytokenyup' })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        })
+    });
+  });
 
 });

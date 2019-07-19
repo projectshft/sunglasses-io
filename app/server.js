@@ -120,7 +120,6 @@ myRouter.post("/api/login", (request, response) => {
 
   } else {
 
-    console.log(email, password);
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
   }
