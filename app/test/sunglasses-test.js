@@ -41,10 +41,20 @@ describe('Brands', () => {
           done();
         })
     });
-    //test to check that brand Id is an appropriate character type
-
     //test to check that brand Id actually exists with our initial data
+    it('it should return an error if the brand Id does not exist', done => {
+      //arrange
+      chai
+        .request(server)
+        .get('/api/brands/8/products')
+        .end((err, res) => {
+          //assert
+          res.should.have.status(404);
+          done();
+        })
+    });
 
+    //test to check that brand Id is an appropriate character type
 
   });
 
