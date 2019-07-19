@@ -234,4 +234,56 @@ describe('Sunglasses.io API', () => {
         });
     });
   });
+
+  describe('GET /brands/{id}/products', () => {
+    it('it should get a 200 response', done => {
+      //arrange
+      const id = 1;
+
+      chai
+        .request(server)
+        .get(`/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+
+    it('it should return an array of products', done => {
+      //arrange
+      const id = 1;
+      //act, assert
+      chai
+        .request(server)
+        .get(`/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.equal(3);
+          res.body[0].should.be.an('object');
+          done();
+        });
+    });
+
+    it('it should return 404', done => {
+      //arrange
+      const id = 0;
+      //act, assert
+      chai
+        .request(server)
+        .get(`/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(404);
+
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+        
+          res.body.code.should.equal(404);
+          res.body.message.should.equal('Brand not found');
+          res.body.fields.should.equal('id');
+        });
+    });
+  });
 });
