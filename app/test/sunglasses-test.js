@@ -53,9 +53,19 @@ describe('Brands', () => {
           done();
         })
     });
-
     //test to check that brand Id is an appropriate character type
-
+    it('it should return an error if the brand Id is an incorrect character type', done => {
+      //arrange
+      chai
+        .request(server)
+        .get('/api/brands/{myObject}/products')
+        .end((err, res) => {
+          //assert
+          res.should.have.status(404);
+          res.body.should.be.eql('id must be an integer.');
+          done();
+        })
+    });
   });
 
 });
