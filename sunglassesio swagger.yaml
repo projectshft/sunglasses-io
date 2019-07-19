@@ -290,9 +290,7 @@ definitions:
         description: Array of image URLs
         items:
           type: string
-          example: 
-            - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
-            - 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+          example: 'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
   User:
     type: object
     required: 
@@ -311,10 +309,7 @@ definitions:
       code:
         type: integer
         format: int32
-        example: 404
       message:
         type: string
-        example: 'Brand not found'
       fields:
         type: string
-        example: 'query'
