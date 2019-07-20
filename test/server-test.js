@@ -204,3 +204,28 @@ describe("/GET cart", () => {
       });
   });
 });
+
+// POST CART 
+describe("/POST cart", () => {
+  it.only("should POST addition of item to cart", done => {
+    let token = 'kjKQZ2QHG1eFCfmT'; 
+    // let productId = '1'; 
+    let item = {
+      productId: '1',
+      quantity: 1
+    }
+    chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=${token}`)
+      .send(item)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.length(1);
+        done();
+      });
+  });
+}); 
