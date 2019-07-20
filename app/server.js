@@ -72,8 +72,18 @@ router.get("/api/brands/:id/products", (request, response) => {
 
 // GET ALL PRODUCTS
 router.get("/api/products", (request, response) => {
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query } = queryString.parse(parsedUrl.query);
+  let productsToReturn = []; 
+  if (query !== undefined) {
+    productsToReturn = products.filter(product => 
+      product.name.includes(query) || product.description.includes(query)
+    );
+  } else {
+    productsToReturn = products; 
+  }
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(products));
+  return response.end(JSON.stringify(productsToReturn));
 });
 
 module.exports = server;

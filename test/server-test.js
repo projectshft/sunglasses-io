@@ -80,4 +80,18 @@ describe("/GET products", () => {
         done();
       });
   });
+  it.only("should limit results to those with a query string", done => {
+    chai
+      .request(server)
+      .get("/api/products?query=best")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(4);
+        done();
+      });
+  });
 });
