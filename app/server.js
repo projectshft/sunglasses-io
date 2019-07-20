@@ -9,6 +9,7 @@ const uid = require('rand-token').uid;
 //server settings
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 const PORT = 3001;
+const TOKEN_VALIDITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -192,7 +193,7 @@ const getValidTokenFromRequest = (request) => {
   if (parsedUrl.query.accessToken) {
     //make sure token is not expired
     const currentAccessToken = accessTokens.find(accessToken => {
-      return accessToken.token === parsedUrl.query.accessToken;
+      return accessToken.token === parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
     if (currentAccessToken) {
       return currentAccessToken;
