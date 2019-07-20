@@ -14,13 +14,14 @@ const header = {'Content-Type': 'application/json'};
 let products = [];
 let brands =[];
 let users = [];
-let accessTokens =[];
+let accessTokens =['gaeaw'];
 let cart = [];
 //set a helper function that parses the accessToken from the url
 const getValidTokenFromRequest = (request) => {
     let parsedUrl = url.parse(request.url, true);
-    //see if the query has an accesstoken present
-    if (parsedUrl.query.accessToken) {
+    let tokenFromUrl = parsedUrl.query.token;
+    //if the query has an accesstoken present
+    if (tokenFromUrl) {
         //check to see if the accessToken the user has is a verified one
         let currentAccessToken = accessTokens.find(accessToken => {
             return accessToken.token == parsedUrl.query.accessToken;
@@ -57,8 +58,6 @@ const server = module.exports = http.createServer(function (request, response) {
    //array of objects 
     //extract the user data and savi it into a users variable
     users = JSON.parse(fs.readFileSync('./initial-data/users.json'), 'utf-8')
-    
-
 });
 
 //creater a route for the /products endpoint
@@ -130,6 +129,20 @@ myRouter.post('/api/login', function(request, response) {
         return response.end();
     }
 });
+
+
+myRouter.get('/api/me/cart', function(request, response) {
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //if there is no verified access toekn return an error
+    if (!currentAccessToken) {
+        response.writeHead(401, 'You do not have access to this data');
+        return response.end();
+    } else {
+        //return the products currently in the cart
+        response.writeHead(200, head);
+        return response.end(cart)
+    }
+})
 
 
 
