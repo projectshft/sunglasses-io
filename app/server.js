@@ -51,13 +51,18 @@ myRouter.get('/api/brands/:id/products', function(request, response){
 });
 //return products by search
 myRouter.get('/api/products', function(request, response){
+  //isolate query from path, use lowercase so case mismatch won't impact return
   let searchString = request._parsedUrl.query.toLowerCase();
   let queryObject = queryString.parse(searchString);
-  let searchResults = [];
-  searchResults = products.filter(product => {
+  //new array with filtered results of products that match query
+  let searchResults = products.filter(product => {
     let productName = product.name.toLowerCase();
     return productName.includes(queryObject.query);
   });
+  if(searchResults.length === 0){
+    response.writeHead(404, 'No matching results found');
+    return response.end();
+  }
   response.writeHead(200, {'Content-Type': 'application/json'});
   return response.end(JSON.stringify(searchResults));
 });
