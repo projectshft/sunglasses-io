@@ -71,7 +71,7 @@ describe ('POST /login', () => {
         chai
             .request(server)
             .post('/api/login')
-            .send({"username": "greenlion235","password": "waters",})
+            .send({"username": "greenlion235","password": "waters"})
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.username.should.equal('greenlion235');
