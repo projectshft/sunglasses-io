@@ -271,7 +271,7 @@ describe('Sunglasses.io API', () => {
       //act, assert
       chai
         .request(server)
-        .get(`/brands/${id}/products`)
+        .get(`/brands/0/products`)
         .end((err, res) => {
           res.should.have.status(404);
 
@@ -283,6 +283,7 @@ describe('Sunglasses.io API', () => {
           res.body.code.should.equal(404);
           res.body.message.should.equal('Brand not found');
           res.body.fields.should.equal('id');
+          done();
         });
     });
   });

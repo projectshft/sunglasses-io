@@ -78,14 +78,24 @@ myRouter.get('/brands', (request, response) => {
 myRouter.get('/brands/:categoryId/products', (request, response) => {
   const { categoryId } = request.params;
   //validate categoryId
-  //only checking for existence; don't want to let client know how many categories
-  // there are by checking bounds here
+  //only checking for existence
   if (!categoryId) {
     response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
     return response.end(JSON.stringify({
       code: 404,
       message: 'Brand not found',
-      fields: 'categoryId'
+      fields: 'id'
+    }));
+  }
+
+  //now check if categoryId exists in brands[]
+  const category = brands.find(brand => brand.id === categoryId);
+  if (!category) {
+    response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 404,
+      message: 'Brand not found',
+      fields: 'id'
     }));
   }
 
