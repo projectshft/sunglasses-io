@@ -6,16 +6,17 @@ If you have any questions about this project or the program in general, visit pr
 
 
 GENERAL PLAN
-- [ ] Create swagger file with required routes
-  - [ ] Check goalworthy/uber/petstore for authentication examples for cart
+- [X] Create swagger file with required routes
+  - [X] Check goalworthy/uber/petstore for authentication examples for cart
   - [X] post api/me/cart/:productId takes a number of items as path parameter
-  - [ ] Update brands and products endpoints to have 404 errors
+  - [X] Update brands and products endpoints to have 404 errors
+  - [ ] 401 errors should be 403...
 - [ ] Write test for each endpoint
   - [X] /brands get
   - [X] /brands/id/products get
   - [X] /products get
   - [X] /login post
-    - [ ] Update errors in api to separate 400 and 401
+    - [X] Update errors in api to separate 400 and 401
   - [ ] /me/cart get
   - [ ] /me/cart post
   - [ ] /me/cart/id put

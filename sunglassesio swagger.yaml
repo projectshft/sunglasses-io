@@ -132,7 +132,7 @@ paths:
       description: The /me/cart GET endpoint allows you to get an array of items in the logged in user's shopping cart
       parameters:
         - name: accessToken
-          in: path
+          in: query
           description: Access token given to logged in users for authentication
           type: string
           required: true
@@ -149,7 +149,7 @@ paths:
                 quantity:
                   type: integer
                   example: 2
-        401:
+        403:
           description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
           schema:
             $ref: '#/definitions/Error'
@@ -174,7 +174,7 @@ paths:
           description: Copy of product added to user's shopping cart
           schema:
             $ref: '#/definitions/Product'
-        401:
+        403:
           description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
           schema:
             $ref: '#/definitions/Error'
@@ -219,7 +219,7 @@ paths:
           description: Invalid quantity
           schema:
             $ref: '#/definitions/Error'
-        401:
+        403:
           description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
           schema:
             $ref: '#/definitions/Error'
@@ -248,7 +248,7 @@ paths:
           description: Copy of product removed from user's cart
           schema:
             $ref: '#/definitions/Product'
-        401:
+        403:
           description: Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in
           schema:
             $ref: '#/definitions/Error'

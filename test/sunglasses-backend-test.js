@@ -734,4 +734,101 @@ describe('Sunglasses.io API', () => {
         });
     });
   });
+
+  describe('GET /me/cart', () =>{
+    it('it should return 403 unauthorized when no access token sent', done => {
+      //arrange
+      //act
+      //assert
+      chai
+        .request(server)
+        .get(`/me/cart`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(401);
+          res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+          res.body.fields.should.equal('query');
+          done();
+        });
+    });
+
+    it('it should return 403 unauthorized when "" token sent', done => {
+      //arrange
+      const accessToken = '';
+      //act
+      //assert
+      chai
+        .request(server)
+        .get(`/me/cart?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(401);
+          res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+          res.body.fields.should.equal('query');
+          done();
+        });
+    });
+
+    //nesting a describe to run before() without affecting the above tests
+    describe('after logging in', () => {
+      let accessToken;
+
+      before('sending a GET request, login as an existing user', done => {
+        //arrange
+        const loginInfo = {
+          username: 'yellowleopard753',
+          password: 'jonjon'
+        };
+        //act, assert
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.should.have.property('accessToken');
+            //arrange for future tests
+            accessToken = res.body.accessToken;
+            //console.log(accessToken); /* used to validate that /login POST was working while these tests are still failing */
+            done();
+          });
+      });
+
+      it('should return a 200 response', done => {
+        //arrange
+        //should have accessToken from logging in
+        //act, assert
+        chai
+          .request(server)
+          .get(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            done();
+          });
+      });
+
+      it('should return an array', done => {
+        //arrange
+        //should have accessToken from logging in
+        //act, assert
+        chai
+          .request(server)
+          .get(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            done();
+          });
+      });
+    });
+  });
 });
