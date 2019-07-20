@@ -562,6 +562,130 @@ describe('Sunglasses.io API', () => {
   });
 
   describe('POST /login', () => {
-    
+    it('it should return a 200 response when sent valid username and password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'yellowleopard753',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+
+    it('it should return an object when sent valid username and password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'yellowleopard753',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        });
+    });
+
+    it('it should return an object with property accessToken when sent valid username and password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'yellowleopard753',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('accessToken');
+          done();
+        });
+    });
+
+    it('it should return a 400 invalid username or password when sent valid username and invalid password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'yellowleopard753',
+        password: 'wrong'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Invalid username or password');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 400 invalid username or password when sent invalid username and valid password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'wrong',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Invalid username or password');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 400 invalid username or password when sent invalid username and invalid password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'wrong',
+        password: 'wrong'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Invalid username or password');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
   });
 });

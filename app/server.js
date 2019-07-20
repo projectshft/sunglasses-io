@@ -44,6 +44,13 @@ const server = http.createServer(function (request, response) {
     products = JSON.parse(data);
     console.log(`Server initialization: ${products.length} products loaded`);
   });
+  fs.readFile('initial-data/users.json', 'utf8', (err, data) => {
+    if (err) {
+      throw err;
+    }
+    users = JSON.parse(data);
+    console.log(`Server initialization: ${users.length} users loaded`);
+  });
 });
 
 //public routes - no access token required/////////////////////////////////////////////////
