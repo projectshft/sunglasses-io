@@ -183,6 +183,17 @@ describe("/POST login", () => {
 
 // GET CART
 describe("/GET cart", () => {
+  it.only("should GET cart for signed-in user", done => { 
+    let token = 'kjKQZ2QHG1eFCfmT'; 
+      chai.request(server)
+        .get(`/api/me/cart?accessToken=${token}`) 
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect("Content-Type", "application/json");
+          expect(res.body).to.be.an("array");
+          done(); 
+        });
+  });
   it.only("should fail as expected when a user is not logged in", done => {
     chai
       .request(server)

@@ -17,7 +17,7 @@ let accessTokens = [];
 let testAccessToken = {
   username: 'lazywolf342',
   lastUpdated: new Date(),
-  token: uid(16)
+  token: "kjKQZ2QHG1eFCfmT"
 }
 accessTokens.push(testAccessToken);
 
