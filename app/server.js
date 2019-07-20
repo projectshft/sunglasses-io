@@ -13,6 +13,14 @@ let products = [];
 let brands = [];
 let users = [];
 let accessTokens = [];
+
+let testAccessToken = {
+  username: 'lazywolf342',
+  lastUpdated: new Date(),
+  token: uid(16)
+}
+accessTokens.push(testAccessToken);
+
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const PORT = 3001;
