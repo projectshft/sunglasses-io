@@ -155,4 +155,18 @@ describe("/POST login", () => {
         done();
       });
   });
+  it.only("should fail as expected when password or username is invalid", done => {
+    let credentials = {
+      username: 'yellowleopard753',
+      password: 'jon'
+    }
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(credentials)
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
 });

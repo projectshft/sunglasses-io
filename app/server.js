@@ -99,6 +99,9 @@ router.post('/api/login', function (request, response) {
     if (user) {
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(); 
+    } else {
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
     }
   } else {
     response.writeHead(400, "Incorrectly formatted response");
