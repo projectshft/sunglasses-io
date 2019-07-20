@@ -744,12 +744,12 @@ describe('Sunglasses.io API', () => {
         .request(server)
         .get(`/me/cart`)
         .end((err, res) => {
-          res.should.have.status(401);
+          res.should.have.status(403);
           res.body.should.be.an('object');
           res.body.should.have.property('code');
           res.body.should.have.property('message');
           res.body.should.have.property('fields');
-          res.body.code.should.equal(401);
+          res.body.code.should.equal(403);
           res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
           res.body.fields.should.equal('query');
           done();
@@ -765,12 +765,12 @@ describe('Sunglasses.io API', () => {
         .request(server)
         .get(`/me/cart?accessToken=${accessToken}`)
         .end((err, res) => {
-          res.should.have.status(401);
+          res.should.have.status(403);
           res.body.should.be.an('object');
           res.body.should.have.property('code');
           res.body.should.have.property('message');
           res.body.should.have.property('fields');
-          res.body.code.should.equal(401);
+          res.body.code.should.equal(403);
           res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
           res.body.fields.should.equal('query');
           done();
@@ -862,6 +862,28 @@ describe('Sunglasses.io API', () => {
               item.should.have.property('product');
               item.should.have.property('quantity');
             });
+            done();
+          });
+      });
+
+      it('should return a 403 unauthorized when incorrect token sent', done => {
+        //arrange
+        //change access token to an incorrect one
+        const invalidAccessToken = accessToken.slice(2);
+        
+        //act, assert
+        chai
+          .request(server)
+          .get(`/me/cart?accessToken=${invalidAccessToken}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
             done();
           });
       });

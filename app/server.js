@@ -185,5 +185,11 @@ myRouter.post('/login', (request, response) => {
   }
 });
 
+//private routes - access token required////////////////////////////////////////////////////
+//helper method to check access tokens
+const getValidTokenFromRequest = (request) => {
+  const parsedUrl = require('url').parse(request.url, true);
+};
+
 //export for testing
 module.exports = server;
