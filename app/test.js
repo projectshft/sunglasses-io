@@ -68,16 +68,15 @@ describe ('GET /brands', () => {
 //set test for user login, /me post request
 describe ('POST /login', () => {
     it ('should grant access to user if the username and password is valid', done => {
+        let user = {username: 'yellowleopard753', password: 'jonjon'}
         chai
             .request(server)
             .post('/api/login')
-            .send({"username": "greenlion235","password": "waters"})
+            .set('Content-type', 'application/json')
+            .send(user)
             .end((err, res) => {
                 res.should.have.status(200);
-                res.body.username.should.equal('greenlion235');
-                res.body.password.should.equal('greenlion235');
                 done();
-                
             })
     })
 })
