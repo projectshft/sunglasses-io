@@ -122,7 +122,7 @@ describe("/GET products", () => {
 
 // LOGIN 
 describe("/POST login", () => {
-  it.only("should POST user login with valid credentials", done => {
+  it.only("should POST user login with valid credentials, return token, and give cart access", done => {
     let credentials = {
       username: 'yellowleopard753',
       password: 'jonjon'
@@ -136,9 +136,19 @@ describe("/POST login", () => {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
         expect("Content-Type", "application/json");
-        // expect(res.body).to.be.a("string");
-        // expect(res.body).to.have.length(16);
-        done();
+        expect(res.body).to.be.a("string");
+        expect(res.body).to.have.length(16);
+        //done();
+        let token = res.body; 
+        chai.request(server)
+          .get(`/api/me/cart?accessToken=${token}`) 
+          //.set('accessToken', token)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            expect("Content-Type", "application/json");
+            expect(res.body).to.be.an("array");
+            done(); 
+        });
       });
   });
   it.only("should fail as expected when password or username is missing", done => {
@@ -164,6 +174,19 @@ describe("/POST login", () => {
       .request(server)
       .post("/api/login")
       .send(credentials)
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+});
+
+// GET CART
+describe("/GET cart", () => {
+  it.only("should fail as expected when a user is not logged in", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
       .end((err, res) => {
         expect(res).to.have.status(401);
         done();

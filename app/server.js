@@ -12,8 +12,28 @@ let products = [];
 // let user = {};
 let brands = [];
 let users = [];
+let accessTokens = [];
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const PORT = 3001;
+
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 // Set up router
 const router = Router();
@@ -98,7 +118,22 @@ router.post('/api/login', function (request, response) {
     });
     if (user) {
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(); 
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
     } else {
       response.writeHead(401, "Invalid username or password");
       return response.end();
@@ -106,6 +141,22 @@ router.post('/api/login', function (request, response) {
   } else {
     response.writeHead(400, "Incorrectly formatted response");
     return response.end();
+  }
+}); 
+
+// GET CART
+router.get('/api/me/cart', function (request, response) { 
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to log in to access the cart");
+    return response.end();
+  } else { 
+    let currentUser = currentAccessToken.username;
+    let user = users.find((user) => {
+      return user.login.username == currentUser;
+    });
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart));
   }
 }); 
 
