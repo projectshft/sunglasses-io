@@ -189,6 +189,19 @@ myRouter.post('/login', (request, response) => {
 //helper method to check access tokens
 const getValidTokenFromRequest = (request) => {
   const parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    //make sure token is not expired
+    const currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token === parsedUrl.query.accessToken;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
 };
 
 //export for testing
