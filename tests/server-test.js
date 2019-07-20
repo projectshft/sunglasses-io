@@ -100,10 +100,18 @@ describe('/GET products', () => {
    .end((err, res) => {
      res.should.have.status(200);
      res.should.be.an('object');
-     console.log(res.body);
      res.body.should.have.property('token');
      done();
    })
-
- });
+  });
+  it('it should get a 401 response if email is invalid', done => {
+    chai
+      .request(server)
+      .post('/api/login')
+      .send({email: "salvado.jordan@example.com", password: "tucker"})
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
  });

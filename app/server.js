@@ -82,10 +82,13 @@ myRouter.post('/api/login', function(request, response){
   });
   
   //if that user is found, return an access token 
-  if(user) {
+  if(foundUser) {
     response.writeHead(200, {'Content-Type': 'application/json'});
     let token = uid(16);
     return response.end(JSON.stringify({'token': token}));
+    } else {
+      response.writeHead(401, 'Invalid username or password');
+      return response.end();
     }
   
 })
