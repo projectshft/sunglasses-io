@@ -76,35 +76,31 @@ myRouter.get('/brands', (request, response) => {
 });
 
 myRouter.get('/brands/:categoryId/products', (request, response) => {
-  const { categoryId } = request.params;
+  const { categoryId } = request.params;  
+
+  //reverse logic to have one return 404
   //validate categoryId
   //only checking for existence
-  if (!categoryId) {
-    response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
-    return response.end(JSON.stringify({
-      code: 404,
-      message: 'Brand not found',
-      fields: 'id'
-    }));
+  if (categoryId) {
+    //now check if categoryId exists in brands[]
+    const category = brands.find(brand => brand.id === categoryId);
+    if (category) {
+      const productsInCategory = products.filter(product => {
+        return (product.categoryId === categoryId) ? true : false;
+      });
+      
+      response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+      return response.end(JSON.stringify(productsInCategory));
+    }
   }
 
-  //now check if categoryId exists in brands[]
-  const category = brands.find(brand => brand.id === categoryId);
-  if (!category) {
-    response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
-    return response.end(JSON.stringify({
-      code: 404,
-      message: 'Brand not found',
-      fields: 'id'
-    }));
-  }
-
-  const productsInCategory = products.filter(product => {
-    return (product.categoryId === categoryId) ? true : false;
-  });
-  
-  response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
-  return response.end(JSON.stringify(productsInCategory));
+  //else either categoryId or category does not exist
+  response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+  return response.end(JSON.stringify({
+    code: 404,
+    message: 'Brand not found',
+    fields: 'id'
+  }));
 });
 
 //export for testing
