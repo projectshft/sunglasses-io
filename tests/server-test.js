@@ -36,7 +36,7 @@ describe('/GET brands/:id/products', () => {
       });
   });
   //test for unsuccessful response when brand id isn't present
-  it('it should GET a 404 response when the id is not found', done => {
+  it('it should get a 404 response when the id is not found', done => {
     chai
       .request(server)
       .get('/api/brands/8/products')
@@ -60,6 +60,15 @@ describe('/GET products', () => {
       res.body.length.should.be.eql(1);
       done();
 
+    })
+ });
+ it('it should get a 404 response if no matches to provided query are found', done => {
+   chai
+    .request(server)
+    .get('/api/products?query=bananas')
+    .end((err, res) => {
+      res.should.have.status(404);
+      done();
     })
  })
 });
