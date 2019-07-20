@@ -175,7 +175,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  'me/cart/:productId':
+  '/me/cart/:productId':
     post:
       summary: add item to the cart
       description: Adds a product to the user's cart
