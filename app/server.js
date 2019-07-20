@@ -27,13 +27,13 @@ const server = module.exports = http.createServer(function (request, response) {
 }).listen(PORT, () => {
     //extract the products data and save it into a  products variable
     //array of objects
-    products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf-8'));
+    products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
     //extract the brands data and save it into a products variable
     //array of objects
-    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf-8'));
+    brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
    //array of objects 
     //extract the user data and savi it into a users variable
-    users = JSON.parse(fs.readFileSync('./initial-data/users.json'), 'utf-8')
+    users = JSON.parse(fs.readFileSync('../initial-data/users.json'), 'utf-8')
     
 
 });
@@ -57,11 +57,11 @@ myRouter.get('/api/products', function(request, response) {
             return response.end();
         }
     } else {
+        //if there's no query set productsToReturn as all available products
         productsToReturn = products;
 
     }
     response.writeHead(200, header);
-    console.log(productsToReturn);
     return response.end(JSON.stringify(productsToReturn));
 })
 

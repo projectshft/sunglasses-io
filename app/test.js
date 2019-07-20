@@ -29,7 +29,7 @@ describe('/GET products', () => {
         it('should return only the products that match that specific query', () => {
             chai    
                 .request(server)
-                .get('/api/products?query=Brown+Sunglasses')
+                .get('/api/products?q=Brown+Sunglasses')
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an('array')
