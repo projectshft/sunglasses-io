@@ -46,3 +46,20 @@ describe('/GET brands/:id/products', () => {
       });
   });
 })
+
+//test for products endpoint
+describe('/GET products', () => {
+ //test for successful response based on search query provided
+ it('it should GET matching pairs of sunglasses based upon provided query', done => {
+   chai
+    .request(server)
+    .get('/api/products?query=sugar')
+    .end((err, res) => {
+      res.should.have.status(200);
+      res.body.should.be.an('array')
+      res.body.length.should.be.eql(1);
+      done();
+
+    })
+ })
+});
