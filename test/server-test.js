@@ -38,7 +38,7 @@ describe("/GET brands", () => {
 });
 
 // GET PRODUCTS BY BRAND
-describe("/GET products by brand id", () => {
+describe("/GET products by brand", () => {
   it.only("should GET all products of a given brand with valid id", done => {
     chai
       .request(server)
@@ -115,6 +115,43 @@ describe("/GET products", () => {
       .get("/api/products?query=blue")
       .end((err, res) => {
         expect(res).to.have.status(404);
+        done();
+      });
+  });
+});
+
+// LOGIN 
+describe("/POST login", () => {
+  it.only("should POST user login with valid credentials", done => {
+    let credentials = {
+      username: 'yellowleopard753',
+      password: 'jonjon'
+    }
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(credentials)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        // expect(res.body).to.be.a("string");
+        // expect(res.body).to.have.length(16);
+        done();
+      });
+  });
+  it.only("should fail as expected when password or username is missing", done => {
+    let credentials = {
+      username: 'yellowleopard753',
+      password: ''
+    }
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(credentials)
+      .end((err, res) => {
+        expect(res).to.have.status(400);
         done();
       });
   });

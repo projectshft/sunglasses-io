@@ -44,7 +44,7 @@ server.listen(PORT, err => {
 
 // endpoint handlers: router.get, router.post
 
-// GET ALL BRANDS
+// GET BRANDS
 router.get("/api/brands", (request, response) => {
   let brandsToReturn = brands;
   if (brandsToReturn.length === 0) {
@@ -70,7 +70,7 @@ router.get("/api/brands/:id/products", (request, response) => {
   return response.end(JSON.stringify(productsToReturn));
 });
 
-// GET ALL PRODUCTS
+// GET PRODUCTS
 router.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = queryString.parse(parsedUrl.query);
@@ -89,5 +89,21 @@ router.get("/api/products", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsToReturn));
 });
+
+// LOGIN 
+router.post('/api/login', function (request, response) {
+  if (request.body.username && request.body.password) {
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+    if (user) {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(); 
+    }
+  } else {
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+}); 
 
 module.exports = server;
