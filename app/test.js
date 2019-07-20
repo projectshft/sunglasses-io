@@ -79,4 +79,16 @@ describe ('POST /login', () => {
                 done();
             })
     })
+    it ('should return an error if improprer credentials are entered', done => {
+        let user = {username: 'aaa', password: 'aaa'}
+        chai
+            .request(server)
+            .post('/api/login')
+            .set('Content-type', 'application/json')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(401);
+                done();
+            })
+    })
 })
