@@ -560,4 +560,8 @@ describe('Sunglasses.io API', () => {
         });
     });
   });
+
+  describe('POST /login', () => {
+    
+  });
 });

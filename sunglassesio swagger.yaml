@@ -111,8 +111,11 @@ paths:
         200:
           description: Login successful - authentication token returned
           schema:
-            type: string
-            example: '0987sdfgjkh'
+            type: object
+            properties:
+              accessToken:
+                type: string
+                example: NY8Z7rIAU4SYeDR8
         400:
           description: Invalid username or password
           schema:
