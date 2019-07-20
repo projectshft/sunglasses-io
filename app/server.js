@@ -16,6 +16,7 @@ myRouter.use(bodyParser.json());
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
 
 const server = http.createServer(function (request, response) {
   //handle CORS preflight request
@@ -135,6 +136,53 @@ myRouter.get('/products', (request, response) => {
     message: 'Product not found',
     fields: 'query'
   }));
+});
+
+myRouter.post('/login', (request, response) => {
+  //Check for username and password in request body
+  const { username, password } = request.body;
+  if (username && password) {
+    //see if there is a user that matches
+    const user = users.find(user => {
+      return user.login.username === username && user.login.password === password;
+    });
+    if (user) {
+      response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+      //successful login, check access tokens
+      const currentAccessToken = accessTokens.find((obj) => {
+        return obj.username === user.login.username;
+      });
+      //if token exists, update otherwise create new token
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify({ accessToken: currentAccessToken.token }));
+      } else {
+        const newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        };
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify({ accessToken: newAccessToken.token }));
+      }
+    } else {
+      //login failed
+      response.writeHead(401, {...CORS_HEADERS, 'content-type': 'application/json'});
+      return response.end(JSON.stringify({
+        code: 401,
+        message: 'Invalid username or password',
+        fields: 'POST body'
+      }));
+    }
+  } else {
+    //missing parameters
+    response.writeHead(400, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 400,
+      message: 'Incorrectly formatted request',
+      fields: 'POST body'
+    }));
+  }
 });
 
 //export for testing

@@ -14,7 +14,8 @@ GENERAL PLAN
   - [X] /brands get
   - [X] /brands/id/products get
   - [X] /products get
-  - [ ] /login post
+  - [X] /login post
+    - [ ] Update errors in api to separate 400 and 401
   - [ ] /me/cart get
   - [ ] /me/cart post
   - [ ] /me/cart/id put

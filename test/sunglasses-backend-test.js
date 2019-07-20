@@ -616,7 +616,53 @@ describe('Sunglasses.io API', () => {
         });
     });
 
-    it('it should return a 400 invalid username or password when sent valid username and invalid password', done => {
+    it('it should return a 400 incorrectly formatted request when sent no username', done => {
+      //arrange
+      const loginInfo = {
+        password: 'wrong'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Incorrectly formatted request');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 400 incorrectly formatted request when sent no password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'yellowleopard753'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Incorrectly formatted request');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 401 invalid username or password when sent valid username and invalid password', done => {
       //arrange
       const loginInfo = {
         username: 'yellowleopard753',
@@ -628,19 +674,19 @@ describe('Sunglasses.io API', () => {
         .post('/login')
         .send(loginInfo)
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           res.body.should.be.an('object');
           res.body.should.have.property('code');
           res.body.should.have.property('message');
           res.body.should.have.property('fields');
-          res.body.code.should.equal(400);
+          res.body.code.should.equal(401);
           res.body.message.should.equal('Invalid username or password');
           res.body.fields.should.equal('POST body');
           done();
         });
     });
 
-    it('it should return a 400 invalid username or password when sent invalid username and valid password', done => {
+    it('it should return a 401 invalid username or password when sent invalid username and valid password', done => {
       //arrange
       const loginInfo = {
         username: 'wrong',
@@ -652,19 +698,19 @@ describe('Sunglasses.io API', () => {
         .post('/login')
         .send(loginInfo)
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           res.body.should.be.an('object');
           res.body.should.have.property('code');
           res.body.should.have.property('message');
           res.body.should.have.property('fields');
-          res.body.code.should.equal(400);
+          res.body.code.should.equal(401);
           res.body.message.should.equal('Invalid username or password');
           res.body.fields.should.equal('POST body');
           done();
         });
     });
 
-    it('it should return a 400 invalid username or password when sent invalid username and invalid password', done => {
+    it('it should return a 401 invalid username or password when sent invalid username and invalid password', done => {
       //arrange
       const loginInfo = {
         username: 'wrong',
@@ -676,12 +722,12 @@ describe('Sunglasses.io API', () => {
         .post('/login')
         .send(loginInfo)
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           res.body.should.be.an('object');
           res.body.should.have.property('code');
           res.body.should.have.property('message');
           res.body.should.have.property('fields');
-          res.body.code.should.equal(400);
+          res.body.code.should.equal(401);
           res.body.message.should.equal('Invalid username or password');
           res.body.fields.should.equal('POST body');
           done();

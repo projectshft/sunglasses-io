@@ -117,6 +117,10 @@ paths:
                 type: string
                 example: NY8Z7rIAU4SYeDR8
         400:
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
           description: Invalid username or password
           schema:
             $ref: '#/definitions/Error'
