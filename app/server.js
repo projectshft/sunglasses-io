@@ -187,6 +187,26 @@ myRouter.post('/login', (request, response) => {
 });
 
 //private routes - access token required////////////////////////////////////////////////////
+myRouter.get('/me/cart', (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(403, {...CORS_HEADERS, 'content-type': 'application/json'});
+      return response.end(JSON.stringify({
+        code: 403,
+        message: 'Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in',
+        fields: 'query'
+      }));
+  } else {
+    //find user and return their cart
+    const user = users.find(user => {
+      return user.login.username === currentAccessToken.username;
+    });
+    response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify(user.cart));
+  }
+});
+
+
 //helper method to check access tokens
 const getValidTokenFromRequest = (request) => {
   const parsedUrl = require('url').parse(request.url, true);
