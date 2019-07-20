@@ -3,7 +3,6 @@ let chaiHttp = require('chai-http');
 let server = require ('./server');
 let Products = require ('../initial-data/products');
 let expect = chai.expect;
-
 let should = chai.should();
 
 chai.use(chaiHttp);
@@ -75,6 +74,9 @@ describe ('POST /login', () => {
             .send({"username": "greenlion235","password": "waters",})
             .end((err, res) => {
                 res.should.have.status(200);
+                res.body.username.should.equal('greenlion235');
+                res.body.password.should.equal('greenlion235');
+                done();
                 
             })
     })

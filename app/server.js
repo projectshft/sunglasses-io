@@ -15,6 +15,7 @@ const header = {'Content-Type': 'application/json'};
 let products = [];
 let brands =[];
 let users = [];
+let accessTokens =[];
 
 const PORT = 3001;
 
@@ -69,6 +70,45 @@ myRouter.get('/api/brands', function(request, response) {
     response.writeHead(200, header);
     return response.end(JSON.stringify(brands));
 })
+
+//create router post for /api/login endpoint
+myRouter.post('/api/login', function(request, response) {
+    let user = [];
+    //see if a username an password was entered
+    if (request.body.username && request.body.password) {
+        //if so find a user that matches the credentials
+        let user = users.filter(user => {
+            return user.login.username == request.body.username && user.login.password == request.body.password
+        })
+        //if there is no user matching credentials return an error
+        if (user.length == 0) {
+            response.writeHead(401, 'Invalid usernmae or password');
+            return response.end();
+        }
+        //see if user currently has an access token
+        let currentAccessToken = accessTokens.find((token) => {
+            return token.username == user.login.username;
+        })
+        //if there is an accesstoken for the user update the time it was last updated
+        if (currentAccessToken) {
+            currentAccessToken.lastUpdated = new Date();
+            return response.end(JSON.stringify(currentAccessToken.token));
+        } else {
+            //if there is not an accesstoken for the user create a new acccesstoken
+            let newAccesstoken = {
+                username: user.login.username,
+                lastUpdated: new Date(),
+                token: uid(16)
+            }
+            accessTokens.push(newAccesstoken);
+            return response.end(JSON.stringify(newAccesstoken.token))
+        }
+    } else {
+        response.writeHead(400, 'Incorrectly fomratted response');
+        return response.end();
+    }
+});
+
 
 
 
