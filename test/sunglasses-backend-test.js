@@ -18,6 +18,47 @@ describe('Sunglasses.io API', () => {
         });
     });
     
+    it('it should return an array', done => {
+      chai
+        .request(server)
+        .get('/brands')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+
+    it('it should return an array of objects', done => {
+      chai
+        .request(server)
+        .get('/brands')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.forEach(item => {
+            item.should.be.an('object');
+          });
+          done();
+        });
+    });
+    
+    it('it should return an array of objects with properties id and name', done => {
+      chai
+        .request(server)
+        .get('/brands')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.forEach(item => {
+            item.should.be.an('object');
+            item.should.have.property('id');
+            item.should.have.property('name');
+          });
+          done();
+        });
+    });
+
     it('it should get all brands in sunglasses store', done => {
       chai
         .request(server)
@@ -249,7 +290,7 @@ describe('Sunglasses.io API', () => {
         });
     });
 
-    it('it should return an array of products', done => {
+    it('it should return an array', done => {
       //arrange
       const id = 1;
       //act, assert
@@ -259,13 +300,75 @@ describe('Sunglasses.io API', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.length.should.be.equal(3);
-          res.body[0].should.be.an('object');
           done();
         });
     });
 
-    it('it should return 404', done => {
+    it('it should return an array of objects', done => {
+      //arrange
+      const id = 1;
+      //act, assert
+      chai
+        .request(server)
+        .get(`/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.forEach(item => {
+            item.should.be.an('object');
+          });
+          done();
+        });
+    });
+
+    it('it should return an array of objects with properties id, categoryId, name,description, price, imageUrls', done => {
+      //arrange
+      const id = 1;
+      //act, assert
+      chai
+        .request(server)
+        .get(`/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.forEach(item => {
+            item.should.be.an('object');
+            item.should.have.property('id');
+            item.should.have.property('categoryId');
+            item.should.have.property('name');
+            item.should.have.property('description');
+            item.should.have.property('price');
+            item.should.have.property('imageUrls');
+          });
+          done();
+        });
+    });
+
+    it('it should return an array of objects where imageUrls property is an array', done => {
+      //arrange
+      const id = 1;
+      //act, assert
+      chai
+        .request(server)
+        .get(`/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.forEach(item => {
+            item.should.be.an('object');
+            item.should.have.property('id');
+            item.should.have.property('categoryId');
+            item.should.have.property('name');
+            item.should.have.property('description');
+            item.should.have.property('price');
+            item.should.have.property('imageUrls');
+            item.imageUrls.should.be.an('array');
+          });
+          done();
+        });
+    });
+
+    it('it should return 404 on invalid categoryId', done => {
       //arrange
       const id = 0;
       //act, assert
@@ -283,6 +386,109 @@ describe('Sunglasses.io API', () => {
           res.body.code.should.equal(404);
           res.body.message.should.equal('Brand not found');
           res.body.fields.should.equal('id');
+          done();
+        });
+    });
+  });
+
+  describe('GET /products', () => {
+    it('it should get a 200 response', done => {
+      //arrange
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+
+    it('it should return an array', done => {
+      //arrange
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.an('array');
+          done();
+        });
+    });
+
+    it('it should have objects as elements of an array', done => {
+      //arrange
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.an('array');
+          res.body.forEach(element => {
+            element.should.be.an('object');
+          });
+          done();
+        });
+    });
+
+    it('it should return all products from a search of "glasses"', done => {
+      //arrange
+      const searchTerm = 'glasses';
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products?query=${searchTerm}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.an('array');
+          res.body.forEach(element => {
+            element.should.be.an('object');
+          });
+          res.body.length.should.equal(11);
+          done();
+        });
+    });
+
+    it('it should return all products from a search of "Glasses"', done => {
+      //arrange
+      const searchTerm = 'Glasses';
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products?query=${searchTerm}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.an('array');
+          res.body.forEach(element => {
+            element.should.be.an('object');
+          });
+          res.body.length.should.equal(11);
+          done();
+        });
+    });
+
+    it('it should return 404 not found error from a search of "contacts"', done => {
+      //arrange
+      const searchTerm = 'contacts';
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products?query=${searchTerm}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.should.be.an('array');
+          res.body.forEach(element => {
+            element.should.be.an('object');
+          });
+          res.body.length.should.equal(11);
           done();
         });
     });

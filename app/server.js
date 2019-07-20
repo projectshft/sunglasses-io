@@ -46,7 +46,7 @@ const server = http.createServer(function (request, response) {
   });
 });
 
-//public routes - no access token required
+//public routes - no access token required/////////////////////////////////////////////////
 myRouter.get('/brands', (request, response) => {
   //substring(8) returns query after the '?' if client sends any
   const { query } = queryString.parse(request.url.substring(8));
@@ -101,6 +101,11 @@ myRouter.get('/brands/:categoryId/products', (request, response) => {
     message: 'Brand not found',
     fields: 'id'
   }));
+});
+
+myRouter.get('/products', (request, response) => {
+  response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+  return response.end();
 });
 
 //export for testing
