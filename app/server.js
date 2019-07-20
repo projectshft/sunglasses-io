@@ -8,7 +8,7 @@ var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
 
-//set variable for 200 header
+//set variable for 200 response header
 const header = {'Content-Type': 'application/json'};
 
 //set default variables
@@ -63,6 +63,11 @@ myRouter.get('/api/products', function(request, response) {
     }
     response.writeHead(200, header);
     return response.end(JSON.stringify(productsToReturn));
+})
+
+myRouter.get('/api/brands', function(request, response) {
+    response.writeHead(200, header);
+    return response.end(JSON.stringify(brands));
 })
 
 

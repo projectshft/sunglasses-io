@@ -12,9 +12,8 @@ chai.use(chaiHttp);
 // let assert = require('assert');
 
 
-//set a test for a get request 
+//set a test for /get products request 
 describe('/GET products', () => {
-    //if no query is entered all of the products should be returned 
         it('should GET all the products if no search query defined', done => {
             chai
                 .request(server)
@@ -27,7 +26,6 @@ describe('/GET products', () => {
                     done();
                 })
         })
-        //if a single query is entered, the specific product should be returned
         it('should return only the products that match that specific query', done => {
             chai    
                 .request(server)
@@ -40,8 +38,7 @@ describe('/GET products', () => {
                     done();
                 })
         })
-        //if the query doesn't match any products in the store return a 400 error
-        it (' should return an error if an unrecognized query is entered', done => {
+        it ('should return an error if an unrecognized query is entered', done => {
             chai
                 .request(server)
                 .get('/api/products?q=zz')
@@ -52,4 +49,19 @@ describe('/GET products', () => {
         })        
 });
 
-
+//set test for get /brands request
+describe ('/GET brands', () => {
+        it ('should GET all the brands in the database', done => {
+            chai
+                .request(server)
+                .get('/api/brands')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    expect("Content-Type", "application/json");
+                    res.body.should.be.an('array')
+                    res.body.should.have.lengthOf(5);
+                    done();
+                    
+                }) 
+    })
+})
