@@ -12,7 +12,7 @@ chai.use(chaiHTTP);
 
 // GET BRANDS
 describe("/GET brands", () => {
-  it.only("should GET all brands", done => {
+  it("should GET all brands", done => {
     chai
       .request(server)
       .get("/api/brands")
@@ -26,11 +26,20 @@ describe("/GET brands", () => {
         done();
       });
   });
+  it.skip("should fail as expected when no brands are found", done => {
+    chai
+      .request(server)
+      .get("/api/brands")
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
 });
 
 // GET PRODUCTS
 describe("/GET products", () => {
-  it.only("should GET all products", done => {
+  it("should GET all products", done => {
     chai
       .request(server)
       .get("/api/products")

@@ -46,8 +46,13 @@ server.listen(PORT, err => {
 
 // GET ALL BRANDS
 router.get("/api/brands", (request, response) => {
+  let brandsToReturn = brands;
+  if (brandsToReturn.length === 0) {
+    response.writeHead(404, "No brands found");
+    return response.end();
+  } 
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(brands));
+  return response.end(JSON.stringify(brandsToReturn));
 });
 
 // GET ALL PRODUCTS
