@@ -829,6 +829,42 @@ describe('Sunglasses.io API', () => {
             done();
           });
       });
+
+      it('should return an array of objects', done => {
+        //arrange
+        //should have accessToken from logging in
+        //act, assert
+        chai
+          .request(server)
+          .get(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.forEach(item => {
+              item.should.be.an('object');
+            });
+            done();
+          });
+      });
+
+      it('should return an array of objects with properties product, quantity', done => {
+        //arrange
+        //should have accessToken from logging in
+        //act, assert
+        chai
+          .request(server)
+          .get(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.forEach(item => {
+              item.should.be.an('object');
+              item.should.have.property('product');
+              item.should.have.property('quantity');
+            });
+            done();
+          });
+      });
     });
   });
 });
