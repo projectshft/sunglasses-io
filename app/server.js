@@ -34,4 +34,5 @@ myRouter.get("/api/brands", (request, response) => {
 	response.end(JSON.stringify(brands));
 })
 
+// export server to use in server-test file
 module.exports = server;
