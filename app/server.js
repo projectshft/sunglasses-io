@@ -51,6 +51,10 @@ myRouter.get('/api/brands/:id/products', function(request, response){
 });
 //return products by search
 myRouter.get('/api/products', function(request, response){
+  if(request._parsedUrl.query === null || !request._parsedUrl.query.includes('=')){
+    response.writeHead(400, 'Invalid Request Format');
+    return response.end();
+  }
   //isolate query from path, use lowercase so case mismatch won't impact return
   let searchString = request._parsedUrl.query.toLowerCase();
   let queryObject = queryString.parse(searchString);

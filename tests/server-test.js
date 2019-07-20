@@ -70,5 +70,23 @@ describe('/GET products', () => {
       res.should.have.status(404);
       done();
     })
+ });
+ it('it should get a 400 response if query is not provided', done => {
+   chai
+    .request(server)
+    .get('/api/products')
+    .end((err, res) => {
+      res.should.have.status(400);
+      done();
+    })
+ })
+ it('it should get a 400 response if query is not formatted correctly', done => {
+   chai
+    .request(server)
+    .get('/api/products?querysugar')
+    .end((err, res) => {
+      res.should.have.status(400);
+      done();
+    })
  })
 });
