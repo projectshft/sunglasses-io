@@ -139,6 +139,42 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      summary: Update quantities in cart
+      description: Allows user to update quantities of items in their cart.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: accessToken
+          in: header
+          description: User's access token
+          required: true
+          type: string
+        - name: updatedQuantities
+          in: body
+          description: Updated quantities for user cart
+          required: true
+          schema:
+            $ref: '#/definitions/Quantities'
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Successfully updated user's cart.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '401':
+          description: Unauthentication Error, You must have authentication to get the requested response.
+        '404':
+          description: User not found.       
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Brand:
     type: object
