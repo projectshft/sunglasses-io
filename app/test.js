@@ -67,18 +67,18 @@ describe ('GET /brands', () => {
 
 //set test for user login, /me post request
 describe ('POST /login', () => {
-    it ('should grant access to user if the username and password is valid', done => {
-        let user = {username: 'yellowleopard753', password: 'jonjon'}
-        chai
-            .request(server)
-            .post('/api/login')
-            .set('Content-type', 'application/json')
-            .send(user)
-            .end((err, res) => {
-                res.should.have.status(200);
-                done();
-            })
-    })
+        it ('should grant access to user if the username and password is valid', done => {
+            let user = {username: 'yellowleopard753', password: 'jonjon'}
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-type', 'application/json')
+                .send(user)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    done();
+        })
+ })
     it ('should return an error if improprer credentials are entered', done => {
         let user = {username: 'aaa', password: 'aaa'}
         chai
@@ -90,5 +90,19 @@ describe ('POST /login', () => {
                 res.should.have.status(401);
                 done();
             })
+    })
+})
+
+
+//set test for /me/cart/:productId
+describe ('GET me/cart', () => {
+    it ('should return all the products currently in a users cart', done => {
+    chai
+        .request(sever)
+        .get('/api/me/cart')
+        .end((err,res) => {
+            res.should.have.status(200);
+            done();
+        })
     })
 })
