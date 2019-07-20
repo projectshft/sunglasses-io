@@ -127,7 +127,300 @@ paths:
       responses:
         '200':
           description: Request to retrieve user's cart was successful.
+          schema:swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: localhost:3001
+schemes: 
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: All Brands
+      description: returns all brands of sunglasses
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Request for brands was successful.
           schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404':
+          description: No brands available
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/brands/:id/products':
+    get:
+      summary: All products of a certain brand
+      description: returns all products of a specific brand by brand ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of the brand for products
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Request for products by brand was successful.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: No products available or brand ID incorrect
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: All Products
+      description: Returns all available products
+      parameters:
+        - name: query
+          in: path
+          description: Search query string from user
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Request for products was successful.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Products not available
+        '404':
+          description: No products that match that query
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Log user into page
+      description: Log user into page requiring username & password
+      tags: 
+        - Login
+      consumes: 
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: login
+          in: body
+          description: User's login credentials
+          schema:
+            $ref: '#/definitions/Login'
+      responses:
+        '200':
+          description: Request to login was successful.
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/Login'
+        '400':
+          description: Server could not understand the request due to invalid syntax.
+        '401':
+          description: The username or password was incorrect.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/me/cart':
+    get:
+      summary: User cart
+      description: Get all the products that are in the user's cart.
+      parameters:
+        - name: accessToken
+          in: header
+          description: User's access token
+          required: true
+          type: string
+      tags: 
+        - Cart
+      responses:
+        '200':
+          description: Request to retrieve user's cart was successful.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '401':
+          description: Unauthentication Error, You must have authentication to get the requested response.
+        '404':
+          description: User not found.
+        default: 
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Update quantities in cart
+      description: Allows user to update quantities of items in their cart.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: accessToken
+          in: header
+          description: User's access token
+          required: true
+          type: string
+        - name: updatedQuantities
+          in: body
+          description: Updated quantities for user cart
+          required: true
+          schema:
+            $ref: '#/definitions/Quantities'
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Successfully updated user's cart.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '401':
+          description: Unauthentication Error, You must have authentication to get the requested response.
+        '404':
+          description: User not found.       
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  'me/cart/:productId':
+    post:
+      summary: add item to the cart
+      description: Adds a product to the user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: ID of the product to be added to the cart
+          required: true
+          type: string
+        - name: accessToken
+          in: headers
+          description: User's access token
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Successfully added product to user's cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        '400':
+          description: server could not understand the request due to invalid syntax.
+        '401':
+          description: Unauthentication Error, You must have authentication to get the requested response.
+        '404':
+          description: User not found.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id for brand
+      name: 
+        type: string
+        description: name of the brand
+  Product:
+    type: object
+    properties:
+        id:
+          type: string
+          description: The id for the product.
+        categoryId:
+          type: string
+          description: The id for the brand of the product.
+        name:
+          type: string
+          description: The name of the product.
+        description:
+          type: string
+          description: A description the product.
+        price:
+          type: number
+          description: The price of the product.
+        imageUrls:
+          type: string
+          description: The URL for the image of a pair of sunglasses.
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: The username for the user
+      password:
+        type: string
+        description: The password for the user
+  Cart:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique Product ID
+      categoryId:
+        type: string
+        description: Brand ID for the Product
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: The description of the product
+      price:
+        type: number
+        description: The sale price of a product
+      imageUrls:
+        type: string
+        description: URLs for images of the product
+      quantity:
+        type: number
+        description: The amount of the product in the cart
+  Quantities:
+    type: object
+    properties:
+      updatedQuantities:
+        type: array
+        items: 
+          type: number
+        description: Array of updated cart quantities
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+    
             type: array
             items:
               $ref: '#/definitions/Cart'
