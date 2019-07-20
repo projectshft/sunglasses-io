@@ -56,7 +56,7 @@ describe('/GET products', () => {
     .get('/api/products?query=sugar')
     .end((err, res) => {
       res.should.have.status(200);
-      res.body.should.be.an('array')
+      res.body.should.be.an('array');
       res.body.length.should.be.eql(1);
       done();
 
@@ -88,5 +88,22 @@ describe('/GET products', () => {
       res.should.have.status(400);
       done();
     })
- })
+ });
 });
+ //tests for log in endpoint
+ describe('/POST login', () => {
+ it('it should get a token object returned if email and password are correct', done => {
+   chai
+   .request(server)
+   .post('/api/login')
+   .send({email: "salvador.jordan@example.com", password: "tucker"})
+   .end((err, res) => {
+     res.should.have.status(200);
+     res.should.be.an('object');
+     console.log(res.body);
+     res.body.should.have.property('token');
+     done();
+   })
+
+ });
+ });

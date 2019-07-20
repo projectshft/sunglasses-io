@@ -10,10 +10,11 @@ const hostname = 'localhost';
 const PORT = 3001;
 
 //State holding variables
-var brands = [];
-var products = [];
-var users = [];
-var user = {};
+let brands = [];
+let products = [];
+let users = [];
+let user = {};
+let accessTokens = [];
 
 //Router set up
 var myRouter = Router();
@@ -26,7 +27,7 @@ const server = module.exports = http.createServer(function (request, response) {
   //load data from files into server memory
   brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
   products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
-  // users = JSON.parse(fs.readFileSync('../initial-data/users.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('../initial-data/users.json', 'utf-8'));
   // user = users[0];
 });
 //return brands of sunglasses
@@ -70,3 +71,21 @@ myRouter.get('/api/products', function(request, response){
   response.writeHead(200, {'Content-Type': 'application/json'});
   return response.end(JSON.stringify(searchResults));
 });
+
+myRouter.post('/api/login', function(request, response){
+  let email = request.body.email;
+  let password = request.body.password;
+  
+  //find user that matches info sent in body of request
+  let foundUser = users.find((user) => {
+    return user.email === request.body.email && user.login.password === request.body.password  
+  });
+  
+  //if that user is found, return an access token 
+  if(user) {
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    let token = uid(16);
+    return response.end(JSON.stringify({'token': token}));
+    }
+  
+})
