@@ -14,12 +14,17 @@ let brands = [];
 let users = [];
 let accessTokens = [];
 
-let testAccessToken = {
+let testAccessToken1 = {
   username: 'lazywolf342',
   lastUpdated: new Date(),
   token: "kjKQZ2QHG1eFCfmT"
 }
-accessTokens.push(testAccessToken);
+let testAccessToken2 = {
+  username: 'greenlion235',
+  lastUpdated: new Date(),
+  token: "hEoJFuix38uedAf0"
+}
+accessTokens.push(testAccessToken1, testAccessToken2);
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
@@ -185,5 +190,25 @@ router.post('/api/me/cart', function (request, response) {
     return response.end(JSON.stringify(user.cart));
   }
 }); 
+
+router.delete('/api/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to log in to access the cart");
+    return response.end();
+  } else { 
+  const { productId } = request.params;
+  let currentUser = currentAccessToken.username;
+  let user = users.find((user) => {
+    return user.login.username == currentUser;
+  });
+  let cartToReturn = user.cart.filter(item => 
+    item.productId !== productId 
+  );
+  user.cart = cartToReturn; 
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user.cart));
+  }
+});
 
 module.exports = server;

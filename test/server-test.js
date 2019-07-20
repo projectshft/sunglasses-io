@@ -242,3 +242,31 @@ describe("/POST cart", () => {
       });
   });
 }); 
+
+// DELETE CART 
+describe("/DELETE cart", () => { 
+  it.only("should DELETE item from cart", done => { 
+    let token = 'hEoJFuix38uedAf0'; 
+    chai 
+      .request(server)
+      .delete(`/api/me/cart/3?accessToken=${token}`)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.length(1);
+        done();
+      });
+  }); 
+  it.only("should fail as expected when a user is not logged in", done => { 
+    chai 
+      .request(server)
+      .delete(`/api/me/cart/4`)
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  }); 
+}); 
