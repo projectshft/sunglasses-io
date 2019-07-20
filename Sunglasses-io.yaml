@@ -117,34 +117,42 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     post:
-      summary: Add an Item to the Cart
-      description: |
-        This endpoint adds a specific item to a user's cart
-      tags:
-        - Cart
-      responses:
-        '200':
-          description: Add was successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me/cart/:productId:
-    post:
       summary: Change the Quantity of a Specific Product in the Cart
       description: |
         This endpdint allows the user to modify the quantity of units desired for a specific product
       tags:
         - Cart
+      responses:
+        '200':
+          description: Change in quality was succesful
+        '400':
+          description: Request failed due to error in endpoint
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Unauthorized to access data
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/:productId:
+    post:
+      summary: Add an Item to the Cart 
+      description: |
+        This endpoint adds a specific item to a user's cart
+      tags:
+        - Cart
       parameters:
         - name: productId
           in: path
-          description: 'The id of the card product to have quantity changed. Use 1 for testing. '
+          description: 'The id of the product to add to the cart'
           required: true
           type: string
       responses:
         '200':
-          description: Change in Quantity was successful
+          description: Add was succesful
         '400':
           description: Request failed due to error in endpoint
           schema:
