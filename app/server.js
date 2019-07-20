@@ -55,6 +55,21 @@ router.get("/api/brands", (request, response) => {
   return response.end(JSON.stringify(brandsToReturn));
 });
 
+// GET PRODUCTS BY BRAND 
+router.get("/api/brands/:id/products", (request, response) => {
+  const { id } = request.params;
+  const brand = brands.find(brand => brand.id === id);
+  if (!brand) {
+    response.writeHead(404, "Brand does not exist");
+    return response.end();
+  }
+  const productsToReturn = products.filter(
+    product => product.brandId === id
+  );
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(productsToReturn));
+});
+
 // GET ALL PRODUCTS
 router.get("/api/products", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
