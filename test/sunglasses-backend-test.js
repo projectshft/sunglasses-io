@@ -735,7 +735,7 @@ describe('Sunglasses.io API', () => {
     });
   });
 
-  describe('GET /me/cart', () =>{
+  describe('GET /me/cart', () => {
     it('it should return 403 unauthorized when no access token sent', done => {
       //arrange
       //act
@@ -888,5 +888,9 @@ describe('Sunglasses.io API', () => {
           });
       });
     });
+  });
+
+  describe('POST /me/cart', () => {
+
   });
 });

@@ -160,12 +160,12 @@ paths:
       description: The /me/cart POST endpoint allows you to add an item to the logged in user's shopping cart
       parameters:
         - name: accessToken
-          in: path
+          in: query
           description: Access token given to logged in users for authentication
           type: string
           required: true
         - name: productId
-          in: path
+          in: query
           description: Unique ID of the product to be added to logged in user's cart
           type: string
           required: true
@@ -195,12 +195,12 @@ paths:
           type: string
           required: true
         - name: accessToken
-          in: path
+          in: query
           description: Access token given to logged in users for authentication
           type: string
           required: true
         - name: quantity
-          in: path
+          in: query
           description: Change amount of selected product in shopping cart to quantity
           type: string
           required: true
@@ -239,7 +239,7 @@ paths:
           type: string
           required: true
         - name: accessToken
-          in: path
+          in: query
           description: Access token given to logged in users for authentication
           type: string
           required: true
