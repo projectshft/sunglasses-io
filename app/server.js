@@ -64,7 +64,7 @@ myRouter.get('/api/products', function(request, response) {
     response.writeHead(200, header);
     return response.end(JSON.stringify(productsToReturn));
 })
-
+//create router for /api/brands endpoint
 myRouter.get('/api/brands', function(request, response) {
     response.writeHead(200, header);
     return response.end(JSON.stringify(brands));

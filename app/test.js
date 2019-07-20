@@ -12,8 +12,8 @@ chai.use(chaiHttp);
 // let assert = require('assert');
 
 
-//set a test for /get products request 
-describe('/GET products', () => {
+//set a test for /products get request 
+describe('GET /products', () => {
         it('should GET all the products if no search query defined', done => {
             chai
                 .request(server)
@@ -49,8 +49,8 @@ describe('/GET products', () => {
         })        
 });
 
-//set test for get /brands request
-describe ('/GET brands', () => {
+//set test for /brands get request
+describe ('GET /brands', () => {
         it ('should GET all the brands in the database', done => {
             chai
                 .request(server)
@@ -63,5 +63,18 @@ describe ('/GET brands', () => {
                     done();
                     
                 }) 
+    })
+})
+
+//set test for user login, /me post request
+describe ('POST /me/login', () => {
+    it ('should grant access to user if the username and password is valid', done => {
+        chai
+            .request(server)
+            .post('api/me/login')
+            .send({"username": "greenlion235","password": "waters",})
+            .end((err, res) => {
+                
+            })
     })
 })
