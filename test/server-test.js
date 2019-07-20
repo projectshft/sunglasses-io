@@ -38,8 +38,8 @@ describe("/GET brands", () => {
 });
 
 // GET PRODUCTS BY BRAND
-describe("/GET products by brand", () => {
-  it.only("should GET all brands", done => {
+describe("/GET products by brand id", () => {
+  it.only("should GET all products of a given brand with valid id", done => {
     chai
       .request(server)
       .get("/api/brands/1/products")
@@ -53,7 +53,7 @@ describe("/GET products by brand", () => {
         done();
       });
   });
-  it.only("should fail as expected when no brands are found", done => {
+  it.only("should fail as expected when no brand matches given id", done => {
     chai
       .request(server)
       .get("/api/brands/6/products")
@@ -83,7 +83,7 @@ describe("/GET products", () => {
   it.only("should limit results to those with a query string", done => {
     chai
       .request(server)
-      .get("/api/products?query=best")
+      .get("/api/products?query=best+glasses")
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
@@ -91,6 +91,30 @@ describe("/GET products", () => {
         expect("Content-Type", "application/json");
         expect(res.body).to.be.an("array");
         expect(res.body).to.have.lengthOf(4);
+        done();
+      });
+  });
+  it.only("should return all products if query is missing", done => {
+    chai
+      .request(server)
+      //property doesn't exist
+      .get("/api/products?query=")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(11);
+        done();
+      });
+  });
+  it.only("should fail as expected when no products match query", done => {
+    chai
+      .request(server)
+      //property doesn't exist
+      .get("/api/products?query=blue")
+      .end((err, res) => {
+        expect(res).to.have.status(404);
         done();
       });
   });

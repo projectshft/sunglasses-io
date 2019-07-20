@@ -79,6 +79,10 @@ router.get("/api/products", (request, response) => {
     productsToReturn = products.filter(product => 
       product.name.includes(query) || product.description.includes(query)
     );
+    if (productsToReturn.length === 0) {
+      response.writeHead(404, "No products found");
+      return response.end();
+    }
   } else {
     productsToReturn = products; 
   }
