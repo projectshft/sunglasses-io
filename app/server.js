@@ -14,11 +14,13 @@ let brands = [];
 let products = [];
 let users = [];
 
-http
-.createServer(function (request, response) {
+
+const server = http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response));
 
-}).listen(PORT, error => {
+})
+
+server.listen(PORT, error => {
     if (error) {
         return console.log("Error on Server Startup: ", error);
       }
@@ -39,3 +41,14 @@ http
       });
       console.log(`Server is listening on ${PORT}`);
 });
+
+module.exports = server
+
+myRouter.get('/api/brands', function( req, res ) {
+    res.writeHead(200, {'Content-Type': 'application/json'})
+    if (brands.length === 0) {
+        console.log("There are no brands in the database")
+        return res.end()
+    }
+    return res.end(JSON.stringify(brands))
+})
