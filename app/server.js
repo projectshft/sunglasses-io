@@ -78,7 +78,7 @@ myRouter.get('/brands', (request, response) => {
 myRouter.get('/brands/:categoryId/products', (request, response) => {
   const { categoryId } = request.params;  
 
-  //reverse logic to have one return 404
+  //reverse logic to have one return 404 instead of two
   //validate categoryId
   //only checking for existence
   if (categoryId) {
@@ -104,8 +104,30 @@ myRouter.get('/brands/:categoryId/products', (request, response) => {
 });
 
 myRouter.get('/products', (request, response) => {
-  response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
-  return response.end();
+  //substring(8) returns query after the '?' if client sends any
+  const { query } = queryString.parse(request.url.substring(10));
+  //if no query or empty string, return all products
+  if (!query) {
+    response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify(products));
+  }
+  //else search for query
+  const matchedProducts = products.filter(product => {
+    return (product.name.toLowerCase().includes(query.toLowerCase()) || product.description.toLowerCase().includes(query.toLowerCase()))
+      ? true
+      : false;
+  });
+  //if matchedProducts empty return 404, else return
+  if (matchedProducts.length > 0) {
+    response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify(matchedProducts));
+  }
+  response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+  return response.end(JSON.stringify({
+    code: 404,
+    message: 'Product not found',
+    fields: 'query'
+  }));
 });
 
 //export for testing

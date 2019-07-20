@@ -414,7 +414,7 @@ describe('Sunglasses.io API', () => {
         .get(`/products`)
         .end((err, res) => {
           res.should.have.status(200);
-          res.should.be.an('array');
+          res.body.should.be.an('array');
           done();
         });
     });
@@ -428,7 +428,7 @@ describe('Sunglasses.io API', () => {
         .get(`/products`)
         .end((err, res) => {
           res.should.have.status(200);
-          res.should.be.an('array');
+          res.body.should.be.an('array');
           res.body.forEach(element => {
             element.should.be.an('object');
           });
@@ -481,6 +481,7 @@ describe('Sunglasses.io API', () => {
         });
     });
 
+    //are these two bad tests?
     it('it should return all products from a search of "glasses"', done => {
       //arrange
       const searchTerm = 'glasses';
@@ -491,7 +492,7 @@ describe('Sunglasses.io API', () => {
         .get(`/products?query=${searchTerm}`)
         .end((err, res) => {
           res.should.have.status(200);
-          res.should.be.an('array');
+          res.body.should.be.an('array');
           res.body.forEach(element => {
             element.should.be.an('object');
           });
@@ -510,7 +511,26 @@ describe('Sunglasses.io API', () => {
         .get(`/products?query=${searchTerm}`)
         .end((err, res) => {
           res.should.have.status(200);
-          res.should.be.an('array');
+          res.body.should.be.an('array');
+          res.body.forEach(element => {
+            element.should.be.an('object');
+          });
+          res.body.length.should.equal(11);
+          done();
+        });
+    });
+    
+    it('it should return all products from a search of ""', done => {
+      //arrange
+      const searchTerm = '';
+      //assert
+      //act
+      chai
+        .request(server)
+        .get(`/products?query=${searchTerm}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
           res.body.forEach(element => {
             element.should.be.an('object');
           });
@@ -528,31 +548,10 @@ describe('Sunglasses.io API', () => {
         .request(server)
         .get(`/products?query=${searchTerm}`)
         .end((err, res) => {
-          res.should.have.status(200);
-          res.should.be.an('object');
+          res.should.have.status(404);
+          res.body.should.be.an('object');
           res.body.should.have.property('code');
-          res.body.should.have.property('messsage');
-          res.body.should.have.property('fields');
-          res.body.code.should.equal(404);
-          res.body.message.should.equal('Product not found');
-          res.body.fields.should.equal('query');
-          done();
-        });
-    });
-
-    it('it should return 404 not found error from a search of ""', done => {
-      //arrange
-      const searchTerm = '';
-      //assert
-      //act
-      chai
-        .request(server)
-        .get(`/products?query=${searchTerm}`)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.should.be.an('object');
-          res.body.should.have.property('code');
-          res.body.should.have.property('messsage');
+          res.body.should.have.property('message');
           res.body.should.have.property('fields');
           res.body.code.should.equal(404);
           res.body.message.should.equal('Product not found');

@@ -13,7 +13,7 @@ GENERAL PLAN
 - [ ] Write test for each endpoint
   - [X] /brands get
   - [X] /brands/id/products get
-  - [ ] /products get
+  - [X] /products get
   - [ ] /login post
   - [ ] /me/cart get
   - [ ] /me/cart post
