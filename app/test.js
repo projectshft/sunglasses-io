@@ -67,13 +67,14 @@ describe ('GET /brands', () => {
 })
 
 //set test for user login, /me post request
-describe ('POST /me/login', () => {
+describe ('POST /login', () => {
     it ('should grant access to user if the username and password is valid', done => {
         chai
             .request(server)
-            .post('api/me/login')
+            .post('/api/login')
             .send({"username": "greenlion235","password": "waters",})
             .end((err, res) => {
+                res.should.have.status(200);
                 
             })
     })
