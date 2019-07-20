@@ -173,7 +173,7 @@ router.get('/api/me/cart', function (request, response) {
   }
 }); 
 
-// POST CART (add item)
+// POST CART (add)
 router.post('/api/me/cart', function (request, response) { 
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
@@ -191,6 +191,7 @@ router.post('/api/me/cart', function (request, response) {
   }
 }); 
 
+// DELETE CART 
 router.delete('/api/me/cart/:productId', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
@@ -210,5 +211,28 @@ router.delete('/api/me/cart/:productId', (request, response) => {
   return response.end(JSON.stringify(user.cart));
   }
 });
+
+// POST CART (edit)
+router.post('/api/me/cart/:productId', (request, response) => { 
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to log in to access the cart");
+    return response.end();
+  } else { 
+    const { productId } = request.params;
+    const parsedUrl = url.parse(request.originalUrl);
+    const { quantity } = queryString.parse(parsedUrl.quantity);
+    let currentUser = currentAccessToken.username;
+    let user = users.find((user) => {
+      return user.login.username == currentUser;
+    });
+    let cartToReturn = user.cart.map(item => 
+      (item.productId === productId)? Object.assign({}, item, { 'quantity': quantity }): item
+    );
+    user.cart = cartToReturn; 
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart));
+  }
+}); 
 
 module.exports = server;

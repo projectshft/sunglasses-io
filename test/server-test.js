@@ -205,8 +205,8 @@ describe("/GET cart", () => {
   });
 });
 
-// POST CART 
-describe("/POST cart", () => {
+// POST CART (add)
+describe("/POST cart (add)", () => {
   it.only("should POST addition of item to cart", done => {
     let token = 'kjKQZ2QHG1eFCfmT'; 
     let item = {
@@ -263,10 +263,38 @@ describe("/DELETE cart", () => {
   it.only("should fail as expected when a user is not logged in", done => { 
     chai 
       .request(server)
-      .delete(`/api/me/cart/4`)
+      .delete(`/api/me/cart/3`)
       .end((err, res) => {
         expect(res).to.have.status(401);
         done();
       });
   }); 
+}); 
+
+// POST CART (edit)
+describe("/POST cart (edit)", () => {
+  it.only("should POST changes to item quantity in cart", done => {
+    let token = 'hEoJFuix38uedAf0'; 
+    chai
+      .request(server)
+      .post(`/api/me/cart/4?quantity=3&accessToken=${token}`)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.length(1);
+        done();
+      });
+  });
+  it.only("should fail as expected when a user is not logged in", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/4?quantity=3")
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
 }); 
