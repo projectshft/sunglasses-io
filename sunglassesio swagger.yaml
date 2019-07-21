@@ -186,6 +186,10 @@ paths:
           description: Product not found
           schema:
             $ref: '#/definitions/Error'
+        409:
+          description: Product already in user's cart
+          schema:
+            $ref: '#/definitions/Error'
   /me/cart/{id}:
     put:
       tags:
