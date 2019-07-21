@@ -185,19 +185,22 @@ router.post('/api/me/cart', function (request, response) {
     return response.end();
   } else { 
     let currentUser = getCurrentUserByUsername(currentAccessToken.username);
-    let item = request.body; 
+    //let item = request.body; 
+    const parsedUrl = url.parse(request.originalUrl);
+    const { productId } = queryString.parse(parsedUrl.query);
     let product = products.find(product => {
-      return product.id === item.productId;
+      return product.id === productId; //item.productId;
     });
     if (!product) {
       response.writeHead(404, "Product does not exist");
       return response.end();
     } else {
       let cartItem = currentUser.cart.find(product => {
-        return product.productId === item.productId;
+        return product.productId === productId; //item.productId;
       });
       if (!cartItem) {
-        item.quantity = 1; 
+        //item.quantity = 1; 
+        let item = {'productId': productId, 'quantity': 1}; 
         currentUser.cart.push(item); 
       } else {
         cartItem.quantity++; 

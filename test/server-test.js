@@ -209,11 +209,10 @@ describe("/GET cart", () => {
 describe("/POST cart (add)", () => {
   it.only("should POST addition of item to cart", done => {
     let token = 'kjKQZ2QHG1eFCfmT'; 
-    let item = { productId : '1'};
+    let productId = '1';
     chai
       .request(server)
-      .post(`/api/me/cart?accessToken=${token}`)
-      .send(item)
+      .post(`/api/me/cart?productId=${productId}&accessToken=${token}`)
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
@@ -226,11 +225,10 @@ describe("/POST cart (add)", () => {
       });
   });
   it.only("should fail as expected when a user is not logged in", done => {
-    let item = { productId : '1'};
+    let productId = '2';
     chai
       .request(server)
-      .post("/api/me/cart")
-      .send(item)
+      .post(`/api/me/cart?productId=${productId}`)
       .end((err, res) => {
         expect(res).to.have.status(401);
         done();
@@ -238,11 +236,10 @@ describe("/POST cart (add)", () => {
   });
   it.only("should fail as expected when no product matches given id", done => {
     let token = 'kjKQZ2QHG1eFCfmT'; 
-    let item = { productId : '12'};
+    let productId = '12';
     chai
       .request(server)
-      .post(`/api/me/cart?accessToken=${token}`)
-      .send(item)
+      .post(`/api/me/cart?productId=${productId}&accessToken=${token}`)
       .end((err, res) => {
         expect(res).to.have.status(404);
         done();
@@ -250,11 +247,10 @@ describe("/POST cart (add)", () => {
   });
   it.only("should increment the item quantity if it exists in the cart already", done => {
     let token = 'kjKQZ2QHG1eFCfmT'; 
-    let item = { productId : '1'};
+    let productId = '1';
     chai
       .request(server)
-      .post(`/api/me/cart?accessToken=${token}`)
-      .send(item)
+      .post(`/api/me/cart?productId=${productId}&accessToken=${token}`)
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
