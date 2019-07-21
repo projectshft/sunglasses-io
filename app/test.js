@@ -130,9 +130,8 @@ describe('POST /me/cart/:productId', () => {
 
     })
 })
-//should return an error if theres is no token
-//should return an errror if there is no product mathcihg that
 
+//set test for DELETE /me/cart/:productID
 describe ('DELETE /me/cart/:productId', () => {
     it ('should delete a product from the users cart', done => {
         chai

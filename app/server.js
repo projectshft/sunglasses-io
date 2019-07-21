@@ -25,6 +25,7 @@ let cart = [{
     "name": "Superglasses",
     "description": "The best glasses in the world",
     "price":150,
+    "quantity": 1,
     "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
 }];
 //set a helper function that parses the accessToken from the url
@@ -61,13 +62,13 @@ const server = module.exports = http.createServer(function (request, response) {
 }).listen(PORT, () => {
     //extract the products data and save it into a  products variable
     //array of objects
-    products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
+    products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf-8'));
     //extract the brands data and save it into a products variable
     //array of objects
-    brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
+    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf-8'));
    //array of objects 
     //extract the user data and savi it into a users variable
-    users = JSON.parse(fs.readFileSync('../initial-data/users.json'), 'utf-8')
+    users = JSON.parse(fs.readFileSync('./initial-data/users.json'), 'utf-8')
 });
 
 //creater a route for the /products endpoint
@@ -152,7 +153,7 @@ myRouter.get('/api/me/cart', function(request, response) {
         return response.end(JSON.stringify(cart))
     }
 })
-//create router post for /api/me/cart/:productId endpoint which adds product to cart
+//create router post for /api/me/cart/:productId endpoint which changes the quantity of product in cart
 myRouter.post('/api/me/cart/:productId', function (request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     //if there is no verified access token return an error
@@ -165,27 +166,22 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
         response.writeHead(400, 'You must specify a product to be added to cart')
         return response.end();
     }
-    let productToBeAdded = products.find(product => {
+    let productToBeChanged = cart.find(product => {
         return product.id == request.params.productId; 
     })
     //if there is no productId matching the id of a product return an error
-    if (!productToBeAdded) {
+    if (!productToBeChanged) {
         response.writeHead(400, 'The id does not match any products available in the store')
         return response.end();
     }
     //if product is already in cart increase its quantity
     for (let i = 0; i < cart.length; i++) {
-        if (productToBeAdded.id == cart[i].id) {
-            response.writeHead(200, header);
-            response.end(JSON.stringify(cart));
-        } else {
-            //if product is not in cart add product to cart with a quantity number of 1
-            productToBeAdded.quantity = 1;
-            cart.push(productToBeAdded);
-            response.writeHead(200, 'Item added to cart');
-            response.end(JSON.stringify(cart));
+        if (productToBeChanged.id == cart[i].id) {
+            productToBeChanged.quantity ++;
         }
-    }
+    } 
+    response.writeHead(200, header);
+    response.end(JSON.stringify(cart));
 })
 
 //delete a specified product from the cart
@@ -215,7 +211,7 @@ myRouter.get('/api/me/cart/:productId', function(request,response) {
         return product.id !== productToBeDeleted.id
     })
 
-    response.writeHead(200, 'Item deleted from cart');
+    response.writeHead(200, header);
     return response.end(JSON.stringify(newCart));
 })
 
