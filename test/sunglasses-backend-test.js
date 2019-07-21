@@ -616,7 +616,61 @@ describe('Sunglasses.io API', () => {
         });
     });
 
-    it('it should return a 400 incorrectly formatted request when sent no username', done => {
+    it('it should return a 200 response when sent valid email and password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'susanna.richards@example.com',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+
+    it('it should return an object when sent valid email and password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'susanna.richards@example.com',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        });
+    });
+
+    it('it should return an object with property accessToken when sent valid email and password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'susanna.richards@example.com',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('accessToken');
+          done();
+        });
+    });
+
+    it('it should return a 400 incorrectly formatted request when sent no username or email', done => {
       //arrange
       const loginInfo = {
         password: 'wrong'
@@ -639,10 +693,33 @@ describe('Sunglasses.io API', () => {
         });
     });
 
-    it('it should return a 400 incorrectly formatted request when sent no password', done => {
+    it('it should return a 400 incorrectly formatted request when sent username and no password', done => {
       //arrange
       const loginInfo = {
         username: 'yellowleopard753'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Incorrectly formatted request');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 400 incorrectly formatted request when sent email and no password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'yellowleopard753'
       }
       //assert, act
       chai
@@ -729,6 +806,78 @@ describe('Sunglasses.io API', () => {
           res.body.should.have.property('fields');
           res.body.code.should.equal(401);
           res.body.message.should.equal('Invalid username or password');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 401 invalid email or password when sent valid email and invalid password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'yellowleopard753',
+        password: 'wrong'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(401);
+          res.body.message.should.equal('Invalid email or password');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 401 invalid email or password when sent invalid email and valid password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'wrong',
+        password: 'jonjon'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(401);
+          res.body.message.should.equal('Invalid email or password');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
+    it('it should return a 401 invalid email or password when sent invalid email and invalid password', done => {
+      //arrange
+      const loginInfo = {
+        email: 'wrong',
+        password: 'wrong'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(401);
+          res.body.message.should.equal('Invalid email or password');
           res.body.fields.should.equal('POST body');
           done();
         });
