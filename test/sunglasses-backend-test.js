@@ -1592,7 +1592,7 @@ describe('Sunglasses.io API', () => {
         //act, assert        
         chai
           .request(server)
-          .post(`/me/cart/${productId}`)
+          .delete(`/me/cart/${productId}`)
           .end((err, res) => {
             res.should.have.status(403);
             res.body.should.be.an('object');
@@ -1612,7 +1612,7 @@ describe('Sunglasses.io API', () => {
         //act, assert        
         chai
           .request(server)
-          .post(`/me/cart/${productId}?accessToken=someonecalculatethechancesthatthistokenisvalid`)
+          .delete(`/me/cart/${productId}?accessToken=someonecalculatethechancesthatthistokenisvalid`)
           .end((err, res) => {
             res.should.have.status(403);
             res.body.should.be.an('object');
@@ -1754,18 +1754,28 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      afterEach('GET /me/cart to verify product was deleted', done => {
-        chai
-          .request(server)
-          .get(`/me/cart?accessToken=${accessToken}`)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('array');
-            res.body.length.should.be.equal(cartSize);
-            //console.log(res.body); /* used to verify user's cart was sent back */
-            done();
-          });
-      });
+      // beforeEach('show users cart', done => {
+      //   chai
+      //     .request(server)
+      //     .get(`/me/cart?accessToken=${accessToken}`)
+      //     .end((err, res) => {
+      //       console.log(res.body);
+      //       done();
+      //     });
+      // });
+
+      // afterEach('GET /me/cart to verify product was deleted', done => {
+      //   chai
+      //     .request(server)
+      //     .get(`/me/cart?accessToken=${accessToken}`)
+      //     .end((err, res) => {
+      //       res.should.have.status(200);
+      //       res.body.should.be.an('array');
+      //       res.body.length.should.be.equal(cartSize);
+      //       //console.log(res.body); /* used to verify user's cart was sent back */
+      //       done();
+      //     });
+      // });
 
       it('it should return 403 unauthorized when no access token sent', done => {
         //arrange
@@ -1834,7 +1844,7 @@ describe('Sunglasses.io API', () => {
         //act, arrange
         chai
           .request(server)
-          .delete(`/me/cart/${productId}`)
+          .delete(`/me/cart/${productId}?accessToken=${accessToken}`)
           .end((err, res) => {
             res.should.have.status(200);
             cartSize--;
@@ -1848,7 +1858,7 @@ describe('Sunglasses.io API', () => {
         //act, arrange
         chai
           .request(server)
-          .delete(`/me/cart/${productId}`)
+          .delete(`/me/cart/${productId}?accessToken=${accessToken}`)
           .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.an('object');
@@ -1863,7 +1873,7 @@ describe('Sunglasses.io API', () => {
         //act, arrange
         chai
           .request(server)
-          .delete(`/me/cart/${productId}`)
+          .delete(`/me/cart/${productId}?accessToken=${accessToken}`)
           .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.an('object');

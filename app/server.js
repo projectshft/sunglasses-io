@@ -320,6 +320,7 @@ myRouter.put('/me/cart/:productId', (request, response) => {
   }));
 });
 
+//this route has 404 repeated several times - see if the logic can be simplified to one 404
 myRouter.delete('/me/cart/:productId', (request, response) => {
   //validate access token
   const currentAccessToken = getValidTokenFromRequest(request);
@@ -333,8 +334,43 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
     }));
   } else {
     //check user's cart for product
-    //if found remove from cart
+    const { productId } = request.params;
+    if (productId) {
+      //find user from access token
+      const user = users.find(user => user.login.username === currentAccessToken.username);
+      //check cart size
+      if (user.cart.length > 0) {
+        //find product in cart
+        const productToDelete = user.cart.find(item => item.product.id === productId);
+        if (!productToDelete) {
+          response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+          return response.end(JSON.stringify({
+            code: 404,
+            message: 'Product not found',
+            fields: 'path'
+          }));
+        }
+        //filter out of cart and return
+        user.cart = user.cart.filter(item => item !== productToDelete);
+        response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+        return response.end(JSON.stringify(productToDelete.product));
+      } else {
+        response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+        return response.end(JSON.stringify({
+          code: 404,
+          message: 'Product not found',
+          fields: 'path'
+        }));
+      }
     //else 404 not found
+    } else {
+      response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+      return response.end(JSON.stringify({
+        code: 404,
+        message: 'Product not found',
+        fields: 'path'
+      }));
+    }
   }
 });
 
