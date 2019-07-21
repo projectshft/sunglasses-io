@@ -4,9 +4,16 @@ var fs = require("fs");
 let users = [];
 users = JSON.parse(fs.readFileSync("../../initial-data/users.json", "utf-8"));
 
-// Function to return all of the
+// Function to return all of the users
 const getUsers = () => {
   return users;
 };
 
-module.exports = { getUsers };
+//Function to find a user by email
+const findUserByEmail = (email) => {
+  return users.find(user => {
+    return user.email == email;
+  });
+};
+
+module.exports = { getUsers, findUserByEmail };

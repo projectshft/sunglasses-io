@@ -38,6 +38,16 @@ describe("GET api/brands/:id/products", () => {
         done();
       });
   });
+  it("should return status 400 if no brands are found", done => {
+    chai
+      .request(server)
+      .get("/api/brands/100/products")
+      .end((err, res) => {
+        assert.isNotNull(res.error);
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
 });
 describe("GET api/products", () => {
   it("should get all the products", done => {
@@ -81,7 +91,7 @@ describe("POST api/login", () => {
         done();
       });
   });
-  it("should return 400 on incorrect format of request being sent", done => {
+  it("should return 400 on an incorrectly formatted request", done => {
     chai
       .request(server)
       .post("/api/login")
@@ -93,3 +103,36 @@ describe("POST api/login", () => {
       });
   });
 });
+describe("GET api/me/cart", () => {
+  it("should return the user's cart on a valid provided token", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .send({ token: 1234567890123456})
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an('array');
+        done();
+      })
+  })
+  it("should return 401 with an invalid token", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .send({ token: 'test'})
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      })
+  })
+  it("should return 400 with an incorrectly formatted request", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .send({ test: 1234567890123456})
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        done();
+      })
+  })
+})

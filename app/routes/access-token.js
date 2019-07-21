@@ -1,5 +1,10 @@
 //Separated routes trying to improve readability in the server.js file
-let accessTokens = [];
+let accessTokens = [{
+  email: "susanna.richards@example.com",
+  lastUpdated: new Date(),
+  token: '1234567890123456'
+}];
+
 let uid = require("rand-token").uid;
 
 //Function to find the token and update it if it exists
@@ -10,6 +15,7 @@ const findToken = sentUser => {
   if (foundToken) {
     foundToken.lastUpdated = new Date();
   }
+
   return foundToken;
 };
 
@@ -24,4 +30,15 @@ const addToken = sentUser => {
   return newAccessToken;
 };
 
-module.exports = { findToken, addToken };
+//Function to find a user's email by provided token
+const findUserByToken = sentToken => {
+  let foundUser = accessTokens.find(token => {
+    return token.token == sentToken;
+  });
+  if (foundUser) {
+    return foundUser.email
+  }
+  return null;
+};
+
+module.exports = { findToken, addToken, findUserByToken };

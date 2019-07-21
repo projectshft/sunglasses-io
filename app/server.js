@@ -1,12 +1,12 @@
-var http = require("http");
-var finalHandler = require("finalhandler");
-var queryString = require("querystring");
-var Router = require("router");
-var bodyParser = require("body-parser");
-var brand = require("./routes/brand");
-let product = require("./routes/product");
-let users = require("./routes/user");
-let accessToken = require("./routes/access-token")
+const http = require("http");
+const finalHandler = require("finalhandler");
+const queryString = require("querystring");
+const Router = require("router");
+const bodyParser = require("body-parser");
+const brand = require("./routes/brand");
+const product = require("./routes/product");
+const users = require("./routes/user");
+const accessToken = require("./routes/access-token")
 const PORT = 3001;
 
 //Initial router setup
@@ -30,19 +30,30 @@ router.get("/api", (request, response) => {
   return response.end("<div>Sunglasses.io API</div>");
 });
 
-//Route to get
+//Route to get all the available brands
 router.get("/api/brands", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brand.getBrands()));
 });
+
+//Route to get all the products associated with a provided brand ID
 router.get("/api/brands/:id/products", (request, response) => {
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(product.getProducts(request.params.id)));
+  const currentProducts = product.getProducts(request.params.id)
+  if (currentProducts.length > 0) {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(currentProducts));
+  }
+  response.writeHead(400, "Invalid request");
+  return response.end();
 });
+
+//Route to get all the available products
 router.get("/api/products", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(product.getProducts()));
 });
+
+//Route to login and provide a token
 router.post("/api/login", (request, response) => {
   if (request.body.email && request.body.password) {
     let user = users.getUsers().find(user => {
@@ -67,5 +78,26 @@ router.post("/api/login", (request, response) => {
     return response.end();
   }
 });
+
+//Route to get a user's cart
+router.get("/api/me/cart", (request, response) => {
+  let currentToken = request.body.token;
+  if (currentToken) {
+    const currentUser = users.findUserByEmail(accessToken.findUserByToken(currentToken));
+    if (currentUser) {
+      response.writeHead(200, { "Content-Type": "application/json"});
+      return response.end(JSON.stringify(currentUser.cart));
+    }
+    response.writeHead(401, "Invalid token");
+    return response.end();
+  }
+  response.writeHead(400, "Incorrectly formatted response");
+  return response.end();
+})
+
+//Route to update the quantity of an item in a user's cart
+
+
+
 
 module.exports = server;
