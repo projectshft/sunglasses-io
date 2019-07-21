@@ -55,9 +55,9 @@ const server = module.exports = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, () => {
   //load data from files into server memory
-  brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf-8'));
-  products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf-8'));
-  users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf-8'));
+  brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
+  products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('../initial-data/users.json', 'utf-8'));
   // user = users[0];
 });
 //return brands of sunglasses
@@ -201,43 +201,16 @@ myRouter.post('/api/me/cart', function(request, response){
       }
     }
   });  
-    // let loggedInUser = users.find((user) => {
-    //   return authToken.user === user.login.username
-    // })
-    // let checkDuplicateProduct = loggedInUser.cart.find((item) =>{
-    //   return desiredProduct.id = item.id
-    // })
-      // if (!desiredProduct){
-      //   response.writeHead(404, 'Product not found.')
-      //   return response.end();
-      // } else if (!checkDuplicateProduct){
-      //   response.writeHead(200, {'Content-Type': 'application/json'});
-      //   desiredProduct.quantity = request.body.quantity;
-      //   loggedInUser.cart.push(desiredProduct)
-      //   //respond with object item from users cart to confirm it was added
-      //   return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
-      // } else {
-  //         response.writeHead(409, 'Product already in cart.  Use different endpoint to update quantity.')
-  //         return response.end();
-  //     }
-  // }
-  // (checkDuplicateProduct.length > 0){
-  //   response.writeHead(409, 'Product already in cart.  Use different endpoint to update quantity.')
-  //   return response.end();
-  //check access token validity
-  // if(authToken){
-  //   response.writeHead(200, {'Content-Type': 'application/json'});
-    //check that matches with user
-    // let loggedInUser = users.find((user) => {
-    //   return authToken.user === user.login.username
-    // })
-    //find product
-  //  let desiredProduct = products.find((product) => {
-  //    return request.body.id === product.id
-  //  })
-  //  desiredProduct.quantity = request.body.quantity;
-  //  loggedInUser.cart.push(desiredProduct)
-  //  //respond with object item from users cart to confirm it was added
-  //  return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
-  // }
-// })
+
+  myRouter.delete('/api/me/cart/:productId', function(request, response){
+    //check for access token in header
+    if(!request.headers.authorization){
+      response.writeHead(401, 'Log in required to perform this action.')
+      return response.end();
+    } 
+    let authToken = getToken(request);
+    if(!authToken){
+      response.writeHead(401, 'Log in required to access content');
+      return response.end();
+    }
+  });
