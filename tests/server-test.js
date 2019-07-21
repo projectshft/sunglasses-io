@@ -114,4 +114,44 @@ describe('/GET products', () => {
         done();
       })
   })
- });
+  it('it should get a 401 response if password is invalid', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tuker"})
+    .end((err, res) => {
+      res.should.have.status(401);
+      done();
+  })
+ })
+ it('it should get a 400 response if email is not supplied', done => {
+   chai 
+    .request(server)
+    .post('/api/login')
+    .send({password: "jonjon"})
+    .end((err, res) => {
+      res.should.have.status(400);
+      done();
+    })
+ })
+ it('it should get a 400 response if password is not supplied', done => {
+  chai 
+   .request(server)
+   .post('/api/login')
+   .send({email: "salvador.jordan@example.com"})
+   .end((err, res) => {
+     res.should.have.status(400);
+     done();
+   })
+})
+it('it should get a 400 response if neither email or password are provided', done => {
+  chai 
+   .request(server)
+   .post('/api/login')
+   .send({})
+   .end((err, res) => {
+     res.should.have.status(400);
+     done();
+   })
+})
+});

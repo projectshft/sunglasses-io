@@ -16,10 +16,24 @@ let users = [];
 let user = {};
 let accessTokens = [];
 
+
 //Router set up
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
+// //helper function to get number of failed log in attempts
+// let getFailedAttempts = function(username){
+//   let currentFailedAttempts = failedLogInAttempts[username];
+//   if (currentFailedAttempts){
+//     return currentFailedAttempts;
+//   } else{
+//     return 0;
+//   }
+// }
+// //helper function set number of failed log in attempts
+// let setFailedAttempts = function(username, numAttempts) {
+//   failedLogInAttempts[username] = numAttempts;
+// }
 
 const server = module.exports = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
@@ -75,18 +89,28 @@ myRouter.get('/api/products', function(request, response){
 myRouter.post('/api/login', function(request, response){
   let email = request.body.email;
   let password = request.body.password;
-  
+  //first check that required elements are present
+  if (!email || !password){
+    response.writeHead(400, 'Invalid request.');
+    return response.end();
+  }
   //find user that matches info sent in body of request
   let foundUser = users.find((user) => {
     return user.email === request.body.email && user.login.password === request.body.password  
   });
+ 
+  //check number of log in attempts for user
+  // if (getFailedAttempts(foundUser.login.username) > 3){
+  //   response.writeHead(403, 'Exceeded 3 failed log in attempts. Try again later.')
+  //   return response.end();
+  // }
   
   //if that user is found, return an access token 
   if(foundUser) {
     response.writeHead(200, {'Content-Type': 'application/json'});
     let token = uid(16);
     return response.end(JSON.stringify({'token': token}));
-    } else {
+    } else{
       response.writeHead(401, 'Invalid username or password');
       return response.end();
     }
