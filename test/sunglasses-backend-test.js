@@ -739,6 +739,31 @@ describe('Sunglasses.io API', () => {
         });
     });
 
+    it('it should return a 400 incorrectly formatted request when sent username, email and password', done => {
+      //arrange
+      const loginInfo = {
+        username: 'someusername',
+        email: 'someemail',
+        password: 'somepassword'
+      }
+      //assert, act
+      chai
+        .request(server)
+        .post('/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.be.an('object');
+          res.body.should.have.property('code');
+          res.body.should.have.property('message');
+          res.body.should.have.property('fields');
+          res.body.code.should.equal(400);
+          res.body.message.should.equal('Incorrectly formatted request');
+          res.body.fields.should.equal('POST body');
+          done();
+        });
+    });
+
     it('it should return a 401 invalid username or password when sent valid username and invalid password', done => {
       //arrange
       const loginInfo = {
