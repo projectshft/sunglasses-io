@@ -166,18 +166,29 @@ myRouter.get("/api/me/cart", (request, response) => {
 //start of POST cart items
 myRouter.post("/api/me/cart", (request, response) => {
 
-  if (!request.body.id){
-    response.writeHead(400, "Incorrectly formatted request");
-    return response.end();
-  }
-
   //we'll grab our token
   const { token } = queryString.parse(request.url.substring(13));
 
   //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {
+
+    //let's check our body for an id key  
+    if (!request.body.id) {
+      response.writeHead(400, "Incorrectly formatted request");
+      return response.end();
+    } 
+      
+    const product = products.find(product => {
+      return product.id == request.body.id;
+    });
+
+    if (!product) {
+      response.writeHead(404, "Product not found.");
+      return response.end();
+    }
+
     //and then our userInfo
-    let userInfo = AUTH_USERS.find(authUser => {
+    const userInfo = AUTH_USERS.find(authUser => {
       return authUser.token == token;
     });
 
@@ -188,20 +199,21 @@ myRouter.post("/api/me/cart", (request, response) => {
     }
 
     //select the User from there
-    let user = users.find(user => {
+    const user = users.find(user => {
       return user.email == userInfo.email;
     });
+
+    //push into User's cart
+    user.cart.push(product);
 
     //at that point we'll have a positive response
     response.writeHead(200, {
       'content-type': 'application/json'
     });
 
-    //push into User's cart
-    user.cart.push(request.body);
-
     //return the item sent our way
-    return response.end(JSON.stringify(request.body));
+    return response.end(JSON.stringify(product));
+
   } else {
     //return error parameter if no token within query
     response.writeHead(400, "Incorrectly formatted request");

@@ -236,6 +236,11 @@ describe('User', () => {
     });
   });
 
+});
+
+//Let's test some User POST to Cart functionality!
+describe('User POST to Cart', () => {
+
   //our cart POST should return the item added to the cart as confirmation
   describe('/POST User cart', () => {
     it('it should respond with 200 and item added to cart, if post is successful', done => {
@@ -309,7 +314,7 @@ describe('User', () => {
 
   //our POST cart should return 400 if there is no object being passed in the body
   describe('/POST User cart', () => {
-    it('it should respond with 400 if no object  with id within POST body', done => {
+    it('it should respond with 400 if no object with id within POST body', done => {
       //arrange
       chai
         .request(server)
@@ -324,5 +329,42 @@ describe('User', () => {
     });
   });
 
+  //our POST cart should return 404 if there is no product of the type passed in
+  describe('/POST User cart', () => {
+    it('it should respond with 404 if there is no product type from POST body id', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({ token: 'thisismytokenyup' })
+        .send({
+          id: "19",
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(404);
+          done();
+        })
+    });
+  });
+
+  //let's have fun with /me/cart/{productId}
+  //product should add to cart and respond with instance product added
+  describe('/POST User cart with productId', () => {
+    it('it should respond with 200 and item added to cart, if post is successful', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/5')
+        .query({ token: 'thisismytokenyup' })
+        .send({})
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        })
+    });
+  });
 
 });
