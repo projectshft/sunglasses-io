@@ -139,7 +139,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-    post:
+    put:
       summary: Update quantities in cart
       description: Allows user to update quantities of items in their cart.
       consumes:

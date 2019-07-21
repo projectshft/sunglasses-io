@@ -257,3 +257,34 @@ describe("/GET the user's cart", () => {
 		  });
 	});
 });
+
+// Test PUT /api/me/cart
+describe("/PUT item quantities to user's cart", () => {
+	it("should update item quantitites in the user's cart", done => {
+		chai
+			.request(server)
+			.put("/api/me/cart")
+			.set("token", token)
+			.send({updatedQuantities: [100]})
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(200);
+				chai.expect("Content-Type", "application/json");
+				chai.expect(response.body).to.be.an("array");
+				chai.expect(response.body).to.be.lengthOf(1);
+				chai.expect(response.body[0].quantity).to.eql(100);
+				chai.expect(response.body).to.deep.equal([
+					{
+						"id": "1",
+            			"categoryId": "1",
+            			"name": "Superglasses",
+            			"description": "The best glasses in the world",
+            			"price":150,
+            			"imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+            			"quantity": 100
+					}
+				]);
+				done();
+			});
+	});
+});
