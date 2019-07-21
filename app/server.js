@@ -141,11 +141,12 @@ myRouter.get('/products', (request, response) => {
 
 myRouter.post('/login', (request, response) => {
   //Check for username and password in request body
-  const { username, password } = request.body;
-  if (username && password) {
+  const { username, email, password } = request.body;
+  if (username && password || email && password) {
     //see if there is a user that matches
     const user = users.find(user => {
-      return user.login.username === username && user.login.password === password;
+      return user.login.username === username && user.login.password === password ||
+             user.email === email && user.login.password === password;
     });
     if (user) {
       response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
@@ -168,10 +169,11 @@ myRouter.post('/login', (request, response) => {
       }
     } else {
       //login failed
+      const usernameOrEmailText = username ? 'username' : 'email';
       response.writeHead(401, {...CORS_HEADERS, 'content-type': 'application/json'});
       return response.end(JSON.stringify({
         code: 401,
-        message: 'Invalid username or password',
+        message: `Invalid ${usernameOrEmailText} or password`,
         fields: 'POST body'
       }));
     }
