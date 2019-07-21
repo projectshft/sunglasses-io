@@ -234,6 +234,12 @@ myRouter.post('/api/me/cart', function(request, response){
       if(!checkProductInCart){
         response.writeHead(404, 'Product not found.')
         return response.end();
+      } else {
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        loggedInUser.cart = loggedInUser.cart.filter((item) => {
+          return item.id != currentProductId;
+        })
+        return response.end(JSON.stringify(loggedInUser.cart));
       }
     }
   });

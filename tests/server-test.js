@@ -483,7 +483,7 @@ describe('/DELETE /me/cart/{productId}', () => {
       .post('/api/login')
       .send({email: "salvador.jordan@example.com", password: "tucker"})
       .end((err, res) => {
-            chai
+          chai
               .request(server)
               .delete('/api/me/cart/1')
               .set('authorization', 'Bearer ' + res.body.token)
@@ -493,4 +493,22 @@ describe('/DELETE /me/cart/{productId}', () => {
               })
        })
       })
+    it('it should remove an item from the users cart', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({email: "salvador.jordan@example.com", password: "tucker"})
+        .end((err, res) => {
+       chai
+          .request(server)
+          .delete('/api/me/cart/3')
+          .set('authorization', 'Bearer ' + res.body.token)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(1);
+           done();
+        })
+      })
+    })
     });
