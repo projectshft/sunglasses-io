@@ -191,11 +191,11 @@ myRouter.get('/me/cart', (request, response) => {
   const currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(403, {...CORS_HEADERS, 'content-type': 'application/json'});
-      return response.end(JSON.stringify({
-        code: 403,
-        message: 'Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in',
-        fields: 'query'
-      }));
+    return response.end(JSON.stringify({
+      code: 403,
+      message: 'Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in',
+      fields: 'query'
+    }));
   } else {
     //find user and return their cart
     const user = users.find(user => {
@@ -203,6 +203,58 @@ myRouter.get('/me/cart', (request, response) => {
     });
     response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
     return response.end(JSON.stringify(user.cart));
+  }
+});
+
+myRouter.post('/me/cart', (request, response) => {
+  //validate access token
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    //either no token sent or invalid token
+    response.writeHead(403, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 403,
+      message: 'Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in',
+      fields: 'query'
+    }));
+  } else {
+    //check if productId is valid
+    const productId = require('url').parse(request.url, true).query.productId;
+    if (productId) {
+      //find product, add to cart and return copy
+      const product = products.find(product => {
+        return product.id === productId;
+      });
+      if (product) {
+        //find user and add to cart
+        const user = users.find(user => {
+          return user.login.username === currentAccessToken.username;
+        });
+        //shouldn't need to check if user exists? since would be handled by getValidTokenFromRequest
+        //add to cart
+        user.cart.push({
+          product: product,
+          quantity: 1
+        });
+        //return copy
+        response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+        return response.end(JSON.stringify(product));
+      } else {
+        response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+        return response.end(JSON.stringify({
+          code: 404,
+          message: 'Product not found',
+          fields: 'query'
+        }));
+      }
+    } else {
+      response.writeHead(400, {...CORS_HEADERS, 'content-type': 'application/json'});
+      return response.end(JSON.stringify({
+        code: 400,
+        message: 'Bad request - productId required',
+        fields: 'query'
+      }));
+    }
   }
 });
 

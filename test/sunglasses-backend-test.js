@@ -736,45 +736,47 @@ describe('Sunglasses.io API', () => {
   });
 
   describe('GET /me/cart', () => {
-    it('it should return 403 unauthorized when no access token sent', done => {
-      //arrange
-      //act
-      //assert
-      chai
-        .request(server)
-        .get(`/me/cart`)
-        .end((err, res) => {
-          res.should.have.status(403);
-          res.body.should.be.an('object');
-          res.body.should.have.property('code');
-          res.body.should.have.property('message');
-          res.body.should.have.property('fields');
-          res.body.code.should.equal(403);
-          res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
-          res.body.fields.should.equal('query');
-          done();
-        });
-    });
-
-    it('it should return 403 unauthorized when "" token sent', done => {
-      //arrange
-      const accessToken = '';
-      //act
-      //assert
-      chai
-        .request(server)
-        .get(`/me/cart?accessToken=${accessToken}`)
-        .end((err, res) => {
-          res.should.have.status(403);
-          res.body.should.be.an('object');
-          res.body.should.have.property('code');
-          res.body.should.have.property('message');
-          res.body.should.have.property('fields');
-          res.body.code.should.equal(403);
-          res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
-          res.body.fields.should.equal('query');
-          done();
-        });
+    describe('before logging in', () => {
+      it('it should return 403 unauthorized when no access token sent', done => {
+        //arrange
+        //act
+        //assert
+        chai
+          .request(server)
+          .get(`/me/cart`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+  
+      it('it should return 403 unauthorized when "" token sent', done => {
+        //arrange
+        const accessToken = '';
+        //act
+        //assert
+        chai
+          .request(server)
+          .get(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
     });
 
     //nesting a describe to run before() without affecting the above tests
@@ -891,6 +893,239 @@ describe('Sunglasses.io API', () => {
   });
 
   describe('POST /me/cart', () => {
+    describe('before logging in', () => {
+      it('it should return a 403 unauthorized response with no parameters', done => {
+        //act, assert
+        chai
+          .request(server)
+          .post('/me/cart')
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
 
+      it('it should return 403 unauthorized response with sent invalid access token and no productId', done => {
+        //arrange
+        const invalidAccessToken = '0123456789abcdef';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${invalidAccessToken}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+    
+      it('it should return 403 unauthorized response with no access token and sent productId', done => {
+        //arrange
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+    
+      it('it should return 403 unauthorized response with sent access token and sent productId', done => {
+        //arrange
+        const invalidAccessToken = '0123456789abcdef'
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${invalidAccessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+    });
+
+    describe('after logging in', () => {
+      let accessToken;
+
+      before('sending a GET request, login as an existing user', done => {
+        //arrange
+        const loginInfo = {
+          username: 'yellowleopard753',
+          password: 'jonjon'
+        };
+        //act, assert
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.should.have.property('accessToken');
+            //arrange for future tests
+            accessToken = res.body.accessToken;
+            //console.log(accessToken); /* used to validate that /login POST was working while these tests are still failing */
+            done();
+          });
+      });
+
+      it('it should return 400 bad request when no productId sent', done => {
+        //arrange
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(400);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(400);
+            res.body.message.should.equal('Bad request - productId required');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+
+      it('it should return 403 unauthorized when incorrect access token sent', done => {
+        //arrange
+        const incorrectAccessToken = accessToken.slice(2);
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${incorrectAccessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+
+      it('it should return 404 product not found when productId of 0 sent', done => {
+        //arrange
+        const productId = '0';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(404);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(404);
+            res.body.message.should.equal('Product not found');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+
+      it('it should return a 200 response', done => {
+        //arrange
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            done();
+          });
+      });
+
+      it('it should return an object', done => {
+        //arrange
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            done();
+          });
+      });
+
+      it('it should return an object with properties id, categoryId, name, description, price, imageUrls', done => {
+        //arrange
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.should.have.property('id');
+            res.body.should.have.property('categoryId');
+            res.body.should.have.property('name');
+            res.body.should.have.property('description');
+            res.body.should.have.property('price');
+            res.body.should.have.property('imageUrls');
+            done();
+          });
+      });
+
+      it('it should return an object where imageUrls property is an array', done => {
+        //arrange
+        const productId = '1';
+        //act, assert        
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.should.have.property('id');
+            res.body.should.have.property('categoryId');
+            res.body.should.have.property('name');
+            res.body.should.have.property('description');
+            res.body.should.have.property('price');
+            res.body.should.have.property('imageUrls');
+            res.body.imageUrls.should.be.an('array');
+            done();
+          });
+      });
+    });
   });
 });
