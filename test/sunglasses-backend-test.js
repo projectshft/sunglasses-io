@@ -1206,8 +1206,8 @@ describe('Sunglasses.io API', () => {
     before('login as an existing user', done => {
       //arrange
       const loginInfo = {
-        username: 'yellowleopard753',
-        password: 'jonjon'
+        username: 'lazywolf342',
+        password: 'tucker'
       };
       //act, assert
       chai
@@ -1238,7 +1238,7 @@ describe('Sunglasses.io API', () => {
             res.body.should.have.property('fields');
             res.body.code.should.equal(400);
             res.body.message.should.equal('Invalid id or quantity');
-            res.body.fields.should.equal('query');
+            res.body.fields.should.equal('path');
             done();
           });
       });
@@ -1249,7 +1249,7 @@ describe('Sunglasses.io API', () => {
         //act, assert
         chai
           .request(server)
-          .put(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}`)
           .end((err, res) => {
             res.should.have.status(400);
             res.body.should.be.an('object');
@@ -1258,7 +1258,7 @@ describe('Sunglasses.io API', () => {
             res.body.should.have.property('fields');
             res.body.code.should.equal(400);
             res.body.message.should.equal('Invalid id or quantity');
-            res.body.fields.should.equal('query');
+            res.body.fields.should.equal('path');
             done();
           });
       });
@@ -1269,7 +1269,7 @@ describe('Sunglasses.io API', () => {
         //act, assert
         chai
           .request(server)
-          .put(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}`)
           .end((err, res) => {
             res.should.have.status(400);
             res.body.should.be.an('object');
@@ -1290,7 +1290,7 @@ describe('Sunglasses.io API', () => {
         //act, assert
         chai
           .request(server)
-          .put(`/me/cart?accessToken=${accessToken}&productId=${productId}&quantity=${quantity}`)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
           .end((err, res) => {
             res.should.have.status(400);
             res.body.should.be.an('object');
@@ -1311,7 +1311,7 @@ describe('Sunglasses.io API', () => {
         //act, assert
         chai
           .request(server)
-          .put(`/me/cart?productId=${productId}&quantity=${quantity}`)
+          .put(`/me/cart/${productId}?quantity=${quantity}`)
           .end((err, res) => {
             res.should.have.status(403);
             res.body.should.be.an('object');
@@ -1333,7 +1333,7 @@ describe('Sunglasses.io API', () => {
         //act, assert
         chai
           .request(server)
-          .put(`/me/cart?accessToken=${invalidAccessToken}&productId=${productId}&quantity=${quantity}`)
+          .put(`/me/cart/${productId}?accessToken=${invalidAccessToken}&quantity=${quantity}`)
           .end((err, res) => {
             res.should.have.status(403);
             res.body.should.be.an('object');
@@ -1354,7 +1354,187 @@ describe('Sunglasses.io API', () => {
         //act, assert
         chai
           .request(server)
-          .put(`/me/cart?accessToken=${accessToken}&productId=${productId}&quantity=${quantity}`)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(404);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(404);
+            res.body.message.should.equal('Product not found');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+    });
+
+    describe('logged in with items in user\'s cart', () => {
+      before('add first item to user\'s cart', done => {
+        const productId = '1';
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            done();
+          });
+      });
+
+      before('add second item to user\'s cart', done => {
+        const productId = '2';
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            done();
+          });
+      });
+
+      before('add third item to user\'s cart', done => {
+        const productId = '3';
+        chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            done();
+          });
+      });
+
+      it('it should return a 400 invalid id or quantity with no productId sent', done => {
+        chai
+          .request(server)
+          .put(`/me/cart?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(400);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(400);
+            res.body.message.should.equal('Invalid id or quantity');
+            res.body.fields.should.equal('path');
+            done();
+          });
+      });
+  
+      it('it should return a 400 invalid id or quantity with invalid productId sent', done => {
+        //arrange
+        const productId = '0';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(400);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(400);
+            res.body.message.should.equal('Invalid id or quantity');
+            res.body.fields.should.equal('path');
+            done();
+          });
+      });
+  
+      it('it should return a 400 invalid id or quantity with valid productId and no quantity sent', done => {
+        //arrange
+        const productId = '1';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}`)
+          .end((err, res) => {
+            res.should.have.status(400);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(400);
+            res.body.message.should.equal('Invalid id or quantity');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+  
+      it('it should return a 400 invalid id or quantity with valid productId and invalid quantity sent', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '0';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(400);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(400);
+            res.body.message.should.equal('Invalid id or quantity');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+  
+      it('it should return a 403 unauthorized with no access token sent', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '2';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+
+      it('it should return a 403 unauthorized with invalid access token sent', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '2';
+        const invalidAccessToken = accessToken.slice(2);
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${invalidAccessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(403);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(403);
+            res.body.message.should.equal('Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in');
+            res.body.fields.should.equal('query');
+            done();
+          });
+      });
+
+      it('it should return a 404 product not found with valid productId of product not in cart sent', done => {
+        //arrange
+        const productId = '11';
+        const quantity = '2';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
           .end((err, res) => {
             res.should.have.status(404);
             res.body.should.be.an('object');
