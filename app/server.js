@@ -165,10 +165,16 @@ myRouter.get("/api/me/cart", (request, response) => {
 
 //start of POST cart items
 myRouter.post("/api/me/cart", (request, response) => {
+
+  if (!request.body.id){
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+
   //we'll grab our token
   const { token } = queryString.parse(request.url.substring(13));
 
-  //checking if it exists
+  //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {
     //and then our userInfo
     let userInfo = AUTH_USERS.find(authUser => {

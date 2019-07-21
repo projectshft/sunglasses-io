@@ -309,7 +309,7 @@ describe('User', () => {
 
   //our POST cart should return 400 if there is no object being passed in the body
   describe('/POST User cart', () => {
-    it('it should respond with 400 if no object within POST body', done => {
+    it('it should respond with 400 if no object  with id within POST body', done => {
       //arrange
       chai
         .request(server)
