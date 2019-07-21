@@ -1226,7 +1226,7 @@ describe('Sunglasses.io API', () => {
     });
 
     describe('logged in with no items in user\'s cart', () => {
-      it('it should return a 400 invalid id or quantity with no productId sent', done => {
+      it('it should return 400 invalid id or quantity with no productId sent', done => {
         chai
           .request(server)
           .put(`/me/cart?accessToken=${accessToken}`)
@@ -1243,7 +1243,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 400 invalid id or quantity with invalid productId sent', done => {
+      it('it should return 400 invalid id or quantity with invalid productId sent', done => {
         //arrange
         const productId = '0';
         //act, assert
@@ -1263,7 +1263,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 400 invalid id or quantity with valid productId and no quantity sent', done => {
+      it('it should return 400 invalid id or quantity with valid productId and no quantity sent', done => {
         //arrange
         const productId = '1';
         //act, assert
@@ -1283,7 +1283,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 400 invalid id or quantity with valid productId and invalid quantity sent', done => {
+      it('it should return 400 invalid id or quantity with valid productId and invalid quantity sent', done => {
         //arrange
         const productId = '1';
         const quantity = '0';
@@ -1304,7 +1304,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 403 unauthorized with no access token sent', done => {
+      it('it should return 403 unauthorized with no access token sent', done => {
         //arrange
         const productId = '1';
         const quantity = '2';
@@ -1325,7 +1325,7 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      it('it should return a 403 unauthorized with invalid access token sent', done => {
+      it('it should return 403 unauthorized with invalid access token sent', done => {
         //arrange
         const productId = '1';
         const quantity = '2';
@@ -1347,7 +1347,7 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      it('it should return a 404 product not found with valid productId sent', done => {
+      it('it should return 404 product not found with valid productId sent', done => {
         //arrange
         const productId = '1';
         const quantity = '2';
@@ -1406,7 +1406,7 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      it('it should return a 400 invalid id or quantity with no productId sent', done => {
+      it('it should return 400 invalid id or quantity with no productId sent', done => {
         chai
           .request(server)
           .put(`/me/cart?accessToken=${accessToken}`)
@@ -1423,7 +1423,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 400 invalid id or quantity with invalid productId sent', done => {
+      it('it should return 400 invalid id or quantity with invalid productId sent', done => {
         //arrange
         const productId = '0';
         //act, assert
@@ -1443,7 +1443,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 400 invalid id or quantity with valid productId and no quantity sent', done => {
+      it('it should return 400 invalid id or quantity with valid productId and no quantity sent', done => {
         //arrange
         const productId = '1';
         //act, assert
@@ -1463,7 +1463,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 400 invalid id or quantity with valid productId and invalid quantity sent', done => {
+      it('it should return 400 invalid id or quantity with valid productId and invalid quantity sent', done => {
         //arrange
         const productId = '1';
         const quantity = '0';
@@ -1484,7 +1484,7 @@ describe('Sunglasses.io API', () => {
           });
       });
   
-      it('it should return a 403 unauthorized with no access token sent', done => {
+      it('it should return 403 unauthorized with no access token sent', done => {
         //arrange
         const productId = '1';
         const quantity = '2';
@@ -1505,7 +1505,7 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      it('it should return a 403 unauthorized with invalid access token sent', done => {
+      it('it should return 403 unauthorized with invalid access token sent', done => {
         //arrange
         const productId = '1';
         const quantity = '2';
@@ -1527,7 +1527,7 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      it('it should return a 404 product not found with valid productId of product not in cart sent', done => {
+      it('it should return 404 product not found with valid productId of product not in cart sent', done => {
         //arrange
         const productId = '11';
         const quantity = '2';
@@ -1544,6 +1544,71 @@ describe('Sunglasses.io API', () => {
             res.body.code.should.equal(404);
             res.body.message.should.equal('Product not found');
             res.body.fields.should.equal('query');
+            done();
+          });
+      });
+
+      it('it should return 200', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '2';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            done();
+          });
+      });
+
+      it('it should return an object', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '2';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            done();
+          });
+      });
+
+      it('it should return an object with properties product and quantity', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '2';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.should.have.property('product');
+            res.body.should.have.property('quantity');
+            done();
+          });
+      });
+
+      it('it should return an object where product.id matches productId and quantity matches quantity sent', done => {
+        //arrange
+        const productId = '1';
+        const quantity = '2';
+        //act, assert
+        chai
+          .request(server)
+          .put(`/me/cart/${productId}?accessToken=${accessToken}&quantity=${quantity}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('object');
+            res.body.should.have.property('product');
+            res.body.should.have.property('quantity');
+            res.body.product.id.should.equal('1');
+            res.body.quantity.should.equal('2');
             done();
           });
       });
