@@ -98,11 +98,22 @@ describe ('POST /login', () => {
 describe ('GET me/cart', () => {
     it ('should return all the products currently in a users cart', done => {
     chai
-        .request(sever)
+        .request(server)
         .get('/api/me/cart')
         .end((err,res) => {
             res.should.have.status(200);
             done();
         })
     })
+    it ('should return an error if the access token is not valid', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart')
+            .end((err, res) => {
+                res.should.have.status(401);
+                done();
+            })
+    })
 })
+
+

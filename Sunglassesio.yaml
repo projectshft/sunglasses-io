@@ -99,6 +99,12 @@ paths:
       summary: View Products Currently in Cart
       description: |
         This enpoint returns the products currenlty in a specific user's cart. The response includes specific info about the products in the cart including its unique id, name, and the number of each product type the user desires to order.
+      parameters:
+        - name: token
+          in: query
+          description: Access token given to user
+          required: false
+          type: string
       tags:
         - Cart
       responses:
@@ -120,6 +126,12 @@ paths:
       summary: Change the Quantity of a Specific Product in the Cart
       description: |
         This endpdint allows the user to modify the quantity of units desired for a specific product
+      parameters:
+        - name: token
+          in: query
+          description: Access token given to user
+          required: false
+          type: string
       tags:
         - Cart
       responses:
@@ -150,6 +162,11 @@ paths:
           description: 'The id of the product to add to the cart'
           required: true
           type: string
+        - name: token
+          in: query
+          description: Access token given to user
+          required: false
+          type: string
       responses:
         '200':
           description: Add was succesful
@@ -176,6 +193,11 @@ paths:
           in: path
           description: 'The id of the cart product to be deleted. Use 1 for testing. '
           required: true
+          type: string
+        - name: token
+          in: query
+          description: Access token given to user
+          required: false
           type: string
       responses:
         '200':
