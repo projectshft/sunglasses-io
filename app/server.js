@@ -235,11 +235,47 @@ myRouter.post('/api/me/cart', function(request, response){
         response.writeHead(404, 'Product not found.')
         return response.end();
       } else {
-        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.writeHead(200, 'Successful operation. The following items remain', {'Content-Type': 'application/json'});
         loggedInUser.cart = loggedInUser.cart.filter((item) => {
           return item.id != currentProductId;
         })
         return response.end(JSON.stringify(loggedInUser.cart));
       }
     }
+  });
+
+  myRouter.post('/api/me/cart/:productId', function(request, response){
+    //check for access token in header
+    if (!request.headers.authorization){
+      response.writeHead(401, 'Log in required to perform this action.')
+      return response.end();
+    } 
+    // let authToken = getToken(request);
+    // if (!authToken){
+    //   response.writeHead(401, 'Log in required to access content');
+    //   return response.end();
+    // }
+    // //check that product id is in path and that it is greater than 1
+    // let currentProductId = getProductId(request);
+    // if (!currentProductId || currentProductId < 1){
+    //   response.writeHead(400, 'Invalid Request');
+    //   return response.end();
+    // } else {
+    //   let loggedInUser = users.find((user) => {
+    //     return authToken.user === user.login.username
+    //   })
+    //   let checkProductInCart = loggedInUser.cart.find((item) =>{
+    //     return currentProductId == item.id
+    //   })
+    //   if(!checkProductInCart){
+    //     response.writeHead(404, 'Product not found.')
+    //     return response.end();
+    //   } else {
+    //     response.writeHead(200, 'Successful operation. The following items remain', {'Content-Type': 'application/json'});
+    //     loggedInUser.cart = loggedInUser.cart.filter((item) => {
+    //       return item.id != currentProductId;
+    //     })
+    //     return response.end(JSON.stringify(loggedInUser.cart));
+    //   }
+    // }
   });

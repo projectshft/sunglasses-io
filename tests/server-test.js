@@ -512,3 +512,22 @@ describe('/DELETE /me/cart/{productId}', () => {
       })
     })
     });
+
+    describe('/POST /me/cart/{productId}', () => {
+      // tests for 401 response
+      it('it should get a 401 response if no access token provided', done => {
+        chai
+          .request(server)
+          .post('/api/login')
+          .send({email: "salvador.jordan@example.com", password: "tucker"})
+          .end((err, res1) => {
+                chai
+                  .request(server)
+                  .post('/api/me/cart/2')
+                  .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                  })
+              })
+        })
+    });
