@@ -48,6 +48,13 @@ var getValidTokenFromRequest = function (request) {
   }
 };
 
+// Helper method to get user (object) from username 
+var getCurrentUserByUsername = function (username) {
+  return users.find(user => {
+    return user.login.username === username;
+  });
+};
+
 // Set up router
 const router = Router();
 router.use(bodyParser.json());
@@ -164,12 +171,9 @@ router.get('/api/me/cart', function (request, response) {
     response.writeHead(401, "You need to log in to access the cart");
     return response.end();
   } else { 
-    let currentUser = currentAccessToken.username;
-    let user = users.find((user) => {
-      return user.login.username == currentUser;
-    });
+    let currentUser = getCurrentUserByUsername(currentAccessToken.username);
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
+    return response.end(JSON.stringify(currentUser.cart));
   }
 }); 
 
@@ -180,14 +184,11 @@ router.post('/api/me/cart', function (request, response) {
     response.writeHead(401, "You need to log in to access the cart");
     return response.end();
   } else { 
-    let currentUser = currentAccessToken.username;
-    let user = users.find((user) => {
-      return user.login.username == currentUser;
-    });
+    let currentUser = getCurrentUserByUsername(currentAccessToken.username);
     let item = request.body; 
-    user.cart.push(item); 
+    currentUser.cart.push(item); 
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
+    return response.end(JSON.stringify(currentUser.cart));
   }
 }); 
 
@@ -199,16 +200,13 @@ router.delete('/api/me/cart/:productId', (request, response) => {
     return response.end();
   } else { 
   const { productId } = request.params;
-  let currentUser = currentAccessToken.username;
-  let user = users.find((user) => {
-    return user.login.username == currentUser;
-  });
-  let cartToReturn = user.cart.filter(item => 
+  let currentUser = getCurrentUserByUsername(currentAccessToken.username);
+  let cartToReturn = currentUser.cart.filter(item => 
     item.productId !== productId 
   );
-  user.cart = cartToReturn; 
+  currentUser.cart = cartToReturn; 
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(user.cart));
+  return response.end(JSON.stringify(currentUser.cart));
   }
 });
 
@@ -221,17 +219,14 @@ router.post('/api/me/cart/:productId', (request, response) => {
   } else { 
     const { productId } = request.params;
     const parsedUrl = url.parse(request.originalUrl);
-    const { quantity } = queryString.parse(parsedUrl.quantity);
-    let currentUser = currentAccessToken.username;
-    let user = users.find((user) => {
-      return user.login.username == currentUser;
-    });
-    let cartToReturn = user.cart.map(item => 
-      (item.productId === productId)? Object.assign({}, item, { 'quantity': quantity }): item
+    const { quantity } = queryString.parse(parsedUrl.query);
+    let currentUser = getCurrentUserByUsername(currentAccessToken.username);
+    let cartToReturn = currentUser.cart.map(item => 
+      (item.productId === productId)? Object.assign({}, item, { 'quantity': Number(quantity) }): item
     );
-    user.cart = cartToReturn; 
+    currentUser.cart = cartToReturn; 
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
+    return response.end(JSON.stringify(currentUser.cart));
   }
 }); 
 
