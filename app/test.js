@@ -143,5 +143,14 @@ describe ('DELETE /me/cart/:productId', () => {
                 done();
             })
     })
+    it ('should return an error if their is no access token or it is not a valid token', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart/1/?token=a')
+            .end((err,res) => {
+                res.should.have.status(401);
+                done();
+            })
+    })
 })
 
