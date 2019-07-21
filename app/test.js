@@ -95,7 +95,7 @@ describe ('POST /login', () => {
 })
 
 
-// set test for /me/cart/
+// set test for GET /me/cart/
 describe ('GET me/cart', () => {
     it ('should return all the products currently in a users cart', done => {
     chai
@@ -112,6 +112,27 @@ describe ('GET me/cart', () => {
             .get('/api/me/cart')
             .end((err, res) => {
                 res.should.have.status(401);
+                done();
+            })
+    })
+})
+//set test for Post /me/cart
+describe ('POST me/cart', () => {
+    it ('should add a product to the cart', done => {
+        let product = {
+            id: "2",
+            categoryId: "1",
+            name: "Black Sunglasses",
+            description: "The best glasses in the world",
+            price: 100,
+            imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        };
+        chai
+            .request(server)
+            .post('/api/me/cart/?token=gaeaw')
+            .send(product)
+            .end((err,res) => {
+                res.should.have.status(200);
                 done();
             })
     })
