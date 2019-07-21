@@ -195,7 +195,7 @@ describe ('/GET me/cart', () => {
       })
   })
 })
-
+//200 response test to add product to cart endpoint
 describe('/POST /me/cart', () => {
   it('it should add a product to the logged in users cart', done => {
     chai
@@ -337,4 +337,95 @@ describe('/POST /me/cart', () => {
         })
     })
   })
+  //tests for 401 response
+  it('it should get a 401 response if no access token is provided', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send({
+          id: '2',
+          quantity: 3
+        })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        })
+    })
+  })
+  it('it should get a 401 response if an invalid access token is provided', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer ' + '12ert32145')
+        .send({
+          id: '2',
+          quantity: 3
+        })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        })
+    })
+  })
+  it('it should get a 404 response if the product is not found', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer ' + res.body.token)
+        .send({
+          id: '22',
+          quantity: 3
+        })
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        })
+    })
+  })
+  // it('it should get a 409 response if the product is already in cart', done => {
+  //   chai
+  //   .request(server)
+  //   .post('/api/login')
+  //   .send({email: "salvador.jordan@example.com", password: "tucker"})
+  //   .end((err, res) => {
+  //     chai
+  //       .request(server)
+  //       .post('/api/me/cart')
+  //       .set('authorization', 'Bearer ' + res.body.token)
+  //       .send({
+  //         id: '2',
+  //         quantity: 3
+  //       })
+  //       .end((err, res) => {
+  //         chai
+  //           .request(server)
+  //           .post('/api/me/cart')
+  //           .set('authorization', 'Bearer ' + res.body.token)
+  //           .send({
+  //             id: '2',
+  //             quantity: 3
+  //           })
+  //           .end((err, res) => {
+  //             res.should.have.status(409);
+  //             done();
+  //           })
+
+  //       })
+  //   })
+  // })
 });

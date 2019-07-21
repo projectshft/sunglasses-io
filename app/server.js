@@ -164,22 +164,80 @@ myRouter.post('/api/me/cart', function(request, response){
     response.writeHead(400, 'Invalid Request');
     return response.end();
   }
-
-  let authToken = getToken(request);
-  //check access token validity
-  if(authToken){
-    response.writeHead(200, {'Content-Type': 'application/json'});
-    //check that matches with user
-    let loggedInUser = users.find((user) => {
-      return authToken.user === user.login.username
-    })
-    //find product
-   let desiredProduct = products.find((product) => {
-     return request.body.id === product.id
-   })
-   desiredProduct.quantity = request.body.quantity;
-   loggedInUser.cart.push(desiredProduct)
-   //respond with object item from users cart to confirm it was added
-   return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
+  //return error if no access token or access token invalid 
+  if(!request.headers.authorization){
+    response.writeHead(401, 'Log in required to access content');
+    return response.end();
   }
-})
+  let authToken = getToken(request);
+  if(!authToken){
+    response.writeHead(401, 'Log in required to access content');
+    return response.end();
+  } else{
+    //return error if product not found
+    let desiredProduct = products.find((product) => {
+      return request.body.id === product.id
+    })
+      if(!desiredProduct){
+        response.writeHead(404, 'Product not found.')
+        return response.end();
+      } else {
+        let loggedInUser = users.find((user) => {
+          return authToken.user === user.login.username
+        })
+        let checkDuplicateProduct = loggedInUser.cart.find((item) =>{
+          return desiredProduct.id = item.id
+        })
+        if (!checkDuplicateProduct){
+          response.writeHead(200, {'Content-Type': 'application/json'});
+          desiredProduct.quantity = request.body.quantity;
+          loggedInUser.cart.push(desiredProduct)
+          //respond with object item from users cart to confirm it was added
+          return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
+        } else {
+          response.writeHead(409, 'Product already in cart.  Use different endpoint to update quantity.')
+          return response.end();
+        }
+      }
+    }
+  });  
+    // let loggedInUser = users.find((user) => {
+    //   return authToken.user === user.login.username
+    // })
+    // let checkDuplicateProduct = loggedInUser.cart.find((item) =>{
+    //   return desiredProduct.id = item.id
+    // })
+      // if (!desiredProduct){
+      //   response.writeHead(404, 'Product not found.')
+      //   return response.end();
+      // } else if (!checkDuplicateProduct){
+      //   response.writeHead(200, {'Content-Type': 'application/json'});
+      //   desiredProduct.quantity = request.body.quantity;
+      //   loggedInUser.cart.push(desiredProduct)
+      //   //respond with object item from users cart to confirm it was added
+      //   return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
+      // } else {
+  //         response.writeHead(409, 'Product already in cart.  Use different endpoint to update quantity.')
+  //         return response.end();
+  //     }
+  // }
+  // (checkDuplicateProduct.length > 0){
+  //   response.writeHead(409, 'Product already in cart.  Use different endpoint to update quantity.')
+  //   return response.end();
+  //check access token validity
+  // if(authToken){
+  //   response.writeHead(200, {'Content-Type': 'application/json'});
+    //check that matches with user
+    // let loggedInUser = users.find((user) => {
+    //   return authToken.user === user.login.username
+    // })
+    //find product
+  //  let desiredProduct = products.find((product) => {
+  //    return request.body.id === product.id
+  //  })
+  //  desiredProduct.quantity = request.body.quantity;
+  //  loggedInUser.cart.push(desiredProduct)
+  //  //respond with object item from users cart to confirm it was added
+  //  return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
+  // }
+// })
