@@ -39,7 +39,6 @@ const getValidTokenFromRequest = (request) => {
     }
 }
 
-
 const PORT = 3001;
 
 //Setup router
