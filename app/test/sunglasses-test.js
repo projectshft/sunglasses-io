@@ -301,7 +301,7 @@ describe('User', () => {
         })
         .end((err, res) => {
           //assert
-          res.should.have.status(400);
+          res.should.have.status(401);
           done();
         })
     });
