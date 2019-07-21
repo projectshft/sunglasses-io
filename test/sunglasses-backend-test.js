@@ -1060,6 +1060,8 @@ describe('Sunglasses.io API', () => {
       });
 
       describe('these tests will successfully add a product to a user\'s cart', () => {
+        let cartLength = 0;
+        
         afterEach('GET /me/cart to verify product was added', done => {
           chai
             .request(server)
@@ -1067,7 +1069,8 @@ describe('Sunglasses.io API', () => {
             .end((err, res) => {
               res.should.have.status(200);
               res.body.should.be.an('array');
-              res.body.length.should.be.equal(1);
+              res.body.length.should.be.equal(cartLength);
+              //console.log(res.body); /* used to verify user's cart was sent back */
               done();
             });
         });
@@ -1075,7 +1078,9 @@ describe('Sunglasses.io API', () => {
         it('it should return a 200 response', done => {
           //arrange
           const productId = '1';
-          //act, assert        
+          //act  
+          cartLength++;
+          //assert 
           chai
             .request(server)
             .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
@@ -1087,8 +1092,10 @@ describe('Sunglasses.io API', () => {
   
         it('it should return an object', done => {
           //arrange
-          const productId = '1';
-          //act, assert        
+          const productId = '2';
+          //act  
+          cartLength++;
+          //assert 
           chai
             .request(server)
             .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
@@ -1101,8 +1108,10 @@ describe('Sunglasses.io API', () => {
   
         it('it should return an object with properties id, categoryId, name, description, price, imageUrls', done => {
           //arrange
-          const productId = '1';
-          //act, assert        
+          const productId = '3';
+          //act  
+          cartLength++;
+          //assert       
           chai
             .request(server)
             .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
@@ -1121,8 +1130,10 @@ describe('Sunglasses.io API', () => {
   
         it('it should return an object where imageUrls property is an array', done => {
           //arrange
-          const productId = '1';
-          //act, assert        
+          const productId = '4';
+          //act  
+          cartLength++;
+          //assert        
           chai
             .request(server)
             .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
@@ -1142,8 +1153,10 @@ describe('Sunglasses.io API', () => {
   
         it('it should return an object where imageUrls property is an array', done => {
           //arrange
-          const productId = '1';
-          //act, assert        
+          const productId = '5';
+          //act  
+          cartLength++;
+          //assert        
           chai
             .request(server)
             .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)

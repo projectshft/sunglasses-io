@@ -231,6 +231,20 @@ myRouter.post('/me/cart', (request, response) => {
           return user.login.username === currentAccessToken.username;
         });
         //shouldn't need to check if user exists? since would be handled by getValidTokenFromRequest
+        //check if product is already in cart - if client wants to change product they should use PUT
+        if (user.cart.length > 0) {
+          const existingProduct = user.cart.find(item => {
+            return item.product.id === productId;
+          });
+          if (existingProduct) {
+            response.writeHead(409, {...CORS_HEADERS, 'content-type': 'application/json'});
+            return response.end(JSON.stringify({
+              code: 409,
+              message: 'Product already in user\'s cart',
+              fields: 'POST'
+            }));
+          }
+        }
         //add to cart
         user.cart.push({
           product: product,
