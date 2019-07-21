@@ -161,5 +161,14 @@ describe ('DELETE /me/cart/:productId', () => {
                 done();
             })
     })
+    it(' should return an error if the product id does not match a product in the store', done => {
+        chai   
+            .request(server)
+            .get('/api/me/cart/5555/?token=gaew')
+            .end((err,res) => {
+                res.should.have.status(401);
+                done();
+            })
+    })
 })
 
