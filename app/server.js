@@ -13,6 +13,25 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+// function that checks whether token is valid or expired
+const getValidTokenFromRequest = (request) => {
+	if (request.headers.token) {
+	  let currentAccessToken = accessTokens.find((accessToken) => {
+		return accessToken.token == request.headers.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+	  });
+	  if (currentAccessToken) {
+		return currentAccessToken;
+	  } else {
+		return null;
+	  }
+	} else {
+	  return null;
+	}
+  };
 
 // set up router
 const myRouter = Router();
@@ -77,5 +96,43 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
 	response.end(JSON.stringify(productsByBrandId));
 })
 
+// POST /api/login (Log user into page requiring username & password)
+myRouter.post("/api/login", (request, response) => {
+	// check to see if username and password were both entered, return user that matches username and password
+	if (request.body.username && request.body.password){
+		let user = users.find((user) => {
+			return user.login.username == request.body.username && user.login.password == request.body.password;
+		});
+		// if there is already an existing access token, use that one
+		if (user){
+			let currentAccessToken = accessTokens.find((tokenObject) => {
+				return tokenObject.username == user.login.username;
+			});
+			// update the lastUpdated value to a new time period
+			if (currentAccessToken){
+				currentAccessToken.lastUpdated = new Date();
+				response.writeHead(200, "Request to login was successful", {"Content-Type": "application/json"});
+				response.end(JSON.stringify(currentAccessToken.token));
+			} else {
+				// new token with user value and "random" generated token
+				let newAccessToken = {
+					username: user.login.username,
+					lastUpdated: new Date(),
+					token: uid(16)
+				}
+			accessTokens.push(newAccessToken);
+        	response.writeHead(200, "Successful Login", {'Content-Type': 'application/json'});
+    		response.end(JSON.stringify(newAccessToken.token));
+			}
+		} else {
+			response.writeHead(401, "The username or password was incorrect.");
+			response.end();
+		}
+	} else {
+		// user is missing a parameter
+		response.writeHead(400, "Server could not understand the request due to invalid syntax or formatting.");
+		response.end();
+	}
+});
 // export server to use in server-test file
 module.exports = server;

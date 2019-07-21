@@ -1,6 +1,7 @@
 const chai = require("chai");
 const chaiHTTP = require("chai-http");
 const server = require("../app/server");
+let token = null;
 
 chai.use(chaiHTTP);
 
@@ -71,7 +72,7 @@ describe("/GET products", () => {
 	// });
 });
 
-// Test for GET /api/brands/:id/products
+// Test GET /api/brands/:id/products
 describe("GET products by brand ID", () => {
 	it("should get all products based on a brand id", done => {
 		chai
@@ -86,7 +87,7 @@ describe("GET products by brand ID", () => {
 				done();
 			})
 	});
-	it("should recieve error if no brand id matches query", done => {
+	it("should return error if no brand id matches query", done => {
 		chai
 			.request(server)
 			.get("/api/brands/10/products")
@@ -96,4 +97,45 @@ describe("GET products by brand ID", () => {
 				done();
 			})
 	});
+});
+
+// Test POST /api/login
+describe("POST login user", () => {
+	it("should login a user", done => {
+		chai
+			.request(server)
+			.post("/api/login")
+			.send({username: 'yellowleopard753', password: 'jonjon'})
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(200);
+				chai.expect("Content-Type", "application/json");
+				chai.expect(response.body).to.be.lengthOf(16);
+				chai.expect(response.body).to.be.a("string");
+				token = response.body;
+				done();
+			})
+	})
+	it("should return 401 error when username or password are incorrect", done => {
+		chai
+			.request(server)
+			.post("/api/login")
+			.send({username: 'invalidUser', password: 'invalidPassword'})
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(401);
+				done();
+			})
+	})
+	it("should return 400 error if formatting of credentials are incorrect", done => {
+		chai
+			.request(server)
+			.post("/api/login")
+			.send({username: '', password: ''})
+			.end((error,response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(400);
+				done();
+			})
+	})
 });
