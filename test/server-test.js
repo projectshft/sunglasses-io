@@ -209,10 +209,7 @@ describe("/GET cart", () => {
 describe("/POST cart (add)", () => {
   it.only("should POST addition of item to cart", done => {
     let token = 'kjKQZ2QHG1eFCfmT'; 
-    let item = {
-      productId: '1',
-      quantity: 1
-    }
+    let item = { productId : '1'};
     chai
       .request(server)
       .post(`/api/me/cart?accessToken=${token}`)
@@ -224,20 +221,30 @@ describe("/POST cart (add)", () => {
         expect("Content-Type", "application/json");
         expect(res.body).to.be.an("array");
         expect(res.body).to.have.length(1);
+        expect(res.body).to.deep.equal([{productId: '1', quantity: 1}]);
         done();
       });
   });
   it.only("should fail as expected when a user is not logged in", done => {
-    let item = {
-      productId: '2',
-      quantity: 1
-    }
+    let item = { productId : '1'};
     chai
       .request(server)
       .post("/api/me/cart")
       .send(item)
       .end((err, res) => {
         expect(res).to.have.status(401);
+        done();
+      });
+  });
+  it.only("should fail as expected when no product matches given id", done => {
+    let token = 'kjKQZ2QHG1eFCfmT'; 
+    let item = { productId : '12'};
+    chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=${token}`)
+      .send(item)
+      .end((err, res) => {
+        expect(res).to.have.status(404);
         done();
       });
   });
