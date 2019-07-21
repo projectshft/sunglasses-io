@@ -36,6 +36,7 @@ let getToken = function(request){
   }
 }
 
+
 // //helper function to get number of failed log in attempts
 // let getFailedAttempts = function(username){
 //   let currentFailedAttempts = failedLogInAttempts[username];
@@ -157,3 +158,22 @@ myRouter.get('/api/me/cart', function(request, response){
   }
 })
 
+myRouter.post('/api/me/cart', function(request, response){
+  let authToken = getToken(request);
+  //check access token validity
+  if(authToken){
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    //check that matches with user
+    let loggedInUser = users.find((user) => {
+      return authToken.user === user.login.username
+    })
+    //find product
+   let desiredProduct = products.find((product) => {
+     return request.body.id === product.id
+   })
+   desiredProduct.quantity = request.body.quantity;
+   loggedInUser.cart.push(desiredProduct)
+   //respond with object item from users cart to confirm it was added
+   return response.end(JSON.stringify(loggedInUser.cart[loggedInUser.cart.length-1]))
+  }
+})

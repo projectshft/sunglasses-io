@@ -213,9 +213,9 @@ describe('/POST /me/cart', () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
+          console.log(res.body);
           res.body.should.be.an('object');
           res.body.should.have.property('id');
-          res.body.should.have.property('brand');
           res.body.should.have.property('name');
           res.body.should.have.property('quantity');
           done();
