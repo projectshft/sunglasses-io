@@ -19,9 +19,12 @@ GENERAL PLAN
     - [X] Update errors in api to separate 400 and 401
   - [X] /me/cart get
   - [X] /me/cart post
-  - [ ] /me/cart/id put
+  - [X] /me/cart/id put
   - [ ] /me/cart/id delete
 - [ ] Make it work
 
 - [ ] allow logging in with email
 - [ ] maybe have post /me/cart add one to quantity if it already exists instead of throwing an error
+- [ ] check authentication token timeout
+- [ ] track failed logins
+- [ ] put /me/cart/id - change 400 error to only handle quantity - having it deal with invalid id lets client know if productid is a product or not, potential security issue
