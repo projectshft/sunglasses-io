@@ -55,9 +55,9 @@ const server = module.exports = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, () => {
   //load data from files into server memory
-  brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
-  products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
-  users = JSON.parse(fs.readFileSync('../initial-data/users.json', 'utf-8'));
+  brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf-8'));
+  products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf-8'));
   // user = users[0];
 });
 //return brands of sunglasses
@@ -180,7 +180,7 @@ myRouter.post('/api/me/cart', function(request, response){
     })
       if(!desiredProduct){
         response.writeHead(404, 'Product not found.')
-        return response.end();
+        return response.end(JSON.stringify(request.headers));
       } else {
         let loggedInUser = users.find((user) => {
           return authToken.user === user.login.username

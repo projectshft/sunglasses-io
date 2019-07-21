@@ -397,35 +397,32 @@ describe('/POST /me/cart', () => {
         })
     })
   })
-  // it('it should get a 409 response if the product is already in cart', done => {
-  //   chai
-  //   .request(server)
-  //   .post('/api/login')
-  //   .send({email: "salvador.jordan@example.com", password: "tucker"})
-  //   .end((err, res) => {
-  //     chai
-  //       .request(server)
-  //       .post('/api/me/cart')
-  //       .set('authorization', 'Bearer ' + res.body.token)
-  //       .send({
-  //         id: '2',
-  //         quantity: 3
-  //       })
-  //       .end((err, res) => {
-  //         chai
-  //           .request(server)
-  //           .post('/api/me/cart')
-  //           .set('authorization', 'Bearer ' + res.body.token)
-  //           .send({
-  //             id: '2',
-  //             quantity: 3
-  //           })
-  //           .end((err, res) => {
-  //             res.should.have.status(409);
-  //             done();
-  //           })
+  it('it should get a 409 response if the product is already in cart', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res1) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer ' + res1.body.token)
+        .send({
+          id: '2',
+          quantity: 3
+        })
+        .end((err, res) => {
+          res.should.have.status(409);
+          chai
+            .request(server)
+            .post('/api/me/cart')
+            .set('authorization', 'Bearer ' + res1.body.token)
+            .send({id: '2', quantity: 3})
+            .end((err, res) => {
+              done();
+            })
 
-  //       })
-  //   })
-  // })
+        })
+    })
+  })
 });
