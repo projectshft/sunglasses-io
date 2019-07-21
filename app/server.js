@@ -192,7 +192,7 @@ myRouter.post('/api/me/cart', function(request, response){
           return authToken.user === user.login.username
         })
         let checkDuplicateProduct = loggedInUser.cart.find((item) =>{
-          return desiredProduct.id = item.id
+          return desiredProduct.id == item.id
         })
         if (!checkDuplicateProduct){
           response.writeHead(200, {'Content-Type': 'application/json'});
@@ -221,8 +221,19 @@ myRouter.post('/api/me/cart', function(request, response){
     }
     //check that product id is in path and that it is greater than 1
     let currentProductId = getProductId(request);
-    if (!currentProductId || currentProductId < 1 || typeof currentProductId !== 'number'){
+    if (!currentProductId || currentProductId < 1){
       response.writeHead(400, 'Invalid Request');
       return response.end();
+    } else {
+      let loggedInUser = users.find((user) => {
+        return authToken.user === user.login.username
+      })
+      let checkProductInCart = loggedInUser.cart.find((item) =>{
+        return currentProductId == item.id
+      })
+      if(!checkProductInCart){
+        response.writeHead(404, 'Product not found.')
+        return response.end();
+      }
     }
   });

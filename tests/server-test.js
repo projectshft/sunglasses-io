@@ -412,13 +412,13 @@ describe('/POST /me/cart', () => {
           quantity: 3
         })
         .end((err, res) => {
-          res.should.have.status(409);
           chai
             .request(server)
             .post('/api/me/cart')
             .set('authorization', 'Bearer ' + res1.body.token)
             .send({id: '2', quantity: 3})
             .end((err, res) => {
+              res.should.have.status(409);
               done();
             })
 
@@ -435,15 +435,6 @@ describe('/DELETE /me/cart/{productId}', () => {
       .post('/api/login')
       .send({email: "salvador.jordan@example.com", password: "tucker"})
       .end((err, res1) => {
-        chai
-          .request(server)
-          .post('/api/me/cart')
-          .set('authorization', 'Bearer ' + res1.body.token)
-          .send({
-            id: '2',
-            quantity: 3
-          })
-          .end((err, res) => {
             chai
               .request(server)
               .delete('/api/me/cart/2')
@@ -452,7 +443,6 @@ describe('/DELETE /me/cart/{productId}', () => {
                 done();
               })
           })
-        })
       })
     it ('it should get a 401 response if the access token is invalid or expired', done => {
       chai
@@ -486,4 +476,21 @@ describe('/DELETE /me/cart/{productId}', () => {
               })
           })
         })
-  })
+  //tests for 404 item not found in cart error response
+    it('it should get a 404 response if item is not found in users cart', done => {
+      chai
+      .request(server)
+      .post('/api/login')
+      .send({email: "salvador.jordan@example.com", password: "tucker"})
+      .end((err, res) => {
+            chai
+              .request(server)
+              .delete('/api/me/cart/1')
+              .set('authorization', 'Bearer ' + res.body.token)
+              .end((err, res) => {
+                res.should.have.status(404);
+                done();
+              })
+       })
+      })
+    });
