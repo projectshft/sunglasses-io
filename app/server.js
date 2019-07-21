@@ -292,12 +292,12 @@ myRouter.put('/me/cart/:productId', (request, response) => {
   //check if quantity is valid - can't combine with above since fields are different
   const quantity = require('url').parse(request.url, true).query.quantity;
   //since our products are id'd starting at 1
-  if (productId < 1 || !quantity || quantity === '0') {
+  if (!quantity || quantity === '0') {
     response.writeHead(400, {...CORS_HEADERS, 'content-type': 'application/json'});
     return response.end(JSON.stringify({
       code: 400,
-      message: 'Invalid id or quantity',
-      fields: (productId < 1) ? 'path' : 'query'
+      message: 'Invalid quantity',
+      fields: 'query'
     }));
   }
   //get logged in user
