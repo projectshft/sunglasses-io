@@ -86,4 +86,14 @@ describe("GET products by brand ID", () => {
 				done();
 			})
 	});
+	it("should recieve error if no brand id matches query", done => {
+		chai
+			.request(server)
+			.get("/api/brands/10/products")
+			.end((error, response) => {
+				chai.assert.exists(response.body);
+				chai.expect(response).to.have.status(404);
+				done();
+			})
+	});
 });
