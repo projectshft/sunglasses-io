@@ -260,7 +260,7 @@ describe('User', () => {
     });
   });
 
-  //our POST cart should return 400 if there is a missing token parameter
+  //our POST cart should return 400 if there is a missing token query parameter
   describe('/POST User cart', () => {
     it('it should respond with 400 if missing token query', done => {
       //arrange
@@ -285,7 +285,7 @@ describe('User', () => {
 
   //our POST cart should return 401 if there is an incorrect token parameter
   describe('/POST User cart', () => {
-    it('it should respond with 400 if missing token query', done => {
+    it('it should respond with 401 if incorrect token within query', done => {
       //arrange
       chai
         .request(server)
@@ -307,8 +307,22 @@ describe('User', () => {
     });
   });
 
-  //our POST cart should return 404 if there is no item with id of that being passed in the body
-
+  //our POST cart should return 400 if there is no object being passed in the body
+  describe('/POST User cart', () => {
+    it('it should respond with 400 if no object within POST body', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({ token: 'thisismytokenyup' })
+        .send([])
+        .end((err, res) => {
+          //assert
+          res.should.have.status(400);
+          done();
+        })
+    });
+  });
 
 
 });

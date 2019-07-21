@@ -174,6 +174,13 @@ myRouter.post("/api/me/cart", (request, response) => {
     let userInfo = AUTH_USERS.find(authUser => {
       return authUser.token == token;
     });
+
+    //we should probably return some sort of error if the token isn't found
+    if (!userInfo) {
+      response.writeHead(401, "Invalid or expired token");
+      return response.end();
+    }
+
     //select the User from there
     let user = users.find(user => {
       return user.email == userInfo.email;
