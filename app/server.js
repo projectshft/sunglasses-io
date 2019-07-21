@@ -163,5 +163,30 @@ myRouter.get("/api/me/cart", (request, response) => {
   
 });
 
+//start of POST cart items
+myRouter.post("/api/me/cart", (request, response) => {
+  //we'll grab our token
+  const { token } = queryString.parse(request.url.substring(13));
+  //and then our userInfo
+  let userInfo = AUTH_USERS.find(authUser => {
+    return authUser.token == token;
+  });
+  //select the User from there
+  let user = users.find(user => {
+    return user.email == userInfo.email;
+  });
+
+  //at that point we'll have a positive response
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
+
+  //push into User's cart
+  user.cart.push(request.body);
+
+  //return the item sent our way
+  return response.end(JSON.stringify(request.body));
+});
+
 //For testing, yo.
 module.exports = server;

@@ -222,7 +222,7 @@ describe('User', () => {
 
   //our cart GET should return an error if the token user is not found
   describe('/GET User cart, with incorrect token parameter', () => {
-    it('it should respond with 404 error, if token parameter is incorrect', done => {
+    it('it should respond with 401 error, if token parameter is incorrect', done => {
       //arrange
       chai
         .request(server)
@@ -236,5 +236,30 @@ describe('User', () => {
     });
   });
 
+  //our cart POST should return the item added to the cart as confirmation
+  describe('/POST User cart', () => {
+    it('it should respond with 200 and item added to cart, if post is successful', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({ token: 'thisismytokenyup' })
+        .send({
+          id: "2",
+          categoryId: "1",
+          name: "Black Sunglasses",
+          description: "The best glasses in the world",
+          price: 100,
+          imageUrls: ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          done();
+        })
+    });
+  });
+
+  
 
 });
