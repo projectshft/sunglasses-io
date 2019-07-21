@@ -1059,72 +1059,107 @@ describe('Sunglasses.io API', () => {
           });
       });
 
-      it('it should return a 200 response', done => {
-        //arrange
-        const productId = '1';
-        //act, assert        
-        chai
-          .request(server)
-          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
-          .end((err, res) => {
-            res.should.have.status(200);
-            done();
-          });
-      });
+      describe('these tests will successfully add a product to a user\'s cart', () => {
+        afterEach('GET /me/cart to verify product was added', done => {
+          chai
+            .request(server)
+            .get(`/me/cart?accessToken=${accessToken}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.length.should.be.equal(1);
+              done();
+            });
+        });
 
-      it('it should return an object', done => {
-        //arrange
-        const productId = '1';
-        //act, assert        
-        chai
-          .request(server)
-          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('object');
-            done();
-          });
-      });
-
-      it('it should return an object with properties id, categoryId, name, description, price, imageUrls', done => {
-        //arrange
-        const productId = '1';
-        //act, assert        
-        chai
-          .request(server)
-          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('object');
-            res.body.should.have.property('id');
-            res.body.should.have.property('categoryId');
-            res.body.should.have.property('name');
-            res.body.should.have.property('description');
-            res.body.should.have.property('price');
-            res.body.should.have.property('imageUrls');
-            done();
-          });
-      });
-
-      it('it should return an object where imageUrls property is an array', done => {
-        //arrange
-        const productId = '1';
-        //act, assert        
-        chai
-          .request(server)
-          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('object');
-            res.body.should.have.property('id');
-            res.body.should.have.property('categoryId');
-            res.body.should.have.property('name');
-            res.body.should.have.property('description');
-            res.body.should.have.property('price');
-            res.body.should.have.property('imageUrls');
-            res.body.imageUrls.should.be.an('array');
-            done();
-          });
+        it('it should return a 200 response', done => {
+          //arrange
+          const productId = '1';
+          //act, assert        
+          chai
+            .request(server)
+            .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              done();
+            });
+        });
+  
+        it('it should return an object', done => {
+          //arrange
+          const productId = '1';
+          //act, assert        
+          chai
+            .request(server)
+            .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('object');
+              done();
+            });
+        });
+  
+        it('it should return an object with properties id, categoryId, name, description, price, imageUrls', done => {
+          //arrange
+          const productId = '1';
+          //act, assert        
+          chai
+            .request(server)
+            .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('object');
+              res.body.should.have.property('id');
+              res.body.should.have.property('categoryId');
+              res.body.should.have.property('name');
+              res.body.should.have.property('description');
+              res.body.should.have.property('price');
+              res.body.should.have.property('imageUrls');
+              done();
+            });
+        });
+  
+        it('it should return an object where imageUrls property is an array', done => {
+          //arrange
+          const productId = '1';
+          //act, assert        
+          chai
+            .request(server)
+            .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('object');
+              res.body.should.have.property('id');
+              res.body.should.have.property('categoryId');
+              res.body.should.have.property('name');
+              res.body.should.have.property('description');
+              res.body.should.have.property('price');
+              res.body.should.have.property('imageUrls');
+              res.body.imageUrls.should.be.an('array');
+              done();
+            });
+        });
+  
+        it('it should return an object where imageUrls property is an array', done => {
+          //arrange
+          const productId = '1';
+          //act, assert        
+          chai
+            .request(server)
+            .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('object');
+              res.body.should.have.property('id');
+              res.body.should.have.property('categoryId');
+              res.body.should.have.property('name');
+              res.body.should.have.property('description');
+              res.body.should.have.property('price');
+              res.body.should.have.property('imageUrls');
+              res.body.imageUrls.should.be.an('array');
+              done();
+            });
+        });
       });
     });
   });
