@@ -284,6 +284,28 @@ describe('User', () => {
   });
 
   //our POST cart should return 401 if there is an incorrect token parameter
+  describe('/POST User cart', () => {
+    it('it should respond with 400 if missing token query', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({ token: 'somerandomtoken' })
+        .send({
+          id: "2",
+          categoryId: "1",
+          name: "Black Sunglasses",
+          description: "The best glasses in the world",
+          price: 100,
+          imageUrls: ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(400);
+          done();
+        })
+    });
+  });
 
   //our POST cart should return 404 if there is no item with id of that being passed in the body
 
