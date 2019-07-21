@@ -3,7 +3,7 @@ var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
-var bodyParser   = require('body-parser');
+var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
@@ -69,14 +69,14 @@ server.listen(PORT, err => {
   console.log(`server running on port ${PORT}`);
 
   //populate brands  
-  brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
+  brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
 
   //populate products
-  products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
+  products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
 
   //populate users
-  users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
-  
+  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
+
   // hardcode "logged in" user
   // user = users[0];
 });
@@ -90,7 +90,7 @@ router.get("/api/brands", (request, response) => {
   if (brandsToReturn.length === 0) {
     response.writeHead(404, "No brands found");
     return response.end();
-  } 
+  }
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brandsToReturn));
 });
@@ -114,9 +114,9 @@ router.get("/api/brands/:id/products", (request, response) => {
 router.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = queryString.parse(parsedUrl.query);
-  let productsToReturn = []; 
+  let productsToReturn = [];
   if (query !== undefined) {
-    productsToReturn = products.filter(product => 
+    productsToReturn = products.filter(product =>
       product.name.includes(query) || product.description.includes(query)
     );
     if (productsToReturn.length === 0) {
@@ -124,7 +124,7 @@ router.get("/api/products", (request, response) => {
       return response.end();
     }
   } else {
-    productsToReturn = products; 
+    productsToReturn = products;
   }
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsToReturn));
@@ -162,54 +162,54 @@ router.post('/api/login', function (request, response) {
     response.writeHead(400, "Incorrectly formatted response");
     return response.end();
   }
-}); 
+});
 
 // GET CART
-router.get('/api/me/cart', function (request, response) { 
+router.get('/api/me/cart', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(401, "You need to log in to access the cart");
     return response.end();
-  } else { 
+  } else {
     let currentUser = getCurrentUserByUsername(currentAccessToken.username);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(currentUser.cart));
   }
-}); 
+});
 
 // POST CART (add)
-router.post('/api/me/cart', function (request, response) { 
+router.post('/api/me/cart', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(401, "You need to log in to access the cart");
     return response.end();
-  } else { 
+  } else {
     let currentUser = getCurrentUserByUsername(currentAccessToken.username);
     //let item = request.body; 
     const parsedUrl = url.parse(request.originalUrl);
     const { productId } = queryString.parse(parsedUrl.query);
     let product = products.find(product => {
-      return product.id === productId; //item.productId;
+      return product.id === productId;
     });
     if (!product) {
       response.writeHead(404, "Product does not exist");
       return response.end();
     } else {
       let cartItem = currentUser.cart.find(product => {
-        return product.productId === productId; //item.productId;
+        return product.productId === productId;
       });
       if (!cartItem) {
         //item.quantity = 1; 
-        let item = {'productId': productId, 'quantity': 1}; 
-        currentUser.cart.push(item); 
+        let item = { 'productId': productId, 'quantity': 1 };
+        currentUser.cart.push(item);
       } else {
-        cartItem.quantity++; 
+        cartItem.quantity++;
       }
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(currentUser.cart));
     }
   }
-}); 
+});
 
 // DELETE CART 
 router.delete('/api/me/cart/:productId', (request, response) => {
@@ -217,36 +217,52 @@ router.delete('/api/me/cart/:productId', (request, response) => {
   if (!currentAccessToken) {
     response.writeHead(401, "You need to log in to access the cart");
     return response.end();
-  } else { 
-  const { productId } = request.params;
-  let currentUser = getCurrentUserByUsername(currentAccessToken.username);
-  let cartToReturn = currentUser.cart.filter(item => 
-    item.productId !== productId 
-  );
-  currentUser.cart = cartToReturn; 
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(currentUser.cart));
+  } else {
+    const { productId } = request.params;
+    let currentUser = getCurrentUserByUsername(currentAccessToken.username);
+    let cartItem = currentUser.cart.find(product => {
+      return product.productId === productId;
+    });
+    if (!cartItem) {
+      response.writeHead(404, "Product does not exist in cart");
+      return response.end();
+    } else {
+      let cartToReturn = currentUser.cart.filter(item =>
+        item.productId !== productId
+      );
+      currentUser.cart = cartToReturn;
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(currentUser.cart));
+    }
   }
 });
 
 // POST CART (edit)
-router.post('/api/me/cart/:productId', (request, response) => { 
+router.post('/api/me/cart/:productId', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(401, "You need to log in to access the cart");
     return response.end();
-  } else { 
+  } else {
     const { productId } = request.params;
     const parsedUrl = url.parse(request.originalUrl);
     const { quantity } = queryString.parse(parsedUrl.query);
     let currentUser = getCurrentUserByUsername(currentAccessToken.username);
-    let cartToReturn = currentUser.cart.map(item => 
-      (item.productId === productId)? Object.assign({}, item, { 'quantity': Number(quantity) }): item
-    );
-    currentUser.cart = cartToReturn; 
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(currentUser.cart));
+    let cartItem = currentUser.cart.find(product => {
+      return product.productId === productId;
+    });
+    if (!cartItem) {
+      response.writeHead(404, "Product does not exist in cart");
+      return response.end();
+    } else {
+      let cartToReturn = currentUser.cart.map(item =>
+        (item.productId === productId) ? Object.assign({}, item, { 'quantity': Number(quantity) }) : item
+      );
+      currentUser.cart = cartToReturn;
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(currentUser.cart));
+    }
   }
-}); 
+});
 
 module.exports = server;

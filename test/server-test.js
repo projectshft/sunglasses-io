@@ -290,6 +290,17 @@ describe("/DELETE cart", () => {
         done();
       });
   }); 
+  it.only("should fail as expected when no cart item matches given id", done => {
+    let token = 'hEoJFuix38uedAf0'; 
+    let productId = '5';
+    chai
+      .request(server)
+      .delete(`/api/me/cart/${productId}?accessToken=${token}`)
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
 }); 
 
 // POST CART (edit)
@@ -315,6 +326,17 @@ describe("/POST cart (edit)", () => {
       .post("/api/me/cart/4?quantity=3")
       .end((err, res) => {
         expect(res).to.have.status(401);
+        done();
+      });
+  });
+  it.only("should fail as expected when no cart item matches given id", done => {
+    let token = 'hEoJFuix38uedAf0'; 
+    let productId = '5';
+    chai
+      .request(server)
+      .post(`/api/me/cart/${productId}?quantity=3&accessToken=${token}`)
+      .end((err, res) => {
+        expect(res).to.have.status(404);
         done();
       });
   });
