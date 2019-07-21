@@ -9,6 +9,8 @@ var uid = require('rand-token').uid;
 const hostname = 'localhost';
 const PORT = 3001;
 
+const TOKEN_TIMEOUT = 1 * 60 * 1000 //5 minute validity timeout
+
 //State holding variables
 let brands = [];
 let products = [];
@@ -25,7 +27,7 @@ myRouter.use(bodyParser.json());
 let getToken = function(request){
   let extractedToken = request.headers.authorization.split(' ')[1];
   let foundToken = accessTokens.find(accessToken =>{
-    return accessToken.token == extractedToken;
+    return accessToken.token == extractedToken && ((new Date) - accessToken.lastUpdated) < TOKEN_TIMEOUT;
   });
   if (foundToken) {
     return foundToken;
@@ -135,6 +137,10 @@ myRouter.post('/api/login', function(request, response){
 })
 
 myRouter.get('/api/me/cart', function(request, response){
+  if(!request.headers.authorization){
+    response.writeHead(400, 'Invalid Request');
+    return response.end();
+  }
   let authToken = getToken(request);
   if (authToken){
     response.writeHead(200, {'Content-Type': 'application/json'});
@@ -144,7 +150,7 @@ myRouter.get('/api/me/cart', function(request, response){
     })
     return response.end(JSON.stringify(loggedInUser.cart));
   } else {
-    response.writeHead(400, 'Invalid Request');
-    return response.end(JSON.stringify(request.headers));
+    response.writeHead(401, 'Invalid or expired access token.');
+    return response.end();
   }
 })

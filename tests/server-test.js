@@ -170,9 +170,28 @@ describe ('/GET me/cart', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(0);
-          console.log(res.body);
           done();
         })
     })
   })
+  it('it should get a 400 response if no access token provided', done => {
+    chai  
+      .request(server)
+      .get('/api/me/cart')
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      })
+  })
+  it('it should get a 401 response if access token is not found or expired', done => {
+    chai  
+      .request(server)
+      .get('/api/me/cart')
+      .set('authorization', 'Bearer 12dc56i9')
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
+
 })
