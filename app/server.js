@@ -60,4 +60,17 @@ myRouter.get('/api/brands', function (req, res) {
     return res.end(JSON.stringify(brands))
 })
 
+myRouter.get('/api/brands/:id/products', (req, res) => {
+    let brandId = req.params.id;
+    let filteredProducts= products.filter(product => {
+        return product.categoryId == brandId
+    })
+    if (filteredProducts.length) {
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        return res.end(JSON.stringify(filteredProducts))
+    }
+    res.writeHead(400, 'No Products Match have that Brand Category Id')
+    return res.end();
+}); 
+
 module.exports = server

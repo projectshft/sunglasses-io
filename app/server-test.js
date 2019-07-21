@@ -28,6 +28,16 @@ describe('Sunglasses API', () => {
                     done();
                 })
         })
+        it ("it should inform the user when there are no brands in the system that match the user's search results", done => {
+            chai   
+                .request(server)
+                .get('/api/brands')
+                .query({name: 'Old Navy'})
+                .end((err, res) => {
+                    expect(res.body).to.have.length(0);
+                    done();
+                })
+        })
         it('it should filter results by brand name', done => {
             chai
                 .request(server)
@@ -44,6 +54,46 @@ describe('Sunglasses API', () => {
                     }])
                     done();
                 })
+        })
+    })
+    describe('GET /api/brands/:id/products', done => {
+        it ('it should return all the products that belong to particular brand based on the brand id', done => {
+            chai
+                .request(server)
+                .get('/api/brands/3/products')
+                .end((err,res) => {
+                    expect(res.body).to.eql([
+                        {
+                            "id": "6",
+                            "categoryId": "3",
+                            "name": "glas",
+                            "description": "Pretty awful glasses",
+                            "price":10,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+                            "cartQuantity": null
+                        },
+                        {
+                            "id": "7",
+                            "categoryId": "3",
+                            "name": "QDogs Glasses",
+                            "description": "They bark",
+                            "price":1500,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+                            "cartQuantity": null
+                        }
+                     ])
+                     done();
+                })
+        })
+        it('it should return no results if the brand id is not found in the system', done => {
+            chai
+                .request(server)
+                .get('/api/brands/6/products')
+                .end((err, res) => {
+                    expect(res.body).to.have.length(0)
+                    done();
+                })
+                
         })
     })
 })
