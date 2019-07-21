@@ -213,7 +213,6 @@ describe('/POST /me/cart', () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
-          console.log(res.body);
           res.body.should.be.an('object');
           res.body.should.have.property('id');
           res.body.should.have.property('name');
@@ -221,5 +220,121 @@ describe('/POST /me/cart', () => {
           done();
         })
     })
-})
-})
+  })
+  //testing for 400 response conditions
+  it('it should get a 400 response if quantity is less than 1', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({
+          id: "3",
+          quantity: 0
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+  })
+  it('it should get a 400 response if quantity is not provided', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({
+          id: "3",
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+  })
+  it('it should get a 400 response if id is not provided', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({
+          quantity: 3
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+  })
+  it('it should get a 400 response if neither quantity nor id are provided', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+  })
+  it('it should get a 400 response if id is not a string', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({
+          id: 2,
+          quantity: 3
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+  })
+  it('it should get a 400 response if quantity is not a number', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({
+          id: '2',
+          quantity: '3'
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+  })
+});

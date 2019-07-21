@@ -159,6 +159,12 @@ myRouter.get('/api/me/cart', function(request, response){
 })
 
 myRouter.post('/api/me/cart', function(request, response){
+  //check for required fields and valid quantity submitted and send back error 
+  if(!request.body.quantity || !request.body.id || typeof request.body.id !== 'string' || typeof request.body.quantity !== 'number' || request.body.quantity < 1){
+    response.writeHead(400, 'Invalid Request');
+    return response.end();
+  }
+
   let authToken = getToken(request);
   //check access token validity
   if(authToken){
