@@ -94,7 +94,7 @@ describe ('POST /login', () => {
 })
 
 
-//set test for /me/cart/:productId
+//set test for /me/cart/
 describe ('GET me/cart', () => {
     it ('should return all the products currently in a users cart', done => {
     chai
@@ -116,4 +116,9 @@ describe ('GET me/cart', () => {
     })
 })
 
-
+//set test for /me/cart/:productId
+describe('POST /me/cart/:productId', () => {
+    it ('should add a product to the users cart')
+})
+//should return an error if theres is no token
+//should return an errror if there is no product mathcihg that
