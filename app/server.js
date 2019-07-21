@@ -14,7 +14,7 @@ const header = {'Content-Type': 'application/json'};
 let products = [];
 let brands =[];
 let users = [];
-let accessTokens =[];
+let accessTokens =['gaeaw'];
 let cart = [];
 //set a helper function that parses the accessToken from the url
 const getValidTokenFromRequest = (request) => {
@@ -50,13 +50,13 @@ const server = module.exports = http.createServer(function (request, response) {
 }).listen(PORT, () => {
     //extract the products data and save it into a  products variable
     //array of objects
-    products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
+    products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf-8'));
     //extract the brands data and save it into a products variable
     //array of objects
-    brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
+    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf-8'));
    //array of objects 
     //extract the user data and savi it into a users variable
-    users = JSON.parse(fs.readFileSync('../initial-data/users.json'), 'utf-8')
+    users = JSON.parse(fs.readFileSync('./initial-data/users.json'), 'utf-8')
 });
 
 //creater a route for the /products endpoint
@@ -177,6 +177,28 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     }
 })
 
+//delete a specified product from the cart
+myRouter.get('/api/me/cart/:productId', function(request,response) {
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //if there is no verified access token return an error
+    if (!currentAccessToken) {
+        response.writeHead(401, 'You do no have access to this data');
+        return response.end();
+    }
+    //if there is no product id specified in the paramters return an error
+    if (request.params.productId == undefined) {
+        response.writeHead(400, 'You must specify a product to be added to cart')
+        return response.end();
+    }
+    let productToBeAdded = products.find(product => {
+        return product.id == request.params.productId; 
+    })
+    //if there is no productId matching the id of a product return an error
+    if (!productToBeAdded) {
+        response.writeHead(400, 'The id does not match any products available in the store')
+        return response.end();
+    }
+})
 
 
 
