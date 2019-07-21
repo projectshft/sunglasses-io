@@ -1174,6 +1174,29 @@ describe('Sunglasses.io API', () => {
             });
         });
       });
+
+      describe('these tests will try to add a product already in a user\'s cart', () => {
+        it('it should return a 409 product already in cart when duplicated productId sent', done => {
+          //arrange
+          //productIds 1-5 have been added to cart, can use any of those
+          const productId = '1';
+          //act, assert
+          chai
+          .request(server)
+          .post(`/me/cart?accessToken=${accessToken}&productId=${productId}`)
+          .end((err, res) => {
+            res.should.have.status(409);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(409);
+            res.body.message.should.equal('Product already in user\'s cart');
+            res.body.fields.should.equal('POST');
+            done();
+          });
+        })
+      });
     });
   });
 });
