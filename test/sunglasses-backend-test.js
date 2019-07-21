@@ -957,7 +957,7 @@ describe('Sunglasses.io API', () => {
     describe('after logging in', () => {
       let accessToken;
 
-      before('sending a GET request, login as an existing user', done => {
+      before('sending a POST request, login as an existing user', done => {
         //arrange
         const loginInfo = {
           username: 'yellowleopard753',
@@ -2060,6 +2060,172 @@ describe('Sunglasses.io API', () => {
             res.body.should.have.property('imageUrls');
             res.body.imageUrls.should.be.an('array');
             cartSize--;
+            done();
+          });
+      });
+    });
+  });
+
+  //testing failed login attempts at the end so no users are locked out of previous tests
+  describe('Failed login attempts', () => {
+    //now test failed login attempts with greenlion235
+    describe('testing failed login attempts', () => {
+      before('failed login attempt #1 using username', done => {
+        const loginInfo = {
+          username: 'greenlion235',
+          password: 'wrong'
+        };
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      before('failed login attempt #2 using email', done => {
+        const loginInfo = {
+          email: 'natalia.ramos@example.com',
+          password: 'wrong'
+        };
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      before('failed login attempt #3 using username', done => {
+        const loginInfo = {
+          username: 'greenlion235',
+          password: 'wrong'
+        };
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      it('should return 401 invalid username or password when sent correct username and password (because of failed logins limit)', done => {
+        //arrange
+        const loginInfo = {
+          username: 'greenlion235',
+          password: 'waters'
+        };
+        //act, assert
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(401);
+            res.body.message.should.equal('Invalid username or password');
+            res.body.fields.should.equal('POST body');
+            done();
+          });
+      });
+
+      it('should return 401 invalid email or password when sent correct username and password (because of failed logins limit)', done => {
+        //arrange
+        const loginInfo = {
+          email: 'natalia.ramos@example.com',
+          password: 'waters'
+        };
+        //act, assert
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            res.body.should.be.an('object');
+            res.body.should.have.property('code');
+            res.body.should.have.property('message');
+            res.body.should.have.property('fields');
+            res.body.code.should.equal(401);
+            res.body.message.should.equal('Invalid email or password');
+            res.body.fields.should.equal('POST body');
+            done();
+          });
+      });
+    });
+
+    //now test if server allows login after two failed logins - limit should be 3
+    describe('testing failed login attempts', () => {
+      before('failed login attempt #1 using username', done => {
+        const loginInfo = {
+          username: 'lazywolf342',
+          password: 'wrong'
+        };
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      before('failed login attempt #2 using email', done => {
+        const loginInfo = {
+          email: 'salvador.jordan@example.com',
+          password: 'wrong'
+        };
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      it('it should return 200 when sent valid username and password', done => {
+        //arrange
+        const loginInfo = {
+          username: 'lazywolf342',
+          password: 'tucker'
+        }
+        //assert, act
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(200);
+            done();
+          });
+      });
+
+      it('it should return 200 when sent valid email and password', done => {
+        //arrange
+        const loginInfo = {
+          email: 'salvador.jordan@example.com',
+          password: 'tucker'
+        }
+        //assert, act
+        chai
+          .request(server)
+          .post('/login')
+          .send(loginInfo)
+          .end((err, res) => {
+            res.should.have.status(200);
             done();
           });
       });

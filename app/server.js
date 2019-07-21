@@ -139,7 +139,6 @@ myRouter.get('/products', (request, response) => {
   }));
 });
 
-//ADD CHECK - SJOULD ONLY RECEIVE EMAIL OR USERNAME, NOT BOTH
 myRouter.post('/login', (request, response) => {
   //Check for username and password in request body
   const { username, email, password } = request.body;
