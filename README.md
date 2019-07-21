@@ -20,7 +20,7 @@ GENERAL PLAN
   - [X] /me/cart get
   - [X] /me/cart post
   - [X] /me/cart/id put
-  - [ ] /me/cart/id delete
+  - [X] /me/cart/id delete
 - [ ] Make it work
 
 - [ ] allow logging in with email

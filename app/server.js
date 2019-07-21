@@ -320,6 +320,24 @@ myRouter.put('/me/cart/:productId', (request, response) => {
   }));
 });
 
+myRouter.delete('/me/cart/:productId', (request, response) => {
+  //validate access token
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    //either no token sent or invalid token
+    response.writeHead(403, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 403,
+      message: 'Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in',
+      fields: 'query'
+    }));
+  } else {
+    //check user's cart for product
+    //if found remove from cart
+    //else 404 not found
+  }
+});
+
 
 //helper method to check access tokens
 const getValidTokenFromRequest = (request) => {
