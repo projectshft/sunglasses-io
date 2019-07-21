@@ -460,15 +460,6 @@ describe('/DELETE /me/cart/{productId}', () => {
       .post('/api/login')
       .send({email: "salvador.jordan@example.com", password: "tucker"})
       .end((err, res1) => {
-        chai
-          .request(server)
-          .post('/api/me/cart')
-          .set('authorization', 'Bearer ' + res1.body.token)
-          .send({
-            id: '2',
-            quantity: 3
-          })
-          .end((err, res) => {
             chai
               .request(server)
               .delete('/api/me/cart/2')
@@ -479,5 +470,20 @@ describe('/DELETE /me/cart/{productId}', () => {
               })
           })
         })
-    })
+    it ('it should get a 400 response if request is not formatted correctly', done => {
+      chai
+      .request(server)
+      .post('/api/login')
+      .send({email: "salvador.jordan@example.com", password: "tucker"})
+      .end((err, res) => {
+            chai
+              .request(server)
+              .delete('/api/me/cart/0')
+              .set('authorization', 'Bearer ' + res.body.token)
+              .end((err, res) => {
+                res.should.have.status(400);
+                done();
+              })
+          })
+        })
   })

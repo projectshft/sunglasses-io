@@ -24,6 +24,7 @@ var myRouter = Router();
 myRouter.use(bodyParser.json());
 
 //helper function to extract access token for endpoints needing a log in
+//refactor to return null for access token not present
 let getToken = function(request){
   let extractedToken = request.headers.authorization.split(' ')[1];
   let foundToken = accessTokens.find(accessToken =>{
@@ -36,6 +37,11 @@ let getToken = function(request){
   }
 }
 
+//helper function to extract productId from path
+let getProductId = function(request) {
+  let productId = request.params.productId
+  return productId;
+}
 
 // //helper function to get number of failed log in attempts
 // let getFailedAttempts = function(username){
@@ -204,13 +210,19 @@ myRouter.post('/api/me/cart', function(request, response){
 
   myRouter.delete('/api/me/cart/:productId', function(request, response){
     //check for access token in header
-    if(!request.headers.authorization){
+    if (!request.headers.authorization){
       response.writeHead(401, 'Log in required to perform this action.')
       return response.end();
     } 
     let authToken = getToken(request);
-    if(!authToken){
+    if (!authToken){
       response.writeHead(401, 'Log in required to access content');
+      return response.end();
+    }
+    //check that product id is in path and that it is greater than 1
+    let currentProductId = getProductId(request);
+    if (!currentProductId || currentProductId < 1 || typeof currentProductId !== 'number'){
+      response.writeHead(400, 'Invalid Request');
       return response.end();
     }
   });
