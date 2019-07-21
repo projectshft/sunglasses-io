@@ -5,6 +5,7 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
+var url = require('url');
 
 const PORT = 3001;
 
@@ -28,10 +29,29 @@ const server = http.createServer(function (request, response) {
 	users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));
 });
 
-// GET /api/brands (give the user all brands available)
+// GET /api/brands (return all brands available)
 myRouter.get("/api/brands", (request, response) => {
-	response.writeHead(200, {"Content-Type": "applicatoin/json"});
+	response.writeHead(200, {"Content-Type": "application/json"});
 	response.end(JSON.stringify(brands));
+})
+
+// GET /api/products (return all products available when no query is provided)
+myRouter.get("/api/products", (request,response) => {
+	const parsedUrl = url.parse(request.url);
+	const { query } = queryString.parse(parsedUrl.query);
+	let productsReturnedByQuery = [];
+	if(query !== undefined){
+		productsReturnedByQuery = products.filter(product =>
+			product.name.includes(query) || product.description.includes(query));
+		if(productsReturnedByQuery.length == 0){
+			response.writeHead(404, "No products that match that query");
+			response.end();
+		}
+	}else{
+		productsReturnedByQuery = products;
+	}
+	response.writeHead(200, {"Content-Type": "application/json"});
+	response.end(JSON.stringify(productsReturnedByQuery));
 })
 
 // export server to use in server-test file
