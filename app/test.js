@@ -125,6 +125,7 @@ describe('POST /me/cart/:productId', () => {
             .post('/api/me/cart/1/?token=gaeaw')
             .end((err,res) => {
                 res.should.have.status(200)
+                done();
             })
 
     })
@@ -139,6 +140,7 @@ describe ('DELETE /me/cart/:productId', () => {
             .get('/api/me/cart/1/?token=gaeaw')
             .end((err,res) => {
                 res.should.have.status(200)
+                done();
             })
     })
 })

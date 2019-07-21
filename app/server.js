@@ -176,14 +176,14 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     //if product is already in cart increase its quantity
     for (let i = 0; i < cart.length; i++) {
         if (productToBeAdded.id == cart[i].id) {
-            response.writeHead(200, 'Item quantity increased by 1');
-            response.end(cart)
+            response.writeHead(200, header);
+            response.end(JSON.stringify(cart));
         } else {
             //if product is not in cart add product to cart with a quantity number of 1
             productToBeAdded.quantity = 1;
             cart.push(productToBeAdded);
             response.writeHead(200, 'Item added to cart');
-            response.end(cart);
+            response.end(JSON.stringify(cart));
         }
     }
 })
@@ -216,7 +216,7 @@ myRouter.get('/api/me/cart/:productId', function(request,response) {
     })
 
     response.writeHead(200, 'Item deleted from cart');
-    return response.end(newCart);
+    return response.end(JSON.stringify(newCart));
 })
 
 
