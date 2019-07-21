@@ -95,51 +95,51 @@ describe ('POST /login', () => {
 })
 
 
-//set test for /me/cart/
-// describe ('GET me/cart', () => {
-//     it ('should return all the products currently in a users cart', done => {
-//     chai
-//         .request(server)
-//         .get('/api/me/cart/?token=gaeaw')
-//         .end((err,res) => {
-//             res.should.have.status(200);
-//             done();
-//         })
-//     })
-//     it ('should return an error if the access token is not valid', done => {
-//         chai
-//             .request(server)
-//             .get('/api/me/cart')
-//             .end((err, res) => {
-//                 res.should.have.status(401);
-//                 done();
-//             })
-//     })
-// })
+// set test for /me/cart/
+describe ('GET me/cart', () => {
+    it ('should return all the products currently in a users cart', done => {
+    chai
+        .request(server)
+        .get('/api/me/cart/?token=gaeaw')
+        .end((err,res) => {
+            res.should.have.status(200);
+            done();
+        })
+    })
+    it ('should return an error if the access token is not valid', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart')
+            .end((err, res) => {
+                res.should.have.status(401);
+                done();
+            })
+    })
+})
 
-// //set test for /me/cart/:productId
-// describe('POST /me/cart/:productId', () => {
-//     it ('should add a product to the users cart', done => {
-//         chai
-//             .request(server)
-//             .post('/api/me/cart/1/?token=gaeaw')
-//             .end((err,res) => {
-//                 res.should.have.status(200)
-//             })
+//set test for /me/cart/:productId
+describe('POST /me/cart/:productId', () => {
+    it ('should add a product to the users cart', done => {
+        chai
+            .request(server)
+            .post('/api/me/cart/1/?token=gaeaw')
+            .end((err,res) => {
+                res.should.have.status(200)
+            })
 
-//     })
-// })
-// //should return an error if theres is no token
-// //should return an errror if there is no product mathcihg that
+    })
+})
+//should return an error if theres is no token
+//should return an errror if there is no product mathcihg that
 
-// describe ('DELETE /me/cart/:productId', () => {
-//     it ('should delete a product from the users cart', done => {
-//         chai
-//             .request(server)
-//             .get('/api/me/cart/1/?token=gaeaw')
-//             .end((err,res) => {
-//                 res.should.have.status(200)
-//             })
-//     })
-// })
+describe ('DELETE /me/cart/:productId', () => {
+    it ('should delete a product from the users cart', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart/1/?token=gaeaw')
+            .end((err,res) => {
+                res.should.have.status(200)
+            })
+    })
+})
 

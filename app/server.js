@@ -35,7 +35,7 @@ const getValidTokenFromRequest = (request) => {
     if (tokenFromUrl) {
         //check to see if the accessToken the user has is a verified one
         let currentAccessToken = accessTokens.find(accessToken => {
-            return accessToken.token == parsedUrl.query.accessToken;
+            return accessToken.token == tokenFromUrl
         })
         //if the token is verified return it
         if (currentAccessToken) {
@@ -148,8 +148,8 @@ myRouter.get('/api/me/cart', function(request, response) {
         return response.end();
     } else {
         //return the products currently in the cart
-        response.writeHead(200, head);
-        return response.end(cart)
+        response.writeHead(200, header);
+        return response.end(JSON.stringify(cart))
     }
 })
 //create router post for /api/me/cart/:productId endpoint which adds product to cart
