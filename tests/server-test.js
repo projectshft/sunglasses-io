@@ -530,4 +530,91 @@ describe('/DELETE /me/cart/{productId}', () => {
                   })
               })
         })
+        it ('it should get a 401 response if the access token is invalid or expired', done => {
+          chai
+          .request(server)
+          .post('/api/login')
+          .send({email: "salvador.jordan@example.com", password: "tucker"})
+          .end((err, res1) => {
+                chai
+                  .request(server)
+                  .post('/api/me/cart/2')
+                  .set('authorization', 'Bearer 123eryyffr')
+                  .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                  })
+              })
+            })
+        it ('it should get a 400 response if no quantity specified in body of request', done => {
+          chai
+          .request(server)
+          .post('/api/login')
+          .send({email: "salvador.jordan@example.com", password: "tucker"})
+          .end((err, res) => {
+                chai
+                  .request(server)
+                  .post('/api/me/cart/1')
+                  .set('authorization', 'Bearer ' + res.body.token)
+                  .send({})
+                  .end((err, res) => {
+                    res.should.have.status(400);
+                    done();
+                  })
+              })
+            })
+        it ('it should get a 400 response if quantity is not greater than 0', done => {
+          chai
+          .request(server)
+          .post('/api/login')
+          .send({email: "salvador.jordan@example.com", password: "tucker"})
+          .end((err, res) => {
+                chai
+                  .request(server)
+                  .post('/api/me/cart/1')
+                  .set('authorization', 'Bearer ' + res.body.token)
+                  .send({quantity: 0})
+                  .end((err, res) => {
+                    res.should.have.status(400);
+                    done();
+                  })
+              })
+            })
+      //tests for 404 item not found in cart error response
+        it('it should get a 404 response if item is not found in users cart', done => {
+          chai
+          .request(server)
+          .post('/api/login')
+          .send({email: "salvador.jordan@example.com", password: "tucker"})
+          .end((err, res) => {
+              chai
+                  .request(server)
+                  .post('/api/me/cart/1')
+                  .set('authorization', 'Bearer ' + res.body.token)
+                  .send({quantity: 5})
+                  .end((err, res) => {
+                    res.should.have.status(404);
+                    done();
+                  })
+           })
+          })
+        it('it should update an item quantity in the users cart', done => {
+          chai
+            .request(server)
+            .post('/api/login')
+            .send({email: "salvador.jordan@example.com", password: "tucker"})
+            .end((err, res) => {
+           chai
+              .request(server)
+              .post('/api/me/cart/2')
+              .set('authorization', 'Bearer ' + res.body.token)
+              .send({quantity: 18})
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('object');
+                res.body.should.have.property('quantity');
+               done();
+            })
+          })
+        })
     });
