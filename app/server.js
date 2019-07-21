@@ -15,7 +15,14 @@ let products = [];
 let brands =[];
 let users = [];
 let accessTokens =['gaeaw'];
-let cart = [];
+let cart = [{
+    "id": "1",
+    "categoryId": "1",
+    "name": "Superglasses",
+    "description": "The best glasses in the world",
+    "price":150,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}];
 //set a helper function that parses the accessToken from the url
 const getValidTokenFromRequest = (request) => {
     let parsedUrl = url.parse(request.url, true);
@@ -173,6 +180,8 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
             //if product is not in cart add product to cart with a quantity number of 1
             productToBeAdded.quantity = 1;
             cart.push(productToBeAdded);
+            response.writeHead(200, 'Item added to cart');
+            response.end(cart);
         }
     }
 })
@@ -190,14 +199,21 @@ myRouter.get('/api/me/cart/:productId', function(request,response) {
         response.writeHead(400, 'You must specify a product to be added to cart')
         return response.end();
     }
-    let productToBeAdded = products.find(product => {
+    let productToBeDeleted = cart.find(product => {
         return product.id == request.params.productId; 
     })
     //if there is no productId matching the id of a product return an error
-    if (!productToBeAdded) {
-        response.writeHead(400, 'The id does not match any products available in the store')
+    if (!productToBeDeleted) {
+        response.writeHead(400, 'The id does not match any products currently in the cart')
         return response.end();
     }
+
+    let newCart = cart.filter(product => {
+        return product.id !== productToBeDeleted.id
+    })
+
+    response.writeHead(200, 'Item with id of deleted from cart');
+    return response.end(newCart);
 })
 
 
