@@ -193,12 +193,18 @@ router.post('/api/me/cart', function (request, response) {
       response.writeHead(404, "Product does not exist");
       return response.end();
     } else {
-      item.quantity = 1; 
-      currentUser.cart.push(item); 
+      let cartItem = currentUser.cart.find(product => {
+        return product.productId === item.productId;
+      });
+      if (!cartItem) {
+        item.quantity = 1; 
+        currentUser.cart.push(item); 
+      } else {
+        cartItem.quantity++; 
+      }
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(currentUser.cart));
     }
-    
   }
 }); 
 

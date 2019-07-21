@@ -248,6 +248,24 @@ describe("/POST cart (add)", () => {
         done();
       });
   });
+  it.only("should increment the item quantity if it exists in the cart already", done => {
+    let token = 'kjKQZ2QHG1eFCfmT'; 
+    let item = { productId : '1'};
+    chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=${token}`)
+      .send(item)
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.length(1);
+        expect(res.body).to.deep.equal([{productId: '1', quantity: 2}]);
+        done();
+      });
+  });
 }); 
 
 // DELETE CART 
