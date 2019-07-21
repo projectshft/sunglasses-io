@@ -31,7 +31,7 @@ const server = http.createServer(function (request, response) {
 
 // GET /api/brands (return all brands available)
 myRouter.get("/api/brands", (request, response) => {
-	response.writeHead(200, {"Content-Type": "application/json"});
+	response.writeHead(200, "Request for brands was successful", {"Content-Type": "application/json"});
 	response.end(JSON.stringify(brands));
 })
 
@@ -39,7 +39,12 @@ myRouter.get("/api/brands", (request, response) => {
 myRouter.get("/api/products", (request,response) => {
 	const parsedUrl = url.parse(request.url);
 	const { query } = queryString.parse(parsedUrl.query);
+	if (products.length == 0){
+		response.writeHead(400, "Products not available");
+	}
+	
 	let productsReturnedByQuery = [];
+	// make sure that if the query is empty that a 404 error is returned, otherwise send a successfull response
 	if(query !== undefined){
 		productsReturnedByQuery = products.filter(product =>
 			product.name.includes(query) || product.description.includes(query));
@@ -50,7 +55,7 @@ myRouter.get("/api/products", (request,response) => {
 	}else{
 		productsReturnedByQuery = products;
 	}
-	response.writeHead(200, {"Content-Type": "application/json"});
+	response.writeHead(200, "Request for products was successful", {"Content-Type": "application/json"});
 	response.end(JSON.stringify(productsReturnedByQuery));
 })
 

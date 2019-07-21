@@ -36,4 +36,17 @@ describe("/GET products", () => {
 				done();
 			});
 	});
+	it("should GET all products that match user's search query", done => {
+		chai	
+			.request(server)
+			.get("/api/products?query=Superglasses")
+			.end((error, response) => {
+				chai.assert.exists(response.body);
+				chai.expect(response).to.have.status(200);
+				chai.expect("Content-Type", "application/json");
+				chai.expect(response.body).to.be.an("array");
+				chai.expect(response.body).to.have.lengthOf(1);
+				done();
+			})
+	});
 });
