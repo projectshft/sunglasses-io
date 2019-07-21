@@ -287,4 +287,15 @@ describe("/PUT item quantities to user's cart", () => {
 				done();
 			});
 	});
+	it("should return error 404 if token is bad", done => {
+		chai
+			.request(server)
+			.put("/api/me/cart")
+			.set("token", "badToken")
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(404);
+				done();
+			});
+	});
 });

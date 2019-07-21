@@ -137,8 +137,36 @@ myRouter.get("/api/me/cart", (request, response) => {
 			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
       		response.end();
       		return;
-		} else{
+		} else {
 			response.writeHead(200, "Request to retrieve user's cart was successful.", {"Content-Type": "application/json"});
+			response.end(JSON.stringify(user.cart));
+		}
+	}
+});
+
+// PUT /api/me/cart (Allows user to update quantities of items in their cart.)
+myRouter.put("/api/me/cart", (request, response) => {
+	let validAccessToken = getValidTokenFromRequest(request);
+	if(!validAccessToken){
+		response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+		response.end();
+	} else {
+		let userAccessToken = accessTokens.find((tokenObject) => {
+			return tokenObject.token == request.headers.token;
+		});
+		let user = users.find((user) => {
+			return user.login.username == userAccessToken.username;
+		})
+		if(!user){
+			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+      		response.end();
+      		return;
+		} else {
+			const updatedQuantities = request.body.updatedQuantities;
+			user.cart.forEach((item, i) => {
+				item.quantity = updatedQuantities[i];
+			})
+			response.writeHead(200, "Successfully updated user's cart", {"Content-Type": "application/json"});
 			response.end(JSON.stringify(user.cart));
 		}
 	}
