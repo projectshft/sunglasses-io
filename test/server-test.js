@@ -340,4 +340,28 @@ describe("/POST cart (edit)", () => {
         done();
       });
   });
+  it.only("should fail as expected when quantity is less than one", done => {
+    let token = 'hEoJFuix38uedAf0'; 
+    let productId = '4';
+    let quantity = 0; 
+    chai
+      .request(server)
+      .post(`/api/me/cart/${productId}?quantity=${quantity}&accessToken=${token}`)
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+  it.only("should fail as expected when quantity is not an integer", done => {
+    let token = 'hEoJFuix38uedAf0'; 
+    let productId = '4';
+    let quantity = 1.5; 
+    chai
+      .request(server)
+      .post(`/api/me/cart/${productId}?quantity=${quantity}&accessToken=${token}`)
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
 }); 

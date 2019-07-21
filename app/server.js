@@ -254,6 +254,9 @@ router.post('/api/me/cart/:productId', (request, response) => {
     if (!cartItem) {
       response.writeHead(404, "Product does not exist in cart");
       return response.end();
+    } else if (Number(quantity) < 1 || Math.floor(Number(quantity)) !== Number(quantity)) {
+      response.writeHead(400, "Invalid quantity supplied");
+      return response.end();
     } else {
       let cartToReturn = currentUser.cart.map(item =>
         (item.productId === productId) ? Object.assign({}, item, { 'quantity': Number(quantity) }) : item
