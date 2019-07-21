@@ -167,25 +167,33 @@ myRouter.get("/api/me/cart", (request, response) => {
 myRouter.post("/api/me/cart", (request, response) => {
   //we'll grab our token
   const { token } = queryString.parse(request.url.substring(13));
-  //and then our userInfo
-  let userInfo = AUTH_USERS.find(authUser => {
-    return authUser.token == token;
-  });
-  //select the User from there
-  let user = users.find(user => {
-    return user.email == userInfo.email;
-  });
 
-  //at that point we'll have a positive response
-  response.writeHead(200, {
-    'content-type': 'application/json'
-  });
+  //checking if it exists
+  if (typeof token !== 'undefined') {
+    //and then our userInfo
+    let userInfo = AUTH_USERS.find(authUser => {
+      return authUser.token == token;
+    });
+    //select the User from there
+    let user = users.find(user => {
+      return user.email == userInfo.email;
+    });
 
-  //push into User's cart
-  user.cart.push(request.body);
+    //at that point we'll have a positive response
+    response.writeHead(200, {
+      'content-type': 'application/json'
+    });
 
-  //return the item sent our way
-  return response.end(JSON.stringify(request.body));
+    //push into User's cart
+    user.cart.push(request.body);
+
+    //return the item sent our way
+    return response.end(JSON.stringify(request.body));
+  } else {
+    //return error parameter if no token within query
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
 });
 
 //For testing, yo.

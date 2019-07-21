@@ -262,7 +262,7 @@ describe('User', () => {
 
   //our POST cart should return 400 if there is a missing token parameter
   describe('/POST User cart', () => {
-    it('it should respond with 200 and item added to cart, if post is successful', done => {
+    it('it should respond with 400 if missing token query', done => {
       //arrange
       chai
         .request(server)
@@ -277,7 +277,7 @@ describe('User', () => {
         })
         .end((err, res) => {
           //assert
-          res.should.have.status(200);
+          res.should.have.status(400);
           done();
         })
     });
