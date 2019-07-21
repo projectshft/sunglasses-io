@@ -21,6 +21,19 @@ let accessTokens = [];
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
+//helper function to extract access token for endpoints needing a log in
+let getToken = function(request){
+  let extractedToken = request.headers.authorization.split(' ')[1];
+  let foundToken = accessTokens.find(accessToken =>{
+    return accessToken.token == extractedToken;
+  });
+  if (foundToken) {
+    return foundToken;
+  } else{
+    return null;
+  }
+}
+
 // //helper function to get number of failed log in attempts
 // let getFailedAttempts = function(username){
 //   let currentFailedAttempts = failedLogInAttempts[username];
@@ -108,11 +121,30 @@ myRouter.post('/api/login', function(request, response){
   //if that user is found, return an access token 
   if(foundUser) {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    let token = uid(16);
-    return response.end(JSON.stringify({'token': token}));
+    let currentToken = {
+      user: foundUser.login.username,
+      lastUpdated: new Date (),
+      token: uid(16)
+    }
+    accessTokens.push(currentToken);
+    return response.end(JSON.stringify({'token': currentToken.token}));
     } else{
       response.writeHead(401, 'Invalid username or password');
       return response.end();
-    }
-  
+    } 
+})
+
+myRouter.get('/api/me/cart', function(request, response){
+  let authToken = getToken(request);
+  if (authToken){
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    //access user's cart
+    let loggedInUser = users.find((user) => {
+      return authToken.user === user.login.username
+    })
+    return response.end(JSON.stringify(loggedInUser.cart));
+  } else {
+    response.writeHead(400, 'Invalid Request');
+    return response.end(JSON.stringify(request.headers));
+  }
 })

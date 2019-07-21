@@ -155,3 +155,24 @@ it('it should get a 400 response if neither email or password are provided', don
    })
 })
 });
+describe ('/GET me/cart', () => {
+  it('it should GET the logged in users cart', done => {
+   chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(0);
+          console.log(res.body);
+          done();
+        })
+    })
+  })
+})
