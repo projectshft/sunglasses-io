@@ -197,7 +197,7 @@ myRouter.get('/api/me/cart/:productId', function(request,response) {
         return response.end();
     }
     //if there is no product id specified in the paramters return an error
-    if (request.params.productId == undefined) {
+    if (!request.params.productId) {
         response.writeHead(400, 'You must specify a product to be added to cart')
         return response.end();
     }
