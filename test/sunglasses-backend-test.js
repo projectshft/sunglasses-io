@@ -1226,23 +1226,6 @@ describe('Sunglasses.io API', () => {
     });
 
     describe('logged in with no items in user\'s cart', () => {
-      it('it should return 400 invalid id or quantity with no productId sent', done => {
-        chai
-          .request(server)
-          .put(`/me/cart?accessToken=${accessToken}`)
-          .end((err, res) => {
-            res.should.have.status(400);
-            res.body.should.be.an('object');
-            res.body.should.have.property('code');
-            res.body.should.have.property('message');
-            res.body.should.have.property('fields');
-            res.body.code.should.equal(400);
-            res.body.message.should.equal('Invalid id or quantity');
-            res.body.fields.should.equal('path');
-            done();
-          });
-      });
-  
       it('it should return 400 invalid id or quantity with invalid productId sent', done => {
         //arrange
         const productId = '0';
@@ -1363,7 +1346,7 @@ describe('Sunglasses.io API', () => {
             res.body.should.have.property('fields');
             res.body.code.should.equal(404);
             res.body.message.should.equal('Product not found');
-            res.body.fields.should.equal('query');
+            res.body.fields.should.equal('path');
             done();
           });
       });
@@ -1402,23 +1385,6 @@ describe('Sunglasses.io API', () => {
           .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.an('object');
-            done();
-          });
-      });
-
-      it('it should return 400 invalid id or quantity with no productId sent', done => {
-        chai
-          .request(server)
-          .put(`/me/cart?accessToken=${accessToken}`)
-          .end((err, res) => {
-            res.should.have.status(400);
-            res.body.should.be.an('object');
-            res.body.should.have.property('code');
-            res.body.should.have.property('message');
-            res.body.should.have.property('fields');
-            res.body.code.should.equal(400);
-            res.body.message.should.equal('Invalid id or quantity');
-            res.body.fields.should.equal('path');
             done();
           });
       });
@@ -1543,7 +1509,7 @@ describe('Sunglasses.io API', () => {
             res.body.should.have.property('fields');
             res.body.code.should.equal(404);
             res.body.message.should.equal('Product not found');
-            res.body.fields.should.equal('query');
+            res.body.fields.should.equal('path');
             done();
           });
       });

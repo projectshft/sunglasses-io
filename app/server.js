@@ -272,6 +272,54 @@ myRouter.post('/me/cart', (request, response) => {
   }
 });
 
+myRouter.put('/me/cart/:productId', (request, response) => {
+  //validate access token
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    //either no token sent or invalid token
+    response.writeHead(403, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 403,
+      message: 'Unauthorized - Missing or invalid accessToken, can only access cart if user is logged in',
+      fields: 'query'
+    }));
+  } 
+  //validate productId and quantity
+  const { productId } = request.params; 
+  //check if quantity is valid - can't combine with above since fields are different
+  const quantity = require('url').parse(request.url, true).query.quantity;
+  //since our products are id'd starting at 1
+  if (productId < 1 || !quantity || quantity === '0') {
+    response.writeHead(400, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 400,
+      message: 'Invalid id or quantity',
+      fields: (productId < 1) ? 'path' : 'query'
+    }));
+  }
+  //get logged in user
+  const user = users.find(user => {
+    return user.login.username === currentAccessToken.username;
+  });
+  //find product in cart
+  const productToUpdate = user.cart.find(item => {
+    return item.product.id === productId;
+  });
+  //update if found
+  if (productToUpdate) {
+    productToUpdate.quantity = quantity;
+    response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify(productToUpdate));
+  }
+  //else 404
+  response.writeHead(404, {...CORS_HEADERS, 'content-type': 'application/json'});
+  return response.end(JSON.stringify({
+    code: 404,
+    message: 'Product not found',
+    fields: 'path'
+  }));
+});
+
 
 //helper method to check access tokens
 const getValidTokenFromRequest = (request) => {
