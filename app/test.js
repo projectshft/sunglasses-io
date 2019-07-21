@@ -118,7 +118,15 @@ describe ('GET me/cart', () => {
 
 //set test for /me/cart/:productId
 describe('POST /me/cart/:productId', () => {
-    it ('should add a product to the users cart')
+    it ('should add a product to the users cart', done => {
+        chai
+            .request(server)
+            .post('/api/me/cart/1')
+            .end((err,res) => {
+                res.should.have.status(200)
+            })
+
+    })
 })
 //should return an error if theres is no token
 //should return an errror if there is no product mathcihg that

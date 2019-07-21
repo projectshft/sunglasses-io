@@ -143,6 +143,40 @@ myRouter.get('/api/me/cart', function(request, response) {
         return response.end(cart)
     }
 })
+//create router post for /api/me/cart/:productId endpoint which adds product to cart
+myRouter.post('/api/me/cart/:productId', function (request, response) {
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //if there is no verified access token return an error
+    if (!currentAccessToken) {
+        response.writeHead(401, 'You do no have access to this data');
+        return response.end();
+    }
+    //if there is no product id specified in the paramters return an error
+    if (request.params.productId == undefined) {
+        response.writeHead(400, 'You must specify a product to be added to cart')
+        return response.end();
+    }
+    let productToBeAdded = products.find(product => {
+        return product.id == request.params.productId; 
+    })
+    //if there is no productId matching the id of a product return an error
+    if (!productToBeAdded) {
+        response.writeHead(400, 'The id does not match any products available in the store')
+        return response.end();
+    }
+    //if product is already in cart increase its quantity
+    for (let i = 0; i < cart.length; i++) {
+        if (productToBeAdded.id == cart[i].id) {
+            cart[i].quantity ++;
+            response.writeHead(200, 'Item quantity increased by 1');
+            response.end(cart)
+        } else {
+            //if product is not in cart add product to cart with a quantity number of 1
+            productToBeAdded.quantity = 1;
+            cart.push(productToBeAdded);
+        }
+    }
+})
 
 
 
