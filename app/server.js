@@ -153,6 +153,35 @@ myRouter.get('/api/me/cart', function(request, response) {
         return response.end(JSON.stringify(cart))
     }
 })
+//create router post for /api/me/cart that adds the product sent in the body of the request to the cart
+myRouter.post('/api/me/cart', function (request, response) {
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //if there is no verified access token return an error
+    if (!currentAccessToken) {
+        response.writeHead(401, 'You do no have access to this data');
+        return response.end();
+    }
+    //if the body of the request is empty return an error
+    if (!request.body.id) {
+        response.writeHead(400, 'There was no product to in body of request to add to cart')
+        return response.end();
+    }
+    //if the product in the body does not exist in the store exactly return an error
+    let productToBeAdded = products.find(product => {
+        return request.body.values == product.values
+    })
+    //if the product does not match return an error
+    if (!productToBeAdded) {
+        response.writeHead(400, 'The product does not exist or is not available in the store')
+    }
+    //add a quantity property to the product
+    productToBeAdded.quantity == 1;
+    //add product to cart
+    cart.push(productToBeAdded);
+    response.writeHead(200, header);
+    return response.end(JSON.stringify(cart));
+
+})
 //create router post for /api/me/cart/:productId endpoint which changes the quantity of product in cart
 myRouter.post('/api/me/cart/:productId', function (request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
@@ -171,7 +200,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     })
     //if there is no productId matching the id of a product return an error
     if (!productToBeChanged) {
-        response.writeHead(400, 'The id does not match any products available in the store')
+        response.writeHead(400, 'The id does not match any products in the cart')
         return response.end();
     }
     //if product is already in cart increase its quantity
