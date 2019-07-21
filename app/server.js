@@ -9,7 +9,7 @@ var uid = require('rand-token').uid;
 const hostname = 'localhost';
 const PORT = 3001;
 
-const TOKEN_TIMEOUT = 1 * 60 * 1000 //5 minute validity timeout
+const TOKEN_TIMEOUT = 5 * 60 * 1000 //5 minute validity timeout
 
 //State holding variables
 let brands = [];
@@ -137,10 +137,12 @@ myRouter.post('/api/login', function(request, response){
 })
 
 myRouter.get('/api/me/cart', function(request, response){
+  //check if access token is present in header of request as specified in api docs
   if(!request.headers.authorization){
     response.writeHead(400, 'Invalid Request');
     return response.end();
   }
+  //check validity of token
   let authToken = getToken(request);
   if (authToken){
     response.writeHead(200, {'Content-Type': 'application/json'});
@@ -154,3 +156,4 @@ myRouter.get('/api/me/cart', function(request, response){
     return response.end();
   }
 })
+

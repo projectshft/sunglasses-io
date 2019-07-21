@@ -155,6 +155,7 @@ it('it should get a 400 response if neither email or password are provided', don
    })
 })
 });
+
 describe ('/GET me/cart', () => {
   it('it should GET the logged in users cart', done => {
    chai
@@ -193,5 +194,32 @@ describe ('/GET me/cart', () => {
         done();
       })
   })
+})
 
+describe('/POST /me/cart', () => {
+  it('it should add a product to the logged in users cart', done => {
+    chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "salvador.jordan@example.com", password: "tucker"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('authorization', 'Bearer '+ res.body.token)
+        .send({
+          id: "3",
+          quantity: 2
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('brand');
+          res.body.should.have.property('name');
+          res.body.should.have.property('quantity');
+          done();
+        })
+    })
+})
 })
