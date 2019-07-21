@@ -50,7 +50,7 @@ describe("/GET products", () => {
 				done();
 			});
 	});
-	it("should return an error if search query does not match any products", done => {
+	it("should return 404 error if search query does not match any products", done => {
 		chai
 			.request(server)
 			.get("/api/products?query=qwertyasdf")
@@ -60,7 +60,7 @@ describe("/GET products", () => {
 				done();
 			});
 	});
-	// it("should return an error if no products can be returned", done => {
+	// it("should return 400 error if no products can be returned", done => {
 	// 	chai
 	// 		.request(server)
 	// 		.get("/api/products")
@@ -73,7 +73,7 @@ describe("/GET products", () => {
 });
 
 // Test GET /api/brands/:id/products
-describe("GET products by brand ID", () => {
+describe("/GET products by brand ID", () => {
 	it("should get all products based on a brand id", done => {
 		chai
 			.request(server)
@@ -87,7 +87,7 @@ describe("GET products by brand ID", () => {
 				done();
 			})
 	});
-	it("should return error if no brand id matches query", done => {
+	it("should return 404 error if no brand id matches query", done => {
 		chai
 			.request(server)
 			.get("/api/brands/10/products")
@@ -100,7 +100,7 @@ describe("GET products by brand ID", () => {
 });
 
 // Test POST /api/login
-describe("POST login user", () => {
+describe("/POST login user", () => {
 	it("should login a user", done => {
 		chai
 			.request(server)
@@ -138,4 +138,122 @@ describe("POST login user", () => {
 				done();
 			})
 	})
+});
+
+// Test POST /api/me/cart/:productId
+describe("/POST add a product to cart" , () => {
+	it("should add a product to the user's cart", done => {
+		chai
+			.request(server)
+			.post("/api/me/cart/1")
+			.set("token", token)
+			.end((error, response) => {
+				chai.assert.isNull(error);
+        		chai.expect(response).to.have.status(200);
+        		chai.expect("Content-Type", "application/json");        
+        		chai.expect(response.body).to.be.an("array");
+				chai.expect(response.body).to.be.lengthOf(1);
+				chai.expect(response.body).to.deep.equal([
+					{
+						"id": "1",
+        				"categoryId": "1",
+       					"name": "Superglasses",
+       					"description": "The best glasses in the world",
+       					"price":150,
+       					"imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+						"quantity": 1
+					}
+				]);
+				done();
+			})
+	});
+	it("should update item quantity if product exists in cart already", done => {
+		chai
+			.request(server)
+			.post("/api/me/cart/1")
+			.set("token", token)
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(200);
+				chai.expect("Content-Type", "application/json");
+				chai.expect(response.body).to.be.an("array");
+				chai.expect(response.body).to.be.lengthOf(1);
+				chai.expect(response.body[0].quantity).to.eql(2)
+				chai.expect(response.body).to.deep.equal([
+					{
+						"id": "1",
+        				"categoryId": "1",
+       					"name": "Superglasses",
+       					"description": "The best glasses in the world",
+       					"price":150,
+       					"imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+						"quantity": 2
+					}
+				]);
+				done();
+			})
+	})
+	it("should return 400 error if productId is invalid", done => {
+		chai
+		  .request(server)
+		  .post("/api/me/cart/13")
+		  .set("token", token)
+		  .end((error, response) => {
+			chai.assert.isNull(error);
+			chai.expect(response).to.have.status(400);
+			chai.expect("Content-Type", "application/json");
+			done();
+		  });
+	  });
+	it("should return 404 error if token is bad", done => {
+		chai
+		  .request(server)
+		  .post("/api/me/cart/3")
+		  .set("token", "badToken")
+		  .end((error, response) => {
+			chai.assert.isNull(error);
+			chai.expect(response).to.have.status(404);
+			done();
+		  });
+	  });
+});
+
+// Test GET /api/me/cart
+describe("/GET the user's cart", () => {
+	it("should get all items that are in the user's cart", done => {
+		chai
+			.request(server)
+			.get("/api/me/cart")
+			.set("token", token)
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(200);
+				chai.expect("Content-Type", "application/json");
+				chai.expect(response.body).to.be.an("array");
+				chai.expect(response.body).to.be.lengthOf(1);
+				chai.expect(response.body).to.deep.equal([
+					{
+						"id": "1",
+        				"categoryId": "1",
+       					"name": "Superglasses",
+       					"description": "The best glasses in the world",
+       					"price":150,
+       					"imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+						"quantity": 2
+					}
+				])
+				done();
+			});
+	});
+	it("should return 404 error if token is bad", done => {
+		chai
+		  .request(server)
+		  .post("/api/me/cart")
+		  .set("token", "badToken")
+		  .end((error, response) => {
+			chai.assert.isNull(error);
+			chai.expect(response).to.have.status(404);
+			done();
+		  });
+	});
 });

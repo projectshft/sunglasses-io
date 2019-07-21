@@ -17,22 +17,6 @@ let accessTokens = [];
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-// function that checks whether token is valid or expired
-const getValidTokenFromRequest = (request) => {
-	if (request.headers.token) {
-	  let currentAccessToken = accessTokens.find((accessToken) => {
-		return accessToken.token == request.headers.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-	  });
-	  if (currentAccessToken) {
-		return currentAccessToken;
-	  } else {
-		return null;
-	  }
-	} else {
-	  return null;
-	}
-  };
-
 // set up router
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -134,5 +118,87 @@ myRouter.post("/api/login", (request, response) => {
 		response.end();
 	}
 });
+
+// GET /api/me/cart (Get all the products that are in the user's cart.)
+myRouter.get("/api/me/cart", (request, response) => {
+	// check to validate access token with helper function, if invalid token then return error message 404
+	let validAccessToken = getValidTokenFromRequest(request);
+	if(!validAccessToken){
+		response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+		response.end();
+	} else {
+		let userAccessToken = accessTokens.find((tokenObject) => {
+			return tokenObject.token == request.headers.token;
+		});
+		let user = users.find((user) => {
+			return user.login.username == userAccessToken.username;
+		})
+		if(!user){
+			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+      		response.end();
+      		return;
+		} else{
+			response.writeHead(200, "Request to retrieve user's cart was successful.", {"Content-Type": "application/json"});
+			response.end(JSON.stringify(user.cart));
+		}
+	}
+});
+
+// POST /api/me/cart/:productId (Adds a product to the user's cart. If product exists in cart already, increase quantity)
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+	// check to validate access token with helper function, if invalid token then return error message 404
+	let validAccessToken = getValidTokenFromRequest(request);
+	if(!validAccessToken){
+		response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+		response.end();
+	} else {
+		let userAccessToken = accessTokens.find((tokenObject) => {
+			return tokenObject.token == request.headers.token;
+		});
+		let user = users.find((user) => {
+			return user.login.username == userAccessToken.username;
+		})
+		if(!user){
+			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+      		response.end();
+      		return;
+		} else {
+			const { productId } = request.params;
+			const validProductId = products.find(product => 
+				product.id == productId);
+			if (!validProductId) {
+				response.writeHead(400, "server could not understand the request due to invalid syntax or formatting");
+				response.end();
+			}
+			const existingProductInCart = user.cart.find(product => product.id == productId);
+			if (!existingProductInCart){
+				const productToAddInCart = products.filter(product => product.id == productId);
+				Object.assign(productToAddInCart[0], {"quantity": 1})
+				user.cart.push(productToAddInCart[0]);
+			} else {
+				existingProductInCart.quantity += 1;
+			}
+			response.writeHead(200, "Successfully added product to user's cart.", {"Content-Type": "application/json"});
+			response.end(JSON.stringify(user.cart));
+		}
+	}
+})
+
+// function that checks whether token is valid or expired
+const getValidTokenFromRequest = (request) => {
+	if (request.headers.token) {
+	  let currentAccessToken = accessTokens.find((accessToken) => {
+		return accessToken.token == request.headers.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+	  });
+	  if (currentAccessToken) {
+		return currentAccessToken;
+	  } else {
+		return null;
+	  }
+	} else {
+	  return null;
+	}
+  };
+
 // export server to use in server-test file
 module.exports = server;

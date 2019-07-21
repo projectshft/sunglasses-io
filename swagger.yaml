@@ -200,7 +200,7 @@ paths:
             items:
               $ref: '#/definitions/Cart'
         '400':
-          description: server could not understand the request due to invalid syntax.
+          description: server could not understand the request due to invalid syntax or formatting.
         '401':
           description: Unauthentication Error, You must have authentication to get the requested response.
         '404':
@@ -233,7 +233,7 @@ paths:
             items:
               $ref: '#/definitions/Cart'
         '400':
-          description: server could not understand the request due to invalid syntax.
+          description: server could not understand the request due to invalid syntax or formatting.
         '401':
           description: Unauthentication Error, You must have authentication to get the requested response.
         '404':
