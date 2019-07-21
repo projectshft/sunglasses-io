@@ -14,7 +14,11 @@ const header = {'Content-Type': 'application/json'};
 let products = [];
 let brands =[];
 let users = [];
-let accessTokens =['gaeaw'];
+let accessTokens =[{
+    username: 'yellowleopard753',
+    lastUpdated: 'today',
+    token: 'gaeaw'
+}];
 let cart = [{
     "id": "1",
     "categoryId": "1",
@@ -100,22 +104,21 @@ myRouter.get('/api/brands', function(request, response) {
 
 //create router post for /api/login endpoint
 myRouter.post('/api/login', function(request, response) {
-    let user = [];
     //see if a username an password was entered
     if (request.body.username && request.body.password) {
         //if so find a user that matches the credentials
         let user = users.filter(user => {
             return user.login.username == request.body.username && user.login.password == request.body.password
-        })
+        });
         //if there is no user matching credentials return an error
-        if (user.length == 0) {
+        if (!user) {
             response.writeHead(401, 'Invalid usernmae or password');
             return response.end();
-        }
+        };
         //see if user currently has an access token
         let currentAccessToken = accessTokens.find((token) => {
-            return token.username == user.login.username;
-        })
+            return token.username == user[0].login.username;
+        });
         //if there is an accesstoken for the user update the time it was last updated
         if (currentAccessToken) {
             currentAccessToken.lastUpdated = new Date();
@@ -126,9 +129,9 @@ myRouter.post('/api/login', function(request, response) {
                 username: request.body.username,
                 lastUpdated: new Date(),
                 token: uid(16)
-            }
+            };
             accessTokens.push(newAccesstoken);
-            return response.end(JSON.stringify(newAccesstoken.token))
+            return response.end(JSON.stringify(newAccesstoken.token));
         }
     } else {
         response.writeHead(400, 'Incorrectly formatted response');
@@ -136,7 +139,7 @@ myRouter.post('/api/login', function(request, response) {
     }
 });
 
-
+//get all the products currently in the cart
 myRouter.get('/api/me/cart', function(request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     //if there is no verified access toekn return an error
@@ -173,7 +176,6 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     //if product is already in cart increase its quantity
     for (let i = 0; i < cart.length; i++) {
         if (productToBeAdded.id == cart[i].id) {
-            cart[i].quantity ++;
             response.writeHead(200, 'Item quantity increased by 1');
             response.end(cart)
         } else {
@@ -207,12 +209,13 @@ myRouter.get('/api/me/cart/:productId', function(request,response) {
         response.writeHead(400, 'The id does not match any products currently in the cart')
         return response.end();
     }
-
+    //create new cart of products
     let newCart = cart.filter(product => {
+        //if the product is not meant to be deleted add it to the new cart
         return product.id !== productToBeDeleted.id
     })
 
-    response.writeHead(200, 'Item with id of deleted from cart');
+    response.writeHead(200, 'Item deleted from cart');
     return response.end(newCart);
 })
 
