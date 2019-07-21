@@ -1,6 +1,7 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('./server');
+let { expect } = require('chai');
 
 let should = chai.should();
 
@@ -22,9 +23,25 @@ describe('Sunglasses API', () => {
                 .request(server)
                 .get('/api/brands')
                 .end((err, res) => {
-                    res.should.have.status(200);
                     res.body.should.be.an('array')
-                    res.body.length.should.be.eql(5)
+                    res.body.should.have.length(5)
+                    done();
+                })
+        })
+        it('it should filter results by brand name', done => {
+            chai
+                .request(server)
+                .get('/api/brands')
+                .query({name: ['Oakley', "Levi's"]})
+                .end((err, res) => {
+                    expect(res.body).to.have.deep.members([ 
+                    {
+                        "id": "1",
+                        "name" : "Oakley"
+                    }, {
+                        "id": "3",
+                        "name" : "Levi's"
+                    }])
                     done();
                 })
         })
