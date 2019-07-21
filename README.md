@@ -18,7 +18,10 @@ GENERAL PLAN
   - [X] /login post
     - [X] Update errors in api to separate 400 and 401
   - [X] /me/cart get
-  - [ ] /me/cart post
+  - [X] /me/cart post
   - [ ] /me/cart/id put
   - [ ] /me/cart/id delete
 - [ ] Make it work
+
+- [ ] allow logging in with email
+- [ ] maybe have post /me/cart add one to quantity if it already exists instead of throwing an error

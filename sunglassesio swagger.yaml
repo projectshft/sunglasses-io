@@ -224,7 +224,7 @@ paths:
                 type: integer
                 example: 2
         400:
-          description: Invalid quantity
+          description: Invalid id or quantity
           schema:
             $ref: '#/definitions/Error'
         403:
