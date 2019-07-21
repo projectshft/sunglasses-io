@@ -1,17 +1,12 @@
-var fs = require('fs');
+//Separated routes trying to improve readability in the server.js file
+var fs = require("fs");
 
 let brands = [];
-let products = [];
 brands = JSON.parse(fs.readFileSync("../../initial-data/brands.json", "utf-8"));
-products = JSON.parse(fs.readFileSync("../../initial-data/products.json", "utf-8"));
 
+// function logic for the api/brands route
 const getBrands = () => {
-    return brands;
-}
+  return brands;
+};
 
-const getProducts = (brandId) => {
-    return products.filter((product) => {
-        return product.categoryId == brandId;
-    })
-}
-module.exports = { getBrands, getProducts };
+module.exports = { getBrands };
