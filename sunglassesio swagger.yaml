@@ -105,6 +105,7 @@ paths:
         - name: loginInfo
           in: body
           required: true
+          description: Must include either username or email, can send both. Must include password.
           schema:
             $ref: '#/definitions/User'
       responses:
@@ -309,12 +310,14 @@ definitions:
   User:
     type: object
     required: 
-      - username
       - password
     properties:
       username:
         type: string
         example: 'yellowleopard753'
+      email:
+        type: string
+        example: 'susanna.richards@example.com'
       password:
         type: string
         example: 'jonjon'
