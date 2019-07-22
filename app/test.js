@@ -66,7 +66,6 @@ describe ('GET /brands', () => {
 })
 
 //set test for user login, /me post request
-//this was working initally but then started to return 500 errors proably an erro in the login 
 describe ('POST /login', () => {
         it ('should grant access to user if the username and password is valid', done => {
             let user = {username: 'yellowleopard753', password: 'jonjon'}
@@ -103,6 +102,7 @@ describe ('GET me/cart', () => {
         .get('/api/me/cart/?token=gaeaw')
         .end((err,res) => {
             res.should.have.status(200);
+            res.body.should.be.an('array');
             done();
         })
     })
