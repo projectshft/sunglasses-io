@@ -56,6 +56,23 @@ const server = http.createServer(function (request, response) {
     console.log(`Server is listening on ${PORT}`);
   });
 
+  //let's make some helper functions!
+  const getAuthorizedUserFromToken = function(token){
+    let userInfo = AUTH_USERS.find(authUser => {
+      return authUser.token == token;
+    });
+    //we should probably return some sort of error if the token isn't found
+    if (!userInfo) {
+      return undefined;
+    }
+
+    let currentUser = users.find((user) => {
+      return user.email == userInfo.email;
+    });
+
+    return currentUser;
+  }
+
   //base route
 myRouter.get("/", (request, response) => {
   response.end("There's nothing to see here, please visit /api/brands and carry on.");
@@ -136,19 +153,12 @@ myRouter.get("/api/me/cart", (request, response) => {
   //and check if that query parameter exists
   if (typeof token !== 'undefined'){
     //check against our AUTH_USER object to grab the User based on token
-    let userInfo = AUTH_USERS.find(authUser => {
-      return authUser.token == token;
-    });
-    //we should probably return some sort of error if the token isn't found
-    if(!userInfo){
+    //we'll now use a helper function for getting our user
+    const user = getAuthorizedUserFromToken(token);
+    if (user === undefined) {
       response.writeHead(401, "Invalid or expired token");
       return response.end();
     }
-
-    //but if the token is found, let's find our user
-    let user = users.find(user => {
-      return user.email == userInfo.email;
-    });
 
     //send over our shopping cart
     response.writeHead(200, {
@@ -187,21 +197,12 @@ myRouter.post("/api/me/cart", (request, response) => {
       return response.end();
     }
 
-    //and then our userInfo
-    const userInfo = AUTH_USERS.find(authUser => {
-      return authUser.token == token;
-    });
-
-    //we should probably return some sort of error if the token isn't found
-    if (!userInfo) {
+    //we'll now use a helper function for getting our user
+    const user = getAuthorizedUserFromToken(token);
+    if(user === undefined){
       response.writeHead(401, "Invalid or expired token");
       return response.end();
     }
-
-    //select the User from there
-    const user = users.find(user => {
-      return user.email == userInfo.email;
-    });
 
     //push into User's cart
     user.cart.push(product);
@@ -221,5 +222,42 @@ myRouter.post("/api/me/cart", (request, response) => {
   }
 });
 
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+  //we'll have to deal with numbers above 10, so goodbye fixed URL substring
+  const splitUrl = request.url.split('?');
+  //we'll also grab our token
+  const { token } = queryString.parse(splitUrl[1]);
+  //checking if it exists and our request body for an id parameter
+  if (typeof token !== 'undefined') {
+    //let's snag our productId
+    const { productId } = request.params;
+    //and find that product!
+    const product = products.find(product => {
+      return product.id == productId;
+    });
+    
+    //we'll now use a helper function for getting our user
+    const user = getAuthorizedUserFromToken(token);
+    if (user === undefined) {
+      response.writeHead(401, "Invalid or expired token");
+      return response.end();
+    }
+
+    //push into User's cart
+    user.cart.push(product);
+
+    //at that point we'll have a positive response
+    response.writeHead(200, {
+      'content-type': 'application/json'
+    });
+
+    //return the item sent our way
+    return response.end(JSON.stringify(product));
+  } else {
+    //return error parameter if no token within query
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+});
 //For testing, yo.
 module.exports = server;

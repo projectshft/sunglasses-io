@@ -367,4 +367,25 @@ describe('User POST to Cart', () => {
     });
   });
 
+  //our POST cart should return 400 if there is a missing token query parameter
+  describe('/POST User cart with productId, missing token', () => {
+    it('it should respond with 400', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/5')
+        .send({})
+        .end((err, res) => {
+          //assert
+          res.should.have.status(400);
+          done();
+        })
+    });
+  });
+
+  //our POST cart should return 401 if there is an incorrect token parameter
+  //our POST cart should return 400 if there is no productId in parameters
+  //our POST cart should return 404 if there is no product with the productId passed in
+  //our POST cart should return 400 if there is no product of the type passed in
+
 });
