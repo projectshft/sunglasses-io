@@ -14,8 +14,17 @@ const header = {'Content-Type': 'application/json'};
 let products = [];
 let brands =[];
 let users = [];
-let accessTokens =[];
-let cart = [];
+//add sample accesstoken to pass tests
+let accessTokens =[{username: 'yellowleopard753', token: 'gaeaw'}];
+//set cart to already have a product in order to pass tests
+let cart = [{
+    "id": "1",
+    "categoryId": "1",
+    "name": "Superglasses",
+    "description": "The best glasses in the world",
+    "price":150,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}];
 
 //set a helper function that parses the accessToken from the url
 const getValidTokenFromRequest = (request) => {
@@ -50,13 +59,16 @@ const server = module.exports = http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request,response))
 }).listen(PORT, () => {
     //extract the products data and save it into a  products variable
-    //array of objects
+     //the following syntax works for chai testing
+    //in order to use postman to test delete the first period in the readFilesync function
     products = JSON.parse(fs.readFileSync('../initial-data/products.json', 'utf-8'));
     //extract the brands data and save it into a products variable
-    //array of objects
+     //the following syntax works for chai testing
+    //in order to use postman to test delete the first period in the readFilesync function
     brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'));
-   //array of objects 
     //extract the user data and savi it into a users variable
+    //the following syntax works for chai testing
+    //in order to use postman to test delete the first period in the readFilesync function
     users = JSON.parse(fs.readFileSync('../initial-data/users.json'), 'utf-8')
 });
 
