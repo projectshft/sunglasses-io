@@ -14,20 +14,9 @@ const header = {'Content-Type': 'application/json'};
 let products = [];
 let brands =[];
 let users = [];
-let accessTokens =[{
-    username: 'yellowleopard753',
-    lastUpdated: 'today',
-    token: 'gaeaw'
-}];
-let cart = [{
-    "id": "1",
-    "categoryId": "1",
-    "name": "Superglasses",
-    "description": "The best glasses in the world",
-    "price":150,
-    "quantity": 1,
-    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-}];
+let accessTokens =[];
+let cart = [];
+
 //set a helper function that parses the accessToken from the url
 const getValidTokenFromRequest = (request) => {
     let parsedUrl = url.parse(request.url, true);
@@ -45,7 +34,7 @@ const getValidTokenFromRequest = (request) => {
             //return nothing if the token is not verified
             return null
         }
-    //if the 
+    //if the url doesn't have a token return null
     } else {
         return null
     }
@@ -97,11 +86,14 @@ myRouter.get('/api/products', function(request, response) {
     response.writeHead(200, header);
     return response.end(JSON.stringify(productsToReturn));
 })
+
+
 //create router for /api/brands endpoint
 myRouter.get('/api/brands', function(request, response) {
     response.writeHead(200, header);
     return response.end(JSON.stringify(brands));
 })
+
 
 //create router post for /api/login endpoint
 myRouter.post('/api/login', function(request, response) {
@@ -128,7 +120,6 @@ myRouter.post('/api/login', function(request, response) {
             //if there is not an accesstoken for the user create a new acccesstoken
             let newAccesstoken = {
                 username: request.body.username,
-                lastUpdated: new Date(),
                 token: uid(16)
             };
             accessTokens.push(newAccesstoken);
@@ -139,6 +130,8 @@ myRouter.post('/api/login', function(request, response) {
         return response.end();
     }
 });
+
+
 
 //get all the products currently in the cart
 myRouter.get('/api/me/cart', function(request, response) {
@@ -153,6 +146,9 @@ myRouter.get('/api/me/cart', function(request, response) {
         return response.end(JSON.stringify(cart))
     }
 })
+
+
+
 //create router post for /api/me/cart that adds the product sent in the body of the request to the cart
 myRouter.post('/api/me/cart', function (request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
@@ -187,6 +183,9 @@ myRouter.post('/api/me/cart', function (request, response) {
     return response.end(JSON.stringify(cart));
 
 })
+
+
+
 //create router post for /api/me/cart/:productId endpoint which changes the quantity of product in cart
 myRouter.post('/api/me/cart/:productId', function (request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
@@ -217,6 +216,8 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     response.writeHead(200, header);
     response.end(JSON.stringify(cart));
 })
+
+
 
 //delete a specified product from the cart
 myRouter.get('/api/me/cart/:productId', function(request,response) {
