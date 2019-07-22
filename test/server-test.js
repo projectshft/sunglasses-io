@@ -91,6 +91,20 @@ describe("/GET products", () => {
         done();
       });
   });
+  it.only("should provide case-insensitive results", done => {
+    chai
+      .request(server)
+      .get("/api/products?query=sunGlasses")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(2);
+        done();
+      });
+  });
   it.only("should return all products if query is missing", done => {
     chai
       .request(server)

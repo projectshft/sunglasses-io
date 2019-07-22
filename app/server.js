@@ -110,7 +110,7 @@ router.get("/api/products", (request, response) => {
   let productsToReturn = [];
   if (query !== undefined) {
     productsToReturn = products.filter(product =>
-      product.name.includes(query) || product.description.includes(query)
+      product.name.toLowerCase().includes(query.toLowerCase()) || product.description.toLowerCase().includes(query.toLowerCase())
     );
     if (productsToReturn.length === 0) {
       response.writeHead(404, "No products found");
