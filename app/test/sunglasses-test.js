@@ -1,7 +1,7 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../server');
-
+let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Brands', () => {
@@ -510,7 +510,7 @@ describe('User DELETE to Cart, with quantity checks', () => {
       //arrange
       chai
         .request(server)
-        .delete('/api/me/cart/11')
+        .delete('/api/me/cart/4')
         .query({ token: 'thisismytokenyup' })
         .end((err, res) => {
           //assert
