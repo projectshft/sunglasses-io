@@ -244,6 +244,11 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     const { productId } = request.params;
     //and find that product!
     const product = getProductFromProductId(productId);
+
+    if(product === undefined){
+      response.writeHead(400, "Incorrectly formatted request");
+      return response.end();
+    }
     
     //we'll now use a helper function for getting our user
     const user = getAuthorizedUserFromToken(token);
