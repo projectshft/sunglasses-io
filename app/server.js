@@ -75,7 +75,7 @@ const server = http.createServer(function (request, response) {
 
   const getTokenFromRequestParams = function(requestUrl){
     //we'll have to deal with numbers above 10, so goodbye fixed URL substring
-    const splitUrl = request.url.split('?');
+    const splitUrl = requestUrl.split('?');
     //we'll also grab our token
     const { token } = queryString.parse(splitUrl[1]);
 
