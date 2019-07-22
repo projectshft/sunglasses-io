@@ -13,6 +13,7 @@ myRouter.use(bodyParser.json());
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = []
 let failedAttempts = {}
 
 
@@ -105,15 +106,31 @@ myRouter.post('/api/login', (req, res) => {
             })
             if (user) {
                 res.writeHead(200, {'Content-Type': 'application/json'})
+                let currentAccessToken = accessTokens.find(tokenObject => tokenObject.username === user.login.username)
+                if(currentAccessToken) {
+                    currentAccessToken.lastUpdated = new Date();
+                    return response.end(JSON.stringify(currentAccessToken.token))
+                } else {
+                    let newAccessToken = {
+                        username: user.login.username,
+                        lastUpdated: new Date(),
+                        token: uid(16)
+                    }
+                    accessTokens.push(newAccessToken);
+                    return res.end(JSON.stringify(newAccessToken.token))
+                }
+            } else {
+                res.writeHead(400, 'Invalid Email and Password', {'Content-Type': 'application/json'})
                 return res.end()
-            }
-            res.writeHead(400, 'Invalid Email and Password', {'Content-Type': 'application/json'})
+            }   
+        } else {
+            res.writeHead(400, "You must enter a properly formatted email address")
             return res.end()
         }
-       res.writeHead(400, "You must enter a properly formatted email address")
-       return res.end()
+    } else {
+        res.writeHead(400, 'You must enter an email and password')
+        return res.end()
     }
-    res.writeHead(400, 'You must enter an email and password')
-    return res.end()
+    
 })
 module.exports = server

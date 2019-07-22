@@ -3,7 +3,7 @@ let chaiHttp = require('chai-http');
 let server = require('./server');
 let { expect } = require('chai');
 
-let should = chai.should();
+const should = chai.should();
 
 chai.use(chaiHttp)
 
@@ -34,7 +34,7 @@ describe('Sunglasses API', () => {
                 .get('/api/brands')
                 .query({name: 'Old Navy'})
                 .end((err, res) => {
-                    expect(res.body).to.have.length(0);
+                    res.body.should.have.length(0);
                     done();
                 })
         })
@@ -188,6 +188,34 @@ describe('Sunglasses API', () => {
                     expect(res).to.have.status(400)
                     done()
             })
+        })
+        it ('it should return a 200 status on a successful login', done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    "email": 'susanna.richards@example.com',
+                    "password": 'jonjon'
+                })
+                .end((err, res) => {
+                    res.should.have.status(200)
+                      done();
+                })
+        })
+        it ('it should return an accesstoken upon a successful login', done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    "email": "salvador.jordan@example.com",
+                    "password": "tucker"
+                })
+                .end((err, res) => {
+                    res.body.should.have.length(16)
+                      done();
+                })
         })
     })
 })
