@@ -71,13 +71,11 @@ const server = http.createServer(function (request, response) {
     });
   }
 
-  const getTokenFromRequestParams = function(requestUrl){
+  const getThingsFromRequestParams = function(requestUrl){
     //we'll have to deal with numbers above 10, so goodbye fixed URL substring
     const splitUrl = requestUrl.split('?');
     //we'll also grab our token
-    const { token } = queryString.parse(splitUrl[1]);
-
-    return token;
+    return queryString.parse(splitUrl[1]);
   }
 
   const getProductFromProductId = function(productId){
@@ -86,16 +84,20 @@ const server = http.createServer(function (request, response) {
     });
   }
 
-  const updateCartWithProduct = function(token, productId, updateType){
+  const updateCartWithProduct = function(token, productId, updateType, updateTotal = 1){
     const findUser = getAuthorizedUserFromToken(token);
     const findMyProduct = findUser.cart.find(shoppingCartItem => {
       return shoppingCartItem.product.id == productId;
     });
 
+    if(updateTotal == undefined){
+      updateTotal = 1;
+    }
+
     if (findMyProduct === undefined && updateType === 'add'){
       const newCartUpdate = {
         product: getProductFromProductId(productId),
-        quantity: 1
+        quantity: updateTotal
       };
 
       findUser.cart.push(newCartUpdate)
@@ -103,10 +105,10 @@ const server = http.createServer(function (request, response) {
     } else if (findMyProduct === undefined && updateType === 'delete'){
       return null
     } else if (findMyProduct !== undefined && updateType === 'delete'){
-      findMyProduct.quantity--;
+      findMyProduct.quantity -= updateTotal;
       return findMyProduct;
     } else {
-      findMyProduct.quantity++;
+      findMyProduct.quantity += updateTotal;
       return findMyProduct;
     }
   }
@@ -187,7 +189,7 @@ myRouter.post("/api/login", (request, response) => {
 
 myRouter.get("/api/me/cart", (request, response) => {
   //let's grab the query token here
-  const token = getTokenFromRequestParams(request.url);
+  const {token} = getThingsFromRequestParams(request.url);
   //and check if that query parameter exists
   if (typeof token !== 'undefined'){
     //check against our AUTH_USER object to grab the User based on token
@@ -215,8 +217,7 @@ myRouter.get("/api/me/cart", (request, response) => {
 myRouter.post("/api/me/cart", (request, response) => {
 
   //we'll grab our token
-  const token = getTokenFromRequestParams(request.url);
-
+  const { token } = getThingsFromRequestParams(request.url);
   //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {
 
@@ -262,7 +263,7 @@ myRouter.post("/api/me/cart", (request, response) => {
 myRouter.post("/api/me/cart/:productId", (request, response) => {
 
   //we'll also grab our token
-  const token = getTokenFromRequestParams(request.url);
+  const {token, total} = getThingsFromRequestParams(request.url);
 
   //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {
@@ -284,7 +285,10 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     }
 
     //push into User's cart, with helper function
-    const cartUpdate = updateCartWithProduct(token, productId, 'add');
+    //let's check for our optional param here
+    const cartUpdate = updateCartWithProduct(token, productId, 'add', total);
+
+
     // user.cart.push(product);
 
     //at that point we'll have a positive response
@@ -304,7 +308,7 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
 
   //we'll also grab our token
-  const token = getTokenFromRequestParams(request.url);
+  const {token} = getThingsFromRequestParams(request.url);
 
   //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {

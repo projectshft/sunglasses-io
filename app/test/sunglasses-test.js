@@ -461,7 +461,7 @@ describe('User POST to Cart, with quantity checks', () => {
           res.body.should.be.an('object');
           res.body.should.have.property('product');
           res.body.should.have.property('quantity');
-          res.body.quantity.should.be.equal(5)
+          res.body.quantity.should.be.equal('5')
           done();
         })
     });
