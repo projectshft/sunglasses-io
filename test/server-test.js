@@ -101,7 +101,7 @@ describe("/GET products by brand ID", () => {
 
 // Test POST /api/login
 describe("/POST login user", () => {
-	it("should login a user", done => {
+	it("should login a user by username", done => {
 		chai
 			.request(server)
 			.post("/api/login")
@@ -196,7 +196,7 @@ describe("/POST add a product to cart" , () => {
 	it("should return 400 error if productId is invalid", done => {
 		chai
 		  .request(server)
-		  .post("/api/me/cart/13")
+		  .delete("/api/me/cart/30")
 		  .set("token", token)
 		  .end((error, response) => {
 			chai.assert.isNull(error);
@@ -291,6 +291,48 @@ describe("/PUT item quantities to user's cart", () => {
 		chai
 			.request(server)
 			.put("/api/me/cart")
+			.set("token", "badToken")
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(404);
+				done();
+			});
+	});
+});
+
+// Test for DELETE /api/me/cart/:productId
+describe("/DELETE an item from cart", () => {
+	it("should remove a product from user's cart", done => {
+		chai
+			.request(server)
+			.delete("/api/me/cart/1")
+			.set("token", token)
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(200);
+				chai.expect("Content-Type", "application/json");
+				chai.expect(response.body).to.be.an("array");
+				chai.expect(response.body).to.be.lengthOf(0);
+				chai.expect(response.body).to.deep.equal([]);
+				done();
+			});
+	});
+	it("should return 400 error if product ID is invalid", done => {
+		chai
+			.request(server)
+			.post("/api/me/cart/5")
+			.set("token", token)
+			.end((error, response) => {
+				chai.assert.isNull(error);
+				chai.expect(response).to.have.status(400);
+				chai.expect("Content-Type", "application/json");
+				done();
+			});
+	});
+	it("should return 404 error if token is bad", done => {
+		chai
+			.request(server)
+			.delete("/api/me/cart/4")
 			.set("token", "badToken")
 			.end((error, response) => {
 				chai.assert.isNull(error);

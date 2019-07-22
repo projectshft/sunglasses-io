@@ -34,6 +34,7 @@ const server = http.createServer(function (request, response) {
 
 // GET /api/brands (return all brands available)
 myRouter.get("/api/brands", (request, response) => {
+	// if there are no brands to return, send 404 error
 	if(brands.length == 0){
 		response.writeHead(404, "No brands available");
 		response.end();
@@ -52,7 +53,7 @@ myRouter.get("/api/products", (request,response) => {
 	}
 
 	let productsReturnedByQuery = [];
-	// make sure that if the query is empty that a 404 error is returned, otherwise send a successfull response
+	// make sure that if the query results return empty that a 404 error is returned, otherwise send a successfull response
 	if(query !== undefined){
 		productsReturnedByQuery = products.filter(product =>
 			product.name.includes(query) || product.description.includes(query));
@@ -70,6 +71,7 @@ myRouter.get("/api/products", (request,response) => {
 // GET /api/brands/:id/products (returns all products of a specific brand by brand ID)
 myRouter.get("/api/brands/:id/products", (request, response) => {
 	const{ id } = request.params;
+	// filter through all products and return only those whose categoryId(brandId) match the request parameter id
 	const productsByBrandId = products.filter(product => 
 		product.categoryId === id);
 	if(productsByBrandId.length == 0){
@@ -127,12 +129,14 @@ myRouter.get("/api/me/cart", (request, response) => {
 		response.writeHead(404, "User not found, You must have authentication to get the requested response.");
 		response.end();
 	} else {
+		// find the matching token
 		let userAccessToken = accessTokens.find((tokenObject) => {
 			return tokenObject.token == request.headers.token;
 		});
+		// find the matching user by username
 		let user = users.find((user) => {
 			return user.login.username == userAccessToken.username;
-		})
+		});
 		if(!user){
 			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
       		response.end();
@@ -162,12 +166,45 @@ myRouter.put("/api/me/cart", (request, response) => {
       		response.end();
       		return;
 		} else {
+			// update an items quantity in the cart based on updatedQuantities
 			const updatedQuantities = request.body.updatedQuantities;
 			user.cart.forEach((item, i) => {
 				item.quantity = updatedQuantities[i];
 			})
 			response.writeHead(200, "Successfully updated user's cart", {"Content-Type": "application/json"});
 			response.end(JSON.stringify(user.cart));
+		}
+	}
+});
+
+// DELETE /api/me/cart/:productId (Removes a product from user's cart)
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+	let validAccessToken = getValidTokenFromRequest(request);
+	if(!validAccessToken){
+		response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+		response.end();
+	} else {
+		let userAccessToken = accessTokens.find((tokenObject) => {
+			return tokenObject.token == request.headers.token;
+		});
+		let user = users.find((user) => {
+			return user.login.username == userAccessToken.username;
+		  });
+		  if(!user){
+			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
+      		response.end();
+      		return;
+		} else {
+			const { productId } = request.params;
+			const validProductId = products.find(product => 
+				product.id == productId);
+			if (!validProductId) {
+				response.writeHead(400, "server could not understand the request due to invalid syntax or formatting");
+				response.end();
+			}
+			response.writeHead(200, "Successfully removed item from user's cart", {"Content-Type": "application/json"});
+			user.cart = user.cart.filter(product => product.id !== productId);
+			response.end(JSON.stringify(user.cart))
 		}
 	}
 });
@@ -185,7 +222,7 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
 		});
 		let user = users.find((user) => {
 			return user.login.username == userAccessToken.username;
-		})
+		});
 		if(!user){
 			response.writeHead(404, "User not found, You must have authentication to get the requested response.");
       		response.end();
@@ -198,6 +235,7 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
 				response.writeHead(400, "server could not understand the request due to invalid syntax or formatting");
 				response.end();
 			}
+			// find if item exists in cart, add it to the cart if it doesnt exist already, increase its quantity if it does exist already
 			const existingProductInCart = user.cart.find(product => product.id == productId);
 			if (!existingProductInCart){
 				const productToAddInCart = products.filter(product => product.id == productId);
