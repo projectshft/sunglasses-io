@@ -5,6 +5,7 @@ const queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
 const uid = require('rand-token').uid;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const PORT = 3001;
 const myRouter = Router();
@@ -14,7 +15,23 @@ let brands = [];
 let products = [];
 let users = [];
 let accessTokens = []
-let failedAttempts = {}
+
+
+const getValidTokenFromRequest = function(request) {
+    const parsedUrl = require('url').parse(request.url, true);
+    if (parsedUrl.query.accessToken) {
+      let currentAccessToken = accessTokens.find(accessToken => {
+        return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+      });
+      if (currentAccessToken) {
+        return currentAccessToken;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
 
 
 const server = http.createServer((request, response) => {
@@ -102,7 +119,7 @@ myRouter.post('/api/login', (req, res) => {
     if(req.body.email && req.body.password) {
         if (req.body.email.includes('@') && req.body.email.includes('.')) {
             let user = users.find(user => {
-                return user.login.email === req.body.username && user.login.password === req.body.password 
+                return user.email === req.body.email && user.login.password === req.body.password 
             })
             if (user) {
                 res.writeHead(200, {'Content-Type': 'application/json'})
@@ -133,4 +150,30 @@ myRouter.post('/api/login', (req, res) => {
     }
     
 })
+
+myRouter.get('/api/me/cart', (req, res) => {
+    let currentAccessToken = getValidTokenFromRequest(req)
+    if (currentAccessToken) {
+        let user = users.find(user => currentAccessToken.username == user.login.username)
+        res.writeHead(200, {'Content-Type': 'application/json'})
+        return res.end(JSON.stringify(user.cart))
+
+    } else {
+        res.writeHead(400, "Login to View Cart")
+       return res.end()
+    }
+})
+ 
+myRouter.post('/api/me/cart', (req, res) => {
+    let currentAccessToken = getValidTokenFromRequest(req)
+    if (currentAccessToken) {
+        let user = users.find(user => currentAccessToken.username == user.login.username)
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        return res.end(JSON.stringify(user))
+    } else {
+        res.writeHead(400, "Login to modify cart")
+        return res.end()
+    }
+})
+
 module.exports = server

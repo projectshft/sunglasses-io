@@ -218,4 +218,88 @@ describe('Sunglasses API', () => {
                 })
         })
     })
+    describe('/api/me/cart', () => {
+        let badTestToken = 'abcdefghijklmnop'
+        let goodTestToken;
+
+        before( done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    "email": "natalia.ramos@example.com",
+                    "password": "waters"
+                })
+                .end((err, res) => {
+                    goodTestToken = res.body;
+                    done()
+                })
+
+        })
+
+        it('it should send a 400 response and deny access for a valid user who doesnt have a current access token', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart')
+                .query({accessToken: badTestToken})
+                .end((err, res) => {
+                    res.should.have.status(400);
+                    done();
+                })
+        })
+
+        it('it should send a 200 response and allow access for a valid user who has a current access token', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart')
+                .query({accessToken: goodTestToken})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    done();
+                })
+        })
+        it('it should return the cart of the user', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart')
+                .set('Content-Type', 'application/json')
+                .query({accessToken: goodTestToken})
+                .end((err, res) => {
+                    res.body.should.be.an('array')
+                    done();
+                })
+        })
+    })
+    // describe('POST /api/me/cart', () => {
+    //     let goodTestToken;
+    //     before( done => {
+    //         chai
+    //             .request(server)
+    //             .post('/api/login')
+    //             .set('Content-Type', 'application/json')
+    //             .send({
+    //                 "email": "salvador.jordan@example.com",
+    //                 "password": "tucker"
+    //             })
+    //             .end((err, res) => {
+    //                 goodTestToken = res.body;
+    //                 done()
+    //             })
+
+    //     })
+    //     // it('it should access the cart of the user with the particular access token', done => {
+    //     //     chai   
+    //     //         .request(server)
+    //     //         .post('/api/me/cart')
+    //     //         .set('Content-Type', 'application/json')
+    //     //         .query({accessToken: goodTestToken})
+    //     //         end((err, res) => {
+    //     //             res.cart.should.be.an('array')
+    //     //             res.cart.should.have.length(0)
+    //     //             res.login.username.should.equal("greenlion235")
+    //     //         })
+    //     // })
+
+    // })
 })
