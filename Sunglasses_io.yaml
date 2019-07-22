@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: Sunglasses API
-  description: Access data direct from sunglasses.io
+  description: This API allows developers to access data from Sunglasses.io. Specifcally, users can get products and brands available in our database, login to an account, as well as adding, deleting, and modifying products in a users cart.
   version: 1.0.0
 host: localhost
 schemes:
@@ -83,6 +83,13 @@ paths:
       summary: Allow for User Login
       description: |
         This endpoint allows the user to submit a username and password in order to gain access to various data
+      parameters:
+        - name: credentials
+          in: body
+          description: 'The id of the brand which offers the products that want to be fetched. Use 1 for testing. '
+          required: false
+          schema:
+             $ref: '#/definitions/Credentials'
       tags:
         - User
       responses:
@@ -98,7 +105,7 @@ paths:
     get:
       summary: View Products Currently in Cart
       description: |
-        This enpoint returns the products currenlty in a specific user's cart. The response includes specific info about the products in the cart including its unique id, name, and the number of each product type the user desires to order.
+        This endpoint returns the products currenlty in a specific user's cart. The response includes specific info about the products in the cart including its unique id, name, and the number of each product type the user desires to order. A token is required in order to perform this action
       parameters:
         - name: token
           in: query
@@ -123,15 +130,21 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     post:
-      summary: Change the Quantity of a Specific Product in the Cart
+      summary: Add an item to the cart
       description: |
-        This endpdint allows the user to modify the quantity of units desired for a specific product
+        This endpdint allows the user to add a product to the cart. The product the user desires to add should be an object should be passed in to the request body following the product model. A quantity property will then be initalized to the product with a value of 1(as shown in the cart model. A token is required in order to perform this action
       parameters:
         - name: token
           in: query
           description: Access token given to user
           required: false
           type: string
+        - name: product
+          in: body
+          description: 'The product to be added to the cart'
+          required: false
+          schema:
+             $ref: '#/definitions/Product'
       tags:
         - Cart
       responses:
@@ -153,7 +166,7 @@ paths:
     post:
       summary: Add an Item to the Cart 
       description: |
-        This endpoint adds a specific item to a user's cart
+        This endpoint changes the quantity of an item in the cart. The id of the product in the cart that the user wants to change. Each call with this endpoint will increase the quantity by one. A token is required to perform this action.
       tags:
         - Cart
       parameters:
@@ -169,7 +182,7 @@ paths:
           type: string
       responses:
         '200':
-          description: Add was succesful
+          description: Change was succesful
         '400':
           description: Request failed due to error in endpoint
           schema:
@@ -266,6 +279,15 @@ definitions:
       name:
         type: string
         description: The name of the brand
+  Credentials:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username
+      password:
+        type: string
+        description: Password
   Error:
     type: object
     properties:
