@@ -719,7 +719,7 @@ describe('Sunglasses.io API', () => {
     it('it should return a 400 incorrectly formatted request when sent email and no password', done => {
       //arrange
       const loginInfo = {
-        email: 'yellowleopard753'
+        email: 'susanna.richards@example.com'
       }
       //assert, act
       chai
@@ -839,7 +839,7 @@ describe('Sunglasses.io API', () => {
     it('it should return a 401 invalid email or password when sent valid email and invalid password', done => {
       //arrange
       const loginInfo = {
-        email: 'yellowleopard753',
+        email: 'susanna.richards@example.com',
         password: 'wrong'
       }
       //assert, act

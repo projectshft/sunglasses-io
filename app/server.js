@@ -10,6 +10,7 @@ const uid = require('rand-token').uid;
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const MAX_LOGIN_ATTEMPTS_ALLOWED = 3;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -18,6 +19,12 @@ let brands = [];
 let products = [];
 let users = [];
 let accessTokens = [];
+// format for below:
+// {
+//   [username]: 0,
+//   [email]: 0
+// }
+const failedLoginAttempts = {};
 
 const server = http.createServer(function (request, response) {
   //handle CORS preflight request
@@ -140,15 +147,40 @@ myRouter.get('/products', (request, response) => {
 });
 
 myRouter.post('/login', (request, response) => {
-  //Check for username and password in request body
+  //Check for username, email and password in request body
   const { username, email, password } = request.body;
-  if ( (username && password || email && password) && !(username && email) ) {
+  if (username === undefined && email === undefined) {
+    //missing parameters
+    response.writeHead(400, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 400,
+      message: 'Incorrectly formatted request',
+      fields: 'POST body'
+    }));
+  }
+  const userForLoginAttempts = username || users.find(u => u.email === email);
+  if (userForLoginAttempts === undefined) {
+    const usernameOrEmailText = username ? 'username' : 'email';
+    response.writeHead(401, {...CORS_HEADERS, 'content-type': 'application/json'});
+    return response.end(JSON.stringify({
+      code: 401,
+      message: `Invalid ${usernameOrEmailText} or password`,
+      fields: 'POST body'
+    }));
+  }
+  const usernameForLoginAttempts = (username) ? username :userForLoginAttempts.login.username;
+  if (!failedLoginAttempts[usernameForLoginAttempts]) {
+    failedLoginAttempts[usernameForLoginAttempts] = 0;
+  }
+  if ((username && password || email && password) && !(username && email) ) {
     //see if there is a user that matches
     const user = users.find(user => {
       return user.login.username === username && user.login.password === password ||
              user.email === email && user.login.password === password;
     });
     if (user) {
+      //since user found, reset failedLoginAttempts
+      failedLoginAttempts[usernameForLoginAttempts] = 0;
       response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
       //successful login, check access tokens
       const currentAccessToken = accessTokens.find((obj) => {
@@ -169,6 +201,13 @@ myRouter.post('/login', (request, response) => {
       }
     } else {
       //login failed
+      //update failedLoginAttempts
+      const numAttempts = failedLoginAttempts[usernameForLoginAttempts];
+      if (numAttempts) {
+        failedLoginAttempts[usernameForLoginAttempts]++;
+      } else {
+        failedLoginAttempts[usernameForLoginAttempts] = 1;
+      }
       const usernameOrEmailText = username ? 'username' : 'email';
       response.writeHead(401, {...CORS_HEADERS, 'content-type': 'application/json'});
       return response.end(JSON.stringify({

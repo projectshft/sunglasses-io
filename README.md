@@ -27,5 +27,5 @@ GENERAL PLAN
 - [ ] maybe have post /me/cart add one to quantity if it already exists instead of throwing an error
 - [ ] check authentication token timeout
 - [ ] track failed logins
-  - [ ] add tests first!
+  - [X] add tests first!
 - [X] put /me/cart/id - change 400 error to only handle quantity - having it deal with invalid id lets client know if productid is a product or not, potential security issue
