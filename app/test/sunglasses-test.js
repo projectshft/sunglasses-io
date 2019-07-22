@@ -490,7 +490,7 @@ describe('User DELETE to Cart, with quantity checks', () => {
       //arrange
       chai
         .request(server)
-        .delete('/api/me/cart/12')
+        .delete('/api/me/cart/11')
         .query({ token: 'thisismytokenyup' })
         .end((err, res) => {
           //assert
@@ -500,5 +500,4 @@ describe('User DELETE to Cart, with quantity checks', () => {
     });
   });
 
-  //our cart DELETE should return a 204 if the item doesn't exist at all
 });
