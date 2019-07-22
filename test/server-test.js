@@ -7,6 +7,8 @@ const assert = chai.assert;
 
 chai.use(chaiHTTP);
 
+// NOTE: some tests rely on pre-set acess tokens in server.js & carts of users in the json file 
+
 // GET BRANDS
 describe("/GET brands", () => {
   it.only("should GET all brands", done => {
