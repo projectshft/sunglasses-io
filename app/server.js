@@ -66,11 +66,9 @@ const server = http.createServer(function (request, response) {
       return undefined;
     }
 
-    let currentUser = users.find((user) => {
+    return users.find((user) => {
       return user.email == userInfo.email;
     });
-
-    return currentUser;
   }
 
   const getTokenFromRequestParams = function(requestUrl){
@@ -80,6 +78,12 @@ const server = http.createServer(function (request, response) {
     const { token } = queryString.parse(splitUrl[1]);
 
     return token;
+  }
+
+  const getProductFromProductId = function(productId){
+    return products.find(product => {
+      return product.id == productId;
+    });
   }
 
   //base route
@@ -197,9 +201,7 @@ myRouter.post("/api/me/cart", (request, response) => {
       return response.end();
     } 
       
-    const product = products.find(product => {
-      return product.id == request.body.id;
-    });
+    const product = getProductFromProductId(request.body.id);
 
     if (!product) {
       response.writeHead(404, "Product not found.");
@@ -241,9 +243,7 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     //let's snag our productId
     const { productId } = request.params;
     //and find that product!
-    const product = products.find(product => {
-      return product.id == productId;
-    });
+    const product = getProductFromProductId(productId);
     
     //we'll now use a helper function for getting our user
     const user = getAuthorizedUserFromToken(token);
