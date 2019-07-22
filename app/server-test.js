@@ -56,7 +56,7 @@ describe('Sunglasses API', () => {
                 })
         })
     })
-    describe('GET /api/brands/:id/products', done => {
+    describe('GET /api/brands/:id/products', () => {
         it ('it should return all the products that belong to particular brand based on the brand id', done => {
             chai
                 .request(server)
@@ -90,10 +90,104 @@ describe('Sunglasses API', () => {
                 .request(server)
                 .get('/api/brands/6/products')
                 .end((err, res) => {
-                    expect(res.body).to.have.length(0)
+                    expect(res.body).to.be.empty
                     done();
                 })
                 
+        })
+    })
+    describe('/api/products', () => {
+        it('it should return an array of all of the products', done => {
+            chai   
+                .request(server)
+                .get('/api/products')
+                .end((err, res) => {
+                    expect(res.body).to.be.an('array').that.has.length(11)
+                    done();
+            })
+        })
+        it('it should filter results by product name', done => {
+            chai
+                .request(server)
+                .get('/api/products')
+                .query({name: ['qdogs', 'coke', 'sugar']})
+                .end((err, res) => {
+                    expect(res.body).to.have.deep.members([
+                        {
+                            "id": "7",
+                            "categoryId": "3",
+                            "name": "QDogs Glasses",
+                            "description": "They bark",
+                            "price":1500,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+                            "cartQuantity": null
+                        }
+                        ,
+                        {
+                            "id": "8",
+                            "categoryId": "4",
+                            "name": "Coke cans",
+                            "description": "The thickest glasses in the world",
+                            "price":110,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+                            "cartQuantity": null
+                        }, 
+                        {
+                            "id": "9",
+                            "categoryId": "4",
+                            "name": "Sugar",
+                            "description": "The sweetest glasses in the world",
+                            "price":125,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+                            "cartQuantity": null
+                        }
+                    ])
+                    done();
+                })
+        })
+    })
+    describe('/api/login', () => {
+        it('it should return a 400 error if there is no email or password in the body', done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    email: 'glaspy21@gmail.com',
+                    password: ''
+                })
+                .end((err, res) => {
+                    expect(res).to.have.status(400)
+                    done()
+            })
+        })
+        it("it should return a 400 error if the email address isn't properly formatted", done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    email: 'lazywolf342',
+                    password: 'bigpapi'
+                })
+                .end((err, res) => {
+                    expect(res).to.have.status(400)
+                    done()
+            })
+        })
+        it('it should return a 400 error if the username and password combination is not found in the database', done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    email: 'susanna.richards@example.com',
+                    password: 'ladygaga'
+                })
+                .end((err, res) => {
+                    expect(res).to.have.status(400)
+                    done()
+            })
         })
     })
 })

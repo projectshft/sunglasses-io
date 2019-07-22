@@ -13,6 +13,7 @@ myRouter.use(bodyParser.json());
 let brands = [];
 let products = [];
 let users = [];
+let failedAttempts = {}
 
 
 const server = http.createServer((request, response) => {
@@ -54,6 +55,7 @@ myRouter.get('/api/brands', function (req, res) {
             queryParams.name = queryParams.name.split(' ');
         }
         //filter brands array by search query brand names
+        let paramName = queryParams.name
         let filteredBrands = brands.filter(brand => queryParams.name.some(queryParam => brand.name.toLowerCase().includes(queryParam.toLowerCase())))
         return res.end(JSON.stringify(filteredBrands))
     }
@@ -73,4 +75,45 @@ myRouter.get('/api/brands/:id/products', (req, res) => {
     return res.end();
 }); 
 
+myRouter.get('/api/products', (req, res) => {
+    let filteredProducts = products
+    let queryParams = []
+    if (req._parsedUrl.query) {
+        queryParams = queryString.parse(req._parsedUrl.query).name
+    } 
+    if (queryParams.length) {
+        if (typeof queryParams === "string") {
+            queryParams.includes(' ') ? 
+            queryParams = queryParams.split(' ') :
+            queryParams = queryParams.split('%20')
+        }
+    
+       filteredProducts = products.filter(product => 
+        queryParams.some(queryParam => product.name.toLowerCase().includes(queryParam.toLowerCase()))
+       )
+    }
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    return res.end(JSON.stringify(filteredProducts))
+})
+
+
+myRouter.post('/api/login', (req, res) => {
+    if(req.body.email && req.body.password) {
+        if (req.body.email.includes('@') && req.body.email.includes('.')) {
+            let user = users.find(user => {
+                return user.login.email === req.body.username && user.login.password === req.body.password 
+            })
+            if (user) {
+                res.writeHead(200, {'Content-Type': 'application/json'})
+                return res.end()
+            }
+            res.writeHead(400, 'Invalid Email and Password', {'Content-Type': 'application/json'})
+            return res.end()
+        }
+       res.writeHead(400, "You must enter a properly formatted email address")
+       return res.end()
+    }
+    res.writeHead(400, 'You must enter an email and password')
+    return res.end()
+})
 module.exports = server
