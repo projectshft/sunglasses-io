@@ -28,4 +28,8 @@ GENERAL PLAN
 - [ ] check authentication token timeout
 - [ ] track failed logins
   - [X] add tests first!
+  - [X] track number of failed logins in failedLoginAttempts
+  - [X] add failed login limit
+  - [ ] add logic to fail all logins after limit is reached
+  - [ ] refactor spaghetti code
 - [X] put /me/cart/id - change 400 error to only handle quantity - having it deal with invalid id lets client know if productid is a product or not, potential security issue
