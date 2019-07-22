@@ -286,7 +286,53 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     //push into User's cart, with helper function
     const cartUpdate = updateCartWithProduct(token, productId, 'add');
     // user.cart.push(product);
-    
+
+    //at that point we'll have a positive response
+    response.writeHead(200, {
+      'content-type': 'application/json'
+    });
+
+    //return the item sent our way
+    return response.end(JSON.stringify(cartUpdate));
+  } else {
+    //return error parameter if no token within query
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+});
+
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+
+  //we'll also grab our token
+  const token = getTokenFromRequestParams(request.url);
+
+  //checking if it exists and our request body for an id parameter
+  if (typeof token !== 'undefined') {
+    //let's snag our productId
+    const { productId } = request.params;
+    //and find that product!
+    const product = getProductFromProductId(productId);
+
+    if (product === undefined) {
+      response.writeHead(400, "Incorrectly formatted request");
+      return response.end();
+    }
+
+    //we'll now use a helper function for getting our user
+    const user = getAuthorizedUserFromToken(token);
+    if (user === undefined) {
+      response.writeHead(401, "Invalid or expired token");
+      return response.end();
+    }
+
+    //push into User's cart, with helper function
+    const cartUpdate = updateCartWithProduct(token, productId, 'delete');
+    // user.cart.push(product);
+    if(cartUpdate === null){
+      response.writeHead(204, "No content to be deleted.");
+      return response.end();
+    }
+
     //at that point we'll have a positive response
     response.writeHead(200, {
       'content-type': 'application/json'

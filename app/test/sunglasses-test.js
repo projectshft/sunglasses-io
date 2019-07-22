@@ -349,7 +349,7 @@ describe('User POST to Cart', () => {
   });
 
   //let's have fun with /me/cart/{productId}
-  //product should add to cart and respond with instance product added
+  //product should add to cart and respond with cart information for product
   describe('/POST User cart with productId', () => {
     it('it should respond with 200 and item added to cart, if post is successful', done => {
       //arrange
@@ -364,7 +364,7 @@ describe('User POST to Cart', () => {
           res.body.should.be.an('object');
           done();
         })
-    });
+      });
   });
 
   //our POST cart should return 400 if there is a missing token query parameter
@@ -451,12 +451,29 @@ describe('User POST to Cart, with quantity checks', () => {
 
 describe('User DELETE to Cart, with quantity checks', () => {
   //our cart DELETE should return the item and quantity within the cart as confirmation
+  beforeEach(function () {
+    it('it should respond with 200 and item added to cart, if post is successful', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/5')
+        .query({ token: 'thisismytokenyup' })
+        .send({})
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        })
+    });
+  })
+
   describe('/DELETE User cart', () => {
     it('it should respond with 200 and item changed in cart, if delete is successful', done => {
       //arrange
       chai
         .request(server)
-        .delete('/api/me/cart/8')
+        .delete('/api/me/cart/5')
         .query({ token: 'thisismytokenyup' })
         .end((err, res) => {
           //assert
@@ -468,5 +485,20 @@ describe('User DELETE to Cart, with quantity checks', () => {
   });
 
   //our cart DELETE should return a 204 if the item doesn't exist in the cart
+  describe('/DELETE User cart', () => {
+    it('it should respond with 204 if there is no item within the cart to delete', done => {
+      //arrange
+      chai
+        .request(server)
+        .delete('/api/me/cart/12')
+        .query({ token: 'thisismytokenyup' })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(204);
+          done();
+        })
+    });
+  });
+
   //our cart DELETE should return a 204 if the item doesn't exist at all
 });
