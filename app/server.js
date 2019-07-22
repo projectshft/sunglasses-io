@@ -86,6 +86,31 @@ const server = http.createServer(function (request, response) {
     });
   }
 
+  const updateCartWithProduct = function(token, productId, updateType){
+    const findUser = getAuthorizedUserFromToken(token);
+    const findMyProduct = findUser.cart.find(shoppingCartItem => {
+      return shoppingCartItem.product.id == productId;
+    });
+
+    if (findMyProduct === undefined && updateType === 'add'){
+      const newCartUpdate = {
+        product: getProductFromProductId(productId),
+        quantity: 1
+      };
+
+      findUser.cart.push(newCartUpdate)
+      return newCartUpdate;
+    } else if (findMyProduct === undefined && updateType === 'delete'){
+      return null
+    } else if (findMyProduct !== undefined && updateType === 'delete'){
+      findMyProduct.quantity--;
+      return findMyProduct;
+    } else {
+      findMyProduct.quantity++;
+      return findMyProduct;
+    }
+  }
+
   //base route
 myRouter.get("/", (request, response) => {
   response.end("There's nothing to see here, please visit /api/brands and carry on.");
@@ -215,8 +240,9 @@ myRouter.post("/api/me/cart", (request, response) => {
       return response.end();
     }
 
-    //push into User's cart
-    user.cart.push(product);
+    //push into User's cart, but now with helper function
+    const cartUpdate = updateCartWithProduct(token, product.id, 'add');
+    // user.cart.push(product);
 
     //at that point we'll have a positive response
     response.writeHead(200, {
@@ -224,7 +250,7 @@ myRouter.post("/api/me/cart", (request, response) => {
     });
 
     //return the item sent our way
-    return response.end(JSON.stringify(product));
+    return response.end(JSON.stringify(cartUpdate));
 
   } else {
     //return error parameter if no token within query
@@ -257,16 +283,17 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
       return response.end();
     }
 
-    //push into User's cart
-    user.cart.push(product);
-
+    //push into User's cart, with helper function
+    const cartUpdate = updateCartWithProduct(token, productId, 'add');
+    // user.cart.push(product);
+    
     //at that point we'll have a positive response
     response.writeHead(200, {
       'content-type': 'application/json'
     });
 
     //return the item sent our way
-    return response.end(JSON.stringify(product));
+    return response.end(JSON.stringify(cartUpdate));
   } else {
     //return error parameter if no token within query
     response.writeHead(400, "Incorrectly formatted request");
