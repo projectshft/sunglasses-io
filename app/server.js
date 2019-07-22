@@ -9,7 +9,6 @@ const url = require("url");
 
 // State holding variables
 let products = [];
-// let user = {};
 let brands = [];
 let users = [];
 let accessTokens = [];
@@ -76,13 +75,7 @@ server.listen(PORT, err => {
 
   //populate users
   users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
-
-  // hardcode "logged in" user
-  // user = users[0];
 });
-
-
-// endpoint handlers: router.get, router.post
 
 // GET BRANDS
 router.get("/api/brands", (request, response) => {
@@ -134,7 +127,7 @@ router.get("/api/products", (request, response) => {
 router.post('/api/login', function (request, response) {
   if (request.body.username && request.body.password) {
     let user = users.find((user) => {
-      return user.login.username == request.body.username && user.login.password == request.body.password;
+      return (user.login.username == request.body.username || user.email == request.body.username) && user.login.password == request.body.password;
     });
     if (user) {
       response.writeHead(200, { "Content-Type": "application/json" });
@@ -185,7 +178,6 @@ router.post('/api/me/cart', function (request, response) {
     return response.end();
   } else {
     let currentUser = getCurrentUserByUsername(currentAccessToken.username);
-    //let item = request.body; 
     const parsedUrl = url.parse(request.originalUrl);
     const { productId } = queryString.parse(parsedUrl.query);
     let product = products.find(product => {
@@ -199,7 +191,6 @@ router.post('/api/me/cart', function (request, response) {
         return product.productId === productId;
       });
       if (!cartItem) {
-        //item.quantity = 1; 
         let item = { 'productId': productId, 'quantity': 1 };
         currentUser.cart.push(item);
       } else {
