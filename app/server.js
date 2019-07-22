@@ -73,6 +73,15 @@ const server = http.createServer(function (request, response) {
     return currentUser;
   }
 
+  const getTokenFromRequestParams = function(requestUrl){
+    //we'll have to deal with numbers above 10, so goodbye fixed URL substring
+    const splitUrl = request.url.split('?');
+    //we'll also grab our token
+    const { token } = queryString.parse(splitUrl[1]);
+
+    return token;
+  }
+
   //base route
 myRouter.get("/", (request, response) => {
   response.end("There's nothing to see here, please visit /api/brands and carry on.");
@@ -149,7 +158,7 @@ myRouter.post("/api/login", (request, response) => {
 
 myRouter.get("/api/me/cart", (request, response) => {
   //let's grab the query token here
-  const { token } = queryString.parse(request.url.substring(13));
+  const token = getTokenFromRequestParams(request.url);
   //and check if that query parameter exists
   if (typeof token !== 'undefined'){
     //check against our AUTH_USER object to grab the User based on token
@@ -177,7 +186,7 @@ myRouter.get("/api/me/cart", (request, response) => {
 myRouter.post("/api/me/cart", (request, response) => {
 
   //we'll grab our token
-  const { token } = queryString.parse(request.url.substring(13));
+  const token = getTokenFromRequestParams(request.url);
 
   //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {
@@ -223,10 +232,10 @@ myRouter.post("/api/me/cart", (request, response) => {
 });
 
 myRouter.post("/api/me/cart/:productId", (request, response) => {
-  //we'll have to deal with numbers above 10, so goodbye fixed URL substring
-  const splitUrl = request.url.split('?');
+
   //we'll also grab our token
-  const { token } = queryString.parse(splitUrl[1]);
+  const token = getTokenFromRequestParams(request.url);
+
   //checking if it exists and our request body for an id parameter
   if (typeof token !== 'undefined') {
     //let's snag our productId
@@ -259,5 +268,6 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     return response.end();
   }
 });
+
 //For testing, yo.
 module.exports = server;
