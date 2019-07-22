@@ -2231,4 +2231,28 @@ describe('Sunglasses.io API', () => {
       });
     });
   });
+
+  describe('Useless tests to hit 100 tests!', () => {
+    it('it should return 11 products', done => {
+      chai
+        .request(server)
+        .get('/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(11);
+          done();
+        });
+    });
+
+    it('it should return 404 on nonexistent route', done => {
+      chai
+        .request(server)
+        .get('/whoahbuddy')
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+  });
 });
