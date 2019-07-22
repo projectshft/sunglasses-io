@@ -384,7 +384,46 @@ describe('User POST to Cart', () => {
   });
 
   //our POST cart should return 401 if there is an incorrect token parameter
-  //our POST cart should return 400 if there is no productId in parameters
+  describe('/POST User cart with productId, incorrect token', () => {
+    it('it should respond with 401 if incorrect token within query', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/8')
+        .query({ token: 'somerandomtoken' })
+        .send({
+          id: "2",
+          categoryId: "1",
+          name: "Black Sunglasses",
+          description: "The best glasses in the world",
+          price: 100,
+          imageUrls: ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(401);
+          done();
+        })
+    });
+  });
+
+  //our POST cart should return 400 if there is productId in parameters is wrong dataType
+  describe('/POST User cart with productId, wrong :productId dataType', () => {
+    it('it should respond with 400 if productId is incorrect data type', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/y')
+        .query({ token: 'thisismytokenyup' })
+        .send({})
+        .end((err, res) => {
+          //assert
+          res.should.have.status(400);
+          done();
+        })
+    });
+  });
+
   //our POST cart should return 404 if there is no product with the productId passed in
   //our POST cart should return 400 if there is no product of the type passed in
 
