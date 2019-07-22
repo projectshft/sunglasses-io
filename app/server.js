@@ -21,8 +21,7 @@ let users = [];
 let accessTokens = [];
 // format for below:
 // {
-//   [username]: 0,
-//   [email]: 0
+//   [username]: 0
 // }
 const failedLoginAttempts = {};
 
@@ -182,7 +181,7 @@ myRouter.post('/login', (request, response) => {
       return user.login.username === username && user.login.password === password ||
              user.email === email && user.login.password === password;
     });
-    //failedLoginAttempts validation here instead of in above if to return correct error code
+    //failedLoginAttempts validation here instead of in above if to return correct error code4z
     if (user && (failedLoginAttempts[usernameForLoginAttempts] < MAX_LOGIN_ATTEMPTS_ALLOWED)) {
       //since user found, reset failedLoginAttempts
       failedLoginAttempts[usernameForLoginAttempts] = 0;
