@@ -3,7 +3,7 @@ info:
   title: Sunglasses API
   description: An API to support Kate's sunglasses platform
   version: 1.0.0
-host: api.goalworthy.com
+host: localhost:3001
 schemes:
   - https
 basePath: /api
@@ -17,13 +17,6 @@ paths:
       summary: Brands of Sunglasses
       description: >
         Brands define groupings of sunglasses for browsing. 
-      parameters:
-        - name: limit
-          in: query
-          description: The number of brands to which the search is limited. 
-          required: false
-          type: number
-          format: int32
       responses:
         '200':
           description: An array of brands of sunglasses
@@ -31,8 +24,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        '400':
-          description: Invalid request format
         default:
           description: Unexpected error
           schema:
@@ -58,8 +49,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
-        '400':
-          description: Invalid request format
         '404':
           description: Brand not found. 
   /products:
@@ -68,7 +57,7 @@ paths:
         - Products
       summary: Products
       description: >
-        This endpoint returns allows you to search products based upon a required search string.  
+        This endpoint returns allows you to search product names based upon a required search string.  
       parameters:
         - name: query
           in: query
@@ -77,7 +66,7 @@ paths:
           type: string
       responses:
         '200':
-          description: An array of products matching the query. 
+          description: An array of products with the query string appearing in the name of the product. 
           schema:
             type: array
             items:
@@ -112,7 +101,6 @@ paths:
                 type: string
                 description: >-
                   User's password as requested at log in.  
-              
       responses:
         '200':
           description: Access Token
@@ -123,6 +111,11 @@ paths:
                type: string
                description: >-
                 Unique token to be used in header for other api requests. 
+        '400':
+          description: Invalid request. 
+        '401':
+          description: Invalid username or password.
+        
   /me/cart:
     get:
       tags: 
@@ -133,7 +126,7 @@ paths:
       parameters:
         - name: access token
           in: header
-          description: The unique identification token for the logged in user. 
+          description: Include in authentication bearer heading.  
           required: true
           type: string
       responses:
@@ -143,6 +136,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '400':
+          description: Invalid request.
         '401':
           description: Invalid or expired access token. 
     post:
@@ -150,21 +145,31 @@ paths:
         - Me
       summary: Add item to logged-in user's cart
       description: >
-        This endpoint adds the product to the logged-in user's cart. 
+        This endpoint adds the product to the logged-in user's cart. You can specify the initial quantity to be added.  Anything less than 1 will throw an error.  Once item has been added to cart, you should use the POST by product ID endpoint for any additional updates to quantity. 
       produces:
         - application/json
       parameters:
         - name: access token
           in: header
-          description: The unique identification token for the logged in user. 
+          description: Include in authentication bearer heading.
           required: true
           type: string
         - in: body
           name: body
-          description: product added to cart
+          description: id of product to be added to cart
           required: true
           schema:
-            $ref: '#/definitions/Product'
+            type: object
+            properties:
+              productId: 
+                type: string
+                description: >-
+                 Product ID
+              quantity:
+                type: integer
+                format: int32
+                description: >-
+                  Initial quantity of product to be added to cart. 
       responses:
         '200':
           description: Successful Operation
@@ -172,6 +177,12 @@ paths:
             $ref: '#/definitions/UserProduct'
         '400':
           description: Invalid Request
+        '401':
+          description: Log in required to access content. 
+        '404':
+          description: Product not found. 
+        '409':
+          description: Product already in cart. Use different endpoint to update quantity.
   /me/cart/{productId}:
     delete:
       tags: 
@@ -184,7 +195,7 @@ paths:
       parameters:
         - name: access token
           in: header
-          description: The unique identification token for the logged in user. 
+          description: Include in authentication bearer heading.
           required: true
           type: string
         - name: productId
@@ -196,9 +207,15 @@ paths:
           format: int64
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation. The following items remain in cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserProduct'
         '400':
           description: Invalid request
+        '401': 
+          description: Log in required to perform this action. 
         '404':
           description: Invalid product ID
     post:
@@ -212,7 +229,7 @@ paths:
       parameters:
         - name: access token
           in: header
-          description: The unique identification token for the logged in user. 
+          description: Include in authentication bearer heading.
           required: true
           type: string
         - name: productId
@@ -222,15 +239,29 @@ paths:
           type: integer
           minimum: 1
           format: int64
+        - in: body
+          name: quantity
+          description: updated quantity for product in cart
+          required: true
+          schema:
+            type: object
+            properties:
+              quantity: 
+                type: integer
+                description: >-
+                 New quantity for product in cart. Must be greater than 0. 
       responses:
         '200':
-          description: Successful operation
+          description: Successful operation.
           schema:
-            $ref: '#/definitions/UserProduct'
+             $ref: '#/definitions/UserProduct'
         '400':
           description: Invalid request
+        '401': 
+          description: Log in required to perform this action. 
         '404':
-          description: Invalid product ID 
+          description: Product not found
+        
 definitions:
   Brand:
     type: object
@@ -267,10 +298,10 @@ definitions:
         type: string
         description: >-
           Text description of the sunglasses (i.e. color, style)
-      image:
+      imageUrls:
         type: string
         description: >-
-          The url for an image of the sunglasses. 
+            The url for an image of the sunglasses. 
   UserProduct:
     type: object
     properties:
@@ -278,14 +309,27 @@ definitions:
         type: string
         description: >-
           The unique identifier given to that specific product. 
-      brand:
+      categoryId:
         type: string
         description: >-
-          The name of the brand which makes this pair of sunglasses. 
+          The brand id
       name:
         type: string
         description: >-
           The name of the pair of sunglasses.  
+      description:
+        type: string
+        description: >-
+          Text description of the sunglasses.
+      price:
+        type: number
+        format: double
+        description: >-
+          The price of the pair of sunglasses. 
+      imageUrls:
+        type: string
+        description: >-
+            The url for an image of the sunglasses. 
       quantity:
         type: integer
         format: int32
