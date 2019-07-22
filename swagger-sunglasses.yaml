@@ -1,0 +1,246 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: sunglasses.io
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands
+      description: |
+        This endpoint returns all of the store's available brands.
+      parameters: []
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404':
+          description: No brands found
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: Products by Brand
+      description: | 
+        This endpoint returns the products of a given brand (by the brand's id) available in the store. 
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for products in.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products for the brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Brand does not exist
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Products
+      description: |
+        This endpoint returns the products available in the store. The optional search query allows narrowing of results (by matches in the product's name or description). 
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: No products found
+  /login:
+    post:
+      tags:
+        - Login
+      summary: User login 
+      description: |
+        This endpoint allows a user to log in and gives access to the user's cart. The keys of the request body object should be 'username' and 'password'; the string value paired with the 'username' key can be either a username or an email address. 
+      parameters:
+        - in: body
+          name: body
+          description: User credentials
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+      responses:
+        '200':
+          description: Successful login (returns access token)
+          schema:
+            type: string
+        '400':
+          description: Incorrectly formatted response
+        '401':
+          description: Invalid username or password supplied
+  /me/cart:
+    get:
+      tags:
+        - Cart
+      summary: Get user cart
+      description: |
+        This endpoint returns the user's cart. 
+      parameters: []
+      responses:
+        '200':
+          description: Returns the user's cart (an array of items)
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+        '401':
+          description: User must log in to access cart
+    post:
+      tags:
+        - Cart
+      summary: Add new item to cart 
+      description: |
+        This endpoint allows you to add a new item to the user's cart. (If the item is already in the cart, the quantity will be incremented by 1.)
+      parameters:
+        - name: productId
+          in: query
+          description: The id of the product to add
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the user's updated cart (an array of items)
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+        '401':
+          description: User must log in to access cart
+        '404':
+          description: Product does not exist
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - Cart
+      summary: Delete item from cart
+      description: |
+        This endpoint allows you to delete an item from the user's cart.
+      produces:
+        - application/json
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to delete
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns the user's updated cart (an array of items)
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+        '401':
+          description: User must log in to access cart
+        '404':
+          description: Product does not exist in user's cart
+    post:
+      summary: Edit quantity of item in cart 
+      description: |
+        This endpoint allows you to edit an item in the user's cart.
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to edit 
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          description: The new quantity of the product (greater than 0)
+          required: true
+          type: integer
+          format: int32
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Returns the user's updated cart (an array of items)
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Item'
+        '400':
+          description: Invalid quantity supplied
+        '401':
+          description: User must log in to access cart
+        '404':
+          description: Product does not exist in user's cart
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the brand. 
+      name:
+        type: string
+        description: The name of the brand. 
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier of the product.
+      brandId:
+        type: string 
+        description: The identifier of the brand of the product.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: The description of the product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the product.
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: The URLs for images of the product.
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        description: The login name of the user (either their username or email address).
+      password:
+        type: string
+        description: The password of the user. 
+  Item:
+    type: object
+    properties:
+      productId:
+        type: string
+        description: The product id of the item in the cart.
+      quantity:
+        type: integer
+        format: int32
+        description: The quantity of the item. 
