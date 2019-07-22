@@ -427,7 +427,7 @@ describe('User POST to Cart', () => {
 });
 
 
-//Let's test some User POST to Cart functionality, but with quantities!
+//Let's test some User POST/DELETE to Cart functionality, but with quantities!
 describe('User POST to Cart, with quantity checks', () => {
   //our cart POST should return the item and quantity within the cart as confirmation
   describe('/POST User cart', () => {
@@ -447,4 +447,26 @@ describe('User POST to Cart, with quantity checks', () => {
         })
     });
   });
+});
+
+describe('User DELETE to Cart, with quantity checks', () => {
+  //our cart DELETE should return the item and quantity within the cart as confirmation
+  describe('/DELETE User cart', () => {
+    it('it should respond with 200 and item changed in cart, if delete is successful', done => {
+      //arrange
+      chai
+        .request(server)
+        .delete('/api/me/cart/8')
+        .query({ token: 'thisismytokenyup' })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        })
+    });
+  });
+
+  //our cart DELETE should return a 204 if the item doesn't exist in the cart
+  //our cart DELETE should return a 204 if the item doesn't exist at all
 });

@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: Sunglasses.io API
-  description: An API to support the goalworthy platform
+  description: An API to support the Sunglasses.io platform
   version: 1.0.0
 host: api.sunglasses.io
 schemes:
