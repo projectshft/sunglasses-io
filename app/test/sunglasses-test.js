@@ -407,7 +407,7 @@ describe('User POST to Cart', () => {
     });
   });
 
-  //our POST cart should return 400 if there is productId in parameters is wrong dataType
+  //our POST cart should return 400 if there is no product of the type passed in
   describe('/POST User cart with productId, wrong :productId dataType', () => {
     it('it should respond with 400 if productId is incorrect data type', done => {
       //arrange
@@ -424,7 +424,27 @@ describe('User POST to Cart', () => {
     });
   });
 
-  //our POST cart should return 404 if there is no product with the productId passed in
-  //our POST cart should return 400 if there is no product of the type passed in
+});
 
+
+//Let's test some User POST to Cart functionality, but with quantities!
+describe('User POST to Cart, with quantity checks', () => {
+  //our cart POST should return the item and quantity within the cart as confirmation
+  describe('/POST User cart', () => {
+    it('it should respond with 200 and item added to cart, if post is successful', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/8')
+        .query({ token: 'thisismytokenyup' })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('product');
+          res.body.should.have.property('quantity');
+          done();
+        })
+    });
+  });
 });
