@@ -146,6 +146,8 @@ myRouter.get('/products', (request, response) => {
   }));
 });
 
+//failedLoginAttempts logic works, although it keeps incrementing
+//  failed logins when sent valid data and user has already passed max login attempts
 myRouter.post('/login', (request, response) => {
   //Check for username, email and password in request body
   const { username, email, password } = request.body;
@@ -158,6 +160,8 @@ myRouter.post('/login', (request, response) => {
       fields: 'POST body'
     }));
   }
+  //not adding to failedLoginAttempts since username/email not in data
+  // should this add to failedLoginAttempts anyway?
   const userForLoginAttempts = username || users.find(u => u.email === email);
   if (userForLoginAttempts === undefined) {
     const usernameOrEmailText = username ? 'username' : 'email';
@@ -172,13 +176,14 @@ myRouter.post('/login', (request, response) => {
   if (!failedLoginAttempts[usernameForLoginAttempts]) {
     failedLoginAttempts[usernameForLoginAttempts] = 0;
   }
-  if ((username && password || email && password) && !(username && email) ) {
+  if ((username && password || email && password) && !(username && email)) {
     //see if there is a user that matches
     const user = users.find(user => {
       return user.login.username === username && user.login.password === password ||
              user.email === email && user.login.password === password;
     });
-    if (user) {
+    //failedLoginAttempts validation here instead of in above if to return correct error code
+    if (user && (failedLoginAttempts[usernameForLoginAttempts] < MAX_LOGIN_ATTEMPTS_ALLOWED)) {
       //since user found, reset failedLoginAttempts
       failedLoginAttempts[usernameForLoginAttempts] = 0;
       response.writeHead(200, {...CORS_HEADERS, 'content-type': 'application/json'});
