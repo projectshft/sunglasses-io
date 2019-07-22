@@ -167,9 +167,17 @@ paths:
         - User
       responses:
         200:
-          description: Product added to Cart.
+          description: Shopping cart information for a user
           schema:
-            $ref: '#/definitions/Product'
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
         400:
           description: Missing or invalid token.
           schema:
@@ -179,37 +187,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   /me/cart/{productId}:
-    delete:
-      summary: Update Product within logged in User's Cart
-      description: >-
-        The User Profile endpoint returns cart information about the Sunglasses.io user that
-        has authorized with the application.
-      parameters:
-        - name: productId
-          in: path
-          description: The id of the Product
-          required: true
-          type: string
-        - name: token
-          in: query
-          description: Authorized User session token
-          required: true
-          type: string
-      tags:
-        - User
-      responses:
-        200:
-          description: Instance of Product removed from Cart.
-          schema:
-            $ref: '#/definitions/Product'
-        400:
-          description: Missing or invalid token.
-          schema:
-            $ref: '#/definitions/Error'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
     post:
       summary: Update Product within logged in User's Cart
       description: >-
@@ -230,9 +207,56 @@ paths:
         - User
       responses:
         200:
-          description: Instance of Product added to Cart.
+          description: Shopping cart information for a user
           schema:
-            $ref: '#/definitions/Product'
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Update Product within logged in User's Cart
+      description: >-
+        The User Profile endpoint returns cart information about the Sunglasses.io user that
+        has authorized with the application.
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the Product
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: Authorized User session token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: Shopping cart information for a user
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
         400:
           description: Missing or invalid token.
           schema:
