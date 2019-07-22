@@ -168,11 +168,16 @@ myRouter.post('/api/me/cart', function (request, response) {
     }
     //if the product in the body does not exist in the store exactly return an error
     let productToBeAdded = products.find(product => {
-        return request.body.values == product.values
+        return request.body.id === product.id 
+        && request.body.categoryId == product.categoryId
+        && request.body.name == product.name
+        && request.body.description == product.description
+        && request.body.price == product.price
     })
     //if the product does not match return an error
     if (!productToBeAdded) {
         response.writeHead(400, 'The product does not exist or is not available in the store')
+        return response.end();
     }
     //add a quantity property to the product
     productToBeAdded.quantity == 1;

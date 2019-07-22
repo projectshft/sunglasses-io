@@ -118,15 +118,18 @@ describe ('GET me/cart', () => {
 })
 //set test for Post /me/cart
 describe ('POST me/cart', () => {
+    let product = {
+        id: "2",
+        categoryId: "1",
+        name: "Black Sunglasses",
+        description: "The best glasses in the world",
+        price: 100,
+        imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    };
+    let wrongProduct = {
+        name: 'wrong product'
+    };
     it ('should add a product to the cart', done => {
-        let product = {
-            id: "2",
-            categoryId: "1",
-            name: "Black Sunglasses",
-            description: "The best glasses in the world",
-            price: 100,
-            imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-        };
         chai
             .request(server)
             .post('/api/me/cart/?token=gaeaw')
@@ -135,6 +138,28 @@ describe ('POST me/cart', () => {
                 res.should.have.status(200);
                 done();
             })
+    })
+    it ('should return an error if there is no access token or it is not a valid token', done => {
+        chai
+            .request(server)
+            .post('/api/me/cart/?token=a')
+            .send(product)
+            .end((err,res) => {
+                res.should.have.status(401);
+                done();
+            })
+    })
+    it (' should return an error if the product entered doest match a product in the store', done => {
+        chai    
+            .request(server)
+            .post('/api/me/cart/?token=gaeaw')
+            .set('Content-type', 'application/json')
+            .send(wrongProduct)
+            .end((err,res) => {
+                res.should.have.status(400);
+                done();
+            })
+
     })
 })
 
@@ -148,7 +173,15 @@ describe('POST /me/cart/:productId', () => {
                 res.should.have.status(200)
                 done();
             })
-
+    })
+    it ('should return an error if there is no access token or it is not a valid token', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart/1/?token=a')
+            .end((err,res) => {
+                res.should.have.status(401);
+                done();
+            })
     })
 })
 
