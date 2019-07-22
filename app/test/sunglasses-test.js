@@ -2,8 +2,6 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../server');
 
-let should = chai.should();
-
 chai.use(chaiHttp);
 
 describe('Brands', () => {
@@ -447,6 +445,28 @@ describe('User POST to Cart, with quantity checks', () => {
         })
     });
   });
+
+  //our cart POST should return the item and quantity within the cart as confirmation,
+  //and update by the amount given in the optional 'total' parameter
+  describe('/POST User cart', () => {
+    it('it should respond with 200 and item added to cart, if post is successful', done => {
+      //arrange
+      chai
+        .request(server)
+        .post('/api/me/cart/11')
+        .query({ token: 'thisismytokenyup', total: 5 })
+        .end((err, res) => {
+          //assert
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('product');
+          res.body.should.have.property('quantity');
+          res.body.quantity.should.be.equal(5)
+          done();
+        })
+    });
+  });
+
 });
 
 describe('User DELETE to Cart, with quantity checks', () => {

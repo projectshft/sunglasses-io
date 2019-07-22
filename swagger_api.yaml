@@ -203,6 +203,12 @@ paths:
           description: Authorized User session token
           required: true
           type: string
+        - name: total
+          in: query
+          description: The number of Products to add to User's cart
+          required: false
+          type: number
+          format: int32
       tags:
         - User
       responses:
