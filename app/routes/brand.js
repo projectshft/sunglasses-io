@@ -2,7 +2,7 @@
 var fs = require("fs");
 
 let brands = [];
-brands = JSON.parse(fs.readFileSync("../../initial-data/brands.json", "utf-8"));
+brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
 // function logic for the api/brands route
 const getBrands = () => {

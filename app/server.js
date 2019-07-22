@@ -11,10 +11,14 @@ const PORT = 3001;
 //Initial router setup
 const router = Router();
 router.use(bodyParser.json());
+router.use(bodyParser.urlencoded());
+router.use(bodyParser.urlencoded({
+  extended: true
+}))
 
 //Inital server setup
 const server = http.createServer((req, res) => {
-  res.writeHead(200);
+  res.writeHead(200, {'Content-Type': 'application/json'});
   router(req, res, finalHandler(req, res));
 });
 
@@ -54,6 +58,7 @@ router.get("/api/products", (request, response) => {
 
 //Route to login and provide a token
 router.post("/api/login", (request, response) => {
+  console.log(request.body)
   if (request.body.email && request.body.password) {
     let user = users.getUsers().find(user => {
       return (

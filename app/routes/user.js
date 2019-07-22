@@ -2,7 +2,7 @@
 var fs = require("fs");
 let users = [];
 
-users = JSON.parse(fs.readFileSync("../../initial-data/users.json", "utf-8"));
+users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
 
 // Function to return all of the users
 const getUsers = () => {

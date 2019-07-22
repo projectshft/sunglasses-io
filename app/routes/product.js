@@ -3,7 +3,7 @@ var fs = require("fs");
 
 let products = [];
 products = JSON.parse(
-  fs.readFileSync("../../initial-data/products.json", "utf-8")
+  fs.readFileSync("./initial-data/products.json", "utf-8")
 );
 
 //function that takes care of both the /api/brands/:id/products route when
