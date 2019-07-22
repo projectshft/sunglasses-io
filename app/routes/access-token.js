@@ -1,9 +1,11 @@
 //Separated routes trying to improve readability in the server.js file
-let accessTokens = [{
-  email: "susanna.richards@example.com",
-  lastUpdated: new Date(),
-  token: '1234567890123456'
-}];
+let accessTokens = [
+  {
+    email: "susanna.richards@example.com",
+    lastUpdated: new Date(),
+    token: "1234567890123456"
+  }
+];
 
 let uid = require("rand-token").uid;
 
@@ -36,7 +38,7 @@ const findUserByToken = sentToken => {
     return token.token == sentToken;
   });
   if (foundUser) {
-    return foundUser.email
+    return foundUser.email;
   }
   return null;
 };

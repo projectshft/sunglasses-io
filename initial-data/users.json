@@ -1,7 +1,7 @@
 [
     {
         "gender": "female",
-        "cart":[],
+        "cart":[ {"cartId": "1", "productId": "2", "quantity": "1"}, {"cartId" : "2", "productId": "4", "quantity": "4"} ],
         "name": {
             "title": "mrs",
             "first": "susanna",

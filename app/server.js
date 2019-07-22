@@ -1,12 +1,11 @@
 const http = require("http");
 const finalHandler = require("finalhandler");
-const queryString = require("querystring");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const brand = require("./routes/brand");
 const product = require("./routes/product");
 const users = require("./routes/user");
-const accessToken = require("./routes/access-token")
+const accessToken = require("./routes/access-token");
 const PORT = 3001;
 
 //Initial router setup
@@ -38,7 +37,7 @@ router.get("/api/brands", (request, response) => {
 
 //Route to get all the products associated with a provided brand ID
 router.get("/api/brands/:id/products", (request, response) => {
-  const currentProducts = product.getProducts(request.params.id)
+  const currentProducts = product.getProducts(request.params.id);
   if (currentProducts.length > 0) {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(currentProducts));
@@ -83,9 +82,11 @@ router.post("/api/login", (request, response) => {
 router.get("/api/me/cart", (request, response) => {
   let currentToken = request.body.token;
   if (currentToken) {
-    const currentUser = users.findUserByEmail(accessToken.findUserByToken(currentToken));
+    const currentUser = users.findUserByEmail(
+      accessToken.findUserByToken(currentToken)
+    );
     if (currentUser) {
-      response.writeHead(200, { "Content-Type": "application/json"});
+      response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(currentUser.cart));
     }
     response.writeHead(401, "Invalid token");
@@ -93,11 +94,106 @@ router.get("/api/me/cart", (request, response) => {
   }
   response.writeHead(400, "Incorrectly formatted response");
   return response.end();
-})
+});
 
-//Route to update the quantity of an item in a user's cart
+// Route to update the quantity of an item in a user's cart
+router.post("/api/me/cart", (request, response) => {
+  let currentToken = request.body.token;
+  let currentCartId = request.body.cartId;
+  let quantity = request.body.quantity;
+  if (currentToken && currentCartId && quantity) {
+    const currentUser = users.findUserByEmail(
+      accessToken.findUserByToken(currentToken)
+    );
+    if (currentUser) {
+      if (!isNaN(currentCartId) && !isNaN(quantity)) {
+        const updatedItem = users.changeQuantityOfCartItem(
+          currentUser,
+          currentCartId,
+          quantity
+        );
+        if (updatedItem) {
+          response.writeHead(200, { "Content-Type": "application/json" });
+          return response.end(JSON.stringify(updatedItem));
+        }
+        response.writeHead(400, "Cart Item Does Not exist");
+        return response.end();
+      }
+      response.writeHead(400, "Cart ID or Quantity are not numbers");
+      return response.end();
+    }
+    response.writeHead(401, "Invalid token");
+    return response.end();
+  }
+  response.writeHead(400, "Incorrectly formatted response");
+  return response.end();
+});
 
+//Route to remove an item from a user's cart
+router.delete("/api/me/cart/:productId", (request, response) => {
+  let productId = request.params.productId;
+  let currentToken = request.body.token;
+  if (currentToken && productId) {
+    let currentUser = users.findUserByEmail(
+      accessToken.findUserByToken(currentToken)
+    );
+    if (currentUser) {
+      if (!isNaN(productId)) {
+        let cartItem = currentUser.cart.find(item => {
+          return item.productId == productId || null;
+        });
+        if (cartItem) {
+          let updatedCart = users.deleteCartItem(currentUser, cartItem);
+          response.writeHead(200, { "Content-Type": "application/json" });
+          return response.end(JSON.stringify(updatedCart));
+        }
+        response.writeHead(400, "Cart item does not exist");
+        return response.end();
+      }
+      response.writeHead(400, "Product Id is not a number");
+      return response.end();
+    }
+    response.writeHead(401, "Invalid token");
+    return response.end();
+  }
+  response.writeHead(400, "Incorrectly formatted response");
+  return response.end();
+});
 
-
+//Route to add an item to a user's cart
+router.post("/api/me/cart/:productId", (request, response) => {
+  let productId = request.params.productId;
+  let currentToken = request.body.token;
+  if (currentToken && productId) {
+    let currentUser = users.findUserByEmail(
+      accessToken.findUserByToken(currentToken)
+    );
+    if (currentUser) {
+      if (!isNaN(productId)) {
+        let cartItem = currentUser.cart.find(item => {
+          return item.productId == productId || null;
+        });
+        if (!cartItem) {
+          let productItem = product.getProducts(productId);
+          if (productItem) {
+            let updatedCart = users.addItemToCart(currentUser, productId);
+            response.writeHead(200, { "Content-Type": "application/json" });
+            return response.end(JSON.stringify(updatedCart));
+          }
+          response.writeHead(400, "Product does not exist");
+          return response.end();
+        }
+        response.writeHead(400, "Item is already in cart");
+        return response.end();
+      }
+      response.writeHead(400, "Product Id is not a number");
+      return response.end();
+    }
+    response.writeHead(401, "Invalid token");
+    return response.end();
+  }
+  response.writeHead(400, "Incorrectly formatted response");
+  return response.end();
+});
 
 module.exports = server;
