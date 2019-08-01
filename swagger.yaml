@@ -14,7 +14,7 @@ paths:
     get:
       summary:  Brands
       description:  |
-        The /brands GET endpoint returns a stringified JSON array of Brand Objects.  Each Brand object contains two properties—- id and name.  The content returned is in form of a JSON string.  Response can be filtered by product name or brands provided in the search query.
+        The /brands GET endpoint returns a stringified JSON array of Brand Objects.  Each Brand object contains two properties—- id and name.  The content returned is in form of a JSON string.  Response can be filtered by brand names provided in the search query.
       parameters:
         - name: query
           in: query
@@ -30,10 +30,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+        '400':
+          description: 'Returns a messaeg saying there are no brands in the database of brands.length is 0'
   /brands/{id}/products:
     get:
       summary:  Brand Products
@@ -54,10 +52,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+        '400':
+          description: "Returns message saying that no products have the brand category id that matches the url parameter."
   /products:
     get:
       summary:  Products
@@ -90,10 +86,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+        '400':
+          description:  'Returns a message saying that the user must enter an email and password or that the user must have a properly formatted email address.'
+        '401':
+          description: 'Returns a message saying that the email and password are invalid.'
   /me/cart:
     get:
       summary:  Get User Cart
@@ -108,6 +104,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '400':
+          description: 'Returns a message saying the user must login to view the cart.'
         default:
           description: Unexpected error
           schema:
@@ -121,6 +119,8 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: 'Returns a message saying that the user must login to modify the cart or that they must enter a product id number to add products to the cart.'
   /me/cart/{productId}:
     delete:
       summary:  Delete User Cart Product
@@ -140,6 +140,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '400':
+          description: 'Returns message to the user saying they must have a valid access token to delete products from the cart or that they must enter the product ids of the products they wish to delete from the cart.'
         default:
           description: Unexpected error
           schema:
@@ -162,6 +164,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '400':
+          description: 'Returns a message to the user syaing that they must have a valid access token or that the product must already be in the user\'s cart in order for the user to change the cart quantity.'
         default:
           description: Unexpected error
           schema:

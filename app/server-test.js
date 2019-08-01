@@ -1,83 +1,83 @@
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let server = require('./server');
-let { expect } = require('chai');
+let chai = require( 'chai' );
+let chaiHttp = require( 'chai-http' );
+let server = require( './server' );
+let { expect } = require( 'chai' );
 
 const should = chai.should();
 
-chai.use(chaiHttp)
+chai.use( chaiHttp )
 
-describe('Sunglasses API', () => {
-    describe('/GET brands', () => {
-        it('it should get a 200 response', done => {
+describe( 'Sunglasses API', () => {
+    describe( '/GET brands', () => {
+        it( 'it should get a 200 response', done => {
             chai
-                .request(server)
-                .get('/api/brands')
-                .end((err, res) => {
-                    res.should.have.status(200);
+                .request( server )
+                .get( '/api/brands' )
+                .end(( err, res ) => {
+                    res.should.have.status (200 );
                     done();
                 })
         })
-        it('it should get all the brands', done => {
+        it( 'it should get all the brands', done => {
             chai
-                .request(server)
-                .get('/api/brands')
-                .end((err, res) => {
-                    res.body.should.be.an('array')
-                    res.body.should.have.length(5)
+                .request( server )
+                .get( '/api/brands' )
+                .end(( err, res ) => {
+                    res.body.should.be.an( 'array' )
+                    res.body.should.have.length( 5 )
                     done();
                 })
         })
-        it ("it should inform the user when there are no brands in the system that match the user's search results", done => {
+        it ( "it should inform the user when there are no brands in the system that match the user's search results", done => {
             chai   
-                .request(server)
-                .get('/api/brands')
-                .query({name: 'Old Navy'})
-                .end((err, res) => {
-                    res.body.should.have.length(0);
+                .request( server )
+                .get( '/api/brands' )
+                .query( { name : 'Old Navy' } )
+                .end( ( err, res ) => {
+                    res.body.should.have.length( 0 );
                     done();
                 })
         })
-        it('it should filter results by brand name', done => {
+        it( 'it should filter results by brand name', done => {
             chai
-                .request(server)
-                .get('/api/brands')
-                .query({name: ['Oakley', "Levi's"]})
-                .end((err, res) => {
-                    expect(res.body).to.have.deep.members([ 
+                .request( server )
+                .get( '/api/brands' )
+                .query( { name: [ 'Oakley', "Levi's" ] } )
+                .end(( err, res ) => {
+                    expect( res.body ).to.have.deep.members([ 
                     {
                         "id": "1",
                         "name" : "Oakley"
                     }, {
-                        "id": "3",
+                        "id" : "3",
                         "name" : "Levi's"
                     }])
                     done();
                 })
         })
     })
-    describe('GET /api/brands/:id/products', () => {
-        it ('it should return all the products that belong to particular brand based on the brand id', done => {
+    describe( 'GET /api/brands/:id/products', () => {
+        it ( 'it should return all the products that belong to particular brand based on the brand id', done => {
             chai
-                .request(server)
-                .get('/api/brands/3/products')
-                .end((err,res) => {
-                    expect(res.body).to.eql([
+                .request( server )
+                .get( '/api/brands/3/products' )
+                .end(( err,res ) => {
+                    expect( res.body ).to.eql([
                         {
-                            "id": "6",
-                            "categoryId": "3",
-                            "name": "glas",
-                            "description": "Pretty awful glasses",
-                            "price":10,
-                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
-                            "cartQuantity": null
+                            "id" : "6",
+                            "categoryId" : "3",
+                            "name" : "glas",
+                            "description" : "Pretty awful glasses",
+                            "price" :10,
+                            "imageUrls" :["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
+                            "cartQuantity" : null
                         },
                         {
                             "id": "7",
                             "categoryId": "3",
                             "name": "QDogs Glasses",
                             "description": "They bark",
-                            "price":1500,
+                            "price" :1500,
                             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"],
                             "cartQuantity": null
                         }
@@ -175,7 +175,7 @@ describe('Sunglasses API', () => {
                     done()
             })
         })
-        it('it should return a 400 error if the username and password combination is not found in the database', done => {
+        it('it should return a 401 error if the username and password combination is not found in the database', done => {
             chai
                 .request(server)
                 .post('/api/login')
@@ -185,7 +185,7 @@ describe('Sunglasses API', () => {
                     password: 'ladygaga'
                 })
                 .end((err, res) => {
-                    expect(res).to.have.status(400)
+                    expect(res).to.have.status(401)
                     done()
             })
         })
@@ -203,24 +203,10 @@ describe('Sunglasses API', () => {
                       done();
                 })
         })
-        it ('it should return an accesstoken upon a successful login', done => {
-            chai
-                .request(server)
-                .post('/api/login')
-                .set('Content-Type', 'application/json')
-                .send({
-                    "email": "salvador.jordan@example.com",
-                    "password": "tucker"
-                })
-                .end((err, res) => {
-                    res.body.should.have.length(16)
-                      done();
-                })
-        })
     })
     describe('/api/me/cart', () => {
         let badTestToken = 'abcdefghijklmnop'
-        let goodTestToken;
+        let nataliaGoodToken;
 
         before( done => {
             chai
@@ -232,7 +218,7 @@ describe('Sunglasses API', () => {
                     "password": "waters"
                 })
                 .end((err, res) => {
-                    goodTestToken = res.body;
+                    nataliaGoodToken = res.body;
                     done()
                 })
 
@@ -253,7 +239,7 @@ describe('Sunglasses API', () => {
             chai
                 .request(server)
                 .get('/api/me/cart')
-                .query({accessToken: goodTestToken})
+                .query({accessToken: nataliaGoodToken})
                 .end((err, res) => {
                     res.should.have.status(200);
                     done();
@@ -264,42 +250,146 @@ describe('Sunglasses API', () => {
                 .request(server)
                 .get('/api/me/cart')
                 .set('Content-Type', 'application/json')
-                .query({accessToken: goodTestToken})
+                .query({accessToken: nataliaGoodToken})
                 .end((err, res) => {
                     res.body.should.be.an('array')
                     done();
                 })
         })
     })
-    // describe('POST /api/me/cart', () => {
-    //     let goodTestToken;
-    //     before( done => {
-    //         chai
-    //             .request(server)
-    //             .post('/api/login')
-    //             .set('Content-Type', 'application/json')
-    //             .send({
-    //                 "email": "salvador.jordan@example.com",
-    //                 "password": "tucker"
-    //             })
-    //             .end((err, res) => {
-    //                 goodTestToken = res.body;
-    //                 done()
-    //             })
+    describe('POST /api/me/cart', () => {
+        let salvadorGoodToken;
+        before( done => {
+            let loginInfo = {
+                "email": "salvador.jordan@example.com",
+                "password": "tucker"
+            }
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send(loginInfo)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    salvadorGoodToken = res.body
+                    done()
+                })
+        });
+        it('it should access the cart of the user with the particular access token', done => {
+            chai   
+                .request(server)
+                .post('/api/me/cart')
+                .set('Content-Type', 'application/json')
+                .query({accessToken: salvadorGoodToken})
+                .send({ 
+                    id: [7, 2]
+                })
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array').of.length(2)
+                    done()
+                })
+        })
+    })
+    describe('DELETE /api/me/cart/:productId', () => {
+        let nataliaGoodToken
+        before(done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    "email": "natalia.ramos@example.com",
+                    "password": "waters"
+                })
+                .end((err, res) => {
+                    nataliaGoodToken = res.body;
+                    done()
+                })
+        })
+        before( done => {
+            chai
+            .request(server)
+            .post('/api/me/cart')
+            .set('Content-Type', 'application/json')
+            .query({
+                accessToken: nataliaGoodToken
+            })
+            .send({
+                id: [ 1, 2, 3, 4 ]
+            })
+            .end( ( err, res) => {
+                done()
+            })
+        })
+        it('it should remove cart items by product id', done => {
+            chai
+                .request(server)
+                .del('/api/me/cart/2')
+                .set('Content-Type', 'application/json')
+                .query({
+                    "accessToken": nataliaGoodToken
+                })
+                .end( ( err, res ) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array').of.length(3);
+                    // res.body.should.have.length(3)
+                    done()
+                }) 
 
-    //     })
-    //     // it('it should access the cart of the user with the particular access token', done => {
-    //     //     chai   
-    //     //         .request(server)
-    //     //         .post('/api/me/cart')
-    //     //         .set('Content-Type', 'application/json')
-    //     //         .query({accessToken: goodTestToken})
-    //     //         end((err, res) => {
-    //     //             res.cart.should.be.an('array')
-    //     //             res.cart.should.have.length(0)
-    //     //             res.login.username.should.equal("greenlion235")
-    //     //         })
-    //     // })
+        })
+    })
+    describe( 'POST /api/me/cart/:productId', () => {
+        let nataliaGoodToken
+        before( done => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set('Content-Type', 'application/json')
+                .send({
+                    "email": "natalia.ramos@example.com",
+                    "password": "waters"
+                })
+                .end((err, res) => {
+                    nataliaGoodToken = res.body;
+                    done()
+                })
+        })
+        it('it should change the cart amount of a particular product to the number sent in the request body', done => {
+            
+            chai 
+                .request(server)
+                .post('/api/me/cart/1')
+                .set('Content-Type', 'application/json')
+                .query({
+                    accessToken: nataliaGoodToken
+                })
+                .send({
+                    cartQuantity: 5
+                })
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.should.equal(5)
+                    done()
+                })
 
-    // })
+        })
+        it("it should send back a 400 error if the productId requested does not match the id of any of the products currently in the user's cart", done => {
+
+            chai 
+                .request(server)
+                .post('/api/me/cart/7')
+                .set('Content-Type', 'application/json')
+                .query({
+                    accessToken: nataliaGoodToken
+                })
+                .send({
+                    cartQuantity: 8
+                })
+                .end((err, res) => {
+                    res.should.have.status(400)
+                    done()
+                })
+        })
+    })
 })
