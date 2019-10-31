@@ -1,0 +1,40 @@
+swagger: "2.0"
+info:
+  title: Sunglasses.io API
+  description: For all your sunglass store needs
+  version: "1.0.0"
+# the domain of the service
+host: "localhost:3001"
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brand Types
+      description: |
+        The Brands endpoint returns information about all available brands in
+        the database. The response includes a brand id and name.
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific brand.
+      name:
+        type: string
+        description: Name of the brand.
