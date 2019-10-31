@@ -16,7 +16,7 @@ let users = [];
 const router = Router();
 router.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
 
   router(request, response, finalHandler(request, response));
 
@@ -36,3 +36,13 @@ http.createServer(function (request, response) {
   // });
   // console.log(`Server is listening on ${PORT}`);
 });
+
+router.get("/api/brands", (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+  res.end(JSON.stringify(brands))
+})
+
+// allow for testing
+module.exports = server
