@@ -1,0 +1,122 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io API
+  description: API for Sunglasses.io store
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Products
+      description: |
+        Products endpoint allows you to search based on different filters such as brand and price in addition to search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands
+      description: |
+        Brands contain the grouping for all products(Each product fall under a single brand).
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: Products by Brand
+      description: |
+        All products associated with given brand
+      parameters:
+        - name: id
+          in: path
+          description: Id of brand to find products in.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Array of products in brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product ID.
+      brandId:
+        type: string
+        description: Brand ID this product belongs to.
+      name:
+        type: string
+        description: Name of the product.
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: integer
+        description: Price of product.
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Product image URLs
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: Brand
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
