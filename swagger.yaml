@@ -72,6 +72,50 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '404':
+          description: Brand not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+      - Login
+      summary: User Login
+      description : |
+        Logs user into application
+      parameters:
+        - name: Username
+          in: body
+          required: true
+          description: Username login input
+          type: string
+        - name: Password
+          in: body
+          required: true
+          description: Password login input
+          type: string
+      responses:
+        '200':
+          description: successful login
+          type: string
+        '400':
+          description: Invalid username/password given
+  /me/cart:
+    get:
+      tags:
+        - Me
+      summary: Shopping Cart
+      description: |
+        Shopping cart for currently logged in user.
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
