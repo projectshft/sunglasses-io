@@ -2,7 +2,6 @@ const chai = require("chai");
 const chaiHTTP = require("chai-http");
 const server = require("../app/server");
 const expect = chai.expect;
-const assert = chai.assert;
 
 chai.use(chaiHTTP);
 chai.use(require("chai-sorted"));
@@ -22,6 +21,15 @@ describe("/GET brands", () => {
         //decide to implement this with a variable database.
         //adding this just for completeness
         expect(response.body).to.have.lengthOf(5);
+        response.body.forEach(item => {
+          expect(item).to.be.an("object");
+          expect(item).to.have.property("id");
+          expect(item).to.have.property("name");
+          expect(item["id"]).to.be.a("string");
+          expect(item["id"]).to.exist;
+          expect(item["id"]).to.not.be.empty;
+          expect(item["name"]).to.be.a("string");
+        });
         done();
       });
   });
