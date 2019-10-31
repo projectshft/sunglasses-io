@@ -10,11 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.18.2",
+    "body-parser": "latest",
     "finalhandler": "latest",
     "http": "latest",
-    "querystring": "^0.2.0",
-    "rand-token": "^0.4.0",
-    "router": "^1.3.2"
+    "querystring": "latest",
+    "rand-token": "latest",
+    "router": "latest"
   }
 }
