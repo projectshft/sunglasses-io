@@ -17,6 +17,7 @@ let products = [];
 let users = [];
 let user = {};
 let accessTokens = [];
+let failedLoginAttempts = {};
 
 
 //Router set up
@@ -73,10 +74,16 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
 
 //return products by search
 myRouter.get('/api/products', function (request, response) {
-  if (request._parsedUrl.query === null || !request._parsedUrl.query.includes('=')) {
-    response.writeHead(400, 'Invalid Request Format');
+  if (request._parsedUrl.query === null) {
+    response.writeHead(200, { 'Content-Type': 'application/json' } );
+    return response.end(JSON.stringify(products));
+  }
+
+  if (!request._parsedUrl.query.includes('=')){
+    response.writeHead(400, 'Incorrect query format');
     return response.end();
   }
+  
   //isolate query from path, use lowercase so case mismatch won't impact return
   let searchString = request._parsedUrl.query.toLowerCase();
   let queryObject = queryString.parse(searchString);
@@ -91,22 +98,30 @@ myRouter.get('/api/products', function (request, response) {
   }
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(searchResults));
+
 });
 
 myRouter.post('/api/login', function (request, response) {
   let email = request.body.email;
   let password = request.body.password;
+
   //first check that required elements are present
   if (!email || !password) {
     response.writeHead(400, 'Invalid request.');
     return response.end();
+  }
+  //create a log in attempt counter if none exists for this email
+  if(!failedLoginAttempts[email]){
+    failedLoginAttempts[email] = 0;
   }
   //find user that matches info sent in body of request
   let foundUser = users.find((user) => {
     return user.email === request.body.email && user.login.password === request.body.password
   });
   //if that user is found, return an access token 
-  if (foundUser) {
+  if (foundUser && failedLoginAttempts[email] <= 3){
+    //reset log in counter
+    failedLoginAttempts[email] = 0;
     response.writeHead(200, { 'Content-Type': 'application/json' });
     let currentToken = {
       user: foundUser.login.username,
@@ -115,7 +130,12 @@ myRouter.post('/api/login', function (request, response) {
     }
     accessTokens.push(currentToken);
     return response.end(JSON.stringify({ 'token': currentToken.token }));
+  } else if (foundUser && failedLoginAttempts[email] > 3){
+    response.writeHead(401, 'Exceeded number of log in attempts.  Contact system administrator');
+    return response.end();
   } else {
+    //increment log in counter
+    failedLoginAttempts[email]++;
     response.writeHead(401, 'Invalid username or password');
     return response.end();
   }

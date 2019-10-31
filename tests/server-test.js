@@ -71,12 +71,15 @@ describe('/GET products', () => {
         done();
       })
   });
-  it('it should get a 400 response if query is not provided', done => {
+  //changing this test to refactor to make search query optional
+  it('it should get a 200 response if query is not provided', done => {
     chai
       .request(server)
       .get('/api/products')
       .end((err, res) => {
-        res.should.have.status(400);
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(11);
         done();
       })
   })
@@ -608,8 +611,9 @@ describe('/POST /me/cart/{productId}', () => {
           .request(server)
           .post('/api/me/cart/2')
           .set('authorization', 'Bearer ' + res.body.token)
-          .send({ quantity: 18 })
+          .send({ quantity: 3 })
           .end((err, res) => {
+            console.log(res.body);
             res.should.have.status(200);
             res.body.should.be.an('object');
             res.body.should.have.property('quantity');
