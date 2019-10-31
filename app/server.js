@@ -21,22 +21,21 @@ const server = http.createServer(function (request, response) {
   router(request, response, finalHandler(request, response));
 
 }).listen(PORT, error => {
-  // if (error) {
-  //   return console.log("Error on Server Startup: ", error);
-  // }
-  // fs.readFile("stores.json", "utf8", (error, data) => {
-  //   if (error) throw error;
-  //   stores = JSON.parse(data);
-  //   console.log(`Server setup: ${stores.length} stores loaded`);
-  // });
+  if (error) {
+    return console.log("Error on Server Startup: ", error);
+  }
+  fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
+    if (error) throw error;
+    brands = JSON.parse(data);
+    console.log(`Server setup: ${brands.length} brands loaded`);
+  });
   // fs.readFile("users.json", "utf8", (error, data) => {
   //   if (error) throw error;
   //   users = JSON.parse(data);
   //   console.log(`Server setup: ${users.length} users loaded`);
   // });
-  // console.log(`Server is listening on ${PORT}`);
+  console.log(`Server is listening on ${PORT}`);
 });
-
 router.get("/api/brands", (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'application/json'
