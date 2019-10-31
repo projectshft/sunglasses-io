@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "chai-http": "^4.3.0",
+    "chai-sorted": "^0.2.0",
     "finalhandler": "latest",
     "http": "latest",
     "querystring": "^0.2.0",
