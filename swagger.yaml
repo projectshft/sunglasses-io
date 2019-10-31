@@ -99,7 +99,6 @@ paths:
       responses:
         '200':
           description: successful login
-          type: string
         '400':
           description: Invalid username/password given
   /me/cart:
@@ -109,6 +108,8 @@ paths:
       summary: Shopping Cart
       description: |
         Shopping cart for currently logged in user.
+      security:
+        - basicAuth: []
       responses:
         '200':
           description: An array of brands
@@ -116,10 +117,52 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '401':
+          $ref: '#/definitions/UnauthorizedError'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+    post:
+      tags:
+        - Me
+      summary: Add to Cart
+      description: |
+        Adds product to Shopping Cart
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: Product Added to Cart
+        '401':
+          $ref: '#/definitions/UnauthorizedError'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - Me
+      summary: Remove from Cart
+      description: |
+        Remove selected item from Cart
+      security:
+        - basicAuth: []
+      # parameters: YOU ARE HERE. check petstore
+      responses:
+        '200':
+          description: Item removed
+        '401':
+          $ref: '#/definitions/UnauthorizedError'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+securityDefinitions:
+  basicAuth:
+    type: basic
 definitions:
   Product:
     type: object
@@ -164,3 +207,5 @@ definitions:
         type: string
       fields:
         type: string
+  UnauthorizedError:
+    description: Auth error. Must be logged in as a valid user.
