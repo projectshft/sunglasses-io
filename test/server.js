@@ -12,12 +12,11 @@ describe("/GET brands", () => {
   it("it should GET all of the brands", done => {
     chai
       .request(server)
-      .get("/api/brands")
+      .get("/brands")
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array");
-        res.body.should.have.property("id");
-        res.body.should.have.property("name");
+        res.body.length.should.be.eq(5)        
         done();
       })
   })
