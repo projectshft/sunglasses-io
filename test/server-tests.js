@@ -19,60 +19,67 @@ let checkForValidArrayBodyResponse = response => {
   expect(response.body).to.be.an("array");
 };
 
+let checkForValidBrand = brand => {
+  expect(brand).to.be.an("object");
+  expect(brand).to.have.property("id");
+  expect(brand).to.have.property("name");
+  //id existence check
+  expect(brand["id"]).to.exist;
+  expect(brand["id"]).to.not.be.empty;
+  expect(brand["id"]).to.be.a("string");
+  expect(brand["name"]).to.be.a("string");
+};
+
 let checkForValidBrandsArray = brands => {
   let usedIds = [];
-  brands.forEach(item => {
-    expect(item).to.be.an("object");
-    expect(item).to.have.property("id");
-    expect(item).to.have.property("name");
-    //id existence check
-    expect(item["id"]).to.exist;
-    expect(item["id"]).to.not.be.empty;
-    expect(item["id"]).to.be.a("string");
+  brands.forEach(brand => {
+    checkForValidBrand(brand);
     //check for unique keys
-    let exists = usedIds.includes(item["id"]);
+    let exists = usedIds.includes(brand["id"]);
     expect(exists).to.be.false;
-    usedIds.push(item["id"]);
-    expect(item["name"]).to.be.a("string");
+    usedIds.push(brand["id"]);
+  });
+};
+
+let checkForValidProduct = product => {
+  expect(product).to.be.an("object");
+  //property check
+  expect(product).to.have.property("id");
+  expect(product).to.have.property("categoryId");
+  expect(product).to.have.property("name");
+  expect(product).to.have.property("description");
+  expect(product).to.have.property("price");
+  expect(product).to.have.property("imageUrls");
+  //id existence check
+  expect(product["id"]).to.exist;
+  expect(product["id"]).to.not.be.empty;
+  //category is required for other end points?
+  expect(product["categoryId"]).to.exist;
+  expect(product["categoryId"]).to.not.be.empty;
+  expect(product["categoryId"]).to.be.a("string");
+  //type checking
+  expect(product["id"]).to.be.a("string");
+  expect(product["categoryId"]).to.be.a("string");
+  expect(product["name"]).to.be.a("string");
+  expect(product["description"]).to.be.a("string");
+  expect(product["price"]).to.be.a("number");
+  expect(product["imageUrls"]).to.be.a("array");
+  //make sure imageUrls is array of strings
+  product["imageUrls"].forEach(image => {
+    expect(image).to.exist;
+    expect(image).to.not.be.empty;
+    expect(image).to.be.a("string");
   });
 };
 
 let checkForValidProductsArray = products => {
   let usedIds = [];
-  products.forEach(item => {
-    expect(item).to.be.an("object");
-    //property check
-    expect(item).to.have.property("id");
-    expect(item).to.have.property("categoryId");
-    expect(item).to.have.property("name");
-    expect(item).to.have.property("description");
-    expect(item).to.have.property("price");
-    expect(item).to.have.property("imageUrls");
-    //make sure imageUrls is array of strings
-    item["imageUrls"].forEach(image => {
-      expect(image).to.exist;
-      expect(image).to.not.be.empty;
-      expect(image).to.be.a("string");
-    });
-    //type checking
-    expect(item["id"]).to.be.a("string");
-    expect(item["categoryId"]).to.be.a("string");
-    expect(item["name"]).to.be.a("string");
-    expect(item["description"]).to.be.a("string");
-    expect(item["price"]).to.be.a("number");
-    expect(item["imageUrls"]).to.be.a("array");
-    //id existence check
-    expect(item["id"]).to.exist;
-    expect(item["id"]).to.not.be.empty;
-    //category is required for other end points?
-    expect(item["categoryId"]).to.exist;
-    expect(item["categoryId"]).to.not.be.empty;
-    expect(item["categoryId"]).to.be.a("string");
+  products.forEach(product => {
+    checkForValidProduct(product);
     //check for unique keys
-    let exists = usedIds.includes(item["id"]);
+    let exists = usedIds.includes(product["id"]);
     expect(exists).to.be.false;
-    usedIds.push(item["id"]);
-    expect(item["name"]).to.be.a("string");
+    usedIds.push(product["id"]);
   });
 };
 
