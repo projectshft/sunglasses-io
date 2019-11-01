@@ -7,9 +7,9 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
 //state holding variables 
-var brands = [];
-var products = [];
-var users = {};
+let brands = [];
+let products = [];
+let accessTokens = [];
 
 const PORT = 3001;
 
@@ -31,21 +31,42 @@ const server = http.createServer(function (request, response) {
   })
 
 //get all brands
-myRouter.get('/brands', (request, response) => {
+myRouter.get('/api/brands', (request, response) => {
   response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
   response.end(JSON.stringify(brands))
 });
 
 //get all products by brand id
-myRouter.get('/brands/id/products', (request, response) => {
-  response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
-  response.end(JSON.stringify(brands))
+myRouter.get('/api/brands/:id/products', function (request, response) {
+  //verify that a brand exists with that ID
+  let brandId = brands.find((brand) => {
+    return brand.id == request.params.id
+  })
+  if (!brandId) {
+    //if there is no brand with that ID, return a 404
+    response.writeHead(404, "That brand cannot be found");
+    response.end();
+  } else { 
+    const brandProduct = products.filter(product => {
+      if (brandId.id == product.brandId) {
+        return product;
+      }
+    })
+    response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
+    response.end(JSON.stringify(brandProduct))
+  }
 });
 
-myRouter.get('/products', (request, response) => {
+//get all products
+myRouter.get('/api/products', (request, response) => {
   response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }))
   response.end(JSON.stringify(products))
 });
+
+//login hell
+myRouter.post('/api/login', (request, response) => {
+
+})
 
 
 //export the server so that tests can be written

@@ -1,22 +1,22 @@
 [
     {
         "id": "1",
-        "name" : "Oakley"
+        "name": "Oakley"
     },
     {
         "id": "2",
-        "name" : "Ray Ban"
+        "name": "Ray Ban"
     },
     {
         "id": "3",
-        "name" : "Levi's"
+        "name": "Levi's"
     },
     {
         "id": "4",
-        "name" : "DKNY"
+        "name": "DKNY"
     },
     {
         "id": "5",
-        "name" : "Burberry"
+        "name": "Burberry"
     }
 ]
