@@ -16,7 +16,21 @@ describe("/GET brands", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array");
-        res.body.length.should.be.eq(5)        
+        res.body.length.should.be.eq(5)
+        done();
+      })
+  })
+});
+
+describe("/GET brands/id/products", () => {
+  it("it should GET all products with brand id", done => {
+    chai
+      .request(server)
+      .get("/brands/id/products")
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        // expect(res).to.eql({id: , name: })
         done();
       })
   })

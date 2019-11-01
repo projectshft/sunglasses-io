@@ -8,4 +8,43 @@ schemes:
 basePath: /
 produces:
   - application/json
-
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: The Brands endpoint allows user to see all brands
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '401':
+          description: 'No products with that brand Id found.'
+          schema:
+            type: string
+  /brands/{brandId}/products:
+    get:
+      summary: Products by Brand Id
+      description: This endpoint allows users to select brand and see all products associated with that brand
+      tags:
+        - Brands
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand to see products
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected Error
+          schema:
+            type: string
+ 
