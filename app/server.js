@@ -29,11 +29,11 @@ const server = http.createServer(function (request, response) {
     brands = JSON.parse(data);
     console.log(`Server setup: ${brands.length} brands loaded`);
   });
-  // fs.readFile("users.json", "utf8", (error, data) => {
-  //   if (error) throw error;
-  //   users = JSON.parse(data);
-  //   console.log(`Server setup: ${users.length} users loaded`);
-  // });
+  fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
+    if (error) throw error;
+    products = JSON.parse(data);
+    console.log(`Server setup: ${products.length} products loaded`);
+  });
   console.log(`Server is listening on ${PORT}`);
 });
 router.get("/api/brands", (req, res) => {
@@ -41,6 +41,13 @@ router.get("/api/brands", (req, res) => {
     'Content-Type': 'application/json'
   })
   res.end(JSON.stringify(brands))
+})
+
+router.get("/api/products", (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+  res.end(JSON.stringify(products))
 })
 
 // allow for testing
