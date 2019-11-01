@@ -21,6 +21,7 @@ describe("/GET brands", () => {
         //decide to implement this with a variable database.
         //adding this just for completeness
         expect(response.body).to.have.lengthOf(5);
+        let usedIds = [];
         response.body.forEach(item => {
           expect(item).to.be.an("object");
           expect(item).to.have.property("id");
@@ -28,6 +29,10 @@ describe("/GET brands", () => {
           expect(item["id"]).to.be.a("string");
           expect(item["id"]).to.exist;
           expect(item["id"]).to.not.be.empty;
+          //check for unique keys
+          let exists = usedIds.includes(item["id"]);
+          expect(exists).to.be.false;
+          usedIds.push(item["id"]);
           expect(item["name"]).to.be.a("string");
         });
         done();
