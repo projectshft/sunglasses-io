@@ -48,9 +48,17 @@ router.get("/api/brands", (req, res) => {
   res.end(JSON.stringify(brands))
 })
 
+router.get('/api/brands/:id/products', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+  let productsInBrand = products.filter((product) => {
+    return product.brandId === req.params.id
+  })
+  res.end(JSON.stringify(productsInBrand));
+})
+
 router.get("/api/products", (req, res) => {
-
-
   // Get our query params from the query string
   const queryParams = queryString.parse(url.parse(req.url).query)
 
