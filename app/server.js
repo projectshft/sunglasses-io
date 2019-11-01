@@ -50,9 +50,6 @@ router.get("/api/brands", (req, res) => {
 
 router.get("/api/products", (req, res) => {
 
-  res.writeHead(200, {
-    'Content-Type': 'application/json'
-  })
 
   // Get our query params from the query string
   const queryParams = queryString.parse(url.parse(req.url).query)
@@ -68,11 +65,30 @@ router.get("/api/products", (req, res) => {
         product.description.toUpperCase().includes(searchQuery.toUpperCase())
       )
     })
+
+    // Return 404 if no products found
+    if (matchingProducts.length === 0) {
+      res.writeHead(404, {
+        'Content-Type': "text/plain"
+      })
+      return res.end("404 Error: No products found.")
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    })
+
     // Return all matching products
     return res.end(JSON.stringify(matchingProducts));
   }
+
+
   // Returns all products if no query given
   else {
+    res.writeHead(200, {
+      'Content-Type': 'application/json'
+    })
+
     return res.end(JSON.stringify(products))
   }
 

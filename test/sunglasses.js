@@ -74,12 +74,12 @@ describe('Products', () => {
     })
     it('it should return 404 error when no products found matching query', done => {
       chai.request(server)
-        .get('/api/products?query=spiciest')
+        .get('/api/products?query=sasdfas')
         .end((err, res) => {
           // Asserting
-          res.should.have.status(200);
-          res.body.should.be.an('array')
-          res.body[0].name.should.be.eql('Habanero')
+          res.should.have.status(404);
+          res.text.should.be.a('string')
+          res.text.should.equal("404 Error: No products found.")
           done();
         })
     })
