@@ -38,6 +38,17 @@ describe('Brands', () => {
           done();
         })
     })
+    it('it should return 404 error when brandID not found', done => {
+      chai.request(server)
+        .get('/api/brands/99999999999/products')
+        .end((err, res) => {
+          // Asserting
+          res.should.have.status(404);
+          res.text.should.be.a('string')
+          res.text.should.equal("404 Error: Brand ID not found.")
+          done();
+        })
+    })
   })
 })
 

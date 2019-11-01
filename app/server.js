@@ -45,15 +45,26 @@ router.get("/api/brands", (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'application/json'
   })
+  // Return all brands
   res.end(JSON.stringify(brands))
 })
 
 router.get('/api/brands/:id/products', (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'application/json'
-  })
+  // Return only matching products from given brand
   let productsInBrand = products.filter((product) => {
     return product.brandId === req.params.id
+  })
+
+  // Return 404 if no products found(brand doesn't exist)
+  if (productsInBrand.length === 0) {
+    res.writeHead(404, {
+      'Content-Type': "text/plain"
+    })
+    return res.end("404 Error: Brand ID not found.")
+  }
+
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
   })
   res.end(JSON.stringify(productsInBrand));
 })
@@ -85,7 +96,6 @@ router.get("/api/products", (req, res) => {
     res.writeHead(200, {
       'Content-Type': 'application/json'
     })
-
     // Return all matching products
     return res.end(JSON.stringify(matchingProducts));
   }
