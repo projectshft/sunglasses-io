@@ -1,0 +1,381 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io 
+  description: Enjoy a cool view with these sunglasses!
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: List of brands
+      description: |
+        List of Brands available for purchase on the site
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of our brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: List of products for the identified brand
+      description: 
+        Lists all products for the brand
+      tags:
+        - Brands
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: brand id
+          type: string
+      responses:
+        '200':
+          description: An array of a brand's products
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Product'
+        '404':
+          description: Brand does not exist
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: List of products
+      description: |
+        A list of products for purchase
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Array of all products
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Logs user into system
+      consumes: 
+        - application/json
+      parameters:
+        - in: body
+          name: login
+          description: User authorization
+          schema:
+            type: object
+            required:
+              - username
+                password
+            properties:
+              username:
+                $ref: '#/definitions/User/properties/login/properties/username'
+              password:
+                $ref: '#/definitions/User/properties/login/properties/password'
+      tags:
+        - User
+      responses:
+        '200':
+          description: Valid login
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                description: Session token for the logged-in user
+        '401':
+          description: Login is invalid
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Shopping cart of user
+      description: 
+        Shopping cart for the logged-in user
+      parameters:
+        - in: query
+          name: token
+          description: Session token for user
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Shopping cart for the logged-in user
+          schema:
+            type: array
+            items: 
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+        '400':
+          description: Token is missing or invalid
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add product to cart
+      consumes: 
+        - application/json
+      parameters:
+        - in: query
+          name: token
+          description: Session token for user
+          required: true
+          type: string
+        - in: body
+          name: product
+          description: The product to be added to the cart
+          schema:
+            $ref: '#/definitions/Product'
+      tags:
+        - User
+      responses:
+        '200':
+          description: Shopping cart for the logged-in user
+          schema:
+            type: array
+            items: 
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+        '400':
+          description: Token is missing or invalid
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    post:
+      summary: Revise cart quantity
+      description: 
+        Update the quantity of an item in the cart
+      parameters:
+        - name: productId
+          in: path
+          description: The product's unique id
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: Session token of user
+          required: true
+          type: string
+        - in: query
+          name: total
+          description: Quantity of product to update
+          type: integer
+      tags:
+        - User
+      responses:
+        '200':
+          description: Shopping cart for the logged-in user
+          schema:
+            type: array
+            items: 
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+        '400':
+          description: Token is missing or invalid
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+    delete:
+      summary: Remove product from cart
+      parameters:
+        - name: productId
+          in: path
+          description: The product's unique id
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: Session token of user
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Shopping cart for the logged-in user
+          schema:
+            type: array
+            items: 
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+        '400':
+          description: Token is missing or invalid
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique id for the Brand
+      name:
+        type: string
+        description: Name of the Brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description:
+          Unique id for the product
+      categoryId:
+        $ref: '#/definitions/Brand/properties/id'
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: integer
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: List of images for the product
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Product'    
+        description: Shopping cart
+      name:
+        type: object
+        properties:
+          title: 
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+      email:
+        type: string
+        format: email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+          type: string
+          format: date
+          description: Birth date of user
+      registered:
+          type: string
+          format: date
+          description: Date user registered on our site
+      phone:
+          type: string
+          format: phone
+      cell:
+          type: string
+          format: phone
+      picture:
+          type: object
+          properties:
+            large:
+              type: string
+              description: url for large picture
+            medium:
+              type: string
+              description: url for medium-size picture
+            thumbnail:
+              type: string
+              description: url for thumbnail picture
+      nat:
+        type: string
+        description: Two-character country code 
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
