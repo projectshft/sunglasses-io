@@ -63,7 +63,10 @@ router.get("/api/products", (req, res) => {
 
     // Return only products matching name from searchQuery
     const matchingProducts = products.filter(product => {
-      return (product.name.toUpperCase().includes(searchQuery.toUpperCase()))
+      return (
+        product.name.toUpperCase().includes(searchQuery.toUpperCase()) ||
+        product.description.toUpperCase().includes(searchQuery.toUpperCase())
+      )
     })
     // Return all matching products
     return res.end(JSON.stringify(matchingProducts));
