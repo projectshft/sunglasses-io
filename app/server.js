@@ -60,4 +60,22 @@ myRouter.get("/api/brands", (request, response) => {
   response.end(JSON.stringify(brands));
 });
 
+myRouter.get("/api/brands/:id/products", (request, response) => {
+  const {id} = request.params;
+
+  const brandProducts = products.filter((product) => product.categoryId === id);
+
+  if (brandProducts.length) {
+    response.writeHead(200, {
+      'content-type': 'application/json'
+    });
+    return response.end(JSON.stringify(brandProducts));
+  } else {
+    response.writeHead(404, 'Brand does not exist');
+    return response.end();
+  }
+
+  
+});
+
 module.exports = server;

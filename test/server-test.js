@@ -21,4 +21,20 @@ describe('Brands', () => {
     });
   });
 
+  // GET /api/brands/:id/products
+  describe('/GET brands/:id/products', () => {
+    it('it should GET all the products associated with the given brand id', done => {
+      chai
+        .request(server)
+        .get('/api/brands/1/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(3);
+          done();
+        });
+    });
+  });
+
+  
 });
