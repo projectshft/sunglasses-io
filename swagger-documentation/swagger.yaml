@@ -86,11 +86,11 @@ paths:
           schema:
             type: object
             required:
-              - username
+              - email
                 password
             properties:
-              username:
-                $ref: '#/definitions/User/properties/login/properties/username'
+              email:
+                $ref: '#/definitions/User/properties/email'
               password:
                 $ref: '#/definitions/User/properties/login/properties/password'
       tags:

@@ -3,7 +3,7 @@ var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
-var bodyParser   = require('body-parser');
+var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
 const PORT = 3001;
@@ -12,12 +12,7 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
-let authorizedUsers = [
-  {
-    email: 'randomemail@gmail.com',
-    token: 'token123'
-  }
-];
+let authorizedUsers = [];
 
 // Create the router
 const myRouter = Router();
@@ -63,8 +58,8 @@ myRouter.get("/api/brands", (request, response) => {
 
 // getting all the products for a given brand id
 myRouter.get("/api/brands/:id/products", (request, response) => {
-  const {id} = request.params;
-
+  const { id } = request.params;
+  
   const brandProducts = products.filter((product) => product.categoryId === id);
 
   if (brandProducts.length) {
@@ -84,6 +79,37 @@ myRouter.get("/api/products", (request, response) => {
     'content-type': 'application/json'
   });
   response.end(JSON.stringify(products));
+});
+
+// authorizing a user to login
+myRouter.post("/api/login", (request, response) => {
+  const { email, password } = request.body;
+  
+  if (email && password) {
+    // get the user
+    const user = users.find(user => user.email === email && user.login.password === password)
+
+    if (user) {
+      // give a session token and place user/token object in authorizedUsers
+      token = uid(16);
+      authorizedUsers.push({email, token});
+
+      response.writeHead(200, {
+        'content-type': 'application/json'
+      });
+
+      return response.end(JSON.stringify({ token }));
+    } else {
+      response.writeHead(401, 'Invalid username or password');
+      return response.end();
+    }
+
+  } else {
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+
+
 });
 
 
