@@ -2,8 +2,6 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server');
 let should = chai.should();
-chai.use(require('chai-like'));
-chai.use(require('chai-things'));
 
 chai.use(chaiHttp);
 
@@ -58,8 +56,10 @@ describe('Products', () => {
         .end((err, res) => {
           // Asserting
           res.should.have.status(200);
-          res.body.should.be.an('array');
-          res.body[0].name.should.be.eql('Peanut Butter')
+          res.body.should.be.an('array')
+          res.body.forEach(product => {
+            product.name.should.include('glasses')
+          });
           done();
         })
     })

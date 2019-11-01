@@ -13,8 +13,6 @@
     "body-parser": "latest",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
-    "chai-like": "^1.1.1",
-    "chai-things": "^0.2.0",
     "finalhandler": "latest",
     "http": "latest",
     "querystring": "latest",
