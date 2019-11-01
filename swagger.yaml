@@ -86,10 +86,10 @@ paths:
       description : |
         Logs user into application
       parameters:
-        - name: Username
+        - name: Email
           in: header
           required: true
-          description: Username login input
+          description: Email login input
           type: string
         - name: Password
           in: header
@@ -100,7 +100,7 @@ paths:
         '200':
           description: successful login
         '400':
-          description: Invalid username/password given
+          description: Invalid Email/password given
   /me/cart:
     get:
       tags:
