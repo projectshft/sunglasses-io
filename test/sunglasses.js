@@ -50,7 +50,7 @@ describe('Products', () => {
           done();
         })
     })
-    it('it should GET all products by name that contain the query', done => {
+    it('it should GET all products by name that contain the query(case sensitive)', done => {
       chai.request(server)
         .get('/api/products?query=glasses')
         .end((err, res) => {
@@ -60,6 +60,17 @@ describe('Products', () => {
           res.body.forEach(product => {
             product.name.should.include('glasses')
           });
+          done();
+        })
+    })
+    it('it should GET all products by name that contain the query(case INsensitive)', done => {
+      chai.request(server)
+        .get('/api/products?query=superglasses')
+        .end((err, res) => {
+          // Asserting
+          res.should.have.status(200);
+          res.body.should.be.an('array')
+          res.body[0].name.should.be.eql('Superglasses')
           done();
         })
     })
