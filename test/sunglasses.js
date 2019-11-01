@@ -2,8 +2,11 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server');
 let should = chai.should();
+chai.use(require('chai-like'));
+chai.use(require('chai-things'));
 
 chai.use(chaiHttp);
+
 
 // Aranging
 describe('Brands', () => {
@@ -45,6 +48,17 @@ describe('Products', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
+          res.body[0].name.should.be.eql('Peanut Butter')
+          done();
+        })
+    })
+    it('it should GET all products by name that contain the query', done => {
+      chai.request(server)
+        .get('/api/products?query=glasses')
+        .end((err, res) => {
+          // Asserting
+          res.should.have.status(200);
+          res.body.should.be.an('array');
           res.body[0].name.should.be.eql('Peanut Butter')
           done();
         })
