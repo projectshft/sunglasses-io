@@ -6,13 +6,37 @@ var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-http.createServer(function (request, response) {
-    myRouter(request, response, finalHandler(request, response))
-}).listen(3001, () => {
-    // Load all the brands from thr brands JSON file 
-    brands = JSON.parse(fs.readFileSync("brands.json", "utf-8"));
+// State holding variables 
+let brands = [];
+
+// Setup router
+const router = Router();
+router.use(bodyParser.json());
+
+
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    router(req, res, finalHandler(req, res));
 });
 
-export.
+server.listen(PORT, err => {
+    if (err) throw err;
+    console.log(`server running on port ${PORT}`);
+    //populate brands  
+    brands = JSON.parse(fs.readFileSync("../initial-data/brands.json", "utf-8"));
+});
+
+router.get("/api/brands", (request, response) => {
+
+
+
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(brands));
+});
+
+
+
+module.exports = server
