@@ -46,15 +46,37 @@ describe("/GET api/brands/:id/products", () => {
 });
 
 
-describe("/GET products", () => {
-  it("it should GET all products", done => {
+describe("GET /products", () => {
+  it("it should GET all the products if no search query defined", done => {
     chai
       .request(server)
-      .get("/api/products")
+      .get('/api/products')
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.be.an("array");
-        res.body.length.should.be.eq(11);
+        expect("Content-Type", "application/json");
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(11);
+        done();
+      })
+  })
+  it("it should return only the products that match said query", done => {
+    chai
+      .request(server)
+      .get('/api/products?q=Peanut+Butter')
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect("Content-Type", "application/json");
+        res.body.should.be.an('array')
+        res.body.should.have.lengthOf(1);
+        done();
+      })
+  })
+  it("it should return an error if unrecognized query is entered", done => {
+    chai
+      .request(server)
+      .get('/api/products?q=xx')
+      .end((err, res) => {
+        res.should.have.status(400);
         done();
       })
   })
@@ -62,25 +84,40 @@ describe("/GET products", () => {
 
 describe("/POST login", () => {
   it("it should return an error if user does not submit username OR password", done => {
+    let user = { username: '', password: ''}
     chai
       .request(server)
       .get("api/login")
-      .send({ username: '', password: '' })
+      .send(user)
       .end((err, res) => {
         res.should.have.status(401);
-        res.body.should.not.have.property('username');
+        res.body.should.have.property('username');
         res.body.should.not.have.property('password');
         done();
       })
   })
-  it("it should return an error if user submits invalid username OR password", done => {
+  it("it should give user access if username and password are valid", done => {
+    let user = { username: 'lazywolf342', password: 'tucker' }
     chai
       .request(server)
-      .get("/login")
-      .send({ username: '', password: '' })
+      .post('/api/login')
+      .set('Content-type', 'application/json')
+      .send(user)
       .end((err, res) => {
-        res.should.have.status(401);
-
+        res.should.have.status(200);
+        done();
       })
   })
-})
+  it("it should return an error if username or password are not valid", done => {
+    let user = { username: 'xxx', password: 'xxx' }
+    chai
+      .request(server)
+      .post('/api/login')
+      .set('Content-type', 'application/json')
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
+});
