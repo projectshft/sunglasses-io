@@ -22,8 +22,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
-        '401':
-          description: 'No products with that brand Id found.'
+      default:
+          description: Unexpected Error
           schema:
             type: string
   /brands/{brandId}/products:
@@ -43,8 +43,33 @@ paths:
           description: Success
           schema:
             $ref: '#/definitions/Brand'
-        default:
-          description: Unexpected Error
+        '404':
+          description: 'No products with that brand Id found.'
+          schema:
+            type: string
+  /products:
+    get:
+      summary: Product Search
+      description: The product endpoints allows user to search for individual product
+      tags:
+        - Product Search
+      parameters:
+        - name: productName
+          in: query
+          description: The name of the product the user is searching for
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Product'
+        '404':
+          description: 'Please enter the name of the product you are searching for.'
+          schema:
+            type: string
+        '404':
+          description: 'The product does not exist'
           schema:
             type: string
  

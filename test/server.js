@@ -35,3 +35,17 @@ describe("/GET brands/id/products", () => {
       })
   })
 });
+
+describe("/GET products", () => {
+  it("it should GET all products", done => {
+    chai
+      .request(server)
+      .get("/products")
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        res.body.length.should.be.eq(11);
+        done();
+      })
+  })
+})
