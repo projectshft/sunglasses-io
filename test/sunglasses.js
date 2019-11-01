@@ -22,6 +22,23 @@ describe('Brands', () => {
         })
     })
   })
+  describe('/GET api/brands/:id/products', () => {
+    // Acting
+    it('it should GET all products for a brand', done => {
+      chai.request(server)
+        // Getting Burberry brand products
+        .get('/api/brands/5/products')
+        .end((err, res) => {
+          // Asserting
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(2);
+          res.body[0].name.should.be.eql('Peanut Butter')
+          res.body[1].name.should.be.eql('Habanero')
+          done();
+        })
+    })
+  })
 })
 
 describe('Products', () => {
