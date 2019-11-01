@@ -37,5 +37,17 @@ describe('Products', () => {
           done();
         })
     })
+    it('it should GET a product by name matching exact query', done => {
+      chai.request(server)
+        .get('/api/products?query=Peanut%20Butter')
+        .end((err, res) => {
+          // Asserting
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(1);
+          res.body[0].name.should.be.eql('Peanut Butter')
+          done();
+        })
+    })
   })
 })

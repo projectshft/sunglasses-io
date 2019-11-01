@@ -17,6 +17,7 @@
     "http": "latest",
     "querystring": "latest",
     "rand-token": "latest",
-    "router": "latest"
+    "router": "latest",
+    "url": "^0.11.0"
   }
 }
