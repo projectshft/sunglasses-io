@@ -87,12 +87,12 @@ paths:
         Logs user into application
       parameters:
         - name: Username
-          in: body
+          in: header
           required: true
           description: Username login input
           type: string
         - name: Password
-          in: body
+          in: header
           required: true
           description: Password login input
           type: string
@@ -112,7 +112,7 @@ paths:
         - basicAuth: []
       responses:
         '200':
-          description: An array of brands
+          description: An array of products in current user's cart
           schema:
             type: array
             items:
@@ -149,17 +149,55 @@ paths:
         Remove selected item from Cart
       security:
         - basicAuth: []
-      # parameters: YOU ARE HERE. check petstore
+      parameters:
+        - name: productId
+          in: path
+          description: Product id to remove from cart
+          required: true
+          type: string
       responses:
         '200':
           description: Item removed
         '401':
           $ref: '#/definitions/UnauthorizedError'
+        '404':
+          description: Product ID not found in cart
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-
+    post:
+      tags:
+        - Me
+      summary: Change quantity
+      description: |
+       Change quantity of product in cart
+      security:
+        - basicAuth: []
+      parameters:
+        - name: productId
+          in: path
+          description: Product id specified for quantity update
+          required: true
+          type: string
+        - name: quantity
+          in: header
+          description: Set quantity of product in cart(50 max)
+          required: true
+          type: integer
+          minimum: 1
+          maximum: 50
+      responses:
+        '200':
+          description: Quantity updated
+        '401':
+          $ref: '#/definitions/UnauthorizedError'
+        '404':
+          description: Product ID not found in cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 securityDefinitions:
   basicAuth:
     type: basic
