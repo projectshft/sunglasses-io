@@ -72,5 +72,16 @@ describe('Products', () => {
           done();
         })
     })
+    it('it should return 404 error when no products found matching query', done => {
+      chai.request(server)
+        .get('/api/products?query=spiciest')
+        .end((err, res) => {
+          // Asserting
+          res.should.have.status(200);
+          res.body.should.be.an('array')
+          res.body[0].name.should.be.eql('Habanero')
+          done();
+        })
+    })
   })
 })
