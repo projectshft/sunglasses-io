@@ -15,7 +15,7 @@ produces:
 paths:
   /brands:
     get:
-      summary: Brand Types
+      summary: List of Brands
       description: |
         The Brands endpoint returns information about all available brands in
         the database. The response includes a brand id and name.
@@ -28,6 +28,20 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Brand"
+  /products:
+    get:
+      summary: List of Products
+      description: |
+        The Products endpoint returns information about all available products in        the database. The response includes a prodct id, name, price, and description. Also inclues a linking id to a Brand as well as an array of images to use with the product.
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of Products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
 definitions:
   Brand:
     type: object
@@ -38,3 +52,26 @@ definitions:
       name:
         type: string
         description: Name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific product.
+      categoryId:
+        type: string
+        description: Identifier linking this product to a category.
+      name:
+        type: string
+        description: Name of the product.
+      description:
+        type: string
+        description: Description about this product
+      price:
+        type: number
+        description: Price for this product
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Array of image Urls for this product
