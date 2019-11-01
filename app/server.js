@@ -53,6 +53,7 @@ const server = http.createServer((request, response) => {
 
 // ROUTES //
 
+// getting all the brands
 myRouter.get("/api/brands", (request, response) => {
   response.writeHead(200, {
     'content-type': 'application/json'
@@ -60,6 +61,7 @@ myRouter.get("/api/brands", (request, response) => {
   response.end(JSON.stringify(brands));
 });
 
+// getting all the products for a given brand id
 myRouter.get("/api/brands/:id/products", (request, response) => {
   const {id} = request.params;
 
@@ -74,8 +76,15 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
     response.writeHead(404, 'Brand does not exist');
     return response.end();
   }
-
-  
 });
+
+// getting all the products
+myRouter.get("/api/products", (request, response) => {
+  response.writeHead(200, {
+    'content-type': 'application/json'
+  });
+  response.end(JSON.stringify(products));
+});
+
 
 module.exports = server;

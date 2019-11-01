@@ -35,6 +35,21 @@ describe('Brands', () => {
         });
     });
   });
+});
 
-  
+describe('Products', () => {
+  // GET /api/products
+  describe('/GET products', () => {
+    it('it should GET all the products', done => {
+      chai
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(11);
+          done();
+        });
+    });
+  });
 });
