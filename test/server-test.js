@@ -39,7 +39,7 @@ describe('Brands', () => {
   });
 
   describe('/GET brands/:id/products with invalid id param', () => {
-    it('it should return an error', done => {
+    it('it should return a 404 error', done => {
       chai
         .request(server)
         .get('/api/brands/products')
@@ -73,7 +73,7 @@ describe('Products', () => {
 describe('User', () => {
   // POST /api/login for valid credentials
   describe('/POST login with valid creds', () => {
-    it('it should return a session token as a string with 16 chars', done => {
+    it('it should return OK and a session token as a string with 16 chars', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -94,7 +94,7 @@ describe('User', () => {
 
   // POST /api/login for invalid credentials
   describe('/POST login with invalid password', () => {
-    it('it should return error for invalid creds', done => {
+    it('it should return 401 error for invalid creds', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -110,7 +110,7 @@ describe('User', () => {
   });
 
   describe('/POST login with invalid email', () => {
-    it('it should return error for invalid creds', done => {
+    it('it should return 401 error for invalid creds', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -127,7 +127,7 @@ describe('User', () => {
 
   // POST login with missing email credential parameter
   describe('/POST login with missing email', () => {
-    it('it should return error for incorrect request', done => {
+    it('it should return 400 error for incorrect request', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -144,7 +144,7 @@ describe('User', () => {
 
   // POST login with missing password parameter
   describe('/POST login with missing password', () => {
-    it('it should return error for incorrect request', done => {
+    it('it should return 400 error for incorrect request', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -178,7 +178,7 @@ describe('User', () => {
 
   // Missing session token
   describe('/GET logged-in user cart', () => {
-    it('it should respond with error if token not in request', done => {
+    it('it should respond with 400 error if token not in request', done => {
       chai
         .request(server)
         .get('/api/me/cart')
@@ -194,7 +194,7 @@ describe('User', () => {
 
   // Invalid session token
   describe('/GET logged-in user cart', () => {
-    it('it should respond with error if token is invalid', done => {
+    it('it should respond with 401 error if token is invalid', done => {
       chai
         .request(server)
         .get('/api/me/cart')
@@ -202,7 +202,7 @@ describe('User', () => {
           token: 'invalidtoken'
         })
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           done();
         });
     });
@@ -236,7 +236,7 @@ describe('User', () => {
 
   // Missing token
   describe('/POST item to cart with missing token', () => {
-    it('it should return error', done => {
+    it('it should return 400 error', done => {
       chai
         .request(server)
         .post('/api/me/cart')
@@ -260,7 +260,7 @@ describe('User', () => {
 
   // Invalid token
   describe('/POST item to cart with invalid token', () => {
-    it('it should return error', done => {
+    it('it should return 401 error', done => {
       chai
         .request(server)
         .post('/api/me/cart')
@@ -276,7 +276,7 @@ describe('User', () => {
           "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
         })
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           done();
         });
     });
@@ -284,12 +284,12 @@ describe('User', () => {
 
   // Invalid product
   describe('/POST item to cart with invalid product', () => {
-    it('it should return error', done => {
+    it('it should return 400 error - do not divulge more than necessary re: products', done => {
       chai
         .request(server)
         .post('/api/me/cart')
         .query({
-          token: 'invalidtoken'
+          token: 'random1661modnar'
         })
         .send({
           "id": "10",
@@ -306,14 +306,14 @@ describe('User', () => {
     });
   });
 
-  // Invalid product
+  // Missing product
   describe('/POST item to cart with missing product', () => {
-    it('it should return error', done => {
+    it('it should return 400 error', done => {
       chai
         .request(server)
         .post('/api/me/cart')
         .query({
-          token: 'invalidtoken'
+          token: 'random1661modnar'
         })
         .send()
         .end((err, res) => {
@@ -357,21 +357,21 @@ describe('User', () => {
   });
 
   describe('/POST update to cart with invalid token', () => {
-    it('it should respond with error', done => {
+    it('it should respond with 401 error', done => {
       chai
         .request(server)
         .post('/api/me/cart/10')
         .query({token: 'zzz', quantity: 3})
         .send({})
         .end((err, res) => {
-          res.should.have.status(400);
+          res.should.have.status(401);
           done();
         });
     });
   });
 
   describe('/POST update to cart with missing token', () => {
-    it('it should respond with error', done => {
+    it('it should respond with 400 error', done => {
       chai
         .request(server)
         .post('/api/me/cart/10')
@@ -385,11 +385,25 @@ describe('User', () => {
   });
 
   describe('/POST update to cart with invalid product', () => {
-    it('it should respond with error', done => {
+    it('it should respond with 400 error - do not divulge more than necessary re: products', done => {
       chai
         .request(server)
         .post('/api/me/cart/1z')
         .query({token: 'random1661modnar', quantity: 3})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe('/POST update to cart with invalid quantity', () => {
+    it('it should respond with 400 error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/10')
+        .query({token: 'random1661modnar', quantity: -3})
         .send({})
         .end((err, res) => {
           res.should.have.status(400);
@@ -403,13 +417,69 @@ describe('User', () => {
     it('it should respond with OK and the revised cart', done => {
       chai
         .request(server)
-        .post('/api/me/cart/1')
+        .delete('/api/me/cart/1')
         .query({token: 'random1661modnar'})
         .send({})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
+          done();
+        });
+    });
+  });
+
+  describe('/DELETE item from cart when item is not in cart', () => {
+    it('it should respond with 400 error', done => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/2')
+        .query({token: 'random1661modnar'})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe('/DELETE item from cart with invalid product parameter', () => {
+    it('it should respond with 400 error', done => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/2z')
+        .query({token: 'random1661modnar'})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe('/DELETE item from cart with invalid token', () => {
+    it('it should respond with 401 error', done => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/10')
+        .query({token: 'random1661modnarblahblahblah'})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+  });
+
+  describe('/DELETE item from cart with missing token', () => {
+    it('it should respond with 400 error', done => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/10')
+        .query({})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
           done();
         });
     });

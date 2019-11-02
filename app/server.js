@@ -132,7 +132,7 @@ myRouter.get("/api/me/cart", (request, response) => {
       const  user = users.find(user => user.email === authorizedUser.email)
       return response.end(JSON.stringify(user.cart));      
     } else { // invalid token
-      response.writeHead(400, "Token is invalid");
+      response.writeHead(401, "Token is invalid");
       return response.end();
     }
   } else { // no token provided
@@ -176,7 +176,7 @@ myRouter.post("/api/me/cart", (request, response) => {
       }
           
     } else { // invalid token
-      response.writeHead(400, "Token is invalid");
+      response.writeHead(401, "Token is invalid");
       return response.end();
     }
   } else { // no token provided
@@ -209,6 +209,11 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
       matchedProduct = products.find(product => product.id === productId);
      
       if (matchedProduct) {
+        // check if quantity is valid
+        if (Number(tokenObj.quantity) < 1) {
+          response.writeHead(400, 'Quantity not an integer > 0; use delete method of api to remove an item from cart');
+          return response.end();
+        }
         // Check if item is in cart, and if so, update the quantity
         const item = user.cart.find(item => item.product.id === productId);
         const itemIdx = user.cart.findIndex(item => item.product.id === productId);
@@ -229,7 +234,62 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
       }
           
     } else { // invalid token
-      response.writeHead(400, "Token is invalid");
+      response.writeHead(401, "Token is invalid");
+      return response.end();
+    }
+  } else { // no token provided
+    response.writeHead(400, "Token is missing");
+    return response.end();
+  }
+});
+
+// Updating item quantities in user cart
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+  // separate the url to enable selecting query string
+  const separatedUrl = request.url.split('?');
+  
+  // get the token
+  const tokenObj = queryString.parse(separatedUrl[1]);
+
+  // check authorizedUsers to see if token exists and is valid
+  if (tokenObj.token) {
+
+    // find associated user
+    const authorizedUser = authorizedUsers.find(user => user.token == tokenObj.token)
+
+    // if valid token 
+    if (authorizedUser) {
+      const user = users.find(user => user.email === authorizedUser.email)
+      
+      // Ensure valid product
+      const {productId} = request.params;
+
+      matchedProduct = products.find(product => product.id === productId);
+     
+      if (matchedProduct) {
+        // Check if item is in cart, and if so, delete it
+        const item = user.cart.find(item => item.product.id === productId);
+        const itemIdx = user.cart.findIndex(item => item.product.id === productId);
+
+        if (item) user.cart.splice(itemIdx,1);
+       
+        // else, send error
+        else {
+          response.writeHead(400, 'Item not in cart');
+          return response.end();
+        }
+        // send back OK and the cart
+        response.writeHead(200, {
+          'content-type': 'application/json'
+        });
+        return response.end(JSON.stringify(user.cart));  
+      } else { // not a valid product
+        response.writeHead(400, 'Incorrectly formatted request');
+        return response.end();
+      }
+          
+    } else { // invalid token
+      response.writeHead(401, "Token is invalid");
       return response.end();
     }
   } else { // no token provided

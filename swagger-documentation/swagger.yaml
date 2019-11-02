@@ -104,6 +104,10 @@ paths:
               token:
                 type: string
                 description: Session token for the logged-in user
+        '400':
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
         '401':
           description: Login is invalid
           schema:
@@ -138,7 +142,11 @@ paths:
                 quantity:
                   type: integer
         '400':
-          description: Token is missing or invalid
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Token is invalid
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -175,7 +183,11 @@ paths:
                 quantity:
                   type: integer
         '400':
-          description: Token is missing or invalid
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Token is invalid
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -217,7 +229,11 @@ paths:
                 quantity:
                   type: integer
         '400':
-          description: Token is missing or invalid
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Token is invalid
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -253,7 +269,11 @@ paths:
                 quantity:
                   type: integer
         '400':
-          description: Token is missing or invalid
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Token is invalid
           schema:
             $ref: '#/definitions/Error'
         default:
