@@ -116,7 +116,7 @@ describe('Products', () => {
 
 describe('Login', () => {
   describe('/POST api/login', () => {
-    it('should return status 200 and return username on succesful login', done => {
+    it('should return status 200 and return an access token on succesful login', done => {
       chai.request(server)
         .post('/api/login')
         .set({
@@ -128,8 +128,8 @@ describe('Login', () => {
         })
         .end((err, res) => {
           res.should.have.status(200)
-          res.text.should.be.a('string')
-          res.text.should.be.eql('yellowleopard753')
+          res.body.should.be.an('string')
+          res.body.length.should.be.eql(16)
           done()
         })
     })

@@ -6,12 +6,14 @@ const Router = require('router');
 const bodyParser = require('body-parser');
 const url = require('url')
 const uid = require('rand-token').uid;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const PORT = 3001;
 // State holding variables
 let brands = [];
 let products = [];
 let users = [];
+let tokens = [];
 
 // Router setup
 const router = Router();
@@ -129,11 +131,37 @@ router.post("/api/login", (req, res) => {
     res.end("Error: username and/or password incorrect")
   }
 
+  // Login is succesful - can return 200.
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+
+  // We have a successful login, if we already have an existing access token, use that
+  let currentAccessToken = tokens.find((tokenItem) => {
+    return tokenItem.username == currentUser.login.username;
+  });
+  // Update the last updated value so we get another time period
+  if (currentAccessToken) {
+    currentAccessToken.lastUpdated = new Date();
+    return res.end(JSON.stringify(currentAccessToken.token));
+  } else {
+    // Create a new token with the user value and a "random" token
+    let newAccessToken = {
+      username: currentUser.login.username,
+      lastUpdated: new Date(),
+      token: uid(16)
+    }
+    tokens.push(newAccessToken);
+    return res.end(JSON.stringify('newAccessToken.token'));
+  }
+
   // Return username if correct login credentials provided
   res.writeHead(200, {
-    'Content-Type': "text/plain"
+    'Content-Type': 'application/json'
   })
-  res.end(currentUser.login.username)
+  res.end(JSON.stringify({
+    username: currentUser.login.username
+  }))
 })
 // allow for testing
 module.exports = server
