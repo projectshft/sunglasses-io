@@ -229,6 +229,7 @@ describe('User', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
+          res.body.length.should.eql(1);
           done();
         });
     });
@@ -335,6 +336,7 @@ describe('User', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
+          res.body[0].should.have.property('quantity').eql(3);
           done();
         });
     });
@@ -345,12 +347,13 @@ describe('User', () => {
       chai
         .request(server)
         .post('/api/me/cart/1')
-        .query({token: 'random1661modnar', quantity: 3})
+        .query({token: 'random1661modnar', quantity: 6})
         .send({})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(2);
+          res.body[1].should.have.property('quantity').eql(6);
           done();
         });
     });
