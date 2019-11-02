@@ -133,5 +133,22 @@ describe('Login', () => {
           done()
         })
     })
+    it('should return 401 error on improper credentials', done => {
+      chai.request(server)
+        .post('/api/login')
+        .set({
+          'Content-Type': 'application/json'
+        })
+        .send({
+          email: 'asdf@fake.com',
+          password: '11111111'
+        })
+        .end((err, res) => {
+          res.should.have.status(401)
+          res.text.should.be.a('string')
+          res.text.should.be.eql('Error: username and/or password incorrect')
+          done()
+        })
+    })
   })
 })
