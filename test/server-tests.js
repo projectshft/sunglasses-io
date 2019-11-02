@@ -3,10 +3,12 @@ const chaiHTTP = require("chai-http");
 const server = require("../app/server");
 const expect = chai.expect;
 
-const EXPECTED_LENGTH_OF_BRANDS = 5;
-const EXPECTED_LENGTH_OF_PRODUCTS = 11;
-const EXPECTED_LENGTH_OF_FILTERED_PRODUCTS = 3;
-const EXPECTED_AVAILABLE_ID_NUM = "1";
+const EXPECTED_LENGTH_OF_ALL_BRANDS = 5;
+const EXPECTED_LENGTH_OF_ALL_PRODUCTS = 11;
+
+const BRAND_FILTER = "1";
+const EXPECTED_LENGTH_OF_BRAND_FILTERED_PRODUCTS = 3;
+
 const BAD_BRAND_ID = "00000000000000000000000000000";
 
 chai.use(chaiHTTP);
@@ -94,7 +96,7 @@ describe("/GET brands", () => {
         //the below test would be removed when you
         //decide to implement this with a variable database.
         //adding this just for completeness
-        expect(response.body).to.have.lengthOf(EXPECTED_LENGTH_OF_BRANDS);
+        expect(response.body).to.have.lengthOf(EXPECTED_LENGTH_OF_ALL_BRANDS);
         checkForValidBrandsArray(response.body);
         done();
       });
@@ -102,7 +104,7 @@ describe("/GET brands", () => {
 });
 
 describe("/GET products", () => {
-  it("should GET all products", done => {
+  it("should GET all products with no additional parameters", done => {
     chai
       .request(server)
       .get("/v1/products")
@@ -112,7 +114,87 @@ describe("/GET products", () => {
         //the below test would be removed when you
         //decide to implement this with a variable database.
         //adding this just for completeness
-        expect(response.body).to.have.lengthOf(EXPECTED_LENGTH_OF_PRODUCTS);
+        expect(response.body).to.have.lengthOf(EXPECTED_LENGTH_OF_ALL_PRODUCTS);
+        checkForValidProductsArray(response.body);
+        done();
+      });
+  });
+
+  it("`Should return a filtered products list when provided a valid query: Coke`", done => {
+    chai
+      .request(server)
+      .get("/v1/products?query=Coke")
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        //the below test would be removed when you
+        //decide to implement this with a variable database.
+        //adding this just for completeness
+        expect(response.body).to.have.lengthOf(1);
+        checkForValidProductsArray(response.body);
+        done();
+      });
+  });
+
+  it(`Should return a filtered products list when provided a valid query (case insensitive): cOkE`, done => {
+    chai
+      .request(server)
+      .get("/v1/products?query=cOkE")
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        //the below test would be removed when you
+        //decide to implement this with a variable database.
+        //adding this just for completeness
+        expect(response.body).to.have.lengthOf(1);
+        checkForValidProductsArray(response.body);
+        done();
+      });
+  });
+
+  it("Should return all products when provided only spaces", done => {
+    chai
+      .request(server)
+      .get("/v1/products?query=   ")
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        //the below test would be removed when you
+        //decide to implement this with a variable database.
+        //adding this just for completeness
+        expect(response.body).to.have.lengthOf(EXPECTED_LENGTH_OF_ALL_PRODUCTS);
+        checkForValidProductsArray(response.body);
+        done();
+      });
+  });
+
+  it("Should return all products when provided with and empty string", done => {
+    chai
+      .request(server)
+      .get("/v1/products?query=")
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        //the below test would be removed when you
+        //decide to implement this with a variable database.
+        //adding this just for completeness
+        expect(response.body).to.have.lengthOf(EXPECTED_LENGTH_OF_ALL_PRODUCTS);
+        checkForValidProductsArray(response.body);
+        done();
+      });
+  });
+
+  it("Should return no products when provided with an unmatched query", done => {
+    chai
+      .request(server)
+      .get("/v1/products?query=THEREDEFINITELYISNTASUNGLASSNAMEDTHIS")
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        //the below test would be removed when you
+        //decide to implement this with a variable database.
+        //adding this just for completeness
+        expect(response.body).to.have.lengthOf(0);
         checkForValidProductsArray(response.body);
         done();
       });
@@ -123,16 +205,16 @@ describe("/GET brands/:brandId/products", () => {
   it("should GET all products that match a valid specified brand id", done => {
     chai
       .request(server)
-      .get(`/v1/brands/${EXPECTED_AVAILABLE_ID_NUM}/products`)
+      .get(`/v1/brands/${BRAND_FILTER}/products`)
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
         //the below test would be removed when you
         //decide to implement this with a variable database.
         //adding this just for completeness
-        expect(response.body.length).to.be.lte(EXPECTED_LENGTH_OF_PRODUCTS);
+        expect(response.body.length).to.be.lte(EXPECTED_LENGTH_OF_ALL_PRODUCTS);
         expect(response.body.length).to.be.equal(
-          EXPECTED_LENGTH_OF_FILTERED_PRODUCTS
+          EXPECTED_LENGTH_OF_BRAND_FILTERED_PRODUCTS
         );
 
         checkForValidProductsArray(response.body);

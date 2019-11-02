@@ -5,6 +5,8 @@ var queryString = require("querystring");
 var Router = require("router");
 var bodyParser = require("body-parser");
 var uid = require("rand-token").uid;
+var querystring = require("querystring");
+var url = require("url");
 
 let brands = [];
 let products = [];
@@ -42,7 +44,17 @@ router.get("/v1/brands", (request, response) => {
 
 //return products, no auth necessary
 router.get("/v1/products", (request, response) => {
-  return prepareValidResponse(response, products);
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query } = querystring.parse(parsedUrl.query);
+  let filteredProducts = [];
+  if (query !== undefined) {
+    filteredProducts = products.filter(p =>
+      p.name.toLowerCase().includes(query.toLowerCase())
+    );
+  } else {
+    filteredProducts = products;
+  }
+  return prepareValidResponse(response, filteredProducts);
 });
 
 //return all products that match brandId, no auth necessary
