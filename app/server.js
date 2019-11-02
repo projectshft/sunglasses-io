@@ -123,12 +123,20 @@ router.post("/api/login", (req, res) => {
   let passwordReq = req.body.password
   let currentUser = (users.find(user => (user.email == emailReq) && (user.login.password === passwordReq)))
 
+  // Make sure there is a email and password in the request
+  if (!emailReq || !passwordReq) {
+    response.writeHead(400, {
+      'Content-Type': "text/plain"
+    });
+    response.end("400 Error: username and password cannot be empty.");
+  }
+
   // If no user found matching given credentials, return error
   if (!currentUser) {
     res.writeHead(401, {
       'Content-Type': "text/plain"
     })
-    res.end("Error: username and/or password incorrect")
+    res.end("401 Error: username and/or password incorrect")
   }
 
   // Login is succesful - can return 200.
@@ -152,7 +160,7 @@ router.post("/api/login", (req, res) => {
       token: uid(16)
     }
     tokens.push(newAccessToken);
-    return res.end(JSON.stringify('newAccessToken.token'));
+    return res.end(JSON.stringify(newAccessToken.token));
   }
 
   // Return username if correct login credentials provided

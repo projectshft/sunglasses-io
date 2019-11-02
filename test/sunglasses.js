@@ -6,7 +6,7 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 
-// Aranging
+// GET brands
 describe('Brands', () => {
   describe('/GET api/brands', () => {
     // Acting
@@ -14,7 +14,6 @@ describe('Brands', () => {
       chai.request(server)
         .get('/api/brands')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(5);
@@ -22,6 +21,7 @@ describe('Brands', () => {
         })
     })
   })
+  // GET Products by BrandId
   describe('/GET api/brands/:id/products', () => {
     // Acting
     it('it should GET all products for a brand', done => {
@@ -52,6 +52,7 @@ describe('Brands', () => {
   })
 })
 
+// GET Products
 describe('Products', () => {
   describe('/GET api/products', () => {
     // Acting
@@ -114,6 +115,7 @@ describe('Products', () => {
   })
 })
 
+// POST login
 describe('Login', () => {
   describe('/POST api/login', () => {
     it('should return status 200 and return an access token on succesful login', done => {
@@ -146,7 +148,24 @@ describe('Login', () => {
         .end((err, res) => {
           res.should.have.status(401)
           res.text.should.be.a('string')
-          res.text.should.be.eql('Error: username and/or password incorrect')
+          res.text.should.be.eql('401 Error: username and/or password incorrect')
+          done()
+        })
+    })
+    it('should return 400 error on missing email and/or password', done => {
+      chai.request(server)
+        .post('/api/login')
+        .set({
+          'Content-Type': 'application/json'
+        })
+        .send({
+          email: '',
+          password: ''
+        })
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.text.should.be.a('string')
+          res.text.should.be.eql('400 Error: Email & Password must not be empty')
           done()
         })
     })
