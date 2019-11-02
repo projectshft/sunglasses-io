@@ -74,6 +74,18 @@ describe('/GET products', () => {
                 done();
             });
     });
+
+    it.only('should be able to search in uppercase or lowercase letters', done => {
+        chai
+            .request(server)
+            .get('/api/products?query=GLASSES')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(10);
+                done();
+            });
+    });
 });
 
 

@@ -50,7 +50,7 @@ router.get("/api/products", (request, response) => {
     } else {
 
         if (query !== undefined) {
-            productsToReturn = products.filter(product => product.description.includes(query));
+            productsToReturn = products.filter(product => product.description.includes(query.toLowerCase()));
 
             if (productsToReturn.length == 0) {
                 response.writeHead(404, { "Content-Type": "application/json" });
