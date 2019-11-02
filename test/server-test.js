@@ -53,12 +53,30 @@ describe('Brands', () => {
 
 // PRODUCTS //
 describe('Products', () => {
-  // GET /api/products
+  // GET /api/products without keywords query
   describe('/GET products', () => {
     it('it should GET all the products', done => {
       chai
         .request(server)
         .get('/api/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(11);
+          done();
+        });
+    });
+  });
+
+  // GET /api/products with keywords query to be implemented fully after learning about no-sql database solutions (e.g. Mongodb)
+  describe('/GET products', () => {
+    it('it should GET all the products', done => {
+      chai
+        .request(server)
+        .get('/api/products')
+        .query({
+          keywords: 'random'
+        })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');

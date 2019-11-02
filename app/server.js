@@ -47,8 +47,16 @@ const server = http.createServer((request, response) => {
 });
 
 // ROUTES //
+myRouter.get("/", (request, response) => {
+  response.writeHead(404, 'Proceed to api/brands for a list of brands in the store');
+  return response.end();
+});
 
-// getting all the brands
+myRouter.get('/api', (request, response) => {
+  response.writeHead(404, 'Proceed to api/brands for a list of brands in the store');
+});
+
+// get all the brands
 myRouter.get("/api/brands", (request, response) => {
   response.writeHead(200, {
     'content-type': 'application/json'
@@ -56,7 +64,7 @@ myRouter.get("/api/brands", (request, response) => {
   response.end(JSON.stringify(brands));
 });
 
-// getting all the products for a given brand id
+// get all the products for a given brand id
 myRouter.get("/api/brands/:id/products", (request, response) => {
   const { id } = request.params;
   
@@ -73,8 +81,20 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
   }
 });
 
-// getting all the products
+// get all the products
 myRouter.get("/api/products", (request, response) => {
+  // separate url to see if any keyword query is present
+  const separatedUrl = request.url.split('?');
+
+  // get the keywords
+  const keywordObj = queryString.parse(separatedUrl[1]);
+
+  // if there's a keyword query
+  if (keywordObj.keywords) {
+    // implement search using no-sql database solution (e.g. MongoDB)
+    // and return results.  Until learned, return all products
+  
+  }
   response.writeHead(200, {
     'content-type': 'application/json'
   });
@@ -110,7 +130,7 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
-// Retrieving a user's cart
+// Get a user's cart
 myRouter.get("/api/me/cart", (request, response) => {
   // separate the url to enable selecting query string
   const separatedUrl = request.url.split('?');
@@ -297,7 +317,5 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
     return response.end();
   }
 });
-
-
 
 module.exports = server;

@@ -63,6 +63,12 @@ paths:
         A list of products for purchase
       tags:
         - Products
+      parameters:
+        - in: query
+          name: keywords
+          description: keywords for back-end search
+          required: false
+          type: string
       responses:
         '200':
           description: Array of all products
