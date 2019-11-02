@@ -19,6 +19,13 @@ paths:
       description: |
         The Brands endpoint returns information about all available brands in
         the database. The response includes a brand id and name.
+        proper display order.
+      parameters:
+        - name: query
+          in: query
+          description: Causes return array to only contain Brands that have a name match
+          required: false
+          type: string
       tags:
         - Brands
       responses:
@@ -33,6 +40,12 @@ paths:
       summary: List of Products
       description: |
         The Products endpoint returns information about all available products in        the database. The response includes a prodct id, name, price, and description. Also inclues a linking id to a Brand as well as an array of images to use with the product.
+      parameters:
+        - name: query
+          in: query
+          description: Causes return array to only contain Products that have a name match
+          required: false
+          type: string
       tags:
         - Products
       responses:
