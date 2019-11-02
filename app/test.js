@@ -1,24 +1,29 @@
-let { expect } = require('chai');
-let brands = require('./server.js');
 
-
-//I want to test if brands is an array of objects
-
-expect(brands._items).to.be.an('array');
-
-
-describe('Brands', () => {
-    describe('/GET brands', () => {
-      it('it should GET all the books', done => {
-        chai
-          .request(server)
-          .get('/book')
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('array');
-            res.body.length.should.be.eql(0);
-            done();
-          });
+const chai = require('chai');
+const chaiHTTP = require('chai-http');
+const server = require('./server');
+​
+const expect = chai.expect;
+const assert = chai.assert;
+let should = chai.should();
+​
+chai.use(chaiHTTP);
+​
+// Endpoint test 1 of 8
+describe('GET /api/brands', () => {
+  it('should GET all brands', done => {
+    chai
+      .request(server)
+      .get('/api/brands')
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.lengthOf(5);
+        done();
       });
-    });
   });
+});
+​
