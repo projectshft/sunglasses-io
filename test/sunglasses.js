@@ -119,6 +119,9 @@ describe('Login', () => {
     it('should return status 200 and return username on succesful login', done => {
       chai.request(server)
         .post('/api/login')
+        .set({
+          'Content-Type': 'application/json'
+        })
         .send({
           email: 'susanna.richards@example.com',
           password: 'jonjon'

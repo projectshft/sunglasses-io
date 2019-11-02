@@ -117,8 +117,14 @@ router.get("/api/products", (req, res) => {
 })
 
 router.post("/api/login", (req, res) => {
-  res.writeHead(200)
-  return res.end()
+  let emailReq = req.body.email
+  let passwordReq = req.body.password
+  let currentUser = (users.find(user => (user.email == emailReq) && (user.login.password === passwordReq)))
+
+  res.writeHead(200, {
+    'Content-Type': "text/plain"
+  })
+  res.end(currentUser.login.username)
 })
 // allow for testing
 module.exports = server
