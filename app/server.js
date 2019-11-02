@@ -141,5 +141,47 @@ myRouter.get("/api/me/cart", (request, response) => {
   }
 });
 
+// Posting an item to a user's cart
+myRouter.post("/api/me/cart", (request, response) => {
+  // separate the url to enable selecting query string
+  const separatedUrl = request.url.split('?');
+  
+  // get the token
+  const tokenObj = queryString.parse(separatedUrl[1])//.split('token:')[1];
+
+  // check authorizedUsers to see if token exists and is valid
+  if (tokenObj) {
+    const authorizedUser = authorizedUsers.find(user => user.token == tokenObj.token)
+
+    // if valid token return the cart
+    if (authorizedUser) {
+      const user = users.find(user => user.email === authorizedUser.email)
+      
+      // Ensure valid product
+      const item = JSON.stringify(request.body);
+      matchedProduct = products.find(product => JSON.stringify(product) === item);
+     
+      if (matchedProduct) {
+        // add item to the user's cart and return the cart with item included
+        user.cart.push(JSON.parse(item));
+        response.writeHead(200, {
+          'content-type': 'application/json'
+        });
+        return response.end(JSON.stringify(user.cart));  
+      } else { // not a valid product
+        response.writeHead(400, 'Incorrectly formatted request');
+        return response.end();
+      }
+          
+    } else { // invalid token
+      response.writeHead(400, "Token is invalid");
+      return response.end();
+    }
+  } else { // no token provided
+    response.writeHead(400, "Token is missing");
+    return response.end();
+  }
+});
+
 
 module.exports = server;

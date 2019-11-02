@@ -208,7 +208,120 @@ describe('User', () => {
     });
   });
 
-  //
+  // POST cart
+  // Valid token and product
+  describe('/POST item to cart with valid token and product', () => {
+    it('it should return cart with item included', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({
+          token: 'random1661modnar'
+        })
+        .send({
+          "id": "10",
+          "categoryId": "5",
+          "name": "Peanut Butter",
+          "description": "The stickiest glasses in the world",
+          "price":103,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+  });
+
+  // Missing token
+  describe('/POST item to cart with missing token', () => {
+    it('it should return error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({
+          
+        })
+        .send({
+          "id": "10",
+          "categoryId": "5",
+          "name": "Peanut Butter",
+          "description": "The stickiest glasses in the world",
+          "price":103,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  // Invalid token
+  describe('/POST item to cart with invalid token', () => {
+    it('it should return error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({
+          token: 'invalidtoken'
+        })
+        .send({
+          "id": "10",
+          "categoryId": "5",
+          "name": "Peanut Butter",
+          "description": "The stickiest glasses in the world",
+          "price":103,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  // Invalid product
+  describe('/POST item to cart with invalid product', () => {
+    it('it should return error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({
+          token: 'invalidtoken'
+        })
+        .send({
+          "id": "10",
+          "categoryId": "5",
+          "name": "Peanut Butter!!!!!",
+          "description": "The stickiest glasses in the world",
+          "price":103,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  // Invalid product
+  describe('/POST item to cart with missing product', () => {
+    it('it should return error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .query({
+          token: 'invalidtoken'
+        })
+        .send()
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
 
 });
 
