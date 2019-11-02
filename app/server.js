@@ -125,10 +125,10 @@ router.post("/api/login", (req, res) => {
 
   // Make sure there is a email and password in the request
   if (!emailReq || !passwordReq) {
-    response.writeHead(400, {
+    res.writeHead(400, {
       'Content-Type': "text/plain"
     });
-    response.end("400 Error: username and password cannot be empty.");
+    res.end("400 Error: Email & Password must not be empty");
   }
 
   // If no user found matching given credentials, return error
