@@ -323,5 +323,96 @@ describe('User', () => {
     });
   });
 
-});
+  // UPDATING a cart total
+  describe('/POST update to cart with valid token and product, when item was previously added to cart', () => {
+    it('it should respond with OK and the revised cart', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/10')
+        .query({token: 'random1661modnar', quantity: 3})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(1);
+          done();
+        });
+    });
+  });
 
+  describe('/POST update to cart with valid token and product, when item was NOT previously added to cart', () => {
+    it('it should respond with OK and the revised cart', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/1')
+        .query({token: 'random1661modnar', quantity: 3})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(2);
+          done();
+        });
+    });
+  });
+
+  describe('/POST update to cart with invalid token', () => {
+    it('it should respond with error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/10')
+        .query({token: 'zzz', quantity: 3})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe('/POST update to cart with missing token', () => {
+    it('it should respond with error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/10')
+        .query({quantity: 3})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe('/POST update to cart with invalid product', () => {
+    it('it should respond with error', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/1z')
+        .query({token: 'random1661modnar', quantity: 3})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  // DELETING items from cart
+  describe('/DELETE item from cart with valid token and product', () => {
+    it('it should respond with OK and the revised cart', done => {
+      chai
+        .request(server)
+        .post('/api/me/cart/1')
+        .query({token: 'random1661modnar'})
+        .send({})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(1);
+          done();
+        });
+    });
+  });
+
+});

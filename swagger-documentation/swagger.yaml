@@ -206,7 +206,7 @@ paths:
         - User
       responses:
         '200':
-          description: Shopping cart for the logged-in user
+          description: Updated cart with revised quantity for the logged-in user
           schema:
             type: array
             items: 
@@ -242,7 +242,7 @@ paths:
         - User
       responses:
         '200':
-          description: Shopping cart for the logged-in user
+          description: Revised (for deleted item) cart for the logged-in user
           schema:
             type: array
             items: 

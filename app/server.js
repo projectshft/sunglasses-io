@@ -116,10 +116,10 @@ myRouter.get("/api/me/cart", (request, response) => {
   const separatedUrl = request.url.split('?');
   
   // get the token
-  const tokenObj = queryString.parse(separatedUrl[1])//.split('token:')[1];
+  const tokenObj = queryString.parse(separatedUrl[1]);
 
   // check authorizedUsers to see if token exists and is valid
-  if (tokenObj) {
+  if (tokenObj.token) {
     const authorizedUser = authorizedUsers.find(user => user.token == tokenObj.token)
 
     // if valid token return the cart
@@ -141,16 +141,18 @@ myRouter.get("/api/me/cart", (request, response) => {
   }
 });
 
-// Posting an item to a user's cart
+// Adding an item to a user's cart
 myRouter.post("/api/me/cart", (request, response) => {
   // separate the url to enable selecting query string
   const separatedUrl = request.url.split('?');
   
   // get the token
-  const tokenObj = queryString.parse(separatedUrl[1])//.split('token:')[1];
+  const tokenObj = queryString.parse(separatedUrl[1]);
 
   // check authorizedUsers to see if token exists and is valid
-  if (tokenObj) {
+  if (tokenObj.token) {
+
+    // find associated user
     const authorizedUser = authorizedUsers.find(user => user.token == tokenObj.token)
 
     // if valid token return the cart
@@ -163,7 +165,7 @@ myRouter.post("/api/me/cart", (request, response) => {
      
       if (matchedProduct) {
         // add item to the user's cart and return the cart with item included
-        user.cart.push(JSON.parse(item));
+        user.cart.push({product: JSON.parse(item), quantity: 1});
         response.writeHead(200, {
           'content-type': 'application/json'
         });
@@ -182,6 +184,60 @@ myRouter.post("/api/me/cart", (request, response) => {
     return response.end();
   }
 });
+
+// Updating item quantities in user cart
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+  // separate the url to enable selecting query string
+  const separatedUrl = request.url.split('?');
+  
+  // get the token
+  const tokenObj = queryString.parse(separatedUrl[1]);
+
+  // check authorizedUsers to see if token exists and is valid
+  if (tokenObj.token) {
+
+    // find associated user
+    const authorizedUser = authorizedUsers.find(user => user.token == tokenObj.token)
+
+    // if valid token 
+    if (authorizedUser) {
+      const user = users.find(user => user.email === authorizedUser.email)
+      
+      // Ensure valid product
+      const {productId} = request.params;
+
+      matchedProduct = products.find(product => product.id === productId);
+     
+      if (matchedProduct) {
+        // Check if item is in cart, and if so, update the quantity
+        const item = user.cart.find(item => item.product.id === productId);
+        const itemIdx = user.cart.findIndex(item => item.product.id === productId);
+        if (item) user.cart[itemIdx].quantity = parseInt(tokenObj.quantity, 10);
+       
+        // else, add the item and qty to the cart
+        else {
+          user.cart.push({product: matchedProduct, quantity: parseInt(tokenObj.quantity, 10)});
+        }
+        // send back OK and the cart
+        response.writeHead(200, {
+          'content-type': 'application/json'
+        });
+        return response.end(JSON.stringify(user.cart));  
+      } else { // not a valid product
+        response.writeHead(400, 'Incorrectly formatted request');
+        return response.end();
+      }
+          
+    } else { // invalid token
+      response.writeHead(400, "Token is invalid");
+      return response.end();
+    }
+  } else { // no token provided
+    response.writeHead(400, "Token is missing");
+    return response.end();
+  }
+});
+
 
 
 module.exports = server;
