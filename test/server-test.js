@@ -125,7 +125,7 @@ describe('User', () => {
     });
   });
 
-  // POST login with missing credential parameters
+  // POST login with missing email credential parameter
   describe('/POST login with missing email', () => {
     it('it should return error for incorrect request', done => {
       chai
@@ -142,6 +142,7 @@ describe('User', () => {
     });
   });
 
+  // POST login with missing password parameter
   describe('/POST login with missing password', () => {
     it('it should return error for incorrect request', done => {
       chai
@@ -158,6 +159,7 @@ describe('User', () => {
   });
 
   // GET cart
+  // Valid session token
   describe('/GET logged-in user cart', () => {
     it('it should return cart for a valid session token', done => {
       chai
@@ -173,6 +175,40 @@ describe('User', () => {
         });
     });
   });
+
+  // Missing session token
+  describe('/GET logged-in user cart', () => {
+    it('it should respond with error if token not in request', done => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .query({
+          
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  // Invalid session token
+  describe('/GET logged-in user cart', () => {
+    it('it should respond with error if token is invalid', done => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .query({
+          token: 'invalidtoken'
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+
+  //
 
 });
 
