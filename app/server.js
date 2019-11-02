@@ -38,6 +38,12 @@ const server = http.createServer(function (request, response) {
     products = JSON.parse(data);
     console.log(`Server setup: ${products.length} products loaded`);
   });
+  // Load initial users
+  fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
+    if (error) throw error;
+    users = JSON.parse(data);
+    console.log(`Server setup: ${users.length} users loaded`);
+  });
   console.log(`Server is listening on ${PORT}`);
 });
 
@@ -93,24 +99,26 @@ router.get("/api/products", (req, res) => {
       return res.end("404 Error: No products found.")
     }
 
+    // Return all matching products
     res.writeHead(200, {
       'Content-Type': 'application/json'
     })
-    // Return all matching products
     return res.end(JSON.stringify(matchingProducts));
   }
-
 
   // Returns all products if no query given
   else {
     res.writeHead(200, {
       'Content-Type': 'application/json'
     })
-
     return res.end(JSON.stringify(products))
   }
 
 })
 
+router.post("/api/login", (req, res) => {
+  res.writeHead(200)
+  return res.end()
+})
 // allow for testing
 module.exports = server

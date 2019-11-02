@@ -113,3 +113,22 @@ describe('Products', () => {
     })
   })
 })
+
+describe('Login', () => {
+  describe('/POST api/login', () => {
+    it('should return status 200 and return username on succesful login', done => {
+      chai.request(server)
+        .post('/api/login')
+        .send({
+          email: 'susanna.richards@example.com',
+          password: 'jonjon'
+        })
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.text.should.be.a('string')
+          res.text.should.be.eql('yellowleopard753')
+          done()
+        })
+    })
+  })
+})
