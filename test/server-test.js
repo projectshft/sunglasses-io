@@ -73,7 +73,7 @@ describe('Products', () => {
 describe('User', () => {
   // POST /api/login for valid credentials
   describe('/POST login with valid creds', () => {
-    it('it should POST for login and return a session token as a string with 16 chars', done => {
+    it('it should return a session token as a string with 16 chars', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -94,7 +94,7 @@ describe('User', () => {
 
   // POST /api/login for invalid credentials
   describe('/POST login with invalid password', () => {
-    it('it should POST for a login, but return error for invalid creds', done => {
+    it('it should return error for invalid creds', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -110,7 +110,7 @@ describe('User', () => {
   });
 
   describe('/POST login with invalid email', () => {
-    it('it should POST for a login, but return error for invalid creds', done => {
+    it('it should return error for invalid creds', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -127,7 +127,7 @@ describe('User', () => {
 
   // POST login with missing credential parameters
   describe('/POST login with missing email', () => {
-    it('it should POST for a login, but return error for incorrect request', done => {
+    it('it should return error for incorrect request', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -143,7 +143,7 @@ describe('User', () => {
   });
 
   describe('/POST login with missing password', () => {
-    it('it should POST for a login, but return error for incorrect request', done => {
+    it('it should return error for incorrect request', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -156,5 +156,23 @@ describe('User', () => {
         });
     });
   });
+
+  // GET cart
+  describe('/GET logged-in user cart', () => {
+    it('it should return cart for a valid session token', done => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .query({
+          token: 'random1661modnar'
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+  });
+
 });
 

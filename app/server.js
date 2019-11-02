@@ -12,7 +12,7 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
-let authorizedUsers = [];
+let authorizedUsers = [ {email: 'natalia.ramos@example.com', token: 'random1661modnar'}];
 
 // Create the router
 const myRouter = Router();
@@ -108,8 +108,37 @@ myRouter.post("/api/login", (request, response) => {
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
   }
+});
 
+// Retrieving a user's cart
+myRouter.get("/api/me/cart", (request, response) => {
+  // separate the url to enable selecting query string
+  const separatedUrl = request.url.split('?');
+  
+  // get the token
+  const tokenObj = queryString.parse(separatedUrl[1])//.split('token:')[1];
 
+  // check authorizedUsers to see if token exists and is valid
+  if (tokenObj) {
+    const authorizedUser = authorizedUsers.find(user => user.token == tokenObj.token)
+
+    // if valid token return the cart
+    if (authorizedUser) {
+      response.writeHead(200, {
+        'content-type': 'application/json'
+      });
+      
+      // get user's cart
+      const  user = users.find(user => user.email === authorizedUser.email)
+      return response.end(JSON.stringify(user.cart));      
+    } else { // invalid token
+      response.writeHead(400, "Token is invalid");
+      return response.end();
+    }
+  } else { // no token provided
+    response.writeHead(400, "Token is missing");
+    return response.end();
+  }
 });
 
 
