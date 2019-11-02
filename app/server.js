@@ -121,6 +121,15 @@ router.post("/api/login", (req, res) => {
   let passwordReq = req.body.password
   let currentUser = (users.find(user => (user.email == emailReq) && (user.login.password === passwordReq)))
 
+  // If no user found matching given credentials, return error
+  if (!currentUser) {
+    res.writeHead(401, {
+      'Content-Type': "text/plain"
+    })
+    res.end("Error: username and/or password incorrect")
+  }
+
+  // Return username if correct login credentials provided
   res.writeHead(200, {
     'Content-Type': "text/plain"
   })
