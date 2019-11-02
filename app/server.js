@@ -39,7 +39,17 @@ server.listen(PORT, err => {
 
 //return brands, no auth necessary
 router.get("/v1/brands", (request, response) => {
-  return prepareValidResponse(response, brands);
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query } = querystring.parse(parsedUrl.query);
+  let filteredBrands = [];
+  if (query !== undefined) {
+    filteredBrands = brands.filter(b =>
+      b.name.toLowerCase().includes(query.toLowerCase())
+    );
+  } else {
+    filteredBrands = brands;
+  }
+  return prepareValidResponse(response, filteredBrands);
 });
 
 //return products, no auth necessary
