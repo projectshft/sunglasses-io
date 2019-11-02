@@ -2,9 +2,9 @@
   "name": "sunglasses-io",
   "version": "1.0.0",
   "description": "",
-  "main": "shopping-cart.js",
+  "main": "app/server.js",
   "scripts": {
-    "start": "node app/shopping-cart.js"
+    "start": "node app/server"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +18,8 @@
     "router": "^1.3.2"
   },
   "devDependencies": {
-    "chai": "^4.2.0"
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^6.2.2"
   }
 }
