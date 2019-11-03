@@ -40,7 +40,7 @@ describe('/GET products', () => {
             });
     });
 
-    it.only('should GET products based on query', done => {
+    it.only('should GET products based on query search', done => {
         chai
             .request(server)
             .get('/api/products?query=best')
@@ -63,10 +63,22 @@ describe('/GET products', () => {
             });
     });
 
-    it.only('should GET error if there are no products that match query', done => {
+    it.only('should GET error if there are no products that match the query', done => {
         chai
             .request(server)
-            .get('/api/products?query=candy')
+            .get('/api/products?query=gucci')
+            .end((err, res) => {
+                res.should.have.status(404);
+                res.body.should.be.a('string');
+                res.body.length.should.be.eql(42);
+                done();
+            });
+    });
+
+    it.only('fails as expected when unrecognized property', done => {
+        chai
+            .request(server)
+            .get('/api/products?query=sdfv')
             .end((err, res) => {
                 res.should.have.status(404);
                 res.body.should.be.a('string');
@@ -88,5 +100,31 @@ describe('/GET products', () => {
     });
 });
 
+// Get Products by brand 
+describe('/GET products by brand id ', () => {
+    it.only('should GET all products for a particular brand', done => {
+        chai
+            .request(server)
+            .get('/api/brands/1/products')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(3);
+                done();
+            });
+    });
+
+    it.only('it should give an error if it is given an id for which there is no brand', done => {
+        chai
+            .request(server)
+            .get('/api/brands/9/products')
+            .end((err, res) => {
+                res.should.have.status(404);
+                res.body.should.be.an('string');
+                res.body.length.should.be.eql(25);
+                done();
+            });
+    });
 
 
+});
