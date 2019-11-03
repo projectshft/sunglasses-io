@@ -14,6 +14,7 @@ let brands = [];
 let products = [];
 let users = [];
 let tokens = [];
+let currentUser;
 
 // Router setup
 const router = Router();
@@ -121,7 +122,7 @@ router.get("/api/products", (req, res) => {
 router.post("/api/login", (req, res) => {
   let emailReq = req.body.email
   let passwordReq = req.body.password
-  let currentUser = (users.find(user => (user.email == emailReq) && (user.login.password === passwordReq)))
+  currentUser = (users.find(user => (user.email == emailReq) && (user.login.password === passwordReq)))
 
   // Make sure there is a email and password in the request
   if (!emailReq || !passwordReq) {
@@ -162,6 +163,15 @@ router.post("/api/login", (req, res) => {
     tokens.push(newAccessToken);
     return res.end(JSON.stringify(newAccessToken.token));
   }
+})
+
+// Return cart of current user
+router.get("/api/me/cart", (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+  // Return all products in user's cart
+  res.end(JSON.stringify(currentUser.cart))
 })
 // allow for testing
 module.exports = server

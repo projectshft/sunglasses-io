@@ -5,11 +5,9 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-
 // GET brands
 describe('Brands', () => {
   describe('/GET api/brands', () => {
-    // Acting
     it('it should GET all the brands in initial-data', done => {
       chai.request(server)
         .get('/api/brands')
@@ -21,6 +19,7 @@ describe('Brands', () => {
         })
     })
   })
+
   // GET Products by BrandId
   describe('/GET api/brands/:id/products', () => {
     // Acting
@@ -29,7 +28,6 @@ describe('Brands', () => {
         // Getting Burberry brand products
         .get('/api/brands/5/products')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(2);
@@ -55,12 +53,10 @@ describe('Brands', () => {
 // GET Products
 describe('Products', () => {
   describe('/GET api/products', () => {
-    // Acting
     it('it should GET all the products in initial-data', done => {
       chai.request(server)
         .get('/api/products')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(11);
@@ -71,7 +67,6 @@ describe('Products', () => {
       chai.request(server)
         .get('/api/products?query=Peanut%20Butter')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
@@ -83,7 +78,6 @@ describe('Products', () => {
       chai.request(server)
         .get('/api/products?query=superglasses')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(200);
           res.body.should.be.an('array')
           res.body[0].name.should.be.eql('Superglasses')
@@ -94,7 +88,6 @@ describe('Products', () => {
       chai.request(server)
         .get('/api/products?query=spiciest')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(200);
           res.body.should.be.an('array')
           res.body[0].name.should.be.eql('Habanero')
@@ -105,7 +98,6 @@ describe('Products', () => {
       chai.request(server)
         .get('/api/products?query=sasdfas')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(404);
           res.text.should.be.a('string')
           res.text.should.equal("404 Error: No products found.")
@@ -175,6 +167,22 @@ describe('Login', () => {
 describe('Me', () => {
   // GET Cart for current user
   describe('/GET api/me/cart', () => {
+    // logs test user in prior to tests requiring user
+    before((done) => {
+      chai.request(server)
+        .post('/api/login')
+        .set({
+          'Content-Type': 'application/json'
+        })
+        .send({
+          email: 'susanna.richards@example.com',
+          password: 'jonjon'
+        })
+        .end((err, res) => {
+          res.should.have.status(200)
+          done()
+        })
+    })
     it('should return products currently in cart', done => {
       chai.request(server)
         .get('/api/me/cart')
