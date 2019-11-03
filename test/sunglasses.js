@@ -232,4 +232,24 @@ describe('Me', () => {
         })
     })
   })
+  describe('/POST api/me/cart', () => {
+    it('should return 401 error when trying to add to cart with invalid access token', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "Better glasses",
+        "description": "The best glasses in the world",
+        "price": 1500,
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=asdf`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(401)
+          res.text.should.eql('401 error: Must be logged in with validated access token to access cart')
+          done()
+        })
+    })
+  })
 })
