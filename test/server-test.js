@@ -132,15 +132,57 @@ describe('/GET products by brand id ', () => {
 // Post Login 
 describe('/Post Login ', () => {
     it.only('should take in the users credentials to verify who they are ', done => {
+
+        let user = {
+            username: 'yellowleopard753',
+            password: 'jonjon'
+        };
+
         chai
             .request(server)
             .post('/api/login')
+            .send(user)
             .end((err, res) => {
                 res.should.have.status(200);
-                res.body.should.be.an('object');
-                res.body.length.should.be.eql(3);
+                res.body.should.be.a('string');
                 done();
             });
     });
 
+    it.only('should return an error if there is nothing in username or password fields ', done => {
+
+        let user = {
+            username: '',
+            password: ''
+        };
+
+        chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(400);
+                res.body.should.be.a('string');
+                done();
+            });
+
+    });
+
+    it.only('should return error if username or password is wrong', done => {
+
+        let user = {
+            username: 'yellowleopard753',
+            password: 'jonjon456'
+        };
+
+        chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(401);
+                res.body.should.be.a('string');
+                done();
+            });
+    });
 });

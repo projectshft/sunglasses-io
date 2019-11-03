@@ -128,14 +128,14 @@ router.post('/api/login', function (request, response) {
             }
         } else {
             // When a login fails, tell the client in a generic way that either the username or password was wrong
-            response.writeHead(401, "Invalid username or password");
-            return response.end();
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify("Invalid username or password"));
         }
 
     } else {
         // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-        response.writeHead(400, "Incorrectly formatted response");
-        return response.end();
+        response.writeHead(400, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify("Incorrectly formatted response"));
     }
 });
 
