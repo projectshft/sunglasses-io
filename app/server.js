@@ -46,11 +46,26 @@ router.get("/api/brands", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
-// Route to brands get /api/brands
+// Route to products get /api/products
 router.get("/api/products", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(products));
 });
+// Route to product ids GET / api / brands /: id / products
+router.get("/api/brands/:id/products", (request, response) => {
+  const { categoryId } = request.params;
+  const category = categories.find(category => category.id == categoryId);
+  if (!category) {
+    response.writeHead(404, "That category does not exist");
+    return response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const relatedGoals = categories.filter(
+    category => category.id === categoryId
+  );
+  return response.end(JSON.stringify(relatedGoals));
+});
+
 
 
 

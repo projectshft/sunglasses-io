@@ -11,7 +11,7 @@ chai.use(chaiHTTP);
 // build test, build server(endpoint) pass test against server, after pass add to swagger doc.
 // GET / api / brands /: id / products
 // POST / api / login
-// GET / api / me / cartmoca
+// GET / api / me / cart
 // POST / api / me / cart
 // DELETE / api / me / cart /: productId
 // POST / api / me / cart /: productId
@@ -55,3 +55,19 @@ describe('GET /api/products', () => {
   });
 });
 
+// GET / api / brands /: id / products
+it('should GET a specific id from the product list', done => {
+  chai
+    .request(server)
+    .get('/api/brands/:id/products')
+    .end((err, res) => {
+      assert.isNotNull(res.body);
+      expect(err).to.be.null;
+      expect(res).to.have.status(200);
+      expect("Content-Type", "application/json");
+      console.log(res.body);
+      expect(res.body).to.be.an('object');
+      // expect(res.body).to.have.lengthOf(1);
+      done();
+    });
+});
