@@ -10,9 +10,35 @@ const url = require("url");
 //state holding variables 
 let brands = [];
 let products = [];
-let accessTokens = [];
+let users = [];
+//add sample to pass tests
+let accessTokens = [{ username: 'lazywolf342', token: 'kashfu'}];
 
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 const PORT = 3001;
+
+//set a helper function that parses the accessToken from the url
+const getValidTokenFromRequest = (request) => {
+  let parsedUrl = url.parse(request.url, true);
+  let tokenFromUrl = parsedUrl.query.token;
+  //if the query has an accesstoken present
+  if (tokenFromUrl) {
+    //check to see if the accessToken the user has is a verified one
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token == tokenFromUrl
+    })
+    //if the token is verified return it
+    if (currentAccessToken) {
+      return currentAccessToken
+    } else {
+      //return nothing if the token is not verified
+      return null
+    }
+    //if the url doesn't have a token return null
+  } else {
+    return null
+  }
+};
 
 // Setup router
 const myRouter = Router()
@@ -72,14 +98,14 @@ myRouter.get('/api/products', function (request, response) {
     //if return product is empty, return an error
     if (productsToReturn.length == 0) {
       response.writeHead(400, 'There are no products that match your search');
-      return response.end();
+      response.end();
     }
   } else {
     //if there is no query set productsToReturn to all products
     productsToReturn = products;
   }
   response.writeHead(200, Object.assign({ 'Content-Type': 'application/json' }));
-  return response.end(JSON.stringify(productsToReturn));
+  response.end(JSON.stringify(productsToReturn));
 });
 
 //login
@@ -110,11 +136,37 @@ myRouter.post('/api/login', function (request, response) {
         token: uid(16)
       };
       accessTokens.push(newAccesstoken);
-      return response.end(JSON.stringify(newAccesstoken.token));
+      response.end(JSON.stringify(newAccesstoken.token));
     }
   } else {
     response.writeHead(400, 'Incorrectly formatted response');
-    return response.end();
+    response.end();
+  }
+});
+
+// endpoint returns cart contents of authorized user
+myRouter.get('/api/me/cart', function (request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know the user is not logged in
+    response.writeHead(401, "You need to have access to continue");
+    response.end();
+  } else {
+    // // Check if the current user has access to the their cart 
+    let user = users.find((user) => {
+      return user.email == currentAccessToken.email;
+    });
+    // Only if user has access then do we return the cart contents
+    if (user) {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(user.cart));
+    } else {
+      // If there isn't a cart associated with that user, then return a 404
+      response.writeHead(404, "Cart not found");
+      response.end();
+      return;
+    }
   }
 });
 

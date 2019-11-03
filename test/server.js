@@ -50,7 +50,7 @@ describe("GET /products", () => {
   it("it should GET all the products if no search query defined", done => {
     chai
       .request(server)
-      .get('/api/products')
+      .get("/api/products")
       .end((err, res) => {
         res.should.have.status(200);
         expect("Content-Type", "application/json");
@@ -62,7 +62,7 @@ describe("GET /products", () => {
   it("it should return only the products that match said query", done => {
     chai
       .request(server)
-      .get('/api/products?q=Peanut+Butter')
+      .get("/api/products?q=Peanut+Butter")
       .end((err, res) => {
         res.should.have.status(200);
         expect("Content-Type", "application/json");
@@ -74,7 +74,7 @@ describe("GET /products", () => {
   it("it should return an error if unrecognized query is entered", done => {
     chai
       .request(server)
-      .get('/api/products?q=xx')
+      .get("/api/products?q=xx")
       .end((err, res) => {
         res.should.have.status(400);
         done();
@@ -84,15 +84,13 @@ describe("GET /products", () => {
 
 describe("/POST login", () => {
   it("it should return an error if user does not submit username OR password", done => {
-    let user = { username: '', password: ''}
+    let user = {username: '', password:''}
     chai
       .request(server)
       .get("api/login")
       .send(user)
       .end((err, res) => {
-        res.should.have.status(401);
-        res.body.should.have.property('username');
-        res.body.should.not.have.property('password');
+        res.should.have.status(400);
         done();
       })
   })
@@ -100,23 +98,66 @@ describe("/POST login", () => {
     let user = { username: 'lazywolf342', password: 'tucker' }
     chai
       .request(server)
-      .post('/api/login')
-      .set('Content-type', 'application/json')
+      .post("/api/login")
+      .set("Content-type", "application/json")
       .send(user)
       .end((err, res) => {
         res.should.have.status(200);
         done();
       })
   })
-  it("it should return an error if username or password are not valid", done => {
-    let user = { username: 'xxx', password: 'xxx' }
+  it("it should return an error if username is not valid", done => {
+    let user = { username: 'xxx', password: 'tucker' }
     chai
       .request(server)
-      .post('/api/login')
-      .set('Content-type', 'application/json')
+      .post("/api/login")
+      .set("Content-type", "application/json")
       .send(user)
       .end((err, res) => {
         res.should.have.status(401);
+        done();
+      })
+  })
+  it("it should return an error if password is not valid", done => {
+    let user = { username: 'lazywolf342', password: 'xxx' }
+    chai
+      .request(server)
+      .post("/api/login")
+      .set("Content-type", "application/json")
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
+});
+
+describe("/Get user cart", () => {
+  it('it should GET the shopping cart contents of authorized user', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart?token=kashfu') 
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        done();
+      })
+  })
+  it('it should not GET cart contents if no access token is submitted in the request', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
+  it('it should not GET cart contents if no cart exists for user', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart?token=kashfu')
+      .end((err, res) => {
+        res.should.have.status(404);
         done();
       })
   })
