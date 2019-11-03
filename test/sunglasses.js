@@ -171,3 +171,19 @@ describe('Login', () => {
     })
   })
 })
+
+describe('Me', () => {
+  // GET Cart for current user
+  describe('/GET api/me/cart', () => {
+    it('should return products currently in cart', done => {
+      chai.request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array')
+          res.body.length.should.be.eql(0)
+          done()
+        })
+    })
+  })
+})

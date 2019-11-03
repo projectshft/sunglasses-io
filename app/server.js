@@ -162,14 +162,6 @@ router.post("/api/login", (req, res) => {
     tokens.push(newAccessToken);
     return res.end(JSON.stringify(newAccessToken.token));
   }
-
-  // Return username if correct login credentials provided
-  res.writeHead(200, {
-    'Content-Type': 'application/json'
-  })
-  res.end(JSON.stringify({
-    username: currentUser.login.username
-  }))
 })
 // allow for testing
 module.exports = server
