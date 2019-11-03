@@ -132,7 +132,7 @@ describe("/POST login", () => {
   })
 });
 
-describe("/Get user cart", () => {
+describe("/GET user cart", () => {
   it('it should GET the shopping cart contents of authorized user', done => {
     chai
       .request(server)
@@ -153,6 +153,45 @@ describe("/Get user cart", () => {
       })
   })
   it('it should not GET cart contents if no cart exists for user', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart?token=kashfu')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      })
+  })
+});
+
+describe('/POST user cart', () => {
+  it('it should UPDATE the shopping cart contents of authorized user', done => {
+    let product = {
+      id: "10",
+      categoryId: "5",
+      name: "Peanut Butter",
+      description: "The stickiest glasses in the world",
+      price: 103,
+      imageUrls: ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
+    chai
+      .request(server)
+      .post('/api/me/cart')
+      .send(product)
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      })
+  })
+  it('it should not UPDATE user cart if no access token submitted in request', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
+  it('it should not UPDATE cart contents if no cart exists for user', done => {
     chai
       .request(server)
       .get('/api/me/cart?token=kashfu')

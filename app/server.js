@@ -23,7 +23,7 @@ const getValidTokenFromRequest = (request) => {
   let tokenFromUrl = parsedUrl.query.token;
   //if the query has an accesstoken present
   if (tokenFromUrl) {
-    //check to see if the accessToken the user has is a verified one
+    //check to see if the accessToken the user has is verified
     let currentAccessToken = accessTokens.find(accessToken => {
       return accessToken.token == tokenFromUrl
     })
@@ -144,7 +144,7 @@ myRouter.post('/api/login', function (request, response) {
   }
 });
 
-// endpoint returns cart contents of authorized user
+// returns cart contents of authorized user
 myRouter.get('/api/me/cart', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
 
@@ -161,6 +161,34 @@ myRouter.get('/api/me/cart', function (request, response) {
     if (user) {
       response.writeHead(200, { 'Content-Type': 'application/json' });
       response.end(JSON.stringify(user.cart));
+    } else {
+      // If there isn't a cart associated with that user, then return a 404
+      response.writeHead(404, "Cart not found");
+      response.end();
+    }
+  }
+});
+
+// updates cart contents of authorized user
+myRouter.post('/api/me/cart', function (request, response) {
+  // Verify valid access token
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+    // Check if the current user has access to the their cart 
+    let user = users.find((user) => {
+      return user.email == currentAccessToken.email;
+    });
+    // Only if user has access then do we update the cart contents
+    if (user) {
+      // Update the user cart with the contents from request
+      Object.assign(user.cart, req.body);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end();
     } else {
       // If there isn't a cart associated with that user, then return a 404
       response.writeHead(404, "Cart not found");
