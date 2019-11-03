@@ -251,6 +251,24 @@ describe('Me', () => {
     
   })
   describe('/DELETE api/me/cart', () => {
+    it('should error 404 if product not found in cart', done => {
+      let fakeProduct = {
+        "id": "422",
+        "brandId": "6",
+        "name": "Fake Glasses",
+        "description": "The fakest glasses in the world",
+        "price": 1500,
+        "imageUrls": []
+      }
+      chai.request(server)
+        .delete(`/api/me/cart?accessToken=${token}`)
+        .send(fakeProduct)
+        .end((err, res) => {
+          res.should.have.status(404)
+          res.text.should.be.eql('404: Requested product to delete not found in cart')
+          done()
+        })
+    })
     it('should delete product from user cart', done => {
       let product = {
         "id": "4",

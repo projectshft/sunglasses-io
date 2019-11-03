@@ -235,6 +235,17 @@ router.delete("/api/me/cart", (req, res) => {
   // Product to remove from cart
   let productObjToRemove = req.body
 
+  let productInCart = currentUser.cart.find(product => {
+    return productObjToRemove.id == product.id;
+  })
+
+  if (!productInCart) {
+    res.writeHead(404, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("404: Requested product to delete not found in cart");
+  }
+
   // New cart returned without the 'deleted' product. Assigned to current user cart.
   let cartAfterProductRemove = currentUser.cart.filter(cartItemObj => {
     cartItemObj != productObjToRemove
