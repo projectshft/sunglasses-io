@@ -231,8 +231,6 @@ describe('Me', () => {
           done()
         })
     })
-  })
-  describe('/POST api/me/cart', () => {
     it('should return 401 error when trying to add to cart with invalid access token', done => {
       let product = {
         "id": "4",
@@ -251,5 +249,23 @@ describe('Me', () => {
           done()
         })
     })
+    it('should delete a product from user cart', done => {
+      chai.request(server)
+        .delete(`/api/me/cart?accessToken=${token}`)
+        // send product obj used in 'add to cart' test
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
   })
+    
 })
