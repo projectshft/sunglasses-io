@@ -228,6 +228,7 @@ describe('Me', () => {
           res.body.should.have.property('description')
           res.body.should.have.property('price')
           res.body.should.have.property('imageUrls')
+          done()
         })
     })
   })

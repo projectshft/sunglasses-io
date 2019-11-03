@@ -199,5 +199,26 @@ router.get("/api/me/cart", (req, res) => {
   // Return all products in user's cart
   res.end(JSON.stringify(currentUser.cart))
 })
+
+router.post("/api/me/cart", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("401 error: Must be logged in with validated access token to access cart");
+  }
+
+  let productObj = req.body
+
+  currentUser.cart.push(productObj)
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+
+  // Return all products in user's cart
+  res.end(JSON.stringify(productObj))
+})
 // allow for testing
 module.exports = server
