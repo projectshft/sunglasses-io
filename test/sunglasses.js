@@ -249,7 +249,15 @@ describe('Me', () => {
           done()
         })
     })
-    it('should delete a product from user cart', done => {
+    it('should delete product from user cart', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "Better glasses",
+        "description": "The best glasses in the world",
+        "price": 1500,
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
       chai.request(server)
         .delete(`/api/me/cart?accessToken=${token}`)
         // send product obj used in 'add to cart' test

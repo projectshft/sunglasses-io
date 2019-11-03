@@ -217,8 +217,32 @@ router.post("/api/me/cart", (req, res) => {
     'Content-Type': 'application/json'
   })
 
-  // Return all products in user's cart
+  // Return product added to cart
   res.end(JSON.stringify(productObj))
+})
+
+router.delete("/api/me/cart", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("401 error: Must be logged in with validated access token to access cart");
+  }
+
+  let productObjToRemove = req.body
+  let cartAfterProductRemove = currentUser.cart.filter(cartItemObj => {
+    cartItemObj != productObjToRemove
+  })
+
+  currentUser.cart = cartAfterProductRemove
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+
+  // Return product removed from cart
+  res.end(JSON.stringify(productObjToRemove))
 })
 // allow for testing
 module.exports = server
