@@ -51,9 +51,9 @@ describe("GET /products", () => {
     chai
       .request(server)
       .get("/api/products")
+      .set("Content-Type", "application/json")
       .end((err, res) => {
         res.should.have.status(200);
-        expect("Content-Type", "application/json");
         res.body.should.be.an('array');
         res.body.length.should.be.eql(11);
         done();
@@ -63,9 +63,9 @@ describe("GET /products", () => {
     chai
       .request(server)
       .get("/api/products?q=Peanut+Butter")
+      .set("Content-Type", "application/json")
       .end((err, res) => {
         res.should.have.status(200);
-        expect("Content-Type", "application/json");
         res.body.should.be.an('array')
         res.body.should.have.lengthOf(1);
         done();
@@ -83,14 +83,27 @@ describe("GET /products", () => {
 });
 
 describe("/POST login", () => {
-  it("it should return an error if user does not submit username OR password", done => {
-    let user = {username: '', password:''}
+  it("it should return an error if user does not submit username", done => {
+    let user = {username: ''}
     chai
       .request(server)
-      .get("api/login")
+      .post("api/login")
+      .set("Content-type", "application/json")
       .send(user)
       .end((err, res) => {
-        res.should.have.status(400);
+        res.should.have.status(401);
+        done();
+      })
+  })
+  it("it should return an error if user does not submit password", done => {
+    let user = { password: '' }
+    chai
+      .request(server)
+      .post("api/login")
+      .set("Content-type", "application/json")
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(401);
         done();
       })
   })
@@ -175,7 +188,7 @@ describe('/POST user cart', () => {
     }
     chai
       .request(server)
-      .post('/api/me/cart')
+      .post('/api/me/cart?token=kashfu')
       .send(product)
       .end((err, res) => {
         res.should.have.status(200);
@@ -201,3 +214,64 @@ describe('/POST user cart', () => {
       })
   })
 });
+
+describe("/POST product to user cart", () => {
+  it("it should ADD a product to the cart of authorized user", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/5?token=kashfu")
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      })
+  })
+  it("it should not ADD a product to the cart if no access token submitted in request", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart/5?token=")
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      })
+  })
+  it("it should not ADD a product to the cart if no cart exists for user", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart?token=qibLi")
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+  })
+});
+describe('/DELETE product from user cart', () => {
+  it('it should DELETE a product from the cart of authorized user', done => {
+    chai
+      .request(server)
+      .post('/api/me/cart/1?token=kashfu')
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+  });
+  it('it should not DELETE a product from the cart if no access token submitted in request', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart/1?token=')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
+  it('it should not DELETE a product from the cart if no cart exists for user', done => {
+    chai
+      .request(server)
+      .get('/api/me/cart?token=kashfu')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
+});
+
+

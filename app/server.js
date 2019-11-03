@@ -193,11 +193,75 @@ myRouter.post('/api/me/cart', function (request, response) {
       // If there isn't a cart associated with that user, then return a 404
       response.writeHead(404, "Cart not found");
       response.end();
-      return;
     }
   }
 });
 
+myRouter.post('/api/me/cart/{productId}', function (request, response) {
+  // Verify valid access token
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in.
+    response.writeHead(401, "You need to have access to continue");
+    response.end();
+  } else {
+    // Check if the current user has access to the their cart 
+    let user = users.find((user) => {
+      return user.email == currentAccessToken.email;
+    });
+    // Only if user has access then do we add the product to the cart 
+    if (user) {
+      // Find the product to add from list of products
+      let newProduct = products.filter((product) => {
+        return product.id == request.params.productId
+      });
+      // Assign a unique id to the product user wants to add to their cart
+      newProduct.id = currentId;
+      currentId++;
+      user.cart.push(newProduct);
+      // Return status successful operation
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end();
+    } else {
+      // If there isn't a cart associated with that user, then return a 404
+      response.writeHead(404, "Cart not found");
+      response.end();
+    }
+  }
+});
+
+myRouter.delete('/api/me/cart/{productId}', function (request, response) {
+  // Verify valid access token
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    response.end();
+  } else {
+    // Check if the current user has access to the their cart 
+    let user = users.find((user) => {
+      return user.email == currentAccessToken.email;
+    });
+    // Only if user has access then do we add the product to the cart 
+    if (user) {
+      // Find the product to add from list of products
+      let productDelete = products.filter((product) => {
+        return product.id == request.params.productId;
+      });
+      user.cart.remove(productDelete);
+      // Return status successful operation
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end();
+    } else {
+      // If there isn't a cart associated with that user, then return a 404
+      response.writeHead(404, "Cart not found");
+      response.end();
+      return;
+    }
+  }
+});
 
 //export the server so that tests can be written
 module.exports = server
