@@ -16,6 +16,24 @@ let users = [];
 let tokens = [];
 let currentUser;
 
+// Helper method to process access token
+var getValidTokenFromRequest = function (req) {
+  var parsedUrl = require('url').parse(req.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = tokens.find(accessToken => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 // Router setup
 const router = Router();
 router.use(bodyParser.json());
@@ -116,7 +134,6 @@ router.get("/api/products", (req, res) => {
     })
     return res.end(JSON.stringify(products))
   }
-
 })
 
 router.post("/api/login", (req, res) => {
@@ -167,6 +184,15 @@ router.post("/api/login", (req, res) => {
 
 // Return cart of current user
 router.get("/api/me/cart", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("401 error: Must be logged in with validated access token to access cart");
+  }
+
   res.writeHead(200, {
     'Content-Type': 'application/json'
   })

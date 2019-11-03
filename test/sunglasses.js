@@ -19,7 +19,6 @@ describe('Brands', () => {
         })
     })
   })
-
   // GET Products by BrandId
   describe('/GET api/brands/:id/products', () => {
     // Acting
@@ -163,10 +162,21 @@ describe('Login', () => {
     })
   })
 })
+// holds access token on login
+let token = '';
 
 describe('Me', () => {
   // GET Cart for current user
   describe('/GET api/me/cart', () => {
+    it('should return 401 error if not logged in with valid token', done => {
+      chai.request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401)
+          res.text.should.eql('401 error: Must be logged in with validated access token to access cart')
+          done()
+        })
+    })
     // logs test user in prior to tests requiring user
     before((done) => {
       chai.request(server)
@@ -180,17 +190,44 @@ describe('Me', () => {
         })
         .end((err, res) => {
           res.should.have.status(200)
+          res.body.length.should.equal(16)
+          token = res.body;
           done()
         })
     })
-    it('should return products currently in cart', done => {
+    it('should return products currently in user cart', done => {
       chai.request(server)
-        .get('/api/me/cart')
+        .get(`/api/me/cart?accessToken=${token}`)
         .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('array')
           res.body.length.should.be.eql(0)
           done()
+        })
+    })
+  })
+  describe('/POST api/me/cart', () => {
+    it('should add a product to user cart', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "Better glasses",
+        "description": "The best glasses in the world",
+        "price": 1500,
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
         })
     })
   })
