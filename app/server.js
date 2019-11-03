@@ -35,36 +35,23 @@ const server = http.createServer((request, response) => {
     console.log(`server running on port ${PORT}`);
   });
 
-// const server = http.createServer((request, response) => {
-//   // res.writeHead(200);
-//   router(request, response, finalHandler(request, response));
-// });
-// server.listen(PORT, err => {
-//   if (err) throw err;
-//   console.log(`server running on port ${PORT}`);
-//   //populate brands
-//   brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
-
-//   //populate products
-//   products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
-
-//   //populate users
-//   users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
-//   // hardcode "logged in" user
-//   // user = users[0];
-// });
-
 // const saveCurrentUser = (currentUser) => {
 //   // set hardcoded "logged in" user
 //   users[0] = currentUser;
 //   fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
 // }
 // // Route to endpoint handlers
-// // Route to brands get /api/brands
+// Route to brands get /api/brands
 router.get("/api/brands", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
+// Route to brands get /api/brands
+router.get("/api/products", (request, response) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(products));
+});
+
 
 
 module.exports = server;
