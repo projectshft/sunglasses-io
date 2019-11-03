@@ -168,7 +168,7 @@ describe('/Post Login ', () => {
 
     });
 
-    it.only('should return error if username or password is wrong', done => {
+    it.only('should return error if password is wrong', done => {
 
         let user = {
             username: 'yellowleopard753',
@@ -185,4 +185,24 @@ describe('/Post Login ', () => {
                 done();
             });
     });
+
+    it.only('should return error if username is wrong', done => {
+
+        let user = {
+            username: 'yellowleopard999',
+            password: 'jonjon'
+        };
+
+        chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(401);
+                res.body.should.be.a('string');
+                done();
+            });
+    });
+
+
 });
