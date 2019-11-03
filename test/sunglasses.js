@@ -39,7 +39,6 @@ describe('Brands', () => {
       chai.request(server)
         .get('/api/brands/99999999999/products')
         .end((err, res) => {
-          // Asserting
           res.should.have.status(404);
           res.text.should.be.a('string')
           res.text.should.equal("404 Error: Brand ID not found.")
@@ -162,7 +161,7 @@ describe('Login', () => {
     })
   })
 })
-// holds access token on login
+// holds access token on login for future route tests requiring valid token
 let token = '';
 
 describe('Me', () => {
@@ -249,6 +248,9 @@ describe('Me', () => {
           done()
         })
     })
+    
+  })
+  describe('/DELETE api/me/cart', () => {
     it('should delete product from user cart', done => {
       let product = {
         "id": "4",
@@ -260,7 +262,6 @@ describe('Me', () => {
       }
       chai.request(server)
         .delete(`/api/me/cart?accessToken=${token}`)
-        // send product obj used in 'add to cart' test
         .send(product)
         .end((err, res) => {
           res.should.have.status(200)
