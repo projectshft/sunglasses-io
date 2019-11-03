@@ -13,6 +13,8 @@ const PORT = process.env.PORT || 3001;
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
+
 
 // Setup router
 const router = Router();
@@ -87,7 +89,55 @@ router.get("/api/brands/:id/products", (request, response) => {
     return response.end(JSON.stringify(relatedBrands));
 });
 
+const saveCurrentUser = (currentUser) => {
+    // set hardcoded "logged in" user
+    users[0] = currentUser;
+    fs.writeFileSync("./initial-data/users.json", JSON.stringify(users), "utf-8");
+}
 
+// Login call
+router.post('/api/login', function (request, response) {
+    // Make sure there is a username and password in the request
+    if (request.body.username && request.body.password) {
+        // See if there is a user that has that username and password
+        let user = users.find((user) => {
+            return user.login.username == request.body.username && user.login.password == request.body.password;
+        });
+        if (user) {
+            // Write the header because we know we will be returning successful at this point and that the response will be json
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+
+            // We have a successful login, if we already have an existing access token, use that
+            let currentAccessToken = accessTokens.find((tokenObject) => {
+                return tokenObject.username == user.login.username;
+            });
+
+            // Update the last updated value so we get another time period
+            if (currentAccessToken) {
+                currentAccessToken.lastUpdated = new Date();
+                return response.end(JSON.stringify(currentAccessToken.token));
+            } else {
+                // Create a new token with the user value and a "random" token
+                let newAccessToken = {
+                    username: user.login.username,
+                    lastUpdated: new Date(),
+                    token: uid(16)
+                }
+                accessTokens.push(newAccessToken);
+                return response.end(JSON.stringify(newAccessToken.token));
+            }
+        } else {
+            // When a login fails, tell the client in a generic way that either the username or password was wrong
+            response.writeHead(401, "Invalid username or password");
+            return response.end();
+        }
+
+    } else {
+        // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+        response.writeHead(400, "Incorrectly formatted response");
+        return response.end();
+    }
+});
 
 
 module.exports = server

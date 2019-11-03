@@ -128,3 +128,19 @@ describe('/GET products by brand id ', () => {
 
 
 });
+
+// Post Login 
+describe('/Post Login ', () => {
+    it.only('should take in the users credentials to verify who they are ', done => {
+        chai
+            .request(server)
+            .post('/api/login')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('object');
+                res.body.length.should.be.eql(3);
+                done();
+            });
+    });
+
+});
