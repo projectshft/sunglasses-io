@@ -210,6 +210,7 @@ router.post("/api/me/cart", (req, res) => {
     return res.end("401 error: Must be logged in with validated access token to access cart");
   }
 
+  // product to add to cart
   let productObj = req.body
 
   currentUser.cart.push(productObj)
@@ -231,12 +232,15 @@ router.delete("/api/me/cart", (req, res) => {
     return res.end("401 error: Must be logged in with validated access token to access cart");
   }
 
+  // Product to remove from cart
   let productObjToRemove = req.body
+
+  // New cart returned without the 'deleted' product. Assigned to current user cart.
   let cartAfterProductRemove = currentUser.cart.filter(cartItemObj => {
     cartItemObj != productObjToRemove
   })
-
   currentUser.cart = cartAfterProductRemove
+
   res.writeHead(200, {
     'Content-Type': 'application/json'
   })
@@ -244,5 +248,6 @@ router.delete("/api/me/cart", (req, res) => {
   // Return product removed from cart
   res.end(JSON.stringify(productObjToRemove))
 })
+
 // allow for testing
-module.exports = server
+module.exports = server;
