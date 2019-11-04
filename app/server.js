@@ -197,7 +197,7 @@ myRouter.post('/api/me/cart', function (request, response) {
   }
 });
 
-myRouter.post('/api/me/cart/{productId}', function (request, response) {
+myRouter.post('/api/me/cart/:id', function (request, response) {
   // Verify valid access token
   let currentAccessToken = getValidTokenFromRequest(request);
 
@@ -213,13 +213,13 @@ myRouter.post('/api/me/cart/{productId}', function (request, response) {
     // Only if user has access then do we add the product to the cart 
     if (user) {
       // Find the product to add from list of products
-      let newProduct = products.filter((product) => {
-        return product.id == request.params.productId
-      });
+      let productId = products.find((product) => {
+        return product.id == request.params.id
+      })
       // Assign a unique id to the product user wants to add to their cart
-      newProduct.id = currentId;
+      productId = currentId;
       currentId++;
-      user.cart.push(newProduct);
+      user.cart.push(productId);
       // Return status successful operation
       response.writeHead(200, { 'Content-Type': 'application/json' });
       response.end();
@@ -231,7 +231,7 @@ myRouter.post('/api/me/cart/{productId}', function (request, response) {
   }
 });
 
-myRouter.delete('/api/me/cart/{productId}', function (request, response) {
+myRouter.delete('/api/me/cart/:id', function (request, response) {
   // Verify valid access token
   let currentAccessToken = getValidTokenFromRequest(request);
 
@@ -248,7 +248,7 @@ myRouter.delete('/api/me/cart/{productId}', function (request, response) {
     if (user) {
       // Find the product to add from list of products
       let productDelete = products.filter((product) => {
-        return product.id == request.params.productId;
+        return product.id == request.params.id;
       });
       user.cart.remove(productDelete);
       // Return status successful operation
@@ -258,7 +258,6 @@ myRouter.delete('/api/me/cart/{productId}', function (request, response) {
       // If there isn't a cart associated with that user, then return a 404
       response.writeHead(404, "Cart not found");
       response.end();
-      return;
     }
   }
 });
