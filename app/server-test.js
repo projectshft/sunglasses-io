@@ -34,7 +34,7 @@ describe('/GET Brands', () => {
     });
    
     
-    describe('/GET Products', () => {
+   describe('/GET Products', () => {
       it('it should GET all the products', done => {
             chai
               .request(server)
@@ -107,3 +107,45 @@ describe('/GET Brands', () => {
                         })
                     });
                   
+describe ('/GET me/cart', () => {
+  it('it should GET the users cart', done => {
+   chai
+    .request(server)
+    .post('/api/login')
+    .send({email: "susanna.richards@example.com", password: "jonjon"})
+    .end((err, res) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(0);
+          done();
+        })
+    })
+  })
+  it('it should return 401 if password is not correct', done => {
+    chai
+      .request(server)
+        .post('/api/users')
+              //wrong password
+              .send({email: "susanna.richards@example.com", password: "patpat"})
+              .end((err, res) => {
+                res.should.have.status(401);
+                done();
+              })
+          });
+        })
+
+    it('it should return 401 if email is not correct', done => {
+          chai
+            .request(server)
+              .post('/api/users')
+                    //wrong email 
+                    .send({email: "patrick.richards@example.com", password: "jonjon"})
+                    .end((err, res) => {
+                      res.should.have.status(401);
+                      done();
+                    })
+                });
