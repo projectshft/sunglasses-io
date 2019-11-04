@@ -47,7 +47,25 @@ describe('/GET Brands', () => {
               })
           });
         });
-
+      it('it should get a 400 reponse if no query is given', done => {
+        chai
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+       })
+    })
+    it('it should get a 400 response if query is in incorrect format (test below) or has spelling errors', done => {
+      chai
+      .request(server)
+      .get('/api/products?!7*(#_')
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+    })  
+   
+          
 
         describe('/POST login', () => {
           it('it should return object if credientials are verified', done => {
@@ -64,4 +82,28 @@ describe('/GET Brands', () => {
                   })
               });
             });
-    
+     it('it should return 401 if email is not correct', done => {
+        chai
+          .request(server)
+            .post('/api/users')
+                  //wrong email 
+                  .send({email: "patrick.richards@example.com", password: "jonjon"})
+                  .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                  })
+              });
+            });
+
+      it('it should return 401 if password is not correct', done => {
+              chai
+                .request(server)
+                  .post('/api/users')
+                        //wrong password
+                        .send({email: "susanna.richards@example.com", password: "patpat"})
+                        .end((err, res) => {
+                          res.should.have.status(401);
+                          done();
+                        })
+                    });
+                  
