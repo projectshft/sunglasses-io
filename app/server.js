@@ -64,15 +64,20 @@ patrickRouter.get("/api/users", (request, response) => {
 });
 
 
+
 // Login call
-patrickRouter.post('/api/login', function(request,response) {
+patrickRouter.post('/api/users', function(request,response) {
+    var email = request.body.email;
+    var password = request.body.password;
   // Make sure there is a username and password in the request
-  if (request.body.username && request.body.password) {
+  if (request.body.email && request.body.password) {
     // See if there is a user that has that username and password
-    let user = users.find((user)=>{
-      return user.login.username == request.body.username && user.login.password == request.body.password;
+    let userLogin = users.find((user)=>{
+      return user.body.email == request.body.email && user.login.password == request.body.password;
     });
-    if (user) {
+
+    //access token if userLogin was fetched correctly
+    if (userLogin) {
       
       response.writeHead(200, {'Content-Type': 'application/json'});
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -86,7 +91,7 @@ patrickRouter.post('/api/login', function(request,response) {
       } else {
         // Create a new token with the user value and a "random" token
         let newAccessToken = {
-          username: user.login.username,
+          username: userLogin.login.username,
           lastUpdated: new Date(),
           token: uid(16)
         }
@@ -97,14 +102,15 @@ patrickRouter.post('/api/login', function(request,response) {
       }
     } else {
       // When a login fails, tell the client in a generic way that either the username or password was wrong
-      response.writeHead(401, "Invalid username or password");
+      response.writeHead(401, {'Content-Type': 'application/json'
+    });
       return response.end();
     }
 
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-    response.writeHead(400, "Incorrectly formatted response");
+    response.writeHead(401, {'Content-Type': 'application/json'
+  });
     return response.end();
   }
 });
-// module.exports = server; 
