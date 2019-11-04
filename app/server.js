@@ -210,19 +210,30 @@ router.post("/api/me/cart", (req, res) => {
     return res.end("401 error: Must be logged in with validated access token to access cart");
   }
 
-  // product to add to cart
-  let productObj = req.body
-
-  // Create quantity property for products in cart
-  productObj.quantity = 1;
-
-  currentUser.cart.push(productObj)
-  res.writeHead(200, {
+    res.writeHead(200, {
     'Content-Type': 'application/json'
   })
 
-  // Return product added to cart
-  res.end(JSON.stringify(productObj))
+  // product to add to cart
+  let productObj = req.body
+
+  const productInCart = currentUser.cart.find(product => {
+    return productObj.id == product.id
+  })
+
+  // Adds 1 to quantity if added producted already in cart, otherwise default to 1
+  if (productInCart) {
+    productInCart.quantity += 1;
+    return res.end(JSON.stringify(productInCart))
+  } else {
+    // Create quantity property for products in cart
+    productObj.quantity = 1;
+    currentUser.cart.push(productObj)
+    return res.end(JSON.stringify(productObj))
+  }
+  
+  
+ 
 })
 
 router.delete("/api/me/cart/:id", (req, res) => {

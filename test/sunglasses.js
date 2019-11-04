@@ -232,6 +232,32 @@ describe('Me', () => {
           done()
         })
     })
+    it('should update quantity if added product already in cart', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "Better glasses",
+        "description": "The best glasses in the world",
+        "price": 1500,
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          res.body.should.have.property('quantity')
+          res.body.quantity.should.be.eql(2)
+          done()
+        })
+    })
     it('should return 401 error when trying to add to cart with invalid access token', done => {
       let product = {
         "id": "4",
