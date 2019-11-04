@@ -6,17 +6,19 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+
 const PORT = 3001;
 let brands = [];
 let users = [];
 let user = {};
+let accessTokens = [];
 let products = [];
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
 //Server Data Setup and Router
-http.createServer( (request, response) => {
+const server = module.exports = http.createServer( (request, response) => {
     myRouter(request, response, finalHandler(request, response))
 })
     .listen(PORT,error => {
@@ -50,11 +52,25 @@ http.createServer( (request, response) => {
     });
 
 myRouter.get('/api/brands', (request,response) => {
-//should return all brands
+//should return all brands in database
+    response.writeHead(200,{'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(brands));
 });
 
 myRouter.get('/api/brands/:id/products', (request,response) => {
 //should return all products of a certain brand
+    const { brandId } = request.params;
+    const brand = brands.find(brand => brand.id = brandId);
+    if (!brand) {
+        response.writeHead(404, "That brand does not exist");
+        return response.end();
+    }
+    response.writeHead(200, { "Content-Type": "application/json" });
+    const productsOfBrand = products.filter(
+        products => products.categoryid === brandId
+    );
+    return response.end(JSON.stringify(productsOfBrand))
+        
 });
 
 myRouter.get('/api/products', (request,response)=>{
@@ -62,7 +78,57 @@ myRouter.get('/api/products', (request,response)=>{
 });
 
 myRouter.post('/api/login', (request,response)=>{
-//authentication    
+//authentication
+if (!failedLoginAttempts[request.body.username]){
+    failedLoginAttempts[request.body.username] = 0;
+  }
+  if (request.body.username && request.body.password && failedLoginAttempts[request.body.username] < 3) {
+      let user = users.find((user)=>{
+          return user.login.username == request.body.username && user.login.password == request.body.password;
+      });
+      if (user) {
+        // Reset our counter of failed logins
+        failedLoginAttempts[request.body.username] = 0;
+        response.writeHead(200);
+
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((currentAccessToken) => {
+        return currentAccessToken.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } 
+      else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    } 
+    else {
+      let numFailedForUser = failedLoginAttempts[request.body.username];
+      if (numFailedForUser) {
+        failedLoginAttempts[request.body.username]++;
+      } 
+      else {
+        failedLoginAttempts[request.body.username] = 1
+      }
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  } 
+  else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }   
 });
 
 myRouter.get('/api/me/cart', (request,response)=>{
