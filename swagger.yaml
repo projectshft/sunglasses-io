@@ -1,0 +1,238 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: localhost:8080
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags: 
+        - Brands
+      summary: All Brands
+      description: 
+        returns all brands of sunglasses
+      responses:
+        '200':
+          description: All brands of sunglasses were returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+  /brands/:id/products:
+    get:
+      tags:
+        - Brands ID
+      summary: All Products in a Brand
+      description: 
+        Returns products based on the brand ID entered
+      parameters:
+        - name: id
+          in: path
+          description: Specific products by brand ID
+          required: true
+          type: string
+      responses:
+        '200':
+          description: All Products in a Brand success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Invalid entry for Brand ID
+          schema:
+              $ref: '#/definitions/Error'
+  /products:
+    get:
+      tags:
+        - Products
+      summary: All Products
+      description: 
+        Return All Products
+      parameters:
+        - name: query
+          in: query
+          description: Search query string from products
+          required: true
+          type: string
+      responses:
+        '200':
+          description: All Products returned successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Product not found
+        '404':
+          description: Invalid search query
+  /Login:     
+    post:
+      tags: 
+        - Log In
+      summary: User log in
+      description: 
+        Authentication for user
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: 
+            Email and password are required here for authenitcation
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: Token has been granted
+          schema: 
+            type: object
+            properties:
+              token:
+               type: string
+        '400':
+          description: Should get a 400 response if no query is given
+        '401':
+          description: Should get a 401 response if the query is in incorrect format
+        
+  /me/cart:
+    get:
+      tags: 
+        - Me
+      summary: Once you login, view your cart
+      description: 
+        Shopping cart for users
+      parameters:
+        - name: access token
+          in: header
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products in cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Invalid request.
+        
+    post:
+      tags:
+        - Me
+      summary: Add to Cart
+      description: 
+        Add a product from the array to the cart 
+      parameters:
+        - name: access token
+          in: header
+          required: true
+          type: string
+        - in: body
+      responses:
+        '200':
+          description: Your Product was added to the cart
+        '401':
+          description: Invalid Request
+  /me/cart/{productId}:
+    delete:
+      tags: 
+        - Me
+      summary: Remove from Cart
+      parameters:
+        - name: access token
+          in: header
+          required: true
+          type: string
+        - name: productId
+      responses:
+        '200':
+          description: Product was successfully removed
+        '401':
+          description: Invalid request
+        '404':
+          description: Product not found
+    post:
+      tags:
+        - Me
+      summary: Adjust cart quantity
+      description: 
+        Add or subtract the number of a specific item in your cart
+      parameters:
+        - name: access token
+          in: header
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: find the specific product ID
+          required: true
+          type: object
+        - in: header
+          name: quantity
+          description: Adjust the quantity
+          required: true
+          type: integer
+          minimum: 1
+          maximum: 500
+      responses:
+        '200':
+          description: Quanity was adjusted
+        '401':
+          description: Invalid request
+        '404':
+          description: Product not found
+        
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Product ID
+      name:
+        type: string
+        description: Product Name
+      brand:
+        type: string
+        description: Product Brand
+      price:
+        type: number
+        description: Product Price
+      description:
+        type: string
+        description: Product Description
+      imageUrls:
+        type: string
+        description: Product URL (image)
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Brand ID
+      name:
+        type: string
+        description: Brand Name
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
