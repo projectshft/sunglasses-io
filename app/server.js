@@ -25,7 +25,17 @@ const errors = {
   MISSING_PASS: { code: 400, message: "Missing Password" },
   MISSING_USERNAME_PASS: { code: 400, message: "Missing username/Password" },
   TOKEN_INVALID: { code: 401, message: "Invalid Access Token" },
-  TOKEN_EXPIRED: { code: 401, message: "Expired Access Token" }
+  TOKEN_EXPIRED: { code: 401, message: "Expired Access Token" },
+  INVALID_QUANTITY_TYPE: {
+    code: 400,
+    message: "Quantity must be a number"
+  },
+  INVALID_QUANTITY_VALUE: {
+    code: 400,
+    message:
+      "Quantity must be greater than or equal to 0 (Use delete if setting to 0)"
+  },
+  MISSING_QUANTITY: { code: 400, message: "Missing Quantity In Body" }
 };
 
 const PORT = process.env.PORT || 3001;
@@ -235,6 +245,47 @@ let prepareValidResponse = function(response, value) {
     return response.end();
   }
 };
+
+router.post("/v1/api/me/cart/:productId", (request, response) => {
+  let token = getValidTokenFromRequest(request);
+  if (!token) {
+    return prepareErrorResponse(response, errors.TOKEN_INVALID);
+  } else if (isTokenExpired(token)) {
+    return prepareErrorResponse(response, errors.TOKEN_EXPIRED);
+  }
+
+  const { productId } = request.params;
+
+  //check for product Id at all
+  if (!productId) {
+    return prepareErrorResponse(response, errors.MISSING_PRODUCT_ID);
+  }
+  //add to users cart and return cart
+  let user = users.find(u => u.login.username === token.username);
+
+  //check for valid product
+  let product = user.cart.find(p => p.product.id == productId);
+
+  if (!product) {
+    return prepareErrorResponse(response, errors.MISSING_PRODUCT_ID_CART);
+  }
+
+  const { quantity } = request.body;
+
+  //check for product Id at all
+  if (quantity === undefined) {
+    return prepareErrorResponse(response, errors.MISSING_QUANTITY);
+  } else if (isNaN(quantity)) {
+    return prepareErrorResponse(response, errors.INVALID_QUANTITY_TYPE);
+  } else if (quantity <= 0) {
+    return prepareErrorResponse(response, errors.INVALID_QUANTITY_VALUE);
+  }
+
+  console.log("---------------------------- ", quantity);
+  product.quantity = quantity;
+
+  return prepareValidResponse(response, user.cart);
+});
 
 //helper function returning specified error object and extracting its code for head
 let prepareErrorResponse = function(response, error) {

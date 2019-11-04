@@ -720,3 +720,152 @@ describe("/DELETE api/me/cart/:productId", () => {
       });
   });
 });
+
+describe("/POST api/me/cart/:productId", () => {
+  let accessToken = "";
+  it("should POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "yellowleopard753", password: "jonjon" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(200);
+        expect(response).to.have.header("Content-Type", "application/json");
+        //property check
+        expect(response.body).to.have.property("accessToken");
+        //accessToken existence check
+        expect(response.body["accessToken"]).to.exist;
+        expect(response.body["accessToken"]).to.not.be.empty;
+        expect(response.body["accessToken"]).to.be.a("string");
+        accessToken = response.body["accessToken"];
+        done();
+      });
+  });
+  it("should POST a valid item quantity update to the cart and return the full cart in response with the updated item/quantity", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .send({ quantity: 50 })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        checkForValidCartItemsArray(response.body);
+        let cartItem2;
+        cartItem2 = response.body.find(p => p.product.id === "2");
+        expect(cartItem2).to.exist;
+        expect(cartItem2.quantity).to.equal(50);
+        done();
+      });
+  });
+  it("should POST the same quantity update to the cart and return the full cart in response with the same quantity", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .send({ quantity: 50 })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        checkForValidCartItemsArray(response.body);
+        let cartItem2;
+        cartItem2 = response.body.find(p => p.product.id === "2");
+        expect(cartItem2).to.exist;
+        expect(cartItem2.quantity).to.equal(50);
+        done();
+      });
+  });
+  it("should POST a 0 quantity update item to the cart and return 400 error", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .send({ quantity: 0 })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 400);
+        expect(response.body.message).to.equal(
+          "Quantity must be greater than or equal to 0 (Use delete if setting to 0)"
+        );
+        done();
+      });
+  });
+  it("should POST a -1 quantity update item to the cart and return 400 error", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .send({ quantity: -1 })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 400);
+        expect(response.body.message).to.equal(
+          "Quantity must be greater than or equal to 0 (Use delete if setting to 0)"
+        );
+        done();
+      });
+  });
+  it("should POST a -1 quantity update item to the cart and return 400 error", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .send({ quantity: "aaaaaaaaaa" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 400);
+        expect(response.body.message).to.equal("Quantity must be a number");
+        done();
+      });
+  });
+  it("should POST a quantity update for a non-existent item in the cart and return a 404 when item isn't found", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/XYZ?accessToken=${accessToken}`)
+      .send({ quantity: 1 })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 404);
+        expect(response.body.message).to.equal("Missing Product In Cart");
+        done();
+      });
+  });
+  it("should POST an empty object and return a 400 for a bad body request", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 400);
+        expect(response.body.message).to.equal("Missing Quantity In Body");
+        done();
+      });
+  });
+  it("should POST an valid object but forget accessToken and return a 401 Unauthorized", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/me/cart/2`)
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        checkForValidIssueResponse(response, 401);
+        expect(response.body.message).to.equal("Invalid Access Token");
+        done();
+      });
+  });
+  it("should POST an valid object but an invalid accessToken and return a 401 Unauthorized", done => {
+    chai
+      .request(server)
+      .post(
+        `/v1/api/me/cart/2?accessToken=definitelynotarealuidunlesswerereallylucky`
+      )
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 401);
+        expect(response.body.message).to.equal("Invalid Access Token");
+        done();
+      });
+  });
+});
+
+//add zero and negative
