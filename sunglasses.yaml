@@ -1,0 +1,241 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io API
+  description: An API to support the Sunglasses shop
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+
+
+paths:
+  /brand: 
+    get:
+      summary: Brands of sunglasses
+      description: |
+        The brand endpoint allows you to search brands based on a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.  
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+   
+  /brands/products: 
+    get:
+      summary: Specific user's cart
+      description: >-
+        Manage user's cart here/log them in to see this
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+
+
+  /me: 
+    get:
+      summary: Specific user's cart
+      description: >-
+        Manage user's cart here/log them in to see this
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: View items in a specific user's cart
+      description: |
+        This endpoint allows you to view quatities and brands of items in the cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Achievement is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    post:
+      summary: Add to Cart
+      description: |
+        This endpoint allows user to add products to their cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    /me/cart:
+    post:
+      summary: Add to Cart
+      description: |
+        This endpoint allows user to add products to their cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+/me/cart/:productID
+    delete:
+      summary: Delete item in Cart
+      description: |
+        This endpoint allows user to delete items from their cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+/me/cart/:productID
+    post:
+      summary: Change quantity of items in cart
+      description: |
+        This endpoint allows user to manipulate the quatity of specific items in their cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'        
+
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      description:
+        type: string
+        description: Description of product.
+      imageURL:
+        type: string
+        description: The URL for the image representing the product
+  
+  User:
+    type: object
+    properties:
+      email:
+        type: string
+        description: Email address of the user
+      password:
+        type: string
+        description: Password of the user
+
+      
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
