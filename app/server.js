@@ -14,13 +14,17 @@ let users = [];
 let tokens = [];
 
 const JSON_CONTENT_HEADER = { "Content-Type": "application/json" };
-
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 const errors = {
+  MISSING_PRODUCT_ID: { code: 400, message: "Missing Product In Body" },
+  INVALID_PRODUCT_ID: { code: 404, message: "Product does not exist" },
   INVALID_BRAND_ID: { code: 404, message: "That brand does not exist" },
   INVALID_USER_PASS: { code: 401, message: "Invalid username and/or Password" },
   MISSING_USERNAME: { code: 400, message: "Missing username" },
   MISSING_PASS: { code: 400, message: "Missing Password" },
-  MISSING_USERNAME_PASS: { code: 400, message: "Missing username/Password" }
+  MISSING_USERNAME_PASS: { code: 400, message: "Missing username/Password" },
+  TOKEN_INVALID: { code: 401, message: "Invalid Access Token" },
+  TOKEN_EXPIRED: { code: 401, message: "Expired Access Token" }
 };
 
 const PORT = process.env.PORT || 3001;
@@ -112,7 +116,6 @@ router.post("/v1/api/login", (request, response) => {
 
   if (!user) {
     user = users.find(obj => obj.login.username === username);
-    console.log("now  here");
     return prepareErrorResponse(response, errors.INVALID_USER_PASS);
   }
 
@@ -141,6 +144,41 @@ router.post("/v1/api/login", (request, response) => {
   return prepareValidResponse(response, clonedToken);
 });
 
+router.post("/v1/api/me/cart", (request, response) => {
+  let token = getValidTokenFromRequest(request);
+  if (!token) {
+    return prepareErrorResponse(response, errors.TOKEN_INVALID);
+  } else if (isTokenExpired(token)) {
+    return prepareErrorResponse(response, errors.TOKEN_EXPIRED);
+  }
+
+  const { productId } = request.body;
+
+  //check for product Id at all
+  if (!productId) {
+    return prepareErrorResponse(response, errors.MISSING_PRODUCT_ID);
+  }
+
+  //check for valid product
+  let product = products.find(p => p.id === productId);
+
+  if (!product) {
+    return prepareErrorResponse(response, errors.INVALID_PRODUCT_ID);
+  }
+
+  //add to users cart and return cart
+  let user = users.find(u => u.login.username === token.username);
+
+  let cartItem = user.cart.find(p => p.product.id === productId);
+  if (!cartItem) {
+    user.cart.push({ quantity: 1, product });
+  } else {
+    cartItem.quantity += 1;
+  }
+
+  return prepareValidResponse(response, user.cart);
+});
+
 //helper function to send return object back as JSON while setting JSON header
 //instead of doing it every single repsonse
 let prepareValidResponse = function(response, value) {
@@ -156,6 +194,27 @@ let prepareValidResponse = function(response, value) {
 let prepareErrorResponse = function(response, error) {
   response.writeHead(error.code, JSON_CONTENT_HEADER);
   return response.end(JSON.stringify(error));
+};
+
+let getValidTokenFromRequest = function(request) {
+  var parsedUrl = require("url").parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = tokens.find(accessToken => {
+      return accessToken.accessToken == parsedUrl.query.accessToken;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+let isTokenExpired = function(token) {
+  return new Date() - token.lastUpdate > TOKEN_VALIDITY_TIMEOUT;
 };
 
 module.exports = server;
