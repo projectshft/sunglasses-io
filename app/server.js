@@ -98,23 +98,22 @@ patrickRouter.post('/api/users', function(request,response) {
         accessTokens.push(newAccessToken);
         response.writeHead(200, {'Content-Type': 'application/json'
 });
-        return response.end(JSON.stringify(newAccessToken.token));
+       return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
       // When a login fails, tell the client in a generic way that either the username or password was wrong
-      response.writeHead(401, {'Content-Type': 'application/json'
+      response.writeHead(400, {'Content-Type': 'application/json'
     });
-      return response.end();
+    return response.end(JSON.stringify(users));
     }
 
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
     response.writeHead(401, {'Content-Type': 'application/json'
   });
-    return response.end();
+  return response.end(JSON.stringify(users));
   }
 });
-
 patrickRouter.get("/api/me/cart", (request, response) => {
   if (!currentAccessToken) {
     return res.end("Unauthorized access to cart");
