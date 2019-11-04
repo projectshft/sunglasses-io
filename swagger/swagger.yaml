@@ -55,6 +55,32 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+  /api/login:
+    post:
+      summary: Login request
+      description: |
+        Logs the user with provided username and password into thesystem and returns an access token to be used as a query param for authentication required requests.
+      parameters:
+        - in: body
+          name: body
+          description: The user to login with.
+          schema:
+            $ref: "#/definitions/User"
+      tags:
+        - Login
+      responses:
+        200:
+          description: Access Token reponse
+          schema:
+            $ref: "#/definitions/AccessToken"
+        400:
+          description: Missing Username, Password, or Both
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: Invalid Username, Password, or Both
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Brand:
     type: object
@@ -88,3 +114,28 @@ definitions:
         items:
           type: string
         description: Array of image Urls for this product
+  AccessToken:
+    type: object
+    properties:
+      accessToken:
+        type: string
+        description: Unique access token used for this account after login.
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username for this user
+      password:
+        type: string
+        description: Password for this user
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+        description: Repeated Error Code
+      message:
+        type: string
+        description: Message detailing the reasoning for the error
