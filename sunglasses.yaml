@@ -12,11 +12,11 @@ produces:
 
 
 paths:
-  /brand: 
+  /api/brands: 
     get:
       summary: Brands of sunglasses
       description: |
-        The brand endpoint allows you to search brands based on a search string
+        The brand endpoint allows you to search brands based on a search string. This is an array of objects with an id and a brand name.
       parameters:
         - name: query
           in: query
@@ -47,11 +47,11 @@ paths:
           schema:
             $ref: '#/definitions/Error'
    
-  /brands/products: 
+  api/brands/:id/products: 
     get:
-      summary: Specific user's cart
-      description: >-
-        Manage user's cart here/log them in to see this
+      summary: products for a specific brand(referenced by id)
+      description: >-   
+        array of products per brand. each product has id, categoryid, name, desciption, price, and imageurls.
       tags:
         - User
       responses:
@@ -66,13 +66,13 @@ paths:
 
 
 
-  /me: 
+  /api/products: 
     get:
-      summary: Specific user's cart
-      description: >-
-        Manage user's cart here/log them in to see this
+      summary: products available in shop
+      description: array of all product objects
+
       tags:
-        - User
+        - products
       responses:
         '200':
           description: Profile information for a user
@@ -82,11 +82,12 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/cart:
-    get:
-      summary: View items in a specific user's cart
-      description: |
-        This endpoint allows you to view quatities and brands of items in the cart
+
+  /api/login:
+    post:
+      summary: 
+      description: login user
+      compare user login to users array, log them in or display error, and assign them a token
       parameters:
         - name: id
           in: path
@@ -102,7 +103,32 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/cart:
+  /api/me/cart:
+    get:
+      summary: Display user's specific cart
+      description: |
+        This endpoint allows user to see their cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user to challenge
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    /api/me/cart:
     post:
       summary: Add to Cart
       description: |
@@ -127,32 +153,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-    /me/cart:
-    post:
-      summary: Add to Cart
-      description: |
-        This endpoint allows user to add products to their cart
-      parameters:
-        - name: id
-          in: path
-          description: The id of the goal to achieve
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user to challenge
-          required: true
-          type: string
-      tags:
-        - User
-      responses:
-        '200':
-          description: Challenge is successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-/me/cart/:productID
+/api/me/cart/:productID
     delete:
       summary: Delete item in Cart
       description: |
@@ -177,7 +178,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-/me/cart/:productID
+/api/me/cart/:productID
     post:
       summary: Change quantity of items in cart
       description: |
