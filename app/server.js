@@ -221,11 +221,16 @@ router.post("/api/me/cart", (req, res) => {
     return res.end(JSON.stringify(productObj));
   }
 
+  if (productObj.price < 0) {
+    res.writeHead(400, {
+      'Content-Type': 'application/json'
+    });
+    return res.end(JSON.stringify(productObj));
+  }
+
     res.writeHead(200, {
     'Content-Type': 'application/json'
   })
-
-
 
   // Checks if added product is already in cart
   const productInCart = currentUser.cart.find(product => {
@@ -300,6 +305,11 @@ router.post("/api/me/cart/:id", (req, res) => {
       'Content-Type': "text/plain"
     });
     return res.end("400 error: cannot set quantity of product to negative number");
+  } else if (newQuantity > 30) {
+    res.writeHead(400, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("400 error: cannot set quantity of product to more than 30");
   }
 
     // Product ID to update in cart

@@ -299,6 +299,30 @@ describe('Me', () => {
           done()
         })
     })
+    it('should not add product with negative price', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "Better glasses",
+        "description": "The best glasses in the world",
+        "price": -200,
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
     it('should not add product with missing id', done => {
       let product = {
         "brandId": "2",
@@ -432,6 +456,16 @@ describe('Me', () => {
         .end((err, res) => {
           res.should.have.status(400)
           res.text.should.eql('400 error: cannot set quantity of product to negative number')
+          done()
+        })
+    })
+    it('should return 400 error when trying to set quantity to more than 30', done => {
+      chai.request(server)
+        .post(`/api/me/cart/4?accessToken=${token}`)
+        .send({quantity: 33})
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.text.should.eql('400 error: cannot set quantity of product to more than 30')
           done()
         })
     })
