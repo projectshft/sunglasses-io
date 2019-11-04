@@ -107,6 +107,38 @@ paths:
           description: Invalid Username, Password, or Both
           schema:
             $ref: "#/definitions/Error"
+  /api/me/cart:
+    post:
+      summary: Add Item To Cart
+      description: |
+        Adds the provided item to the users cart, increments it's quantity if already in the cart.
+      parameters:
+        - name: accessToken
+          in: query
+          description: Valid Access Token for User associated with Cart.
+          required: true
+          type: string
+      tags:
+        - Cart Actions
+      responses:
+        200:
+          description: Returns Current Cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        404:
+          description: Item Wasn't Found
+          schema:
+            $ref: "#/definitions/Error"
+        400:
+          description: Bad Request (Missing Product in Body)
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: Invalid Access Token
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Brand:
     type: object
@@ -155,6 +187,15 @@ definitions:
       password:
         type: string
         description: Password for this user
+  CartItem:
+    type: object
+    properties:
+      quantity:
+        type: integer
+        format: int32
+        description: Amount Of Product In Cart
+      product:
+        $ref: "#/definitions/Product"
   Error:
     type: object
     properties:
