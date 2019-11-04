@@ -235,6 +235,7 @@ router.delete("/api/me/cart/:id", (req, res) => {
   // Product ID to remove from cart
   let productToRemove = req.params.id
 
+  // Check if product found in cart
   let productInCart = currentUser.cart.find(product => {
     return productToRemove == product.id;
   })
