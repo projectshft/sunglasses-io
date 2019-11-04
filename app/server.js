@@ -144,6 +144,20 @@ router.post("/v1/api/login", (request, response) => {
   return prepareValidResponse(response, clonedToken);
 });
 
+router.get("/v1/api/me/cart", (request, response) => {
+  let token = getValidTokenFromRequest(request);
+  if (!token) {
+    return prepareErrorResponse(response, errors.TOKEN_INVALID);
+  } else if (isTokenExpired(token)) {
+    return prepareErrorResponse(response, errors.TOKEN_EXPIRED);
+  }
+
+  //add to users cart and return cart
+  let user = users.find(u => u.login.username === token.username);
+
+  return prepareValidResponse(response, user.cart);
+});
+
 router.post("/v1/api/me/cart", (request, response) => {
   let token = getValidTokenFromRequest(request);
   if (!token) {

@@ -570,3 +570,75 @@ describe("/POST api/me/cart", () => {
       });
   });
 });
+
+describe("/GET api/me/cart", () => {
+  let accessToken = "";
+  it("POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "yellowleopard753", password: "jonjon" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(200);
+        expect(response).to.have.header("Content-Type", "application/json");
+        //property check
+        expect(response.body).to.have.property("accessToken");
+        //accessToken existence check
+        expect(response.body["accessToken"]).to.exist;
+        expect(response.body["accessToken"]).to.not.be.empty;
+        expect(response.body["accessToken"]).to.be.a("string");
+        accessToken = response.body["accessToken"];
+        done();
+      });
+  });
+  it("should GET the complete cart for the user", done => {
+    chai
+      .request(server)
+      .get(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .send({ productId: "1" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        checkForValidCartItemsArray(response.body);
+        //from the posts above the cart currently has 2 items and 2 diff quantities on those items
+        expect(response.body.length).to.equal(2);
+        let cartItem1, cartItem2;
+        cartItem1 = response.body.find(p => p.product.id === "1");
+        cartItem2 = response.body.find(p => p.product.id === "2");
+        expect(cartItem1).to.exist;
+        expect(cartItem2).to.exist;
+        expect(cartItem1.quantity).to.equal(2);
+        expect(cartItem2.quantity).to.equal(1);
+        done();
+      });
+  });
+  it("should attempt to get the cart but forget accessToken and return a 401 Unauthorized", done => {
+    chai
+      .request(server)
+      .get(`/v1/api/me/cart`)
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        checkForValidIssueResponse(response, 401);
+        expect(response.body.message).to.equal("Invalid Access Token");
+        done();
+      });
+  });
+  it("should attempt to get the cart but have an invalid accessToken and return a 401 Unauthorized", done => {
+    chai
+      .request(server)
+      .get(
+        `/v1/api/me/cart?accessToken=definitelynotarealuidunlesswerereallylucky`
+      )
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 401);
+        expect(response.body.message).to.equal("Invalid Access Token");
+        done();
+      });
+  });
+});
