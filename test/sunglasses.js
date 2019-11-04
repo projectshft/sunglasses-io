@@ -250,19 +250,11 @@ describe('Me', () => {
     })
     
   })
-  describe('/DELETE api/me/cart', () => {
+  describe('/DELETE api/me/cart/:id', () => {
     it('should error 404 if product not found in cart', done => {
-      let fakeProduct = {
-        "id": "422",
-        "brandId": "6",
-        "name": "Fake Glasses",
-        "description": "The fakest glasses in the world",
-        "price": 1500,
-        "imageUrls": []
-      }
+
       chai.request(server)
-        .delete(`/api/me/cart?accessToken=${token}`)
-        .send(fakeProduct)
+        .delete(`/api/me/cart/422?accessToken=${token}`)
         .end((err, res) => {
           res.should.have.status(404)
           res.text.should.be.eql('404: Requested product to delete not found in cart')
@@ -270,41 +262,19 @@ describe('Me', () => {
         })
     })
     it('should delete product from user cart', done => {
-      let product = {
-        "id": "4",
-        "brandId": "2",
-        "name": "Better glasses",
-        "description": "The best glasses in the world",
-        "price": 1500,
-        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-      }
       chai.request(server)
-        .delete(`/api/me/cart?accessToken=${token}`)
-        .send(product)
+        // ID '4' is product added to cart in earlier test
+        .delete(`/api/me/cart/4?accessToken=${token}`)
         .end((err, res) => {
           res.should.have.status(200)
-          res.body.should.be.an('object');
-          res.body.should.have.property('id')
-          res.body.should.have.property('brandId')
-          res.body.should.have.property('name')
-          res.body.should.have.property('description')
-          res.body.should.have.property('price')
-          res.body.should.have.property('imageUrls')
+          res.body.should.be.an('array');
+          res.body.length.should.eql(0)
           done()
         })
     })
     it('should return 401 error when trying to delete from cart with invalid access token', done => {
-      let product = {
-        "id": "4",
-        "brandId": "2",
-        "name": "Better glasses",
-        "description": "The best glasses in the world",
-        "price": 1500,
-        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-      }
       chai.request(server)
-        .delete(`/api/me/cart?accessToken=asdf`)
-        .send(product)
+        .delete(`/api/me/cart/4?accessToken=asdf`)
         .end((err, res) => {
           res.should.have.status(401)
           res.text.should.eql('401 error: Must be logged in with validated access token to access cart')

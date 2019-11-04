@@ -222,7 +222,7 @@ router.post("/api/me/cart", (req, res) => {
   res.end(JSON.stringify(productObj))
 })
 
-router.delete("/api/me/cart", (req, res) => {
+router.delete("/api/me/cart/:id", (req, res) => {
   let currentAccessToken = getValidTokenFromRequest(req);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
@@ -232,11 +232,11 @@ router.delete("/api/me/cart", (req, res) => {
     return res.end("401 error: Must be logged in with validated access token to access cart");
   }
 
-  // Product to remove from cart
-  let productObjToRemove = req.body
+  // Product ID to remove from cart
+  let productToRemove = req.params.id
 
   let productInCart = currentUser.cart.find(product => {
-    return productObjToRemove.id == product.id;
+    return productToRemove == product.id;
   })
 
   if (!productInCart) {
@@ -248,7 +248,7 @@ router.delete("/api/me/cart", (req, res) => {
 
   // New cart returned without the 'deleted' product. Assigned to current user cart.
   let cartAfterProductRemove = currentUser.cart.filter(cartItemObj => {
-    cartItemObj != productObjToRemove
+    cartItemObj.id != productToRemove
   })
   currentUser.cart = cartAfterProductRemove
 
@@ -256,8 +256,8 @@ router.delete("/api/me/cart", (req, res) => {
     'Content-Type': 'application/json'
   })
 
-  // Return product removed from cart
-  res.end(JSON.stringify(productObjToRemove))
+  // Return new cart after DELETE product
+  res.end(JSON.stringify(currentUser.cart))
 })
 
 // allow for testing
