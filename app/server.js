@@ -30,5 +30,54 @@ myRouter.get('/api/brands', function(request, response) {
   return response.end(JSON.stringify(brands));
 });
 
+// Route for a specific brand's Products Endpoint
+myRouter.get('/api/brands/:id/products', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
+// Route for a specific Product's Endpoint
+myRouter.get('/api/brands/products', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
+// Route for a specific user's login
+myRouter.post('/api/login', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
+
+// Route for a specific user's cart 
+myRouter.get('/api/me/cart', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
+// Route for a user to add products to their cart
+myRouter.post('/api/me/cart', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
+// Route for a user to delete items from their cart
+myRouter.delete('/api/me/cart/productID', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
+// Route for a user to change quantity of items in cart
+myRouter.post('/api/me/cart/productID', function(request, response) {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(brands));
+});
+
 module.exports = server;
-lkjydckmut,ktyfil,oyddtte
+ 
+
+//questions for office hours:
+//better indenting/nesting api items
+//talk through definitions in api
+//post vs get difference 
+//
