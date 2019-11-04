@@ -55,6 +55,32 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+  "/brands/{brandId}/products":
+    get:
+      summary: List of Products For the Specified Brand
+      description: |
+        The Products endpoint returns information about all available products in        the database. The response includes a prodct id, name, price, and description. Also inclues a linking id to a Brand as well as an array of images to use with the product.
+      parameters:
+        - name: brandId
+          in: path
+          description: The brand ID to filter the returned products by
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of Products filtered by Brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: The specified Brand was not found.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Error"
   /api/login:
     post:
       summary: Login request
