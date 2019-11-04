@@ -291,6 +291,7 @@ router.post("/api/me/cart/:id", (req, res) => {
     return productToUpdate == product.id;
   })
 
+  // If no product found, return error
   if (productIndex === -1) {
     res.writeHead(404, {
       'Content-Type': "text/plain"
@@ -298,6 +299,7 @@ router.post("/api/me/cart/:id", (req, res) => {
     return res.end("404: Requested product to change quantity not found in cart");
   }
 
+  // Set new quantity of specified product
   const newQuantity = parseInt(req.body.quantity);
   currentUser.cart[productIndex].quantity = newQuantity;
 

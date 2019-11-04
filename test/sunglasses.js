@@ -290,7 +290,28 @@ describe('Me', () => {
           done()
         })
     })
+    it('should return error 404 if product not found in cart', done => {
+      chai.request(server)
+        .post(`/api/me/cart/10000000?accessToken=${token}`)
+        .send({quantity: 10})
+        .end((err, res) => {
+          res.should.have.status(404)
+          res.text.should.be.eql('404: Requested product to change quantity not found in cart')
+          done()
+        })
+    })
+    it('should return 401 error when trying to change quantity in cart with invalid access token', done => {
+      chai.request(server)
+        .post(`/api/me/cart/4?accessToken=asdf`)
+        .send({quantity: 10})
+        .end((err, res) => {
+          res.should.have.status(401)
+          res.text.should.eql('401 error: Must be logged in with validated access token to access cart')
+          done()
+        })
+    })
   })
+  
   describe('/DELETE api/me/cart/:id', () => {
     it('should error 404 if product not found in cart', done => {
       chai.request(server)
