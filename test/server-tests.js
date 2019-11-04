@@ -118,7 +118,7 @@ describe("/GET brands", () => {
   it("should GET all brands with no additional parameters", done => {
     chai
       .request(server)
-      .get("/v1/brands")
+      .get("/api/brands")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -134,7 +134,7 @@ describe("/GET brands", () => {
   it("`Should return a filtered brands list when provided a valid query: DKNY`", done => {
     chai
       .request(server)
-      .get("/v1/brands?query=DKNY")
+      .get("/api/brands?query=DKNY")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -150,7 +150,7 @@ describe("/GET brands", () => {
   it(`Should return a filtered brands list when provided a valid query (case insensitive): dKnY`, done => {
     chai
       .request(server)
-      .get("/v1/brands?query=dKnY")
+      .get("/api/brands?query=dKnY")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -166,7 +166,7 @@ describe("/GET brands", () => {
   it("Should return all brands when provided only spaces", done => {
     chai
       .request(server)
-      .get("/v1/brands?query=   ")
+      .get("/api/brands?query=   ")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -182,7 +182,7 @@ describe("/GET brands", () => {
   it("Should return all brands when provided with and empty string", done => {
     chai
       .request(server)
-      .get("/v1/brands?query=")
+      .get("/api/brands?query=")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -198,7 +198,7 @@ describe("/GET brands", () => {
   it("Should return no products when provided with an unmatched query", done => {
     chai
       .request(server)
-      .get("/v1/brands?query=THEREDEFINITELYISNTASUNGLASSNAMEDTHIS")
+      .get("/api/brands?query=THEREDEFINITELYISNTASUNGLASSNAMEDTHIS")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -216,7 +216,7 @@ describe("/GET products", () => {
   it("should GET all products with no additional parameters", done => {
     chai
       .request(server)
-      .get("/v1/products")
+      .get("/api/products")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -232,7 +232,7 @@ describe("/GET products", () => {
   it("`Should return a filtered products list when provided a valid query: Coke`", done => {
     chai
       .request(server)
-      .get("/v1/products?query=Coke")
+      .get("/api/products?query=Coke")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -248,7 +248,7 @@ describe("/GET products", () => {
   it(`Should return a filtered products list when provided a valid query (case insensitive): cOkE`, done => {
     chai
       .request(server)
-      .get("/v1/products?query=cOkE")
+      .get("/api/products?query=cOkE")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -264,7 +264,7 @@ describe("/GET products", () => {
   it("Should return all products when provided only spaces", done => {
     chai
       .request(server)
-      .get("/v1/products?query=   ")
+      .get("/api/products?query=   ")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -280,7 +280,7 @@ describe("/GET products", () => {
   it("Should return all products when provided with and empty string", done => {
     chai
       .request(server)
-      .get("/v1/products?query=")
+      .get("/api/products?query=")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -296,7 +296,7 @@ describe("/GET products", () => {
   it("Should return no products when provided with an unmatched query", done => {
     chai
       .request(server)
-      .get("/v1/products?query=THEREDEFINITELYISNTASUNGLASSNAMEDTHIS")
+      .get("/api/products?query=THEREDEFINITELYISNTASUNGLASSNAMEDTHIS")
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -314,7 +314,7 @@ describe("/GET brands/:brandId/products", () => {
   it("should GET all products that match a valid specified brand id", done => {
     chai
       .request(server)
-      .get(`/v1/brands/${BRAND_FILTER}/products`)
+      .get(`/api/brands/${BRAND_FILTER}/products`)
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -333,7 +333,7 @@ describe("/GET brands/:brandId/products", () => {
   it("should return an error when brand does not exist", done => {
     chai
       .request(server)
-      .get(`/v1/brands/${BAD_BRAND_ID}/products`)
+      .get(`/api/brands/${BAD_BRAND_ID}/products`)
       .end((error, response) => {
         checkForValidIssueResponse(response, 404);
         done();
@@ -345,7 +345,7 @@ describe("/POST api/login", () => {
   it("should POST a valid login and get back a valid response including an accessToken", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -364,7 +364,7 @@ describe("/POST api/login", () => {
   it("should POST a login with an invalid pass get back a 401 response noting invalid user/pass", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "wrongpass" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -378,7 +378,7 @@ describe("/POST api/login", () => {
   it("should POST a login with an invalid username get back a 401 response noting invalid user/pass", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "badusername", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -392,7 +392,7 @@ describe("/POST api/login", () => {
   it("should POST a login without a username get back a 400 response noting missing username", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ password: "password" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -404,7 +404,7 @@ describe("/POST api/login", () => {
   it("should POST a login without a password get back a 400 response noting missing", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "username" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -416,7 +416,7 @@ describe("/POST api/login", () => {
   it("should POST a login without a username or password get back a 400 response noting missing", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
@@ -428,7 +428,7 @@ describe("/POST api/login", () => {
   it("should POST a valid login a second time and get back a valid response including an accessToken", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -451,7 +451,7 @@ describe("/POST api/me/cart", () => {
   it("should POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -471,7 +471,7 @@ describe("/POST api/me/cart", () => {
   it("should POST a valid item to the cart and return the full cart in response with the updated item/quantity", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
       .send({ productId: "1" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -486,7 +486,7 @@ describe("/POST api/me/cart", () => {
   it("should POST the same item to the cart and return the full cart in response with the quantity for that product updated", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
       .send({ productId: "1" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -501,7 +501,7 @@ describe("/POST api/me/cart", () => {
   it("should POST a different item to the cart and return the full cart in response with the updated item/quantity", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
       .send({ productId: "2" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -521,7 +521,7 @@ describe("/POST api/me/cart", () => {
   it("should POST a non-existent item to the cart and return a 404 when item isn't found", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
       .send({ productId: "XYZ" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -533,7 +533,7 @@ describe("/POST api/me/cart", () => {
   it("should POST an empty object and return a 400 for a bad body request", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
@@ -545,7 +545,7 @@ describe("/POST api/me/cart", () => {
   it("should POST an valid object but forget accessToken and return a 401 Unauthorized", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart`)
+      .post(`/api/me/cart`)
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
@@ -559,7 +559,7 @@ describe("/POST api/me/cart", () => {
     chai
       .request(server)
       .post(
-        `/v1/api/me/cart?accessToken=definitelynotarealuidunlesswerereallylucky`
+        `/api/me/cart?accessToken=definitelynotarealuidunlesswerereallylucky`
       )
       .send({})
       .end((error, response) => {
@@ -576,7 +576,7 @@ describe("/GET api/me/cart", () => {
   it("POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -596,7 +596,7 @@ describe("/GET api/me/cart", () => {
   it("should GET the complete cart for the user", done => {
     chai
       .request(server)
-      .get(`/v1/api/me/cart?accessToken=${accessToken}`)
+      .get(`/api/me/cart?accessToken=${accessToken}`)
       .send({ productId: "1" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -617,7 +617,7 @@ describe("/GET api/me/cart", () => {
   it("should attempt to get the cart but forget accessToken and return a 401 Unauthorized", done => {
     chai
       .request(server)
-      .get(`/v1/api/me/cart`)
+      .get(`/api/me/cart`)
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
@@ -631,7 +631,7 @@ describe("/GET api/me/cart", () => {
     chai
       .request(server)
       .get(
-        `/v1/api/me/cart?accessToken=definitelynotarealuidunlesswerereallylucky`
+        `/api/me/cart?accessToken=definitelynotarealuidunlesswerereallylucky`
       )
       .send({})
       .end((error, response) => {
@@ -648,7 +648,7 @@ describe("/DELETE api/me/cart/:productId", () => {
   it("POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -668,7 +668,7 @@ describe("/DELETE api/me/cart/:productId", () => {
   it("should DELETE a valid item from the cart and return the updated cart", done => {
     chai
       .request(server)
-      .delete(`/v1/api/me/cart/1?accessToken=${accessToken}`)
+      .delete(`/api/me/cart/1?accessToken=${accessToken}`)
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidArrayBodyResponse(response);
@@ -685,7 +685,7 @@ describe("/DELETE api/me/cart/:productId", () => {
   it("should attempt to delete from the cart but forget accessToken and return a 401 Unauthorized", done => {
     chai
       .request(server)
-      .delete(`/v1/api/me/cart/1`)
+      .delete(`/api/me/cart/1`)
       .end((error, response) => {
         expect(error).to.be.null;
         expect(response.body).to.not.be.null;
@@ -698,7 +698,7 @@ describe("/DELETE api/me/cart/:productId", () => {
     chai
       .request(server)
       .delete(
-        `/v1/api/me/cart/1?accessToken=definitelynotarealuidunlesswerereallylucky`
+        `/api/me/cart/1?accessToken=definitelynotarealuidunlesswerereallylucky`
       )
       .send({})
       .end((error, response) => {
@@ -711,7 +711,7 @@ describe("/DELETE api/me/cart/:productId", () => {
   it("should DELETE an invalid or missing item from the cart and return a 404 not found error", done => {
     chai
       .request(server)
-      .delete(`/v1/api/me/cart/XYZ?accessToken=${accessToken}`)
+      .delete(`/api/me/cart/XYZ?accessToken=${accessToken}`)
       .end((error, response) => {
         expect(error).to.be.null;
         checkForValidIssueResponse(response, 404);
@@ -726,7 +726,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
     chai
       .request(server)
-      .post(`/v1/api/login`)
+      .post(`/api/login`)
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -746,7 +746,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST a valid item quantity update to the cart and return the full cart in response with the updated item/quantity", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .post(`/api/me/cart/2?accessToken=${accessToken}`)
       .send({ quantity: 50 })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -762,7 +762,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST the same quantity update to the cart and return the full cart in response with the same quantity", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .post(`/api/me/cart/2?accessToken=${accessToken}`)
       .send({ quantity: 50 })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -778,7 +778,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST a 0 quantity update item to the cart and return 400 error", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .post(`/api/me/cart/2?accessToken=${accessToken}`)
       .send({ quantity: 0 })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -792,7 +792,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST a -1 quantity update item to the cart and return 400 error", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .post(`/api/me/cart/2?accessToken=${accessToken}`)
       .send({ quantity: -1 })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -806,7 +806,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST a -1 quantity update item to the cart and return 400 error", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .post(`/api/me/cart/2?accessToken=${accessToken}`)
       .send({ quantity: "aaaaaaaaaa" })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -818,7 +818,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST a quantity update for a non-existent item in the cart and return a 404 when item isn't found", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/XYZ?accessToken=${accessToken}`)
+      .post(`/api/me/cart/XYZ?accessToken=${accessToken}`)
       .send({ quantity: 1 })
       .end((error, response) => {
         expect(error).to.be.null;
@@ -830,7 +830,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST an empty object and return a 400 for a bad body request", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2?accessToken=${accessToken}`)
+      .post(`/api/me/cart/2?accessToken=${accessToken}`)
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
@@ -842,7 +842,7 @@ describe("/POST api/me/cart/:productId", () => {
   it("should POST an valid object but forget accessToken and return a 401 Unauthorized", done => {
     chai
       .request(server)
-      .post(`/v1/api/me/cart/2`)
+      .post(`/api/me/cart/2`)
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
@@ -856,7 +856,7 @@ describe("/POST api/me/cart/:productId", () => {
     chai
       .request(server)
       .post(
-        `/v1/api/me/cart/2?accessToken=definitelynotarealuidunlesswerereallylucky`
+        `/api/me/cart/2?accessToken=definitelynotarealuidunlesswerereallylucky`
       )
       .send({})
       .end((error, response) => {

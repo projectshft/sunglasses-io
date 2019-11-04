@@ -61,7 +61,7 @@ server.listen(PORT, err => {
 });
 
 //return brands, no auth necessary
-router.get("/v1/brands", (request, response) => {
+router.get("/api/brands", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = querystring.parse(parsedUrl.query);
   let filteredBrands = [];
@@ -76,7 +76,7 @@ router.get("/v1/brands", (request, response) => {
 });
 
 //return products, no auth necessary
-router.get("/v1/products", (request, response) => {
+router.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = querystring.parse(parsedUrl.query);
   let filteredProducts = [];
@@ -91,7 +91,7 @@ router.get("/v1/products", (request, response) => {
 });
 
 //return all products that match brandId, no auth necessary
-router.get("/v1/brands/:brandId/products", (request, response) => {
+router.get("/api/brands/:brandId/products", (request, response) => {
   const { brandId } = request.params;
   //check for brand existence first
   const brand = brands.find(brand => brand.id == brandId);
@@ -106,7 +106,7 @@ router.get("/v1/brands/:brandId/products", (request, response) => {
 });
 
 //return all products that match brandId, no auth necessary
-router.post("/v1/api/login", (request, response) => {
+router.post("/api/login", (request, response) => {
   const { username, password } = request.body;
 
   //check for missing/blank username & pass
@@ -155,7 +155,7 @@ router.post("/v1/api/login", (request, response) => {
   return prepareValidResponse(response, clonedToken);
 });
 
-router.get("/v1/api/me/cart", (request, response) => {
+router.get("/api/me/cart", (request, response) => {
   let token = getValidTokenFromRequest(request);
   if (!token) {
     return prepareErrorResponse(response, errors.TOKEN_INVALID);
@@ -169,7 +169,7 @@ router.get("/v1/api/me/cart", (request, response) => {
   return prepareValidResponse(response, user.cart);
 });
 
-router.post("/v1/api/me/cart", (request, response) => {
+router.post("/api/me/cart", (request, response) => {
   let token = getValidTokenFromRequest(request);
   if (!token) {
     return prepareErrorResponse(response, errors.TOKEN_INVALID);
@@ -204,7 +204,7 @@ router.post("/v1/api/me/cart", (request, response) => {
   return prepareValidResponse(response, user.cart);
 });
 
-router.delete("/v1/api/me/cart/:productId", (request, response) => {
+router.delete("/api/me/cart/:productId", (request, response) => {
   let token = getValidTokenFromRequest(request);
   if (!token) {
     return prepareErrorResponse(response, errors.TOKEN_INVALID);
@@ -246,7 +246,7 @@ let prepareValidResponse = function(response, value) {
   }
 };
 
-router.post("/v1/api/me/cart/:productId", (request, response) => {
+router.post("/api/me/cart/:productId", (request, response) => {
   let token = getValidTokenFromRequest(request);
   if (!token) {
     return prepareErrorResponse(response, errors.TOKEN_INVALID);
