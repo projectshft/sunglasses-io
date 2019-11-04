@@ -206,3 +206,36 @@ describe('/Post Login ', () => {
 
 
 });
+
+//Add to cart Post
+describe('/Post add to cart button ', () => {
+    it.only('should check to make sure user has access token ', done => {
+        let accessToken = [{
+            token: '87987'
+        }];
+        chai
+            .request(server)
+            .post('/api/me/cart')
+            .send(accessToken)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('object');
+                done();
+            });
+    });
+
+    it.only('if the access token does not match assigned token ', done => {
+        let accessToken = [{
+            token: '879d7'
+        }];
+        chai
+            .request(server)
+            .post('/api/me/cart')
+            .send(accessToken)
+            .end((err, res) => {
+                res.should.have.status(401);
+                res.body.should.be.a('array');
+                done();
+            });
+    });
+});

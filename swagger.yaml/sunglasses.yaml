@@ -1,0 +1,276 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses store 
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - "brands"
+      summary: "brands"
+      description: "This endpoint gives the user the most popular brands available to them from the store"
+      parameters:
+        - name: limit
+          in: query
+          description:
+          The number of results to limit the search to.
+          required: false
+          type: array
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      tags:
+        - "products"
+      summary: "products"
+      description: >-
+        The products endpoint returns products that the user has searched on the application
+      responses:
+        '200':
+          description: "product search is successful"
+          schema:
+            $ref: '#/definitions/products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+          '404':
+            description: "Products not found"
+          schema:
+            $ref: '#/definitions/products'
+        default:
+          description: "gives error if there are are no products based on query"
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      tags:
+      - "pet"
+      summary: "Search a product"
+      description: "This endpoint allows you to seach a product which will give you all the products for a given brand"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "search"
+        in: "query"
+        description: "Brand ids that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "object"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/brands"
+        400:
+          description: "Invalid search value"
+  /login:
+    post:
+      summary: enter login
+      description: |
+        This endpoint allows you enter your username and login in order to shop in the store
+      parameters:
+        - name: id
+          in: path
+          description: The id of the goal to achieve
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: login is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+         '400':
+          description: "Invalid Format"
+         '401':
+          description: "Invalid Username or Password"
+  /me/cart:
+    post:
+      summary: shopping cart
+      description: |
+        This endpoint allows you to add items to the shopping cart
+      parameters:
+        - name: id
+          in: path
+          description: 
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: shopping cart
+      description: |
+        Returns the items that are in the
+      parameters:
+        - name: id
+          in: path
+          description: 
+          required: true
+          type: string
+        - name: userId
+          in: path
+          description: The id user
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Challenge is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /categories:
+    get:
+      summary: Categories
+      description: >
+        Categories define groupings of goals for browsing.
+      parameters:
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: An array of categories
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /categories/{id}/goals:
+    get:
+      summary: Goals in Category
+      description: >
+        All the goals in a given cateogyr
+      parameters:
+        - name: id
+          in: path
+          description: The id of the category to search for goals in.
+          required: true
+          type: string
+      tags:
+        - Categories
+      responses:
+        '200':
+          description: An array of goals in the category
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Goal'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Goal:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a goal.
+      categoryId:
+        type: string
+        description: The id of the category this goal belongs to.
+      description:
+        type: string
+        description: Description of product.
+      upVotes:
+        type: integer
+        format: int32
+        description: The number of up votes given to a goal
+      downVotes:
+        type: integer
+        format: int32
+        description: The number of down votes given to a goal
+      imageURL:
+        type: string
+        description: The URL for the image representing the goal
+  brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the Uber user.
+      last_name:
+        type: string
+        description: Last name of the Uber user.
+      email:
+        type: string
+        description: Email address of the Uber user
+      acceptedGoals:
+        items:
+          $ref: '#/definitions/brands'
+      achievedGoals:
+        items:
+          $ref: '#/definitions/brands'
+      giftedGoals:
+        items:
+          $ref: '#/definitions/brands'    
+      challengedGoals:
+        items:
+          $ref: '#/definitions/brands '        
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

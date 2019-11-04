@@ -13,8 +13,18 @@ const PORT = process.env.PORT || 3001;
 let brands = [];
 let products = [];
 let users = [];
-let accessTokens = [];
+let accessTokens = [{
+    token: '87987' // hard coded access token for testing purposes 
+}];
+let cart = [];
 
+
+
+const saveCurrentUser = (currentUser) => {
+    // set hardcoded "logged in" user
+    users[0] = currentUser;
+    fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
+};
 
 // Setup router
 const router = Router();
@@ -36,6 +46,9 @@ server.listen(PORT, err => {
     products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf-8"));
     //access to users.json file 
     users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
+    // hardcode "logged in" user
+    user = users[0];
+
 });
 
 // Route for just brands 
@@ -64,7 +77,7 @@ router.get("/api/products", (request, response) => {
                 response.writeHead(404, { "Content-Type": "application/json" });
                 return response.end(JSON.stringify("There are no products that fit your search"));
             }
-            // const { query } = parsedQuery;
+
         } else {
             response.writeHead(200, { "Content-Type": "application/json" });
             return response.end(JSON.stringify(products));
@@ -82,18 +95,13 @@ router.get("/api/brands/:id/products", (request, response) => {
         response.writeHead(404, { "Content-Type": "application/json" });
         return response.end(JSON.stringify("That brand does not exist"));
     }
-    const relatedBrands = products.filter(
+    const relatedProducts = products.filter(
         products => products.categoryId == brandSearch.id
     );
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(relatedBrands));
+    return response.end(JSON.stringify(relatedProducts));
 });
 
-const saveCurrentUser = (currentUser) => {
-    // set hardcoded "logged in" user
-    users[0] = currentUser;
-    fs.writeFileSync("./initial-data/users.json", JSON.stringify(users), "utf-8");
-}
 
 // Login call
 router.post('/api/login', function (request, response) {
@@ -137,6 +145,41 @@ router.post('/api/login', function (request, response) {
         response.writeHead(400, { 'Content-Type': 'application/json' });
         return response.end(JSON.stringify("Incorrectly formatted response"));
     }
+});
+
+router.post("/api/me/cart", (request, response) => {
+
+    var getValidTokenFromRequest = function (request) {
+        var parsedUrl = require('url').parse(request.url, true);
+        if (parsedUrl.query.accessToken) {
+            // Verify the access token to make sure it's valid and not expired
+            let currentAccessToken = accessTokens.find(accessToken => {
+                return accessToken.token == parsedUrl.query.accessToken;
+            });
+
+            if (currentAccessToken) {
+                response.writeHead(200);
+                return response.end(JSON.stringify(currentAccessToken));
+
+            } else {
+                response.writeHead(401, { "Content-Type": "application/json" });
+                return response.end(JSON.stringify("Please login"));
+            }
+
+
+        } else {
+            return null;
+        }
+    };
+
+
+    var eitherTokenOrNull = getValidTokenFromRequest(request)
+
+    // response.writeHead(200)
+    // user.addedProduct.push(cart);
+    // saveCurrentUser(user);
+    response.end();
+
 });
 
 
