@@ -276,11 +276,9 @@ describe('Me', () => {
           done()
         })
     })
-    
   })
   describe('/DELETE api/me/cart/:id', () => {
     it('should error 404 if product not found in cart', done => {
-
       chai.request(server)
         .delete(`/api/me/cart/422?accessToken=${token}`)
         .end((err, res) => {
@@ -307,6 +305,19 @@ describe('Me', () => {
           res.should.have.status(401)
           res.text.should.eql('401 error: Must be logged in with validated access token to access cart')
           done()
+        })
+    })
+  })
+  describe('/POST api/me/cart/:id', () => {
+    it('should change quantity of item in cart', done => {
+      chai.request(server)
+        .post(`/api/me/cart/4?accessToken=${token}`)
+        .send(10)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('object')
+          res.body.should.have.property('quantity')
+          res.body.quantity.should.eql(10)
         })
     })
   })

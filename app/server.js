@@ -217,6 +217,7 @@ router.post("/api/me/cart", (req, res) => {
   // product to add to cart
   let productObj = req.body
 
+  // Checks if added product is already in cart
   const productInCart = currentUser.cart.find(product => {
     return productObj.id == product.id
   })
@@ -231,9 +232,6 @@ router.post("/api/me/cart", (req, res) => {
     currentUser.cart.push(productObj)
     return res.end(JSON.stringify(productObj))
   }
-  
-  
- 
 })
 
 router.delete("/api/me/cart/:id", (req, res) => {
