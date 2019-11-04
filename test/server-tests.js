@@ -32,6 +32,21 @@ let checkForValidBrand = brand => {
   expect(brand["name"]).to.be.a("string");
 };
 
+let checkForValidIssueResponse = (response, expectedCode) => {
+  expect(response.body).to.not.be.null;
+  expect(response).to.have.status(expectedCode);
+  expect(response).to.have.header("Content-Type", "application/json");
+  expect(response.body).to.not.be.null;
+  expect(response.body).to.be.an("object");
+  expect(response.body).to.have.property("code");
+  expect(response.body).to.have.property("message");
+  expect(response.body.code).to.be.a("number");
+  expect(response.body.code).to.equal(expectedCode);
+  expect(response.body.message).to.exist;
+  expect(response.body.message).to.not.be.empty;
+  expect(response.body.message).to.be.a("string");
+};
+
 let checkForValidBrandsArray = brands => {
   let usedIds = [];
   brands.forEach(brand => {
@@ -320,17 +335,7 @@ describe("/GET brands/:brandId/products", () => {
       .request(server)
       .get(`/v1/brands/${BAD_BRAND_ID}/products`)
       .end((error, response) => {
-        expect(response).to.not.be.null;
-        expect(response).to.have.status(404);
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(404);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 404);
         done();
       });
   });
@@ -363,18 +368,7 @@ describe("/POST api/login", () => {
       .send({ username: "yellowleopard753", password: "wrongpass" })
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(401);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(401);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 401);
         expect(response.body.message).to.equal(
           "Invalid username and/or Password"
         );
@@ -388,18 +382,7 @@ describe("/POST api/login", () => {
       .send({ username: "badusername", password: "jonjon" })
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(401);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(401);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 401);
         expect(response.body.message).to.equal(
           "Invalid username and/or Password"
         );
@@ -413,18 +396,7 @@ describe("/POST api/login", () => {
       .send({ password: "password" })
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(400);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(400);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 400);
         expect(response.body.message).to.equal("Missing username");
         done();
       });
@@ -436,18 +408,7 @@ describe("/POST api/login", () => {
       .send({ username: "username" })
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(400);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(400);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 400);
         expect(response.body.message).to.equal("Missing Password");
         done();
       });
@@ -459,18 +420,7 @@ describe("/POST api/login", () => {
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(400);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(400);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 400);
         expect(response.body.message).to.equal("Missing username/Password");
         done();
       });
@@ -575,16 +525,7 @@ describe("/POST api/me/cart", () => {
       .send({ productId: "XYZ" })
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response).to.have.status(404);
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(404);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 404);
         expect(response.body.message).to.equal("Product does not exist");
         done();
       });
@@ -596,18 +537,7 @@ describe("/POST api/me/cart", () => {
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(400);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(400);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 400);
         expect(response.body.message).to.equal("Missing Product In Body");
         done();
       });
@@ -620,17 +550,7 @@ describe("/POST api/me/cart", () => {
       .end((error, response) => {
         expect(error).to.be.null;
         expect(response.body).to.not.be.null;
-        expect(response).to.have.status(401);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(401);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 401);
         expect(response.body.message).to.equal("Invalid Access Token");
         done();
       });
@@ -644,18 +564,7 @@ describe("/POST api/me/cart", () => {
       .send({})
       .end((error, response) => {
         expect(error).to.be.null;
-        expect(response.body).to.not.be.null;
-        expect(response).to.have.status(401);
-        expect(response).to.have.header("Content-Type", "application/json");
-        expect(response.body).to.not.be.null;
-        expect(response.body).to.be.an("object");
-        expect(response.body).to.have.property("code");
-        expect(response.body).to.have.property("message");
-        expect(response.body.code).to.be.a("number");
-        expect(response.body.code).to.equal(401);
-        expect(response.body.message).to.exist;
-        expect(response.body.message).to.not.be.empty;
-        expect(response.body.message).to.be.a("string");
+        checkForValidIssueResponse(response, 401);
         expect(response.body.message).to.equal("Invalid Access Token");
         done();
       });
