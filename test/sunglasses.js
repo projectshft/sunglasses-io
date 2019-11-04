@@ -276,6 +276,29 @@ describe('Me', () => {
           done()
         })
     })
+    it('should not add product with missing price', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "Better glasses",
+        "description": "The best glasses in the world",
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.not.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
   })
   describe('/POST api/me/cart/:id', () => {
     it('should change quantity of item in cart', done => {
@@ -307,6 +330,16 @@ describe('Me', () => {
         .end((err, res) => {
           res.should.have.status(401)
           res.text.should.eql('401 error: Must be logged in with validated access token to access cart')
+          done()
+        })
+    })
+    it('should return 400 error when trying to set quantity to non-positive number', done => {
+      chai.request(server)
+        .post(`/api/me/cart/4?accessToken=${token}`)
+        .send({quantity: -5})
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.text.should.eql('400 error: cannot set quantity of product to negative number')
           done()
         })
     })

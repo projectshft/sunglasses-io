@@ -210,12 +210,22 @@ router.post("/api/me/cart", (req, res) => {
     return res.end("401 error: Must be logged in with validated access token to access cart");
   }
 
+  // product to add to cart
+  let productObj = req.body
+
+  // Respond with error if price missing from product
+  if (!productObj.price) {
+    res.writeHead(400, {
+      'Content-Type': 'application/json'
+    });
+    return res.end(JSON.stringify(productObj));
+  }
+
     res.writeHead(200, {
     'Content-Type': 'application/json'
   })
 
-  // product to add to cart
-  let productObj = req.body
+
 
   // Checks if added product is already in cart
   const productInCart = currentUser.cart.find(product => {
@@ -283,6 +293,15 @@ router.post("/api/me/cart/:id", (req, res) => {
     return res.end("401 error: Must be logged in with validated access token to access cart");
   }
 
+  const newQuantity = parseInt(req.body.quantity);
+  // Checks if quantity sent is valid number
+  if (newQuantity < 1) {
+    res.writeHead(400, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("400 error: cannot set quantity of product to negative number");
+  }
+
     // Product ID to update in cart
   let productToUpdate = req.params.id;
 
@@ -297,10 +316,9 @@ router.post("/api/me/cart/:id", (req, res) => {
       'Content-Type': "text/plain"
     });
     return res.end("404: Requested product to change quantity not found in cart");
-  }
+  } 
 
   // Set new quantity of specified product
-  const newQuantity = parseInt(req.body.quantity);
   currentUser.cart[productIndex].quantity = newQuantity;
 
   res.writeHead(200, {
