@@ -17,6 +17,7 @@ const JSON_CONTENT_HEADER = { "Content-Type": "application/json" };
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 const errors = {
   MISSING_PRODUCT_ID: { code: 400, message: "Missing Product In Body" },
+  MISSING_PRODUCT_ID_CART: { code: 404, message: "Missing Product In Cart" },
   INVALID_PRODUCT_ID: { code: 404, message: "Product does not exist" },
   INVALID_BRAND_ID: { code: 404, message: "That brand does not exist" },
   INVALID_USER_PASS: { code: 401, message: "Invalid username and/or Password" },
@@ -189,6 +190,37 @@ router.post("/v1/api/me/cart", (request, response) => {
   } else {
     cartItem.quantity += 1;
   }
+
+  return prepareValidResponse(response, user.cart);
+});
+
+router.delete("/v1/api/me/cart/:productId", (request, response) => {
+  let token = getValidTokenFromRequest(request);
+  if (!token) {
+    return prepareErrorResponse(response, errors.TOKEN_INVALID);
+  } else if (isTokenExpired(token)) {
+    return prepareErrorResponse(response, errors.TOKEN_EXPIRED);
+  }
+  const { productId } = request.params;
+
+  //check for product Id at all
+  if (!productId) {
+    return prepareErrorResponse(response, errors.MISSING_PRODUCT_ID);
+  }
+
+  //add to users cart and return cart
+  let user = users.find(u => u.login.username === token.username);
+
+  //check for valid product
+  let product = user.cart.find(p => p.product.id == productId);
+
+  if (!product) {
+    return prepareErrorResponse(response, errors.MISSING_PRODUCT_ID_CART);
+  }
+
+  user.cart = user.cart.filter(p => {
+    return p.product.id != productId;
+  });
 
   return prepareValidResponse(response, user.cart);
 });

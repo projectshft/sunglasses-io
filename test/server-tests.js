@@ -642,3 +642,81 @@ describe("/GET api/me/cart", () => {
       });
   });
 });
+
+describe("/DELETE api/me/cart/:productId", () => {
+  let accessToken = "";
+  it("POST a valid login and get back a valid response including an accessToken (for use in next tests)", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "yellowleopard753", password: "jonjon" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(200);
+        expect(response).to.have.header("Content-Type", "application/json");
+        //property check
+        expect(response.body).to.have.property("accessToken");
+        //accessToken existence check
+        expect(response.body["accessToken"]).to.exist;
+        expect(response.body["accessToken"]).to.not.be.empty;
+        expect(response.body["accessToken"]).to.be.a("string");
+        accessToken = response.body["accessToken"];
+        done();
+      });
+  });
+  it("should DELETE a valid item from the cart and return the updated cart", done => {
+    chai
+      .request(server)
+      .delete(`/v1/api/me/cart/1?accessToken=${accessToken}`)
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidArrayBodyResponse(response);
+        checkForValidCartItemsArray(response.body);
+        //from the posts above the cart currently has 2 items and 2 diff quantities on those items
+        expect(response.body.length).to.equal(1);
+        let cartItem2;
+        cartItem2 = response.body.find(p => p.product.id === "2");
+        expect(cartItem2).to.exist;
+        expect(cartItem2.quantity).to.equal(1);
+        done();
+      });
+  });
+  it("should attempt to delete from the cart but forget accessToken and return a 401 Unauthorized", done => {
+    chai
+      .request(server)
+      .delete(`/v1/api/me/cart/1`)
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        checkForValidIssueResponse(response, 401);
+        expect(response.body.message).to.equal("Invalid Access Token");
+        done();
+      });
+  });
+  it("should attempt to delete from the cart but have an invalid accessToken and return a 401 Unauthorized", done => {
+    chai
+      .request(server)
+      .delete(
+        `/v1/api/me/cart/1?accessToken=definitelynotarealuidunlesswerereallylucky`
+      )
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 401);
+        expect(response.body.message).to.equal("Invalid Access Token");
+        done();
+      });
+  });
+  it("should DELETE an invalid or missing item from the cart and return a 404 not found error", done => {
+    chai
+      .request(server)
+      .delete(`/v1/api/me/cart/XYZ?accessToken=${accessToken}`)
+      .end((error, response) => {
+        expect(error).to.be.null;
+        checkForValidIssueResponse(response, 404);
+        expect(response.body.message).to.equal("Missing Product In Cart");
+        done();
+      });
+  });
+});
