@@ -213,8 +213,8 @@ router.post("/api/me/cart", (req, res) => {
   // product to add to cart
   let productObj = req.body
 
-  // Respond with error if price missing from product
-  if (!productObj.price) {
+  // Respond with error if properties missing from product
+  if (!productObj.price || !productObj.id || !productObj.brandId || !productObj.name || !productObj.description) {
     res.writeHead(400, {
       'Content-Type': 'application/json'
     });

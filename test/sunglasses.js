@@ -299,6 +299,98 @@ describe('Me', () => {
           done()
         })
     })
+    it('should not add product with missing id', done => {
+      let product = {
+        "brandId": "2",
+        "name": "Better glasses",
+        "price": 1000,
+        "description": "The best glasses in the world",
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.body.should.be.an('object');
+          res.body.should.not.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
+    it('should not add product with missing brandId', done => {
+      let product = {
+        "id": "4",
+        "name": "Better glasses",
+        "price": 1000,
+        "description": "The best glasses in the world",
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.not.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
+    it('should not add product with missing name', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "price": 1000,
+        "description": "The best glasses in the world",
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.not.have.property('name')
+          res.body.should.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
+    it('should not add product with missing description', done => {
+      let product = {
+        "id": "4",
+        "brandId": "2",
+        "name": "bestGlasses",
+        "price": 1000,
+        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      chai.request(server)
+        .post(`/api/me/cart?accessToken=${token}`)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.body.should.be.an('object');
+          res.body.should.have.property('id')
+          res.body.should.have.property('brandId')
+          res.body.should.have.property('name')
+          res.body.should.not.have.property('description')
+          res.body.should.have.property('price')
+          res.body.should.have.property('imageUrls')
+          done()
+        })
+    })
   })
   describe('/POST api/me/cart/:id', () => {
     it('should change quantity of item in cart', done => {
