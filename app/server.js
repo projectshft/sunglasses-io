@@ -213,6 +213,9 @@ router.post("/api/me/cart", (req, res) => {
   // product to add to cart
   let productObj = req.body
 
+  // Create quantity property for products in cart
+  productObj.quantity = 1;
+
   currentUser.cart.push(productObj)
   res.writeHead(200, {
     'Content-Type': 'application/json'
