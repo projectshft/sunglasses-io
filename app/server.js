@@ -24,49 +24,56 @@ const server = http.createServer((request, response) => {
   console.log(PORT);
 });
 
-// Route for Brands Endpoint
+//1 of 8 
+// Route for Brands Endpoint 
 myRouter.get('/api/brands', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
+//2 of 8 
 // Route for a specific brand's Products Endpoint
 myRouter.get('/api/brands/:id/products', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
+//3 of 8 
 // Route for a specific Product's Endpoint
 myRouter.get('/api/brands/products', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
+//4 of 8 
 // Route for a specific user's login
 myRouter.post('/api/login', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
-
+//5 of 8 
 // Route for a specific user's cart 
 myRouter.get('/api/me/cart', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
+//6 of 8 
 // Route for a user to add products to their cart
 myRouter.post('/api/me/cart', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
+//7 of 8 
 // Route for a user to delete items from their cart
 myRouter.delete('/api/me/cart/productID', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
+//8 of 8 
 // Route for a user to change quantity of items in cart
 myRouter.post('/api/me/cart/productID', function(request, response) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
