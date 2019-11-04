@@ -114,3 +114,31 @@ patrickRouter.post('/api/users', function(request,response) {
     return response.end();
   }
 });
+
+patrickRouter.get("/api/me/cart", (request, response) => {
+  if (!currentAccessToken) {
+    return res.end("Unauthorized access to cart");
+  }
+
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  res.end(JSON.stringify(userLogin.cart))
+})
+
+//setup for posting and deleting cart
+patrickRouter.post("/api/me/cart", (request, response) => {
+    if (!currentAccessToken) {
+      return res.end("Unauthorized access to cart");
+    }
+  
+    res.writeHead(200, {'Content-Type': 'application/json'})
+    res.end(JSON.stringify(userLogin.cart))
+  })
+  
+patrickRouter.delete("/api/me/cart", (request, response) => {
+    if (!currentAccessToken) {
+      return res.end("Unauthorized access to cart");
+    }
+    res.writeHead(200, {'Content-Type': 'application/json'})
+    res.end(JSON.stringify(userLogin.cart))
+
+})
