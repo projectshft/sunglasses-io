@@ -87,4 +87,4 @@ module.exports = server;
 //better indenting/nesting api items
 //talk through definitions in api
 //post vs get difference 
-//
+//lots of invalid or unexpected token errors on internal modules while getting mocha/chai tests to run-review that process

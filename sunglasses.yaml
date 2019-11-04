@@ -128,7 +128,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-    /api/me/cart:
+   /api/me/cart:
     post:
       summary: Add to Cart
       description: |
