@@ -273,5 +273,40 @@ router.delete("/api/me/cart/:id", (req, res) => {
   res.end(JSON.stringify(currentUser.cart))
 })
 
+router.post("/api/me/cart/:id", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("401 error: Must be logged in with validated access token to access cart");
+  }
+
+    // Product ID to update in cart
+  let productToUpdate = req.params.id;
+
+  // Check if product found in cart and returns index
+  let productIndex = currentUser.cart.findIndex(product => {
+    return productToUpdate == product.id;
+  })
+
+  if (productIndex === -1) {
+    res.writeHead(404, {
+      'Content-Type': "text/plain"
+    });
+    return res.end("404: Requested product to change quantity not found in cart");
+  }
+
+  const newQuantity = parseInt(req.body.quantity);
+  currentUser.cart[productIndex].quantity = newQuantity;
+
+  res.writeHead(200, {
+    'Content-Type': 'application/json'
+  })
+
+  res.end(JSON.stringify(currentUser.cart[productIndex]))
+})
+
 // allow for testing
 module.exports = server;
