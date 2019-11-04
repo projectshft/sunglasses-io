@@ -10,11 +10,17 @@ var url = require("url");
 
 let brands = [];
 let products = [];
+let users = [];
+let tokens = [];
 
 const JSON_CONTENT_HEADER = { "Content-Type": "application/json" };
 
 const errors = {
-  INVALID_BRAND_ID: { code: 404, message: "That brand does not exist" }
+  INVALID_BRAND_ID: { code: 404, message: "That brand does not exist" },
+  INVALID_USER_PASS: { code: 401, message: "Invalid username and/or Password" },
+  MISSING_USERNAME: { code: 400, message: "Missing username" },
+  MISSING_PASS: { code: 400, message: "Missing Password" },
+  MISSING_USERNAME_PASS: { code: 400, message: "Missing username/Password" }
 };
 
 const PORT = process.env.PORT || 3001;
@@ -35,6 +41,8 @@ server.listen(PORT, err => {
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
   //populate products
   products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
+  //populate products
+  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
 });
 
 //return brands, no auth necessary
@@ -80,6 +88,57 @@ router.get("/v1/brands/:brandId/products", (request, response) => {
     product => product.categoryId === brand.id
   );
   return prepareValidResponse(response, filteredProducts);
+});
+
+//return all products that match brandId, no auth necessary
+router.post("/v1/api/login", (request, response) => {
+  const { username, password } = request.body;
+
+  //check for missing/blank username & pass
+  if (
+    (!username || username.trim() === "") &&
+    (!password || password.trim() === "")
+  ) {
+    return prepareErrorResponse(response, errors.MISSING_USERNAME_PASS);
+  } else if (!username || username.trim() === "") {
+    return prepareErrorResponse(response, errors.MISSING_USERNAME);
+  } else if (!password || password.trim() === "") {
+    return prepareErrorResponse(response, errors.MISSING_PASS);
+  }
+
+  let user = users.find(
+    obj => obj.login.username === username && obj.login.password === password
+  );
+
+  if (!user) {
+    user = users.find(obj => obj.login.username === username);
+    console.log("now  here");
+    return prepareErrorResponse(response, errors.INVALID_USER_PASS);
+  }
+
+  //find or create access token
+  let accessUser = tokens.find(obj => obj.username === username);
+
+  if (accessUser) {
+    accessUser.lastUpdate = Date.now();
+  } else {
+    var uid = require("rand-token").uid;
+
+    accessUser = {
+      username,
+      accessToken: uid(16),
+      lastUpdate: Date.now()
+    };
+
+    tokens.push(accessUser);
+  }
+
+  //return only the token
+  let clonedToken = Object.assign({}, accessUser);
+  delete clonedToken.username;
+  delete clonedToken.lastUpdate;
+
+  return prepareValidResponse(response, clonedToken);
 });
 
 //helper function to send return object back as JSON while setting JSON header

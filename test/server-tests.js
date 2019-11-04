@@ -321,3 +321,144 @@ describe("/GET brands/:brandId/products", () => {
       });
   });
 });
+
+describe("/POST api/login", () => {
+  it("should POST a valid login and get back a valid response including an accessToken", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "yellowleopard753", password: "jonjon" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(200);
+        expect(response).to.have.header("Content-Type", "application/json");
+        //property check
+        expect(response.body).to.have.property("accessToken");
+        //accessToken existence check
+        expect(response.body["accessToken"]).to.exist;
+        expect(response.body["accessToken"]).to.not.be.empty;
+        expect(response.body["accessToken"]).to.be.a("string");
+        done();
+      });
+  });
+  it("should POST a login with an invalid pass get back a 401 response noting invalid user/pass", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "yellowleopard753", password: "wrongpass" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(401);
+        expect(response).to.have.header("Content-Type", "application/json");
+        expect(response.body).to.not.be.null;
+        expect(response.body).to.be.an("object");
+        expect(response.body).to.have.property("code");
+        expect(response.body).to.have.property("message");
+        expect(response.body.code).to.be.a("number");
+        expect(response.body.code).to.equal(401);
+        expect(response.body.message).to.exist;
+        expect(response.body.message).to.not.be.empty;
+        expect(response.body.message).to.be.a("string");
+        expect(response.body.message).to.equal(
+          "Invalid username and/or Password"
+        );
+        done();
+      });
+  });
+  it("should POST a login with an invalid username get back a 401 response noting invalid user/pass", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "badusername", password: "jonjon" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(401);
+        expect(response).to.have.header("Content-Type", "application/json");
+        expect(response.body).to.not.be.null;
+        expect(response.body).to.be.an("object");
+        expect(response.body).to.have.property("code");
+        expect(response.body).to.have.property("message");
+        expect(response.body.code).to.be.a("number");
+        expect(response.body.code).to.equal(401);
+        expect(response.body.message).to.exist;
+        expect(response.body.message).to.not.be.empty;
+        expect(response.body.message).to.be.a("string");
+        expect(response.body.message).to.equal(
+          "Invalid username and/or Password"
+        );
+        done();
+      });
+  });
+  it("should POST a login without a username get back a 400 response noting missing username", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ password: "password" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(400);
+        expect(response).to.have.header("Content-Type", "application/json");
+        expect(response.body).to.not.be.null;
+        expect(response.body).to.be.an("object");
+        expect(response.body).to.have.property("code");
+        expect(response.body).to.have.property("message");
+        expect(response.body.code).to.be.a("number");
+        expect(response.body.code).to.equal(400);
+        expect(response.body.message).to.exist;
+        expect(response.body.message).to.not.be.empty;
+        expect(response.body.message).to.be.a("string");
+        expect(response.body.message).to.equal("Missing username");
+        done();
+      });
+  });
+  it("should POST a login without a password get back a 400 response noting missing", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({ username: "username" })
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(400);
+        expect(response).to.have.header("Content-Type", "application/json");
+        expect(response.body).to.not.be.null;
+        expect(response.body).to.be.an("object");
+        expect(response.body).to.have.property("code");
+        expect(response.body).to.have.property("message");
+        expect(response.body.code).to.be.a("number");
+        expect(response.body.code).to.equal(400);
+        expect(response.body.message).to.exist;
+        expect(response.body.message).to.not.be.empty;
+        expect(response.body.message).to.be.a("string");
+        expect(response.body.message).to.equal("Missing Password");
+        done();
+      });
+  });
+  it("should POST a login without a username or password get back a 400 response noting missing", done => {
+    chai
+      .request(server)
+      .post(`/v1/api/login`)
+      .send({})
+      .end((error, response) => {
+        expect(error).to.be.null;
+        expect(response.body).to.not.be.null;
+        expect(response).to.have.status(400);
+        expect(response).to.have.header("Content-Type", "application/json");
+        expect(response.body).to.not.be.null;
+        expect(response.body).to.be.an("object");
+        expect(response.body).to.have.property("code");
+        expect(response.body).to.have.property("message");
+        expect(response.body.code).to.be.a("number");
+        expect(response.body.code).to.equal(400);
+        expect(response.body.message).to.exist;
+        expect(response.body.message).to.not.be.empty;
+        expect(response.body.message).to.be.a("string");
+        expect(response.body.message).to.equal("Missing username/Password");
+        done();
+      });
+  });
+});
