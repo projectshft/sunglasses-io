@@ -1,0 +1,45 @@
+# this documentation is for the Sunglasses API
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: Let you app find the Sunglasses from the hottest brands
+  version: "1.0.0"
+# the domain of the service
+host: 3001
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: brands
+      description: |
+        The brands endpoint returns all inventory for all brands included on the Sunglasses site.
+      parameters:
+        - name: Brand name
+          in: query
+          description: brands Oakley, Ray Ban, Levi's, DKNY can all be searched
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/:id/product:
+    get:
+      summary: 
+      description: |
+        
