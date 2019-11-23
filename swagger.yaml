@@ -27,10 +27,10 @@ paths:
   /brands/:id/products:
     get:
       tags:
-        - Brands ID
+        - Products
       summary: All Products in a Brand
       description: 
-        Returns products based on the brand ID entered
+        Returns ALL products based on the brand ID entered
       parameters:
         - name: id
           in: path
@@ -41,8 +41,6 @@ paths:
         '200':
           description: All Products in a Brand success
           schema:
-            type: array
-            items:
               $ref: '#/definitions/Product'
         '404':
           description: Invalid entry for Brand ID
@@ -202,12 +200,12 @@ definitions:
       id:
         type: string
         description: Product ID
+      categoryId:
+        type: string
+        description: The Product ID based on category.  
       name:
         type: string
         description: Product Name
-      brand:
-        type: string
-        description: Product Brand
       price:
         type: number
         description: Product Price
