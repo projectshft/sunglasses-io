@@ -6,14 +6,10 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
-
-
-// if(!module.parent){
-//     app.listen(3001);
-// }
+var url = require("url");
 
 const PORT = 8080;
-const host = 'localhost'
+
 
 const patrickRouter = Router();
 patrickRouter.use(bodyParser.json());
@@ -24,6 +20,25 @@ var brands = [];
 var products = [];
 var users = [];
 let accessTokens = [];
+
+// Helper method to process access token
+const getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token == parsedUrl.query.accessToken;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 
 
 const Server = module.exports = http.createServer(function (request, response) {
@@ -141,3 +156,5 @@ patrickRouter.delete("/api/me/cart", (request, response) => {
     res.end(JSON.stringify(userLogin.cart))
 
 })
+
+module.exports = Server;
