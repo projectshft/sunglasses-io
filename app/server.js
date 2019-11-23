@@ -8,9 +8,14 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 var url = require("url");
 
+// if(!module.parent){
+//     app.listen(3001);
+// }
+
 const PORT = 8080;
 
 
+//router to json works
 const patrickRouter = Router();
 patrickRouter.use(bodyParser.json());
 
@@ -40,7 +45,6 @@ const getValidTokenFromRequest = function(request) {
 };
 
 
-
 const Server = module.exports = http.createServer(function (request, response) {
     patrickRouter(request, response, finalHandler(request, response)) 
 }).listen(PORT, ()=>{
@@ -59,7 +63,10 @@ patrickRouter.get("/api/brands", (request, response) => {
     return response.end(JSON.stringify(brands));
 
 
-});
+})
+
+
+
 
 patrickRouter.get("/api/products", (request, response) => {
     response.writeHead(200, {'Content-Type': 'application/json'
@@ -67,17 +74,20 @@ patrickRouter.get("/api/products", (request, response) => {
     return response.end(JSON.stringify(products));
     
 
-});
+})
 
 
-patrickRouter.get("/api/users", (request, response) => {
-    response.writeHead(200, {'Content-Type': 'application/json'
-});
-    return response.end(JSON.stringify(products));
+
+
+
+
+// patrickRouter.get("/api/users", (request, response) => {
+//     response.writeHead(200, {'Content-Type': 'application/json'
+// });
+//     return response.end(JSON.stringify(users));
     
 
-});
-
+// });
 
 
 // Login call
@@ -113,7 +123,7 @@ patrickRouter.post('/api/users', function(request,response) {
         accessTokens.push(newAccessToken);
         response.writeHead(200, {'Content-Type': 'application/json'
 });
-       return response.end(JSON.stringify(newAccessToken.token));
+        return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
       // When a login fails, tell the client in a generic way that either the username or password was wrong
@@ -129,6 +139,8 @@ patrickRouter.post('/api/users', function(request,response) {
   return response.end(JSON.stringify(users));
   }
 });
+
+
 patrickRouter.get("/api/me/cart", (request, response) => {
   if (!currentAccessToken) {
     return res.end("Unauthorized access to cart");
