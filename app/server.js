@@ -14,6 +14,11 @@ var url = require("url");
 
 const PORT = 8080;
 
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+let currentAccessToken = accessTokens.find((accessToken) => {
+  return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+});
 
 //router to json works
 const patrickRouter = Router();
@@ -142,12 +147,26 @@ patrickRouter.post('/api/users', function(request,response) {
 
 
 patrickRouter.get("/api/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    return res.end("Unauthorized access to cart");
-  }
+    response.writeHead(401, "Unauthorized access to cart");
+    response.end();
+  } else {
 
-  res.writeHead(200, {'Content-Type': 'application/json'})
-  res.end(JSON.stringify(userLogin.cart))
+    let userLogin = users.find((user)=>{
+      return user.body.email == request.body.email && user.login.password == request.body.password;
+    });
+    if(user) {
+      resquest.writeHead(200, {'Content-Type': 'application/json'})
+      response.end(JSON.stringify(userLogin.cart));
+
+
+    } else {
+      response.writeHead(404, "Request not found")
+      response.end();
+    }
+  
+  }
 })
 
 //setup for posting and deleting cart
