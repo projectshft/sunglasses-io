@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3009;
 
 // State holding variables 
 let brands = [];
@@ -16,7 +16,7 @@ let users = [];
 let accessTokens = [{
     token: '87987' // hard coded access token for testing purposes 
 }];
-let cart = [];
+let items = [];
 
 
 
@@ -105,6 +105,7 @@ router.get("/api/brands/:id/products", (request, response) => {
 
 // Login call
 router.post('/api/login', function (request, response) {
+
     // Make sure there is a username and password in the request
     if (request.body.username && request.body.password) {
         // See if there is a user that has that username and password
@@ -145,12 +146,14 @@ router.post('/api/login', function (request, response) {
         response.writeHead(400, { 'Content-Type': 'application/json' });
         return response.end(JSON.stringify("Incorrectly formatted response"));
     }
+
 });
 
 router.post("/api/me/cart", (request, response) => {
 
     var getValidTokenFromRequest = function (request) {
         var parsedUrl = require('url').parse(request.url, true);
+
         if (parsedUrl.query.accessToken) {
             // Verify the access token to make sure it's valid and not expired
             let currentAccessToken = accessTokens.find(accessToken => {
@@ -168,7 +171,9 @@ router.post("/api/me/cart", (request, response) => {
 
 
         } else {
+
             return null;
+
         }
     };
 
@@ -182,5 +187,12 @@ router.post("/api/me/cart", (request, response) => {
 
 });
 
+// Route for our shopping cart  
+router.get("/api/me/cart", (request, response) => {
+
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart));
+});
 
 module.exports = server

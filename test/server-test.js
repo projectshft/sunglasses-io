@@ -6,6 +6,7 @@ const assert = chai.assert;
 const { expect } = require('chai');
 const should = chai.should();
 
+
 chai.use(chaiHTTP);
 
 
@@ -209,7 +210,7 @@ describe('/Post Login ', () => {
 
 //Add to cart Post
 describe('/Post add to cart button ', () => {
-    it.only('should check to make sure user has access token ', done => {
+    it.only('should check to make sure user has an access token ', done => {
         let accessToken = [{
             token: '87987'
         }];
@@ -238,4 +239,24 @@ describe('/Post add to cart button ', () => {
                 done();
             });
     });
+
+});
+
+//Add to cart GET
+describe('/GET shopping cart ', () => {
+    it.only('return a subtotal of 0 if no items are in cart ', done => {
+
+        chai
+            .request(server)
+            .get('/api/me/cart')
+            .send()
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.equal(0);
+                done();
+            });
+
+    });
+
 });
