@@ -229,13 +229,14 @@ describe('/Post add to cart button ', () => {
         let accessToken = [{
             token: '879d7'
         }];
+
         chai
             .request(server)
             .post('/api/me/cart')
             .send(accessToken)
             .end((err, res) => {
                 res.should.have.status(401);
-                res.body.should.be.a('array');
+                res.body.should.be.a('sting');
                 done();
             });
     });

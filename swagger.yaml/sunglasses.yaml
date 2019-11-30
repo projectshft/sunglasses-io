@@ -61,7 +61,7 @@ paths:
   /brands/{id}/products:
     get:
       tags:
-      - "pet"
+      "products"
       summary: "Search a product"
       description: "This endpoint allows you to seach a product which will give you all the products for a given brand"
       produces:
@@ -156,12 +156,11 @@ paths:
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
-  /categories:
-    get:
-      summary: Categories
+  /me/cart:
+    post:
+      summary: adding items to shopping cart
       description: >
-        Categories define groupings of goals for browsing.
+        add items to shopping cart 
       parameters:
         - name: limit
           in: query
@@ -182,22 +181,48 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /categories/{id}/goals:
-    get:
-      summary: Goals in Category
+        '401': 
+          descrition: Invalid product added to cart
+  /me/cart/:productId:
+    delete:
+      summary: deleting items in the cart 
       description: >
-        All the goals in a given cateogyr
+        deleting items in the cart
       parameters:
         - name: id
           in: path
-          description: The id of the category to search for goals in.
+          description: 
           required: true
           type: string
       tags:
-        - Categories
+        - delete
       responses:
         '200':
-          description: An array of goals in the category
+          description: successfully deleted item from cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Goal'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  /me/cart/:productId:
+ /me/cart/:productId:
+    post:
+      summary: editing items in the cart 
+      description: >
+       changing quantities within the cart 
+      parameters:
+        - name: id
+          in: path
+          description: 
+          required: true
+          type: string
+      tags:
+        - delete
+      responses:
+        '200':
+          description: successfully deleted item from cart
           schema:
             type: array
             items:

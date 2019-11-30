@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3000;
 
 // State holding variables 
 let brands = [];
@@ -153,16 +153,17 @@ router.post("/api/me/cart", (request, response) => {
 
     var getValidTokenFromRequest = function (request) {
         var parsedUrl = require('url').parse(request.url, true);
+        const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
         if (parsedUrl.query.accessToken) {
             // Verify the access token to make sure it's valid and not expired
-            let currentAccessToken = accessTokens.find(accessToken => {
-                return accessToken.token == parsedUrl.query.accessToken;
+            let currentAccessToken = accessTokens.find((accessToken) => {
+                return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
             });
 
             if (currentAccessToken) {
                 response.writeHead(200);
-                return response.end(JSON.stringify(currentAccessToken));
+                return currentAccessToken;
 
             } else {
                 response.writeHead(401, { "Content-Type": "application/json" });
@@ -183,16 +184,17 @@ router.post("/api/me/cart", (request, response) => {
     // response.writeHead(200)
     // user.addedProduct.push(cart);
     // saveCurrentUser(user);
-    response.end();
+    return response.end();
 
 });
 
 // Route for our shopping cart  
 router.get("/api/me/cart", (request, response) => {
 
-
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
 });
+
+
 
 module.exports = server
