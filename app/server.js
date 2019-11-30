@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3009;
+const PORT = process.env.PORT || 3002;
 
 // State holding variables 
 let brands = [];
