@@ -18,11 +18,25 @@ describe('/GET brands', () => {
     });
 });
 
+describe('/GET producst', ()=>{
+    it('it should GET all the products', done => {
+        chai
+        .request(SunglassesServer)
+        .get('/api/products')
+        .end((err,res)=> {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(11);
+            done();
+        });
+    });
+});
+
 describe('/GET products by brand id', () => {
     it('it should GET all products by categoryID', done => {
         chai
         .request(SunglassesServer)
-        .get('/api/brands/3/products')
+        .get('/api/brands/:id/products', {id: "3"})
         .end((err,res) => {
             res.should.have.status(200);
             res.body.should.be.an('array');
@@ -31,5 +45,3 @@ describe('/GET products by brand id', () => {
         });
     });
 });
-
-

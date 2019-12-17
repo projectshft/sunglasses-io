@@ -21,53 +21,57 @@ myRouter.use(bodyParser.json());
 const server = module.exports = http.createServer( (request, response) => {
     myRouter(request, response, finalHandler(request, response))
 })
-    .listen(PORT,error => {
-        if (error) {
-            return console.log("Error on Server Startup: ", error);
-        }
-        //brands = JSON.parse(fs.readFile('initial-data/brands.json','utf-8'));
-        
-        fs.readFile('initial-data/brands.json','utf-8', (error, data) => {
-            if (error) throw error;
-            brands = JSON.parse(data);
-            console.log(`Server setup: ${brands.length} brands loaded`);
-        });
-        //users = JSON.parse(fs.readFileSync('initial-data/users.json','utf-8'));
-        
-        fs.readFile('initial-data/users.json','utf-8', (error, data) => {
-            if (error) throw error;
-            users = JSON.parse(data);
-            user = users[0];
-            console.log(`Server setup: ${users.length} users loaded`);
-        });
-
-        
-        // products = JSON.parse(fs.readFileSync('initial-data/products.json','utf-8'));
-        
-        fs.readFile('initial-data/products.json','utf-8', (error, data) => {
-            if (error) throw error;
-            products = JSON.parse(data);
-            console.log(`Server setup: ${products.length} products loaded`);
-        });
+.listen(PORT,error => {
+    if (error) {
+        return console.log("Error on Server Startup: ", error);
+    }
+    //brands = JSON.parse(fs.readFile('initial-data/brands.json','utf-8'));
+    
+    fs.readFile('initial-data/brands.json','utf-8', (error, data) => {
+        if (error) throw error;
+        brands = JSON.parse(data);
+        console.log(`Server setup: ${brands.length} brands loaded`);
     });
+    //users = JSON.parse(fs.readFileSync('initial-data/users.json','utf-8'));
+    
+    fs.readFile('initial-data/users.json','utf-8', (error, data) => {
+        if (error) throw error;
+        users = JSON.parse(data);
+        user = users[0];
+        console.log(`Server setup: ${users.length} users loaded`);
+    });
+
+    
+    // products = JSON.parse(fs.readFileSync('initial-data/products.json','utf-8'));
+    
+    fs.readFile('initial-data/products.json','utf-8', (error, data) => {
+        if (error) throw error;
+        products = JSON.parse(data);
+        console.log(`Server setup: ${products.length} products loaded`);
+    });
+});
 
 myRouter.get('/api/brands', (request,response) => {
 //should return all brands in database
+    console.log(request.params);
     response.writeHead(200,{'Content-Type': 'application/json'});
     return response.end(JSON.stringify(brands));
 });
 
 myRouter.get('/api/brands/:id/products', (request,response) => {
 //should return all products of a certain brand
-    const { brandId } = request.params;
-    const brand = brands.find(brand => brand.id = brandId);
+    console.log(request.params)
+    const brandId = request.params.id;
+    const brand = brands.find(b=> b.id == brandId);
+    console.log(brand);
     if (!brand) {
+      console.log('brand id:',brand);
         response.writeHead(404, "That brand does not exist");
         return response.end();
     }
     response.writeHead(200, { "Content-Type": "application/json" });
     const productsOfBrand = products.filter(
-        products => products.categoryid === brandId
+        p => p.categoryId == brandId
     );
     return response.end(JSON.stringify(productsOfBrand))
         
@@ -75,6 +79,9 @@ myRouter.get('/api/brands/:id/products', (request,response) => {
 
 myRouter.get('/api/products', (request,response)=>{
 //should return all products
+console.log(request.params);
+    response.writeHead(200,{'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(products));
 });
 
 myRouter.post('/api/login', (request,response)=>{
