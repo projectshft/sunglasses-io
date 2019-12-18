@@ -36,7 +36,7 @@ describe('/GET products by brand id', () => {
     it('it should GET all products by categoryID', done => {
         chai
         .request(SunglassesServer)
-        .get('/api/brands/:id/products', {id: "3"})
+        .get('/api/brands/:id/products', {'id': "3"})
         .end((err,res) => {
             res.should.have.status(200);
             res.body.should.be.an('array');
@@ -45,3 +45,16 @@ describe('/GET products by brand id', () => {
         });
     });
 });
+
+describe('/POST login', ()=> {
+    it('it should return an access token for a user', done => {
+        chai
+        .request(SunglassesServer)
+        .post('/api/login', {"email":"susanna.richards@example.com","password":"jonjon"})
+        .end((err,res)=> {
+            res.should.have.status(200);
+            res.body.should.be.a('string');
+            done();
+        })
+    })
+})

@@ -85,57 +85,43 @@ console.log(request.params);
 });
 
 myRouter.post('/api/login', (request,response)=>{
-//authentication
-if (!failedLoginAttempts[request.body.username]){
-    failedLoginAttempts[request.body.username] = 0;
-  }
-  if (request.body.username && request.body.password && failedLoginAttempts[request.body.username] < 3) {
-      let user = users.find((user)=>{
-          return user.login.username == request.body.username && user.login.password == request.body.password;
-      });
-      if (user) {
-        // Reset our counter of failed logins
-        failedLoginAttempts[request.body.username] = 0;
-        response.writeHead(200);
+  //authentication
+  // Make sure there is a username and password in the request
+  // See if there is a user that has that username and password
+  // Write the header because we know we will be returning successful at this point and that the response will be json
+  // If we already have an existing access token, use that
+  // Update the last updated value of the existing token so we get another time period before expiration
+  // Create a new token with the user value and a "random" token
+  // When a login fails, tell the client in a generic way that either the username or password was wrong
+  // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
 
-      // We have a successful login, if we already have an existing access token, use that
-      let currentAccessToken = accessTokens.find((currentAccessToken) => {
-        return currentAccessToken.username == user.login.username;
-      });
+  console.log(request.body);
+  let loginEmail = request.body.email;
+  let loginPassword = request.body.password;
 
-      // Update the last updated value so we get another time period
-      if (currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
-      } 
-      else {
-        // Create a new token with the user value and a "random" token
-        let newAccessToken = {
-          username: user.login.username,
-          lastUpdated: new Date(),
-          token: uid(16)
-        }
-        accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
-      }
-    } 
-    else {
-      let numFailedForUser = failedLoginAttempts[request.body.username];
-      if (numFailedForUser) {
-        failedLoginAttempts[request.body.username]++;
-      } 
-      else {
-        failedLoginAttempts[request.body.username] = 1
-      }
-      response.writeHead(401, "Invalid username or password");
-      return response.end();
-    }
-  } 
-  else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-    response.writeHead(400, "Incorrectly formatted response");
+  let loggedInUser = users.find(user=> (user.email == loginEmail) && (user.login.password == loginPassword))
+
+  if(!loggedInUser){
+    response.writeHead(404,"Email and/or Password is incorrect.")
     return response.end();
-  }   
+  } else {
+    response.writeHead(200,{'Content-Type': 'application/json'})
+  }
+
+  let currentAccessToken = accessTokens.find(t=> t.username == loggedInUser.login.username);
+
+  if (currentAccessToken) {
+    currentAccessToken.lastUpdated = new Date();
+    return response.end(JSON.stringify(currentAccessToken.token))
+  } else {
+    let newToken = {
+      username: loggedInUser.login.username,
+      lastUpdated: new Date,
+      token: uid(16)
+    }
+    accessTokens.push(newToken);
+    return response.end(JSON.stringify(newToken.token))
+  }
 });
 
 myRouter.get('/api/me/cart', (request,response)=>{
