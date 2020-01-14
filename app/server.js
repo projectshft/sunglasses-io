@@ -7,24 +7,46 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // State holding variables 
 let brands = [];
 let products = [];
 let users = [];
+
+// hard coded access token for testing purposes 
 let accessTokens = [{
-    token: '87987' // hard coded access token for testing purposes 
+    username: 'yellowleopard753',
+    token: '87987'
 }];
-let items = [];
 
 
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+    var parsedUrl = require('url').parse(request.url, true);
+    var tokenInUrl = parsedUrl.query.token
 
-const saveCurrentUser = (currentUser) => {
-    // set hardcoded "logged in" user
-    users[0] = currentUser;
-    fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
+    if (tokenInUrl) {
+        // Verify the access token to make sure it's valid and not expired
+        let currentAccessToken = accessTokens.find(accessToken => {
+            return accessToken.token == tokenInUrl
+        });
+        if (currentAccessToken) {
+            return currentAccessToken;
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
 };
+
+
+// const saveCurrentUser = (currentUser) => {
+//     // set hardcoded "logged in" user
+//     users[0] = currentUser;
+//     fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
+// };
 
 // Setup router
 const router = Router();
@@ -150,41 +172,25 @@ router.post('/api/login', function (request, response) {
 });
 
 router.post("/api/me/cart", (request, response) => {
-
-    var getValidTokenFromRequest = function (request) {
-        var parsedUrl = require('url').parse(request.url, true);
-        const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
-
-        if (parsedUrl.query.accessToken) {
-            // Verify the access token to make sure it's valid and not expired
-            let currentAccessToken = accessTokens.find((accessToken) => {
-                return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-            });
-
-            if (currentAccessToken) {
-                response.writeHead(200);
-                return currentAccessToken;
-
-            } else {
-                response.writeHead(401, { "Content-Type": "application/json" });
-                return response.end(JSON.stringify("Please login"));
-            }
-
-
-        } else {
-
-            return null;
-
+    // Check for valid token in request 
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //If there is no token in request, alert user to sign in 
+    if (!currentAccessToken) {
+        response.writeHead(400, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify("Please sign in"));
+    } else {
+        //if there is a token in the request, check it against known users 
+        let loggedInUser = users.find((user) => {
+            return user.login.username == currentAccessToken.username
+        })
+        //If user matches a user in database, return the cart 
+        if (loggedInUser) {
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify(loggedInUser.cart));
         }
-    };
 
+    }
 
-    var eitherTokenOrNull = getValidTokenFromRequest(request)
-
-    // response.writeHead(200)
-    // user.addedProduct.push(cart);
-    // saveCurrentUser(user);
-    return response.end();
 
 });
 

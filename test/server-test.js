@@ -210,40 +210,34 @@ describe('/Post Login ', () => {
 
 //Add to cart Post
 describe('/Post add to cart button ', () => {
-    it.only('should check to make sure user has an access token ', done => {
-        let accessToken = [{
-            token: '87987'
-        }];
+    it.only('should check for access token of user', done => {
         chai
             .request(server)
-            .post('/api/me/cart')
-            .send(accessToken)
+            .post('/api/me/cart?token=87987')
+            .send()
             .end((err, res) => {
                 res.should.have.status(200);
-                res.body.should.be.a('object');
+                res.body.should.be.an('array');
                 done();
             });
     });
 
     it.only('if the access token does not match assigned token ', done => {
-        let accessToken = [{
-            token: '879d7'
-        }];
 
         chai
             .request(server)
-            .post('/api/me/cart')
-            .send(accessToken)
+            .post('/api/me/cart?token=879d7')
+            .send()
             .end((err, res) => {
-                res.should.have.status(401);
-                res.body.should.be.a('sting');
+                res.should.have.status(400);
+                res.body.should.be.a('string');
                 done();
             });
     });
 
 });
 
-//Add to cart GET
+//Cart GET route 
 describe('/GET shopping cart ', () => {
     it.only('return a subtotal of 0 if no items are in cart ', done => {
 
