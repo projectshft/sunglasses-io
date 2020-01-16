@@ -217,12 +217,12 @@ describe('/Post add to cart button ', () => {
             .send()
             .end((err, res) => {
                 res.should.have.status(200);
-                res.body.should.be.an('array');
+                // res.body.should.be.an('array');
                 done();
             });
     });
 
-    it.only('if the access token does not match assigned token ', done => {
+    it.only('if the access token does not match assigned token return error ', done => {
 
         chai
             .request(server)
@@ -231,6 +231,28 @@ describe('/Post add to cart button ', () => {
             .end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.be.a('string');
+                done();
+            });
+    });
+
+    it.only('adding a product to the users cart should update the cart, and return the new cart', done => {
+
+        let product = {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price": 50,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+
+        chai
+            .request(server)
+            .post('/api/me/cart?token=87987')
+            .send(product)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
                 done();
             });
     });

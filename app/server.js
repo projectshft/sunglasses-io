@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // State holding variables 
 let brands = [];
@@ -174,6 +174,9 @@ router.post('/api/login', function (request, response) {
 router.post("/api/me/cart", (request, response) => {
     // Check for valid token in request 
     let currentAccessToken = getValidTokenFromRequest(request);
+
+    let updatedCart = request.body
+
     //If there is no token in request, alert user to sign in 
     if (!currentAccessToken) {
         response.writeHead(400, { 'Content-Type': 'application/json' });
@@ -183,11 +186,16 @@ router.post("/api/me/cart", (request, response) => {
         let loggedInUser = users.find((user) => {
             return user.login.username == currentAccessToken.username
         })
-        //If user matches a user in database, return the cart 
+        //If user matches a user in database, add product to the cart 
         if (loggedInUser) {
+            //When a user adds a product to the cart, it should update the current cart
+            Object.assign(loggedInUser.cart, updatedCart)
+
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
+
         }
+
 
     }
 
