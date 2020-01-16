@@ -179,20 +179,24 @@ router.post("/api/me/cart", (request, response) => {
 
     //If there is no token in request, alert user to sign in 
     if (!currentAccessToken) {
-        response.writeHead(400, { 'Content-Type': 'application/json' });
+        response.writeHead(403, { 'Content-Type': 'application/json' });
         return response.end(JSON.stringify("Please sign in"));
+
     } else {
+
         //if there is a token in the request, check it against known users 
         let loggedInUser = users.find((user) => {
             return user.login.username == currentAccessToken.username
         })
+
         //If user matches a user in database, add product to the cart 
         if (loggedInUser) {
+
             //When a user adds a product to the cart, it should update the current cart
             Object.assign(loggedInUser.cart, updatedCart)
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
-            return response.end(JSON.stringify(loggedInUser.cart));
+            return response.end();
 
         }
 
@@ -202,11 +206,31 @@ router.post("/api/me/cart", (request, response) => {
 
 });
 
-// Route for our shopping cart  
+// Route for user to retrieve shopping cart 
 router.get("/api/me/cart", (request, response) => {
+    let currentAccessToken = getValidTokenFromRequest(request);
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
+    if (!currentAccessToken) {
+        response.writeHead(403, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify("Please sign in"));
+
+    } else {
+        //if there is a token in the request, check it against known users 
+        let loggedInUser = users.find((user) => {
+            return user.login.username == currentAccessToken.username
+        })
+
+        //If user matches a user in database, return cart of user
+        if (loggedInUser) {
+
+
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify(loggedInUser.cart));
+
+        }
+    }
+
+
 });
 
 

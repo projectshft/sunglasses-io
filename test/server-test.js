@@ -217,7 +217,6 @@ describe('/Post add to cart button ', () => {
             .send()
             .end((err, res) => {
                 res.should.have.status(200);
-                // res.body.should.be.an('array');
                 done();
             });
     });
@@ -229,13 +228,13 @@ describe('/Post add to cart button ', () => {
             .post('/api/me/cart?token=879d7')
             .send()
             .end((err, res) => {
-                res.should.have.status(400);
+                res.should.have.status(403);
                 res.body.should.be.a('string');
                 done();
             });
     });
 
-    it.only('adding a product to the users cart should update the cart, and return the new cart', done => {
+    it.only('adding a product to the users cart should update the cart', done => {
 
         let product = {
             "id": "3",
@@ -252,7 +251,6 @@ describe('/Post add to cart button ', () => {
             .send(product)
             .end((err, res) => {
                 res.should.have.status(200);
-                res.body.should.be.a('array');
                 done();
             });
     });
@@ -265,7 +263,7 @@ describe('/GET shopping cart ', () => {
 
         chai
             .request(server)
-            .get('/api/me/cart')
+            .get('/api/me/cart?token=87987')
             .send()
             .end((err, res) => {
                 res.should.have.status(200);
@@ -274,6 +272,42 @@ describe('/GET shopping cart ', () => {
                 done();
             });
 
+    });
+
+    it.only('should check for access token of user', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart?token=87987')
+            .send()
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                done();
+            });
+    });
+
+    it.only('should return shopping cart to the user', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart?token=87987')
+            .send()
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                done();
+            });
+    });
+
+    it.only('should return error if user is not logged in', done => {
+        chai
+            .request(server)
+            .get('/api/me/cart')
+            .send()
+            .end((err, res) => {
+                res.should.have.status(403);
+                res.body.should.be.an('string');
+                done();
+            });
     });
 
 });
