@@ -302,12 +302,54 @@ describe('/GET shopping cart ', () => {
         chai
             .request(server)
             .get('/api/me/cart')
-            .send()
             .end((err, res) => {
                 res.should.have.status(403);
                 res.body.should.be.an('string');
                 done();
             });
     });
+
+});
+
+describe('/DELETE shopping cart', () => {
+    it.only('should remove an item from the shopping cart', done => {
+
+        chai
+            .request(server)
+            .delete('/api/me/cart/1?token=87987')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                done();
+            });
+
+    });
+    it.only('should not be able to remove item if token is invalid', done => {
+
+        chai
+            .request(server)
+            .delete('/api/me/cart/1?token=8787')
+            .end((err, res) => {
+                res.should.have.status(403);
+                res.body.should.be.an('string');
+                done();
+            });
+
+    });
+
+    it.only('should not be able to remove item if token is not present', done => {
+
+        chai
+            .request(server)
+            .delete('/api/me/cart/1?token=')
+            .end((err, res) => {
+                res.should.have.status(403);
+                res.body.should.be.an('string');
+                done();
+            });
+
+    });
+
+
 
 });

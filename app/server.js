@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // State holding variables 
 let brands = [];
@@ -20,6 +20,9 @@ let accessTokens = [{
     token: '87987'
 }];
 
+// This is to ensure our tokens expire after 15 minutes 
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
 
 // Helper method to process access token
 var getValidTokenFromRequest = function (request) {
@@ -30,6 +33,7 @@ var getValidTokenFromRequest = function (request) {
         // Verify the access token to make sure it's valid and not expired
         let currentAccessToken = accessTokens.find(accessToken => {
             return accessToken.token == tokenInUrl
+                && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
         if (currentAccessToken) {
             return currentAccessToken;
@@ -61,7 +65,7 @@ const server = http.createServer((req, res) => {
 //sever listening for json and errors 
 server.listen(PORT, err => {
     if (err) throw err;
-    console.log(`server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
     //access to brands.json file 
     brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
     //access to products.json file 
@@ -175,7 +179,7 @@ router.post("/api/me/cart", (request, response) => {
     // Check for valid token in request 
     let currentAccessToken = getValidTokenFromRequest(request);
 
-    let updatedCart = request.body
+    let addedItem = request.body
 
     //If there is no token in request, alert user to sign in 
     if (!currentAccessToken) {
@@ -192,8 +196,8 @@ router.post("/api/me/cart", (request, response) => {
         //If user matches a user in database, add product to the cart 
         if (loggedInUser) {
 
-            //When a user adds a product to the cart, it should update the current cart
-            Object.assign(loggedInUser.cart, updatedCart)
+            //When a user adds a product to the cart, it should update the users cart
+            Object.assign(loggedInUser.cart, addedItem)
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end();
@@ -208,13 +212,16 @@ router.post("/api/me/cart", (request, response) => {
 
 // Route for user to retrieve shopping cart 
 router.get("/api/me/cart", (request, response) => {
+    // Check for valid token in request 
     let currentAccessToken = getValidTokenFromRequest(request);
 
+    //If there is not a token in the request, ask user to sign in 
     if (!currentAccessToken) {
         response.writeHead(403, { 'Content-Type': 'application/json' });
         return response.end(JSON.stringify("Please sign in"));
 
     } else {
+
         //if there is a token in the request, check it against known users 
         let loggedInUser = users.find((user) => {
             return user.login.username == currentAccessToken.username
@@ -223,6 +230,81 @@ router.get("/api/me/cart", (request, response) => {
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
 
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify(loggedInUser.cart));
+
+        }
+    }
+
+
+});
+
+// Route removing products from the cart
+router.delete("/api/me/cart/:productId", (request, response) => {
+    // Check for valid token in request 
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    //If there is not a token in the request, ask user to sign in 
+    if (!currentAccessToken) {
+        response.writeHead(403, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify("Please sign in"));
+
+    } else {
+
+        //if there is a token in the request, check it against known users 
+        let loggedInUser = users.find((user) => {
+            return user.login.username == currentAccessToken.username
+        })
+
+        // Match the product Id from params against the product Id in our JSON
+        // product list
+
+        let product = products.find((product) => {
+            return product.id == request.params.productId
+        })
+
+        //If user matches a user in database, return cart of user
+        if (loggedInUser) {
+
+            loggedInUser.cart.splice(product, 1)
+
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify(loggedInUser.cart));
+
+        }
+    }
+
+
+});
+
+// Route updating products in the cart
+router.post("/api/me/cart/:productId", (request, response) => {
+    // Check for valid token in request 
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    //If there is not a token in the request, ask user to sign in 
+    if (!currentAccessToken) {
+        response.writeHead(403, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify("Please sign in"));
+
+    } else {
+
+        //if there is a token in the request, check it against known users 
+        let loggedInUser = users.find((user) => {
+            return user.login.username == currentAccessToken.username
+        })
+
+        // Match the product Id from params against the product Id in our JSON
+        // product list
+
+        let product = products.find((product) => {
+            return product.id == request.params.productId
+        })
+
+        //If user matches a user in database, return cart of user
+        if (loggedInUser) {
+
+            loggedInUser.cart.splice(product, 1)
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
