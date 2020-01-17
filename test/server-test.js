@@ -353,3 +353,32 @@ describe('/DELETE shopping cart', () => {
 
 
 });
+
+describe('/POST update shopping cart ', () => {
+    it.only('should allow user to change the quantity of item', done => {
+
+        chai
+            .request(server)
+            .post('/api/me/cart/1?token=87987')
+            .send({ quantity: 2 })
+            .end((err, res) => {
+                res.should.have.status(200);
+                done();
+            });
+
+    });
+    
+    it.only('should give an error if the product doesnt exist in cart', done => {
+
+        chai
+            .request(server)
+            .post('/api/me/cart/1?token=87987')
+            .send({ quantity: 2 })
+            .end((err, res) => {
+                res.should.have.status(404);
+                res.body.should.be.an('string');
+                done();
+            });
+
+    });
+});

@@ -297,14 +297,30 @@ router.post("/api/me/cart/:productId", (request, response) => {
         // Match the product Id from params against the product Id in our JSON
         // product list
 
-        let product = products.find((product) => {
+        let productToBeUpdated = products.find((product) => {
             return product.id == request.params.productId
         })
+
+
+        let productIndex = loggedInUser.cart.findIndex(product => {
+            return productToBeUpdated == product.id
+        })
+
+
+        // Check to see if the product is currently in the cart 
+        if (productIndex === -1) {
+            response.writeHead(404, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify("Product not found in cart"));
+
+        }
+
+
+        let newQuantity = parseInt(request.body.quantity)
 
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
 
-            loggedInUser.cart.splice(product, 1)
+            loggedInUser.cart[productIndex].quantity = newQuantity
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
