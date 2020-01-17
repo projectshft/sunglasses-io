@@ -33,7 +33,7 @@ var getValidTokenFromRequest = function (request) {
         // Verify the access token to make sure it's valid and not expired
         let currentAccessToken = accessTokens.find(accessToken => {
             return accessToken.token == tokenInUrl
-                && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+            // && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
         if (currentAccessToken) {
             return currentAccessToken;
@@ -45,12 +45,6 @@ var getValidTokenFromRequest = function (request) {
     }
 };
 
-
-// const saveCurrentUser = (currentUser) => {
-//     // set hardcoded "logged in" user
-//     users[0] = currentUser;
-//     fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
-// };
 
 // Setup router
 const router = Router();
@@ -297,31 +291,38 @@ router.post("/api/me/cart/:productId", (request, response) => {
         // Match the product Id from params against the product Id in our JSON
         // product list
 
+
+
         let productToBeUpdated = products.find((product) => {
             return product.id == request.params.productId
         })
 
 
-        let productIndex = loggedInUser.cart.findIndex(product => {
+        let cartIndex = loggedInUser.cart.findIndex(product => {
             return productToBeUpdated == product.id
         })
 
 
-        // Check to see if the product is currently in the cart 
-        if (productIndex === -1) {
-            response.writeHead(404, { 'Content-Type': 'application/json' });
-            return response.end(JSON.stringify("Product not found in cart"));
 
-        }
+        // Check to see if the product is currently in the cart 
+        // if (cartIndex === -1) {
+        //     response.writeHead(404, { 'Content-Type': 'application/json' });
+        //     return response.end(JSON.stringify("Product not found in cart"));
+
+        // }
 
 
         let newQuantity = parseInt(request.body.quantity)
 
+
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
 
-            loggedInUser.cart[productIndex].quantity = newQuantity
 
+
+            loggedInUser.cart[cartIndex].quantity = newQuantity
+
+            console.log(loggedInUser.cart)
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
 
