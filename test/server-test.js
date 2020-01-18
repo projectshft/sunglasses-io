@@ -251,6 +251,29 @@ describe('/Post add to cart button ', () => {
             .send(product)
             .end((err, res) => {
                 res.should.have.status(200);
+                res.body.should.be.an('array')
+                done();
+            });
+    });
+
+    it.only('if product is already in the cart it should update the quantity', done => {
+
+        let product = {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price": 50,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+
+        chai
+            .request(server)
+            .post('/api/me/cart?token=87987')
+            .send(product)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array')
                 done();
             });
     });
@@ -357,22 +380,14 @@ describe('/DELETE shopping cart', () => {
 describe('/POST update shopping cart ', () => {
     it.only('should allow user to change the quantity of item', done => {
 
-        let product = {
-            "id": "3",
-            "categoryId": "1",
-            "name": "Brown Sunglasses",
-            "description": "The best glasses in the world",
-            "price": 50,
-            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-        }
-
         chai
             .request(server)
             .post('/api/me/cart/1?token=87987')
-            .send({ quantity: 2, product : product })
+            .send({ quantity: 2 })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an('array')
+                res.body.quantity.should.equal(2)
                 done();
             });
 

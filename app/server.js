@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // State holding variables 
 let brands = [];
@@ -187,15 +187,28 @@ router.post("/api/me/cart", (request, response) => {
             return user.login.username == currentAccessToken.username
         })
 
+        let product = request.body
+
+
         //If user matches a user in database, add product to the cart 
         if (loggedInUser) {
 
-            //When a user adds a product to the cart, it should update the users cart
-            Object.assign(loggedInUser.cart, addedItem)
+            // if there is no product, add product to cart along with quantity starting at 1 
+            if (!product) {
 
-            response.writeHead(200, { 'Content-Type': 'application/json' });
-            return response.end();
+                loggedInUser.cart.push({ quantity: 1, product })
+                // Object.assign(loggedInUser.cart, addedItem)
 
+                response.writeHead(200, { 'Content-Type': 'application/json' });
+                return response.end(JSON.stringify(loggedInUser.cart));
+
+            } else {
+
+                // if the product is in the cart, increment the quantity by 1 and return the cart
+                product.quantity += 1
+                response.writeHead(200, { 'Content-Type': 'application/json' });
+                return response.end(JSON.stringify(loggedInUser.cart));
+            }
         }
 
 
@@ -223,6 +236,7 @@ router.get("/api/me/cart", (request, response) => {
 
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
+
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
@@ -291,8 +305,6 @@ router.post("/api/me/cart/:productId", (request, response) => {
         // Match the product Id from params against the product Id in our JSON
         // product list
 
-
-
         let productToBeUpdated = products.find((product) => {
             return product.id == request.params.productId
         })
@@ -302,23 +314,17 @@ router.post("/api/me/cart/:productId", (request, response) => {
             return productToBeUpdated == product.id
         })
 
-
-
         // Check to see if the product is currently in the cart 
+        // If it is, then we should return an error
         // if (cartIndex === -1) {
         //     response.writeHead(404, { 'Content-Type': 'application/json' });
         //     return response.end(JSON.stringify("Product not found in cart"));
-
         // }
-
 
         let newQuantity = parseInt(request.body.quantity)
 
-
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
-
-
 
             loggedInUser.cart[cartIndex].quantity = newQuantity
 
