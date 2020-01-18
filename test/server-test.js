@@ -146,6 +146,7 @@ describe('/Post Login ', () => {
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a('string');
+                res.body.length.should.be.eql(5);
                 done();
             });
     });
@@ -164,6 +165,7 @@ describe('/Post Login ', () => {
             .end((err, res) => {
                 res.should.have.status(400);
                 res.body.should.be.a('string');
+                res.body.length.should.be.eql(30);
                 done();
             });
 
@@ -183,6 +185,7 @@ describe('/Post Login ', () => {
             .end((err, res) => {
                 res.should.have.status(401);
                 res.body.should.be.a('string');
+                res.body.length.should.be.eql(28);
                 done();
             });
     });
@@ -201,6 +204,7 @@ describe('/Post Login ', () => {
             .end((err, res) => {
                 res.should.have.status(401);
                 res.body.should.be.a('string');
+                res.body.length.should.be.eql(28);
                 done();
             });
     });
@@ -217,6 +221,7 @@ describe('/Post add to cart button ', () => {
             .send()
             .end((err, res) => {
                 res.should.have.status(200);
+                res.body.length.should.be.eql(0);
                 done();
             });
     });
@@ -230,6 +235,7 @@ describe('/Post add to cart button ', () => {
             .end((err, res) => {
                 res.should.have.status(403);
                 res.body.should.be.a('string');
+                res.body.length.should.be.eql(14);
                 done();
             });
     });
@@ -328,6 +334,7 @@ describe('/GET shopping cart ', () => {
             .end((err, res) => {
                 res.should.have.status(403);
                 res.body.should.be.an('string');
+                res.body.length.should.be.eql(14);
                 done();
             });
     });
@@ -355,6 +362,7 @@ describe('/DELETE shopping cart', () => {
             .end((err, res) => {
                 res.should.have.status(403);
                 res.body.should.be.an('string');
+                res.body.length.should.be.eql(14);
                 done();
             });
 
@@ -368,6 +376,7 @@ describe('/DELETE shopping cart', () => {
             .end((err, res) => {
                 res.should.have.status(403);
                 res.body.should.be.an('string');
+                res.body.length.should.be.eql(14);
                 done();
             });
 
@@ -383,11 +392,11 @@ describe('/POST update shopping cart ', () => {
         chai
             .request(server)
             .post('/api/me/cart/1?token=87987')
-            .send({ quantity: 2 })
+            .send({ quantity: 5 })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an('array')
-                res.body.quantity.should.equal(2)
+                res.body.length.should.be.eql(1);
                 done();
             });
 
@@ -397,11 +406,12 @@ describe('/POST update shopping cart ', () => {
 
         chai
             .request(server)
-            .post('/api/me/cart/1?token=87987')
+            .post('/api/me/cart/0?token=87987')
             .send({ quantity: 2 })
             .end((err, res) => {
                 res.should.have.status(404);
                 res.body.should.be.an('string');
+                res.body.length.should.be.eql(25);
                 done();
             });
 

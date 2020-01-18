@@ -271,7 +271,7 @@ router.delete("/api/me/cart/:productId", (request, response) => {
             return product.id == request.params.productId
         })
 
-        //If user matches a user in database, return cart of user
+        //If user matches a user in database, remove item from cart and return cart
         if (loggedInUser) {
 
             loggedInUser.cart.splice(product, 1)
@@ -309,29 +309,34 @@ router.post("/api/me/cart/:productId", (request, response) => {
             return product.id == request.params.productId
         })
 
-
-        let cartIndex = loggedInUser.cart.findIndex(product => {
-            return productToBeUpdated == product.id
-        })
-
-        // Check to see if the product is currently in the cart 
-        // If it is, then we should return an error
-        // if (cartIndex === -1) {
-        //     response.writeHead(404, { 'Content-Type': 'application/json' });
-        //     return response.end(JSON.stringify("Product not found in cart"));
-        // }
-
         let newQuantity = parseInt(request.body.quantity)
 
-        //If user matches a user in database, return cart of user
+        //If user matches a user in database, update quantity 
+        //and return cart of user
+
         if (loggedInUser) {
 
-            loggedInUser.cart[cartIndex].quantity = newQuantity
+            loggedInUser.cart.push(productToBeUpdated)
+            // Check to see if the product is currently in the cart 
+            // If it is, then we should return an error
+            let cartIndex = loggedInUser.cart.findIndex(product => {
+                return product == productToBeUpdated
+            })
 
-            console.log(loggedInUser.cart)
-            response.writeHead(200, { 'Content-Type': 'application/json' });
-            return response.end(JSON.stringify(loggedInUser.cart));
+            //If the cart has no items or theres no id in the request parameters 
+            //we return an error message 
+            if (cartIndex == -1 || request.params.productId == "" || request.params.productId == 0) {
+                response.writeHead(404, { 'Content-Type': 'application/json' });
+                return response.end(JSON.stringify("No products found in cart"));
 
+            } else {
+
+                //Update the quantity with the value coming back in the request 
+                loggedInUser.cart[cartIndex].quantity = newQuantity
+
+                response.writeHead(200, { 'Content-Type': 'application/json' });
+                return response.end(JSON.stringify(loggedInUser.cart));
+            }
         }
     }
 
