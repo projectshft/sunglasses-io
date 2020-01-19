@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // State holding variables 
 let brands = [];
@@ -173,10 +173,9 @@ router.post("/api/me/cart", (request, response) => {
     // Check for valid token in request 
     let currentAccessToken = getValidTokenFromRequest(request);
 
-    let addedItem = request.body
-
     //If there is no token in request, alert user to sign in 
     if (!currentAccessToken) {
+
         response.writeHead(403, { 'Content-Type': 'application/json' });
         return response.end(JSON.stringify("Please sign in"));
 
@@ -187,30 +186,32 @@ router.post("/api/me/cart", (request, response) => {
             return user.login.username == currentAccessToken.username
         })
 
-        let product = request.body
+        let product = products.find(product => product.id == request.body.id)
+
+        // loggedInUser.cart.push(product)
+
+        let productInCart = loggedInUser.cart.find(item => item.id === request.body.id)
 
 
-        //If user matches a user in database, add product to the cart 
-        if (loggedInUser) {
+        // If there is no product already in the shopping cart,
+        // add product to cart along with quantity starting at 1 
+        if (!productInCart) {
 
-            // if there is no product, add product to cart along with quantity starting at 1 
-            if (!product) {
+            loggedInUser.cart.push({ quantity: 1, product: product })
+            // Object.assign(loggedInUser.cart, addedItem)
 
-                loggedInUser.cart.push({ quantity: 1, product })
-                // Object.assign(loggedInUser.cart, addedItem)
+        } else {
 
-                response.writeHead(200, { 'Content-Type': 'application/json' });
-                return response.end(JSON.stringify(loggedInUser.cart));
+            // if the product is in the cart already,
+            // increment the quantity by 1 and return the cart
+            productInCart.quantity++;
+            // console.log(productInCart.quantity)
 
-            } else {
-
-                // if the product is in the cart, increment the quantity by 1 and return the cart
-                product.quantity += 1
-                response.writeHead(200, { 'Content-Type': 'application/json' });
-                return response.end(JSON.stringify(loggedInUser.cart));
-            }
         }
 
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        // console.log('shopping cart', loggedInUser.cart)
+        return response.end(JSON.stringify(loggedInUser.cart));
 
     }
 
@@ -236,9 +237,8 @@ router.get("/api/me/cart", (request, response) => {
 
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
-
-
             response.writeHead(200, { 'Content-Type': 'application/json' });
+            console.log("poop", loggedInUser.cart)
             return response.end(JSON.stringify(loggedInUser.cart));
 
         }
@@ -285,7 +285,7 @@ router.delete("/api/me/cart/:productId", (request, response) => {
 
 });
 
-// Route updating products in the cart
+// Route updating product quantity in the cart
 router.post("/api/me/cart/:productId", (request, response) => {
     // Check for valid token in request 
     let currentAccessToken = getValidTokenFromRequest(request);
@@ -319,20 +319,20 @@ router.post("/api/me/cart/:productId", (request, response) => {
             loggedInUser.cart.push(productToBeUpdated)
             // Check to see if the product is currently in the cart 
             // If it is, then we should return an error
-            let cartIndex = loggedInUser.cart.findIndex(product => {
+            let shoppingCartIndex = loggedInUser.cart.findIndex(product => {
                 return product == productToBeUpdated
             })
 
             //If the cart has no items or theres no id in the request parameters 
             //we return an error message 
-            if (cartIndex == -1 || request.params.productId == "" || request.params.productId == 0) {
+            if (shoppingCartIndex == -1 || request.params.productId == "" || request.params.productId == 0) {
                 response.writeHead(404, { 'Content-Type': 'application/json' });
                 return response.end(JSON.stringify("No products found in cart"));
 
             } else {
 
                 //Update the quantity with the value coming back in the request 
-                loggedInUser.cart[cartIndex].quantity = newQuantity
+                loggedInUser.cart[shoppingCartIndex].quantity = newQuantity
 
                 response.writeHead(200, { 'Content-Type': 'application/json' });
                 return response.end(JSON.stringify(loggedInUser.cart));
