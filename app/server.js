@@ -205,12 +205,10 @@ router.post("/api/me/cart", (request, response) => {
             // if the product is in the cart already,
             // increment the quantity by 1 and return the cart
             productInCart.quantity++;
-            // console.log(productInCart.quantity)
 
         }
 
         response.writeHead(200, { 'Content-Type': 'application/json' });
-        // console.log('shopping cart', loggedInUser.cart)
         return response.end(JSON.stringify(loggedInUser.cart));
 
     }
