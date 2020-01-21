@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // State holding variables 
 let brands = [];
@@ -33,7 +33,7 @@ var getValidTokenFromRequest = function (request) {
         // Verify the access token to make sure it's valid and not expired
         let currentAccessToken = accessTokens.find(accessToken => {
             return accessToken.token == tokenInUrl
-            // && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+                && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
         if (currentAccessToken) {
             return currentAccessToken;
@@ -71,7 +71,7 @@ server.listen(PORT, err => {
 
 });
 
-// Route for just brands 
+// Route to return all brands  
 router.get("/api/brands", (request, response) => {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(brands));
@@ -123,7 +123,7 @@ router.get("/api/brands/:id/products", (request, response) => {
 });
 
 
-// Login call
+// User login route 
 router.post('/api/login', function (request, response) {
 
     // Make sure there is a username and password in the request
@@ -238,7 +238,6 @@ router.get("/api/me/cart", (request, response) => {
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
             response.writeHead(200, { 'Content-Type': 'application/json' });
-            // console.log("poop", loggedInUser.cart)
             return response.end(JSON.stringify(loggedInUser.cart));
 
         }
