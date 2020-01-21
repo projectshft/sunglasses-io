@@ -2,8 +2,8 @@ swagger: "2.0"
 info:
   title: Sunglasses API
   description: An API to support the sunglasses store 
-  version: 1.0.0
-host: api.sunglasses.io
+  version: "1.0.0"
+host: "localhost:3000"
 schemes:
   - https
 basePath: /api
@@ -12,250 +12,226 @@ produces:
 paths:
   /brands:
     get:
+      summary: List of Brands
+      description: |
+        This endpoint gives the user the most popular brands
       tags:
-        - "brands"
-      summary: "brands"
-      description: "This endpoint gives the user the most popular brands available to them from the store"
-      parameters:
-        - name: limit
-          in: query
-          description:
-          The number of results to limit the search to.
-          required: false
-          type: array
+        - Brands
       responses:
-        '200':
+        200:
           description: An array of brands
           schema:
             type: array
             items:
-              $ref: '#/definitions/brands'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+              $ref: "#/definitions/Brands"
   /products:
     get:
+      summary: List of Products in the store
+      description: |
+        The Products endpoint returns products that the user has searched in the application
+      parameters: 
+        - name: query
+          in: query
+          description: Search word provided by user
+          required: false
+          type: string
       tags:
-        - "products"
-      summary: "products"
-      description: >-
-        The products endpoint returns products that the user has searched on the application
+        - Products
       responses:
-        '200':
-          description: "product search is successful"
-          schema:
-            $ref: '#/definitions/products'
-        default:
-          description: Unexpected error
+        200:
+          description: An array of products based on query
+          schema: 
+            type: array
+            items: 
+              $ref: '#/definitions/Products'
+        404:
+          description: Products not found
           schema:
             $ref: '#/definitions/Error'
-          '404':
-            description: "Products not found"
-          schema:
-            $ref: '#/definitions/products'
         default:
-          description: "gives error if there are are no products based on query"
+          description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
   /brands/{id}/products:
     get:
       tags:
-      "products"
-      summary: "Search a product"
-      description: "This endpoint allows you to seach a product which will give you all the products for a given brand"
-      produces:
-      - "application/json"
+        - Brands
+      summary: Get products by brand
+      description: This endpoint allows you to seach a product which will give you all the products for a given brand
       parameters:
-      - name: "search"
-        in: "query"
-        description: "Brand ids that need to be considered for filter"
+      - name: id
+        in: path
+        description: Brand id to find products of 
         required: true
-        type: "array"
-        items:
-          type: "object"
+        type: string
       responses:
         200:
-          description: "successful operation"
+          description: Array of products in specified brand 
           schema:
-            type: "array"
+            type: array
             items:
-              $ref: "#/definitions/brands"
-        400:
-          description: "Invalid search value"
+              $ref: "#/definitions/Brands"
+        404:
+          description: Invalid search value
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /login:
     post:
-      summary: enter login
+      summary: Enter login
       description: |
         This endpoint allows you enter your username and login in order to shop in the store
       parameters:
-        - name: id
-          in: path
-          description: The id of the goal to achieve
+        - name: Email
+          in: header
           required: true
+          description: Email of user 
           type: string
+        - name: Password
+          in: header 
+          required: true 
+          description: Password of user
+          type: string 
       tags:
         - User
       responses:
-        '200':
+        200:
           description: login is successful
+          schema: 
+            $ref: '#/definitions/User'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-         '400':
+        400:
           description: "Invalid Format"
-         '401':
-          description: "Invalid Username or Password"
+          schema: 
+            $ref: '#/definitions/Error'
+        401:
+          description: Invalid Username or Password
+          schema: 
+            $ref: '#/definitions/Error'
   /me/cart:
     post:
-      summary: shopping cart
+      summary: Shopping cart
       description: |
         This endpoint allows you to add items to the shopping cart
       parameters:
-        - name: id
-          in: path
-          description: 
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user
-          required: true
-          type: string
-      tags:
-        - User
-      responses:
-        '200':
-          description: Challenge is successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me/cart:
-    get:
-      summary: shopping cart
-      description: |
-        Returns the items that are in the
-      parameters:
-        - name: id
-          in: path
-          description: 
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user
-          required: true
-          type: string
-      tags:
-        - User
-      responses:
-        '200':
-          description: Challenge is successful
-        default:
-          description: Unexpected error
-          schema:
-  /me/cart:
-    post:
-      summary: adding items to shopping cart
-      description: >
-        add items to shopping cart 
-      parameters:
-        - name: limit
+        - name: token
           in: query
-          description: The number of results to limit the search to
-          required: false
-          type: number
-          format: int32
+          description: Access Token for User 
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: The product to add to the cart
+          required: true
+          schema: 
+             $ref: '#/definitions/ProductId'
       tags:
-        - Categories
+        - Shopping Cart 
       responses:
-        '200':
-          description: An array of categories
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Category'
+        200:
+          description: Updated shopping cart 
+        403: 
+          description: Please sign in 
+          schema: 
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-        '401': 
-          descrition: Invalid product added to cart
-  /me/cart/:productId:
-    delete:
-      summary: deleting items in the cart 
-      description: >
-        deleting items in the cart
+    get:
+      summary: Shopping cart 
+      description: |
+        Returns the items that are in the cart 
       parameters:
-        - name: id
-          in: path
-          description: 
+        - name: token
+          in: query
+          description: Valid token for user
           required: true
           type: string
       tags:
-        - delete
+        - Shopping Cart
       responses:
-        '200':
-          description: successfully deleted item from cart
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Goal'
+        200:
+          description: Returns shopping cart for user
+        403: 
+          description: Please Sign in 
+          schema: 
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'  /me/cart/:productId:
- /me/cart/:productId:
+            $ref: '#/definitions/Error'
+  /me/cart/:{productId}:
+    delete:
+      summary: Deleting items in the cart 
+      description: |
+        Removes a particular item by id 
+      parameters:
+        - name: token
+          in: query
+          description: Valid token for user
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: The id of the product to be removed
+          required: true
+          type: string
+      tags:
+        - Delete
+      responses:
+        200:
+          description: Return shopping cart for user
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Cart'
+        403: 
+          description: Token not present 
+          schema: 
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
     post:
-      summary: editing items in the cart 
-      description: >
+      summary: editing quantity of product in the cart 
+      description: |
        changing quantities within the cart 
       parameters:
-        - name: id
-          in: path
-          description: 
+        - name: token
+          in: query
+          description: Valid token for user
           required: true
           type: string
+        - name: productId
+          in: path
+          description: The id of the product to be removed
+          required: true
+          type: string
+        - in: body
+          name: body 
+          required: true
+          description: new quantity 
+          schema: 
+            $ref: '#/definitions/ProductId'
       tags:
-        - delete
+        - Quantity
       responses:
-        '200':
-          description: successfully deleted item from cart
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Goal'
+        200:
+          description: Return cart
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
 definitions:
-  Goal:
-    type: object
-    properties:
-      id:
-        type: string
-        description: Unique identifier for a goal.
-      categoryId:
-        type: string
-        description: The id of the category this goal belongs to.
-      description:
-        type: string
-        description: Description of product.
-      upVotes:
-        type: integer
-        format: int32
-        description: The number of up votes given to a goal
-      downVotes:
-        type: integer
-        format: int32
-        description: The number of down votes given to a goal
-      imageURL:
-        type: string
-        description: The URL for the image representing the goal
-  brands:
+  Brands:
     type: object
     properties:
       id:
@@ -265,30 +241,38 @@ definitions:
       name:
         type: string
         description: The name of the brand
+  Products: 
+    type: object 
+    properties: 
+      id:
+        type: string
+        description: Identifier for this product 
+      categoryId: 
+        type: string 
+        description: Identifier links to one particular brand
+      name: 
+        type: string 
+        description: Name of item 
+      description: 
+        type: string 
+        description: More information on the item 
+      price: 
+        type: integer
+        description: Price of the item 
+      imageUrls: 
+        type: array
+        items: 
+          type: string 
+          description: Product image URLs 
   User:
     type: object
     properties:
-      first_name:
+      username: 
         type: string
-        description: First name of the Uber user.
-      last_name:
-        type: string
-        description: Last name of the Uber user.
-      email:
-        type: string
-        description: Email address of the Uber user
-      acceptedGoals:
-        items:
-          $ref: '#/definitions/brands'
-      achievedGoals:
-        items:
-          $ref: '#/definitions/brands'
-      giftedGoals:
-        items:
-          $ref: '#/definitions/brands'    
-      challengedGoals:
-        items:
-          $ref: '#/definitions/brands '        
+        description: Username of the user 
+      password: 
+        type: string 
+        description: Password for the user 
   Error:
     type: object
     properties:
@@ -299,3 +283,16 @@ definitions:
         type: string
       fields:
         type: string
+  Cart: 
+    type: object 
+    properties: 
+      quantity: 
+        type: integer
+        format: int32
+        description: Quantity of products in cart 
+  ProductId: 
+    type: object
+    properties: 
+      productId: 
+        type: string
+        description: Id of the product being added to the cart

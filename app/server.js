@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // State holding variables 
 let brands = [];
@@ -238,7 +238,7 @@ router.get("/api/me/cart", (request, response) => {
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
             response.writeHead(200, { 'Content-Type': 'application/json' });
-            console.log("poop", loggedInUser.cart)
+            // console.log("poop", loggedInUser.cart)
             return response.end(JSON.stringify(loggedInUser.cart));
 
         }
