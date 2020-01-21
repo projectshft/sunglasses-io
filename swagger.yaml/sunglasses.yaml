@@ -212,7 +212,7 @@ paths:
           type: string
         - name: productId
           in: path
-          description: The id of the product to be removed
+          description: The id of the product to be added
           required: true
           type: string
         - in: body
@@ -294,5 +294,5 @@ definitions:
     type: object
     properties: 
       productId: 
-        type: string
+        type: object
         description: Id of the product being added to the cart

@@ -197,7 +197,7 @@ router.post("/api/me/cart", (request, response) => {
         // add product to cart along with quantity starting at 1 
         if (!productInCart) {
 
-            loggedInUser.cart.push({ quantity: 1, product: product })
+            loggedInUser.cart.push({ quantity: 1, product })
             // Object.assign(loggedInUser.cart, addedItem)
 
         } else {
