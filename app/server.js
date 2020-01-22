@@ -234,12 +234,15 @@ router.get("/api/me/cart", (request, response) => {
             return user.login.username == currentAccessToken.username
         })
 
+        module.exports = loggedInUser.cart
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
 
             //needed to add this to clear cart for testing purposes, 
             //needs to be removed before code implemented 
-            loggedInUser.cart = []
+            // loggedInUser.cart = []
+
+
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
@@ -281,6 +284,41 @@ router.delete("/api/me/cart/:productId", (request, response) => {
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
+
+        }
+    }
+
+
+});
+
+router.delete("/api/me/cart/", (request, response) => {
+    // Check for valid token in request 
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    //If there is not a token in the request, ask user to sign in 
+    if (!currentAccessToken) {
+        response.writeHead(403, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify("Please sign in"));
+
+    } else {
+
+        //if there is a token in the request, check it against known users 
+        let loggedInUser = users.find((user) => {
+            return user.login.username == currentAccessToken.username
+        })
+
+        // Match the product Id from params against the product Id in our JSON
+        // product list
+
+        let cart = loggedInUser.cart
+
+        //If user matches a user in database, remove item from cart and return cart
+        if (loggedInUser) {
+
+            cart = []
+
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            return response.end(JSON.stringify(cart));
 
         }
     }

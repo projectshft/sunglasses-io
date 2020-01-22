@@ -1,7 +1,7 @@
 const chai = require("chai");
 const server = require('../app/server')
 const chaiHTTP = require("chai-http");
-let Users = require('../initial-data/users')
+let loggedInUser = require('../app/server')
 
 const assert = chai.assert;
 const { expect } = require('chai');
@@ -12,11 +12,8 @@ chai.use(chaiHTTP);
 
 
 
-describe('Clear out shopping cart before each test', () => {
-    beforeEach(done => {
-        Users[0].cart = []
-        done()
-    });
+
+
 
 //Get Brands 
 describe('/GET brands', () => {
@@ -284,24 +281,29 @@ describe('/Post add to cart button ', () => {
 
 });
 
+//Cart GET route 
+describe('/Delete shopping cart ', () => {
+
+    it.only('clear the entire shopping cart ', done => {
+
+        chai
+            .request(server)
+            .delete('/api/me/cart?token=87987')
+            .send()
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.equal(0)
+                done();
+            });
+
+    });
+
+});
+
+
     //Cart GET route 
     describe('/GET shopping cart ', () => {
-
-        it.only('return a subtotal of 0 if no items are in cart ', done => {
-
-
-            chai
-                .request(server)
-                .get('/api/me/cart?token=87987')
-                .send()
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.an('array');
-                    res.body.length.should.equal(0)
-                    done();
-                });
-
-        });
 
         it.only('should check for access token of user', done => {
             chai
@@ -415,4 +417,3 @@ describe('/POST update shopping cart ', () => {
     });
 });
 
-});
