@@ -111,6 +111,7 @@ router.get("/api/products", (request, response) => {
 router.get("/api/brands/:id/products", (request, response) => {
     const { id } = request.params;
     const brandSearch = brands.find(brand => brand.id == id);
+
     if (!brandSearch) {
         response.writeHead(404, { "Content-Type": "application/json" });
         return response.end(JSON.stringify("That brand does not exist"));
@@ -236,7 +237,8 @@ router.get("/api/me/cart", (request, response) => {
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
 
-            //needed to add this to clear cart for testing purposes, needs to be removed before implemented 
+            //needed to add this to clear cart for testing purposes, 
+            //needs to be removed before code implemented 
             loggedInUser.cart = []
 
             response.writeHead(200, { 'Content-Type': 'application/json' });
