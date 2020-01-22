@@ -1,6 +1,7 @@
 const chai = require("chai");
 const server = require('../app/server')
 const chaiHTTP = require("chai-http");
+let Users = require('../initial-data/users')
 
 const assert = chai.assert;
 const { expect } = require('chai');
@@ -10,6 +11,12 @@ const should = chai.should();
 chai.use(chaiHTTP);
 
 
+
+describe('Clear out shopping cart before each test', () => {
+    beforeEach(done => {
+        Users[0].cart = []
+        done()
+    });
 
 //Get Brands 
 describe('/GET brands', () => {
@@ -202,9 +209,11 @@ describe('/Post Login ', () => {
 
 });
 
+
+
 //Add to cart Post
 describe('/Post add to cart button ', () => {
-    
+
     it.only('should check for access token of user', done => {
         chai
             .request(server)
@@ -275,59 +284,62 @@ describe('/Post add to cart button ', () => {
 
 });
 
-//Cart GET route 
-describe('/GET shopping cart ', () => {
-    it.only('return a subtotal of 0 if no items are in cart ', done => {
+    //Cart GET route 
+    describe('/GET shopping cart ', () => {
 
-        chai
-            .request(server)
-            .get('/api/me/cart?token=87987')
-            .send()
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                res.body.length.should.equal(0)
-                done();
-            });
+        it.only('return a subtotal of 0 if no items are in cart ', done => {
+
+
+            chai
+                .request(server)
+                .get('/api/me/cart?token=87987')
+                .send()
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    res.body.length.should.equal(0)
+                    done();
+                });
+
+        });
+
+        it.only('should check for access token of user', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart?token=87987')
+                .send()
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    done();
+                });
+        });
+
+        it.only('should return shopping cart to the user', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart?token=87987')
+                .send()
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    done();
+                });
+        });
+
+        it.only('should return error if user is not logged in', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart')
+                .end((err, res) => {
+                    res.should.have.status(403);
+                    res.body.should.be.an('string');
+                    done();
+                });
+        });
 
     });
 
-    it.only('should check for access token of user', done => {
-        chai
-            .request(server)
-            .get('/api/me/cart?token=87987')
-            .send()
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                done();
-            });
-    });
-
-    it.only('should return shopping cart to the user', done => {
-        chai
-            .request(server)
-            .get('/api/me/cart?token=87987')
-            .send()
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                done();
-            });
-    });
-
-    it.only('should return error if user is not logged in', done => {
-        chai
-            .request(server)
-            .get('/api/me/cart')
-            .end((err, res) => {
-                res.should.have.status(403);
-                res.body.should.be.an('string');
-                done();
-            });
-    });
-
-});
 
 describe('/DELETE shopping cart', () => {
     it.only('should remove an item from the shopping cart', done => {
@@ -370,6 +382,7 @@ describe('/DELETE shopping cart', () => {
 
 
 
+
 });
 
 describe('/POST update shopping cart ', () => {
@@ -400,4 +413,6 @@ describe('/POST update shopping cart ', () => {
             });
 
     });
+});
+
 });

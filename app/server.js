@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const url = require("url");
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // State holding variables 
 let brands = [];
@@ -190,7 +190,7 @@ router.post("/api/me/cart", (request, response) => {
 
         // loggedInUser.cart.push(product)
 
-        let productInCart = loggedInUser.cart.find(item => item.id === request.body.id)
+        let productInCart = loggedInUser.cart.find(item => item.id == request.body.id || request.params.id)
 
 
         // If there is no product already in the shopping cart,
@@ -202,7 +202,7 @@ router.post("/api/me/cart", (request, response) => {
 
         } else {
 
-            // if the product is in the cart already,
+            // If the product is in the cart already,
             // increment the quantity by 1 and return the cart
             productInCart.quantity++;
 
@@ -235,6 +235,10 @@ router.get("/api/me/cart", (request, response) => {
 
         //If user matches a user in database, return cart of user
         if (loggedInUser) {
+
+            //needed to add this to clear cart for testing purposes, needs to be removed before implemented 
+            loggedInUser.cart = []
+
             response.writeHead(200, { 'Content-Type': 'application/json' });
             return response.end(JSON.stringify(loggedInUser.cart));
 
