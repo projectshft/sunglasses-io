@@ -8,11 +8,13 @@ var uid = require('rand-token').uid;
 
 
 const PORT = 3001;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 let brands = [];
 let users = [];
-let user = {};
+//let user = {};
 let accessTokens = [];
 let products = [];
+let loggedInUser= {};
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -27,14 +29,14 @@ const server = module.exports = http.createServer( (request, response) => {
     }
     //brands = JSON.parse(fs.readFile('initial-data/brands.json','utf-8'));
     
-    fs.readFile('initial-data/brands.json','utf-8', (error, data) => {
+    fs.readFile('app/initial-data/brands.json','utf-8', (error, data) => {
         if (error) throw error;
         brands = JSON.parse(data);
         console.log(`Server setup: ${brands.length} brands loaded`);
     });
     //users = JSON.parse(fs.readFileSync('initial-data/users.json','utf-8'));
     
-    fs.readFile('initial-data/users.json','utf-8', (error, data) => {
+    fs.readFile('app/initial-data/users.json','utf-8', (error, data) => {
         if (error) throw error;
         users = JSON.parse(data);
         user = users[0];
@@ -44,7 +46,7 @@ const server = module.exports = http.createServer( (request, response) => {
     
     // products = JSON.parse(fs.readFileSync('initial-data/products.json','utf-8'));
     
-    fs.readFile('initial-data/products.json','utf-8', (error, data) => {
+    fs.readFile('app/initial-data/products.json','utf-8', (error, data) => {
         if (error) throw error;
         products = JSON.parse(data);
         console.log(`Server setup: ${products.length} products loaded`);
@@ -99,7 +101,7 @@ myRouter.post('/api/login', (request,response)=>{
   let loginEmail = request.body.email;
   let loginPassword = request.body.password;
 
-  let loggedInUser = users.find(user=> (user.email == loginEmail) && (user.login.password == loginPassword))
+  loggedInUser = users.find(user=> (user.email == loginEmail) && (user.login.password == loginPassword))
 
   if(!loggedInUser){
     response.writeHead(404,"Email and/or Password is incorrect.")
@@ -124,18 +126,91 @@ myRouter.post('/api/login', (request,response)=>{
   }
 });
 
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 myRouter.get('/api/me/cart', (request,response)=>{
-//cart content of authenticated user    
+//cart content of authenticated user  
+
+  let currentAccessToken= getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, 'No valid token is supplied');
+    return response.end();
+  } else { //returns authenticated user's cart contents.
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end(JSON.stringify(loggedInUser.cart))
+  }
+
 });
 
 myRouter.post('/api/me/cart', (request,response)=>{
-//add item(s) to cart of authenticated user    
+//add item(s) to cart of authenticated user
+  let currentAccessToken= getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, 'No valid token is supplied');
+    return response.end();
+  } else {
+    console.log(request.body);
+    let product= request.body
+    console.log(loggedInUser.cart);
+    loggedInUser.cart.push(product);
+    console.log(loggedInUser.cart);
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end(JSON.stringify(loggedInUser.cart))
+  }
 });
 
 myRouter.delete('/api/me/cart/:productId', (request,response)=>{
-//removes item(s) from cart    
+//removes item(s) from cart   
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken){
+    response.writeHead('No valid token is supplied')
+    return response.end();
+  }
+
+  let deletedProduct = request.params.id
+
+  let newCart = loggedInUser.cart.filter(itemInCart =>{
+    itemInCart.id != deletedProduct
+  });
+
+  loggedInUser.cart = newCart;
+
+  response.writeHead(200, {'Content-Type': 'application/json'});
+  response.end(JSON.stringify(loggedInUser.cart));
 });
 
-myRouter.post('/api/me/cart/productId', (request,response)=>{
-//update quantity of item(s) in cart 
+myRouter.post('/api/me/cart/:productId', (request,response)=>{
+//update quantity of item(s) in cart
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken){
+    response.writeHead('No valid token is supplied')
+    return response.end();
+  }
+  
+  let productToEdit = request.params.id
+  let newQuantity = request.body.quantity
+
+  let editedProduct = loggedInUser.cart.find(item =>{
+    item.id = productToEdit;
+    item.quantity = newQuantity;
+  })
+
+  
+  
 });
