@@ -2,7 +2,18 @@ const chai = require("chai");
 const chaiHTTP = require("chai-http");
 const server = require("../app/server");
 const expect = chai.expect;
-const assert = chai.assert;
+let should = chai.should;
 
 chai.use(chaiHTTP);
-chai.use(require("chai-sorted"));
+
+describe("/GET brands", () => {
+    it.only("should GET all brands", done => {
+      chai
+        .request(server)
+        .get("/api/brands")
+        .end((err, res) => {
+            res.should.have.status(200);
+            done();
+        });
+    });
+});

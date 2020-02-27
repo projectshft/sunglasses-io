@@ -2,10 +2,15 @@ var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
-//used in goals worth to parse equery string for serch
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
+
+// State holding variables
+let brands = [];
+let user = {};
+let products = [];
+let users = [];
 
 const PORT = 3001;
 
@@ -13,12 +18,30 @@ const PORT = 3001;
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
-    if (request.url.includes('api')) {
-        response.writeHead(200, {'Content-Type': 'application/json'});
-        myRouter(request, response, finalHandler(request, response))
-      } else {
-        // This call serves the webpage for the frontend rather than opening it directly
-        serve(request,response, finalHandler(request,response))
-      }
-}).listen(PORT);
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    router(req, res, finalHandler(req, res));
+  });
+  
+  server.listen(PORT, err => {
+    if (err) throw err;
+    console.log(`server running on port ${PORT}`);
+    //populate brands 
+    brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
+  
+    //populate products
+    products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
+  
+    //populate users
+    users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
+    // hardcode "logged in" user
+    user = users[0];
+  });
+
+// Notice how much cleaner these endpoint handlers are...
+myRouter.get("/api/brands", (request, response) => {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(brands));
+  });
+
+module.exports = server;
