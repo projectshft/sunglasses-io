@@ -1,172 +1,186 @@
-let Book = require('../app/models/book');
-​
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('../server');
+let server = require('./app/server.js');
 ​
 let should = chai.should();
 ​
 chai.use(chaiHttp);
 ​
-describe('Books', () => {
-  beforeEach(() => {
-    Book.removeAll();
-  });
+// describe('Books', () => {
+//   beforeEach(() => {
+//     Book.removeAll();
+//   });
 ​
-  describe('/GET book', () => {
-    it('it should GET all the books', done => {
-      chai
-        .request(server)
-        .get('/book')
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.an('array');
-          res.body.length.should.be.eql(0);
-          done();
-        });
-    });
-  });
-​
-  describe('/POST book', () => {
-    it('it should POST a book ', done => {
-      // arrange
-      let book = {
-        title: 'The Hunger Games',
-        author: 'Suzanne Collins',
-        year: 2008,
-        pages: 301
-      };
-      // act
-      chai
-        .request(server)
-        .post('/book')
-        .send(book)
-        // assert
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('title');
-          res.body.should.have.property('author');
-          res.body.should.have.property('pages');
-          res.body.should.have.property('year');
-          done();
-        });
-    });
-    it('it should not POST a book without pages', done =>{
-         // arrange
-      let book = {
-        title: 'The Hunger Games',
-        author: 'Suzanne Collins',
-        year: 2008
-      };
-      // act
-      chai
-        .request(server)
-        .post('/book')
-        .send(book)
-        // assert
-        .end((err, res) => {
-        res.should.have.status(500);    
-          done();
-        });
-    })
-  });
-  describe('/GET book/:id', () => {
-    it('it should GET a book by the given id', done => {
-        //arrange
-        let book = {
-        title: 'The Hunger Games',
-        author: 'Suzanne Collins',
-        year: 2008,
-        pages: 301
-        };
-        //act
+describe('/GET brands', () => {
+    it('it should GET all the brands', done => {
         chai
         .request(server)
-        .post('/book')
-        .send(book)
-        //assert
+        .get('/api/brands')
         .end((err, res) => {
-          res.should.have.status(200);
-          chai
-          .request(server)
-          .get('/book/' + res.body.id)
-          .end((err, res) => {
-              res.should.have.status(200);
-              done();
-            })
-        })
-    });
-  });
-  describe('/PUT book/:id', () => {
-    it('it should UPDATE a book by the given id', done => {
-        //arrange
-        let book = {
-        title: 'The Hunger Games',
-        author: 'Suzanne Collins',
-        year: 2008,
-        pages: 301
-        };
-        //act
-        chai
-        .request(server)
-        .post('/book')
-        .send(book)
-        //assert
-        .end((err, res) => {
-          res.should.have.status(200);
-          // Change the title to something else
-          const createdBook = res.body 
-          createdBook.title = "Gilligan's Island"
-          chai
-          .request(server)
-          .put('/book/' + createdBook.id)
-          .send(createdBook)
-          .end((err, res) => {
-              res.should.have.status(200);
-              chai
-              .request(server)
-              .get('/book/'+ createdBook.id)
-              .end((err, res) => {
-                res.should.have.status(200);
-                res.body.title.should.equal("Gilligan's Island");
-              done();
-            })
-        })
-    });
-  });
-});
-describe('/DELETE book/:id', () => {
-  it('it should DELETE a book by given id', done => {
-    // arrange
-    let book = {
-      title: 'The Hunger Games',
-      author: 'Suzanne Collins',
-      year: 2008,
-      pages: 301
-      };
-      //act
-      chai
-      .request(server)
-      .post('/book')
-      .send(book)
-      //assert
-      .end((err, res) => {
-        res.should.have.status(200);
-        chai
-        .request(server)
-        .get('/book/' + res.body.id)
-        .end((err, res) => {
-          res.should.have.status(200);
-          chai
-          .request(server)
-          .delete('/book/' + res.body.id)
-          .end((err, res) => {
             res.should.have.status(200);
-            done();
-          })
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(5);
+        done();
         })
-      })
-    });
-  });
+    })
 });
+
+describe('/GET products by brand ID', () => {
+    it('it should GET all the products by brand ID', done => {
+        chai
+        .request(server)
+        .get('api/brands/:id/products')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+        done();  
+        })
+    })
+});
+
+describe('/GET products', () => {
+    it('it should GET all the products', done => {
+        chai
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(11);
+        done();
+        })
+    })
+});
+​
+describe('/POST login', () => {
+    it('it should allow user to login', done => {
+        let user = {
+            username: "yellowleopard753",
+            password: "jonjon"
+        }
+        // act
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        // assert
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.should.be.an('object');
+            res.body.should.have.property('token');
+            done();
+        })
+    })
+});
+
+
+describe('/GET /me/cart', () => {
+    it('it should GET the cart status for the user', done => {
+        chai
+        .request(server)
+        .get('api/me/cart')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(0);
+            done();
+        })
+    })
+});
+
+describe('/POST /me/cart', () => {
+    it('it should POST new item to users cart', done => {
+        //arrange
+        let product = {
+            "id": "10",
+            "categoryId": "5",
+            "name": "Peanut Butter",
+            "description": "The stickiest glasses in the world",
+            "price":103,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        //act
+        chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+            //assert
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(1);
+            done();
+        })
+    })
+})
+
+describe('/DELETE me/cart/:productId', () => {
+    it('it should DELETE an item from the users cart', done => {
+    // arrange
+        let product = {
+            "id": "10",
+            "categoryId": "5",
+            "name": "Peanut Butter",
+            "description": "The stickiest glasses in the world",
+            "price":103,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        //act
+        chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+        //assert
+        .end((err, res) => {
+            res.should.have.status(200);
+            chai
+            .request(server)
+            .delete('/api/me/cart/' + res.body.id)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(0);
+                done();
+            })
+        })
+    })
+});
+
+describe('/PUT me/cart/:productId', () => {
+    it('it should update a book by the given id', done => {
+        //arrange
+        let product = {
+            "id": "10",
+            "categoryId": "5",
+            "name": "Peanut Butter",
+            "description": "The stickiest glasses in the world",
+            "price":103,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        let product = {
+            "id": "10",
+            "categoryId": "5",
+            "name": "Peanut Butter",
+            "description": "The stickiest glasses in the world",
+            "price":103,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        //act
+        chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+        //assert
+        .end((err, res) => {
+           res.should.have.status(200);
+            chai
+            .request(server)
+            .put('/api/me/cart/' + res.body.id)
+            .send(product)
+            .end((err, res) => {
+                res.should.have.status(200);
+            done();
+            })
+        })
+    })
+})
