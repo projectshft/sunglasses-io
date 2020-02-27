@@ -18,7 +18,7 @@ var products = {};
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+let server = http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, (error) => {
     if (error) {
@@ -49,7 +49,10 @@ http.createServer(function (request, response) {
 
 // First route to the brands. She return all brand names of sunglasses
 myRouter.get('/api/brands', function(request,response) {
+    response.writeHead(200, { "Content-Type": "application/json" });
 	// Return all brands in the db
-	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(brands))
 });
+
+module.exports = server
+
