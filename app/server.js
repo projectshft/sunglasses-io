@@ -42,5 +42,10 @@ http.createServer((request, response) => {
 
 // Public route - all users of API can access
 myRouter.get("/api/brands", (request, response) => {
+    if (!brands) {
+        response.writeHead(404, 'No brands found');
+        response.end();
+    }
+    response.writeHead(200, 'Retrieved all brands')
     response.end(JSON.stringify(brands));
 });
