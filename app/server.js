@@ -6,6 +6,14 @@ var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
+let chai = require('chai');
+let chaiHttp = require('chai-http');
+//let server = require('../server');
+
+let should = chai.should();
+
+chai.use(chaiHttp);
+
 const PORT = 3001;
 // State holding variables
 let products = [];
@@ -16,7 +24,7 @@ let brands = [];
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer((request, response) => {
+const server = http.createServer((request, response) => {
     myRouter(request, response, finalHandler(request, response));
 }).listen(PORT, error => {
     if (error) {
@@ -49,3 +57,6 @@ myRouter.get("/api/brands", (request, response) => {
     response.writeHead(200, 'Retrieved all brands')
     response.end(JSON.stringify(brands));
 });
+
+// export to test file for Chai
+module.exports = server
