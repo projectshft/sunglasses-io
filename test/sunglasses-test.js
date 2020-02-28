@@ -177,3 +177,69 @@ describe ('/POST /api/login', () =>{
         })
     })
 });
+
+describe('/GET /api/me/cart', () => {
+    it('it should GET the status of the cart', done => {
+        //arrange
+        let user = {
+            username: 'greenlion235',
+            password: 'waters'
+        }
+        //act
+      chai
+      //
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            
+            res.should.have.status(200);
+            
+            chai 
+            .request(server)
+            .get('/api/me/cart?accessToken=' + res.body)
+            .end((err, res) => {
+                res.should.have.status(200);
+                done();
+            })
+        })
+    });
+  });
+
+  describe('/POST /api/me/cart', () => {
+    it('it should update the items in the cart', done => {
+        //arrange
+        let user = {
+            username: 'greenlion235',
+            password: 'waters'
+        };
+        let product = {product:{ 
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }, 
+        quantity: 1}
+        //act
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        //assert
+        .end((err, res) => {
+            
+            res.should.have.status(200);
+            
+            chai 
+            .request(server)
+            .post('/api/me/cart?accessToken=' + res.body)
+            .send(product)
+            .end((err, res) => {
+                res.should.have.status(200);
+                done();
+            })
+        })
+    });
+  });

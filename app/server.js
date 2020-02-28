@@ -9,6 +9,7 @@ var uid = require('rand-token').uid;
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; 
 const failedLoginAttempts = {};
+const newAccessToken = uid(16);
 
 let brands = [];
 let users = [];
@@ -30,12 +31,13 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
     failedLoginAttempts[username] = numFails;
   }
   
-  var getValidTokenFromRequest = function(request) {
-    var parsedUrl = require('url').parse(request.url, true);
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+    var parsedUrl = require('url').parse(request.url,true)
     if (parsedUrl.query.accessToken) {
-      // Verify the access token to make sure it's valid and not expired
-      let currentAccessToken = accessTokens.find(accessToken => {
-        return accessToken.token == parsedUrl.query.accessToken  && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+      // Verify the access token to make sure its valid and not expired
+      let currentAccessToken = accessTokens.find((accessToken) => {
+        return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
       });
       if (currentAccessToken) {
         return currentAccessToken;
@@ -47,24 +49,12 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
     }
   };
 
-
-
-// Setup router
+  // Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
 let server = 
 http.createServer((request, response) => {
-    // Handle CORS Preflight request
-  if (request.method === 'OPTIONS'){
-    response.writeHead(200, CORS_HEADERS);
-    return response.end();
-  }
-    // Verify that a valid API Key exists before we let anyone access our API
-//   if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
-//     response.writeHead(401, "You need to have a valid API key to use this API", CORS_HEADERS);
-//     return response.end();
-//   }
 
 myRouter(request, response, finalHandler(request, response));
 }).listen(PORT, error => {
@@ -91,12 +81,13 @@ myRouter(request, response, finalHandler(request, response));
 
 // Route for the brands 
 myRouter.get('/api/brands', function(request,response) {
-response.writeHead(200, {'Content-Type': 'application/json'})
+    response.writeHead(200, {'Content-Type': 'application/json'})
     return response.end(JSON.stringify(brands))
 
   });
 
 myRouter.get("/api/brands/:id/products", (request, response) => {
+    //filter for product list by category id(brand name)
     const productlistbybrand = products.filter((product) => {
        return product.categoryId == request.params.id;})
     if(productlistbybrand.length === 0 ) {
@@ -113,6 +104,43 @@ myRouter.get('/api/products', function(request,response) {
         return response.end(JSON.stringify(products))
     
       });  
+    
+// Route for the shopping cart
+myRouter.get('/api/me/cart', function(request,response) {
+    //verifying token
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //must login in to get cart
+    if (!currentAccessToken) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, "You need to log in to recieve cart information");
+        return response.end();
+    }else{
+        //search to see if username and password match
+        let user = users.find((user)=>{
+        return user.login.username == currentAccessToken.username
+    });
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart))
+   }
+});
+
+myRouter.post('/api/me/cart', function (request, response){
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //must login in to get cart
+    if (!currentAccessToken) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, "You need to log in to recieve cart information");
+        return response.end();
+    }else{
+        //search to see if username and password match
+        let user = users.find((user)=>{
+        return user.login.username == currentAccessToken.username
+    });
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart))
+   }
+});
+
 
 // Login call
 myRouter.post('/api/login', function(request,response) {
