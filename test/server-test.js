@@ -1,13 +1,13 @@
-const chai = require("chai");
-const chaiHTTP = require("chai-http");
+let chai = require('chai');
+let chaiHttp = require('chai-http');
 const server = require("../app/server");
-const expect = chai.expect;
-let should = chai.should;
 
-chai.use(chaiHTTP);
+let should = chai.should();
+
+chai.use(chaiHttp);
 
 describe("/GET brands", () => {
-    it.only("should GET all brands", done => {
+    it("should GET all brands", done => {
       chai
         .request(server)
         .get("/api/brands")

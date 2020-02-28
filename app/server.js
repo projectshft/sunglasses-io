@@ -20,7 +20,7 @@ myRouter.use(bodyParser.json());
 
 const server = http.createServer((req, res) => {
     res.writeHead(200);
-    router(req, res, finalHandler(req, res));
+    myRouter(req, res, finalHandler(req, res));
   });
   
   server.listen(PORT, err => {
@@ -40,6 +40,9 @@ const server = http.createServer((req, res) => {
 
 // Notice how much cleaner these endpoint handlers are...
 myRouter.get("/api/brands", (request, response) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    const { query, sort } = querystring.parse(parsedUrl.query);
+    let brandsToReturn = [];
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(brands));
   });
