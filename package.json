@@ -12,7 +12,10 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "chai": "^4.2.0",
-    "finalhandler": "latest",
+    "chai-http": "^4.3.0",
+    "final": "^0.2.0",
+    "finalhandler": "^1.1.2",
+    "handler": "^0.1.3",
     "http": "0.0.0",
     "mocha": "^7.1.0",
     "querystring": "^0.2.0",
