@@ -14,11 +14,9 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-const PORT = 3001;
-// State holding variables
-let products = [];
-let users = [];
 let brands = [];
+
+const PORT = 3001;
 
 // Setup router
 var myRouter = Router();
@@ -30,22 +28,25 @@ const server = http.createServer((request, response) => {
     if (error) {
         return console.log("Error on Server Startup: ", error);
     }
-    fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
-        if (error) throw error;
-        products = JSON.parse(data);
-        console.log(`Server setup: ${products.length} products loaded`);
-    });
-    fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
-        if (error) throw error;
-        brands = JSON.parse(data);
-        console.log(`Server setup: ${brands.length} brands loaded`);
-    });
-    fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
-        if (error) throw error;
-        users = JSON.parse(data);
-        console.log(`Server setup: ${users.length} users loaded`);
-    });
-    console.log(`Server is listening on ${PORT}`);
+    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf8'))
+    
+    
+    // fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
+    //     if (error) throw error;
+    //     products = JSON.parse(data);
+    //     console.log(`Server setup: ${products.length} products loaded`);
+    // });
+    // // fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
+    // //     if (error) throw error;
+    // //     brands = JSON.parse(data);
+    // //     console.log(`Server setup: ${brands.length} brands loaded`);
+    // // });
+    // fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
+    //     if (error) throw error;
+    //     users = JSON.parse(data);
+    //     console.log(`Server setup: ${users.length} users loaded`);
+    // });
+    // console.log(`Server is listening on ${PORT}`);
 });
 
 // Public route - all users of API can access
@@ -54,8 +55,10 @@ myRouter.get("/api/brands", (request, response) => {
         response.writeHead(404, 'No brands found');
         response.end();
     }
-    response.writeHead(200, 'Retrieved all brands')
+   // response.writeHead(200, 'Retrieved all brands')
+    response.writeHead(200, 'Retrieved all brands', { "Content-Type": "application/json" });
     response.end(JSON.stringify(brands));
+    
 });
 
 // export to test file for Chai
