@@ -4,6 +4,9 @@ let server = require('./app/server.js')
 
 let should = chai.should();
 
+chai.use(chaiHttp);
+
+
 describe("GET brands", () => {
     it("it should return all the brands", done=>{
         chai
@@ -18,11 +21,11 @@ describe("GET brands", () => {
     })
 })
 
-describe("GET brands/:id/product", () => {
+describe("GET brands/:id/products", () => {
     it("it should get all the products of one brand", done=>{
         chai
         .request(server)
-        .get('api/brands/:id/products')
+        .get('/api/brands/1/products')
         .end((err, res) => {
             res.should.have.status(200)
             res.body.should.be.an('array')
@@ -35,7 +38,7 @@ describe("GET api/products", () => {
     it("it should return all products", done=>{
         chai
         .request(server)
-        .get("api/brands/:id/products")
+        .get("/api/products")
         .end((err, res) => {
             res.should.have.status(200)
             res.body.should.be.an("array")
@@ -53,11 +56,12 @@ describe("POST api/login", () => {
         }
         chai
         .request(server)
-        .post("api/login")
+        .post("/api/login")
         .send(user)
         .end((err, res) => {
             res.should.have.status(200)
-            res.body.should.have.property("token")
+            res.should.be.an('object')
+            res.body.should.be.an('string')
             done()
         })
     })
@@ -65,62 +69,22 @@ describe("POST api/login", () => {
 
 describe("GET api/me/cart", () => {
     it("it return all items in a user's cart", done=>{
-        chai
-        .request(server)
-        .get("api/me/cart")
-        .end((err, res) => {
-            res.should.have.status(200)
-            res.body.should.be.an('array')
-            res.body.length.should.be.eql(0)
-            done()
-        })
-    })
-})
-
-describe("POST /api/me/cart", () => {
-    it("it adds an item to a user's cart", done =>{
-        let item = {
-            "id": "3",
-            "categoryId": "1",
-            "name": "Brown Sunglasses",
-            "description": "The best glasses in the world",
-            "price":50,
-            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        let user = {
+            username:"yellowleopard753",
+            password:"jonjon"
         }
         chai
         .request(server)
-        .post("/api/me/cart")
-        .send(item)
-        .end((err, res) => {
-            res.should.have.status(200)
-            res.should.be.an.array('array')
-            res.body.length.should.be.eql(1)
-            done()
-        })
-    })
-})
-
-describe("DELETE /api/me/cart/:productid", () => {
-    it("it adds an item to a user's cart", done => {
-        let item = {
-            "id": "3",
-            "categoryId": "1",
-            "name": "Brown Sunglasses",
-            "description": "The best glasses in the world",
-            "price":50,
-            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-        }
-        chai
-        .request(server)
-        .post("/api/me/cart")
-        .send(item)
+        .post("/api/login")
+        .send(user)
         .end((err, res) => {
             chai
             .request(server)
-            .delete("/api/me/cart" + res.body.id)
+            .get("/api/me/cart")
+            .send({token: res.body})
             .end((err, res) => {
                 res.should.have.status(200)
-                res.should.be.an.array('array')
+                res.body.should.be.an('array')
                 res.body.length.should.be.eql(0)
                 done()
             })
@@ -128,8 +92,12 @@ describe("DELETE /api/me/cart/:productid", () => {
     })
 })
 
-describe("PUT /api/me/cart/:productid", () => {
-    it("it allows a user update the quanitity of an item in the cart", done => {
+describe("POST /api/me/cart", () => {
+    it("it adds an item to a user's cart", done =>{
+        let user = {
+            username:"yellowleopard753",
+            password:"jonjon"
+        }
         let item = {
             "id": "3",
             "categoryId": "1",
@@ -140,19 +108,88 @@ describe("PUT /api/me/cart/:productid", () => {
         }
         chai
         .request(server)
-        .post("/api/me/cart")
-        .send(item)
+        .post("/api/login")
+        .send(user)
         .end((err, res) => {
             chai
             .request(server)
             .post("/api/me/cart")
-            .send(item)
+            .send({token: res.body, item: item})
             .end((err, res) => {
                 res.should.have.status(200)
-                res.should.be.an.array('array')
+                res.body.should.be.an('array')
                 res.body.length.should.be.eql(1)
                 done()
             })
         })
     })
 })
+
+describe("DELETE /api/me/cart/:productid", () => {
+    it("it adds an item to a user's cart", done => {
+        let user = {
+            username:"yellowleopard753",
+            password:"jonjon"
+        }
+        let item = {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+
+        chai
+        .request(server)
+        .post("/api/login")
+        .send(user)
+        .end((err, res) => {
+            chai
+            .request(server)
+            .post("/api/me/cart")
+            .send({token: res.body, item: item})
+            .end((err, res) => {
+                chai
+                .request(server)
+                .delete("/api/me/cart/")
+                .send({token: res.body})
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.should.be.an('array')
+                    res.body.length.should.be.eql(0)
+                    done()
+                })
+            })
+        })
+    })
+})
+
+// describe("PUT /api/me/cart/:productid", () => {
+//     it("it allows a user update the quanitity of an item in the cart", done => {
+//         let item = {
+//             "id": "3",
+//             "categoryId": "1",
+//             "name": "Brown Sunglasses",
+//             "description": "The best glasses in the world",
+//             "price":50,
+//             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+//         }
+//         chai
+//         .request(server)
+//         .post("/api/me/cart")
+//         .send(item)
+//         .end((err, res) => {
+//             chai
+//             .request(server)
+//             .post("/api/me/cart")
+//             .send(item)
+//             .end((err, res) => {
+//                 res.should.have.status(200)
+//                 res.should.be.an.array('array')
+//                 res.body.length.should.be.eql(1)
+//                 done()
+//             })
+//         })
+//     })
+// })
