@@ -1,14 +1,9 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('./app/server');
-
-
-
 let should = chai.should();
 
 chai.use(chaiHttp);
-
-
 
 //testing to see that all the initial 5 brands are returned when ran
 describe('/GET brands', () => {
@@ -41,6 +36,7 @@ describe('/GET brands/:id/products', () => {
                 done();
             });
     });
+
     it('it should not GET all the products with an invalid ID', done => {
         chai
             .request(server)
@@ -50,6 +46,7 @@ describe('/GET brands/:id/products', () => {
                 done();
             });
     });
+
     it('it should not GET all the products if ID is not a number', done => {
         chai
             .request(server)
@@ -108,6 +105,7 @@ describe('/POST login', () => {
                 done();
             });
     });
+
     it('it should return error if username is invalid', done => {
         const user = {
             username: "greenlion235",
@@ -122,6 +120,7 @@ describe('/POST login', () => {
                 done();
             });
     });
+
     it('if user did not pass any username or password', done => {
         chai
             .request(server)
@@ -159,6 +158,7 @@ describe('/GET me/cart', () => {
         });
         
     });
+
     it('it should NOT GET current users cart without accessToken', done => {
         const user = {
             username: "greenlion235",
@@ -396,11 +396,51 @@ describe('/DELETE me/cart/:productId', () => {
                     chai
                     .request(server)
                     .delete('/api/me/cart/1?accessToken='+ token)
-                    .send(addProduct)
                     .end((err, res) => {
                         res.should.have.status(200);
                         res.body.should.be.an('array')
                         res.body.length.should.be.eql(0);
+                        done();
+                        });
+                });
+            })
+    }); 
+
+    it('should not Delete item from cart with invalid productID ', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = {
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                 quanity: 1
+            }
+            const token = res.body
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken='+ token)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    chai
+                    .request(server)
+                    .delete('/api/me/cart/6?accessToken='+ token)
+                    .end((err, res) => {
+                        res.should.have.status(404);
                         done();
                         });
                 });

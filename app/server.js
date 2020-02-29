@@ -229,14 +229,26 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
         response.writeHead(401, "You need to log in to delete an item from cart");
         return response.end();
     }else{
+
         //Search to find the correct user cart
         let user = users.find((user)=>{
             return user.login.username == currentAccessToken.username
         })
 
+        // Verify that the product exists to know if we should continue processing
+        let product = user.cart.find((item) => {
+            return item.product.id == request.params.productId;
+        });
+
+        if (!product) {
+            // If there isn't a product with that id, then return a 404
+            response.writeHead(404, "That product cannot be found");
+            return response.end();
+        }
+
         //Search cart to find product wanting to be deleted 
         user.cart = user.cart.filter((item)=>{
-            return item.product.id !== request.body.product.id
+            return item.product.id !== request.params.productId
         })
 
         //Gives user success status and sends back the new user cart
@@ -262,11 +274,11 @@ myRouter.put('/api/me/cart/:productId', function(request,response) {
 
         //Search cart to find product wanting to be deleted 
         let findItemToEdit = user.cart.find((item)=>{
-            return item.product.id === request.body.product.id
+            return item.product.id === request.params.id
         })
 
         //edit item that was found
-        findItemToEdit = request.body.product
+        //findItemToEdit = request.body.product
 
         //Gives user success status and sends back the new user cart
         response.writeHead(200, { "Content-Type": "application/json" });
