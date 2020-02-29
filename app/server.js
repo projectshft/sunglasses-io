@@ -33,7 +33,7 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
   
 // Helper method to process access token
 var getValidTokenFromRequest = function(request) {
-    var parsedUrl = require('url').parse(request.url,true)
+    var parsedUrl = require('url').parse(request.url, true)
     if (parsedUrl.query.accessToken) {
       // Verify the access token to make sure its valid and not expired
       let currentAccessToken = accessTokens.find((accessToken) => {
@@ -53,6 +53,7 @@ var getValidTokenFromRequest = function(request) {
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
+//
 let server = 
 http.createServer((request, response) => {
 
@@ -81,8 +82,9 @@ myRouter(request, response, finalHandler(request, response));
 
 // Route for the brands 
 myRouter.get('/api/brands', function(request,response) {
-    response.writeHead(200, {'Content-Type': 'application/json'})
-    return response.end(JSON.stringify(brands))
+
+  response.writeHead(200, {'Content-Type': 'application/json'})
+      return response.end(JSON.stringify(brands))
 
   });
 
@@ -100,6 +102,7 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
   
   // Route for the products 
 myRouter.get('/api/products', function(request,response) {
+
     response.writeHead(200, {'Content-Type': 'application/json'})
         return response.end(JSON.stringify(products))
     
@@ -119,6 +122,7 @@ myRouter.get('/api/me/cart', function(request,response) {
         let user = users.find((user)=>{
         return user.login.username == currentAccessToken.username
     });
+    
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart))
    }
@@ -136,10 +140,69 @@ myRouter.post('/api/me/cart', function (request, response){
         let user = users.find((user)=>{
         return user.login.username == currentAccessToken.username
     });
+    // let product = request.body.product
+    // product[quantity] = 1 
+    user.cart.push(request.body); 
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart))
    }
 });
+
+
+
+myRouter.delete ('/api/me/cart/:productId', function (request, response){
+    let currentAccessToken = getValidTokenFromRequest(request);
+  
+    //must login in to get cart
+    if (!currentAccessToken) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, "You need to log in to recieve cart information");
+        return response.end();
+    }else{
+        //search to see if username and password match
+        let user = users.find((user)=>{
+        return user.login.username == currentAccessToken.username
+    });
+    
+    let cart = user.cart.filter(item => item.id !== request.params.productId);
+    user.cart = cart; 
+    
+    // user.cart.push(request.body); 
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(cart))
+  }
+    
+});
+
+myRouter.put('/api/me/cart/:productId', function (request, response){
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  //must login in to get cart
+  if (!currentAccessToken) {
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to log in to recieve cart information");
+      return response.end();
+  }else{
+      //search to see if username and password match
+      let user = users.find((user)=>{
+      return user.login.username == currentAccessToken.username
+  });
+  //
+  
+  let cart = user.cart.map(product => {if (product.id == request.params.productId && product.quantity > 1 ) {
+    return product.quantity++}
+    });
+
+    user.cart = cart; 
+    
+  user.cart.push(request.body); 
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(cart))
+}
+  
+});
+
+
 
 
 // Login call
@@ -190,6 +253,22 @@ myRouter.post('/api/login', function(request,response) {
       return response.end();
     }
   });
+
+  // Route for the search by product name 
+  myRouter.get('/api/search', function(request,response) {
+    var parsedUrl = require('url').parse(request.url, true);
+  
+      let searchResults = products.filter(product => {
+        if( product.name.includes(parsedUrl.query.query))
+        return products
+      })
+    
+    response.writeHead(200, {'Content-Type': 'application/json'})
+        return response.end(JSON.stringify(searchResults))
+    
+      });  
+
+
 
 
   module.exports = server;

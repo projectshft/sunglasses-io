@@ -5,6 +5,11 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 
+// describe('Books', () => {
+//     beforeEach(() => {
+//         Book.removeAll();
+//       });
+
 describe('/GET /api/brands', () => {
     it('it should GET all the brands', done => {
         //arrange
@@ -123,9 +128,7 @@ describe ('/POST /api/login', () =>{
         .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.a('string');
-            // res.body.should.have.property('username');
-            // res.body.should.have.property('lastUpdated');
-            // res.body.should.have.property('token')
+         
             done();
         })
     })
@@ -192,14 +195,15 @@ describe('/GET /api/me/cart', () => {
         .post('/api/login')
         .send(user)
         .end((err, res) => {
-            
+            let token = res.body 
             res.should.have.status(200);
             
             chai 
             .request(server)
-            .get('/api/me/cart?accessToken=' + res.body)
+            .get('/api/me/cart?accessToken=' + token)
             .end((err, res) => {
                 res.should.have.status(200);
+                res.body.should.be.an('array');
                 done();
             })
         })
@@ -235,11 +239,128 @@ describe('/GET /api/me/cart', () => {
             chai 
             .request(server)
             .post('/api/me/cart?accessToken=' + res.body)
-            .send(product)
+            .send({product: product})
             .end((err, res) => {
                 res.should.have.status(200);
+                res.body.should.be.an('array');
                 done();
             })
         })
     });
   });
+
+  describe('/DELETE /api/me/cart/:productId', () => {
+    it('it should DELETE items in the cart by product Id', done => {
+        //arrange
+        let user = {
+            username: 'greenlion235',
+            password: 'waters'
+        };
+        let product = {product:{ 
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }, 
+        quantity: 1}
+        //act
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        //assert
+        .end((err, res) => {
+            let token = res.body;
+            res.should.have.status(200);
+           
+            chai 
+            .request(server)
+            .post('/api/me/cart?accessToken=' + token)
+            .send({product:product})
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                //assert
+                chai 
+                .request(server)
+                .delete('/api/me/cart/1?accessToken=' + token)
+               
+                .end((err, res)=>{
+                    res.should.have.status(200);
+                    done();
+                }) 
+              
+            })
+        })
+    });
+  });
+
+  describe('/PUT /api/me/cart/:productId', () => {
+    it('it should update items in the cart by product Id', done => {
+        //arrange
+        let user = {
+            username: 'greenlion235',
+            password: 'waters'
+        };
+        let product = {product:{ 
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }, 
+        quantity: 1}
+        //act
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        //assert
+        .end((err, res) => {
+            let token = res.body;
+            res.should.have.status(200);
+
+            chai 
+            .request(server)
+            .post('/api/me/cart?accessToken=' + token)
+            .send({product: product})
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                //assert
+                chai 
+                .request(server)
+                .put('/api/me/cart/1?accessToken=' + token)
+                //
+                .end((err, res)=>{
+                    res.should.have.status(200);
+                    done();
+                }) 
+              
+            })
+        })
+    });
+  });
+
+describe('/GET /api/search', () => {
+  it('it should GET the product back with a query string Habanero', done => {
+    chai
+      .request(server)
+      .get('/api/search?query=Habanero')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        res.body[0].should.be.a('object');
+        res.body[0].should.have.property('categoryId');
+        res.body[0].should.have.property('description')
+        res.body[0].should.have.property('id');
+        res.body[0].should.have.property('name')
+        res.body[0].should.have.property('imageUrls');
+        done();
+      });
+  });
+});
