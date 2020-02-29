@@ -55,7 +55,7 @@ let server = http.createServer(function (request, response) {
     // Return all brands definitions (for now)
     return response.end(JSON.stringify(brands));
   });
-
+  //products router by brand id
   myRouter.get('/api/brands/:id/products', function(request,response) {
     const foundProducts = products.filter(product => {
         return product.categoryId == request.params.id
@@ -201,7 +201,7 @@ let server = http.createServer(function (request, response) {
         response.writeHead(404);	
         return response.end("Nothing to post");
       }
-      
+
       if(request.body.quantity < 0 || typeof request.body.quantity != 'number') {
         response.writeHead(404);	
         return response.end("Invalid quantity");

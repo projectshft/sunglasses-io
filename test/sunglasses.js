@@ -87,9 +87,7 @@ describe('The sunglasses store', () => {
               done();
             });
         });
-    });
 
-    describe('/GET api/products empty', () => {
         it('it should not GET any products', done => {
             let products = []
             chai
@@ -122,9 +120,7 @@ describe('The sunglasses store', () => {
                 done();
             });
         });
-    });
 
-    describe('/POST api/login invalid', () => {
         it('it should not login an invalid user', done => {
             // arrange
             let user = {
@@ -169,9 +165,7 @@ describe('The sunglasses store', () => {
                 done();
                 });
         });
-    });
 
-    describe('/POST api/me/cart invalid', () => {
         it('it should not post without the price field', done => {
             // arrange
             let cartItem = {
@@ -195,6 +189,106 @@ describe('The sunglasses store', () => {
                 done();
                 });
         });
+    
+        it('it should increment quantity of the product in the user cart', done => {
+            // arrange
+            let cartItem = {
+                    product: {
+                        "id": "2",
+                        "categoryId": "1",
+                        "name": "Black Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":100,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 1
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body[0].should.have.property('quantity');
+                done();
+                });
+        });
+
+        it('it should add product to the user cart not the same category', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 1
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body[0].should.have.property('quantity');
+                done();
+                });
+        });
+
+        it('it should fail to add product with negative quantity', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: -20
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(404);
+                done();
+                });
+        });
+
+        it('it should fail to add product with not a number quantity', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 'k'
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(404);
+                done();
+                });
+        });
     });
 
     describe('/GET api/me/cart', () => {
@@ -209,9 +303,7 @@ describe('The sunglasses store', () => {
                     done();
                 });
         });
-    });
 
-    describe('/GET api/me/cart', () => {
         it('it should let know the token is missing ', done => {
             
             chai
@@ -222,7 +314,6 @@ describe('The sunglasses store', () => {
                     done();
                 });
         });
-
     });
     //update product properties
     describe('/POST api/me/cart/:productId', () => {
@@ -253,114 +344,6 @@ describe('The sunglasses store', () => {
         });
     });   
     
-    describe('/POST api/me/cart add product the same category', () => {
-        it('it should increment quantity of the product in the user cart', done => {
-            // arrange
-            let cartItem = {
-                    product: {
-                        "id": "2",
-                        "categoryId": "1",
-                        "name": "Black Sunglasses",
-                        "description": "The best glasses in the world",
-                        "price":100,
-                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-                    },
-                    quantity: 1
-                }
-            chai
-                .request(server)
-                .post('/api/me/cart?accessToken=' + token)
-                .send(cartItem)
-                // assert
-                .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                res.body[0].should.have.property('quantity');
-                done();
-                });
-        });
-    });  
-
-    describe('/POST api/me/cart add product different category', () => {
-        it('it should add product to the user cart not the same category', done => {
-            // arrange
-            let cartItem = {
-                    product:     {
-                        "id": "3",
-                        "categoryId": "1",
-                        "name": "Brown Sunglasses",
-                        "description": "The best glasses in the world",
-                        "price":50,
-                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-                    },
-                    quantity: 1
-                }
-            chai
-                .request(server)
-                .post('/api/me/cart?accessToken=' + token)
-                .send(cartItem)
-                // assert
-                .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                res.body[0].should.have.property('quantity');
-                done();
-                });
-        });
-    });
-
-    describe('/POST api/me/cart with negative number', () => {
-        it('it should fail to add product with negative quantity', done => {
-            // arrange
-            let cartItem = {
-                    product:     {
-                        "id": "3",
-                        "categoryId": "1",
-                        "name": "Brown Sunglasses",
-                        "description": "The best glasses in the world",
-                        "price":50,
-                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-                    },
-                    quantity: -20
-                }
-            chai
-                .request(server)
-                .post('/api/me/cart?accessToken=' + token)
-                .send(cartItem)
-                // assert
-                .end((err, res) => {
-                res.should.have.status(404);
-                done();
-                });
-        });
-    });
-
-    describe('/POST api/me/cart with quantity not a number', () => {
-        it('it should fail to add product with not a number quantity', done => {
-            // arrange
-            let cartItem = {
-                    product:     {
-                        "id": "3",
-                        "categoryId": "1",
-                        "name": "Brown Sunglasses",
-                        "description": "The best glasses in the world",
-                        "price":50,
-                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-                    },
-                    quantity: 'k'
-                }
-            chai
-                .request(server)
-                .post('/api/me/cart?accessToken=' + token)
-                .send(cartItem)
-                // assert
-                .end((err, res) => {
-                res.should.have.status(404);
-                done();
-                });
-        });
-    });
-    
     describe('/DELETE api/me/cart/:productId', () => {
         it('it should delete product from the cart', done => {
             // arrange
@@ -387,9 +370,7 @@ describe('The sunglasses store', () => {
                 done();
                 });
         });
-    });
 
-    describe('/DELETE api/me/cart/:productId', () => {
         it('it should decrement quantity for the product we need to delete from the cart', done => {
             // arrange
             let cartItem = {
