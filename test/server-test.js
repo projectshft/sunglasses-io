@@ -1,7 +1,7 @@
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-const server = require('../app/server');
-const should = chai.should();
+let chai = require('chai');
+let chaiHttp = require('chai-http');
+let server = require('../app/server');
+let should = chai.should();
 
 chai.use(chaiHttp);
 
@@ -9,8 +9,9 @@ chai.use(chaiHttp);
 
 describe('Brands', () => {
     describe('/GET /api/brands', () => {
-        it('it should respond with all the brands located in the brands json file', done => {
-            chai.request(server)
+        it('it should GET all the brands in initial-data', done => {
+            chai
+                .request(server)
                 .get('/api/brands')
                 .end((err, res) => {
                     // Checks to make sure the status code is a successful one 
