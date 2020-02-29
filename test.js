@@ -71,6 +71,7 @@ describe('/POST login', () => {
 
 describe('/GET /me/cart', () => {
     it('it should GET the cart status for the user', done => {
+
         let user = {
             username: "yellowleopard753",
             password: "jonjon"
@@ -116,11 +117,12 @@ describe('/POST /me/cart', () => {
         .post('/api/login')
         .send(user)
         .end((err, res) => {
+            let token = res.body
             res.should.have.status(200);
             chai
             .request(server)
             .post('/api/me/cart')
-            .send({product: product, token: res.body})
+            .send({product: product, token: token})
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an('array');
@@ -134,6 +136,7 @@ describe('/POST /me/cart', () => {
 describe('/DELETE me/cart/:productId', () => {
     it('it should DELETE an item from the users cart', done => {
         // arrange
+        
         let user = {
             username: "yellowleopard753",
             password: "jonjon"
@@ -152,17 +155,18 @@ describe('/DELETE me/cart/:productId', () => {
         .post('/api/login')
         .send(user)
         .end((err, res) => {
+            let token = res.body
             res.should.have.status(200);
             chai
             .request(server)
             .post('/api/me/cart')
-            .send({product: product, token: res.body})
+            .send({product: product, token: token})
             .end((err, res) => {
                 res.should.have.status(200);
                 chai
                 .request(server)
-                .delete('/api/me/cart/')
-                .send({product: product, token: res.body})
+                .delete('/api/me/cart/10')
+                .send({token: token})
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an('array');
@@ -174,41 +178,61 @@ describe('/DELETE me/cart/:productId', () => {
     })
 })
 
-// describe('/PUT me/cart/:productId', () => {
-//     it('it should update a book by the given id', done => {
-//         //arrange
-//         let product = {
-//             "id": "10",
-//             "categoryId": "5",
-//             "name": "Peanut Butter",
-//             "description": "The stickiest glasses in the world",
-//             "price":103,
-//             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-//         }
-//         let product1 = {
-//             "id": "10",
-//             "categoryId": "5",
-//             "name": "Peanut Butter",
-//             "description": "The stickiest glasses in the world",
-//             "price":103,
-//             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-//         }
-//         //act
-//         chai
-//         .request(server)
-//         .post('/api/me/cart')
-//         .send(product)
-//         //assert
-//         .end((err, res) => {
-//            res.should.have.status(200);
-//             chai
-//             .request(server)
-//             .put('/api/me/cart/' + res.body.id)
-//             .send(product)
-//             .end((err, res) => {
-//                 res.should.have.status(200);
-//             done();
-//             })
-//         })
-//     })
-// })
+describe('/PUT me/cart/:productId', () => {
+    it('it should update a book by the given id', done => {
+        //arrange
+        let user = {
+            username: "yellowleopard753",
+            password: "jonjon"
+        }
+        let product = {
+            "id": "10",
+            "categoryId": "5",
+            "name": "Peanut Butter",
+            "description": "The stickiest glasses in the world",
+            "price":103,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        //act
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            let token = res.body
+            res.should.have.status(200);
+            chai
+            .request(server)
+            .post('/api/me/cart')
+            .send({product: product, token: token})
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai
+                .request(server)
+                .put('/api/me/cart/10')
+                .send({token: token})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    res.body.length.should.be.eql(1);
+                    done();
+                })
+            })
+        })
+    })
+})
+
+describe('/GET search?q=:query', () => {
+    it('it should search for product description and product name matching query', done => {
+        //act
+        chai
+        .request(server)
+        .get('/api/search?q=spiciest')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(1);
+            done();
+        })
+    })
+})

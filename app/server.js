@@ -130,8 +130,9 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
     failedLoginAttempts[username] = numFails;
   }
 
-  var getValidTokenFromRequest = function(request) {
-    var token = request.body.token
+ // Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+    let token = request.body.token
     if (token) {
       // Verify the access token to make sure its valid and not expired
       let currentAccessToken = accessTokens.find((accessToken) => {
@@ -172,7 +173,9 @@ myRouter.post('/api/me/cart', function(request,response) {
        let user =  users.find((user)=>{
         return user.login.username == currentAccessToken.username
        })
+
        let product = request.body.product;
+       product['quantity'] = 1;
 
        user.cart.push(product);
 
@@ -182,7 +185,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     }
 });
 
-myRouter.post('/api/me/cart/:productId', function(request,response) {
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
       response.writeHead(401, "You need to have access to this call to continue",);
@@ -193,14 +196,52 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
         return user.login.username == currentAccessToken.username
        })
 
-       let userCart = user.cart.filter(function(p) {
-            return p.id !== request.params.id
+       let cart = user.cart.filter(function(p) {
+            return p.id !== request.params.productId
         })
 
-       response.writeHead(200, { "Content-Type": "application/json" });
-       return response.end(JSON.stringify(userCart));
+        user.cart = cart 
 
+       response.writeHead(200, { "Content-Type": "application/json" });
+       return response.end(JSON.stringify(user.cart));
     }
 });
+
+myRouter.put('/api/me/cart/:productId', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to this call to continue",);
+    return response.end();
+  } else {
+
+     let user =  users.find((user)=>{
+      return user.login.username == currentAccessToken.username
+     })
+     
+     let cart = user.cart.map((p)=>{
+        if(p.id == request.params.productId) {
+           p.quantity++
+        }
+        return p 
+      })
+      
+      user.cart = cart
+
+     response.writeHead(200, { "Content-Type": "application/json" });
+     return response.end(JSON.stringify(user.cart));
+
+  }
+});
+
+myRouter.get('/api/search', function(request,response) {
+  let query = request._parsedUrl.query.slice(2)
+
+  let queryResults = products.filter(function(p) {
+    return p.name.includes(query) || p.description.includes(query)
+  })
+  
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(queryResults));
+})
 
 module.exports = server
