@@ -196,13 +196,23 @@ myRouter.post('/api/me/cart', function(request,response) {
             response.writeHead(400, "Cannot add without both the product and the quanity");	
             return response.end();
         }
-        //Search to see if username and password match
+        //Search to find the correct user cart
         let user = users.find((user)=>{
-        return user.login.username == currentAccessToken.username
+            return user.login.username == currentAccessToken.username
         })
 
-        //Pushes the product sent into the cart array
-        user.cart.push(request.body)
+        //Search to see if the product they want to add is already in the cart
+        let isProductAlreadyInTheCart = user.cart.find((item)=>{
+            return item.product.id === request.body.product.id
+        })
+
+        if (!isProductAlreadyInTheCart ){
+            //if the product is not already in the cart it pushes the product sent into the cart array
+            user.cart.push(request.body)
+        }else{
+            //if the product is in the cart, it increases the quanity by one
+            isProductAlreadyInTheCart.quanity++
+        }
 
         //Gives user success status and sends back the new user cart
         response.writeHead(200, { "Content-Type": "application/json" });

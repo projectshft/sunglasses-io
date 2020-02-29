@@ -290,6 +290,7 @@ describe('/POST cart', () => {
                     .post('/api/me/cart?accessToken='+ token)
                     .send(addProduct)
                     .end((err, res) => {
+                        res.should.have.status(200);
                         res.body.should.be.an('array')
                         res.body[0].should.be.an('object')
                         res.body.length.should.be.eql(1);
@@ -301,4 +302,45 @@ describe('/POST cart', () => {
     });
 });
 
-
+// describe('/DELETE cart', () => {
+//     it('if item in cart is deleted it returns a new cart without', done => {
+//         const user = {
+//             username: "greenlion235",
+//             password: "waters"
+//         }
+//         chai
+//         .request(server)
+//         .post('/api/login')
+//         .send(user)
+//         .end((err, res) => {
+//             res.should.have.status(200);
+//             res.body.should.be.an('string')
+//             let addProduct = {
+//                 product: {
+//                 "id": "1",
+//                 "categoryId": "1",
+//                 "name": "Superglasses",
+//                 "description": "The best glasses in the world",
+//                 "price":150,
+//                 "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+//                 },
+//                  quanity: 1
+//             }
+//             let token = res.body
+//                 chai
+//                     .request(server)
+//                     .post('/api/me/cart?accessToken='+ token)
+//                     .send(addProduct)
+//                     .end((err, res) => {
+//                         res.should.have.status(200);
+//                         chai
+//                         .request(server)
+//                         .delete('/api/me/cart?accessToken='+ token)
+//                         .send(addProduct)
+//                         .end((err, res) => {
+//                             res.should.have.status(200);
+//                         });
+//                     });
+//         }); 
+//     });
+// });
