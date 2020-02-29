@@ -22,25 +22,13 @@ describe("/GET brands", () => {
             done();
         });
     });
-    it("should limit results when a user search a brand with a query string", done => {
-        chai
-        .request(server)
-        .get("/v1/brands?query=Oakley")
-        .end((err, res) => {
-            // expect(err).to.be.null;
-            // expect(res).to.have.status(200);
-            // expect("Content-Type", "application/json");
-            // expect(res.body).to.be.an("array");
-            // expect(res.body).to.have.lengthOf(1);
-        });
-    });
 });
 
 describe("/GET brands/:id/products", () => {
     it("should GET all brands", done => {
       chai
         .request(server)
-        .get(`/api/brands/1/products`)
+        .get("/api/brands/1/products")
         .end((err, res) => {
             expect(err).to.be.null
             expect("Content-Type", "application/json");
@@ -63,9 +51,30 @@ describe("/GET products", () => {
             expect("Content-Type", "application/json");
             res.body.should.not.equal('null')
             res.should.have.status(200);
-            res.body.should.be.an('array');
+            res.body.should.be.an("array");
             res.body.length.should.be.eql(11);
             done();
         });
     });
+});
+
+describe('/POST login', () => {
+  it('it should POST a token when user logs in ', done => {
+    // arrange
+    let token = {
+      token: 'zfLQotqSQP90wYDx'
+    };
+    // act
+    chai
+      .request(server)
+      .post('/login')
+      .send(token)
+      // assert
+      .end((err, res) => {
+        res.should.have.status(200);
+        // res.body.should.be.a('string');
+        // res.body.length.should.be.eql(16)
+        done();
+      });
+  });
 });

@@ -7,7 +7,7 @@ const url = require("url");
 const querystring = require('querystring');
 var uid = require('rand-token').uid;
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 // State holding variables
@@ -30,23 +30,7 @@ let failedLoginAttempts = {};
  //   count: 0
  // }
 
- // Helper method to process access token
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url, true);
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure it's valid and not expired
-    let currentAccessToken = accessTokens.find(accessToken => {
-      return accessToken.token == parsedUrl.query.accessToken;
-    });
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
+
 // Setup router
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -65,16 +49,7 @@ const server = http.createServer((req, res) => {
     products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
     //populate users
     users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
-    // hardcode "logged in" user
-    user = users[0]
   });
-
-
-const saveCurrentUser = (currentUser) => {
-  // set hardcoded "logged in" user
-  users[0] = currentUser;
-  fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
-}
 
 //GET all the brands
 myRouter.get("/api/brands", (request, response) => {
@@ -117,7 +92,7 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
 //GET all the products
 myRouter.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
-  const { query, sort } = querystring.parse(parsedUrl.query);
+  const { query } = querystring.parse(parsedUrl.query);
   let productsToReturn = [];
   if (query !== undefined) {
     productsToReturn = products.filter(product => product.name.includes(query));
@@ -129,16 +104,13 @@ myRouter.get("/api/products", (request, response) => {
   } else {
     productsToReturn = products;
   }
-  if (sort !== undefined) {
-    productsToReturn.sort((a, b) => a[sort] - b[sort]);
-  }
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsToReturn));
 });
 
+
 // Login call
 myRouter.post('/api/login', function(request,response) {
-  let currentAccessToken = getValidTokenFromRequest(request);
   if (!failedLoginAttempts[request.body.username]){
     failedLoginAttempts[request.body.username] = 0;
   
@@ -152,7 +124,7 @@ myRouter.post('/api/login', function(request,response) {
       // Reset our counter of failed logins
       failedLoginAttempts[request.body.username] = 0;
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.writeHead(200, Object.assign({'Content-Type': 'application/json'}));
       }
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((accessToken) => {
@@ -184,11 +156,13 @@ myRouter.post('/api/login', function(request,response) {
       response.writeHead(401, "Invalid username or password");
       return response.end();
     }
+
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
     response.writeHead(400, "Incorrectly formatted response");
     return response.end();
   }
 });
+
 
 module.exports = server;
