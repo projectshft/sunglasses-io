@@ -1,5 +1,6 @@
 var http = require('http');
 var fs = require('fs');
+var url = require('url');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
@@ -45,6 +46,33 @@ let server = http.createServer(function (request, response) {
     });
     console.log(`Server is listening on ${PORT}`);
   });
+
+  //search router
+  myRouter.get('/api/search', function(request,response) {
+    const parsedUrl = url.parse(request.url, true);
+    const query = parsedUrl.query.query;
+    let productsToReturn = [];
+
+    if(!query) {
+      response.writeHead(404, "Search is empty");
+      return response.end();
+    }
+
+    if (query !== undefined) {
+      productsToReturn= products.filter(item => item.name.includes(query));
+  
+      if (!productsToReturn) {
+        response.writeHead(404, "There aren't any products to return");
+        return response.end();
+      }
+    } else {
+      productsToReturn = products;
+    }
+
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    // Return serach result
+    return response.end(JSON.stringify(productsToReturn));
+  });
   //brands router
   myRouter.get('/api/brands', function(request,response) {
     if(request.body.length === 0) {
@@ -72,15 +100,28 @@ let server = http.createServer(function (request, response) {
   });
   //products router
   myRouter.get('/api/products', function(request,response) {
-    
+    const parsedUrl = url.parse(request.url, true);
+    const query = parsedUrl.query.query;
+    let productsToReturn = [];
+
     if(request.body.length === 0) {
       response.writeHead(404);	
       return response.end("Products array is empty");
     }
 
+    if (query !== undefined) {
+      productsToReturn= products.filter(item => item.name.includes(query));
+  
+      if (!productsToReturn) {
+        response.writeHead(404, "There aren't any products to return");
+        return response.end();
+      }
+    } else {
+      productsToReturn = products;
+    }
     response.writeHead(200, {'Content-Type': 'application/json'});
     // Return all products definitions (for now)
-    return response.end(JSON.stringify(products));
+    return response.end(JSON.stringify(productsToReturn));
   });
   // Helpers to get/set our number of failed requests per username
   var getNumberOfFailedLoginRequestsForUsername = function(username) {
@@ -114,7 +155,6 @@ let server = http.createServer(function (request, response) {
   };
   // Login call
   myRouter.post('/api/login', function(request,response) {
-
     // Make sure there is a username and password in the request
     if (request.body.username && request.body.password ) {
       // See if there is a user that has that username and password
