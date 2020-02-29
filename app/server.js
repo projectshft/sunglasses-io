@@ -25,9 +25,19 @@ const server = http.createServer(function (request, response) {
     // Load initial brands
     fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
         if (error) throw error;
+        // Create a varialbe to represent the data in the json file
         brands = JSON.parse(data);
         console.log(`Server setup: ${brands.length} brands loaded`);
     });
+
+    // Load initial products
+    fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
+        if (error) throw error;
+        // Create a varialbe to represent the data in the json file
+        products = JSON.parse(data);
+        console.log(`Server setup: ${products.length} products loaded`);
+    });
+
 
     console.log(`Server is listening on ${PORT}`);
 
@@ -42,8 +52,17 @@ myRouter.get('/api/brands', function (request, response) {
 });
 
 myRouter.get('/api/brands/:id/products', function (request, response) {
-    response.writeHead(200,)
-})
+
+    //Need to compare the id from the request paramaters to match the id of products in data from the global variable products
+    let matchingProduct = products.filter((product) => {
+        return product.categoryId === request.params.id
+    })
+    response.writeHead(200, {
+        "Content-Type": "application/json"
+    });
+    return response.end(JSON.stringify(matchingProduct));
+
+});
 
 
 
