@@ -33,14 +33,19 @@ const server = http.createServer(function (request, response) {
 
 });
 
-// Notice how much cleaner these endpoint handlers are...
 myRouter.get('/api/brands', function (request, response) {
-    // Return all books in the db
+    // Return all the brands in the brands json file
     response.writeHead(200, {
         "Content-Type": "application/json"
     });
     return response.end(JSON.stringify(brands));
 });
+
+myRouter.get('/api/brands/:id/products', function (request, response) {
+    response.writeHead(200,)
+})
+
+
 
 // Used for testing
 module.exports = server;

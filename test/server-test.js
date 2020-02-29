@@ -24,4 +24,23 @@ describe('Brands', () => {
                 })
         })
     })
+
+    describe('/GET /api/brands/:id/products', () => {
+        it('it should get all the products associated with that brand id', done => {
+            chai
+                .request(server)
+                .get('/api/brands/1/products')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    // There are 3 products that have the brand id of 1
+                    res.body.length.should.be.eql(3);
+                    res.body[0].name.should.be.eql('Superglasses');
+                    res.body[1].name.should.be.eql('Black Sunglasses');
+                    res.body[2].name.should.be.eql('Brown Sunglasses');
+                    done();
+                })
+        })
+    })
 })
+
