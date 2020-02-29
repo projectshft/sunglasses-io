@@ -168,10 +168,23 @@ describe("PUT /api/me/cart/:productid", () => {
                     res.should.have.status(200)
                     res.body.cart.should.be.an('array')
                     res.body.cart.length.should.be.eql(1)
+                    done()
                 })
             })
         })
     })
 })
 
-describe("GET")
+describe("GET /api/search?q=:query", () => {
+    it("should return all products that match the users search request", done => {
+        chai
+        .request(server)
+        .get("/api/search?q=the best")
+        .end((err, res) => {
+            res.should.have.status(200)
+            res.body.results.should.be.an('array')
+            res.body.results.length.should.be.eql(4)
+            done()
+        })
+    })
+})

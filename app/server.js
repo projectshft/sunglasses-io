@@ -222,4 +222,17 @@ myRouter.put('/api/me/cart/:productId', function(request, response) {
   }
 })
 
+myRouter.get('/api/search', function(request, response) {
+  let patt = new RegExp("\q=(.*)")
+  const query = patt.exec(request.url)[1]
+  // query = query.toString()
+  query = query.replace("%20", " ")
+
+  const searchResults = products.filter((product) => {
+    return product.name.includes(query) || product.description.includes(query)
+  })
+response.writeHead(200, {"Content-type": "application/json"})
+  return response.end(JSON.stringify(searchResults))
+})
+
 module.exports = server;
