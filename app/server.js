@@ -188,7 +188,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     //must login in to get cart
     if (!currentAccessToken) {
         // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-        response.writeHead(401, "You need to log in to recieve cart information");
+        response.writeHead(401, "You need to log in to add item to cart");
         return response.end();
     }else{
         //Check if the product and the quanity are both in the request
@@ -220,7 +220,60 @@ myRouter.post('/api/me/cart', function(request,response) {
     };
 });
 
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
+    //verifying token
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //must login in to get cart
+    if (!currentAccessToken) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, "You need to log in to delete an item from cart");
+        return response.end();
+    }else{
+        //Search to find the correct user cart
+        let user = users.find((user)=>{
+            return user.login.username == currentAccessToken.username
+        })
 
+        //Search cart to find product wanting to be deleted 
+        user.cart = user.cart.filter((item)=>{
+            return item.product.id !== request.body.product.id
+        })
+
+        //Gives user success status and sends back the new user cart
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(user.cart))
+
+    }
+})
+
+myRouter.put('/api/me/cart/:productId', function(request,response) {
+    //verifying token
+    let currentAccessToken = getValidTokenFromRequest(request);
+    //must login in to get cart
+    if (!currentAccessToken) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, "You need to log in to delete an item from cart");
+        return response.end();
+    }else{
+        //Search to find the correct user cart
+        let user = users.find((user)=>{
+            return user.login.username == currentAccessToken.username
+        })
+
+        //Search cart to find product wanting to be deleted 
+        let findItemToEdit = user.cart.find((item)=>{
+            return item.product.id === request.body.product.id
+        })
+
+        //edit item that was found
+        findItemToEdit = request.body.product
+
+        //Gives user success status and sends back the new user cart
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(user.cart))
+    }
+})
 
 module.exports = server
+
 
