@@ -154,7 +154,7 @@ myRouter.get('/api/me/cart', function(request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+      response.writeHead(401, "You need to have access to this call to continue");
       return response.end();
     } else {
         const user = users.find((user) => {
@@ -170,7 +170,7 @@ myRouter.post('/api/me/cart', function(request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+      response.writeHead(401, "You need to have access to this call to continue");
       return response.end();
     } else {
         const user = users.find((user) => {
@@ -187,16 +187,16 @@ myRouter.delete('/api/me/cart/:productId', function(request, response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+      response.writeHead(401, "You need to have access to this call to continue");
       return response.end();
     } else {
         const user = users.find((user) => {
             return user.login.username == currentAccessToken.username
         })
-        const shoppingCart = user.cart
         user.cart = user.cart.filter((item) => {
-            return !(item.id == request.params.id)
+            return !(item.id == request.params.productId)
         })
+        const shoppingCart = user.cart
         response.writeHead(200, {"Content-type": "application/json"})
         return response.end(JSON.stringify(shoppingCart))
     }
@@ -205,4 +205,9 @@ myRouter.delete('/api/me/cart/:productId', function(request, response) {
 
 
 
-module.exports = server
+function stop() {
+  server.close();
+}
+
+module.exports = server;
+module.exports.stop = stop;
