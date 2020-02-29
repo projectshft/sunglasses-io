@@ -132,19 +132,40 @@ describe ('/POST /api/login', () =>{
             done();
         })
     })
-    // it('the login username and password cannot be empty', done =>{
-    //     //arrange
-    //     //TODO fil in 
-    //     //act
-    //     chai 
-    //     .request(server)
-    //     .post('/api/login')
-    //     //assert
-    //     .end((err, res) => {
-    //         res.should.have.status(400);
-    //         done();
-    //     })
-    // })
+    it('the login username cannot be empty', done =>{
+        //arrange
+        let user ={
+          username: '',
+          password: 'waters'
+        }
+        //act
+        chai 
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        //assert
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        })
+    })
+    it('the login password cannot be empty', done =>{
+      //arrange
+      let user ={
+        username: 'greenlion235',
+        password: ''
+      }
+      //act
+      chai 
+      .request(server)
+      .post('/api/login')
+      .send(user)
+      //assert
+      .end((err, res) => {
+          res.should.have.status(400);
+          done();
+      })
+  })
     it('the login username is invalid', done =>{
         //arrange
         let user ={

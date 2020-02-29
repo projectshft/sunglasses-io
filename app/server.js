@@ -167,7 +167,7 @@ myRouter.delete ('/api/me/cart/:productId', function (request, response){
     let cart = user.cart.filter(item => item.id !== request.params.productId);
     user.cart = cart; 
     
-    // user.cart.push(request.body); 
+    //
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(cart))
   }
@@ -259,7 +259,7 @@ myRouter.post('/api/login', function(request,response) {
     var parsedUrl = require('url').parse(request.url, true);
   
       let searchResults = products.filter(product => {
-        if( product.name.includes(parsedUrl.query.query))
+        if( product.name.includes(parsedUrl.query.query) || product.description.includes(parsedUrl.query.query))
         return products
       })
     
