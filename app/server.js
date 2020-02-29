@@ -45,7 +45,6 @@ let server = http.createServer(function (request, response) {
     });
     console.log(`Server is listening on ${PORT}`);
   });
-
   //brands router
   myRouter.get('/api/brands', function(request,response) {
     if(request.body.length === 0) {
@@ -71,7 +70,6 @@ let server = http.createServer(function (request, response) {
     // Return all products definitions (for now)
     return response.end(JSON.stringify(foundProducts));
   });
-
   //products router
   myRouter.get('/api/products', function(request,response) {
     
@@ -84,7 +82,6 @@ let server = http.createServer(function (request, response) {
     // Return all products definitions (for now)
     return response.end(JSON.stringify(products));
   });
-
   // Helpers to get/set our number of failed requests per username
   var getNumberOfFailedLoginRequestsForUsername = function(username) {
     let currentNumberOfFailedRequests = failedLoginAttempts[username];
@@ -98,7 +95,6 @@ let server = http.createServer(function (request, response) {
   var setNumberOfFailedLoginRequestsForUsername = function(username,numFails) {
     failedLoginAttempts[username] = numFails;
   }
-
   // Helper method to process access token
   var getValidTokenFromRequest = function(request) {
     var parsedUrl = require('url').parse(request.url,true)
@@ -167,12 +163,12 @@ let server = http.createServer(function (request, response) {
       return response.end();
     }
   });
-
+  //get all products in the cart
   myRouter.get('/api/me/cart', function(request,response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+      response.writeHead(401, "You need to have access to this call to continue");
       return response.end();
     } else {
       // Return whats in the cart
@@ -180,29 +176,113 @@ let server = http.createServer(function (request, response) {
         response.writeHead(404);	
         return response.end("Cart is empty");
       }
+
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(user.cart));
     }
   });
-  
+  //add product to the cart
   myRouter.post('/api/me/cart', function(request,response) {
-    // Add items to the cart
-    if(!request.body.product.price) {
-      // Return error 
-      response.writeHead(500);	
-      return response.end("Product Has to have price");
-    }
+    let currentAccessToken = getValidTokenFromRequest(request);
+    if (!currentAccessToken) {
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to have access to this call to continue");
+      return response.end();
+    } else {
+      // Add items to the cart
+      if(!request.body.product.price) {
+        // Return error 
+        response.writeHead(500);	
+        return response.end("Product Has to have price");
+      }
 
-     if(!request.body) {
-      // Return error 
-      response.writeHead(404);	
-      return response.end("Nothing to post");
+      if(!request.body) {
+        // Return error 
+        response.writeHead(404);	
+        return response.end("Nothing to post");
+      }
+      if(user.cart.length > 0) {
+        //if the product id is in the cart, increment quantity of that product
+        user.cart.forEach((item) => {
+          if(item.product.id == request.body.product.id) {
+            item.quantity = item.quantity + request.body.quantity
+          }
+          else {
+            user.cart.push(request.body)
+          }
+        })
+      }
+      else {
+        //if not the same product, add new product to the cart
+        user.cart.push(request.body); 
+      }
+      // Return success with added book
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(user.cart));
     }
-    const addedItem = (request.body)
-    user.cart.push(addedItem); 
-    // Return success with added book
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
   });
-  
+  //update product properties of given id in the cart
+  myRouter.post('/api/me/cart/:productId', function(request,response) {
+    let currentAccessToken = getValidTokenFromRequest(request);
+    if (!currentAccessToken) {
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to have access to this call to continue");
+      return response.end();
+    } else {
+      if(!request.body) {
+        // Return error 
+        response.writeHead(404);	
+        return response.end("Nothing to update");
+      }
+
+      //Find index of the product we need to update using findIndex method.    
+      let itemIndex = user.cart.findIndex((obj) => {
+        return obj.product.id == request.body.product.id});
+
+      //Update propeties of the product send to update
+      user.cart[itemIndex].categoryId = request.body.product.categoryId
+      user.cart[itemIndex].name = request.body.product.name
+      user.cart[itemIndex].description = request.body.product.description
+      user.cart[itemIndex].price = request.body.product.price
+      user.cart[itemIndex].imageUrls = request.body.product.imageUrls
+    }
+      // Return success with added book
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(user.cart));
+  });
+  //delete product of given id from the cart
+  myRouter.delete('/api/me/cart/:productId', function(request,response) {
+    let currentAccessToken = getValidTokenFromRequest(request);
+    if (!currentAccessToken) {
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, "You need to have access to this call to continue");
+      return response.end();
+    } else {
+      if(!request.body) {
+        // Return error 
+        response.writeHead(404);	
+        return response.end("Nothing to delete");
+      }
+
+      //Find index of the product we need to delete using findIndex method.    
+      let itemIndex = user.cart.findIndex((obj) => {
+        return obj.product.id == request.body.product.id});
+
+      user.cart.forEach((item) => {
+        //if need to delete a product with quntity grater than 1
+        //decriment product quantity
+        if(item.product.id == request.body.product.id && item.quantity > 1) {
+          item.quantity--
+        }
+        else if(item.product.id == request.body.product.id && item.quantity === 1) {
+          //remove product from the cart
+          user.cart.splice(itemIndex, 1);
+        }
+      })
+    }
+      // Return success with added book
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(user.cart));
+  });
+
   module.exports = server

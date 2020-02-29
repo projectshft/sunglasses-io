@@ -6,9 +6,10 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-let token = '';
-
 describe('The sunglasses store', () => {
+    //variable token to hold the token of the current user after login to pass for validation
+    let token = '';
+
     describe('/GET api/brands', () => {
         it('it should GET all the brands', done => {
           chai
@@ -132,14 +133,235 @@ describe('The sunglasses store', () => {
             }
 
             chai
-            .request(server)
-            .post('/api/login')
-            .send(user)
-            // assert
-            .end((err, res) => {
-              res.should.have.status(401);
-              done();
+                .request(server)
+                .post('/api/login')
+                .send(user)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(401);
+                done();
             });
+        });
+    });
+
+    describe('/POST api/me/cart', () => {
+        it('it should add product to the user cart', done => {
+            // arrange
+            let cartItem = {
+                    product: {
+                        "id": "2",
+                        "categoryId": "1",
+                        "name": "Black Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":100,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 1
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                done();
+                });
+        });
+    });
+
+    describe('/POST api/me/cart invalid', () => {
+        it('it should not post without the price field', done => {
+            // arrange
+            let cartItem = {
+                product: {
+                    "id": "2",
+                    "categoryId": "1",
+                    "name": "Black Sunglasses",
+                    "description": "The best glasses in the world",
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                quantity: 1
+            }
+
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(500);
+                done();
+                });
+        });
+    });
+
+    describe('/GET api/me/cart', () => {
+        it('it should GET all the products in the cart for the user', done => {
+
+            chai
+                .request(server)
+                .get('/api/me/cart?accessToken=' + token)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    done();
+                });
+        });
+    });
+
+    describe('/GET api/me/cart', () => {
+        it('it should let know the token is missing ', done => {
+            
+            chai
+                .request(server)
+                .get('/api/me/cart?accessToken=' )
+                .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                });
+        });
+
+    });
+    //update product properties
+    describe('/POST api/me/cart/:productId', () => {
+        it('it should update product properties in the cart, changed price for the test', done => {
+            // arrange
+            let cartItem = {
+                product: {
+                    "id": "2",
+                    "categoryId": "1",
+                    "name": "Black Sunglasses",
+                    "description": "The best glasses in the world",
+                    "price":150,
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                quantity: 1
+            }
+
+            chai
+                .request(server)
+                .post('/api/me/cart/2?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                done();
+                });
+        });
+    });   
+    
+    describe('/POST api/me/cart', () => {
+        it('it should increment quantity of the product in the user cart', done => {
+            // arrange
+            let cartItem = {
+                    product: {
+                        "id": "2",
+                        "categoryId": "1",
+                        "name": "Black Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":100,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 1
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body[0].should.have.property('quantity');
+                done();
+                });
+        });
+    });  
+
+    describe('/POST api/me/cart', () => {
+        it('it should add product to the user cart not the same category', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 1
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body[0].should.have.property('quantity');
+                done();
+                });
+        });
+    });
+
+    describe('/DELETE api/me/cart/:productId', () => {
+        it('it should delete product from the cart', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 1
+                }
+            chai
+                .request(server)
+                .delete('/api/me/cart/3?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body[0].should.have.property('quantity');
+                done();
+                });
+        });
+    });
+
+    describe('/DELETE api/me/cart/:productId', () => {
+        it('it should decriment quantity for the product we need to delete from the cart', done => {
+            // arrange
+            let cartItem = {
+                product: {
+                    "id": "2",
+                    "categoryId": "1",
+                    "name": "Black Sunglasses",
+                    "description": "The best glasses in the world",
+                    "price":100,
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                quantity: 1
+            }
+            chai
+                .request(server)
+                .delete('/api/me/cart/2?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body[0].should.have.property('quantity');
+                done();
+                });
         });
     });
 
