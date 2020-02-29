@@ -160,9 +160,8 @@ myRouter.get('/api/me/cart', function(request, response) {
         const user = users.find((user) => {
             return user.login.username == currentAccessToken.username
         })
-        const shoppingCart = user.cart
         response.writeHead(200, {"Content-type": "application/json"})
-        return response.end(JSON.stringify(shoppingCart))
+        return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
     }
 })
 
@@ -176,10 +175,11 @@ myRouter.post('/api/me/cart', function(request, response) {
         const user = users.find((user) => {
             return user.login.username == currentAccessToken.username
         })
-        const shoppingCart = user.cart
-        shoppingCart.push(request.body.item)
+        const newItem = request.body.item
+        newItem["quantity"] = 1
+        user.cart.push(newItem)
         response.writeHead(200, {"Content-type": "application/json"})
-        return response.end(JSON.stringify(shoppingCart))
+        return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
     }
 })
 
@@ -196,18 +196,30 @@ myRouter.delete('/api/me/cart/:productId', function(request, response) {
         user.cart = user.cart.filter((item) => {
             return !(item.id == request.params.productId)
         })
-        const shoppingCart = user.cart
         response.writeHead(200, {"Content-type": "application/json"})
-        return response.end(JSON.stringify(shoppingCart))
+        return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
     }
 })
 
-
-
-
-function stop() {
-  server.close();
-}
+myRouter.put('/api/me/cart/:productId', function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+      const user = users.find((user) => {
+          return user.login.username == currentAccessToken.username
+      })
+      user.cart = user.cart.map((item) => {
+        if (item.id == request.params.productId) {
+          item.quantity ++
+        }
+        return item
+      })
+      response.writeHead(200, {"Content-type": "application/json"})
+      return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
+  }
+})
 
 module.exports = server;
-module.exports.stop = stop;

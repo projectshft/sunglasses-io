@@ -49,7 +49,7 @@ describe("GET api/products", () => {
 })
 
 describe("POST api/login", () => {
-    it("it should allow  a user with correct credentails to login", done=>{
+    it("it should allow  a user with correct credentials to login", done=>{
         let user = {
             username:"yellowleopard753",
             password:"jonjon"
@@ -84,8 +84,8 @@ describe("GET api/me/cart", () => {
             .send({token: res.body})
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.an('array')
-                res.body.length.should.be.eql(0)
+                res.body.cart.should.be.an('array')
+                res.body.cart.length.should.be.eql(0)
                 done()
             })
         })
@@ -118,16 +118,16 @@ describe("POST /api/me/cart", () => {
             .send({token: res.body, item: item})
             .end((err, res) => {
                 res.should.have.status(200)
-                res.body.should.be.an('array')
-                res.body.length.should.be.eql(1)
+                res.body.cart.should.be.an('array')
+                res.body.cart.length.should.be.eql(1)
                 chai
                 .request(server)
                 .delete("/api/me/cart/3")
-                .send({token: userToken})
+                .send({token: res.body.token})
                 .end((err, res) => {
                     res.should.have.status(200)
-                    res.body.should.be.an('array')
-                    res.body.length.should.be.eql(0)
+                    res.body.cart.should.be.an('array')
+                    res.body.cart.length.should.be.eql(0)
                     done()
                 })
             })
@@ -135,31 +135,43 @@ describe("POST /api/me/cart", () => {
     })
 })
 
-// describe("PUT /api/me/cart/:productid", () => {
-//     it("it allows a user update the quanitity of an item in the cart", done => {
-//         let item = {
-//             "id": "3",
-//             "categoryId": "1",
-//             "name": "Brown Sunglasses",
-//             "description": "The best glasses in the world",
-//             "price":50,
-//             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-//         }
-//         chai
-//         .request(server)
-//         .post("/api/me/cart")
-//         .send(item)
-//         .end((err, res) => {
-//             chai
-//             .request(server)
-//             .post("/api/me/cart")
-//             .send(item)
-//             .end((err, res) => {
-//                 res.should.have.status(200)
-//                 res.should.be.an.array('array')
-//                 res.body.length.should.be.eql(1)
-//                 done()
-//             })
-//         })
-//     })
-// })
+describe("PUT /api/me/cart/:productid", () => {
+    it("it allows a user update the quanitity of an item in the cart", done => {
+        let user = {
+            username:"yellowleopard753",
+            password:"jonjon"
+        }
+        let item = {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        chai
+        .request(server)
+        .post("/api/login")
+        .send(user)
+        .end((err, res) => {
+            const userToken = res.body
+            chai
+            .request(server)
+            .post("/api/me/cart")
+            .send({token: res.body, item: item})
+            .end((err, res) => {
+                chai
+                .request(server)
+                .put("/api/me/cart/3")
+                .send({token: res.body.token})
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.cart.should.be.an('array')
+                    res.body.cart.length.should.be.eql(1)
+                })
+            })
+        })
+    })
+})
+
+describe("GET")
