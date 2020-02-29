@@ -60,21 +60,47 @@ describe("/GET products", () => {
 
 describe('/POST login', () => {
   it('it should POST a token when user logs in ', done => {
-    // arrange
-    let token = {
-      token: 'zfLQotqSQP90wYDx'
-    };
-    // act
+    let login = {
+      username: "greenlion235",
+      password: "waters"
+    }
     chai
       .request(server)
-      .post('/login')
-      .send(token)
-      // assert
+      .post('/api/login')
+      .send(login)
       .end((err, res) => {
         res.should.have.status(200);
-        // res.body.should.be.a('string');
-        // res.body.length.should.be.eql(16)
+        res.body.should.be.a('string');
+        res.body.length.should.be.eql(16)
         done();
       });
   });
+  it('it should NOT POST a token when user does NOT login with a correct username or password', done => {
+    let login = {
+      username: "greenlion235",
+      password: null
+    }
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(login)
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+  // it('it should NOT POST a token when user does NOT login in with a username or password', done => {
+  //   let login = [
+  //     {username: "greenlion235",
+  //     password: "waters"}
+  //   ]
+  //   chai
+  //     .request(server)
+  //     .post('/api/login')
+  //     .send(login)
+  //     .end((err, res) => {
+  //       res.should.have.status(400);
+  //       done();
+  //     });
+  // });
 });

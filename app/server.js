@@ -164,5 +164,21 @@ myRouter.post('/api/login', function(request,response) {
   }
 });
 
+//GET all products of a particular user's cart
+myRouter.get("/api/me/cart", (request, response) => {
+  const { id } = request.params;
+  const brand = brands.find(brand => brand.id == id);
+  if (!brand) {
+    response.writeHead(404, "That brand does not exist");
+    return response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const relatedBrands = brands.filter(
+    brand => brand.id === id
+  );
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(relatedBrands));
+});
+
 
 module.exports = server;
