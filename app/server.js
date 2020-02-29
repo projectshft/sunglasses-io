@@ -201,11 +201,17 @@ let server = http.createServer(function (request, response) {
         response.writeHead(404);	
         return response.end("Nothing to post");
       }
+      
+      if(request.body.quantity < 0 || typeof request.body.quantity != 'number') {
+        response.writeHead(404);	
+        return response.end("Invalid quantity");
+      }
+
       if(user.cart.length > 0) {
         //if the product id is in the cart, increment quantity of that product
         user.cart.forEach((item) => {
           if(item.product.id == request.body.product.id) {
-            item.quantity = item.quantity + request.body.quantity
+            item.quantity++
           }
           else {
             user.cart.push(request.body)
@@ -270,7 +276,7 @@ let server = http.createServer(function (request, response) {
 
       user.cart.forEach((item) => {
         //if need to delete a product with quntity grater than 1
-        //decriment product quantity
+        //decrement product quantity
         if(item.product.id == request.body.product.id && item.quantity > 1) {
           item.quantity--
         }

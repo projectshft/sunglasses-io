@@ -253,7 +253,7 @@ describe('The sunglasses store', () => {
         });
     });   
     
-    describe('/POST api/me/cart', () => {
+    describe('/POST api/me/cart add product the same category', () => {
         it('it should increment quantity of the product in the user cart', done => {
             // arrange
             let cartItem = {
@@ -281,7 +281,7 @@ describe('The sunglasses store', () => {
         });
     });  
 
-    describe('/POST api/me/cart', () => {
+    describe('/POST api/me/cart add product different category', () => {
         it('it should add product to the user cart not the same category', done => {
             // arrange
             let cartItem = {
@@ -309,6 +309,58 @@ describe('The sunglasses store', () => {
         });
     });
 
+    describe('/POST api/me/cart with negative number', () => {
+        it('it should fail to add product with negative quantity', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: -20
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(404);
+                done();
+                });
+        });
+    });
+
+    describe('/POST api/me/cart with quantity not a number', () => {
+        it('it should fail to add product with not a number quantity', done => {
+            // arrange
+            let cartItem = {
+                    product:     {
+                        "id": "3",
+                        "categoryId": "1",
+                        "name": "Brown Sunglasses",
+                        "description": "The best glasses in the world",
+                        "price":50,
+                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quantity: 'k'
+                }
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken=' + token)
+                .send(cartItem)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(404);
+                done();
+                });
+        });
+    });
+    
     describe('/DELETE api/me/cart/:productId', () => {
         it('it should delete product from the cart', done => {
             // arrange
@@ -338,7 +390,7 @@ describe('The sunglasses store', () => {
     });
 
     describe('/DELETE api/me/cart/:productId', () => {
-        it('it should decriment quantity for the product we need to delete from the cart', done => {
+        it('it should decrement quantity for the product we need to delete from the cart', done => {
             // arrange
             let cartItem = {
                 product: {
