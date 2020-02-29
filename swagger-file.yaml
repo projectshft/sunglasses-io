@@ -1,0 +1,95 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io
+  description: API to support Sunglasses.io 
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows a user to see all products of a certain brand
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404':
+          description: 'No brand that name has been found.'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Error'
+  /brands/:id/products:
+    get:
+      summary: Brands/:id/products
+      description: |
+        Returns all products matching product ID
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Retrieved products by brand ID
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+  /brands/products:
+    get:
+      summary: Products
+      description: returns all products in database
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Products'
+        '404':
+          description: ''
+          schema:
+            type: string      
+  
+definitions:
+  Brand:
+    type: object
+    properties:
+      brandId:
+        type: string
+        description: name of the brand producing this product.
+      products:
+        type: array
+        items:
+          type: object
+        description: all the products from this brand.
+  Products:
+    type: object
+    properties:
+      brandId:
+        type: string
+        description: name of the product.
+      products:
+        type: array
+        items:
+          type: object
+        description: all the products by this search.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
