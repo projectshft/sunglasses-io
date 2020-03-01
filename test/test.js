@@ -141,19 +141,50 @@ describe('Brands', () => {
                   })
               })
             })
-            describe('GET/api/me/cart', () => {
-              it('it should let user access cart if valid access token', done => {
-                chai
-                  .request(server)
-                  .get('/api/me/cart')
-                  .set('test', accessToken)
-                  .end((error, response) => {
-                    response.should.have.status(200)
-                    response.body.should.be.an('array')
-                    done()
-                  })
-              })
-            })
+
+            describe('/GET get cart', () => {
+                it('it should get the cart for a user after they log in', done => {
+                  // log user in
+                  chai
+                    .request(server)
+                    .post('/api/login')
+                    .send({ username: 'greenlion235', password: 'waters' })
+                    .end((err, res) => {
+                      // get user's cart
+                      chai
+                        .request(server)
+                        .get(`/api/me/cart?token=${res.body.token}`)
+                        .end((err, res) => {
+                          res.should.have.status(200);
+                          res.body.should.be.a('array');
+                          res.body.length.should.be.eql(0);
+                          done();
+                        })
+                    });
+                })
+              });
+
+
+            // describe('GET/api/me/cart', () => {
+            //   it('it should let user access cart if valid access token', done => {
+            //     chai
+            //     .request(server)
+            //     .post('/api/login')
+            //     .send({ username: 'greenlion235', password: 'waters' })
+            //     .end((err, res) => {
+            //       // add product to cart  
+            //     chai
+            //       .request(server)
+            //       .get(`/api/me/cart?token=${res.body.token}`)
+            //       .end((error, response) => {
+            //         res.should.have.status(200);
+            //         res.body.should.be.a('array');
+            //        // res.body.length.should.be.eql(0);
+            //         done();
+            //       })
+            //     })
+            //   })
+            // })
 
             describe('/POST /api/me/cart/:productId', () => {
                 it('if a user is not logged in, they should not be allowed to add a product to their cart', done => {
@@ -170,7 +201,7 @@ describe('Brands', () => {
                   chai
                     .request(server)
                     .post('/api/me/cart/20')
-                    .set('test', accessToken)
+                    .set('token', accessToken)
                     .end((error, response) => {
                       response.should.have.status(409)
                       response.body.should.be.an('object')
@@ -181,7 +212,7 @@ describe('Brands', () => {
                   chai
                     .request(server)
                     .post('/api/me/cart/3')
-                    .set('test', accessToken)
+                    .set('token', accessToken)
                     .end((error, response) => {
                       response.should.have.status(200)
                       response.body.should.be.an('array')

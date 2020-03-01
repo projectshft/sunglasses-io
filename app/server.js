@@ -21,7 +21,7 @@ let accessTokens = [];
 
 // A variable to limit validity of access tokens to 30 minutes
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
-
+// helper function - validate tokens
 var getValidTokenFromRequest = function (request) {
     var parsedUrl = require('url').parse(request.url, true)
     if (parsedUrl.query.accessToken) {
@@ -29,6 +29,7 @@ var getValidTokenFromRequest = function (request) {
         let currentAccessToken = accessTokens.find((accessToken) => {
             return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
+        console.log(currentAccessToken)
         if (currentAccessToken) {
             return currentAccessToken;
         } else {
@@ -38,23 +39,7 @@ var getValidTokenFromRequest = function (request) {
         return null;
     }
 };
-// var getValidTokenFromRequest = function(request) {
-//     if (request.headers.xauth) {
-//       // Verify the access token to make sure it's valid and not expired
-//       let currentAccessToken = accessTokens.find(accessToken => {
-//         return accessToken.token == request.headers.xauth
-//       })
-//       if (currentAccessToken) {
-//         return currentAccessToken
-//       } else {
-//         return null
-//       }
-//     } else {
-//       return null
-//     }
-//   }
 
-// Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
