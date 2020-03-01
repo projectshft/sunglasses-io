@@ -99,7 +99,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Category'
+              $ref: '#/definitions/User'
         '401':
           description: Invalid username or password
           schema:
@@ -145,7 +145,7 @@ paths:
         summary: Add product to the user cart
         description:    The Cart endpoint add new product to the cart.
         tags:
-        - User
+          - User
         parameters:
           - name: accessToken
             in: query
@@ -162,86 +162,89 @@ paths:
             description: List of Products in the user cart
             schema:
               $ref: '#/definitions/User'
+          '400':
+            description: Invalid quantity
+            schema:
+              $ref: '#/definitions/Error'
           '401':
             description: Need an accessToken to view the cart
             schema:
               $ref: '#/definitions/Error'
           '404':
-            description: Cart is empty
+            description: Nothing to post or invalid quantity
             schema:
               $ref: '#/definitions/Error'
+          '500':
+          description: Product Has to have price
+          schema:
+            $ref: '#/definitions/Error'
           default:
             description: Unexpected error
             schema:
               $ref: '#/definitions/Error'
-  /me/{goal_id}/challenge:
-    get:
-      summary: Get goal by id to challenge
-      description: The goal by id endpoint returns specific goal for the user to challenge.
+  /me/cart/{productId}:
+    post:
+      summary: Update product properties in the user cart
+      description:    The Cart endpoint update product in the cart.
       tags:
-        - Goal
-        parameters: 
-          - 
-            name: "goal_id"
-            in: "path"
-            description: "ID of goal "
-            required: true
-            type: "integer"
-            format: "int64"
-      responses:
-        '200':
-          description: Goal information for a user
-          schema:
-            $ref: '#/definitions/Goal'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me/{goal_id}/gift:
-    get:
-      summary: Get goal by id to challenge
-      description: The goal by id endpoint returns specific goal for the user to challenge.
-      tags:
-        - Goal
-      parameters: 
-          - 
-            name: "goal_id"
-            in: "path"
-            description: "ID of goal "
-            required: true
-            type: "integer"
-            format: "int64"
-      responses:
-        '200':
-          description: Goal information for a user
-          schema:
-            $ref: '#/definitions/Goal'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /history:
-    get:
-      summary: User Activity
-      description: 'The User Activity endpoint returns data about a user''s lifetime activity with Uber. The response will include pickup locations and times, dropoff locations and times, the distance of past requests, and information about which products were requested.<br><br>The history array in the response will have a maximum length based on the limit parameter. The response value count may exceed limit, therefore subsequent API requests may be necessary.'
-      tags:
-        - User
+      - User
       parameters:
-        - name: offset
+        - name: accessToken
           in: query
-          type: integer
-          format: int32
-          description: Offset the list of returned results by this amount. Default is zero.
-        - name: limit
-          in: query
-          type: integer
-          format: int32
-          description: 'Number of items to retrieve. Default is 5, maximum is 100.'
+          description: token created for the user on the login
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: unique id of the product to be updated
+          required: true
+          type: string
       responses:
         '200':
-          description: History information for the given user
+          description: Product with updated properties
           schema:
-            $ref: '#/definitions/Activities'
+            $ref: '#/definitions/User'
+        '401':
+          description: Need an accessToken to update products in the cart
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Nothing to update
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete product from the user cart
+      description:    The Cart endpoint deletes product with given id in the cart.
+      tags:
+      - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: token created for the user on the login
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: unique id of the product to be deleted
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Product with updated properties
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Need an accessToken to delete product in the cart
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Nothing to delete
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -259,50 +262,40 @@ definitions:
       last_name:
         type: string
         description: Last name of the user.
-      goals:
+      brands:
         type: array
-        description: 'Array of goals ids for the user'
+        description: 'Array of brands ids for the user'
         items:
-          $ref: '#/definitions/Activity'
-  Category:
+          $ref: '#/definitions/Brand'
+  Brand:
     type: object
     properties:
       display_name:
         type: string
-        description: Display name of the category.
-      category_id:
-        type: integer
-        format: int32
-        description: 'Unique identifier representing a specific category'
-  Goal:
+        description: Display name of the brand.
+      id:
+        type: string
+        description: 'Unique identifier representing a specific brand'
+  Product:
     type: object
     properties:
-      goal_title:
+      name:
         type: string
-        description: Goal title.
-      goal_type:
+        description: Product name.
+      description:
         type: string
-        description: Goal type.
-      up_votes:
+        description: Product description.
+      price:
         type: integer
-        description: Upvote of the goal
-      down_votes:
-        type: integer
-        description: Down vote of the goal
-      goal_id:
-        type: integer
-        format: int32
-        description: 'Unique identifier representing a specific goal'
-      entered_date:
+        description: Price of the product
+      imageUrls:
+        type: array
+        items: 
+          type: string
+        description: Image of the product
+      id:
         type: string
-      category:
-        type: string
-  Activity:
-    type: object
-    properties:
-      uuid:
-        type: string
-        description: Unique identifier for the activity
+        description: 'Unique identifier representing a specific product'
   Error:
     type: object
     properties:

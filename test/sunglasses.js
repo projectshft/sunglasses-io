@@ -162,7 +162,7 @@ describe('The sunglasses store', () => {
                         "price":100,
                         "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
                     },
-                    quantity: 1
+                    quantity: 4
                 }
             chai
                 .request(server)
@@ -271,7 +271,7 @@ describe('The sunglasses store', () => {
                 .send(cartItem)
                 // assert
                 .end((err, res) => {
-                res.should.have.status(404);
+                res.should.have.status(400);
                 done();
                 });
         });
@@ -295,7 +295,7 @@ describe('The sunglasses store', () => {
                 .send(cartItem)
                 // assert
                 .end((err, res) => {
-                res.should.have.status(404);
+                res.should.have.status(400);
                 done();
                 });
         });
@@ -406,6 +406,17 @@ describe('The sunglasses store', () => {
                 done();
                 });
         });
-    });
 
+        it('it should delete all products of given id with query all from the cart', done => {
+            chai
+                .request(server)
+                .delete('/api/me/cart/2?accessToken=' + token + '&query=all')
+                // assert
+                .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                done();
+                });
+        });
+    });
   });

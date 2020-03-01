@@ -212,7 +212,7 @@ let server = http.createServer(function (request, response) {
       }
 
       if(request.body.quantity < 0 || typeof request.body.quantity != 'number') {
-        response.writeHead(404);	
+        response.writeHead(400);	
         return response.end("Invalid quantity");
       }
 
@@ -268,6 +268,8 @@ let server = http.createServer(function (request, response) {
   //delete product of given id from the cart
   myRouter.delete('/api/me/cart/:productId', function(request,response) {
     let currentAccessToken = getValidTokenFromRequest(request);
+    const parsedUrl = url.parse(request.url, true);
+    const query = parsedUrl.query.query;
     if (!currentAccessToken) {
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
       response.writeHead(401, "You need to have access to this call to continue");
@@ -281,12 +283,17 @@ let server = http.createServer(function (request, response) {
 
       //Find index of the product we need to delete using findIndex method.    
       let itemIndex = user.cart.findIndex((obj) => {
-        return obj.product.id == request.body.product.id});
+        return obj.product.id == request.params.productId
+      });
 
       user.cart.forEach((item) => {
+        //delete all products of given isd from the cart 
+        if(query == 'all') {
+          user.cart.splice(itemIndex, 1);
+        }
         //if need to delete a product with quntity grater than 1
         //decrement product quantity
-        if(item.product.id == request.body.product.id && item.quantity > 1) {
+        else if(item.product.id == request.body.product.id && item.quantity > 1) {
           item.quantity--
         }
         else if(item.product.id == request.body.product.id && item.quantity === 1) {
@@ -299,5 +306,6 @@ let server = http.createServer(function (request, response) {
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(user.cart));
   });
+
 
   module.exports = server
