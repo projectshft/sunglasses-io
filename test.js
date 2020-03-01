@@ -28,13 +28,13 @@ describe('/GET brands', () => {
 //         .request(server)
 //         .get('/api/brands')
 //         .end((err, res) => {
-//             res.should.have.status(400);
+//             res.should.have.status(404);
 //             done();
 //         })
 //     })
 // })
 
-//positive tests
+//positive tests for get products by brand id endpoint 
 describe('/GET products by brand ID', () => {
     it('it should GET all the products by brand ID', done => {
         chai
@@ -84,6 +84,7 @@ describe('/GET products by brand ID', () => {
     })
 })
 
+// positive test for get products endpoint
 describe('/GET products', () => {
     it('it should GET all the products', done => {
         chai
@@ -97,6 +98,19 @@ describe('/GET products', () => {
         })
     })
 })
+
+// negative tests for get products endpoint 
+// describe('/GET products', () => {
+//     it('it should return an error if there are no products', done => {
+//         chai
+//         .request(server)
+//         .get('/api/products')
+//         .end((err, res) => {
+//             res.should.have.status(404);
+//             done();
+//         })
+//     })
+// })
 
 describe('/POST login', () => {
     it('it should allow user to login', done => {

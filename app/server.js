@@ -80,8 +80,13 @@ myRouter.get('/api/brands/:id/products', function(request,response) {
 })
 
 myRouter.get('/api/products', function(request,response) {
+  if (products.length == 0 ) {
+    response.writeHead(404, "Sorry we couldn't find any products")
+    return response.end()
+  } else {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(products));
+  }
 });
 
 myRouter.post('/api/login', function(request,response) {
