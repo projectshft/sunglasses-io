@@ -1,0 +1,309 @@
+swagger: '2.0'
+info:
+  title: Sunglasses
+  description: sunglass products, brands, and users
+  version: "1.0.0"
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brand Types
+      description: |
+        The Brands endpoint returns information about the *Sunglass Website brands offered. The response includes the display all the brands we have avaliable.
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of Brand names
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: All products within a certain brand
+      description: |
+        This endpoint returns all products we have avaliable for a specific brand on the  *Sunglass Website.
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          description: unique id number of brand
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of products with the same brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        404:
+          description: Invalid Id
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: All products
+      description: |
+        This endpoint returns all products we have avaliable at *Sunglass Website.
+      tags:
+        - Products
+      parameters:
+        - name: keyword
+          in: query
+          description: unique id number of brand
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of products with the same brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: Incorrectly formatted keyword
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: No products found
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Logs in the user
+      description: |
+        This endpoint returns user access token *Sunglass Website.
+      tags:
+        - Login
+      responses:
+        200:
+          description: user is logged in
+        401:
+          description: Invalid username or password
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Incorrectly Formated username and password
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: All items in users cart
+      description: |
+        This endpoint returns all products in a logged in members shopping cart at *Sunglass Website.
+      tags:
+        - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: unique token of logged in user
+          required: true
+          type: string
+      responses:
+        200:
+          description: An array of products in users cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: You must log in to see cart
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add item to cart
+      description: |
+        This endpoint adds an item to logged in members shopping cart at *Sunglass Website.
+      tags:
+        - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: unique token of logged in user
+          required: true
+          type: string
+        - name: item
+          in: body
+          description: product and quanity you want to add
+          required: true
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/ItemToAdd'
+      responses:
+        200:
+          description: Item was added and new cart returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        400:
+          description: Invalid Request sent must include product and quanity
+          schema:
+            $ref: '#/definitions/Error'        
+        401:
+          description: You must log in to see cart
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      summary: Deletes item from user's cart
+      description: |
+        This endpoint deletes a products from a logged in members shopping cart at *Sunglass Website.
+      tags:
+        - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: unique token of logged in user
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: ID of product that will be deleted
+          required: true
+          type: string
+      responses:
+        200:
+          description: Product was deleted from cart and update cart returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: You must log in to delete item from cart
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Product Id could not be found
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Edit quanity of item to cart
+      description: |
+        This endpoint changes the quanity of an item in an logged in members shopping cart at *Sunglass Website.
+      tags:
+        - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: unique token of logged in user
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: ID of product that will be deleted
+          required: true
+          type: string
+        - name: quanity
+          in: query
+          description: edits the quanity of selected product
+          required: true
+          type: number
+      responses:
+        200:
+          description: Item's quanity was updated and new cart returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        404:
+          description: Invalid quanity sent
+          schema:
+            $ref: '#/definitions/Error'        
+        401:
+          description: You must log in to edit cart
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for each brand
+      name:
+        type: string
+        description: Name of brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for each product
+      categoryId:
+        type: string
+        description: unique identifier of brand
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: number
+        description: Price of product
+      imageUrls:
+        type: array
+        items:
+            type: string
+            description: ImageUrl of product
+  ItemToAdd:
+    type: object
+    properties:
+      product:
+        type: object
+        description: Details of product
+      quanity:
+        type: string
+        description: Number of product
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      
+  
+

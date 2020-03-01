@@ -133,7 +133,7 @@ myRouter.post('/api/login', function(request,response) {
 
     }else {
         //when no username or password is entered
-        response.writeHead(404, "invalid username or password");
+        response.writeHead(404, "Incorrectly formatted username or password");
         return response.end();
         }
 });

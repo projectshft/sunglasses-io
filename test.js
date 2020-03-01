@@ -22,7 +22,7 @@ describe('/GET brands', () => {
 
 //test to get all the products in a specific brand
 describe('/GET brands/:id/products', () => {
-    it('it should GET all the products with ', done => {
+    it('it should GET all the products with the same brand', done => {
         //act
         chai
             .request(server)
@@ -60,7 +60,7 @@ describe('/GET brands/:id/products', () => {
 
 //testing to see that all the initial 11 products are returned when ran
 describe('/GET products', () => {
-    it('it should GET all the brands', done => {
+    it('it should GET all the products', done => {
         chai
             .request(server)
             .get('/api/products')
@@ -320,6 +320,7 @@ describe('/POST me/cart', () => {
         
     });
 
+    //FIX THIS ONE
     it('if the same product is added twice, it should not Post cart item again but increase the quanity', done => {
         const user = {
             username: "greenlion235",
@@ -479,7 +480,6 @@ describe('/DELETE me/cart/:productId', () => {
                         chai
                         .request(server)
                         .delete('/api/me/cart/1')
-                        .send(addProduct)
                         .end((err, res) => {
                             res.should.have.status(401);
                             done();
@@ -489,7 +489,7 @@ describe('/DELETE me/cart/:productId', () => {
     });
 });
 
-//deleting item from cart
+//editing quanity of item in cart cart
 describe('/POST me/cart/:productId', () => {
     it('should edit quanity of specific product in cart', done => {
         const user = {
