@@ -65,7 +65,7 @@ let server = http.createServer(function (request, response) {
     // Return 404 if not found
     if (foundProducts.length === 0) {
       response.writeHead(404);	
-      return response.end("Brand Not Found");
+      return response.end("Brand id Not Found");
     }
 
     response.writeHead(200, {'Content-Type': 'application/json'});

@@ -23,6 +23,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '404':
+          description: Brands array is empty
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -46,6 +50,10 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '404':
+          description: Brand id Not Found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -54,23 +62,26 @@ paths:
     get:
       summary: Products
       description: |
-        Products by brand.
+        All products available.
       tags:
         - Products
       parameters:
-        - name: limit
+        - name: keyword
           in: query
-          description: How many items to return at one time (max 10)
+          description: Name of the product
           required: false
-          type: integer
-          format: int32
+          type: string
       responses:
         '200':
-          description: An array of categories
+          description: An array of products
           schema:
             type: array
             items:
-              $ref: '#/definitions/Category'
+              $ref: '#/definitions/Product'
+        '404':
+          description: There aren't any products to return
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
