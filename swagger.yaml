@@ -1,0 +1,416 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io API
+  description: An API to support the Sunglasses.io platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: 'All Brands available within our store.'
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of Brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Get Products by Brand
+      description: 'All the Products from a given Brand.'
+      parameters:
+        - name: id
+          in: path
+          description: The id of the Brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of Products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        404:
+          description: Brand not found.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Products
+      description: 'All Products available within our store.'
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of Products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        404:
+          description: Product not found.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Logs a User into our system.
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: login
+          description: The User's auth info.
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                $ref: '#/definitions/User/properties/login/properties/username'
+              password:
+                $ref: '#/definitions/User/properties/login/properties/password'
+      tags:
+        - User
+      responses:
+        200:
+          description: Login acceptance.
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                description: The user's session token.
+        401:
+          description: Invalid username or password.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Retrieve logged in User's Cart
+      description: >-
+        The User Profile endpoint returns cart information about the Sunglasses.io user that
+        has authorized with the application.
+      parameters:
+        - name: token
+          in: query
+          description: Authorized User session token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: Shopping cart information for a user
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add Product to logged in User's Cart
+      consumes:
+        - application/json
+      parameters:
+        - name: token
+          in: query
+          description: Authorized User session token
+          required: true
+          type: string
+        - in: body
+          name: new Cart item
+          description: The User's desired item to purchase
+          schema:
+            $ref: '#/definitions/Product'
+      tags:
+        - User
+      responses:
+        200:
+          description: Shopping cart information for a user
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    post:
+      summary: Update Product within logged in User's Cart
+      description: >-
+        The User Profile endpoint returns cart information about the Sunglasses.io user that
+        has authorized with the application.
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the Product
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: Authorized User session token
+          required: true
+          type: string
+        - name: total
+          in: query
+          description: The number of Products to add to User's cart
+          required: false
+          type: number
+          format: int32
+      tags:
+        - User
+      responses:
+        200:
+          description: Shopping cart information for a user
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Update Product within logged in User's Cart
+      description: >-
+        The User Profile endpoint returns cart information about the Sunglasses.io user that
+        has authorized with the application.
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the Product
+          required: true
+          type: string
+        - name: token
+          in: query
+          description: Authorized User session token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: Shopping cart information for a user
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                product:
+                  $ref: '#/definitions/Product'
+                quantity:
+                  type: integer
+                  format: int32
+        400:
+          description: Missing or invalid token.
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Non-comforming selector of self-identfied gender.
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+        description: Initially empty array that holds a user's desired purchases.
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: User's preferred honorific.
+          first:
+            type: string
+            description: User's preferred given name.
+          last:
+            type: string
+            description: User's preferred surname.
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: User's street or mailing address.
+          city:
+            type: string
+            description: User's city associated with street or mailing address.
+          state:
+            type: string
+            description: User's state or province associated with street or mailing address.
+          postcode:
+            type: integer
+            format: int32
+            description: User's postal code associated with street or mailing address.
+      email:
+        type: string
+        format: email
+        example: sean@example.com
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: User's system handle.
+          password:
+            type: string
+            description: User's system password. Should probably not be here.
+          salt:
+            type: string
+            description: User's system salt, used as a cryptographic tool to prevent hackery. Definitely had to google this.
+          md5:
+            type: string
+            description: User's system md5, used as a cryptographic tool to prevent hackery. Definitely had to google this.
+          sha1:
+            type: string
+            description: User's system sha1, used as a cryptographic tool to prevent hackery. Definitely had to google this.
+          sha256:
+            type: string
+            description: User's system sha256, used as a cryptographic tool to prevent hackery. Definitely had to google this.
+      dob:
+        type: string
+        format: date
+        description: User's Date of Birth, string-formatted with exact time of day.
+        example: "1947-04-05 10:47:17"
+      registered:
+        type: string
+        format: date
+        description: User's Date registered with our site - perhaps will give them a nice e-mail on this date each year.
+        example: "1947-04-05 10:47:17"
+      phone:
+        type: string
+        format: phone_number
+        description: User's phone number, in string format.
+        example: "(000)-000-0000"
+      cell:
+        type: string
+        format: phone_number
+        description: User's cellular phone number, in string format.
+        example: "(000)-000-0000"
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: URL for User's picture, large-sized.
+          medium:
+            type: string
+            description: URL for User's picture, medium-sized.
+          thumbnail:
+            type: string
+            description: URL for User's picture, thumbnail-sized.
+      nat:
+        type: string
+        format: ISO-3166-1-alpha-2
+        description: ISO-standard two-character country code, for User's stated home country.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique system identifier of the Product.
+      categoryId:
+        $ref: '#/definitions/Brand/properties/id'
+      name:
+        type: string
+        description: Short descriptor of the Product.
+      description:
+        type: string
+        description: Long description of the Product.
+      price:
+        type: integer
+        format: int32
+        description: Cost to customer of the Product.
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Array of image URLs associated with the Product.
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique system identifier of the Category.
+      name:
+        type: string
+        description: Short descriptor of the Category.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
