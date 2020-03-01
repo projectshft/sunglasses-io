@@ -1,0 +1,256 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: Get the sunglasses you like API
+  version: 1.0.0
+host: sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Get all brands
+      description: 'All brands endpoint returns an array of all brands.'
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of all brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Get all products of specific brand
+      description: 'All products endpoint returns an array of all products of specific brand.'
+      tags:
+        - Products
+      parameters:
+        - name: id
+        in: path
+        description: unique id of the brand
+        required: true
+        type: string
+      responses:
+        '200':
+          description: An array of all products of specific brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Products
+      description: |
+        Products by brand.
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 10)
+          required: false
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: An array of categories
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /categories/{id}/goals:
+    get:
+      summary: Categories
+      description: |
+        Categories of the goals.
+      tags:
+        - Categories
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 10)
+          required: false
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: An array of categories
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: User Profile
+      description:    The User Profile endpoint returns information about the Uber user that has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/{goal_id}/challenge:
+    get:
+      summary: Get goal by id to challenge
+      description: The goal by id endpoint returns specific goal for the user to challenge.
+      tags:
+        - Goal
+        parameters: 
+          - 
+            name: "goal_id"
+            in: "path"
+            description: "ID of goal "
+            required: true
+            type: "integer"
+            format: "int64"
+      responses:
+        '200':
+          description: Goal information for a user
+          schema:
+            $ref: '#/definitions/Goal'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/{goal_id}/gift:
+    get:
+      summary: Get goal by id to challenge
+      description: The goal by id endpoint returns specific goal for the user to challenge.
+      tags:
+        - Goal
+      parameters: 
+          - 
+            name: "goal_id"
+            in: "path"
+            description: "ID of goal "
+            required: true
+            type: "integer"
+            format: "int64"
+      responses:
+        '200':
+          description: Goal information for a user
+          schema:
+            $ref: '#/definitions/Goal'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /history:
+    get:
+      summary: User Activity
+      description: 'The User Activity endpoint returns data about a user''s lifetime activity with Uber. The response will include pickup locations and times, dropoff locations and times, the distance of past requests, and information about which products were requested.<br><br>The history array in the response will have a maximum length based on the limit parameter. The response value count may exceed limit, therefore subsequent API requests may be necessary.'
+      tags:
+        - User
+      parameters:
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          description: Offset the list of returned results by this amount. Default is zero.
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          description: 'Number of items to retrieve. Default is 5, maximum is 100.'
+      responses:
+        '200':
+          description: History information for the given user
+          schema:
+            $ref: '#/definitions/Activities'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  User:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        description: 'Unique identifier representing a specific user'
+      fist_name:
+        type: string
+        description: First name of the user.
+      last_name:
+        type: string
+        description: Last name of the user.
+      goals:
+        type: array
+        description: 'Array of goals ids for the user'
+        items:
+          $ref: '#/definitions/Activity'
+  Category:
+    type: object
+    properties:
+      display_name:
+        type: string
+        description: Display name of the category.
+      category_id:
+        type: integer
+        format: int32
+        description: 'Unique identifier representing a specific category'
+  Goal:
+    type: object
+    properties:
+      goal_title:
+        type: string
+        description: Goal title.
+      goal_type:
+        type: string
+        description: Goal type.
+      up_votes:
+        type: integer
+        description: Upvote of the goal
+      down_votes:
+        type: integer
+        description: Down vote of the goal
+      goal_id:
+        type: integer
+        format: int32
+        description: 'Unique identifier representing a specific goal'
+      entered_date:
+        type: string
+      category:
+        type: string
+  Activity:
+    type: object
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the activity
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
