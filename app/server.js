@@ -5,17 +5,49 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
-
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-
 let should = chai.should();
 
 chai.use(chaiHttp);
 
-let brands = [];
 
 const PORT = 3001;
+
+//  helper functions & variables  ************************
+
+let brands = [];
+let accessTokens = [];
+
+// A variable to limit validity of access tokens to 30 minutes
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+
+var getValidTokenFromRequest = function(request) {
+    var parsedUrl = require('url').parse(request.url,true)
+    if (parsedUrl.query.accessToken) {
+      // Verify the access token to make sure its valid and not expired
+      let currentAccessToken = accessTokens.find((accessToken) => {
+        return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+      });
+      if (currentAccessToken) {
+        return currentAccessToken;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  };
+
+  const getValidUserFromToken = function(token) {
+    if (token) {
+      const currentUser = users.find(user => user.login.username === token.username);
+      return currentUser;
+    }
+    return null;
+  };
+
+
 
 // Setup router
 var myRouter = Router();
@@ -27,7 +59,7 @@ const server = http.createServer((request, response) => {
     if (error) {
         return console.log("Error on Server Startup: ", error);
     }
-    //    brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf8'))
+    // setting up Brands, Products and Users
     fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
         if (error) throw error;
         products = JSON.parse(data);
@@ -98,7 +130,94 @@ myRouter.get("/api/products", (request, response) => {
     response.end(JSON.stringify(products));
 });
 
+//****************************************************************************/
+// POST /api/login rout
+myRouter.post('/api/login', (request, response) => {
+    //check for password and username was included in request
+    if (request.body.username && request.body.password) {
+      //verify that request is matching user in database
+      let user = users.find(user => {
+        return (
+          user.login.username == request.body.username &&
+          user.login.password == request.body.password
+        )
+      })
+      if (user) {
+        //when successful, return json header
+        response.writeHead(
+          200,
+          Object.assign({
+            'Content-Type': 'application/json'
+          })
+        )
+        // We have a successful login, if we already have an existing access token, use that
+        let currentAccessToken = accessTokens.find(accessToken => {
+          return (
+            accessToken.token == new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+          )
+        })
+        // Update the last updated value so we get another time period
+        if (currentAccessToken) {
+          currentAccessToken.lastUpdated = new Date()
+          response.end(JSON.stringify(currentAccessToken.token))
+          return
+        } else {
+          // Create a new token with the user value and a "random" token
+          let newAccessToken = {
+            username: user.login.username,
+            lastUpdated: new Date(),
+            token: uid(16)
+          }
+          accessTokens.push(newAccessToken)
+          response.end(JSON.stringify(newAccessToken.token))
+          return
+        }
+      } else {
+        // When a login fails, tell the client in a generic way that either the username or password was wrong
+        response.writeHead(406, 'Invalid username or password.')
+        response.end()
+        return
+      }
+    } else {
+      //if there was no username or password in the request, throw a 405
+      response.writeHead(405, 'You must enter your username and password.')
+      response.end()
+      return
+    }
+  })
+    //****************************************************************************/
+    // GET /api/me/cart
+  myRouter.get('/api/me/cart', (request, response) => {
+    let currentAccessToken = getValidTokenFromRequest(request)
+    if (!currentAccessToken) {
+      response.writeHead(400, 'Access not authorized')
+      response.end()
+      return
+    } else {
+      // search for user by username parameters 
+      let user = users.find(user => {
+        return user.login.username == currentAccessToken.username
+      })
+      response.writeHead(
+        200,
+        Object.assign({
+          'Content-Type': 'application/json'
+        })
+      )
+      //show cart if the user is logged in
+      response.end(JSON.stringify(user.cart))
+      return
+    }
+  })
+  //****************************************************************************/
+  // POST api/me/cart
+  
+  
+  
+  
 
 
 // export to test file for Chai
 module.exports = server
+
+

@@ -84,4 +84,75 @@ describe('Brands', () => {
             })
         })
     })
+
+//  log in test  
+    describe('Login', () => {
+        describe('/POST login', () => {
+          it('it should return error without username or password was submitted', done => {
+            chai
+              .request(server)
+              .post('/api/login')
+              .send({ username: '', password: '' })
+              .end((error, response) => {
+                response.should.have.status(405)
+                response.should.not.have.property('password')
+                response.should.not.have.property('username')
+                done()
+              })
+          })
+          it('it should return error if incorrect password or username', done => {
+            chai
+              .request(server)
+              .post('/api/login')
+              .send({ username: 'madeline', password: '342623q' })
+              .end((error, response) => {
+                response.should.have.status(406)
+                response.should.not.have.property('password')
+                response.should.not.have.property('username')
+                done()
+              })
+          })
+          it('it should return access token if valid username and password was submitted', done => {
+            chai
+              .request(server)
+              .post('/api/login')
+              .send({ username: 'greenlion235', password: 'waters' })
+              .end((error, response) => {
+                response.should.have.status(200)
+                response.type.should.equal('application/json')
+                accessToken = response.body
+                should.not.exist(error)
+                done()
+              })
+          })
+        })
+    })
+    //  GET cart test
+    describe('GET/api/me/cart', () => {
+            describe('/GET cart', () => {
+              it('it should return error if not logged in', done => {
+                chai
+                  .request(server)
+                  .get('/api/me/cart')
+                  .end((error, response) => {
+                    response.should.have.status(400)
+                    response.body.should.be.an('object')
+                    done()
+                  })
+              })
+            })
+            describe('GET/api/me/cart', () => {
+              it('it should let user access cart if valid access token', done => {
+                chai
+                  .request(server)
+                  .get('/api/me/cart')
+                  .set('test', accessToken)
+                  .end((error, response) => {
+                    response.should.have.status(200)
+                    response.body.should.be.an('array')
+                    done()
+                  })
+              })
+            })
+});
 });
