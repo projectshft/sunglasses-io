@@ -15,6 +15,12 @@ var users = [];
 var accessTokens = [];
 var products = {};
 
+const deleteCart = function(){
+   users.forEach(function(user){
+       return user.cart = []
+   })
+}
+
 
 // Setup router
 var myRouter = Router();
@@ -46,6 +52,7 @@ let server = http.createServer(function (request, response) {
       if (error) throw error;
       users = JSON.parse(data);
       console.log(`Server setup: ${users.length} users loaded`);
+      module.exports = users
     });
     
     //console log so I know server is up and running
@@ -80,11 +87,20 @@ myRouter.get('/api/brands/:id/products', function(request,response) {
 
 // Return all productsin the db
 myRouter.get('/api/products', function(request,response) {
+
+    //parsing URL to find keyword searched
+    var parsedUrl = require('url').parse(request.url,true)
+    const keyword = parsedUrl.query.keyword
+
+    const productsWithKeyword = products.filter(function(product){
+        product.name.includes(keyword) === true
+    })
+
     response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products))
+	return response.end(JSON.stringify(productsWithKeyword))
 });
 
-// Routes to products in specific brand. Should return all products with the brand name the user requested of sunglasses
+// Posts login and returns access Token
 myRouter.post('/api/login', function(request,response) {
 
     //Check if both username and password were entered
@@ -206,13 +222,14 @@ myRouter.post('/api/me/cart', function(request,response) {
             return item.product.id === request.body.product.id
         })
 
-        if (!isProductAlreadyInTheCart ){
-            //if the product is not already in the cart it pushes the product sent into the cart array
-            user.cart.push(request.body)
-        }else{
-            //if the product is in the cart, it increases the quanity by one
-            isProductAlreadyInTheCart.quanity++
+        if (isProductAlreadyInTheCart ){
+            //if the product is in the cart, its should send error message
+            response.writeHead(400, "Cannot add, product is aleady in cart");	
+            return response.end();
         }
+
+        //if the product is not already in the cart it pushes the product sent into the cart array
+        user.cart.push(request.body)
 
         //Gives user success status and sends back the new user cart
         response.writeHead(200, { "Content-Type": "application/json" });
@@ -258,7 +275,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
     }
 })
 
-myRouter.put('/api/me/cart/:productId', function(request,response) {
+myRouter.post('/api/me/cart/:productId', function(request,response) {
     //verifying token
     let currentAccessToken = getValidTokenFromRequest(request);
     //must login in to get cart
@@ -271,21 +288,36 @@ myRouter.put('/api/me/cart/:productId', function(request,response) {
         let user = users.find((user)=>{
             return user.login.username == currentAccessToken.username
         })
+        //parsing URL to find new Quanity and converting it to a number 
+        var parsedUrl = require('url').parse(request.url,true)
+        const quanity = parseInt(parsedUrl.query.quanity)
 
+        //if no value or a negative value or a decimal passed it should return an error
+        if (isNaN(quanity) || quanity <= 0 || parsedUrl.query.quanity % 1 !== 0){
+            // If there isn't an new quanity in the parameter, we can not edit the quanity
+            response.writeHead(404, "Invalid quanity amount was given. Quanity must be a number");
+            return response.end(); 
+        }else{
         //Search cart to find product wanting to be deleted 
-        let findItemToEdit = user.cart.find((item)=>{
-            return item.product.id === request.params.id
+        let itemToEdit = user.cart.find((item)=>{
+            return item.product.id === request.params.productId
         })
-
-        //edit item that was found
-        //findItemToEdit = request.body.product
+        
+        //Sets the quanity to the new value
+        itemToEdit.quanity = quanity
 
         //Gives user success status and sends back the new user cart
         response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(user.cart))
+        }
     }
 })
 
-module.exports = server
+
+
+module.exports = { server, deleteCart}
+
+
+
 
 

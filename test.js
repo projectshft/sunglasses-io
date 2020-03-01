@@ -1,12 +1,17 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('./app/server');
+let { server, deleteCart } = require('./app/server');
 let should = chai.should();
+
+
 
 chai.use(chaiHttp);
 
+
+
 //testing to see that all the initial 5 brands are returned when ran
 describe('/GET brands', () => {
+
     it('it should GET all the brands', done => {
         chai
             .request(server)
@@ -60,7 +65,7 @@ describe('/GET brands/:id/products', () => {
 
 //testing to see that all the initial 11 products are returned when ran
 describe('/GET products', () => {
-    it('it should GET all the products', done => {
+    it('it should GET all the products when no keyword is searched', done => {
         chai
             .request(server)
             .get('/api/products')
@@ -68,6 +73,17 @@ describe('/GET products', () => {
                 res.should.have.status(200);
                 res.body.should.be.an('array');
                 res.body.length.should.be.eql(11);
+                done();
+            });
+    });
+    it('it should GET products that include the keyword', done => {
+        chai
+            .request(server)
+            .get('/api/products?keyword=black')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(1);
                 done();
             });
     });
@@ -131,6 +147,12 @@ describe('/POST login', () => {
             });
     });
 });
+
+describe('Cart', function() {
+    beforeEach(function() {
+        // runs before each test in this block
+        deleteCart()
+      });
 
 //testing to get an empty cart when cart is first recieved
 describe('/GET me/cart', () => {
@@ -320,8 +342,8 @@ describe('/POST me/cart', () => {
         
     });
 
-    //FIX THIS ONE
-    it('if the same product is added twice, it should not Post cart item again but increase the quanity', done => {
+    
+    it('if the same product is added twice, it should give back error that product is already in the cart', done => {
         const user = {
             username: "greenlion235",
             password: "waters"
@@ -351,12 +373,14 @@ describe('/POST me/cart', () => {
                     .send(addProduct)
                     .end((err, res) => {
                         res.should.have.status(200);
-                        res.body.should.be.an('array')
-                        res.body[0].should.be.an('object')
-                        res.body.length.should.be.eql(1);
-                        res.body[0].should.have.property('product');
-                        res.body[0].should.have.property('quanity');
-                        done();
+                        chai
+                        .request(server)
+                        .post('/api/me/cart?accessToken='+ token)
+                        .send(addProduct)
+                        .end((err, res) => {
+                            res.should.have.status(400);
+                            done();
+                        });
                     });
         }); 
     });
@@ -364,6 +388,7 @@ describe('/POST me/cart', () => {
 
 //deleting item from cart
 describe('/DELETE me/cart/:productId', () => {
+
     it('should Delete item from cart', done => {
         const user = {
             username: "greenlion235",
@@ -487,7 +512,7 @@ describe('/DELETE me/cart/:productId', () => {
                     });
         }); 
     });
-});
+ });
 
 //editing quanity of item in cart cart
 describe('/POST me/cart/:productId', () => {
@@ -521,21 +546,9 @@ describe('/POST me/cart/:productId', () => {
                 .send(addProduct)
                 .end((err, res) => {
                     res.should.have.status(200);
-                    let editProduct = {
-                        product: {
-                        "id": "1",
-                        "categoryId": "1",
-                        "name": "Superglasses",
-                        "description": "The best glasses in the world",
-                        "price":150,
-                        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-                        },
-                         quanity: 2
-                    }
                     chai
                         .request(server)
-                        .put('/api/me/cart/1?accessToken='+ token)
-                        .send(editProduct)
+                        .post('/api/me/cart/1?quanity=5&accessToken='+ token)
                         .end((err, res) => {
                             res.should.have.status(200);
                             res.body.should.be.an('array')
@@ -548,4 +561,169 @@ describe('/POST me/cart/:productId', () => {
                 });
             })
     }); 
+
+    it('should not edit quanity if quanity is not passed as a parameter', done => {
+            const user = {
+                username: "greenlion235",
+                password: "waters"
+            }
+            chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('string')
+                let addProduct = {
+                    product: {
+                    "id": "1",
+                    "categoryId": "1",
+                    "name": "Superglasses",
+                    "description": "The best glasses in the world",
+                    "price":150,
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                     quanity: 1
+                }
+                const token = res.body
+                chai
+                    .request(server)
+                    .post('/api/me/cart?accessToken='+ token)
+                    .send(addProduct)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        chai
+                            .request(server)
+                            .post('/api/me/cart/1?&accessToken='+ token)
+                            .end((err, res) => {
+                                res.should.have.status(404);
+                                done();
+                            });
+                    });
+                })
+    }); 
+
+    it('should not edit quanity if quanity is a string', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = {
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                quanity: 1
+            }
+            const token = res.body
+            chai
+                .request(server)
+                .post('/api/me/cart?&accessToken='+ token)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    chai
+                        .request(server)
+                        .post('/api/me/cart/1?quanity=string&accessToken='+ token)
+                        .end((err, res) => {
+                            res.should.have.status(404);
+                            done();
+                        });
+                });
+            })
+    }); 
+
+    it('should not edit quanity if quanity is a negative number', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = {
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                quanity: 1
+            }
+            const token = res.body
+            chai
+                .request(server)
+                .post('/api/me/cart?&accessToken='+ token)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    chai
+                        .request(server)
+                        .post('/api/me/cart/1?quanity=-5&accessToken='+ token)
+                        .end((err, res) => {
+                            res.should.have.status(404);
+                            done();
+                        });
+                });
+            })
+    }); 
+
+    it('should not edit quanity if quanity is a decimal', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = {
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                quanity: 1
+            }
+            const token = res.body
+            chai
+                .request(server)
+                .post('/api/me/cart?&accessToken='+ token)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    chai
+                        .request(server)
+                        .post('/api/me/cart/1?quanity=5.8&accessToken='+ token)
+                        .end((err, res) => {
+                            res.should.have.status(404);
+                            done();
+                        });
+                });
+            })
+    });
 })
+});
