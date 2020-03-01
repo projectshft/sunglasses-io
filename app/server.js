@@ -19,7 +19,7 @@ let users = [];
 let user = {};
 
 // Setup router
-var myRouter = Router();
+let myRouter = Router();
 myRouter.use(bodyParser.json());
 
 let server = http.createServer(function (request, response) {
@@ -46,33 +46,6 @@ let server = http.createServer(function (request, response) {
     });
     console.log(`Server is listening on ${PORT}`);
   });
-
-  //search router
-  myRouter.get('/api/search', function(request,response) {
-    const parsedUrl = url.parse(request.url, true);
-    const query = parsedUrl.query.query;
-    let productsToReturn = [];
-
-    if(!query) {
-      response.writeHead(404, "Search is empty");
-      return response.end();
-    }
-
-    if (query !== undefined) {
-      productsToReturn= products.filter(item => item.name.includes(query));
-  
-      if (!productsToReturn) {
-        response.writeHead(404, "There aren't any products to return");
-        return response.end();
-      }
-    } else {
-      productsToReturn = products;
-    }
-
-    response.writeHead(200, {'Content-Type': 'application/json'});
-    // Return serach result
-    return response.end(JSON.stringify(productsToReturn));
-  });
   //brands router
   myRouter.get('/api/brands', function(request,response) {
     if(request.body.length === 0) {
@@ -88,11 +61,12 @@ let server = http.createServer(function (request, response) {
     const foundProducts = products.filter(product => {
         return product.categoryId == request.params.id
     })
+
     // Return 404 if not found
-	if (foundProducts.length === 0) {
-		response.writeHead(404);	
-		return response.end("Brand Not Found");
-	}
+    if (foundProducts.length === 0) {
+      response.writeHead(404);	
+      return response.end("Brand Not Found");
+    }
 
     response.writeHead(200, {'Content-Type': 'application/json'});
     // Return all products definitions (for now)
@@ -103,11 +77,6 @@ let server = http.createServer(function (request, response) {
     const parsedUrl = url.parse(request.url, true);
     const query = parsedUrl.query.query;
     let productsToReturn = [];
-
-    if(request.body.length === 0) {
-      response.writeHead(404);	
-      return response.end("Products array is empty");
-    }
 
     if (query !== undefined) {
       productsToReturn= products.filter(item => item.name.includes(query));

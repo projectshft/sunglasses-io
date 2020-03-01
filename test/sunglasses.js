@@ -10,30 +10,6 @@ describe('The sunglasses store', () => {
     //variable token to hold the token of the current user after login to pass for validation
     let token = '';
 
-    describe('/GET api/search', () => {
-        it('it should GET all the products with a query string Sugar', done => {
-          chai
-            .request(server)
-            .get('/api/search?query=Sugar')
-            .end((err, res) => {
-              res.should.have.status(200);
-              res.body.should.be.an('array');
-              res.body.length.should.be.eql(1);
-              done();
-            });
-        });
-
-        it('it should not GET any search result, query is empty', done => {
-            chai
-                .request(server)
-                .get('/api/search?query=')
-                .end((err, res) => {
-                res.should.have.status(404);
-                done();
-                });
-        });
-    });
-
     describe('/GET api/brands', () => {
         it('it should GET all the brands', done => {
           chai
@@ -377,7 +353,7 @@ describe('The sunglasses store', () => {
                 });
         });
     });   
-    
+  
     describe('/DELETE api/me/cart/:productId', () => {
         it('it should delete product from the cart', done => {
             // arrange
