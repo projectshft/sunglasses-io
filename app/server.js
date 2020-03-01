@@ -93,15 +93,15 @@ myRouter.get('/api/brands', function(request, response) {
 
 myRouter.get("/api/brands/:id/products", (request, response) => {
     //filter for product list by category id(brand name)
-    const productlistbybrand = products.filter((product) => {
+    const productListByBrand = products.filter((product) => {
        return product.categoryId == request.params.id;})
 
-    if(productlistbybrand.length === 0 ) {
+    if(productListByBrand.length === 0 ) {
         response.writeHead(404, "There are no products for this brand") ;
         return response.end(); 
     } 
       response.writeHead(200, {'Content-Type': 'application/json'})
-      return response.end(JSON.stringify(productlistbybrand));
+      return response.end(JSON.stringify(productListByBrand));
     });
   
   // Route for the products 
@@ -114,6 +114,55 @@ myRouter.get('/api/products', function(request, response) {
     return response.end(JSON.stringify(products))
     
       });  
+
+// Login call
+myRouter.post('/api/login', function(request,response) {
+ 
+  // Make sure there is a username and password in the request
+  if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
+    // See if there is a user that has that username and password
+   
+    let user = users.find((user)=>{
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+    if (user) {
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, 0);
+      // Write the header because we know we will be returning successful at this point and that the response will be json
+      response.writeHead(200, {'Content-Type': 'application/json'});
+     
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, ++numFailedForUser);
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+});
     
 // Route for the shopping cart
 myRouter.get('/api/me/cart', function(request, response) {
@@ -124,7 +173,6 @@ myRouter.get('/api/me/cart', function(request, response) {
         // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
         response.writeHead(401, "You need to log in to recieve cart information");
         return response.end();
-  
 
     }else{
         //search to see if username and password match
@@ -138,6 +186,7 @@ myRouter.get('/api/me/cart', function(request, response) {
 });
 
 myRouter.post('/api/me/cart', function (request, response){
+
     let currentAccessToken = getValidTokenFromRequest(request);
     //must login in to get cart
     if (!currentAccessToken) {
@@ -159,30 +208,33 @@ myRouter.post('/api/me/cart', function (request, response){
 
 
 myRouter.delete ('/api/me/cart/:productId', function (request, response){
-    let currentAccessToken = getValidTokenFromRequest(request);
+    
+  let currentAccessToken = getValidTokenFromRequest(request);
   
     //must login in to get cart
     if (!currentAccessToken) {
         // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
         response.writeHead(401, "You need to log in to recieve cart information");
         return response.end();
-    }else{
-        //search to see if username and password match
-        let user = users.find((user)=>{
-        return user.login.username == currentAccessToken.username
-    });
-    
-    let cart = user.cart.filter(item => item.id !== request.params.productId);
-    user.cart = cart; 
-    
-    //
+
+    }else {
+      //search to see if username and password match
+      let user = users.find((user)=>{
+      return user.login.username == currentAccessToken.username
+  });
+        //filter cart to delete all products with a specific productId 
+    let cart = user.cart.filter(object=>object.product.product.id != request.params.productId)
+
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(cart))
-  }
-    
+};
+
+// } else {
+//   response.writeHead(404, "That product cannot be found. Check to make sure productId is correct and product is in the cart");
+//   return response.end();
 });
 
-myRouter.put('/api/me/cart/:productId', function (request, response){
+myRouter.post('/api/me/cart/:productId', function (request, response){
   let currentAccessToken = getValidTokenFromRequest(request);
 
   //must login in to get cart
@@ -194,94 +246,45 @@ myRouter.put('/api/me/cart/:productId', function (request, response){
       //search to see if username and password match
       let user = users.find((user)=>{
       return user.login.username == currentAccessToken.username
-  });
-  //
-  
-  let cart = user.cart.map(product => {if (product.id == request.params.productId && product.quantity > 1 ) {
-    return product.quantity++}
-    });
-
-    user.cart = cart; 
-    
-    user.cart.push(request.body); 
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(cart))
-}
-  
-});
-
-
-
-
-// Login call
-myRouter.post('/api/login', function(request,response) {
- 
-    // Make sure there is a username and password in the request
-    if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
-      // See if there is a user that has that username and password
-     
-      let user = users.find((user)=>{
-        return user.login.username == request.body.username && user.login.password == request.body.password;
       });
-      if (user) {
-        setNumberOfFailedLoginRequestsForUsername(request.body.username, 0);
-        // Write the header because we know we will be returning successful at this point and that the response will be json
-        response.writeHead(200, {'Content-Type': 'application/json'});
-       
-        // We have a successful login, if we already have an existing access token, use that
-        let currentAccessToken = accessTokens.find((tokenObject) => {
-          return tokenObject.username == user.login.username;
-        });
+
+    let cart = user.cart.map((object) => {
+      if (object.product.product.id == request.params.productId && object.product.quantity >= 1 ) {
+        object.product.quantity++
+        return object 
+      }})
+
+      user.cart = cart;
+
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(cart)) 
+      
+   // } else {
+      //   response.writeHead(404, "That product cannot be found. Check to make sure productId is correct and product is in the cart");
+      //   return response.end();    // }
   
-        // Update the last updated value so we get another time period
-        if (currentAccessToken) {
-          currentAccessToken.lastUpdated = new Date();
-          return response.end(JSON.stringify(currentAccessToken.token));
-        } else {
-          // Create a new token with the user value and a "random" token
-          let newAccessToken = {
-            username: user.login.username,
-            lastUpdated: new Date(),
-            token: uid(16)
-          }
-          accessTokens.push(newAccessToken);
-          return response.end(JSON.stringify(newAccessToken.token));
-        }
-      } else {
-        let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
-        setNumberOfFailedLoginRequestsForUsername(request.body.username, ++numFailedForUser);
-        // When a login fails, tell the client in a generic way that either the username or password was wrong
-        response.writeHead(401, "Invalid username or password");
-        return response.end();
-      }
-  
-    } else {
-      // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-      response.writeHead(400, "Incorrectly formatted response");
-      return response.end();
-    }
-  });
+}
+})
+
 
   // Route for the search by product name 
   myRouter.get('/api/search', function(request,response) {
     
     var parsedUrl = require('url').parse(request.url, true);
-  
+      
       let searchResults = products.filter(product => {
-        if( product.name.includes(parsedUrl.query.query) || product.description.includes(parsedUrl.query.query))
+        if(product.name.toLowerCase().includes(parsedUrl.query.query.toLowerCase()) || product.description.toLowerCase().includes(parsedUrl.query.query.toLowerCase()))
         return products
       })
       if(searchResults.length === 0 ) {
         response.writeHead(404, "There is no product with that term in the name or description") ;
         return response.end(); 
     } 
-
+    
     response.writeHead(200, {'Content-Type': 'application/json'})
-        return response.end(JSON.stringify(searchResults))
+        return response.end(JSON.stringify(searchResults));
     
       });  
-
-
 
 
   module.exports = server;

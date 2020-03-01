@@ -10,10 +10,10 @@ chai.use(chaiHttp);
 //         Book.removeAll();
 //       });
 
-describe('/GET /api/brands', () => {
-    it('it should GET all the brands', done => {
-        //arrange
 
+describe('/GET /api/brands', () => {
+  //positive tests 
+    it('it should GET all the brands', done => {
         //act
       chai
         .request(server)
@@ -24,9 +24,11 @@ describe('/GET /api/brands', () => {
           res.should.be.json;
           res.body.should.be.an('array');
           res.body.length.should.be.eql(5);
+          // add more details
           done();
         });
     });
+    //negative tests 
     it('it should return a 404 because there no brands', done => {
       //arrange
 
@@ -42,21 +44,6 @@ describe('/GET /api/brands', () => {
             done();
           });
   });
-//   it('it should return a 404 because there are no brands', done => {
-//     //arrange
-
-//     let brands = [];
-//     //act 
-//     chai
-//         .request(server)
-//         //below might be wrong 
-//         .get('/api/' + brands)
-//         //assert
-//         .end((err, res) => {
-//           res.should.have.status(404);
-//           done();
-//         });
-// });
   });
 
 describe('/GET /api/brands/:id/products', () => {
@@ -90,7 +77,7 @@ describe('/GET /api/brands/:id/products', () => {
         //act
       chai
         .request(server)
-        .get('/api/brands/6/products')
+        .get('/api/brands/7/products')
         //assert
         .end((err, res) => {
           res.should.have.status(404);
@@ -108,10 +95,63 @@ describe('/GET /api/brands/:id/products', () => {
           res.should.have.status(404);
           done();
         });
-    });
+      });
+      // it('it should return a 404 error and the product was not found', done => {
+      //     //arrange
+      //     let brands = [
+      //       {
+      //           "id": "1",
+      //           "name" : "Oakley"
+      //       },
+      //       {
+      //           "id": "2",
+      //           "name" : "Ray Ban"
+      //       },
+      //       {
+      //           "id": "3",
+      //           "name" : "Levi's"
+      //       },
+      //       {
+      //           "id": "4",
+      //           "name" : "DKNY"
+      //       },
+      //       {
+      //           "id": "5",
+      //           "name" : "Burberry"
+      //       },
+      //       {
+      //         "id":"6",
+      //         "name": "Chanel"
+      //       }
+      //   ]
+      //     //act
+      //   chai
+      //     .request(server)
+      //     .get('/api/brands/6/products')
+      //     //assert
+      //     .end((err, res) => {
+      //       res.should.have.status(404);
+      //       done();
+      //     });
+    
+  //   it('it should return a 400 error if the response is not JSON', done => {
+  //     //arrange
+  //     //act
+  //   chai
+  //     .request(server)
+  //     .get('/api/brands/1/products')
+  //     //assert
+  //     .end((err, res) => {
+  //       res.should.have.status(400);
+  //       res.should.be.text;
+  //       done();
+  //     });
+  // });
   });
 
+  //GET products tests
   describe('/GET /api/products', () => {
+    //positive tests
     it('it should GET all the products', done => {
         //arrange
  
@@ -128,7 +168,8 @@ describe('/GET /api/brands/:id/products', () => {
           done();
         });
     });
-    it('it should not GET the brands', done => {
+    //negative tests
+    it('it should not GET the products', done => {
       let products = [];
       chai
           .request(server)
@@ -140,8 +181,9 @@ describe('/GET /api/brands/:id/products', () => {
           });
   });
   });
-
+//POST login tests
 describe ('/POST /api/login', () =>{
+  //positive test to get the accessToken
     it('it should POST user login', done =>{
         //arrange
         let user = {
@@ -158,10 +200,11 @@ describe ('/POST /api/login', () =>{
             res.should.have.status(200);
             res.should.be.json;
             res.body.should.be.a('string');
-         
             done();
         })
     })
+    //negative tests
+    //username field cannot be empty
     it('the login username cannot be empty', done =>{
         //arrange
         let user = {
@@ -230,9 +273,32 @@ describe ('/POST /api/login', () =>{
             done();
         })
     })
+    it('it should not let the user login after 3 failed login attempts', done =>{
+      //arrange
+      let user ={
+          username: 'greenlion235',
+          password: 'water'
+      }
+      //act
+      chai 
+      .request(server)
+      .post('/api/login')
+      .send(user)
+          // .send(user)
+          // .send(user)
+          // .send(user)
+      //assert
+      .end((err, res) => {
+          res.should.have.status(401);
+          done();
+      })
+  })
+ 
 });
 
+//tests for viewing your cart
 describe('/GET /api/me/cart', () => {
+  //positive test 
     it('it should GET the status of the cart', done => {
         //arrange
         let user = {
@@ -261,8 +327,39 @@ describe('/GET /api/me/cart', () => {
             })
         })
     });
+    //negative tests
+    it ( 'it should have a valid access token', done => {
+      //arrange
+      //act
+      
+      chai 
+      .request(server)
+      //no access token in the request
+      .get('/api/me/cart')
+      
+      //assert
+      .end((err, res) => {
+          res.should.have.status(401);
+          done();
+      })
+      // it ( 'it should have a current access token', done => {
+      //   //arrange
+      //   //act
+        
+      //   chai 
+      //   .request(server)
+      //   //no access token in the request
+      //   .get('/api/me/cart')
+        
+      //   //assert
+      //   .end((err, res) => {
+      //       res.should.have.status(401);
+      //       done();
+      //   })
+  })
   });
 
+  //tests for updating cart 
   describe('/POST /api/me/cart', () => {
     it('it should update the items in the cart', done => {
         //arrange
@@ -270,7 +367,8 @@ describe('/GET /api/me/cart', () => {
             username: 'greenlion235',
             password: 'waters'
         };
-        let product = {product:{ 
+        let product = {
+          product:{ 
             "id": "1",
             "categoryId": "1",
             "name": "Superglasses",
@@ -303,26 +401,36 @@ describe('/GET /api/me/cart', () => {
             })
         })
     });
-    //change the it statement 
-    it('it should test to see if you are logged in to view the cart', done => {
+    it ( 'it should have a valid access token', done => {
       //arrange
-      let user = {
-          username: 'greenlion235',
-          password: 'water'
-      };
+
       //act
-    chai
+      
+      chai 
       .request(server)
-      .post('/api/login')
-      .send(user)
+      //no access token in the request
+      .post('/api/me/cart')
+      
       //assert
       .end((err, res) => {
-          
           res.should.have.status(401);
           done();
-          
       })
   });
+      // it ( 'it should have a current access token', done => {
+      //   //arrange
+      //   //act
+        
+      //   chai 
+      //   .request(server)
+      //   //no access token in the request
+      //   .get('/api/me/cart')
+        
+      //   //assert
+      //   .end((err, res) => {
+      //       res.should.have.status(401);
+      //       done();
+      //   })
   });
 
   describe('/DELETE /api/me/cart/:productId', () => {
@@ -332,7 +440,8 @@ describe('/GET /api/me/cart', () => {
             username: 'greenlion235',
             password: 'waters'
         };
-        let product = {product:{ 
+        let product = {
+          product:{ 
             "id": "1",
             "categoryId": "1",
             "name": "Superglasses",
@@ -368,56 +477,80 @@ describe('/GET /api/me/cart', () => {
                 .end((err, res)=>{
                     res.should.have.status(200);
                     res.should.be.json;
+                    res.body.should.be.an('array');
                     done();
                 }) 
               
             })
         })
     });
-    it('it should return a 404 error and the item is not in the cart', done => {
-      //arrange
-      //act
-    chai
-      .request(server)
-      .get('/api/me/cart/12')
-      //assert
-      .end((err, res) => {
-        res.should.have.status(404);
-        done();
-      });
-  });
-  it('it should return a 404 error and the item is not in a cart', done => {
-      //arrange
-      //act
-    chai
-      .request(server)
-      .get('/api/me/cart/z')
-      //assert
-      .end((err, res) => {
-        res.should.have.status(404);
-        done();
-      });
-  });
-  it('it should see if you are logged in to delete the product from the cart', done => {
-    //arrange
-    let user = {
-        username: 'greenlion235',
-        password: 'water'
-    };
-    //act
-  chai
-    .request(server)
-    .post('/api/login')
-    .send(user)
-    //assert
-    .end((err, res) => {
-        res.should.have.status(401);
-        done();
-    })
+    //negative tests
+    //item does not exist 
+  //   it('it should return a 404 error and the item does not exist', done => {
+  //          //arrange
+  //          let user = {
+  //           username: 'greenlion235',
+  //           password: 'waters'
+  //       };
+  //     //act
+  //     chai
+  //       .request(server)
+  //       .post('/api/login')
+  //       .send(user)
+  //       //assert
+  //       .end((err, res) => {
+  //           let token = res.body;
+  //           res.should.have.status(200);
+  //           res.should.be.json;
+           
+  //           chai 
+  //           .request(server)
+  //           .post('/api/me/cart?accessToken=' + token)
+  //           .end((err, res) => {
+  //             chai 
+  //             .request(server)
+  //             .delete('/api/me/cart/z?accessToken=' + token)
+  //           //assert
+  //             res.should.have.status(404);
+  //             done();
+  //           });
+  // });
+
+  // item does not exist 
+  // it('it should return a 404 error and the item does not exist', done => {
+  //     //arrange
+  //     //act
+  //   chai
+  //     .request(server)
+  //     .delete('/api/me/cart/z')
+  //     //assert
+  //     .end((err, res) => {
+  //       res.should.have.status(404);
+  //       done();
+  //     });
+  // });
+//test for item not in cart 
+
+//test for valid accessToken 
+it ( 'it should have a valid access token', done => {
+  //arrange
+
+  //act
+  
+  chai 
+  .request(server)
+  //no access token in the request
+  .delete('/api/me/cart/1')
+  
+  //assert
+  .end((err, res) => {
+      res.should.have.status(401);
+      done();
+  })
 });
 });
 
-  describe('/PUT /api/me/cart/:productId', () => {
+  describe('/POST /api/me/cart/:productId', () => {
     it('it should update items in the cart by product Id', done => {
         //arrange
         let user = {
@@ -447,7 +580,7 @@ describe('/GET /api/me/cart', () => {
             chai 
             .request(server)
             .post('/api/me/cart?accessToken=' + token)
-            .send({product: product})
+            .send({product:product})
             .end((err, res) => {
                 res.should.have.status(200);
                 res.should.be.json;
@@ -455,65 +588,42 @@ describe('/GET /api/me/cart', () => {
                 //assert
                 chai 
                 .request(server)
-                .put('/api/me/cart/1?accessToken=' + token)
+                .post('/api/me/cart/1?accessToken=' + token)
                 //
                 .end((err, res)=>{
                     res.should.have.status(200);
                     res.should.be.json;
+                    res.body.should.be.an('array')
                     done();
                 }) 
               
             })
         })
-    });u
-    it('it should return a 401 and the user needs to be logged in to update the cart', done => {
-      //arrange
-      let user = {
-          username: 'greenlion235',
-          password: 'waters'
-      };
-      let product = {product:{ 
-          "id": "1",
-          "categoryId": "1",
-          "name": "Superglasses",
-          "description": "The best glasses in the world",
-          "price":150,
-          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-      }, 
-      quantity: 1}
-      //act
-    chai
-      .request(server)
-      .post('/api/login')
-      .send(user)
-      //assert
-      .end((err, res) => {
-          let token = res.body;
-          res.should.have.status(200);
-          res.should.be.json;
+    });
+    // it('it should return a 401 and the user needs to be logged in to update the cart', done => {
+  
 
-          chai 
-          .request(server)
-          .post('/api/me/cart?accessToken=' + token)
-          .send({product: product})
-          .end((err, res) => {
-              res.should.have.status(200);
-              res.should.be.json;
-              res.body.should.be.an('array');
-              //assert
-              chai 
-              .request(server)
-              .put('/api/me/cart/1?accessToken=' + token)
-              //
-              .end((err, res)=>{
-                  res.should.have.status(200);
-                  res.should.be.json;
-                  done();
-              }) 
+    //       chai 
+    //       .request(server)
+    //       .post('/api/me/cart?accessToken=' + token)
+      
+    //       .end((err, res) => {
+    //           res.should.have.status(200);
+    //           res.should.be.json;
+    //           res.body.should.be.an('array');
+    //           //assert
+    //           chai 
+    //           .request(server)
+    //           .put('/api/me/cart/1?accessToken=' + token)
+    //           //
+    //           .end((err, res)=>{
+    //               res.should.have.status(200);
+    //               res.should.be.json;
+    //               done();
+    //           }) 
             
-          })
-      })
-  });
+    //       })
+    //   })
   });
 
 describe('/GET /api/search', () => {
@@ -544,6 +654,25 @@ describe('/GET /api/search', () => {
         res.body[0].price.should.equal(153);
         res.body[0].should.have.property('imageUrls');
         res.body[0].imageUrls.should.be.an('array')
+        done();
+      });
+  });
+  it('it should not return a product name or description', done => {
+    chai
+      .request(server)
+      .get('/api/search?query=2')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
+  it('it should not return a product name or description ', done => {
+    chai
+      .request(server)
+      //case sensitive 
+      .get('/api/search?query=Russia')
+      .end((err, res) => {
+        res.should.have.status(404);
         done();
       });
   });
