@@ -45,7 +45,7 @@ const server = http.createServer(function (request, response) {
 
 myRouter.get('/api/brands', function (request, response) {
     // Return all the brands in the brands json file
-    response.writeHead(200, ('Success'),  {
+    response.writeHead(200, ('Success'), {
         "Content-Type": "application/json"
     });
     return response.end(JSON.stringify(brands));
@@ -57,6 +57,16 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
     let matchingProduct = products.filter((product) => {
         return product.categoryId === request.params.id
     })
+
+    // Write status code of 404 if the matching product returns an empty array
+    if (matchingProduct.length === 0) {
+        response.writeHead(404,  {
+            "Content-Type": "html/text"
+        })
+
+        response.end(('Error 404: CategoryID was not found'))
+
+    }
 
     response.writeHead(200, ('Success'), {
         "Content-Type": "application/json"
