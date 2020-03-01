@@ -76,10 +76,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Products'
-        401:
-          description: Incorrectly formatted keyword
-          schema:
-            $ref: '#/definitions/Error'
         404:
           description: No products found
           schema:

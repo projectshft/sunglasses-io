@@ -76,14 +76,45 @@ describe('/GET products', () => {
                 done();
             });
     });
-    it('it should GET products that include the keyword', done => {
+    it('it should GET products that include the keyword if it is in the product description or name', done => {
         chai
             .request(server)
-            .get('/api/products?keyword=black')
+            .get('/api/products?keyword=Black')
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an('array');
                 res.body.length.should.be.eql(1);
+                done();
+            });
+    });
+    it('it should GET products that include the keyword if the keyword is a brand', done => {
+        chai
+            .request(server)
+            .get('/api/products?keyword=Ray+Ban')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(2);
+                done();
+            });
+    });
+    it('it should GET products that include the keyword if  it is the price', done => {
+        chai
+            .request(server)
+            .get('/api/products?keyword=1500')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(2);
+                done();
+            });
+    });
+    it('it should not GET products when the keyword does not match', done => {
+        chai
+            .request(server)
+            .get('/api/products?keyword=jskhsdhpasohgpo')
+            .end((err, res) => {
+                res.should.have.status(404);
                 done();
             });
     });

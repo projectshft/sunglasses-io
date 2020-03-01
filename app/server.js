@@ -89,15 +89,48 @@ myRouter.get('/api/brands/:id/products', function(request,response) {
 myRouter.get('/api/products', function(request,response) {
 
     //parsing URL to find keyword searched
-    var parsedUrl = require('url').parse(request.url,true)
-    const keyword = parsedUrl.query.keyword
+    let parsedUrl = require('url').parse(request.url,true)
+    let keyword = parsedUrl.query.keyword
 
-    const productsWithKeyword = products.filter(function(product){
-        product.name.includes(keyword) === true
+    //if no keyword then it will return all the products
+    if (!keyword){
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(products)) 
+    }
+
+    //makes key word all caps so it will match when searched
+    keyword = keyword.toUpperCase()
+
+    //check to see if they searched a brand name
+    const isTheKeyWordABrand = brands.filter(function(brand){
+        const brandName = brand.name.toUpperCase()
+        return brandName.includes(keyword)
     })
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(productsWithKeyword))
+    //if it matches a brand then it will return only products with that brand name
+    if (isTheKeyWordABrand.length !== 0){
+        const productsWithSearchedBrand = products.filter((product=>product.categoryId == isTheKeyWordABrand[0].id))
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(productsWithSearchedBrand))
+    }
+
+    //combines all the strings in the product together and makes uppercase so it can match with keyword
+    const productsWithKeyword = products.filter(function(product){
+        let combinedDescription = product.name + ' ' + product.description + ' ' + product.price + ' ' + product.imageUrls
+        combinedDescriptionInCaps = combinedDescription.toUpperCase()
+        return combinedDescriptionInCaps.includes(keyword)
+    })
+
+    //returns array of products that include keyword
+    if (productsWithKeyword.length !== 0){ 
+        response.writeHead(200, { "Content-Type": "application/json" });
+	    return response.end(JSON.stringify(productsWithKeyword))
+    }
+
+    //if brands or products do not match search, sends error message
+    response.writeHead(404, "Product that match that search word could not be found");
+    return response.end(JSON.stringify(productsWithKeyword))
+
 });
 
 // Posts login and returns access Token
