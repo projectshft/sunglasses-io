@@ -49,10 +49,25 @@ describe('Brands', () => {
                 .end((err, res) => {
                     res.should.have.status(404);
                     res.text.should.be.a('string');
-                    // res.text.should.be.equal('Error 404: CategoryID was not found')
                     done();
                 })
         })
     })
+})
+
+describe('Products', () => {
+    describe('/GET /api/products', () => {
+        it('it should GET all the products', done => {
+            chai
+                .request(server)
+                .get('/api/products')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    res.body.length.should.be.eql(11);
+                    done();
+                })
+        })
+    }) 
 })
 

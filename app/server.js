@@ -58,9 +58,9 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
         return product.categoryId === request.params.id
     })
 
-    // Write status code of 404 if the matching product returns an empty array
+    // Write status of 404 if the matching product returns an empty array
     if (matchingProduct.length === 0) {
-        response.writeHead(404,  {
+        response.writeHead(404, ('Error'), {
             "Content-Type": "html/text"
         })
 
@@ -75,7 +75,14 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
 
 });
 
+myRouter.get('/api/products', function (request, response) {
+    response.writeHead(200, ('Success'), {
+        "Content-Type": "application/json"
+    });
 
+    response.end(JSON.stringify(products));
+
+});
 
 // Used for testing
 module.exports = server;
