@@ -180,16 +180,14 @@ myRouter.post('/api/login', function(request,response) {
 
 // Only logged in users can access a specific store's issues if they have access
 myRouter.get('/api/me/cart', function(request,response) {
-  //confirm user is logged in
-  const tokenedUser = accessTokens.find(user => user.username == request.body.username);
 
   //find user based on accessToken
-  const signedInUsername = tokenedUser.username;
+  const signedInUsername = accessTokens[0].username;
   const currentUser = users.find((user) => {
     return user.login.username == signedInUsername
   });
 
-  //if no user
+  //if no user is logged in
   if (!currentUser) {
     response.writeHead(401, "User must be signed in to see cart");
     return response.end();
@@ -207,5 +205,43 @@ myRouter.get('/api/me/cart', function(request,response) {
   return response.end(JSON.stringify(cart))
 });
 
+//POST a product to user cart
+myRouter.post("/api/me/cart", (request, response) => {
+  //find user based on accessToken
+  const signedInUsername = accessTokens[0].username;
+  const currentUser = users.find((user) => {
+    return user.login.username == signedInUsername
+  });
+  
+  //if no user is logged in
+  if (!currentUser) {
+    response.writeHead(401, "User must be signed in to add to your cart");
+    return response.end();
+  }
+  let addedItem = request.body
+	if (!addedItem.id) {
+		response.writeHead(404);	
+		return response.end("Cannot post without an id");
+  }
+  if (!addedItem.categoryId) {
+		response.writeHead(404);	
+		return response.end("Cannot post without a categoryId");
+  }
+  if (!addedItem.name) {
+		response.writeHead(404);	
+		return response.end("Cannot post without a name");
+  }
+  if (!addedItem.price) {
+		response.writeHead(404);	
+		return response.end("Cannot post without a price");
+  }
+  let cart = currentUser.cart
+  cart.push(addedItem)
+  let lastAddedItem = cart[cart.length-1]
+
+	// Return success with added book
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(lastAddedItem));
+});
 
 module.exports = server;

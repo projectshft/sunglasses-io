@@ -102,19 +102,49 @@ describe('/POST login', () => {
   // });
 });
 
+
 describe("/GET me/cart", () => {
-  it("should GET the cart of the logged in user's cart", done => {
-    // let login = {
-    //   username: "greenlion235",
-    //   password: "waters"
-    // }
-    // let ac
+  it("should GET all the products in a logged in user's cart", done => {
     chai
       .request(server)
-      .get('/api/me/cart')
+      .get("/api/me/cart")
+      .end((err, res) => {
+          expect(err).to.be.null
+          expect("Content-Type", "application/json");
+          res.body.should.not.equal('null')
+          res.should.have.status(404);
+          res.body.should.be.a("object");
+          done();
+      });
+  });
+});
+
+describe("/POST me/cart", () => {
+  it("should POST a product to the logged in user's cart", done => {
+    let product = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      description: "The best glasses in the world",
+      price: 100,
+      imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+      ]
+  }
+    chai
+      .request(server)
+      .post('/api/me/cart')
+      .send(product)
       .end((err, res) => {
         res.should.have.status(200);
+        res.body.should.be.an('object');
+        res.body.should.have.property('id');
+        res.body.should.have.property('categoryId');
+        res.body.should.have.property('name');
+        res.body.should.have.property('price');
         done();
       });
     });
-  });
+});
