@@ -46,18 +46,37 @@ let server = http.createServer(function (request, response) {
   });
 
 myRouter.get('/api/brands', function(request,response) {
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(brands));
+    if (brands.length == 0 ) {
+     response.writeHead(404, "Sorry we couldn't find any brands")
+     return response.end()
+    } else {
+     response.writeHead(200, { "Content-Type": "application/json" });
+     return response.end(JSON.stringify(brands));
+    }
 });
 
 myRouter.get('/api/brands/:id/products', function(request,response) {
-
-    let productslist = products.filter((product) => {
-        return product.categoryId == request.params.id
+  //productslist returns a list of products that have the same category id as the brand id passed through the parameters
+  let productsList = products.filter((product) => {
+      return product.categoryId == request.params.id
+    })
+  let brandList = brands.filter((brand) => {
+      return brand.id == request.params.id 
     })
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(productslist));
+    if(isNaN(request.params.id)) {
+      response.writeHead(400, "Brand id is invalid")
+      return response.end()
+    } else if (brandList.length == 0) {
+      response.writeHead(400, "This brand does not exist")
+      return response.end()
+    } else if (productsList.length == 0) {
+      response.writeHead(404, "This brand currently has no products")
+      return response.end()
+    } else {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(productsList));
+    }
 })
 
 myRouter.get('/api/products', function(request,response) {

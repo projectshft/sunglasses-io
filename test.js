@@ -6,6 +6,7 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
+// positive tests for get brands endpoint 
 describe('/GET brands', () => {
     it('it should GET all the brands', done => {
         chai
@@ -15,11 +16,25 @@ describe('/GET brands', () => {
             res.should.have.status(200);
             res.body.should.be.an('array');
             res.body.length.should.be.eql(5);
-        done();
+            done();
         })
     })
 })
 
+// negative tests for get brands endpoint 
+// describe('/GET brands', () => {
+//     it('it should return an error if there are no brands', done => {
+//         chai
+//         .request(server)
+//         .get('/api/brands')
+//         .end((err, res) => {
+//             res.should.have.status(400);
+//             done();
+//         })
+//     })
+// })
+
+//positive tests
 describe('/GET products by brand ID', () => {
     it('it should GET all the products by brand ID', done => {
         chai
@@ -28,7 +43,43 @@ describe('/GET products by brand ID', () => {
         .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.an('array');
-        done();  
+            done();  
+        })
+    })
+})
+// // negative tests for get brands by id endpoint
+// describe('/GET products by brand ID', () => {
+//     it('it should return an error if brand has no products', done => {
+//         chai
+//         .request(server)
+//         .get('/api/brands/5/products')
+//         .end((err, res) => {
+//             res.should.have.status(404);
+//             done();  
+//         })
+//     })
+// })
+
+describe('/GET products by brand ID', () => {
+    it('it should return an error if brand id is invalid', done => {
+        chai
+        .request(server)
+        .get('/api/brands/@/products')
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();  
+        })
+    })
+})
+
+describe('/GET products by brand ID', () => {
+    it('it should return an error if brand does not exist', done => {
+        chai
+        .request(server)
+        .get('/api/brands/6/products')
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();  
         })
     })
 })
@@ -42,7 +93,7 @@ describe('/GET products', () => {
             res.should.have.status(200);
             res.body.should.be.an('array');
             res.body.length.should.be.eql(11);
-        done();
+            done();
         })
     })
 })
@@ -236,3 +287,4 @@ describe('/GET search?q=:query', () => {
         })
     })
 })
+
