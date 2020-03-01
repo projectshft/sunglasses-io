@@ -39,10 +39,10 @@ paths:
         - Products
       parameters:
         - name: id
-        in: path
-        description: unique id of the brand
-        required: true
-        type: string
+          in: path
+          description: unique id of the brand
+          required: true
+          type: string
       responses:
         '200':
           description: An array of all products of specific brand
@@ -86,46 +86,94 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /categories/{id}/goals:
-    get:
-      summary: Categories
+  /login:
+    post:
+      summary: Login user
       description: |
-        Categories of the goals.
-      tags:
-        - Categories
-      parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 10)
-          required: false
-          type: integer
-          format: int32
-      responses:
-        '200':
-          description: An array of categories
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Category'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me:
-    get:
-      summary: User Profile
-      description:    The User Profile endpoint returns information about the Uber user that has authorized with the application.
+        User login
       tags:
         - User
       responses:
         '200':
-          description: Profile information for a user
+          description: User is logged in
           schema:
-            $ref: '#/definitions/User'
+            type: array
+            items:
+              $ref: '#/definitions/Category'
+        '401':
+          description: Invalid username or password
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: Incorrectly formatted response
+          schema:
+            $ref: '#/definitions/Error'              
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: All products in the user cart
+      description:    The Cart endpoint returns all products in the cart for the user.
+      tags:
+        - User
+      parameters:
+        -name: accessToken
+        in: query
+        description: token created for the user on the login
+        required: true
+        type: string
+      responses:
+        '200':
+          description: List of Products in the user cart
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Need an accessToken to view the cart
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Cart is empty
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      post:
+        summary: Add product to the user cart
+        description:    The Cart endpoint add new product to the cart.
+        tags:
+        - User
+        parameters:
+          - name: accessToken
+            in: query
+            description: token created for the user on the login
+            required: true
+            type: string
+          - name: product
+            in: body
+            description: the product added to the cart
+            required: true
+            type: object
+        responses:
+          '200':
+            description: List of Products in the user cart
+            schema:
+              $ref: '#/definitions/User'
+          '401':
+            description: Need an accessToken to view the cart
+            schema:
+              $ref: '#/definitions/Error'
+          '404':
+            description: Cart is empty
+            schema:
+              $ref: '#/definitions/Error'
+          default:
+            description: Unexpected error
+            schema:
+              $ref: '#/definitions/Error'
   /me/{goal_id}/challenge:
     get:
       summary: Get goal by id to challenge
