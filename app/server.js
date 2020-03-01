@@ -54,7 +54,7 @@ const server = http.createServer((req, res) => {
 //GET all the brands
 myRouter.get("/api/brands", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
-  const { query, sort } = querystring.parse(parsedUrl.query);
+  const { query } = querystring.parse(parsedUrl.query);
   let brandsToReturn = [];
   if (query !== undefined) {
     brandsToReturn = brands.filter(brand => brand.name.includes(query));
@@ -65,9 +65,6 @@ myRouter.get("/api/brands", (request, response) => {
     }
   } else {
     brandsToReturn = brands;
-  }
-  if (sort !== undefined) {
-    brandsToReturn.sort((a, b) => a[sort] - b[sort]);
   }
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brandsToReturn));
@@ -124,7 +121,7 @@ myRouter.post('/api/login', function(request,response) {
       // Reset our counter of failed logins
       failedLoginAttempts[request.body.username] = 0;
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, Object.assign({'Content-Type': 'application/json'}));
+      response.writeHead(200, {'Content-Type': 'application/json'});
       }
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((accessToken) => {
@@ -164,20 +161,50 @@ myRouter.post('/api/login', function(request,response) {
   }
 });
 
-//GET all products of a particular user's cart
-myRouter.get("/api/me/cart", (request, response) => {
-  const { id } = request.params;
-  const brand = brands.find(brand => brand.id == id);
-  if (!brand) {
-    response.writeHead(404, "That brand does not exist");
+// Helper method to process access token
+// var getValidTokenFromRequest = function(currentAccessToken) {
+//   if (currentAccessToken) {
+//     // Verify the access token to make sure its valid and not expired
+//     let currentAccessToken = accessTokens.find((accessToken) => {
+//       return accessToken.token == currentAccessToken.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+//     });
+//     if (currentAccessToken) {
+//       return currentAccessToken;
+//     } else {
+//       return null;
+//     }
+//   } else {
+//     return null;
+//   }
+// };
+
+// Only logged in users can access a specific store's issues if they have access
+myRouter.get('/api/me/cart', function(request,response) {
+  //confirm user is logged in
+  const tokenedUser = accessTokens.find(user => user.username == request.body.username);
+
+  //find user based on accessToken
+  const signedInUsername = tokenedUser.username;
+  const currentUser = users.find((user) => {
+    return user.login.username == signedInUsername
+  });
+
+  //if no user
+  if (!currentUser) {
+    response.writeHead(401, "User must be signed in to see cart");
     return response.end();
   }
+
+  //Check to see if cart is empty
+  let cart = currentUser.cart
+  if(cart.length == 0){
+    response.writeHead(404, "Sorry cart is empty, add something to see cart");
+    return response.end();
+  }
+
+  //return user's cart
   response.writeHead(200, { "Content-Type": "application/json" });
-  const relatedBrands = brands.filter(
-    brand => brand.id === id
-  );
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(relatedBrands));
+  return response.end(JSON.stringify(cart))
 });
 
 

@@ -90,10 +90,7 @@ describe('/POST login', () => {
       });
   });
   // it('it should NOT POST a token when user does NOT login in with a username or password', done => {
-  //   let login = [
-  //     {username: "greenlion235",
-  //     password: "waters"}
-  //   ]
+  //   let login = null
   //   chai
   //     .request(server)
   //     .post('/api/login')
@@ -104,3 +101,20 @@ describe('/POST login', () => {
   //     });
   // });
 });
+
+describe("/GET me/cart", () => {
+  it("should GET the cart of the logged in user's cart", done => {
+    // let login = {
+    //   username: "greenlion235",
+    //   password: "waters"
+    // }
+    // let ac
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+    });
+  });
