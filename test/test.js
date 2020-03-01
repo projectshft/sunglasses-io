@@ -154,5 +154,59 @@ describe('Brands', () => {
                   })
               })
             })
+
+            describe('/POST /api/me/cart/:productId', () => {
+                it('if a user is not logged in, they should not be allowed to add a product to their cart', done => {
+                  chai
+                    .request(server)
+                    .post('/api/me/cart/3')
+                    .end((error, response) => {
+                      response.should.have.status(408)
+                      response.body.should.be.an('object')
+                      done()
+                    })
+                })
+                it('it should not allow a logged in user to add a product to their cart if the product doesnt exist', done => {
+                  chai
+                    .request(server)
+                    .post('/api/me/cart/20')
+                    .set('test', accessToken)
+                    .end((error, response) => {
+                      response.should.have.status(409)
+                      response.body.should.be.an('object')
+                      done()
+                    })
+                })
+                it('it should allow a user to add a product their cart if they are logged in', done => {
+                  chai
+                    .request(server)
+                    .post('/api/me/cart/3')
+                    .set('test', accessToken)
+                    .end((error, response) => {
+                      response.should.have.status(200)
+                      response.body.should.be.an('array')
+                      cart = response.body
+                      response.body.should.have.deep.members([
+                        {
+                          quantity: 1,
+                          product: {
+                            productId: '3',
+                            brandId: '1',
+                            productName: 'Brown Sunglasses',
+                            description: 'The best glasses in the world',
+                            price: 50,
+                            imageUrls: [
+                              'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                              'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                              'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+                            ]
+                          }
+                        }
+                      ])
+            
+                      done()
+                    })
+                })
+              })
 });
 });
