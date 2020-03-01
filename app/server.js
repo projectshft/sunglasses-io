@@ -68,7 +68,7 @@ myRouter.get('/api/brands/:id/products', function(request,response) {
       response.writeHead(400, "Brand id is invalid")
       return response.end()
     } else if (brandList.length == 0) {
-      response.writeHead(400, "This brand does not exist")
+      response.writeHead(404, "This brand does not exist")
       return response.end()
     } else if (productsList.length == 0) {
       response.writeHead(404, "This brand currently has no products")
@@ -90,12 +90,19 @@ myRouter.get('/api/products', function(request,response) {
 });
 
 myRouter.post('/api/login', function(request,response) {
+    if(request.body.username == '' || request.body.password  == '') {
+      response.writeHead(400, "Username and password are required")
+      return response.end()
+    } else if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
     // Make sure there is a username and password in the request
-    if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
       // See if there is a user that has that username and password
       let user = users.find((user)=>{
         return user.login.username == request.body.username && user.login.password == request.body.password;
-      });
+    });
+      if (!user) {
+        response.writeHead(400, "Could not find username or password") 
+        return response.end()
+      }
 
       if (user) {
         // If we found a user, reset our counter of failed logins

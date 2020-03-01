@@ -78,7 +78,7 @@ describe('/GET products by brand ID', () => {
         .request(server)
         .get('/api/brands/6/products')
         .end((err, res) => {
-            res.should.have.status(400);
+            res.should.have.status(404);
             done();  
         })
     })
@@ -112,6 +112,7 @@ describe('/GET products', () => {
 //     })
 // })
 
+// positive test for user login endpoint
 describe('/POST login', () => {
     it('it should allow user to login', done => {
         let user = {
@@ -133,6 +134,44 @@ describe('/POST login', () => {
     })
 })
 
+// negative tests for user login endpoint 
+describe('/POST login', () => {
+    it('it should return an error if username or password is blank', done => {
+        let user = {
+            username: "",
+            password: "jonjon"
+        }
+        // act
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        // assert
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        })
+    })
+})
+
+describe('/POST login', () => {
+    it('it should return an error if username is not found', done => {
+        let user = {
+            username: "yellowleopard751",
+            password: "jonjon"
+        }
+        // act
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        // assert
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        })
+    })
+})
 
 describe('/GET /me/cart', () => {
     it('it should GET the cart status for the user', done => {
