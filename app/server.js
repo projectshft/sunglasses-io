@@ -211,7 +211,61 @@ myRouter.post('/api/login', (request, response) => {
   })
   //****************************************************************************/
   // POST api/me/cart
+  myRouter.post('/api/me/cart/:id', (request, response) => {
+    let currentAccessToken = getValidTokenFromRequest(request)
+    
+    if (!currentAccessToken) {
+      response.writeHead(
+        409,
+        'no access, log-in failed'
+      )
+      response.end()
+      return
+    } else {
+      // find user if logged in
+      let user = users.find(user => {
+        return user.login.username == currentAccessToken.username
+      })
   
+      //filter for the products with the appropriate product Id
+      let productToAdd = products.find(product => {
+          console.log(request.params)
+          console.log(product.id)
+        return product.id == request.params.id
+      })
+  
+      //see if the product in already in the cart by productId
+      let searchForProduct = user.cart.find(item => {
+        return item.product.id == request.params.id
+      })
+      //if there are no products with the brand Id, a 409 error should be thrown
+      if (!productToAdd) {
+        response.writeHead(409, 'not found')
+        response.end()
+        return
+      } else if (searchForProduct) {
+        // if the product is already in the cart, increase the quantity
+        searchForProduct.quantity += 1
+        response.writeHead(201, 'item already in the cart, increased quantity by 1')
+        response.end()
+        return
+      } else {
+        //if the product is not in the cart, create a new cartItem
+        let cartItem = {}
+        cartItem.quantity = 1
+        cartItem.product = productToAdd
+        user.cart.push(cartItem)
+        response.writeHead(
+          200,
+          Object.assign({
+            'Content-Type': 'application/json'
+          })
+        )
+        response.end(JSON.stringify(user.cart))
+        return
+      }
+    }
+  })
   
   
   
