@@ -221,14 +221,25 @@ myRouter.post("/api/me/cart", (request, response) => {
   
   //if post product is missing id, categoryId, name, or price
   let addedItem = request.body
+  //create a quantity key/value on the posted item
+  addedItem.quantity = 1
 	if (!addedItem.id || !addedItem.categoryId || !addedItem.name || !addedItem.price) {
 		response.writeHead(400);	
 		return response.end("Incorrectly formatted response. Must have id, categoryId, name & price.");
   }
-  
-  //push added item to cart
+
+  //does cart have item?
   cart = currentUser.cart
-  cart.push(addedItem)
+  const doesItemExistInCart = cart.find((item) => {
+    return item.id == addedItem.id
+  });
+
+  // if not push to cart and move on
+  if(!doesItemExistInCart){
+    cart.push(addedItem)
+  }else{
+    doesItemExistInCart.quantity ++
+  }
 
   //show in response the last item added user should go to cart to see full cart
   let lastAddedItem = cart[cart.length-1]
@@ -253,9 +264,15 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
     response.writeHead(404, "That item does not exist in user's cart");
     return response.end("That item does not exist in user's cart");
   }
-
-  //remove item from cart 
-  currentUser.cart = cart.filter((keepItem => keepItem.id != productId))
+  //if itemSelectedToDelete.quantity == 1 filter out
+  if(itemSelectedToDelete.quantity == 1){
+    //filter item out of the cart 
+    currentUser.cart = cart.filter((keepItem => keepItem.id != productId))
+  }else{
+    //subtract one from the quantity, but leave item in the cart
+    itemSelectedToDelete.quantity --
+  }
+  
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(itemSelectedToDelete));
 });

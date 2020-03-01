@@ -239,3 +239,42 @@ describe("/DELETE me/cart/:productId", () => {
     })
   });
 });
+
+// describe('/PUT book/:id', () => {
+//   it('it should UPDATE a book by the given id', done => {
+//       //arrange
+//       let item = {
+//         id: "2",
+//         categoryId: "1",
+//         name: "Black Sunglasses",
+//         price: 100,
+//       };
+//       //act
+//       chai
+//       .request(server)
+//       .post('/api/cart/me')
+//       .send(item)
+//       //assert
+//       .end((err, res) => {
+//         res.should.have.status(200);
+//         // Change the title to something else
+//         const changedBook = res.body
+//         changedBook.title = 'Harry Potter'
+//         chai
+//         .request(server)
+//         .put('/book/' + changedBook.id)
+//         .send(changedBook)
+//         .end((err, res) => {
+//           res.should.have.status(200);
+//           chai
+//           .request(server)
+//           .get('/book/'+ changedBook.id)
+//           .end((err, res) => {
+//             res.should.have.status(200);
+//             res.body.title.should.equal('Harry Potter');
+//           done();
+//         })
+//       })
+//     });
+//   });
+// });
