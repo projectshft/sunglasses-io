@@ -81,35 +81,42 @@ myRouter(request, response, finalHandler(request, response));
 });
 
 // Route for the brands 
-myRouter.get('/api/brands', function(request,response) {
-
+myRouter.get('/api/brands', function(request, response) {
+  if (brands.length === 0){
+    // change the error message 
+    response.writeHead(404, "Brands cannot be found") ;
+    return response.end(); 
+  }
   response.writeHead(200, {'Content-Type': 'application/json'})
-      return response.end(JSON.stringify(brands))
-
+  return response.end(JSON.stringify(brands))
   });
 
 myRouter.get("/api/brands/:id/products", (request, response) => {
     //filter for product list by category id(brand name)
     const productlistbybrand = products.filter((product) => {
        return product.categoryId == request.params.id;})
+
     if(productlistbybrand.length === 0 ) {
-        response.writeHead(404, "That brand cannot be found") ;
+        response.writeHead(404, "There are no products for this brand") ;
         return response.end(); 
     } 
       response.writeHead(200, {'Content-Type': 'application/json'})
-        return response.end(JSON.stringify(productlistbybrand));
+      return response.end(JSON.stringify(productlistbybrand));
     });
   
   // Route for the products 
-myRouter.get('/api/products', function(request,response) {
-
+myRouter.get('/api/products', function(request, response) {
+  if (products.length === 0){
+    response.writeHead(404, "Products cannot be found");
+    return response.end(); 
+  }
     response.writeHead(200, {'Content-Type': 'application/json'})
-        return response.end(JSON.stringify(products))
+    return response.end(JSON.stringify(products))
     
       });  
     
 // Route for the shopping cart
-myRouter.get('/api/me/cart', function(request,response) {
+myRouter.get('/api/me/cart', function(request, response) {
     //verifying token
     let currentAccessToken = getValidTokenFromRequest(request);
     //must login in to get cart
@@ -117,6 +124,8 @@ myRouter.get('/api/me/cart', function(request,response) {
         // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
         response.writeHead(401, "You need to log in to recieve cart information");
         return response.end();
+  
+
     }else{
         //search to see if username and password match
         let user = users.find((user)=>{
@@ -140,8 +149,7 @@ myRouter.post('/api/me/cart', function (request, response){
         let user = users.find((user)=>{
         return user.login.username == currentAccessToken.username
     });
-    // let product = request.body.product
-    // product[quantity] = 1 
+
     user.cart.push(request.body); 
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart))
@@ -195,7 +203,7 @@ myRouter.put('/api/me/cart/:productId', function (request, response){
 
     user.cart = cart; 
     
-  user.cart.push(request.body); 
+    user.cart.push(request.body); 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(cart))
 }
@@ -256,13 +264,18 @@ myRouter.post('/api/login', function(request,response) {
 
   // Route for the search by product name 
   myRouter.get('/api/search', function(request,response) {
+    
     var parsedUrl = require('url').parse(request.url, true);
   
       let searchResults = products.filter(product => {
         if( product.name.includes(parsedUrl.query.query) || product.description.includes(parsedUrl.query.query))
         return products
       })
-    
+      if(searchResults.length === 0 ) {
+        response.writeHead(404, "There is no product with that term in the name or description") ;
+        return response.end(); 
+    } 
+
     response.writeHead(200, {'Content-Type': 'application/json'})
         return response.end(JSON.stringify(searchResults))
     
