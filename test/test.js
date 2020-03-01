@@ -145,16 +145,18 @@ describe('Brands', () => {
             describe('/GET get cart', () => {
                 it('it should get the cart for a user after they log in', done => {
                   // log user in
-                  chai
-                    .request(server)
-                    .post('/api/login')
-                    .send({ username: 'greenlion235', password: 'waters' })
-                    .end((err, res) => {
-                      // get user's cart
+                  
+                    let user = { username: 'greenlion235', password: 'waters' }
+                    
                       chai
                         .request(server)
-                        .get(`/api/me/cart?token=${res.body.token}`)
+                        .post('/api/login')
+                        .send(user)
                         .end((err, res) => {
+                            chai
+                            .request(server)
+                            .get(`/api/me/cart?token=${res.body.token}`)
+                            .end((err, res) => {
                           res.should.have.status(200);
                           res.body.should.be.a('array');
                           res.body.length.should.be.eql(0);
@@ -163,7 +165,7 @@ describe('Brands', () => {
                     });
                 })
               });
-
+    })
 
             // describe('GET/api/me/cart', () => {
             //   it('it should let user access cart if valid access token', done => {
@@ -239,5 +241,5 @@ describe('Brands', () => {
                     })
                 })
               })
-});
+
 });

@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  title: Sunglasses.io
+  title: Sunglasses API
   description: API to support Sunglasses.io 
   version: 1.0.0
 host: localhost:3001
@@ -10,11 +10,11 @@ basePath: /api
 produces:
   - application/json
 paths:
-  /brands:
+  /api/brands:
     get:
       summary: Brands
       description: |
-        The Brands endpoint allows a user to see all products of a certain brand
+        Brands endpoint allows to see all brands in Sunglasses.io
       tags:
         - Brands
       responses:
@@ -25,40 +25,180 @@ paths:
             items:
               $ref: '#/definitions/Brand'
         '404':
-          description: 'No brand that name has been found.'
+          description: 'No brands found.'
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Error'
-  /brands/:id/products:
+            type: string
+  '/api/brands/:id/products':
     get:
-      summary: Brands/:id/products
-      description: |
-        Returns all products matching product ID
+      summary: Products by Brand Id
+      description: This endput allows the user to click on a brand and see the appropriate products
       tags:
         - Brands
-      responses:
-        '200':
-          description: Retrieved products by brand ID
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Products'
-  /brands/products:
-    get:
-      summary: Products
-      description: returns all products in database
-      tags:
-        - Products
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand to see products
+          required: true
+          type: string
       responses:
         '200':
           description: Success
           schema:
-            $ref: '#/definitions/Products'
+            $ref: '#/definitions/Brand'
         '404':
-          description: ''
+          description: 'Brand not found with given ID'
           schema:
-            type: string      
+            type: string
+  /api/products:
+    get:
+      summary: Product Search
+      description: Products endpoint display all the products in Sunglasses.io
+      tags:
+        - Product Search
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/Product'
+        '402':
+          description: 'Please enter the name of the product you are searching for.'
+          schema:
+            type: string
+        '403':
+          description: 'The product does not exist'
+          schema:
+            type: string
+  /api/login:
+    post:
+      summary: User Login
+      description: Log-in endpoint for user to access data from their cart
+      tags:
+        - Login
+      parameters:
+        - name: username
+          in: path
+          description: username
+          required: true
+          type: string
+        - name: password
+          in: path
+          description: user's  password
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '405':
+          description: 'incorrect username and password.'
+          schema:
+            type: string
+        '406':
+          description: 'Invalid username or password.'
+          schema:
+            type: string
+  '/api/me/cart':
+    get:
+      summary: User's Cart
+      description: This endpoint allows a user to access their cart.
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: 'Access not authorized - need to be logged-in.'
+          schema:
+            type: string
+    post:
+      summary: Change product quantity
+      description: This endpoint allows logged user to edit quantity of product in the cart
+      tags:
+        - Cart
+      parameters:
+        - name: quantity
+          in: path
+          description: Quantity to change 
+          required: true
+          type: integer
+        - name: Id
+          in: path
+          description: Id of the product to modify
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '410':
+          description: 'ID doesnt match products in the shopping cart.'
+          schema:
+            type: string
+        '411':
+          description: 'missing ID or quantity in request.'
+          schema:
+            type: string
+        '400':
+          description: 'Access not authorized - need to be logged-in.'
+          schema:
+            type: string
+  '/api/me/cart/:id':
+    post:
+      summary: Add Product to Cart
+      description: This endpoint allows logged user's add products to shopping cart
+      tags:
+        - Cart
+      parameters:
+        - name: Id
+          in: path
+          description: The id of the product in the cart
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '201':
+          description: 'product matching ID in cart already, increased quantity +1.'
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: 'Access not authorized - need to be logged-in.'
+          schema:
+            type: string
+        '405':
+          description: 'Product not found, no matching Id.'
+          schema:
+            type: string
+    delete:
+      summary: Delete Product in Cart
+      description: The end point allows a user to delete products from their cart
+      tags:
+        - Cart
+      parameters:
+        - name: Id
+          in: path
+          description:  Id of the product in the cart
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Success
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: 'Access not authorized - need to be logged-in.'
+          schema:
+            type: string
+        '410':
+          description: 'ID doesnt match products in the shopping cart.'
+          schema:
+            type: string
   
 definitions:
   Brand:
@@ -66,30 +206,46 @@ definitions:
     properties:
       brandId:
         type: string
-        description: name of the brand producing this product.
+        description: Unique Id for the brand.
       products:
         type: array
         items:
           type: object
-        description: all the products from this brand.
-  Products:
+        description: All of the given brand's products
+  Product:
     type: object
     properties:
+      productId:
+        type: string
+        description: Id given to the product
       brandId:
         type: string
-        description: name of the product.
-      products:
+        description: Id of the brand the product belong's to
+      productName:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: string
+        description: Price of the product
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: Url of the main image
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username 
+      password:
+        type: string
+        description: Password 
+      cart:
         type: array
         items:
           type: object
-        description: all the products by this search.
-  Error:
-    type: object
-    properties:
-      code:
-        type: integer
-        format: int32
-      message:
-        type: string
-      fields:
-        type: string
+          description: products in the user cart

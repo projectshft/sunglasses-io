@@ -95,7 +95,7 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
         return brand.id === request.params.id;
     });
     if (!findBrandId) {
-        response.writeHead(404, 'Brand not found with this ID', {
+        response.writeHead(404, 'Brand not found with given ID', {
             "Content-Type": "application/json"
         });
         response.end();
@@ -172,7 +172,7 @@ myRouter.post('/api/login', (request, response) => {
         }
     } else {
         //if there was no username or password in the request, throw a 405
-        response.writeHead(405, 'You must enter your username and password.')
+        response.writeHead(405, 'incorrect username and password.')
         response.end()
         return
     }
@@ -182,7 +182,7 @@ myRouter.post('/api/login', (request, response) => {
 myRouter.get('/api/me/cart', (request, response) => {
     let currentAccessToken = getValidTokenFromRequest(request)
     if (!currentAccessToken) {
-        response.writeHead(400, 'Access not authorized')
+        response.writeHead(400, 'Access not authorized - need to be logged in')
         response.end()
         return
     } else {
@@ -208,7 +208,7 @@ myRouter.post('/api/me/cart/:id', (request, response) => {
 
     if (!currentAccessToken) {
         response.writeHead(
-            409,
+            400,
             'no access, log-in failed'
         )
         response.end()
@@ -231,7 +231,7 @@ myRouter.post('/api/me/cart/:id', (request, response) => {
         })
         //if not matching ID found in the cart
         if (!toAdd) {
-            response.writeHead(410, 'not found')
+            response.writeHead(405, 'Product not found, no matching Id')
             response.end()
             return
         } else if (findProduct) {
@@ -265,8 +265,8 @@ myRouter.delete('/api/me/cart/:id', (request, response) => {
     //if not logged in trow error
     if (!currentAccessToken) {
         response.writeHead(
-            409,
-            'no access, log-in failed'
+            400,
+            'Access not authorized - need to be logged-in'
         )
         response.end()
         return
@@ -318,8 +318,8 @@ myRouter.post('/api/me/cart', (request, response) => {
     //if not logged in trow error
     if (!currentAccessToken) {
         response.writeHead(
-            409,
-            'no access, log-in failed'
+            400,
+            'Access not authorized - need to be logged-in'
         )
         response.end()
         return
