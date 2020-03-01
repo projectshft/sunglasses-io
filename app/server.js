@@ -93,16 +93,13 @@ myRouter.post('/api/login', function(request,response) {
     if(request.body.username == '' || request.body.password  == '') {
       response.writeHead(400, "Username and password are required")
       return response.end()
+
     } else if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
     // Make sure there is a username and password in the request
       // See if there is a user that has that username and password
       let user = users.find((user)=>{
         return user.login.username == request.body.username && user.login.password == request.body.password;
     });
-      if (!user) {
-        response.writeHead(400, "Could not find username or password") 
-        return response.end()
-      }
 
       if (user) {
         // If we found a user, reset our counter of failed logins
@@ -200,7 +197,6 @@ myRouter.post('/api/me/cart', function(request,response) {
       response.writeHead(401, "You need to have access to this call to continue",);
       return response.end();
     } else {
-
        let user =  users.find((user)=>{
         return user.login.username == currentAccessToken.username
        })
@@ -208,11 +204,25 @@ myRouter.post('/api/me/cart', function(request,response) {
        let product = request.body.product;
        product['quantity'] = 1;
 
-       user.cart.push(product);
+        let foundProduct = products.filter((p)=> {
+          return p.id == product.id
+        })
 
-       response.writeHead(200, { "Content-Type": "application/json" });
-       return response.end(JSON.stringify(user.cart));
+        let repeatProduct = user.cart.find((p)=> {
+          return p.id == product.id
+        })
 
+           if (foundProduct.length == 0) {
+            response.writeHead(404, "This product doesn't exist");
+            return response.end();
+          } else if (repeatProduct) {
+            response.writeHead(404, "Product is already in cart")
+            return response.end()
+          } else {
+            user.cart.push(product);
+            response.writeHead(200, { "Content-Type": "application/json" });
+            return response.end(JSON.stringify(user.cart));
+        }
     }
 });
 

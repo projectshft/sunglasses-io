@@ -155,7 +155,7 @@ describe('/POST login', () => {
 })
 
 describe('/POST login', () => {
-    it('it should return an error if username is not found', done => {
+    it('it should return an error if username or password is incorrect', done => {
         let user = {
             username: "yellowleopard751",
             password: "jonjon"
@@ -167,39 +167,46 @@ describe('/POST login', () => {
         .send(user)
         // assert
         .end((err, res) => {
-            res.should.have.status(400);
+            res.should.have.status(401);
             done();
         })
     })
 })
 
-describe('/GET /me/cart', () => {
-    it('it should GET the cart status for the user', done => {
-
+describe('/POST login', () => {
+    it('it should return a 400 error on 4th login attempt with incorrect credentials', done => {
         let user = {
-            username: "yellowleopard753",
+            username: "yellowleopard751",
             password: "jonjon"
         }
+        // act
         chai
         .request(server)
         .post('/api/login')
         .send(user)
+        // assert
         .end((err, res) => {
-            res.should.have.status(200);
+            res.should.have.status(401);
             chai
             .request(server)
-            .get('/api/me/cart')
-            .send({token: res.body})
+            .post('/api/login')
+            .send(user)
             .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                res.body.length.should.be.eql(0);
+                res.should.have.status(401);
+                chai
+                .request(server)
+                .post('/api/login')
+                .send(user)
+                .end((err, res) => {
+                res.should.have.status(400);
                 done();
+                })
             })
         })
     })
 })
 
+// positive test for user cart status endpoint 
 describe('/POST /me/cart', () => {
     it('it should POST new item to users cart', done => {
         //arrange
@@ -237,21 +244,16 @@ describe('/POST /me/cart', () => {
     })
 })
 
-describe('/DELETE me/cart/:productId', () => {
-    it('it should DELETE an item from the users cart', done => {
-        // arrange
-        
+// negative test for adding to user cart endpoint
+describe('/POST /me/cart', () => {
+    it('it should return an error if the item being added does not exist', done => {
+        //arrange
         let user = {
             username: "yellowleopard753",
             password: "jonjon"
         }
         let product = {
-            "id": "10",
-            "categoryId": "5",
-            "name": "Peanut Butter",
-            "description": "The stickiest glasses in the world",
-            "price":103,
-            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+            "id": "100",
         }
         //act
         chai
@@ -266,24 +268,15 @@ describe('/DELETE me/cart/:productId', () => {
             .post('/api/me/cart')
             .send({product: product, token: token})
             .end((err, res) => {
-                res.should.have.status(200);
-                chai
-                .request(server)
-                .delete('/api/me/cart/10')
-                .send({token: token})
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.an('array');
-                    res.body.length.should.be.eql(0);
-                    done();
-                })
-            })
+                res.should.have.status(404);
+                done();
+            })    
         })
     })
 })
 
-describe('/PUT me/cart/:productId', () => {
-    it('it should update a book by the given id', done => {
+describe('/POST /me/cart', () => {
+    it('it should return an error if the item being added is already in the cart', done => {
         //arrange
         let user = {
             username: "yellowleopard753",
@@ -310,6 +303,86 @@ describe('/PUT me/cart/:productId', () => {
             .post('/api/me/cart')
             .send({product: product, token: token})
             .end((err, res) => {
+                res.should.have.status(404)
+                done()
+            })    
+        })
+    })
+})
+// positive test for delete endpoint
+describe('/DELETE me/cart/:productId', () => {
+    it('it should DELETE an item from the users cart', done => {
+        // arrange
+        
+        let user = {
+            username: "yellowleopard753",
+            password: "jonjon"
+        }
+        let product = {
+            "id": "9",
+            "categoryId": "4",
+            "name": "Sugar",
+            "description": "The sweetest glasses in the world",
+            "price":125,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        //act
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            let token = res.body
+            res.should.have.status(200);
+            chai
+            .request(server)
+            .post('/api/me/cart')
+            .send({product: product, token: token})
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai
+                .request(server)
+                .delete('/api/me/cart/10')
+                .send({token: token})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    res.body.length.should.be.eql(1);
+                    done();
+                })
+            })
+        })
+    })
+})
+
+describe('/PUT me/cart/:productId', () => {
+    it('it should update a product by the given id', done => {
+        //arrange
+        let user = {
+            username: "yellowleopard753",
+            password: "jonjon"
+        }
+        let product = {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        //act
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            let token = res.body
+            res.should.have.status(200);
+            chai
+            .request(server)
+            .post('/api/me/cart')
+            .send({product: product, token: token})
+            .end((err, res) => {
                 res.should.have.status(200);
                 chai
                 .request(server)
@@ -318,7 +391,7 @@ describe('/PUT me/cart/:productId', () => {
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an('array');
-                    res.body.length.should.be.eql(1);
+                    res.body.length.should.be.eql(2);
                     done();
                 })
             })
