@@ -147,4 +147,95 @@ describe("/POST me/cart", () => {
         done();
       });
     });
+    it("it should NOT POST a product to a user's cart is there is no id", done => {
+      let product = {
+        id: null,
+        categoryId: "1",
+        name: "Black Sunglasses",
+        price: 100,
+    }
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    })
+    it("it should NOT POST a product to a user's cart is there is no categoryId", done => {
+      let product = {
+        id: "2",
+        categoryId: null,
+        name: "Black Sunglasses",
+        price: 100,
+    }
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    })
+    it("it should NOT POST a product to a user's cart is there is no name", done => {
+      let product = {
+        id: "2",
+        categoryId: "1",
+        name: null,
+        price: 100,
+    }
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    })
+    it("it should NOT POST a product to a user's cart is there is no price", done => {
+      let product = {
+        id: "2",
+        categoryId: "1",
+        name: "Black Sunglasses",
+        price: null,
+    }
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    })
+});
+
+describe("/DELETE me/cart/:productId", () => {
+  it("should DELETE all products from cart that equal the productId number", done => {
+    let product = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      price: 100,
+    }
+    chai.request(server)
+    .post('/api/me/cart')
+    .send(product)
+    .end((err, res) => {
+      res.should.have.status(200)
+      chai
+      .request(server)
+      .delete("/api/me/cart/2")
+      .end((err, res) => {
+          expect("Content-Type", "application/json");
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.id.should.be.eql('2');
+          done();
+      });
+    })
+  });
 });

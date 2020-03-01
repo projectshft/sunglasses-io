@@ -29,7 +29,7 @@ let failedLoginAttempts = {};
  //   lastAttempt: <A valid date>,
  //   count: 0
  // }
-
+let cart = [];
 
 // Setup router
 const myRouter = Router();
@@ -194,7 +194,7 @@ myRouter.get('/api/me/cart', function(request,response) {
   }
 
   //Check to see if cart is empty
-  let cart = currentUser.cart
+  cart = currentUser.cart
   if(cart.length == 0){
     response.writeHead(404, "Sorry cart is empty, add something to see cart");
     return response.end();
@@ -218,30 +218,46 @@ myRouter.post("/api/me/cart", (request, response) => {
     response.writeHead(401, "User must be signed in to add to your cart");
     return response.end();
   }
+  
+  //if post product is missing id, categoryId, name, or price
   let addedItem = request.body
-	if (!addedItem.id) {
-		response.writeHead(404);	
-		return response.end("Cannot post without an id");
+	if (!addedItem.id || !addedItem.categoryId || !addedItem.name || !addedItem.price) {
+		response.writeHead(400);	
+		return response.end("Incorrectly formatted response. Must have id, categoryId, name & price.");
   }
-  if (!addedItem.categoryId) {
-		response.writeHead(404);	
-		return response.end("Cannot post without a categoryId");
-  }
-  if (!addedItem.name) {
-		response.writeHead(404);	
-		return response.end("Cannot post without a name");
-  }
-  if (!addedItem.price) {
-		response.writeHead(404);	
-		return response.end("Cannot post without a price");
-  }
-  let cart = currentUser.cart
+  
+  //push added item to cart
+  cart = currentUser.cart
   cart.push(addedItem)
+
+  //show in response the last item added user should go to cart to see full cart
   let lastAddedItem = cart[cart.length-1]
 
-	// Return success with added book
+	// Return success with last added item 
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(lastAddedItem));
+});
+
+// //GET all products of a particular brand
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+  //find current user's cart
+  const signedInUsername = accessTokens[0].username;
+  const currentUser = users.find((user) => {
+    return user.login.username == signedInUsername
+  });
+  cart = currentUser.cart
+
+  const { productId } = request.params;
+  const itemSelectedToDelete = cart.find(item => item.id == productId);
+  if (!itemSelectedToDelete) {
+    response.writeHead(404, "That item does not exist in user's cart");
+    return response.end("That item does not exist in user's cart");
+  }
+
+  //remove item from cart 
+  currentUser.cart = cart.filter((keepItem => keepItem.id != productId))
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(itemSelectedToDelete));
 });
 
 module.exports = server;

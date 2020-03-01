@@ -7,6 +7,20 @@
     "password": "tucker"
 }
 
+
+{
+    "id": "2",
+    "categoryId": "1",
+    "name": "Black Sunglasses",
+    "price": 100
+}
+{
+    "id": "4",
+    "categoryId": "2",
+    "name": "Better glasses",
+    "price": 1500
+}
+
 {
     "id": "2",
     "categoryId": "1",
@@ -18,10 +32,4 @@
         "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
         "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
     ]
-}
-{
-    "id": "2",
-    "categoryId": "1",
-    "name": "Black Sunglasses",
-    "price": 100
 }
