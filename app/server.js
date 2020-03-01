@@ -45,7 +45,7 @@ const server = http.createServer(function (request, response) {
 
 myRouter.get('/api/brands', function (request, response) {
     // Return all the brands in the brands json file
-    response.writeHead(200, {
+    response.writeHead(200, ('Success'),  {
         "Content-Type": "application/json"
     });
     return response.end(JSON.stringify(brands));
@@ -57,7 +57,8 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
     let matchingProduct = products.filter((product) => {
         return product.categoryId === request.params.id
     })
-    response.writeHead(200, {
+
+    response.writeHead(200, ('Success'), {
         "Content-Type": "application/json"
     });
     return response.end(JSON.stringify(matchingProduct));

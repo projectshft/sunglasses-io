@@ -26,7 +26,7 @@ describe('Brands', () => {
     })
 
     describe('/GET /api/brands/:id/products', () => {
-        it('it should get all the products associated with that brand id', done => {
+        it('it should GET all the products associated with that brand id', done => {
             chai
                 .request(server)
                 .get('/api/brands/1/products')
@@ -38,6 +38,18 @@ describe('Brands', () => {
                     res.body[0].name.should.be.eql('Superglasses');
                     res.body[1].name.should.be.eql('Black Sunglasses');
                     res.body[2].name.should.be.eql('Brown Sunglasses');
+                    done();
+                })
+        })
+        //We want to to return 404 because it the ID may not be there now but could eventually exist in the future
+        it('it should return a status of 404 if the categoryID was not found', done => {
+            chai
+                .request(server)
+                .get('/api/brands/6//products')
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    res.text.should.be.a('string');
+                    res.text.should.be.equal('Error 404: CategoryID was not found')
                     done();
                 })
         })
