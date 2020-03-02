@@ -93,6 +93,7 @@ myRouter.get('/api/brands', function(request, response) {
   return response.end(JSON.stringify(brands))
   });
 
+//Route for getting products by brand Id
 myRouter.get("/api/brands/:id/products", (request, response) => {
     //filter for product list by category id(brand name)
     const productListByBrand = products.filter((product) => {
@@ -166,7 +167,7 @@ myRouter.post('/api/login', function(request,response) {
   }
 });
     
-// Route for the shopping cart
+// Route for getting the shopping cart
 myRouter.get('/api/me/cart', function(request, response) {
     //verifying token
     let currentAccessToken = getValidTokenFromRequest(request);
@@ -187,6 +188,7 @@ myRouter.get('/api/me/cart', function(request, response) {
    }
 });
 
+//Route for updating the cart 
 myRouter.post('/api/me/cart', function (request, response){
 
     let currentAccessToken = getValidTokenFromRequest(request);
@@ -208,7 +210,7 @@ myRouter.post('/api/me/cart', function (request, response){
 });
 
 
-
+//Route for deleting an item for Id in the cart 
 myRouter.delete ('/api/me/cart/:productId', function (request, response){
     
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -231,11 +233,9 @@ myRouter.delete ('/api/me/cart/:productId', function (request, response){
     return response.end(JSON.stringify(cart))
 } ;
 
-// } else {
-//   response.writeHead(404, "That product cannot be found. Check to make sure productId is correct and product is in the cart");
-//   return response.end();
 });
 
+//Route for updating quantity of product in cart by product Id
 myRouter.post('/api/me/cart/:productId', function (request, response){
   let currentAccessToken = getValidTokenFromRequest(request);
 
@@ -261,20 +261,17 @@ myRouter.post('/api/me/cart/:productId', function (request, response){
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(cart)) 
       
-   // } else {
-      //   response.writeHead(404, "That product cannot be found. Check to make sure productId is correct and product is in the cart");
-      //   return response.end();    // }
-  
 }
 })
 
 
-  // Route for the search by product name 
+  // Route for the search by product name or description
   myRouter.get('/api/search', function(request,response) {
     
     var parsedUrl = require('url').parse(request.url, true);
       
-      let searchResults = products.filter(product => {
+      let searchResults = products.filter(product => {\
+        //converts to lowercase 
         if(product.name.toLowerCase().includes(parsedUrl.query.query.toLowerCase()) || product.description.toLowerCase().includes(parsedUrl.query.query.toLowerCase()))
         return products
       })
