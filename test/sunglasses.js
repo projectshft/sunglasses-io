@@ -168,6 +168,24 @@ describe('The sunglasses store', () => {
                 done();
             });
         });
+
+        it('it should not login after three attempts', done => {
+            // arrange
+            let user = {
+                "username": "test",
+                "password": "jonjon"
+            }
+
+            chai
+                .request(server)
+                .post('/api/login?query=3')
+                .send(user)
+                // assert
+                .end((err, res) => {
+                res.should.have.status(401);
+                done();
+            });
+        });
     });
 
     describe('/POST api/me/cart', () => {

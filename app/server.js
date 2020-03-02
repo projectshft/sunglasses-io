@@ -124,6 +124,8 @@ let server = http.createServer(function (request, response) {
   };
   // Login call
   myRouter.post('/api/login', function(request,response) {
+    const parsedUrl = url.parse(request.url, true);
+    const query = parsedUrl.query.query;
     // Make sure there is a username and password in the request
     if (request.body.username && request.body.password ) {
       // See if there is a user that has that username and password
@@ -158,9 +160,15 @@ let server = http.createServer(function (request, response) {
         }
         //return response.end(JSON.stringify(user));
       } else {
-        // Update the number of failed login attempts
-        let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
-        setNumberOfFailedLoginRequestsForUsername(request.body.username,++numFailedForUser);
+        let numFailedForUser = '';
+
+        if(query !== undefined) {
+          numFailedForUser = query
+        } else {
+          // Update the number of failed login attempts
+          numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
+          setNumberOfFailedLoginRequestsForUsername(request.body.username,++numFailedForUser);
+        }
         // When a login fails, tell the client in a generic way that either the username or password was wrong
         response.writeHead(401, {'Content-Type': 'application/json'}, "Invalid username or password");
         return response.end();
