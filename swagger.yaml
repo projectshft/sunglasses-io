@@ -1,0 +1,405 @@
+swagger: "2.0"
+info:
+  description: "An API to support the sunglasses platform"
+  version: "1.0.0"
+  title: "SUNGLASSES API"
+host: "localhost3001"
+basePath: "/api"
+schemes:
+- "https"
+produces:
+- "application/json"
+paths:
+  /brands:
+    get:
+      tags:
+      - "Brands"
+      summary: "Brands"
+      description: "The Brands endpoint will return back to you the brands in the\
+        \ sunglasses api.\n"
+      operationId: "brandsGET"
+      parameters:
+      - name: "query"
+        in: "query"
+        description: "Search brand query string"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "An array of goals"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        "404":
+          description: "Cannot find query search for that brand."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Brands"
+  /brands/{id}/products:
+    get:
+      tags:
+      - "Brands"
+      summary: "Brands of a particular product"
+      description: "One brand of a particular of the products"
+      operationId: "brandsIdProductsGET"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The id of the product to search for brands in."
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "An array of a barnd of a particular product"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        "404":
+          description: "Cannot find query search for that particular brand"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Brands"
+  /products:
+    get:
+      tags:
+      - "Products"
+      summary: "Products"
+      description: "Products define groupings of brands for browsing."
+      operationId: "productsGET"
+      parameters:
+      - name: "limit"
+        in: "query"
+        description: "The number of results to limit the search to"
+        required: false
+        type: "number"
+        format: "int32"
+      responses:
+        "200":
+          description: "An array of categories"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: "Cannot find query search for that particular brand"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Products"
+  /login:
+    post:
+      tags:
+      - "Login"
+      summary: "Login"
+      description: "Login for a user."
+      operationId: "loginPOST"
+      parameters:
+      - in: "body"
+        name: "login"
+        description: "The login for the user requires username and password and returns\
+          \ a token."
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: "An array of categories"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Login"
+        "404":
+          description: "Cannot find query search for that particular brand"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Login"
+  /me/cart:
+    get:
+      tags:
+      - "Cart"
+      summary: "User Cart"
+      description: "The User Cart endpoint returns logged in user's cart."
+      operationId: "meCartGET"
+      parameters: []
+      responses:
+        "200":
+          description: "Profile information for a user"
+          schema:
+            $ref: "#/definitions/Cart"
+        "401":
+          description: "Must be logged in to view cart."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        "404":
+          description: "Cart is empty, must add something to see cart."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+    post:
+      tags:
+      - "Cart"
+      summary: "Post Item to Cart"
+      description: "This endpoint allows you post an item to the user's cart"
+      operationId: "meCartPOST"
+      parameters:
+      - in: "body"
+        name: "item"
+        description: "Id, categoryId, name, and price are required to post."
+        required: true
+        schema:
+          $ref: "#/definitions/Product"
+      responses:
+        "200":
+          description: "Item added to cart"
+          schema:
+            $ref: "#/definitions/Item"
+        "400":
+          description: "Incorrectly formatted response. Must have id, categoryId,\
+            \ name, and price of product."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+  /me/cart/{productId}:
+    post:
+      tags:
+      - "User"
+      summary: "Change the quantity of an item in cart."
+      description: "This endpoint allows user to change the quantity of an item in\
+        \ their cart."
+      operationId: "meCartProductIdPOST"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "The id of the goal to achieve"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "item"
+        description: "Id, categoryId, name, and price are required to post."
+        required: true
+        schema:
+          $ref: "#/definitions/Item"
+      responses:
+        "200":
+          description: "Item added to cart"
+          schema:
+            $ref: "#/definitions/Item"
+        "400":
+          description: "Incorrectly formatted response. Must have id, categoryId,\
+            \ name, price, and quantity of product."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "User"
+    delete:
+      tags:
+      - "User"
+      summary: "Achieve a Goal"
+      description: "The delete endpoint will allow user to delete one item from the\
+        \ cart by selected product id."
+      operationId: "meCartProductIdDELETE"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "The id of the product trying to delete"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "item"
+        description: "Id, categoryId, name, price, and new quantity are required to\
+          \ post."
+        required: true
+        schema:
+          $ref: "#/definitions/Item"
+      responses:
+        "200":
+          description: "Item added to cart"
+          schema:
+            $ref: "#/definitions/Item"
+        "404":
+          description: "Item does not exist in user's cart."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Error"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "User"
+definitions:
+  Brand:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Unique identifier for a brand."
+      name:
+        type: "string"
+        description: "The id of the product this brand belongs to."
+    example:
+      name: "name"
+      id: "id"
+  Product:
+    type: "object"
+    required:
+    - "categoryId"
+    - "id"
+    - "name"
+    - "price"
+    properties:
+      id:
+        type: "string"
+        description: "The unique identifier given to the product."
+      categoryId:
+        type: "string"
+        description: "The id of the brand this product belongs to."
+      name:
+        type: "string"
+        description: "The name of the product."
+      description:
+        type: "string"
+        description: "The description of the given product."
+      price:
+        type: "number"
+        description: "The price for one of the given product."
+      imageUrls:
+        type: "array"
+        items:
+          type: "string"
+          description: "URL links to images of the product."
+    example:
+      price: 0.80082819046101150206595775671303272247314453125
+      imageUrls:
+      - "imageUrls"
+      - "imageUrls"
+      name: "name"
+      description: "description"
+      id: "id"
+      categoryId: "categoryId"
+  Item:
+    type: "object"
+    required:
+    - "categoryId"
+    - "id"
+    - "name"
+    - "price"
+    - "quantity"
+    properties:
+      id:
+        type: "string"
+        description: "The unique identifier given to the product."
+      categoryId:
+        type: "string"
+        description: "The id of the brand this product belongs to."
+      name:
+        type: "string"
+        description: "The name of the product."
+      price:
+        type: "number"
+        description: "The price for one of the given product."
+      quantity:
+        type: "string"
+        description: "The quantity of the given product."
+    example:
+      quantity: "quantity"
+      price: 0.80082819046101150206595775671303272247314453125
+      name: "name"
+      id: "id"
+      categoryId: "categoryId"
+  Login:
+    type: "string"
+    description: "The token returned from user log in."
+  User:
+    type: "object"
+    required:
+    - "password"
+    - "username"
+    properties:
+      username:
+        type: "string"
+        description: "The username of the user."
+      password:
+        type: "string"
+        description: "The password of the user."
+    description: "Token given to logged in user."
+  Cart:
+    type: "array"
+    items:
+      $ref: "#/definitions/Cart_inner"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
+  Cart_inner:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "The unique identifier given to the product."
+      categoryId:
+        type: "string"
+        description: "The id of the brand this product belongs to."
+      name:
+        type: "string"
+        description: "The name of the product."
+      description:
+        type: "string"
+        description: "The description of the given product."
+      price:
+        type: "number"
+        description: "The price for one of the given product."
+      quantity:
+        type: "number"
+        description: "The price for one of the given product."
+    description: "The cart of the user."
