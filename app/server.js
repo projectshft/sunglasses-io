@@ -8,29 +8,33 @@ var uid = require('rand-token').uid;
 var url = require('url')
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let should = chai.should();
 
 chai.use(chaiHttp);
-
-
 const PORT = 3001;
 
-//  helper functions & variables  ************************
-
+//  helper functions & variables  ***********************
 let brands = [];
-let accessTokens = [];
+
+// accessToken has values so it could be tested in test.js, otherwise it would be empty
+let accessTokens = [{
+    username: "fakeUser123",
+    lastUpdated: new Date(),
+    token: "abc1234"
+}];
 
 // A variable to limit validity of access tokens to 30 minutes
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+
 // helper function - validate tokens
 var getValidTokenFromRequest = function (request) {
     var parsedUrl = require('url').parse(request.url, true)
+    console.log(parsedUrl)
     if (parsedUrl.query.accessToken) {
         // Verify the access token to make sure its valid and not expired
         let currentAccessToken = accessTokens.find((accessToken) => {
             return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
-        console.log(currentAccessToken)
+    
         if (currentAccessToken) {
             return currentAccessToken;
         } else {
@@ -120,6 +124,7 @@ myRouter.get('/api/products', function(request, response) {
     let matchingProduct = products.filter((product) => {
         return product.name == queryTerm;    
     });
+    
     if (matchingProduct.length == 0) {  
         response.writeHead(402, 'Missing name of the product you are searching for');
         response.end();
@@ -229,7 +234,6 @@ myRouter.post('/api/me/cart/:id', (request, response) => {
 
         //find product using its id
         let toAdd = products.find(product => {
-
             return product.id == request.params.id
         })
 
@@ -245,8 +249,10 @@ myRouter.post('/api/me/cart/:id', (request, response) => {
         } else if (findProduct) {
             // if the product is already in the cart, increase the quantity
             findProduct.quantity++
-            response.writeHead(201, 'product matching ID in cart already, increased quantity +1')
-            response.end()
+            response.writeHead(201, Object.assign({
+                'Content-Type': 'application/json'
+            }))
+            response.end(JSON.stringify(user.cart))
             return
         } else {
             //for new product create new cartItem
