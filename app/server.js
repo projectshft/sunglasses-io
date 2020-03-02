@@ -160,7 +160,7 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
       }
     } else if (getNumberOfFailedLoginRequestsForUsername(request.body.username) >= 3) {
       response.writeHead(400, {'Content-Type': 'application/json'});
-      return response.end("Three incorrect login attempts");
+      return response.end("More than three incorrect login attempts");
     } else {
       // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
       response.writeHead(400, {'Content-Type': 'application/json'});

@@ -83,7 +83,7 @@ paths:
               type: string
               description: access token give user access for fifteen minutes. Timer is reset after user activity. 
           '400':
-            description: Incorrectly formatted response
+            description: Incorrectly formatted response or more than three incorrect login attempts
           '401':
             description:
               Incorrect username or password
@@ -132,7 +132,7 @@ paths:
             items:
               $ref: "#/definitions/User/properties/cart"
         '401':
-          description: You need to have access to this call to continue
+          description: Item does not exist or the item is already in the user's cart.
     
     delete: 
       summary: Remove cart item
@@ -154,7 +154,7 @@ paths:
             items:
               $ref: "#/definitions/User/properties/cart"
         '401':
-          description: You need to have access to this call to continue
+          description: Item cannot be deleted because it is not in the user's cart.
             
     put:
       summary: Increment item quantity
@@ -176,7 +176,22 @@ paths:
             items:
               $ref: "#/definitions/Product"
         '401':
-          description: You need to have access to this call to continue
+          description: Item cannot be incremented because it is not in the user's cart
+  /api/search:
+    get:
+      summary: Products
+      description: Return all sunglass products that match the user's search query
+      tags: 
+        - Products
+      responses:
+        '200':
+          description: An array of products objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "401":
+          description: User entereed a multi-word search term or no items match the search term
             
 definitions: 
   Brand:
@@ -210,6 +225,7 @@ definitions:
         imageUrls:
           type: string
           description: Three image urls for images of the product.
+  
   User: 
       type: object
       properties:
