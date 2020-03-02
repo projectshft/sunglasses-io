@@ -110,6 +110,7 @@ describe("/GET me/cart", () => {
         .get('/api/me/cart')
         .end((err, res) => {
           res.should.have.status(200);
+          res.body.should.be.an('array');
           done();
       });
     });
