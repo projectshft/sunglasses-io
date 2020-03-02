@@ -49,7 +49,7 @@ paths:
             items:
               $ref: '#/definitions/Products'
         404:
-          description: Invalid Id
+          description: Brand ID could not be found
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -77,7 +77,7 @@ paths:
             items:
               $ref: '#/definitions/Products'
         404:
-          description: No products found
+          description: Product that match that search word could not be found
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -99,7 +99,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         404:
-          description: Incorrectly Formated username and password
+          description: Incorrectly formated username and password
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -127,7 +127,7 @@ paths:
             items:
               $ref: '#/definitions/Products'
         401:
-          description: You must log in to see cart
+          description: You need to log in to recieve cart information
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -162,11 +162,19 @@ paths:
             items:
               $ref: '#/definitions/Products'
         400:
-          description: Invalid Request sent must include product and quanity
+          description: Cannot add without object containing both the product and the quanity
           schema:
             $ref: '#/definitions/Error'        
         401:
-          description: You must log in to see cart
+          description: You need to log in to add item to cart
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Quanity must be a number
+          schema:
+            $ref: '#/definitions/Error'
+        405:
+          description: Cannot add, product is aleady in cart
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -203,7 +211,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
         404:
-          description: Product Id could not be found
+          description: That product cannot be found
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -240,11 +248,11 @@ paths:
             items:
               $ref: '#/definitions/Products'
         404:
-          description: Invalid quanity sent
+          description: Invalid quanity. Quanity must be a number.
           schema:
             $ref: '#/definitions/Error'        
         401:
-          description: You must log in to edit cart
+          description: You need to log in to edit an item's quanity in cart
           schema:
             $ref: '#/definitions/Error'
         default:

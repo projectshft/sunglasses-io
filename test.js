@@ -215,9 +215,9 @@ describe('/POST login', () => {
     });    
 });
 
+//resets cart and failed number of logins before each test
 describe('Cart', function() {
     beforeEach(function() {
-        // runs before each test in this block
         resetCart()
         setNumberOfFailedLoginRequestsForUsername("greenlion235", 0)
       });
@@ -410,6 +410,75 @@ describe('/POST me/cart', () => {
         
     });
 
+    it('it should NOT Post if quanity is not a number', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = { 
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                 quanity: 'fish'
+            }
+                chai
+                .request(server)
+                .post('/api/me/cart?accessToken='+ res.body)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    done();
+            });
+        });
+        
+    });
+
+    it('it should NOT Post if request is not an object', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = [{
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                }},
+                {quanity: 'fish'}
+            ]
+                chai
+                .request(server)
+                .post('/api/me/cart?accessToken='+ res.body)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(400);
+                    done();
+            });
+        });
+        
+    });
     
     it('if the same product is added twice, it should give back error that product is already in the cart', done => {
         const user = {
@@ -446,7 +515,7 @@ describe('/POST me/cart', () => {
                         .post('/api/me/cart?accessToken='+ token)
                         .send(addProduct)
                         .end((err, res) => {
-                            res.should.have.status(400);
+                            res.should.have.status(405);
                             done();
                         });
                     });
@@ -533,6 +602,47 @@ describe('/DELETE me/cart/:productId', () => {
                     chai
                     .request(server)
                     .delete('/api/me/cart/6?accessToken='+ token)
+                    .end((err, res) => {
+                        res.should.have.status(404);
+                        done();
+                        });
+                });
+            })
+    }); 
+
+    it('should not Delete item with no ID number ', done => {
+        const user = {
+            username: "greenlion235",
+            password: "waters"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(user)
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('string')
+            let addProduct = {
+                product: {
+                "id": "1",
+                "categoryId": "1",
+                "name": "Superglasses",
+                "description": "The best glasses in the world",
+                "price":150,
+                "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                },
+                 quanity: 1
+            }
+            const token = res.body
+            chai
+                .request(server)
+                .post('/api/me/cart?accessToken='+ token)
+                .send(addProduct)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    chai
+                    .request(server)
+                    .delete('/api/me/cart?accessToken='+ token)
                     .end((err, res) => {
                         res.should.have.status(404);
                         done();

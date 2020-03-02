@@ -210,11 +210,6 @@ myRouter.post('/api/login', function(request,response) {
         }
 });
 
-// Return all productsin the db
-myRouter.get('/api/products', function(request,response) {
-    response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products))
-});
 
 var getValidTokenFromRequest = function(request) {
     var parsedUrl = require('url').parse(request.url,true)
@@ -264,10 +259,19 @@ myRouter.post('/api/me/cart', function(request,response) {
         return response.end();
     }else{
         //Check if the product and the quanity are both in the request
-        if (!request.body.quanity || !request.body.product) {
-            response.writeHead(400, "Cannot add without both the product and the quanity");	
+        if (!request.body.quanity || !request.body.product || !request.body || typeof request.body !== 'object') {
+            response.writeHead(400, "Cannot add without object containing both the product and the quanity");	
             return response.end();
         }
+
+        //if no value or a negative value or a decimal passed it should return an error
+        const quanity = request.body.quanity
+        if (isNaN(quanity) || quanity <= 0 || request.body.quanity % 1 !== 0){
+            // If there isn't an new quanity in the parameter, we can not edit the quanity
+            response.writeHead(404, "Invalid quanity amount was given. Quanity must be a number");
+            return response.end(); 
+        }
+
         //Search to find the correct user cart
         let user = users.find((user)=>{
             return user.login.username == currentAccessToken.username
@@ -280,7 +284,7 @@ myRouter.post('/api/me/cart', function(request,response) {
 
         if (isProductAlreadyInTheCart ){
             //if the product is in the cart, its should send error message
-            response.writeHead(400, "Cannot add, product is aleady in cart");	
+            response.writeHead(405, "Cannot add, product is aleady in cart");	
             return response.end();
         }
 
@@ -331,13 +335,14 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
     }
 })
 
+//edit quanities in cart
 myRouter.post('/api/me/cart/:productId', function(request,response) {
     //verifying token
     let currentAccessToken = getValidTokenFromRequest(request);
     //must login in to get cart
     if (!currentAccessToken) {
         // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-        response.writeHead(401, "You need to log in to delete an item from cart");
+        response.writeHead(401, "You need to log in to edit an item's quanity in cart");
         return response.end();
     }else{
         //Search to find the correct user cart
@@ -349,9 +354,9 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
         const quanity = parseInt(parsedUrl.query.quanity)
 
         //if no value or a negative value or a decimal passed it should return an error
-        if (isNaN(quanity) || quanity <= 0 || parsedUrl.query.quanity % 1 !== 0){
+        if (!quanity || isNaN(quanity) || quanity <= 0 || parsedUrl.query.quanity % 1 !== 0){
             // If there isn't an new quanity in the parameter, we can not edit the quanity
-            response.writeHead(404, "Invalid quanity amount was given. Quanity must be a number");
+            response.writeHead(404, "Invalid quanity. Quanity must be a number");
             return response.end(); 
         }else{
         //Search cart to find product wanting to be deleted 
