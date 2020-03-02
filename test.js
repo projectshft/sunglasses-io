@@ -55,6 +55,16 @@ describe('/GET brands/:id/products', () => {
                 done();
             });
     });
+
+    it('it should not GET all the products with no ID', done => {
+        chai
+            .request(server)
+            .get('/api/brands/products')
+            .end((err, res) => {
+                res.should.have.status(404);
+                done();
+            });
+    });
 });
 
 //testing to see that all the initial 11 products are returned when ran
