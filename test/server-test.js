@@ -214,7 +214,7 @@ describe("/POST me/cart", () => {
 });
 
 describe("/DELETE me/cart/:productId", () => {
-  it("should DELETE all products from cart that equal the productId number", done => {
+  it("should DELETE one product from cart the user's cart that equals the productId number", done => {
     let product = {
       id: "2",
       categoryId: "1",
@@ -234,6 +234,11 @@ describe("/DELETE me/cart/:productId", () => {
           res.should.have.status(200);
           res.body.should.be.an('object');
           res.body.id.should.be.eql('2');
+          res.body.should.have.property('id');
+          res.body.should.have.property('categoryId');
+          res.body.should.have.property('name');
+          res.body.should.have.property('price');
+          res.body.should.have.property('quantity');
           done();
       });
     })
