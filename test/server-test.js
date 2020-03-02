@@ -141,7 +141,7 @@ describe('Login', () => {
                     done()
                 })
         })
-        it('should return status 401 if the email or password was empty', done => {
+        it('should return status 401 if the email or password was incorrect', done => {
             chai
                 .request(server)
                 .post('/api/login')
@@ -160,49 +160,46 @@ describe('Login', () => {
     })
 })
 
-// // allows for future paths involving the cart that require a valid accessToken
-// let validToken = '';
-
-// describe('Me', () => {
-//     describe('/GET api/me/cart', () => {
-//         it('should return 401 error if not logged in with valid token', done => {
-//             chai
-//                 .request(server)
-//                 .get('/api/me/cart')
-//                 .end((err, res) => {
-//                     res.should.have.status(401)
-//                     done()
-//                 })
-//         })
-//         // logs test user in prior to tests requiring user
-//         before((done) => {
-//             chai
-//                 .request(server)
-//                 .post('/api/login')
-//                 .set({
-//                     'Content-Type': 'application/json'
-//                 })
-//                 .send({
-//                     email: "salvador.jordan@example.com",
-//                     password: "tucker"
-//                 })
-//                 .end((err, res) => {
-//                     res.should.have.status(200)
-//                     res.body.length.should.equal(16)
-//                     validToken = res.body;
-//                     done()
-//                 })
-//         })
-//         it('should return products currently in user cart', done => {
-//             chai
-//                 .request(server)
-//                 .get(`/api/me/cart?accessToken=${validToken}`)
-//                 .end((err, res) => {
-//                     res.should.have.status(200)
-//                     res.body.should.be.an('array')
-//                     res.body.length.should.be.eql(0)
-//                     done()
-//                 })
-//         })
-//     })
-// })
+describe('Me', () => {
+    describe('/GET api/me/cart', () => {
+        it('should return 401 error if not logged in with valid token', done => {
+            chai
+                .request(server)
+                .get('/api/me/cart')
+                .end((err, res) => {
+                    res.should.have.status(401)
+                    done()
+                })
+        })
+        // logs test user in prior to tests requiring user
+        before((done) => {
+            chai
+                .request(server)
+                .post('/api/login')
+                .set({
+                    'Content-Type': 'application/json'
+                })
+                .send({
+                    email: "salvador.jordan@example.com",
+                    password: "tucker"
+                })
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.length.should.equal(16)
+                    validToken = res.body;
+                    done()
+                })
+        })
+        it('should return products currently in user cart', done => {
+            chai
+                .request(server)
+                .get(`/api/me/cart?accessToken=${validToken}`)
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.should.be.an('array')
+                    res.body.length.should.be.eql(0)
+                    done()
+                })
+        })
+    })
+})
