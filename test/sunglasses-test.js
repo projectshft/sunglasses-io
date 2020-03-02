@@ -4,18 +4,7 @@ let server = require('../app/server');
 let should = chai.should();
 chai.use(chaiHttp);
 
-
-describe('Cart Remove', () => {
-
-
-  beforeEach(() => { //Before each test we empty the database
-    console.log('before every test in file');
-        users.cart.removeAll([], (err) => { 
-         done();           
-      });        
-  });
-});
-
+//GET brands tests
 describe('/GET /api/brands', () => {
   //positive tests 
     it('it should GET all the brands', done => {
@@ -42,7 +31,6 @@ describe('/GET /api/brands', () => {
       //act 
       chai
           .request(server)
-          //below might be wrong 
           .get('/api/' + brands)
           //assert
           .end((err, res) => {
@@ -64,6 +52,7 @@ describe('/GET /api/brands', () => {
   });
 })
 
+//Get Products by brand Id 
 describe('/GET /api/brands/:id/products', () => {
     it('it should GET all the products from a specific brand by brand id', done => {
         //arrange
@@ -179,8 +168,7 @@ describe('/GET /api/brands/:id/products', () => {
     it('it should return a 404 because there are no products', done => {
       let products = [];
       chai
-          .request(server)
-          //below might be wrong 
+          .request(server) 
           .get('/api/' + products)
           .end((err, res) => {
           res.should.have.status(404);
@@ -317,7 +305,7 @@ describe ('/POST /api/login', () =>{
  
 });
 
-//tests for viewing your cart
+//tests for GET the status of your cart
 describe('/GET /api/me/cart', () => {
   //positive test 
     it('it should GET the status of the cart', done => {
@@ -426,6 +414,7 @@ describe('/GET /api/me/cart', () => {
   });
   });
 
+  //tests for Deleting items by product Id in cart 
   describe('/DELETE /api/me/cart/:productId', () => {
     it('it should DELETE items in the cart by product Id', done => {
         //arrange
@@ -497,6 +486,7 @@ it ( 'it should have a valid access token', done => {
 });
 });
 
+//tests for updating quantity of product by productId in cart 
   describe('/POST /api/me/cart/:productId', () => {
     it('it should update items in the cart by product Id', done => {
         //arrange
@@ -566,6 +556,7 @@ it ( 'it should have a valid access token', done => {
   });
   });
 
+  //tests for the search bar 
 describe('/GET /api/search', () => {
   it('it should GET the product back with a query string Habanero', done => {
     chai
@@ -597,6 +588,7 @@ describe('/GET /api/search', () => {
         done();
       });
   });
+  //negative tests
   it('it should not return a product name or description', done => {
     chai
       .request(server)
