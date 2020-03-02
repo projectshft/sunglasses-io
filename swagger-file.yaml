@@ -52,20 +52,22 @@ paths:
   /api/products:
     get:
       summary: Product Search
-      description: Products endpoint display all the products in Sunglasses.io
+      description: Products endpoint enables search for product by product name
       tags:
         - Product Search
+      parameters:
+        - name: Product name
+          in: path
+          description: search parameters
+          required: true
+          type: string
       responses:
         '200':
           description: Success
           schema:
             $ref: '#/definitions/Product'
         '402':
-          description: 'Please enter the name of the product you are searching for.'
-          schema:
-            type: string
-        '403':
-          description: 'The product does not exist'
+          description: 'Missing name of the product you are searching for.'
           schema:
             type: string
   /api/login:

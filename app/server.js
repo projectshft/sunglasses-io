@@ -5,6 +5,7 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
+var url = require('url')
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let should = chai.should();
@@ -104,23 +105,30 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
     response.writeHead(200, 'All products with this brand ID', {
         "Content-Type": "application/json"
     });
-    response.end(JSON.stringify(brandAfterFilter));
+    response.end(JSON.stringify(brandAfterFilter))
+
 });
 
 //****************************************************************************/
 // GET all products /api/products    --- public
-myRouter.get("/api/products", (request, response) => {
-    if (!products) {
-        response.writeHead(404, 'No products found', {
-            "Content-Type": "application/json"
-        });
-        response.end();
-    }
-    response.writeHead(200, {
-        'Content-Type': 'application/json'
+myRouter.get('/api/products', function(request, response) {
+    let searchTerm = url.parse(request.url).query
+    let queryObject = queryString.parse(searchTerm)
+    let queryTerm = queryObject.query
+      
+    // getting match of query with name of product
+    let matchingProduct = products.filter((product) => {
+        return product.name == queryTerm;    
     });
-    response.end(JSON.stringify(products));
-});
+    if (matchingProduct.length == 0) {  
+        response.writeHead(402, 'Missing name of the product you are searching for');
+        response.end();
+        return;
+    } else {
+         response.writeHead(200, {'Content-Type': 'application/json'});
+         response.end(JSON.stringify(matchingProduct));
+    }
+  });
 
 //****************************************************************************/
 // POST /api/login rout
@@ -371,11 +379,3 @@ myRouter.post('/api/me/cart', (request, response) => {
 
 // export to test file for Chai
 module.exports = server
-
-// const getValidUserFromToken = function (token) {
-//     if (token) {
-//         const currentUser = users.find(user => user.login.username === token.username);
-//         return currentUser;
-//     }
-//     return null;
-// };
