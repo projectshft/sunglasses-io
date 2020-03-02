@@ -47,6 +47,7 @@ describe('/GET products by brand ID', () => {
         })
     })
 })
+
 // // negative tests for get brands by id endpoint
 // describe('/GET products by brand ID', () => {
 //     it('it should return an error if brand has no products', done => {

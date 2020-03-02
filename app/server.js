@@ -21,6 +21,7 @@ var failedLoginAttempts = {};
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
+// Set up server 
 let server = http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, error => {
@@ -45,57 +46,73 @@ let server = http.createServer(function (request, response) {
     console.log(`Server is listening on ${PORT}`);
   });
 
+// Set up get brands endpoint 
 myRouter.get('/api/brands', function(request,response) {
+    // Check if the brands array has anything in it, if not send back an error 
     if (brands.length == 0 ) {
      response.writeHead(404, "Sorry we couldn't find any brands")
      return response.end()
     } else {
+     // If there are brands in the array, send the array of brand objects back 
      response.writeHead(200, { "Content-Type": "application/json" });
      return response.end(JSON.stringify(brands));
     }
 });
 
+// Set up get brand by product id endpoint
 myRouter.get('/api/brands/:id/products', function(request,response) {
-  //productslist returns a list of products that have the same category id as the brand id passed through the parameters
+  // Return a list of products that have the same category id as the brand id passed through the parameters
   let productsList = products.filter((product) => {
       return product.categoryId == request.params.id
     })
+  
+  // Return all of the brands that match the id  
   let brandList = brands.filter((brand) => {
       return brand.id == request.params.id 
     })
 
+    // If the id is not a number return an error 
     if(isNaN(request.params.id)) {
       response.writeHead(400, "Brand id is invalid")
       return response.end()
+    // If no brands match the id parameter send back an error 
     } else if (brandList.length == 0) {
       response.writeHead(404, "This brand does not exist")
       return response.end()
+    // If no products match the id parameter send back an arror 
     } else if (productsList.length == 0) {
       response.writeHead(404, "This brand currently has no products")
       return response.end()
+    // If there are products, send a response back with the product list 
     } else {
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(productsList));
     }
 })
 
+// Set up get products endpoint 
 myRouter.get('/api/products', function(request,response) {
+  // If there are no products in the products array send back an error 
   if (products.length == 0 ) {
     response.writeHead(404, "Sorry we couldn't find any products")
     return response.end()
+  // If there are products in the products array send back the array of product objects
   } else {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(products));
   }
 });
 
+// 
 myRouter.post('/api/login', function(request,response) {
+    // Check to make sure the username or password are not left blank 
     if(request.body.username == '' || request.body.password  == '') {
       response.writeHead(400, "Username and password are required")
       return response.end()
 
-    } else if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
     // Make sure there is a username and password in the request
+    } else if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
+
       // See if there is a user that has that username and password
       let user = users.find((user)=>{
         return user.login.username == request.body.username && user.login.password == request.body.password;
@@ -144,7 +161,7 @@ myRouter.post('/api/login', function(request,response) {
     }
   });
 
-  // Helpers to get/set our number of failed requests per username
+// Helpers to get/set our number of failed requests per username
 var getNumberOfFailedLoginRequestsForUsername = function(username) {
     let currentNumberOfFailedRequests = failedLoginAttempts[username];
     if (currentNumberOfFailedRequests) {
@@ -154,6 +171,7 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
     }
   }
   
+  // Helper method to set the number of failed login requests for user
   var setNumberOfFailedLoginRequestsForUsername = function(username,numFails) {
     failedLoginAttempts[username] = numFails;
   }
@@ -176,31 +194,38 @@ var getValidTokenFromRequest = function(request) {
     }
   };
 
+  // Set up get cart status for user endpoint
   myRouter.get('/api/me/cart', function(request,response) {
+    // Check to make sure the access token exists and is still valid 
     let currentAccessToken = getValidTokenFromRequest(request);
+    // If access token is not valid return an error 
     if (!currentAccessToken) {
       response.writeHead(401, "You need to have access to this call to continue",);
       return response.end();
     } else {
+       // Find the correct user by matching matching their username to their access token
        let user =  users.find((user)=>{
         return user.login.username == currentAccessToken.username
        })
-       
+    
+    // Send back the current users cart 
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
     }
 });
 
+// Set up add something to cart endpoint
 myRouter.post('/api/me/cart', function(request,response) {
+    // Check to make sure the access token exists and is still valid 
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
       response.writeHead(401, "You need to have access to this call to continue",);
       return response.end();
     } else {
+       // Find the correct user by matching matching their username to their access token
        let user =  users.find((user)=>{
         return user.login.username == currentAccessToken.username
        })
-
        let product = request.body.product;
        product['quantity'] = 1;
 
@@ -226,6 +251,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     }
 });
 
+// Set up delete product endpoint
 myRouter.delete('/api/me/cart/:productId', function(request,response) {
     let currentAccessToken = getValidTokenFromRequest(request);
     if (!currentAccessToken) {
@@ -248,6 +274,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
     }
 });
 
+// Set up update cart by product Id endpoint 
 myRouter.put('/api/me/cart/:productId', function(request,response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
@@ -274,13 +301,18 @@ myRouter.put('/api/me/cart/:productId', function(request,response) {
   }
 });
 
+// Set up search endpoint
 myRouter.get('/api/search', function(request,response) {
+
+  // slice the request to remove the =q
   let query = request._parsedUrl.query.slice(2)
 
+  // Check if the query is in the product name or description
   let queryResults = products.filter(function(p) {
     return p.name.includes(query) || p.description.includes(query)
   })
   
+  // Return the query results
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(queryResults));
 })
