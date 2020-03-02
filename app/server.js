@@ -4,13 +4,14 @@ var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
-// var uid = require('rand-token').uid;
+var uid = require('rand-token').uid;
 const PORT = 8080;
 
 // State Holding Variables
 let brands = [];
 let products = [];
 let users = [];
+let verifiedUsers = []
 
 // Setup router
 const myRouter = Router();
@@ -38,6 +39,12 @@ const server = http.createServer(function (request, response) {
         // Create a varialbe to represent the data in the json file
         products = JSON.parse(data);
         console.log(`Server setup: ${products.length} products loaded`);
+    });
+
+    fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
+        if (error) throw error;
+        users = JSON.parse(data);
+        console.log(`Server setup: ${users.length} users loaded`);
     });
 
 
@@ -85,9 +92,9 @@ myRouter.get('/api/products', function (request, response) {
 
     //variables that are arrays with matching products
     let matchedName = products.filter((product) => {
-       if (product.name === queryParams.name) {
-           return product
-       }
+        if (product.name === queryParams.name) {
+            return product
+        }
     });
     let matchedDescription = products.filter((product) => {
         if (product.description === queryParams.description) {
@@ -103,24 +110,20 @@ myRouter.get('/api/products', function (request, response) {
         response.end('There were no products found');
     }
 
-
-
     //Edged case for if there is a query
-    if (matchedName.length > 0 ) {
+    if (matchedName.length > 0) {
         response.writeHead(200, ('Success'), {
             "Content-Type": "application/json"
         });
-    
+
         response.end(JSON.stringify(matchedName));
     } else if (matchedDescription.length > 0) {
         response.writeHead(200, ('Success'), {
             "Content-Type": "application/json"
         });
-    
+
         response.end(JSON.stringify(matchedDescription));
     }
-
-
 
     response.writeHead(200, ('Success'), {
         "Content-Type": "application/json"
@@ -128,6 +131,34 @@ myRouter.get('/api/products', function (request, response) {
 
     response.end(JSON.stringify(products));
 
+});
+
+myRouter.post('/api/login', function (request, response) {
+    const email = request.body.email;
+    const password = request.body.password;
+
+    if (email && password) {
+        // find the user with that email and password
+        const user = users.find(user => user.email === email && user.login.password === password);
+
+        if (user) {
+            // now that user has been verified we can issue an access token
+            let verifiedUser = {
+                email: email,
+                accessToken: uid(16)
+            }
+            //now add verified user to the verifiedUsers array in memory
+            verifiedUsers.push(verifiedUser);
+    
+            response.writeHead(200, ('Success'), {
+                'content-type': 'application/json'
+            });
+            
+            return response.end(JSON.stringify(verifiedUser.accessToken));
+        }
+    }
+
+  
 });
 
 // Used for testing

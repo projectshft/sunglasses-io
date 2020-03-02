@@ -75,7 +75,9 @@ describe('Products', () => {
             chai
                 .request(server)
                 .get('/api/products')
-                .query({name: "Superglasses"})
+                .query({
+                    name: "Superglasses"
+                })
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an('array');
@@ -83,14 +85,16 @@ describe('Products', () => {
                     done();
                 })
         })
-    }) 
+    })
 
     describe('/GET /api/products', () => {
         it('it should GET all the products with the description that matches the query', done => {
             chai
                 .request(server)
                 .get('/api/products')
-                .query({description: "The sweetest glasses in the world"})
+                .query({
+                    description: "The sweetest glasses in the world"
+                })
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an('array');
@@ -98,6 +102,27 @@ describe('Products', () => {
                     done();
                 })
         })
-    }) 
+    })
 })
 
+describe('Login', () => {
+    describe('/POST /api/login', () => {
+        it('should return status 200 and return an access token', done => {
+            chai.request(server)
+                .post('/api/login')
+                .set({
+                    'Content-Type': 'application/json'
+                })
+                .send({
+                    email: "salvador.jordan@example.com",
+                    password: "tucker"
+                })
+                .end((err, res) => {
+                    res.should.have.status(200)
+                    res.body.should.be.an('string')
+                    res.body.length.should.be.eql(16)
+                    done()
+                })
+        })
+    })
+})
