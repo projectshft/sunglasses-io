@@ -85,7 +85,7 @@ describe('Products', () => {
   });
 });
 
-//Let's test some User functionality!
+//User Functionality test
 describe('User', () => {
 
   //check for vanilla known login
@@ -237,7 +237,7 @@ describe('User', () => {
 
 });
 
-//Let's test some User POST to Cart functionality!
+//User POST to Cart functionality
 describe('User POST to Cart', () => {
 
   //our cart POST should return the item added to the cart as confirmation
@@ -347,7 +347,7 @@ describe('User POST to Cart', () => {
     });
   });
 
-  //let's have fun with /me/cart/{productId}
+  
   //product should add to cart and respond with cart information for product
   describe('/POST User cart with productId', () => {
     it('it should respond with 200 and item added to cart, if post is successful', done => {
@@ -426,7 +426,7 @@ describe('User POST to Cart', () => {
 });
 
 
-//Let's test some User POST/DELETE to Cart functionality, but with quantities!
+//User POST/DELETE to Cart functionality, quanitity test
 describe('User POST to Cart, with quantity checks', () => {
   //our cart POST should return the item and quantity within the cart as confirmation
   describe('/POST User cart', () => {
