@@ -15,26 +15,24 @@ const PORT = 3001;
 //  helper functions & variables  ***********************
 let brands = [];
 
-// accessToken has values so it could be tested in test.js, otherwise it would be empty
+// accessToken has values so it could be tested in test.js, otherwise this variable would be empty
 let accessTokens = [{
     username: "fakeUser123",
     lastUpdated: new Date(),
     token: "abc1234"
 }];
 
-// A variable to limit validity of access tokens to 30 minutes
+// A variable to limit validity of access tokens to 15 minutes
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
-// helper function - validate tokens
+// helper function - validate tokens from requests
 var getValidTokenFromRequest = function (request) {
     var parsedUrl = require('url').parse(request.url, true)
-    console.log(parsedUrl)
     if (parsedUrl.query.accessToken) {
         // Verify the access token to make sure its valid and not expired
         let currentAccessToken = accessTokens.find((accessToken) => {
             return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
-    
         if (currentAccessToken) {
             return currentAccessToken;
         } else {
@@ -45,6 +43,7 @@ var getValidTokenFromRequest = function (request) {
     }
 };
 
+// ROUTER set up
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -115,25 +114,27 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
 
 //****************************************************************************/
 // GET all products /api/products    --- public
-myRouter.get('/api/products', function(request, response) {
+myRouter.get('/api/products', function (request, response) {
     let searchTerm = url.parse(request.url).query
     let queryObject = queryString.parse(searchTerm)
     let queryTerm = queryObject.query
-      
+
     // getting match of query with name of product
     let matchingProduct = products.filter((product) => {
-        return product.name == queryTerm;    
+        return product.name == queryTerm;
     });
-    
-    if (matchingProduct.length == 0) {  
+
+    if (matchingProduct.length == 0) {
         response.writeHead(402, 'Missing name of the product you are searching for');
         response.end();
         return;
     } else {
-         response.writeHead(200, {'Content-Type': 'application/json'});
-         response.end(JSON.stringify(matchingProduct));
+        response.writeHead(200, {
+            'Content-Type': 'application/json'
+        });
+        response.end(JSON.stringify(matchingProduct));
     }
-  });
+});
 
 //****************************************************************************/
 // POST /api/login rout
@@ -155,7 +156,7 @@ myRouter.post('/api/login', (request, response) => {
                     'Content-Type': 'application/json'
                 })
             )
-            // We have a successful login, if we already have an existing access token, use that
+            // if accessToken included use that token
             let currentAccessToken = accessTokens.find(accessToken => {
                 return (
                     accessToken.token == new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
