@@ -492,6 +492,108 @@ describe('Cart', function() {
             });
             
         });
+
+        it('it should NOT Post if product does not contain name', done => {
+            const user = {
+                username: "greenlion235",
+                password: "waters"
+            }
+            chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('string')
+                let addProduct = { 
+                    product: {
+                    "id": "1",
+                    "categoryId": "1",
+                    "description": "The best glasses in the world",
+                    "price":150,
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quanity: 1
+                }
+                    chai
+                    .request(server)
+                    .post('/api/me/cart?accessToken='+ res.body)
+                    .send(addProduct)
+                    .end((err, res) => {
+                        res.should.have.status(400);
+                        done();
+                });
+            });
+            
+        });
+
+        it('it should NOT Post if product does not contain price', done => {
+            const user = {
+                username: "greenlion235",
+                password: "waters"
+            }
+            chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('string')
+                let addProduct = { 
+                    product: {
+                    "id": "1",
+                    "categoryId": "1",
+                    "name": "Superglasses",
+                    "description": "The best glasses in the world",
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quanity: 1
+                }
+                    chai
+                    .request(server)
+                    .post('/api/me/cart?accessToken='+ res.body)
+                    .send(addProduct)
+                    .end((err, res) => {
+                        res.should.have.status(400);
+                        done();
+                });
+            });
+            
+        });
+
+        it('it should NOT Post if product does not contain id', done => {
+            const user = {
+                username: "greenlion235",
+                password: "waters"
+            }
+            chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('string')
+                let addProduct = { 
+                    product: {
+                    "price":150,
+                    "categoryId": "1",
+                    "name": "Superglasses",
+                    "description": "The best glasses in the world",
+                    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    },
+                    quanity: 1
+                }
+                    chai
+                    .request(server)
+                    .post('/api/me/cart?accessToken='+ res.body)
+                    .send(addProduct)
+                    .end((err, res) => {
+                        res.should.have.status(400);
+                        done();
+                });
+            });
+            
+        });
         
         it('if the same product is added twice, it should give back error that product is already in the cart', done => {
             const user = {

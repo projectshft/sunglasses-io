@@ -258,8 +258,8 @@ myRouter.post('/api/me/cart', function(request,response) {
         response.writeHead(401, "You need to log in to add item to cart");
         return response.end();
     }else{
-        //Check if the product and the quanity are both in the request
-        if (!request.body.quanity || !request.body.product || !request.body || typeof request.body !== 'object') {
+        //Check if the product and the quanity are both in the request with correct properties
+        if (!request.body.quanity || !request.body.product || !request.body || typeof request.body !== 'object' || !request.body.product.name || !request.body.product.price || !request.body.product.id) {
             response.writeHead(400, "Cannot add without object containing both the product and the quanity");	
             return response.end();
         }
