@@ -162,13 +162,13 @@ myRouter.post('/api/login', (request, response) => {
                     accessToken.token == new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
                 )
             })
-            // Update the last updated value so we get another time period
+            // Update time stamp on token
             if (currentAccessToken) {
                 currentAccessToken.lastUpdated = new Date()
                 response.end(JSON.stringify(currentAccessToken.token))
                 return
             } else {
-                // Create a new token with the user value and a "random" token
+                // new token
                 let newAccessToken = {
                     username: user.login.username,
                     lastUpdated: new Date(),
@@ -179,13 +179,12 @@ myRouter.post('/api/login', (request, response) => {
                 return
             }
         } else {
-            // When a login fails, tell the client in a generic way that either the username or password was wrong
             response.writeHead(406, 'Invalid username or password.')
             response.end()
             return
         }
     } else {
-        //if there was no username or password in the request, throw a 405
+        //no username or password in the request, throw a 405
         response.writeHead(405, 'incorrect username and password.')
         response.end()
         return
