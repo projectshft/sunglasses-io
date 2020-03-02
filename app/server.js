@@ -270,7 +270,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response){
     
     var parsedUrl = require('url').parse(request.url, true);
       
-      let searchResults = products.filter(product => {\
+      let searchResults = products.filter(product => {
         //converts to lowercase 
         if(product.name.toLowerCase().includes(parsedUrl.query.query.toLowerCase()) || product.description.toLowerCase().includes(parsedUrl.query.query.toLowerCase()))
         return products
