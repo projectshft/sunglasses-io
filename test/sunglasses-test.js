@@ -5,11 +5,16 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 
-// describe('Books', () => {
-//     beforeEach(() => {
-//         Book.removeAll();
-//       });
+describe('Cart Remove', () => {
 
+
+  beforeEach(() => { //Before each test we empty the database
+    console.log('before every test in file');
+        users.cart.removeAll([], (err) => { 
+         done();           
+      });        
+  });
+});
 
 describe('/GET /api/brands', () => {
   //positive tests 
@@ -29,6 +34,7 @@ describe('/GET /api/brands', () => {
         });
     });
     //negative tests 
+
     it('it should return a 404 because there no brands', done => {
       //arrange
 
@@ -44,7 +50,19 @@ describe('/GET /api/brands', () => {
             done();
           });
   });
+  it('it should return a 404 because there no brands', done => {
+    //act 
+    chai
+        .request(server)
+        //below might be wrong 
+        .get('/api/bogus/')
+        //assert
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
   });
+})
 
 describe('/GET /api/brands/:id/products', () => {
     it('it should GET all the products from a specific brand by brand id', done => {
@@ -96,57 +114,45 @@ describe('/GET /api/brands/:id/products', () => {
           done();
         });
       });
-      // it('it should return a 404 error and the product was not found', done => {
-      //     //arrange
-      //     let brands = [
-      //       {
-      //           "id": "1",
-      //           "name" : "Oakley"
-      //       },
-      //       {
-      //           "id": "2",
-      //           "name" : "Ray Ban"
-      //       },
-      //       {
-      //           "id": "3",
-      //           "name" : "Levi's"
-      //       },
-      //       {
-      //           "id": "4",
-      //           "name" : "DKNY"
-      //       },
-      //       {
-      //           "id": "5",
-      //           "name" : "Burberry"
-      //       },
-      //       {
-      //         "id":"6",
-      //         "name": "Chanel"
-      //       }
-      //   ]
-      //     //act
-      //   chai
-      //     .request(server)
-      //     .get('/api/brands/6/products')
-      //     //assert
-      //     .end((err, res) => {
-      //       res.should.have.status(404);
-      //       done();
-      //     });
-    
-  //   it('it should return a 400 error if the response is not JSON', done => {
-  //     //arrange
-  //     //act
-  //   chai
-  //     .request(server)
-  //     .get('/api/brands/1/products')
-  //     //assert
-  //     .end((err, res) => {
-  //       res.should.have.status(400);
-  //       res.should.be.text;
-  //       done();
-  //     });
-  // });
+      it('it should return a 404 error and the product was not found', done => {
+          //arrange
+          let brands = [
+            {
+                "id": "1",
+                "name" : "Oakley"
+            },
+            {
+                "id": "2",
+                "name" : "Ray Ban"
+            },
+            {
+                "id": "3",
+                "name" : "Levi's"
+            },
+            {
+                "id": "4",
+                "name" : "DKNY"
+            },
+            {
+                "id": "5",
+                "name" : "Burberry"
+            },
+            {
+              "id":"6",
+              "name": "Chanel"
+            }
+        ]
+          //act
+        chai
+          .request(server)
+          .get('/api/brands/6/products')
+          //assert
+          .end((err, res) => {
+            res.should.have.status(404);
+            done();
+          });
+
+        })
   });
 
   //GET products tests
@@ -165,11 +171,12 @@ describe('/GET /api/brands/:id/products', () => {
           res.should.be.json;
           res.body.should.be.an('array');
           res.body.length.should.be.eql(11);
+          res.body[0].should.be.a('object')
           done();
         });
     });
     //negative tests
-    it('it should not GET the products', done => {
+    it('it should return a 404 because there are no products', done => {
       let products = [];
       chai
           .request(server)
@@ -180,7 +187,21 @@ describe('/GET /api/brands/:id/products', () => {
           done();
           });
   });
+  it('it should return a 404 because there are no products', done => {
+    //act 
+    chai
+        .request(server)
+        //below might be wrong 
+        .get('/api/bogus/')
+        //assert
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+
   });
+
 //POST login tests
 describe ('/POST /api/login', () =>{
   //positive test to get the accessToken
@@ -342,20 +363,6 @@ describe('/GET /api/me/cart', () => {
           res.should.have.status(401);
           done();
       })
-      // it ( 'it should have a current access token', done => {
-      //   //arrange
-      //   //act
-        
-      //   chai 
-      //   .request(server)
-      //   //no access token in the request
-      //   .get('/api/me/cart')
-        
-      //   //assert
-      //   .end((err, res) => {
-      //       res.should.have.status(401);
-      //       done();
-      //   })
   })
   });
 
@@ -417,20 +424,6 @@ describe('/GET /api/me/cart', () => {
           done();
       })
   });
-      // it ( 'it should have a current access token', done => {
-      //   //arrange
-      //   //act
-        
-      //   chai 
-      //   .request(server)
-      //   //no access token in the request
-      //   .get('/api/me/cart')
-        
-      //   //assert
-      //   .end((err, res) => {
-      //       res.should.have.status(401);
-      //       done();
-      //   })
   });
 
   describe('/DELETE /api/me/cart/:productId', () => {
@@ -484,53 +477,7 @@ describe('/GET /api/me/cart', () => {
             })
         })
     });
-    //negative tests
-    //item does not exist 
-  //   it('it should return a 404 error and the item does not exist', done => {
-  //          //arrange
-  //          let user = {
-  //           username: 'greenlion235',
-  //           password: 'waters'
-  //       };
-  //     //act
-  //     chai
-  //       .request(server)
-  //       .post('/api/login')
-  //       .send(user)
-  //       //assert
-  //       .end((err, res) => {
-  //           let token = res.body;
-  //           res.should.have.status(200);
-  //           res.should.be.json;
-           
-  //           chai 
-  //           .request(server)
-  //           .post('/api/me/cart?accessToken=' + token)
-  //           .end((err, res) => {
-  //             chai 
-  //             .request(server)
-  //             .delete('/api/me/cart/z?accessToken=' + token)
-  //           //assert
-  //             res.should.have.status(404);
-  //             done();
-  //           });
-  // });
-
-  // item does not exist 
-  // it('it should return a 404 error and the item does not exist', done => {
-  //     //arrange
-  //     //act
-  //   chai
-  //     .request(server)
-  //     .delete('/api/me/cart/z')
-  //     //assert
-  //     .end((err, res) => {
-  //       res.should.have.status(404);
-  //       done();
-  //     });
-  // });
-//test for item not in cart 
-
+  //negative tests
 //test for valid accessToken 
 it ( 'it should have a valid access token', done => {
   //arrange
@@ -600,30 +547,23 @@ it ( 'it should have a valid access token', done => {
             })
         })
     });
-    // it('it should return a 401 and the user needs to be logged in to update the cart', done => {
-  
+    //test for valid accessToken 
+  it ( 'it should return a 404 and the user needs to have a valid access token', done => {
+    //arrange
 
-    //       chai 
-    //       .request(server)
-    //       .post('/api/me/cart?accessToken=' + token)
-      
-    //       .end((err, res) => {
-    //           res.should.have.status(200);
-    //           res.should.be.json;
-    //           res.body.should.be.an('array');
-    //           //assert
-    //           chai 
-    //           .request(server)
-    //           .put('/api/me/cart/1?accessToken=' + token)
-    //           //
-    //           .end((err, res)=>{
-    //               res.should.have.status(200);
-    //               res.should.be.json;
-    //               done();
-    //           }) 
-            
-    //       })
-    //   })
+    //act
+    
+    chai 
+    .request(server)
+    //no access token in the request
+    .post('/api/me/cart/1')
+    
+    //assert
+    .end((err, res) => {
+        res.should.have.status(401);
+        done();
+    })
+  });
   });
 
 describe('/GET /api/search', () => {

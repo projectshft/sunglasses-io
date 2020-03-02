@@ -17,6 +17,8 @@ let products = [];
 let accessTokens = [];
 
 
+
+
 //functions to check for password attempts
 var getNumberOfFailedLoginRequestsForUsername = function(username) {
     let currentNumberOfFailedRequests = failedLoginAttempts[username];
@@ -227,7 +229,7 @@ myRouter.delete ('/api/me/cart/:productId', function (request, response){
 
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(cart))
-};
+} ;
 
 // } else {
 //   response.writeHead(404, "That product cannot be found. Check to make sure productId is correct and product is in the cart");
