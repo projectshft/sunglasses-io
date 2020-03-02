@@ -19,6 +19,8 @@ describe('The sunglasses store', () => {
               res.should.have.status(200);
               res.body.should.be.an('array');
               res.body.length.should.be.eql(5);
+              res.body[0].should.have.property('id');
+              res.body[0].should.have.property('name');
               done();
             });
         });
@@ -45,6 +47,12 @@ describe('The sunglasses store', () => {
                     res.should.have.status(200);
                     res.body.should.be.an('array');
                     res.body.length.should.be.eql(testId);
+                    res.body[0].should.have.property('id');
+                    res.body[0].should.have.property('categoryId');
+                    res.body[0].should.have.property('name');
+                    res.body[0].should.have.property('description');
+                    res.body[0].should.have.property('price');
+                    res.body[0].should.have.property('imageUrls');
                     done();
                 });
         });
@@ -82,6 +90,12 @@ describe('The sunglasses store', () => {
               res.should.have.status(200);
               res.body.should.be.an('array');
               res.body.length.should.be.eql(1);
+              res.body[0].should.have.property('id');
+              res.body[0].should.have.property('categoryId');
+              res.body[0].should.have.property('name');
+              res.body[0].should.have.property('description');
+              res.body[0].should.have.property('price');
+              res.body[0].should.have.property('imageUrls');
               done();
             });
         });
@@ -105,6 +119,12 @@ describe('The sunglasses store', () => {
                 res.should.have.status(200);
                 res.body.should.be.an('array');
                 res.body.length.should.be.eql(11);
+                res.body[0].should.have.property('id');
+                res.body[0].should.have.property('categoryId');
+                res.body[0].should.have.property('name');
+                res.body[0].should.have.property('description');
+                res.body[0].should.have.property('price');
+                res.body[0].should.have.property('imageUrls');
                 done();
               });
           });
