@@ -12,10 +12,29 @@ let brands = [];
 let products = [];
 let users = [];
 let verifiedUsers = []
+let currentSessionUser;
 
 // Setup router
 const myRouter = Router();
 myRouter.use(bodyParser.json());
+
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+    var parsedUrl = require('url').parse(request.url,true)
+    if (parsedUrl.query.accessToken) {
+      // Verify the access token to make sure its valid and not expired
+      let currentAccessToken = verifiedUsers.find((accessToken) => {
+        return accessToken.token == parsedUrl.query.accessToken;
+      });
+      if (currentAccessToken) {
+        return currentAccessToken;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  };
 
 // declare server so it can be exported to the testing file
 const server = http.createServer(function (request, response) {
@@ -137,15 +156,31 @@ myRouter.post('/api/login', function (request, response) {
     const email = request.body.email;
     const password = request.body.password;
 
+    //check to see if there was an email and password in the request
+    if (!email || !password) {
+        response.writeHead(400, {
+            'Content-Type': "html/text"
+        })
+        response.end("400 Error: Either username or password was left empty in the request ")
+    }
+
     if (email && password) {
         // find the user with that email and password
-        const user = users.find(user => user.email === email && user.login.password === password);
+        currentSessionUser = users.find(user => user.email === email && user.login.password === password);
 
-        if (user) {
+        if (!currentSessionUser){
+            response.writeHead(401, {
+                'Content-Type': "text/plain"
+            })
+            response.end("401 Error: Either the email or password was invalid ")
+        }
+
+
+        if (currentSessionUser) {
             // now that user has been verified we can issue an access token
             let verifiedUser = {
                 email: email,
-                accessToken: uid(16)
+                token: uid(16)
             }
             //now add verified user to the verifiedUsers array in memory
             verifiedUsers.push(verifiedUser);
@@ -154,12 +189,29 @@ myRouter.post('/api/login', function (request, response) {
                 'content-type': 'application/json'
             });
             
-            return response.end(JSON.stringify(verifiedUser.accessToken));
+            return response.end(JSON.stringify(verifiedUser.token));
         }
     }
 
   
 });
+
+myRouter.get('/api/me/cart', function (request, response) {
+    let currentSession = getValidTokenFromRequest(request);
+    if (!currentSession) {
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      response.writeHead(401, {
+        'Content-Type': "text/plain"
+      });
+      return response.end("401 error: Must have valid token to access the cart");
+    }
+  
+    response.writeHead(200, {
+      'Content-Type': 'application/json'
+    })
+    // Return all products in user's cart
+    response.end(JSON.stringify(currentUser.cart))
+})
 
 // Used for testing
 module.exports = server;
