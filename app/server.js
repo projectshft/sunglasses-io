@@ -56,12 +56,12 @@ const server = http.createServer(function (request, response) {
     console.log(`Server is listening on ${PORT}`);
   });
 
-  //Our beloved helper functions
+  //Our helper functions
   const getAuthorizedUserFromToken = function(token){
     let userInfo = AUTH_USERS.find(authUser => {
       return authUser.token == token;
     });
-    //we should probably return some sort of error if the token isn't found
+    //Error if the token isn't found
     if (!userInfo) {
       return undefined;
     }
@@ -72,7 +72,7 @@ const server = http.createServer(function (request, response) {
   }
 
   const getThingsFromRequestParams = function(requestUrl){
-    //we'll have to deal with numbers above 10, so goodbye fixed URL substring
+    //fixed URL substring
     const splitUrl = requestUrl.split('?');
     //we'll also grab our token
     return queryString.parse(splitUrl[1]);
