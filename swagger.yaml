@@ -106,7 +106,7 @@ paths:
                 type: string
                 description: The user's session token.
         401:
-          description: Invalid username or password.
+          description: Invalid username and/or password.
           schema:
             $ref: '#/definitions/Error'
         default:
@@ -205,7 +205,7 @@ paths:
           type: string
         - name: total
           in: query
-          description: The number of Products to add to User's cart
+          description: The number of products to add to user's cart
           required: false
           type: number
           format: int32
