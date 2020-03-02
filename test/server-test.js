@@ -105,6 +105,14 @@ describe('/POST login', () => {
 
 describe("/GET me/cart", () => {
   it("should GET all the products in a logged in user's cart", done => {
+    let cart = [
+      {      
+        id: "2",
+        categoryId: "1",
+        name: "Black Sunglasses",
+        price: 100
+      }
+    ]
     chai
       .request(server)
       .get("/api/me/cart")
@@ -112,8 +120,8 @@ describe("/GET me/cart", () => {
           expect(err).to.be.null
           expect("Content-Type", "application/json");
           res.body.should.not.equal('null')
-          res.should.have.status(404);
-          res.body.should.be.a("object");
+          res.should.have.status(200);
+          res.body.should.be.an("array");
           done();
       });
   });
@@ -132,7 +140,7 @@ describe("/POST me/cart", () => {
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
       ]
-  }
+    }
     chai
       .request(server)
       .post('/api/me/cart')
@@ -219,7 +227,7 @@ describe("/DELETE me/cart/:productId", () => {
       id: "2",
       categoryId: "1",
       name: "Black Sunglasses",
-      price: 100,
+      price: 100
     }
     chai.request(server)
     .post('/api/me/cart')
@@ -245,41 +253,38 @@ describe("/DELETE me/cart/:productId", () => {
   });
 });
 
-// describe('/PUT book/:id', () => {
-//   it('it should UPDATE a book by the given id', done => {
-//       //arrange
-//       let item = {
-//         id: "2",
-//         categoryId: "1",
-//         name: "Black Sunglasses",
-//         price: 100,
-//       };
-//       //act
-//       chai
-//       .request(server)
-//       .post('/api/cart/me')
-//       .send(item)
-//       //assert
-//       .end((err, res) => {
-//         res.should.have.status(200);
-//         // Change the title to something else
-//         const changedBook = res.body
-//         changedBook.title = 'Harry Potter'
-//         chai
-//         .request(server)
-//         .put('/book/' + changedBook.id)
-//         .send(changedBook)
-//         .end((err, res) => {
-//           res.should.have.status(200);
-//           chai
-//           .request(server)
-//           .get('/book/'+ changedBook.id)
-//           .end((err, res) => {
-//             res.should.have.status(200);
-//             res.body.title.should.equal('Harry Potter');
-//           done();
-//         })
-//       })
-//     });
-//   });
-// });
+describe('/POST me/cart/:productId', () => {
+  it("it should UPDATE a product in the user's cart by the given id", done => {
+      let item = {
+        id: "2",
+        categoryId: "1",
+        name: "Black Sunglasses",
+        price: 100,
+      };
+  
+      chai
+      .request(server)
+      .post('/api/me/cart')
+      .send(item)
+      .end((err, res) => {
+        res.should.have.status(200);
+        let changedQuantity = res.body
+        changedQuantity.quantity = 1
+        chai
+        .request(server)
+        .post('/api/me/cart/2')
+        .send(changedQuantity)
+        .end((err, res) => {
+          res.should.have.status(200);
+          chai
+          .request(server)
+          .get('/api/me/cart')
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.quantity.should.equal(2);
+          done();
+        })
+      })
+    });
+  });
+});

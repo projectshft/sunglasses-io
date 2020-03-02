@@ -86,7 +86,7 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
   return response.end(JSON.stringify(relatedBrands));
 });
 
-//GET all the products
+//GET all of the products
 myRouter.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = querystring.parse(parsedUrl.query);
@@ -106,7 +106,7 @@ myRouter.get("/api/products", (request, response) => {
 });
 
 
-// Login call
+//POST token for Login call
 myRouter.post('/api/login', function(request,response) {
   if (!failedLoginAttempts[request.body.username]){
     failedLoginAttempts[request.body.username] = 0;
@@ -178,7 +178,7 @@ myRouter.post('/api/login', function(request,response) {
 //   }
 // };
 
-// Only logged in users can access a specific store's issues if they have access
+//GET logged in user's cart
 myRouter.get('/api/me/cart', function(request,response) {
 
   //find user based on accessToken
@@ -205,7 +205,7 @@ myRouter.get('/api/me/cart', function(request,response) {
   return response.end(JSON.stringify(cart))
 });
 
-//POST a product to user cart
+//POST one product to user cart
 myRouter.post("/api/me/cart", (request, response) => {
   //find user based on accessToken
   const signedInUsername = accessTokens[0].username;
@@ -218,7 +218,6 @@ myRouter.post("/api/me/cart", (request, response) => {
     response.writeHead(401, "User must be signed in to add to your cart");
     return response.end();
   }
-  
   
   let addedItem = request.body
   //create a quantity key/value on the posted item
@@ -249,7 +248,7 @@ myRouter.post("/api/me/cart", (request, response) => {
 	return response.end(JSON.stringify(addedItem));
 });
 
-// //GET all products of a particular brand
+//DELETE one product from a user's cart
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
   //find current user's cart
   const signedInUsername = accessTokens[0].username;
@@ -276,6 +275,43 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
   
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(itemSelectedToDelete));
+});
+
+//POST (change) one product's quantity in a user's cart
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+  //find current user's cart
+  const signedInUsername = accessTokens[0].username;
+  const currentUser = users.find((user) => {
+    return user.login.username == signedInUsername
+  });
+  cart = currentUser.cart
+
+  const { productId } = request.params;
+  let itemAndSelectedQuantity = request.body
+
+  //if post product is missing id, categoryId, name, or price
+	if (!itemAndSelectedQuantity.id || !itemAndSelectedQuantity.categoryId || !itemAndSelectedQuantity.name || !itemAndSelectedQuantity.price || !itemAndSelectedQuantity.quantity) {
+		response.writeHead(400);	
+		return response.end("Incorrectly formatted response. Must have id, categoryId, name & price.");
+  }
+
+  //Find the item
+  let itemSelectedToChangeQuantity = cart.find((item) => {
+    return item.id == productId
+  });
+
+  //If the item does not exist respond with error message
+  if(!itemSelectedToChangeQuantity){
+    response.writeHead(404, "That item does not exist in user's cart");
+    return response.end();
+  }else {
+    //exists in the cart then change quantity to passed in request
+    Object.assign(itemSelectedToChangeQuantity, itemAndSelectedQuantity)
+    // currentUser.cart.itemSelectedToChangeQuantity.quantity == itemAndSelectedQuantity.quantity
+  }
+  
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(itemSelectedToChangeQuantity));
 });
 
 module.exports = server;

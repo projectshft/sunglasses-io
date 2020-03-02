@@ -9,6 +9,14 @@
 
 
 {
+    "id": "4",
+    "categoryId": "2",
+    "name": "Better glasses",
+    "price": 1500,
+    "quantity": 20
+}
+
+{
     "id": "2",
     "categoryId": "1",
     "name": "Black Sunglasses",
