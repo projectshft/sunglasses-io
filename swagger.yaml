@@ -1,0 +1,270 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses.io webpage
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Brands
+      description: The brands endpoints returns all sunglass brands from the server
+      tags: 
+       - Brands
+      responses:
+        '200':
+          description: An array of brand objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        "503":
+          description: There are currently no brands
+  /api/brands/{id}/products:
+    get: 
+      summary: Products by brand
+      description: Returns all sunglass products for the brand that matches the given brand id
+      parameters:
+        - name: id
+          in: path
+          description: Brand id, return all the given products for given brand id
+          required: true
+          type: string
+      tags: 
+        - Brands
+      responses:
+        '200':
+          description: An array of products objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "503":
+          description: Issue with brand id, no brand with that id, or no products for the given brand
+    
+  /api/products:
+      get:
+        summary: Products
+        description: Return all sunglass products from server
+        tags: 
+          - Products
+        responses:
+          '200':
+            description: An array of products objects.
+            schema:
+              type: array
+              items:
+                $ref: "#/definitions/Product"
+          "503":
+            description: There are no products to return
+          
+  /api/login:
+      post:
+        summary: User login
+        description: Allows a user to login to the webpage.
+        parameters:
+          - name: username & password
+            in: body
+            description: The user name and passowrd for login
+            required: true
+            schema:
+              type: string
+        tags: 
+          - User
+        responses:
+          '200': 
+            description: An access token
+            schema:
+              type: string
+              description: access token give user access for fifteen minutes. Timer is reset after user activity. 
+          '400':
+            description: Incorrectly formatted response
+          '401':
+            description:
+              Incorrect username or password
+  
+  /api/me/cart:
+    get: 
+      summary: User cart
+      description: Returns the items in a logged user's cart.
+      parameters:
+        - name: token
+          in: body
+          description: user's access token.
+          required: true
+          schema:
+            type: string
+      tags: 
+        - User
+      responses:
+        '200':
+          description: An array of products objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User/properties/cart"
+
+        '401':
+          description: You need to have access to this call to continue
+            
+    post:
+      summary: Add to cart
+      description: Add a sunglass item to a user's shopping cart.
+      parameters:
+        - name: token & item
+          in: body
+          description: user's access token and item
+          required: true
+          schema:
+            type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User/properties/cart"
+        '401':
+          description: You need to have access to this call to continue
+    
+    delete: 
+      summary: Remove cart item
+      description: Allows a user to remove an item from their cart.
+      parameters:
+        - name: token
+          in: body
+          description: user's access token
+          required: true
+          schema:
+            type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User/properties/cart"
+        '401':
+          description: You need to have access to this call to continue
+            
+    put:
+      summary: Increment item quantity
+      description: Allows a user to increment the quantity of one of the items in their cart.
+      parameters:
+        - name: token
+          in: body
+          description: user's access token
+          required: true
+          schema:
+            type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products objects.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        '401':
+          description: You need to have access to this call to continue
+            
+definitions: 
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Sunglass brand id number
+      name:
+        type: string
+        description: Brand name
+    
+  Product:
+      type: object
+      properties:
+        id:
+          type: string
+          description: product id number
+        categoryId:
+          type: string
+          description: Id number of the brand the sunglass product belongs to.
+        name:
+          type: string
+          description: name of the product
+        description:
+          type: string
+          description: description of the sunglass product.
+        price:
+          type: number
+          description: price of the sunglass product
+        imageUrls:
+          type: string
+          description: Three image urls for images of the product.
+  User: 
+      type: object
+      properties:
+        gender: 
+          type: string
+          description: gender of the user.
+        cart:
+          type: array
+          description: shopping cart of the user
+          items: 
+            description: Product items
+            type: object
+        name:
+          type: object
+          properties:
+            first:
+              type: string
+              description: User's first name.
+            last:
+              type: string
+              description: User's last name.
+        location:
+          type: object
+          properties:
+            street:
+              type: string
+              description: The user's street address.
+            city:
+              type: string
+              description: City of the user's address
+            state: 
+              type: string
+              description: State of the user's address
+            postcode:
+              type: string
+              description: Postcode of user's address
+        email:
+          type: string
+          description: User's email address.
+        login:
+          type: object
+          properties:
+            username:
+              type: string
+              description: Username of the user
+            password: 
+              type: string
+              description: Password of the user
+        registered:
+          type: string
+          description: Date user registered
+        cell:
+          type: string
+          description: User's cell phone number
+        residentCountry:
+          type: string
+          description: User's coutry of resident.
+        
