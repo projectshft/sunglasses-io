@@ -6,7 +6,6 @@ chai.use(chaiHttp);
 
 //testing to see that all the initial 5 brands are returned when ran
 describe('/GET brands', () => {
-
     it('it should GET all the brands', done => {
         chai
             .request(server)
@@ -71,6 +70,7 @@ describe('/GET products', () => {
                 done();
             });
     });
+
     it('it should GET products that include the keyword if it is in the product description or name', done => {
         chai
             .request(server)
@@ -82,6 +82,7 @@ describe('/GET products', () => {
                 done();
             });
     });
+
     it('it should GET products that include the keyword if the keyword is a brand', done => {
         chai
             .request(server)
@@ -93,6 +94,7 @@ describe('/GET products', () => {
                 done();
             });
     });
+
     it('it should GET products that include the keyword if  it is the price', done => {
         chai
             .request(server)
@@ -104,6 +106,7 @@ describe('/GET products', () => {
                 done();
             });
     });
+
     it('it should not GET products when the keyword does not match', done => {
         chai
             .request(server)
