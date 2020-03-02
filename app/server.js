@@ -7,6 +7,7 @@ var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+var failedLoginAttempts = {};
 
 
 // State holding variables
@@ -15,7 +16,8 @@ var users = [];
 var accessTokens = [];
 var products = {};
 
-const deleteCart = function(){
+//function so the cart can be empty after every test
+const resetCart = function(){
    users.forEach(function(user){
        return user.cart = []
    })
@@ -133,11 +135,25 @@ myRouter.get('/api/products', function(request,response) {
 
 });
 
+// Helpers to get/set our number of failed requests per username
+var getNumberOfFailedLoginRequestsForUsername = function(username) {
+    let currentNumberOfFailedRequests = failedLoginAttempts[username];
+    if (currentNumberOfFailedRequests) {
+      return currentNumberOfFailedRequests;
+    } else {
+      return 0;
+    }
+}
+  
+var setNumberOfFailedLoginRequestsForUsername = function(username,numFails) {
+    failedLoginAttempts[username] = numFails;
+}
+
 // Posts login and returns access Token
 myRouter.post('/api/login', function(request,response) {
 
     //Check if both username and password were entered
-    if (request.body.username && request.body.password) {
+    if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
         
         //search to see if username and password match
         let user = users.find((user)=>{
@@ -146,6 +162,9 @@ myRouter.post('/api/login', function(request,response) {
 
         //if user is found. We need to return current token or create new token
         if (user){
+
+            // If we found a user, reset our counter of failed logins
+            setNumberOfFailedLoginRequestsForUsername(request.body.username,0);
             
             //user successfully logged status
             response.writeHead(200, { "Content-Type": "application/json" });
@@ -175,6 +194,10 @@ myRouter.post('/api/login', function(request,response) {
             }
 
         }else {
+            // Update the number of failed login attempts
+            let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
+            setNumberOfFailedLoginRequestsForUsername(request.body.username,++numFailedForUser);
+
             // When incorrect username or password is entered
             response.writeHead(401, "Invalid username or password");
             return response.end();
@@ -348,7 +371,7 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
 
 
 
-module.exports = { server, deleteCart}
+module.exports = { server, resetCart, setNumberOfFailedLoginRequestsForUsername}
 
 
 

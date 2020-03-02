@@ -1,13 +1,8 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let { server, deleteCart } = require('./app/server');
+let { server, resetCart, setNumberOfFailedLoginRequestsForUsername } = require('./app/server');
 let should = chai.should();
-
-
-
 chai.use(chaiHttp);
-
-
 
 //testing to see that all the initial 5 brands are returned when ran
 describe('/GET brands', () => {
@@ -177,12 +172,54 @@ describe('/POST login', () => {
                 done();
             });
     });
+
+    it('if user password is incorrect 3 times they should recieve a 401', done => {
+        setNumberOfFailedLoginRequestsForUsername("greenlion235", 0)
+        const user = {
+            username: "greenlion235",
+            password: "nottherightpassword"
+        }
+        chai
+            .request(server)
+            .post('/api/login')
+            .send(user)
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai
+                .request(server)
+                .post('/api/login')
+                .send(user)
+                .end((err, res) => {
+                    res.should.have.status(401);
+                    chai
+                    .request(server)
+                    .post('/api/login')
+                    .send(user)
+                    .end((err, res) => {
+                        res.should.have.status(401);
+                        const user2 = {
+                        username: "greenlion235",
+                        password: "waters"
+                        }
+                        chai
+                            .request(server)
+                            .post('/api/login')
+                            .send(user2)
+                            .end((err, res) => {
+                                res.should.have.status(404);
+                                done();
+                        });
+                    })
+                })
+            })
+    });    
 });
 
 describe('Cart', function() {
     beforeEach(function() {
         // runs before each test in this block
-        deleteCart()
+        resetCart()
+        setNumberOfFailedLoginRequestsForUsername("greenlion235", 0)
       });
 
 //testing to get an empty cart when cart is first recieved
