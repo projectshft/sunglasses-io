@@ -119,11 +119,11 @@ paths:
       tags:
         - User
       parameters:
-        -name: accessToken
-        in: query
-        description: token created for the user on the login
-        required: true
-        type: string
+        - name: accessToken
+          in: query
+          description: token created for the user on the login
+          required: true
+          type: string
       responses:
         '200':
           description: List of Products in the user cart
@@ -141,47 +141,42 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-      post:
-        summary: Add product to the user cart
-        description:    The Cart endpoint add new product to the cart.
-        tags:
-          - User
-        parameters:
-          - name: accessToken
-            in: query
-            description: token created for the user on the login
-            required: true
-            type: string
-          - name: product
-            in: body
-            description: the product added to the cart
-            required: true
-            type: object
-        responses:
-          '200':
-            description: List of Products in the user cart
-            schema:
-              $ref: '#/definitions/User'
-          '400':
-            description: Invalid quantity
-            schema:
-              $ref: '#/definitions/Error'
-          '401':
-            description: Need an accessToken to view the cart
-            schema:
-              $ref: '#/definitions/Error'
-          '404':
-            description: Nothing to post or invalid quantity
-            schema:
-              $ref: '#/definitions/Error'
-          '500':
+    post:
+      summary: Add product to the user cart
+      description:    The Cart endpoint add new product to the cart.
+      tags:
+        - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: token created for the user on the login
+          required: true
+          type: string
+      responses:
+        '200':
+          description: List of Products in the user cart
+          schema:
+            $ref: '#/definitions/User'
+        '400':
+          description: Invalid quantity
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Need an accessToken to view the cart
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Nothing to post or invalid quantity
+          schema:
+            $ref: '#/definitions/Error'
+        '500':
           description: Product Has to have price
           schema:
             $ref: '#/definitions/Error'
-          default:
-            description: Unexpected error
-            schema:
-              $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /me/cart/{productId}:
     post:
       summary: Update product properties in the user cart
@@ -253,24 +248,48 @@ definitions:
   User:
     type: object
     properties:
-      user_id:
-        type: integer
-        description: 'Unique identifier representing a specific user'
-      fist_name:
+      gender:
         type: string
-        description: First name of the user.
-      last_name:
-        type: string
-        description: Last name of the user.
-      brands:
+        description: 'Gender of the user'
+      cart:
         type: array
-        description: 'Array of brands ids for the user'
         items:
-          $ref: '#/definitions/Brand'
+          $ref: '#/definitions/Product'
+        description: Array of products in the cart for the user.
+      name:
+        type: object
+        description: Name of the user includes title, first name and last name.
+      location:
+        type: object
+        description: Address of the user.
+      email:
+        type: string
+        description: Email of the user.
+      login:
+        type: object
+        description: Login includes username, password, salt, md5,sha1,sha256.
+      dob:
+        type: string
+        description: Date.
+      registered:
+        type: string
+        description: Date.
+      phone:
+        type: string
+        description: User phone number.
+      cell:
+        type: string
+        description: User cell phone.
+      picture:
+        type: object
+        description: It's an object with large, medium and thumbnail urls for the image.
+      nat:
+        type: string
+        description: EI.
   Brand:
     type: object
     properties:
-      display_name:
+      name:
         type: string
         description: Display name of the brand.
       id:
