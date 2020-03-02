@@ -1,0 +1,289 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands: 
+   get:
+    summary: Brands
+    description:  |
+     The brands endpoint allows a user to get all of the sunglass brands available. 
+    tags: 
+      - Brands
+    responses:
+     '200':
+       description: An array of brand objects 
+       schema: 
+        type: array 
+        items:
+          $ref: '#/definitions/Brand'
+     '404': 
+       description: There are no brands
+  /api/brands/{id}/products:
+    get:
+     summary: Products by Brand
+     description:  |
+      The products by brand endpoint allows a user to get all of the products by brand.
+     parameters:
+      - name: id
+        in: path 
+        description: The id of the brand 
+        required: true 
+        type: string 
+     tags: 
+      - Brands
+     responses:
+      '200':
+        description: An array of product objects 
+        schema: 
+          type: array 
+          items:
+            $ref: '#/definitions/Product'
+      '400': 
+        description: Brand Id is invalid
+      '404': 
+        description: Brand does not exist or brand currently has no products
+  /api/products:
+    get:
+      summary: Products 
+      description: |
+       The products endpoint allows a user to get all of the products.
+      tags:
+       - Products 
+      responses: 
+       '200':
+        description: An array of product objects 
+        schema: 
+          type: array 
+          items: 
+            $ref: '#/definitions/Product'
+       '404': 
+        description: There are no products
+  /api/login:
+    post: 
+     summary: User Login
+     description: |
+      This endpoint allows a user to login.
+     parameters: 
+      - name: username and password 
+        in: body
+        description: The username and password for login 
+        required: true 
+        schema:
+         type: string
+     tags:
+      - Login
+     responses: 
+      '200':
+        description: An access token  
+      '400':
+        description: Incorrectly formatted response
+      '401':
+        description: Invalid username or password
+  /api/me/cart:
+    get:
+     summary: User Cart
+     description: |
+       The user cart endpoint allows user to view what's in their cart.
+     parameters:
+      - name: access token 
+        in: body
+        description: User access token 
+        required: true 
+        schema:
+         type: string
+     tags:
+      - User
+     responses:
+      '200':
+       description: An array of product objects 
+       schema: 
+        type: array 
+        items:
+         description: an array of product objects
+         $ref: '#/definitions/Product'
+      '401': 
+        description: You need to have access to this call to continue
+    post: 
+      summary: Add to Cart
+      description: |
+       The add to cart endpoint allows user to add a product to their cart. 
+      parameters:
+       - name: access token and product
+         in: body
+         description: User access token and product 
+         required: true 
+         schema: 
+          type: string 
+      tags:
+       - User
+      responses:
+       '200':
+        description: An array of product objects 
+        schema: 
+          type: array 
+          items:
+            $ref: '#/definitions/Product'
+       '401': 
+        description: You need to have access to this call to continue
+       '404':
+        description: Product is already in cart or this product doesn't exist
+    delete:
+      summary: Delete from Cart
+      description: |
+       The delete from cart endpoint allows user to remove a product from their cart.
+      parameters:
+       - name: access token 
+         in: body
+         description: User access token 
+         required: true 
+         schema: 
+          type: string 
+      tags:
+       - User
+      responses:
+       '200':
+        description: An array of product objects 
+        schema: 
+          type: array 
+          items: 
+           description: array of product objects
+           $ref: '#/definitions/Product'
+       '401': 
+        description: You need to have access to this call to continue
+    put:
+      summary: Update Product in Cart
+      description: |
+       The update product in cart endpoint allows user to update a product in their cart.
+      parameters:
+       - name: access token 
+         in: body
+         description: User access token 
+         required: true 
+         schema: 
+          type: string 
+      tags:
+       - User
+      responses:
+       '200':
+        description: An array of product objects 
+        schema: 
+          type: array 
+          items:
+            $ref: '#/definitions/Product'
+       '401': 
+        description: You need to have access to this call to continue
+definitions:
+    Brand:
+      type: object
+      properties:
+       id: 
+        type: string
+        description: unique brand id 
+       name:
+        type: string 
+        description: name of brand
+    Product: 
+      type: object 
+      properties:
+       id:
+        type: string
+        description: unique product id 
+       categoryId: 
+        type: string
+        description: unique brand id 
+       name: 
+        type: string
+        description: name of product 
+       description:
+        type: string
+        description: description of product 
+       price:
+        type: number 
+        description: price of product 
+       imageUrls: 
+        type: string
+        description: image of product 
+    User:
+     type: object 
+     properties:
+      gender: 
+       type: string
+       description: gender of user 
+      cart:
+       type: array 
+       items: 
+         description: array of products
+       description: user shopping cart 
+      name: 
+       type: object 
+       properties: 
+        first: 
+          type: string 
+          description: user's first name 
+        last:
+          type: string 
+          description: user's last name 
+      location:
+        type: object 
+        properties: 
+          street:
+            type: string
+            description: user street name 
+          city:
+            type: string 
+            description: user city name 
+          state: 
+            type: string 
+            description: user state name 
+          country:
+            type: string 
+            description: user country address
+          postcode: 
+            type: string 
+            description: user postcode name 
+      email: 
+        type: string 
+        description: user's email 
+      login: 
+        type: object 
+        properties: 
+          username: 
+            type: string 
+            description: user username 
+          password: 
+            type: string 
+            description: user password 
+      registered: 
+        type: string 
+        description: date user signed up 
+      cell: 
+        type: string 
+        description: user cell phone number 
+        
+        
+       
+        
+      
+      
+       
+      
+      
+      
+      
+       
+      
+        
+     
+      
+         
+      
+  
+ 
