@@ -89,43 +89,32 @@ describe('/POST login', () => {
         done();
       });
   });
-  // it('it should NOT POST a token when user does NOT login in with a username or password', done => {
-  //   let login = null
-  //   chai
-  //     .request(server)
-  //     .post('/api/login')
-  //     .send(login)
-  //     .end((err, res) => {
-  //       res.should.have.status(400);
-  //       done();
-  //     });
-  // });
 });
-
 
 describe("/GET me/cart", () => {
-  it("should GET all the products in a logged in user's cart", done => {
-    let cart = [
-      {      
-        id: "2",
-        categoryId: "1",
-        name: "Black Sunglasses",
-        price: 100
-      }
-    ]
+  it("should Get all the products in user's cart", done => {
+    let product = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      price: 100,
+    }
     chai
       .request(server)
-      .get("/api/me/cart")
+      .post('/api/me/cart')
+      .send(product)
       .end((err, res) => {
-          expect(err).to.be.null
-          expect("Content-Type", "application/json");
-          res.body.should.not.equal('null')
+        res.should.have.status(200);
+        chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an("array");
           done();
       });
-  });
+    });
 });
+})
 
 describe("/POST me/cart", () => {
   it("should POST a product to the logged in user's cart", done => {
@@ -253,38 +242,75 @@ describe("/DELETE me/cart/:productId", () => {
   });
 });
 
-describe('/POST me/cart/:productId', () => {
-  it("it should UPDATE a product in the user's cart by the given id", done => {
-      let item = {
+describe("/Post me/cart/:productId", () => {
+  it("should change the quantity of a product and POST it to the cart", done => {
+    let product = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      price: 100
+    }
+    chai.request(server)
+    .post('/api/me/cart')
+    .send(product)
+    .end((err, res) => {
+      res.should.have.status(200)
+      res.body.should.have.property('id');
+      res.body.should.have.property('categoryId');
+      res.body.should.have.property('name');
+      res.body.should.have.property('price');
+      res.body.should.have.property('quantity');;
+      let changedItem = res.body
+      changedItem.quantity = 2
+      chai
+      .request(server)
+      .post("/api/me/cart/" + changedItem.id)
+      .send(changedItem)
+      .end((err, res) => {
+          expect("Content-Type", "application/json");
+          res.should.have.status(200);
+          res.body.should.have.property('id');
+          res.body.should.have.property('categoryId');
+          res.body.should.have.property('name');
+          res.body.should.have.property('price');
+          res.body.should.have.property('quantity');;
+          res.body.quantity.should.equal(2)
+          done();
+      });
+    })
+  });
+  it("should NOT change the quantity of a product and POST it to the cart if it is missing quantity", done => {
+    let product = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      price: 100
+    }
+    chai.request(server)
+    .post('/api/me/cart')
+    .send(product)
+    .end((err, res) => {
+      res.should.have.status(200)
+      res.body.should.have.property('id');
+      res.body.should.have.property('categoryId');
+      res.body.should.have.property('name');
+      res.body.should.have.property('price');
+      res.body.should.have.property('quantity');;
+      let changedItem = {
         id: "2",
         categoryId: "1",
         name: "Black Sunglasses",
-        price: 100,
-      };
-  
+        price: 100
+      }
       chai
       .request(server)
-      .post('/api/me/cart')
-      .send(item)
+      .post("/api/me/cart/" + changedItem.id)
+      .send(changedItem)
       .end((err, res) => {
-        res.should.have.status(200);
-        let changedQuantity = res.body
-        changedQuantity.quantity = 1
-        chai
-        .request(server)
-        .post('/api/me/cart/2')
-        .send(changedQuantity)
-        .end((err, res) => {
-          res.should.have.status(200);
-          chai
-          .request(server)
-          .get('/api/me/cart')
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.quantity.should.equal(2);
+          expect("Content-Type", "application/json");
+          res.should.have.status(400);
           done();
-        })
-      })
-    });
+      });
+    })
   });
 });

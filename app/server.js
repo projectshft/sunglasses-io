@@ -16,19 +16,8 @@ let user = {};
 let products = [];
 let users = [];
 let accessTokens = [];
- // An access token can look like this:
- // {
- //   username: 'sean',
- //   lastUpdated: <A valid date>,
- //   token: 'qwertyuiopasdfg1'
- // }
 let failedLoginAttempts = {};
- // failed atthempt can look like this:
- // {
- //   username: 'sean',
- //   lastAttempt: <A valid date>,
- //   count: 0
- // }
+
 let cart = [];
 
 // Setup router
@@ -60,7 +49,7 @@ myRouter.get("/api/brands", (request, response) => {
     brandsToReturn = brands.filter(brand => brand.name.includes(query));
 
     if (!brandsToReturn) {
-      response.writeHead(404, "Sorry we cannot return the brand you searched.");
+      response.writeHead(404, "Sorry cannot find the search for that brand");
       return response.end();
     }
   } else {
@@ -160,23 +149,6 @@ myRouter.post('/api/login', function(request,response) {
     return response.end();
   }
 });
-
-// Helper method to process access token
-// var getValidTokenFromRequest = function(currentAccessToken) {
-//   if (currentAccessToken) {
-//     // Verify the access token to make sure its valid and not expired
-//     let currentAccessToken = accessTokens.find((accessToken) => {
-//       return accessToken.token == currentAccessToken.token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-//     });
-//     if (currentAccessToken) {
-//       return currentAccessToken;
-//     } else {
-//       return null;
-//     }
-//   } else {
-//     return null;
-//   }
-// };
 
 //GET logged in user's cart
 myRouter.get('/api/me/cart', function(request,response) {
