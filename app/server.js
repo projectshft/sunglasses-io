@@ -51,21 +51,55 @@ let server = http.createServer(function (request, response) {
 )
 
 myRouter.get('/api/brands', function(request, response) {
+  if (brands.length == 0 ) {
+    response.writeHead(503, {'Content-Type': 'text/plain'})
+    return response.end("There are currently no brands")
+  } else {
     response.writeHead(200, {"Content-type": "application/json"})
     return response.end(JSON.stringify(brands))
+  }
 })
 
 myRouter.get('/api/brands/:id/products', function(request, response) {
-    let productsList = products.filter((product) => {
-        return product.categoryId == request.params.id
-    })
-    response.writeHead(200, {"Content-type": "application/json"})
-    return response.end(JSON.stringify(productsList))
+  let patt = new RegExp("^[0-9]*$")
+
+  if (!request.params.id.match(patt)) {
+    response.writeHead(503,{'Content-Type': 'text/plain'})
+    return response.end("Brand id should contain only numbers")
+  }
+
+  let brand = brands.filter((brand) => {
+    return brand.id == request.params.id
+  })
+
+  if (brand.length == 0) {
+    response.writeHead(503,{'Content-Type': 'text/plain'})
+    return response.end("There is no brand with that id")
+  }
+
+  let productsList = products.filter((product) => {
+    return product.categoryId == brand[0].id
+  })
+
+  if (productsList.length == 0) {
+    response.writeHead(503, {'Content-Type': 'text/plain'})
+    return response.end("The given brand has no products")
+  }
+
+  response.writeHead(200, {"Content-type": "application/json"})
+  return response.end(JSON.stringify(productsList))
 })
 
 myRouter.get('/api/products', function(request, response) {
+  if(products.length == 0) {
+    response.writeHead(503, {'Content-Type': 'text/plain'})
+    return response.end("There are no products to return")
+  } 
+  else {
     response.writeHead(200, {"Content-type": "application/json"})
     return response.end(JSON.stringify(products))
+  }
+
 })
 
 // Helpers to get/set our number of failed requests per username
@@ -121,13 +155,16 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
         let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
         setNumberOfFailedLoginRequestsForUsername(request.body.username,++numFailedForUser);
         // When a login fails, tell the client in a generic way that either the username or password was wrong
-        response.writeHead(401, "Invalid username or password");
-        return response.end();
+        response.writeHead(401, {'Content-Type': 'application/json'});
+        return response.end("Invalid username or password");
       }
+    } else if (getNumberOfFailedLoginRequestsForUsername(request.body.username) >= 3) {
+      response.writeHead(400, {'Content-Type': 'application/json'});
+      return response.end("Three incorrect login attempts");
     } else {
       // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-      response.writeHead(400, "Incorrectly formatted response");
-      return response.end();
+      response.writeHead(400, {'Content-Type': 'application/json'});
+      return response.end("Incorrectly formatted response");
     }
   });
   
@@ -142,75 +179,144 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
       });
       if (currentAccessToken) {
         return currentAccessToken;
-      } else {
-        return null;
       }
+
+      let expiredAccessToken = accessTokens.find((accessToken) => {
+        return accessToken.token == token && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+      });
+
+      if (expiredAccessToken) {
+        return "expired"
+      }
+
+      if (!(currentAccessToken) && !(expiredAccessToken)) {
+        return "no access token"
+      }
+
     } else {
-      return null;
+      return "none";
     }
   };
 
 myRouter.get('/api/me/cart', function(request, response) {
-    let currentAccessToken = getValidTokenFromRequest(request);
-    if (!currentAccessToken) {
-      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue");
-      return response.end();
+    let accessToken = getValidTokenFromRequest(request);
+    if (accessToken == "expired") {
+      response.writeHead(400, {'Content-Type': 'application/json'});
+      return response.end("Access token has expired");
+    } else if (accessToken == "no access token") {
+      response.writeHead(400, {'Content-Type': 'application/json'});
+      return response.end("Access token does not exist");
+    } else if (accessToken == "none") {
+      response.writeHead(401, {'Content-Type': 'application/json'});
+      return response.end("You need to have access to this call to continue");
     } else {
         const user = users.find((user) => {
-            return user.login.username == currentAccessToken.username
+            return user.login.username == accessToken.username
         })
         response.writeHead(200, {"Content-type": "application/json"})
-        return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
+        return response.end(JSON.stringify({cart: user.cart, token: accessToken.token}))
     }
 })
 
 myRouter.post('/api/me/cart', function(request, response) {
-    let currentAccessToken = getValidTokenFromRequest(request);
-    if (!currentAccessToken) {
-      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue");
-      return response.end();
-    } else {
+  let accessToken = getValidTokenFromRequest(request);
+  if (accessToken == "expired") {
+    response.writeHead(400, {'Content-Type': 'application/json'});
+    return response.end("Access token has expired");
+  } else if (accessToken == "no access token") {
+    response.writeHead(400, {'Content-Type': 'application/json'});
+    return response.end("Access token does not exist");
+  } else if (accessToken == "none") {
+    response.writeHead(401, {'Content-Type': 'application/json'});
+    return response.end("You need to have access to this call to continue");
+  } else {
         const user = users.find((user) => {
-            return user.login.username == currentAccessToken.username
+            return user.login.username == accessToken.username
         })
-        const newItem = request.body.item
+
+        const newItem = products.find((item) => {
+          return item.id == request.body.item.id
+        })
+
+        if (!newItem) {
+          response.writeHead(401, {'Content-Type': 'application/json'});
+          return response.end("Item does not exist");
+        }
+
+        const repeatItem = user.cart.find((item) => {
+          return item.id == request.body.item.id
+        })
+
+        if (repeatItem) {
+          response.writeHead(401, {'Content-Type': 'application/json'});
+          return response.end("Cannot POST multiple of the same item to the cart, you must increment the item quantity using PUT /api/me/cart/:productId");
+        }
+
         newItem["quantity"] = 1
         user.cart.push(newItem)
         response.writeHead(200, {"Content-type": "application/json"})
-        return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
+        return response.end(JSON.stringify({cart: user.cart, token: accessToken.token}))
     }
 })
 
 myRouter.delete('/api/me/cart/:productId', function(request, response) {
-    let currentAccessToken = getValidTokenFromRequest(request);
-    if (!currentAccessToken) {
-      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, "You need to have access to this call to continue");
-      return response.end();
-    } else {
+  let accessToken = getValidTokenFromRequest(request);
+  if (accessToken == "expired") {
+    response.writeHead(400, {'Content-Type': 'application/json'});
+    return response.end("Access token has expired");
+  } else if (accessToken == "no access token") {
+    response.writeHead(400, {'Content-Type': 'application/json'});
+    return response.end("Access token does not exist");
+  } else if (accessToken == "none") {
+    response.writeHead(401, {'Content-Type': 'application/json'});
+    return response.end("You need to have access to this call to continue");
+  } else {
         const user = users.find((user) => {
-            return user.login.username == currentAccessToken.username
+            return user.login.username == accessToken.username
         })
+
+        const toBeDeleted = user.cart.filter((item) => {
+          return item.id == request.params.productId
+        })
+
+        if (toBeDeleted.length == 0) {
+          response.writeHead(401, {'Content-Type': 'application/json'});
+          return response.end("This item is not in your cart.");
+        }
+
         user.cart = user.cart.filter((item) => {
             return !(item.id == request.params.productId)
         })
         response.writeHead(200, {"Content-type": "application/json"})
-        return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
+        return response.end(JSON.stringify({cart: user.cart, token: accessToken.token}))
     }
 })
 
 myRouter.put('/api/me/cart/:productId', function(request, response) {
-  let currentAccessToken = getValidTokenFromRequest(request);
-  if (!currentAccessToken) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue");
-    return response.end();
+  let accessToken = getValidTokenFromRequest(request);
+  if (accessToken == "expired") {
+    response.writeHead(400, {'Content-Type': 'application/json'});
+    return response.end("Access token has expired");
+  } else if (accessToken == "no access token") {
+    response.writeHead(400, {'Content-Type': 'application/json'});
+    return response.end("Access token does not exist");
+  } else if (accessToken == "none") {
+    response.writeHead(401, {'Content-Type': 'application/json'});
+    return response.end("You need to have access to this call to continue");
   } else {
       const user = users.find((user) => {
-          return user.login.username == currentAccessToken.username
+          return user.login.username == accessToken.username
       })
+
+      const itemToIncrement = user.cart.find((item) => {
+        return item.id = request.params.productId
+      })
+
+      if (!itemToIncrement) {
+        response.writeHead(401, {'Content-Type': 'application/json'});
+        return response.end("Item not in cart. You must add an item before incrementing it");
+      }
+
       user.cart = user.cart.map((item) => {
         if (item.id == request.params.productId) {
           item.quantity ++
@@ -218,20 +324,28 @@ myRouter.put('/api/me/cart/:productId', function(request, response) {
         return item
       })
       response.writeHead(200, {"Content-type": "application/json"})
-      return response.end(JSON.stringify({cart: user.cart, token: currentAccessToken.token}))
+      return response.end(JSON.stringify({cart: user.cart, token: accessToken.token}))
   }
 })
 
 myRouter.get('/api/search', function(request, response) {
   let patt = new RegExp("\q=(.*)")
   const query = patt.exec(request.url)[1]
-  // query = query.toString()
-  query = query.replace("%20", " ")
+
+  if (query.includes("%20")) {
+    response.writeHead(401, {'Content-Type': 'application/json'});
+    return response.end("Please enter a one word search term");
+  }
 
   const searchResults = products.filter((product) => {
     return product.name.includes(query) || product.description.includes(query)
   })
-response.writeHead(200, {"Content-type": "application/json"})
+
+  if (searchResults.length == 0) {
+    response.writeHead(401, {'Content-Type': 'application/json'});
+    return response.end("No items match the entered search term.");
+  }
+  response.writeHead(200, {"Content-type": "application/json"})
   return response.end(JSON.stringify(searchResults))
 })
 
