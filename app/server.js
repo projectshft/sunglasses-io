@@ -2,7 +2,6 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 var finalHandler = require('finalhandler');
-var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
@@ -314,6 +313,5 @@ let server = http.createServer(function (request, response) {
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(user.cart));
   });
-
 
   module.exports = server

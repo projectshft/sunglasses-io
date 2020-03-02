@@ -117,6 +117,7 @@ paths:
       summary: All products in the user cart
       description:    The Cart endpoint returns all products in the cart for the user.
       tags:
+        - Product
         - User
       parameters:
         - name: accessToken
@@ -128,7 +129,7 @@ paths:
         '200':
           description: List of Products in the user cart
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/product'
         '401':
           description: Need an accessToken to view the cart
           schema:
@@ -145,6 +146,7 @@ paths:
       summary: Add product to the user cart
       description:    The Cart endpoint add new product to the cart.
       tags:
+        - Product
         - User
       parameters:
         - name: accessToken
@@ -156,7 +158,7 @@ paths:
         '200':
           description: List of Products in the user cart
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/Product'
         '400':
           description: Invalid quantity
           schema:
@@ -183,6 +185,7 @@ paths:
       description:    The Cart endpoint update product in the cart.
       tags:
       - User
+      - Product
       parameters:
         - name: accessToken
           in: query
@@ -198,7 +201,7 @@ paths:
         '200':
           description: Product with updated properties
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/Product'
         '401':
           description: Need an accessToken to update products in the cart
           schema:
@@ -216,6 +219,7 @@ paths:
       description:    The Cart endpoint deletes product with given id in the cart.
       tags:
       - User
+      - Product
       parameters:
         - name: accessToken
           in: query
@@ -231,7 +235,7 @@ paths:
         '200':
           description: Product with updated properties
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/Product'
         '401':
           description: Need an accessToken to delete product in the cart
           schema:
