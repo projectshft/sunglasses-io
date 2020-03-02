@@ -68,6 +68,36 @@ describe('Products', () => {
                     done();
                 })
         })
+    })
+
+    describe('/GET /api/products', () => {
+        it('it should GET all the products with the name that matches the query', done => {
+            chai
+                .request(server)
+                .get('/api/products')
+                .query({name: "Superglasses"})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    res.body.length.should.be.eql(1);
+                    done();
+                })
+        })
+    }) 
+
+    describe('/GET /api/products', () => {
+        it('it should GET all the products with the description that matches the query', done => {
+            chai
+                .request(server)
+                .get('/api/products')
+                .query({description: "The sweetest glasses in the world"})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    res.body.length.should.be.eql(1);
+                    done();
+                })
+        })
     }) 
 })
 
