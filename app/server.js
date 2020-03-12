@@ -23,8 +23,8 @@ var getValidTokenFromRequest = function(request) {
     var parsedUrl = require('url').parse(request.url,true)
     if (parsedUrl.query.accessToken) {
       // Verify the access token to make sure its valid and not expired
-      let currentAccessToken = verifiedUsers.find((accessToken) => {
-        return accessToken.token == parsedUrl.query.accessToken;
+      let currentAccessToken = verifiedUsers.find((user) => {
+        return user.token == parsedUrl.query.accessToken;
       });
       if (currentAccessToken) {
         return currentAccessToken;

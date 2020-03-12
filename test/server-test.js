@@ -162,43 +162,31 @@ describe('Login', () => {
 
 describe('Me', () => {
     describe('/GET api/me/cart', () => {
-        it('should return 401 error if not logged in with valid token', done => {
-            chai
-                .request(server)
-                .get('/api/me/cart')
-                .end((err, res) => {
-                    res.should.have.status(401)
-                    done()
-                })
-        })
-        // logs test user in prior to tests requiring user
-        before((done) => {
+        it("Should return the products in the current user's cart", done => {
+            let currentUser = {
+                email: "salvador.jordan@example.com",
+                password: "tucker"
+            }
             chai
                 .request(server)
                 .post('/api/login')
                 .set({
                     'Content-Type': 'application/json'
                 })
-                .send({
-                    email: "salvador.jordan@example.com",
-                    password: "tucker"
-                })
+                .send(currentUser)
                 .end((err, res) => {
-                    res.should.have.status(200)
-                    res.body.length.should.equal(16)
-                    validToken = res.body;
-                    done()
-                })
-        })
-        it('should return products currently in user cart', done => {
-            chai
-                .request(server)
-                .get(`/api/me/cart?accessToken=${validToken}`)
-                .end((err, res) => {
-                    res.should.have.status(200)
-                    res.body.should.be.an('array')
-                    res.body.length.should.be.eql(0)
-                    done()
+                    let validToken = res.body
+                    chai
+                        .request(server)
+                        .get('/api/me/cart')
+                        .send(validToken)
+                        .end((err,res) => {
+                            res.should.have.status(200)
+                            res.cart.should.be.an('array')
+                            res.cart.length.should.be.eql(0)
+                        })
+
+
                 })
         })
     })
