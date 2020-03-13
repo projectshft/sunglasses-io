@@ -178,12 +178,14 @@ describe('Me', () => {
                     let validToken = res.body
                     chai
                         .request(server)
-                        .get('/api/me/cart')
-                        .send(validToken)
+                        .get(`/api/me/cart/?accessToken=${validToken}`)
+                        .send()
                         .end((err,res) => {
                             res.should.have.status(200)
-                            res.cart.should.be.an('array')
-                            res.cart.length.should.be.eql(0)
+                            res.body.should.be.an('array')
+                            res.body.length.should.be.eql(0)
+                            console.log(res.body)
+                            done()
                         })
 
 

@@ -20,7 +20,7 @@ myRouter.use(bodyParser.json());
 
 // Helper method to process access token
 var getValidTokenFromRequest = function(request) {
-    var parsedUrl = require('url').parse(request.url,true)
+    var parsedUrl = require('url').parse(request.url, true)
     if (parsedUrl.query.accessToken) {
       // Verify the access token to make sure its valid and not expired
       let currentAccessToken = verifiedUsers.find((user) => {
@@ -210,7 +210,9 @@ myRouter.get('/api/me/cart', function (request, response) {
       'Content-Type': 'application/json'
     })
     // Return all products in user's cart
-    response.end(JSON.stringify(currentUser.cart))
+   
+
+    response.end(JSON.stringify(currentSessionUser.cart))
 })
 
 // Used for testing
