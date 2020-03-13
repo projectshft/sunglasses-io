@@ -19,22 +19,22 @@ const myRouter = Router();
 myRouter.use(bodyParser.json());
 
 // Helper method to process access token
-var getValidTokenFromRequest = function(request) {
+var getValidTokenFromRequest = function (request) {
     var parsedUrl = require('url').parse(request.url, true)
     if (parsedUrl.query.accessToken) {
-      // Verify the access token to make sure its valid and not expired
-      let currentAccessToken = verifiedUsers.find((user) => {
-        return user.token == parsedUrl.query.accessToken;
-      });
-      if (currentAccessToken) {
-        return currentAccessToken;
-      } else {
-        return null;
-      }
+        // Verify the access token to make sure its valid and not expired
+        let currentAccessToken = verifiedUsers.find((user) => {
+            return user.token == parsedUrl.query.accessToken;
+        });
+        if (currentAccessToken) {
+            return currentAccessToken;
+        } else {
+            return null;
+        }
     } else {
-      return null;
+        return null;
     }
-  };
+};
 
 // declare server so it can be exported to the testing file
 const server = http.createServer(function (request, response) {
@@ -70,6 +70,9 @@ const server = http.createServer(function (request, response) {
     console.log(`Server is listening on ${PORT}`);
 
 });
+
+
+////// BELOW ARE THE PATHS FOR THE NODE SERVER //////////
 
 myRouter.get('/api/brands', function (request, response) {
     // Return all the brands in the brands json file
@@ -168,7 +171,7 @@ myRouter.post('/api/login', function (request, response) {
         // find the user with that email and password
         currentSessionUser = users.find(user => user.email === email && user.login.password === password);
 
-        if (!currentSessionUser){
+        if (!currentSessionUser) {
             response.writeHead(401, {
                 'Content-Type': "text/plain"
             })
@@ -184,34 +187,85 @@ myRouter.post('/api/login', function (request, response) {
             }
             //now add verified user to the verifiedUsers array in memory
             verifiedUsers.push(verifiedUser);
-    
+
             response.writeHead(200, ('Success'), {
                 'content-type': 'application/json'
             });
-            
+
             return response.end(JSON.stringify(verifiedUser.token));
         }
     }
 
-  
+
 });
+
+/////////// PATHS BELOW REQUIRED YOU TO BE LOEGGED IN /////////
 
 myRouter.get('/api/me/cart', function (request, response) {
     let currentSession = getValidTokenFromRequest(request);
     if (!currentSession) {
-      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      response.writeHead(401, {
-        'Content-Type': "text/plain"
-      });
-      return response.end("401 error: Must have valid token to access the cart");
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: Must have valid token to access the cart");
     }
-  
+
     response.writeHead(200, {
-      'Content-Type': 'application/json'
+        'Content-Type': 'application/json'
     })
     // Return all products in user's cart
-   
 
+
+    response.end(JSON.stringify(currentSessionUser.cart))
+})
+
+myRouter.post('/api/me/cart', function (request, response) {
+    let currentSession = getValidTokenFromRequest(request);
+    if (!currentSession) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: Must have valid token to access the cart");
+    }
+
+    // Edge Case for adding the same product more than once 
+    //Checks to see if the product being added already exists in the user's cart
+    let duplicateProduct = currentSessionUser.cart.find((product) => {
+        return product.id === request.body.product.id
+    })
+
+    if (duplicateProduct) {
+        response.writeHead(401, {
+            'Content-Type': 'text/plain'
+        });
+        return response.end("ERROR: The product you tried to add already exists in the user's cart, Try the UPDATE path");
+    }
+
+
+    //Match the requested product id with the a product in the products store
+    let newProduct = products.find((product) => {
+        return product.id === request.body.id
+    })
+    //Edge Case for if the product doesn't exist in the Products store
+    if (!newProduct) {
+        response.writeHead(401, {
+            'Content-Type': 'text/plain'
+        });
+        return response.end("This product does not exist");
+    }
+
+    // Added Quantity key to the product being added to handle if it is added again
+    newProduct.quantity = 1
+    // Added the newProduct to the currentSessionUser's so that it only exist in that users cart
+    currentSessionUser.cart.push(newProduct)
+    
+    response.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+
+    // Return all products in user's cart
     response.end(JSON.stringify(currentSessionUser.cart))
 })
 

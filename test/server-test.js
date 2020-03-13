@@ -180,10 +180,48 @@ describe('Me', () => {
                         .request(server)
                         .get(`/api/me/cart/?accessToken=${validToken}`)
                         .send()
-                        .end((err,res) => {
+                        .end((err, res) => {
                             res.should.have.status(200)
                             res.body.should.be.an('array')
                             res.body.length.should.be.eql(0)
+                            done()
+                        })
+
+
+                })
+        })
+    })
+    describe('/POST api/me/cart', () => {
+        it("Should add a product to the current user's cart", done => {
+            let currentUser = {
+                email: "salvador.jordan@example.com",
+                password: "tucker"
+            }
+            chai
+                .request(server)
+                .post('/api/login')
+                .set({
+                    'Content-Type': 'application/json'
+                })
+                .send(currentUser)
+                .end((err, res) => {
+                    let validToken = res.body
+                    let newProduct = {
+                        "id": "1",
+                        "categoryId": "1",
+                        "name": "Superglasses",
+                        "description": "The best glasses in the world",
+                        "price": 150,
+                        "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                    }
+                    chai
+                        .request(server)
+                        .post(`/api/me/cart/?accessToken=${validToken}`)
+                        .send(newProduct)
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            res.body.should.be.an('array')
+                            res.body.length.should.be.eql(1)
                             console.log(res.body)
                             done()
                         })
