@@ -281,19 +281,19 @@ myRouter.put('/api/me/cart/:productId', function (request, response) {
 
     //Send an error if the cart is empty 
     if (currentSessionUser.cart.length === 0) {
-        response.writeHead(401, {
+        response.writeHead(402, {
             'Content-Type': "text/plain"
         });
-        return response.end("401 error: INVALID ACTION the currentSessionUser's Cart is empty");
+        return response.end("402 error: INVALID ACTION the currentSessionUser's Cart is empty");
     }
 
     // Edge case for if the quantity sent was negative or zero
     let requestedQuantity = request.body.quantity;
     if (requestedQuantity < 1) {
-        response.writeHead(401, {
+        response.writeHead(403, {
             'Content-Type': "text/plain"
         });
-        return response.end("401 error: Quantity can't be Zero or a Negative");
+        return response.end("403 error: Quantity can't be Zero or a Negative");
     }
     // The product we will need to find and update the quantity of
     let requestedProductId = request.params.productId
@@ -302,6 +302,7 @@ myRouter.put('/api/me/cart/:productId', function (request, response) {
     let cartProductIndex = currentSessionUser.cart.findIndex(product => {
         return product.id === requestedProductId;
     })
+
 
     //Now use the the cartProductIndex to update the request product with the requested quantity
 
@@ -330,10 +331,10 @@ myRouter.delete('/api/me/cart/:productId', function (request, response) {
 
     //Send an error if the cart is empty 
     if (currentSessionUser.cart.length === 0) {
-        response.writeHead(401, {
+        response.writeHead(402, {
             'Content-Type': "text/plain"
         });
-        return response.end("401 error: INVALID ACTION the currentSessionUser's Cart is empty");
+        return response.end("402 error: INVALID ACTION the currentSessionUser's Cart is empty");
     }
 
     // productToDelete is need to find the product we want to remove from the cart

@@ -1,174 +1,252 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  title: "API for Sunglasses.io"
-  description: "This is an API that gives us access to Swagger.io store."
-  version: "1.0.0"
-host: "localhost:3001"
+  title: Sunglasses.io API
+  description: Sunglasses.io API
+  version: 1.0.0
+host: localhost:8080
 schemes:
-  - "https"
-basePath: "/api"
-tags: 
-  - name: "Brands"
-    description: "The Brand that made the pair of sunglasses"
-  - name: "Products"
-    description: "Sunglasses"
-  - name: "Me"
-    description: "A verified user"
+  - http
+basePath: /api
+produces:
+  - application/json
 paths:
-  /brands:
-    get:
-      summary: "Brands"
-      description: "A list of all the Brands"
-      tags:
-        - "Brands"
-      responses: 
-        200:
-          description: "Success: An array of Brands"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Brands"
-        default:
-          description: "Unexpexted error"
-          schema:
-            $ref: '#/definitions/Error'
-  /brands/:id/products:
-    get:
-      summary: "Products"
-      description: "A list of products matching the brandID"
-      tags:
-      - "Brands"
-      parameters:
-        - name: "id"
-          in: "path"
-          description: "brandID"
-          required: true
-          type: "string"
-      responses: 
-        200:
-          description: "Success: An array of Products with brandID"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Product"
-        404:
-          description: "Error: BrandId was not found"
-        default:
-          description: "Unexpexted error"
-          schema:
-            $ref: '#/definitions/Error'
   /products:
     get:
-      summary: "Products"
-      description: "Products allows you to search based on name or description of the product your looking for."
       tags:
-        - "Products"
+        - Products
+      summary: Products
+      description: |
+        The Products in this API are sunglasess and they also have their associated brands. This API ensures that a user must be logged in before accessing cart paths.
       parameters:
-        - name: "query"
-          in: "query"
-          description: "query from the search"
+        - name: query
+          in: query
+          description: Search query string
           required: false
-          type: "string"
+          type: string
       responses:
-        200:
-          description: "An array of products"
+        '200':
+          description: An array of products
           schema:
-            type: "array"
+            type: array
             items:
               $ref: '#/definitions/Product'
         default:
-          description: "Unexpected Error"
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands
+      description: |
+        The manufacturer brands of each pair of sunglasses that are located in the store.
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: Products by Brand
+      description: |
+        All products manfuctured by that Brand
+      parameters:
+        - name: id
+          in: path
+          description: brand id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Array of products in brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Brand not found
+        default:
+          description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
   /login:
     post:
       tags:
-      - "Login"
-      summary: "User Login"
+      - Login
+      summary: User Login
       description : |
         Logs user into application
       parameters:
-        - name: "Email"
-          in: "header"
+        - name: Email
+          in: header
           required: true
-          description: "Email login input"
-          type: "string"
-        - name: "Password"
-          in: "header"
+          description: Email login input
+          type: string
+        - name: Password
+          in: header
           required: true
-          description: "Password login input"
-          type: "string"
+          description: Password login input
+          type: string
       responses:
-        200:
-          description: "Success: You are logged in an received an access token"
-        400:
-          description: "Error: Email or Password Field was left empty"
-        401:
-          description: "Error: Email or Password Field was incorrect"
+        '200':
+          description: successful login
+        '400':
+          description: Either username or password was left empty in the request
+        '401':
+          description: Either the email or password was invalid 
   /me/cart:
     get:
       tags:
-        - "Me"
-      summary: "Shopping Cart"
+        - Me
+      summary: Shopping Cart
       description: |
         Shopping cart for currently logged in user.
+      security:
+        - basicAuth: []
       responses:
-        200:
-          description: "An array of products in current user's cart"
+        '200':
+          description: Returns all products in the user's cart as an Array.
           schema:
-            type: "array"
+            type: array
             items:
               $ref: '#/definitions/Product'
-          401:
-            decription: "Error: You must be logged in to access the cart"
-            schema: "#/definitions/AuthorizationError"
-          default:
-            description: "Unexpected Error"
-            schema:
-              $ref: '#/definitions/Error'
+        '400':
+          $ref: '#/definitions/UnauthorizedError'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - Me
+      summary: Add to Cart
+      description: |
+        Adds specified product to the Shopping Cart
+      security:
+        - basicAuth: []
+      responses:
+        '200':
+          description: The Specified Product Was Added to the Shoping Cart
+        '401':
+          $ref: '#/definitions/UnauthorizedError'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    put:
+      tags:
+        - Me
+      summary: Change quantity
+      description: |
+       Change quantity of product in cart
+      security:
+        - basicAuth: []
+      parameters:
+        - name: productId
+          in: path
+          description: Specified productId to update quantity
+          required: true
+          type: string
+        - name: quantity
+          in: header
+          description: Set quantity of product in cart (min 1)
+          required: true
+          type: integer
+          minimum: 1
+      responses:
+        '200':
+          description: Quantity updated
+        '403':
+          description: Quantity can't be Zero or a Negative
+        '402':
+          description: INVALID ACTION the currentSessionUser's Cart is empty
+        '404':
+          description: Product ID not found in cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+        - Me
+      summary: Remove from Cart
+      description: |
+        Remove selected item from Cart
+      security:
+        - basicAuth: []
+      parameters:
+        - name: productId
+          in: path
+          description: Product ID to remove from cart
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Item removed
+        '402':
+          description: INVALID ACTION the currentSessionUser's Cart is empty
+        '404':
+          description: Product ID not found in cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+securityDefinitions:
+  basicAuth:
+    type: basic
 definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The Product's Unique ID
+      brandId:
+        type: string
+        description: The Product's BrandID
+      name:
+        type: string
+        description: The Product's Name
+      description:
+        type: string
+        description: The Product's Description
+      price:
+        type: integer
+        description: The Product's Price
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Link to the product's image 
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          Identifier of the Brand
+      name:
+        type: string
+        description: Brand
   Error:
-    type: "object"
+    type: object
     properties:
       code:
-        type: "integer"
-        format: "int32"
+        type: integer
+        format: int32
       message:
-        type: "string"
+        type: string
       fields:
-        type: "string"
-  AuthorizationError:
-    description: "Must be a verified user"
-  Brands:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-        description: "The Brands unique identifier"
-      name:
-        type: "string"
-        description: "The name of the Brand"
-  Product:
-    type: "object"
-    properties:
-      id:
-        type: "string"
-        description: "Id for a pair of sunglasses"
-      brandId:
-        type: "string"
-        description: "The brand that made the pair of sunglasses"
-      name:
-        type: "string"
-        description: "The name of the pair of sunglasses"
-      description:
-        type: "string"
-        description: "The description of the pair of sunglasses"
-      price:
-        type: "integer"
-        description: "The price associated with the pair of sunglasses"
-      imageUrls:
-        type: "array"
-        items:
-          type: "string"
-        description: "An image of the pair of sunglasses"
-  
+        type: string
+  UnauthorizedError:
+    description: Auth error. You Must be a valid user.
