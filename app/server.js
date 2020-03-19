@@ -269,5 +269,46 @@ myRouter.post('/api/me/cart', function (request, response) {
     response.end(JSON.stringify(currentSessionUser.cart))
 })
 
+myRouter.put('/api/me/cart/:productId', function (request, response) {
+    let currentSession = getValidTokenFromRequest(request);
+    if (!currentSession) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: Must have valid token to access the cart");
+    }
+
+    // Edge case for if the quantity sent was negative or zero
+    let requestedQuantity = request.body.quantity;
+    if (requestedQuantity < 1 ) {
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: Quantity can't be Zero or a Negative");
+    }
+    // The product we will need to find and update the quantity of
+    let requestedProductId = request.params.productId 
+
+    //Check to see if the product exists in the cart so we can update the quantity and if so return index for reference
+    let cartProductIndex = currentSessionUser.cart.findIndex(product => {
+        return product.id === requestedProductId;
+    })
+
+    //Now use the the cartProductIndex to update the request product with the requested quantity
+
+    currentSessionUser.cart[cartProductIndex].quantity = requestedQuantity;
+
+   
+    
+
+    response.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+
+    // We Are just going to send back the product that was updated in the cart
+    response.end(JSON.stringify(currentSessionUser.cart[cartProductIndex]))
+})
+
 // Used for testing
 module.exports = server;

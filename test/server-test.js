@@ -222,12 +222,44 @@ describe('Me', () => {
                             res.should.have.status(200)
                             res.body.should.be.an('array')
                             res.body.length.should.be.eql(1)
+                            res.body[0].quantity.should.be.eql(1)
                             console.log(res.body)
                             done()
                         })
-
-
                 })
         })
     })
+    describe('/PUT api/me/cart/:productId', () => {
+        it('Should update the quantity of a product that already exists in the cart', done => {
+            let currentUser = {
+                email: "salvador.jordan@example.com",
+                password: "tucker"
+            }
+            chai
+                .request(server)
+                .post('/api/login')
+                .set({
+                    'Content-Type': 'application/json'
+                })
+                .send(currentUser)
+                .end((err, res) => {
+                    let validToken = res.body
+
+                    chai.request(server)
+                        .put(`/api/me/cart/1/?accessToken=${validToken}`)
+                        .send({
+                            quantity: 3
+                        })
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            res.body.should.be.an('object')
+                            res.body.should.have.property('quantity')
+                            res.body.quantity.should.eql(3)
+                            done()
+                        })
+                })
+        })
+    })
+
+    // TODO: Write Tests for UPDATE AND DELETE
 })
