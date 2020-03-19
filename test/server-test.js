@@ -260,6 +260,34 @@ describe('Me', () => {
                 })
         })
     })
+    describe('/DELETE api/me/cart/:productId', () => {
+        it('Should remove the product from the cart given the productId', done => {
+            let currentUser = {
+                email: "salvador.jordan@example.com",
+                password: "tucker"
+            }
+            chai
+                .request(server)
+                .post('/api/login')
+                .set({
+                    'Content-Type': 'application/json'
+                })
+                .send(currentUser)
+                .end((err, res) => {
+                    let validToken = res.body
+                    // In the path below the 1 represents the productId
+                    chai.request(server)
+                        .delete(`/api/me/cart/1/?accessToken=${validToken}`)
+                        .send()
+                        .end((err, res) => {
+                            res.should.have.status(200)
+                            res.body.should.be.an('array')
+                            res.body.length.should.eql(0)
+                            done()
+                        })
+                })
+        })
+    })
 
-    // TODO: Write Tests for UPDATE AND DELETE
+   
 })

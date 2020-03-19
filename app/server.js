@@ -260,7 +260,7 @@ myRouter.post('/api/me/cart', function (request, response) {
     newProduct.quantity = 1
     // Added the newProduct to the currentSessionUser's so that it only exist in that users cart
     currentSessionUser.cart.push(newProduct)
-    
+
     response.writeHead(200, {
         'Content-Type': 'application/json'
     })
@@ -279,16 +279,24 @@ myRouter.put('/api/me/cart/:productId', function (request, response) {
         return response.end("401 error: Must have valid token to access the cart");
     }
 
+    //Send an error if the cart is empty 
+    if (currentSessionUser.cart.length === 0) {
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: INVALID ACTION the currentSessionUser's Cart is empty");
+    }
+
     // Edge case for if the quantity sent was negative or zero
     let requestedQuantity = request.body.quantity;
-    if (requestedQuantity < 1 ) {
+    if (requestedQuantity < 1) {
         response.writeHead(401, {
             'Content-Type': "text/plain"
         });
         return response.end("401 error: Quantity can't be Zero or a Negative");
     }
     // The product we will need to find and update the quantity of
-    let requestedProductId = request.params.productId 
+    let requestedProductId = request.params.productId
 
     //Check to see if the product exists in the cart so we can update the quantity and if so return index for reference
     let cartProductIndex = currentSessionUser.cart.findIndex(product => {
@@ -299,8 +307,8 @@ myRouter.put('/api/me/cart/:productId', function (request, response) {
 
     currentSessionUser.cart[cartProductIndex].quantity = requestedQuantity;
 
-   
-    
+
+
 
     response.writeHead(200, {
         'Content-Type': 'application/json'
@@ -308,6 +316,58 @@ myRouter.put('/api/me/cart/:productId', function (request, response) {
 
     // We Are just going to send back the product that was updated in the cart
     response.end(JSON.stringify(currentSessionUser.cart[cartProductIndex]))
+})
+
+myRouter.delete('/api/me/cart/:productId', function (request, response) {
+    let currentSession = getValidTokenFromRequest(request);
+    if (!currentSession) {
+        // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: Must have valid token to access the cart");
+    }
+
+    //Send an error if the cart is empty 
+    if (currentSessionUser.cart.length === 0) {
+        response.writeHead(401, {
+            'Content-Type': "text/plain"
+        });
+        return response.end("401 error: INVALID ACTION the currentSessionUser's Cart is empty");
+    }
+
+    // productToDelete is need to find the product we want to remove from the cart
+    let productToDelete = request.params.productId;
+
+    //Next see if the Id given in the request matches a product Id in the user's cart
+    let productExists = currentSessionUser.cart.find(product => {
+        return product.id === productToDelete;
+    })
+
+    if (!productExists) {
+        res.writeHead(404, {
+            'Content-Type': "text/plain"
+        });
+        return res.end("404: The Product you requested to be deleted does not exist in the user's cart");
+    }
+
+    // Next Filter the user's cart so that the product requested for deletion doesn't exist in the cart anymore
+    
+    let cartAfterDeletion = currentSessionUser.cart.filter(product => {
+        return product.id !== productToDelete
+    })
+
+    //Now set the currentSessionUser's cart to eqaul the newly filter out array
+    currentSessionUser.cart = cartAfterDeletion;
+
+
+
+    response.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+
+    // We Are going to sen back the cart so the front-end knows what the cart looks like after deleting the request product for deletion
+    response.end(JSON.stringify(currentSessionUser.cart))
 })
 
 // Used for testing
