@@ -23,11 +23,17 @@ let server = http.createServer(function (request, response) {
       return console.log('Error on Server Startup: ', error)
     }
     //Reads the brands.JSON file
-    fs.readFile('../initial-data/brands.json', 'utf8', function (error, data) {
+    fs.readFile('./initial-data/brands.json', 'utf8', function (error, data) {
       if (error) throw error;
       brands = JSON.parse(data);
       console.log(`Server setup: ${brands.length} brands loaded`);
     });
+
+    fs.readFile('./initial-data/products.json', 'utf8', function (error, data) {
+        if (error) throw error;
+        products = JSON.parse(data);
+        console.log(`Server setup: ${products.length} products loaded`);
+      });
     
     console.log(`Server is listening on ${PORT}`);
   });
@@ -36,6 +42,18 @@ let server = http.createServer(function (request, response) {
 myRouter.get('/api/brands', function(request,response){
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(brands));
+});
+
+myRouter.get('/api/brands/:id/products', function(request,response){
+    let productsWithBrandId = products.filter((product) => product.categoryId === request.params.id)
+
+    if (productsWithBrandId.length === 0) {
+		response.writeHead(404);	
+		return response.end("Brand ID could not be found");
+	}
+    
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(productsWithBrandId));
 });
 
 module.exports = server;
