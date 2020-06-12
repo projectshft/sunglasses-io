@@ -90,19 +90,58 @@ describe("/GET products", () => {
     .end((err, res) => {
       expect(err).to.be.null;
       expect(res).to.have.status(200);
-      expect("Content-Type", "application/json");
+      expect("Content-Type", "application/json");//look at response.headers, this needs to be edited
       expect(res.body).to.be.an("array");
       expect(res.body).to.have.lengthOf(11);//length of total product list
       done();
       });
   });
-  it.only("fails as expected with unrecognized query", done => {
+  //return to this to add failing condition?
+});
+
+//LOGIN
+const fullUserCredentials = {
+  username: 'yellowleopard753',
+  password: 'jonjon'
+}
+const missingUserCredentials = {
+  username: 'yellowleopard743',
+  password: ''
+}
+const wrongCredentials = {
+  username: "someguy",
+  password: "password"
+}
+
+describe("/POST user login", () => {
+  it.only("should return 200 response if the user logged in correctly", done => {
     chai
       .request(server)
-      .get("/api/products?query=banana") //should this be here? Right now I have it set up so that if a query doesn't return anything, theres an error. Should empty search results be an error?
+      .post("/api/login")
+      .send(fullUserCredentials)
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res).to.have.status(200); 
         done();
       });
-  });
-});
+  })
+  it.only("should return 400 if user is missing a parameter", done => {
+    chai
+    .request(server)
+    .post("/api/login")
+    .send(missingUserCredentials)
+    .end((err, res) => {
+      expect(res).to.have.status(400); 
+      done();
+    });
+  })
+  it.only("should return 401 if the login fails", done => {
+    chai
+    .request(server)
+    .post("/api/login")
+    .send(wrongCredentials)
+    .end((err, res) => {
+      expect(res).to.have.status(401); 
+      done();
+    });
+  })
+})
