@@ -4,9 +4,11 @@ var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
+const url = require("url");
 var uid = require('rand-token').uid;
 
 let brands = [];
+let NumofBrands = 5;
 
 //set up server
 const PORT = 3001;
@@ -62,7 +64,7 @@ const server = http.createServer((req, res) => {
       const productList = products.filter(product => product.categoryId.includes(id));
       const numId = parseInt(id, 10)
       
-      if (numId >= 5) { //hardcode number of brands. this says that the number of brands can't be more than 5
+      if (numId >= NumofBrands) { //hardcode number of brands. this says that the number of brands can't be more than 5, probably a better way to do this
         response.writeHead(404, "That brand does not exist");
         return response.end();
       }
@@ -70,5 +72,23 @@ const server = http.createServer((req, res) => {
       return response.end(JSON.stringify(productList));
     });
 
+    //GET PRODUCTS BY SEARCH
+    router.get("/api/products", (request, response) => {
+      const parsedUrl = url.parse(request.originalUrl); //parse the url to get the query
+      const { query } = queryString.parse(parsedUrl.query);
+      let productsToReturn = [];
+      if (query) {//if the query is defined, filter the products by query and assign them to productsToReturn
+        productsToReturn = products.filter(product => product.description.includes(query));
+
+        if (productsToReturn.length == 0 ) {//if the query is defined but there are no goals to return, 404 error || I tried to use (!productsToReturn) but this didn't work
+          response.writeHead(404, "There aren't any goals to return");
+          return response.end();
+        }
+      } else {
+        productsToReturn = products;
+      }
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(productsToReturn));
+    });
 
 module.exports = server
