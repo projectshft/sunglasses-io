@@ -1,0 +1,328 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses platform
+  version: 1.0.0
+host: sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint allows you to search products based on a search string or product id, with ability to limit results, by default returns all products
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: productId
+          in: query
+          description: The id of product to find  
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+        - User
+      summary: Logs user into the system
+      description: ''
+      operationId: loginUser
+      produces:
+        - application/json
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: calls per hour allowed by the user
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+        '400':
+          description: Invalid username/password supplied
+  /me/cart:
+    get:
+      summary: View shopping cart
+      description: |
+        This endpoint allows user to view the current state of their shopping cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: View cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add to cart
+      description: |
+        This endpoint allows user to add products to shopping cart
+      parameters:
+        - name: productId
+          in: query
+          description: The id of the product to add
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Add to cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      summary: Delete from cart
+      description: |
+        This endpoint allows user to delete product from shopping cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to delete
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Delete is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Change quantity
+      description: |
+        This endpoint allows user to change quantity of product in shopping cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to edit
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          description: The 
+          required: true
+          type: number
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Update is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      summary: All brands
+      description: >
+        The Brands endpoint returns list of all brands available for browsing
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{brandId}/products:
+    get:
+      summary: Products in Brand
+      description: >
+        All of the products of a given brand
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand to search for products in.
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products of the specified brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of product
+      imageURL:
+        type: string
+        description: The URL for the image representing the product
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of user.
+      cart:
+        type: array
+        description: Shopping cart of the user.
+        items:
+          $ref: '#/definitions/Product'
+      name:
+        type: object
+        description: Full name of user
+        properties:
+          title: 
+            type: string
+            description: Title of user
+          first: 
+            type: string
+            description: First name of user
+          last:
+            type: string
+            description: Last name of user
+      location:
+        type: object
+        description: Location of user
+        properties:
+          street: 
+            type: string
+            description: Street where user is located
+          city: 
+            type: string
+            description: City where user is locatedr
+          state:
+            type: string
+            description: State where user is located
+          postcode:
+            type: number
+            format: int32
+            description: Postal code where user is located
+      email:
+        type: string
+        description: Email address of user
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: Username of user
+          password:
+            type: string
+            description: Password of user
+          salt:
+            type: string
+            description: Encryption for password
+          md5:
+           type: string
+           description: Encryption for password
+          sha1:
+            type: string
+            description: Encryption for password
+          sha256:
+            type: string
+            description: Encryption for password
+      dob:
+        type: string
+        description: User date of birth
+      registered:
+        type: string
+        description: Timestamp of registration
+      phone:
+        type: string
+        description: Main phone number of user
+      cell:
+        type: string
+        description: Cell phone number of user
+      picture:
+        type: object
+        description: Photo of user in multiple sizes
+        properties:
+          large: 
+            type: string
+            description: Image URL for large photo of user
+          medium: 
+            type: string
+            description: Image URL for medium photo of user
+          thumbnail:
+            type: string
+            description: Image URL for small photo of user  
+      nat:
+        type: string
+        description: Network Address Translation
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
