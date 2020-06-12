@@ -44,14 +44,31 @@ const server = http.createServer((req, res) => {
     fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
   }
 
+
+  //RETURNS ALL BRANDS
   router.get("/api/brands", (request, response) => {
-//is there no need for a query since they are all being returned?
+    //is there no need for a query since they are all being returned?
     if (!brands) {
       response.writeHead(404, "No brands to return");
       return response.end();
-  } else 
+    } else 
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(brands));
+    });
+
+    //GET PRODUCTS BY BRAND ID
+    router.get("/api/brands/:id/products", (request, response) => {
+      const { id } = request.params;
+      const productList = products.filter(product => product.categoryId.includes(id));
+      const numId = parseInt(id, 10)
+      
+      if (numId >= 5) { //hardcode number of brands. this says that the number of brands can't be more than 5
+        response.writeHead(404, "That brand does not exist");
+        return response.end();
+      }
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(JSON.stringify(brands));
-  });
+      return response.end(JSON.stringify(productList));
+    });
 
 
+module.exports = server
