@@ -1,8 +1,8 @@
-let Brands = require('./initial-data/brands.json')
+let Brands = require('../initial-data/brands.json')
 
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('./app/server.js');
+let server = require('../app/server.js');
 
 let should = chai.should();
 
@@ -72,6 +72,26 @@ describe('/GET products', () => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(11)
+        done();
+      });
+  });
+});
+
+describe('/POST login', () => {
+  it('should create user session for a valid user', done => {
+    let login = {
+        username: 'greenlion235', 
+        password: 'waters' 
+      }
+    
+    // act
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(login)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
         done();
       });
   });
