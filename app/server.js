@@ -28,7 +28,7 @@ let server = http.createServer(function (request, response) {
       brands = JSON.parse(data);
       console.log(`Server setup: ${brands.length} brands loaded`);
     });
-
+    //Reads the products.JSON file
     fs.readFile('./initial-data/products.json', 'utf8', function (error, data) {
         if (error) throw error;
         products = JSON.parse(data);
@@ -43,7 +43,7 @@ myRouter.get('/api/brands', function(request,response){
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(brands));
 });
-
+// Route to the products for a specific brand ID. Should return products offered for that brand
 myRouter.get('/api/brands/:id/products', function(request,response){
     let productsWithBrandId = products.filter((product) => product.categoryId === request.params.id)
 
@@ -54,6 +54,12 @@ myRouter.get('/api/brands/:id/products', function(request,response){
     
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(productsWithBrandId));
+});
+
+// Route to the products. Should return all products offered
+myRouter.get('/api/products', function(request,response){
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(products));
 });
 
 module.exports = server;
