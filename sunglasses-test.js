@@ -61,7 +61,21 @@ describe('/GET brand products', () => {
       });  
 });
 
-
+describe('/GET products', () => {
+  it('should GET a list of all products', done => {
+    // act
+    chai
+      .request(server)
+      .get('/api/products')
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(11)
+        done();
+      });
+  });
+});
 
 
 
