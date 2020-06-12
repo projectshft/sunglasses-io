@@ -25,6 +25,42 @@ describe('/GET brands', () => {
     });
 });
 
+describe('/GET brand products', () => {
+  it('should GET all products of a given brand', done => {
+    // act
+    chai
+      .request(server)
+      .get(`/api/brands/2/products`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(2)
+        done();
+      });
+  });
+  it ('should error if invalid brand id is passed', done => {
+    chai
+        .request(server)
+        .get(`/api/brands/6/products`)
+        .end((err, res) => {
+          // assert
+          res.should.have.status(404);
+          done();
+        });
+      });
+  it ('should error if no brand id is passed', done => {
+    chai
+        .request(server)
+        .get(`/api/brands//products`)
+        .end((err, res) => {
+          // assert
+          res.should.have.status(404);
+          done();
+        });
+      });  
+});
+
 
 
 
