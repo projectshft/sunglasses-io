@@ -8,6 +8,9 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
+//Setup router
+var myRouter = Router();
+
 http.createServer(function (request, response) {
 
 }).listen(PORT);
