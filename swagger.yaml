@@ -1,0 +1,414 @@
+---
+swagger: "2.0"
+info:
+  description: 'An API for the Sunglasses Store.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters.'
+  version: 1.0.0
+  title: Sunglasses-io
+  termsOfService: ""
+  contact:
+    email: adholton@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+host: virtserver.swaggerhub.com
+basePath: /ADH_ProjectShift/Sunglasses-io/1.0.0
+tags:
+- name: Brands
+  description: Access to sunglasses brands
+- name: Products
+  description: Access to sunglasses product types
+- name: Login
+  description: Access to user login
+- name: User
+  description: Access to user account (specifically for adding to/modifying cart)
+schemes:
+- https
+- http
+produces:
+- application/json
+paths:
+  /brands:
+    get:
+      tags:
+      - Brands
+      summary: Get all brands of sunglasses
+      description: |
+        This endpoint will show all brands of sunglasses or only sunglasses specified in query
+      operationId: getSunglassesBrands
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: query
+        in: query
+        description: Search query string
+        required: false
+        type: string
+      responses:
+        "200":
+          description: operation successful, an array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+  /brands/{id}/products:
+    get:
+      tags:
+      - Brands
+      summary: Get product types of each brand
+      description: |
+        This endpoint will get all the products of a certain brand
+      operationId: getProductsBySunglassesBrandId
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: The id of the brands to search for products in.
+        required: true
+        type: string
+      responses:
+        "200":
+          description: operation successful, an array products of a particular brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+  /products:
+    get:
+      tags:
+      - Products
+      summary: Gets product types
+      description: |
+        This endpoint will show all product types of sunglasses or only product types specified in query
+      operationId: getProducts
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: query
+        in: query
+        description: Search query string
+        required: false
+        type: string
+      responses:
+        "200":
+          description: operation successful, an array products types, regardless of brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+  /login:
+    post:
+      tags:
+      - Login
+      summary: Creates a user profile
+      description: |
+        This can only be done by the logged in user?
+      operationId: createUser
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Creates user object
+        required: true
+        schema:
+          $ref: '#/definitions/Login'
+      responses:
+        "200":
+          description: operation successful, user profile created
+          schema:
+            type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+  /me/cart:
+    get:
+      tags:
+      - User
+      summary: Gets user's cart
+      description: |
+        This endpoint returns the user's cart after they have been authorized
+      operationId: getUserCart
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: api_key
+        in: header
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Operation successful, returns user's cart
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+      - sunglassesstore_auth:
+        - write:itemsInCart
+        - read:itemsInCart
+    post:
+      tags:
+      - User
+      summary: Add item to authorized user's cart (this is definitely to add item to cart but why no id? params?)
+      description: |
+        Adds an item to authorized user's cart (this definitely adds item to cart, but why no id? params?)
+      operationId: addItemToCart
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: api_key
+        in: header
+        required: true
+        type: string
+      responses:
+        "200":
+          description: successful operation, item added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+      - sunglassesstore_auth:
+        - write:itemsInCart
+        - read:itemsInCart
+  /me/cart/{productId}:
+    post:
+      tags:
+      - User
+      summary: Change quantity of item in authorized user's cart
+      description: |
+        Change quantity of item in authorized user's cart
+      operationId: changeItemQuantity
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: api_key
+        in: header
+        required: true
+        type: string
+      - name: productId
+        in: path
+        description: Product Id to delete
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: successful operation, item quantity modified
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/User'
+      security:
+      - api_key: []
+      - sunglassesstore_auth:
+        - write:itemsInCart
+        - read:itemsInCart
+    delete:
+      tags:
+      - User
+      summary: Delete item(s) from authorized user's cart
+      description: |
+        Deletes an item from authorized user's cart
+      operationId: deleteItem
+      produces:
+      - application/xml
+      - application/json
+      parameters:
+      - name: api_key
+        in: header
+        required: true
+        type: string
+      - name: productId
+        in: path
+        description: Product Id to delete
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: successful operation, item deleted from cart
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+      - api_key: []
+      - sunglassesstore_auth:
+        - write:itemsInCart
+        - read:itemsInCart
+securityDefinitions:
+  sunglassesstore_auth:
+    type: oauth2
+    authorizationUrl: http://sunglasses-io.swagger.io/oauth/dialog
+    flow: implicit
+    scopes:
+      write:itemsInCart: add or modify items in cart in your account
+      read:itemsInCart: read items in cart in your account
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    xml:
+      name: Brands
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+      categoryId:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: integer
+        format: int64
+      imageUrls:
+        type: array
+        xml:
+          name: imageUrls
+          wrapped: true
+        items:
+          type: string
+    xml:
+      name: Products
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Brands'
+      name:
+        $ref: '#/definitions/Name'
+      location:
+        $ref: '#/definitions/Location'
+      email:
+        type: string
+      login:
+        $ref: '#/definitions/Login'
+      dob:
+        type: string
+        format: date-time
+      registered:
+        type: string
+        format: date-time
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        $ref: '#/definitions/Picture'
+      nat:
+        type: string
+    xml:
+      name: User
+  Name:
+    type: object
+    properties:
+      title:
+        type: string
+      first:
+        type: string
+      last:
+        type: string
+  Location:
+    type: object
+    properties:
+      street:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      postcode:
+        type: integer
+        format: int64
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      salt:
+        type: string
+      md5:
+        type: string
+      sha1:
+        type: string
+      sha256:
+        type: string
+  Picture:
+    type: object
+    properties:
+      large:
+        type: string
+      medium:
+        type: string
+      thumbnail:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
