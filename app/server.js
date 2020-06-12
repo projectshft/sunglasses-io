@@ -13,4 +13,5 @@ var myRouter = Router();
 
 http.createServer(function (request, response) {
 
+  myRouter(request, response, finalHandler(request, response))
 }).listen(PORT);
