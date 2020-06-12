@@ -1,0 +1,136 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: number
+        format: double
+        description: The price of a given product
+      imageURL:
+        type: string
+        description: The URL for the image representing the product
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand of sunglasses.
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the user.
+      cart:
+        type: array
+        items:
+          type: object
+        description: The user's cart
+      name:
+        type: object
+        description: name components for user
+        properties:
+          title:
+            type: string
+            description: Title of the user.
+          first_name:
+            type: string
+            description: First name of the user.
+          last_name:
+            type: string
+            description: Last name of the  user.
+      location:
+        type: object
+        description: the user's current mailing address 
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
+      email:
+        type: string
+        description: Email address of the  user
+      login:
+        type: object
+        description: the user's login information
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        description: the user's date of birth
+      registered:
+        type: string
+        description: the user's date of registration
+      phone:
+        type: string
+        description: the user's landline number
+      cell:
+        type: string
+        description: the user's cell phone number
+      picture:
+        type: object
+        description: the user's available pictures
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+        description: the user's nationality
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
