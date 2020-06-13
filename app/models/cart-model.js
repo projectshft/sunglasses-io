@@ -29,13 +29,20 @@ class UserCart {
 
   // for finding a product in the cart (either to check for its removal or to update it)
   static findProductInCart(productId) {
-    return cart.find((product=>product.id == productId))
+    return cart.find((product => product.id == productId))
   }
 
   //for post request to change the quantity of a product already in the cart
-  // static changeQuantityOfProduct(productId) {
+  static changeQuantityOfProduct(updatedProduct) {
+    // const foundProduct = cart.find((product => product.id == productId))
 
-  // }
+    // foundProduct.quantity = newQuantity;
+    // return foundProduct;
+
+    let product = cart.find((product => product.id == updatedProduct.id))
+    Object.assign(product, updatedProduct);
+    return product;
+  }
 }
 
 module.exports = UserCart;

@@ -83,9 +83,12 @@ myRouter.post('/api/me/cart', function(request,response) {
 
 //Handle request for testing if a book is successfully removed from the cart
 myRouter.get('/api/me/cart/:productId', function(request,response) {
-  if (UserCart.findProductInCart(request.params.productId)) {
+
+  const productInCart = UserCart.findProductInCart(request.params.productId);
+
+  if (productInCart) {
   response.writeHead(200, {"Content-Type": "application/json"});
-  return response.end();
+  return response.end(JSON.stringify(productInCart));
 
   } else {
     response.writeHead(404);
@@ -113,6 +116,27 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
   response.writeHead(200);
 	return response.end();
 })
+
+// Handle post request to change quantity of item in cart
+myRouter.post('/api/me/cart/:productId', function(request,response) {
+  // Check if product is in cart
+  const foundProduct = UserCart.findProductInCart(request.params.productId);
+
+  // If product is not in the cart, return an error
+  if (!foundProduct) {
+    response.writeHead(404);
+    return response.end("Product not found");
+  }
+
+  // At this point, we know the product is in the cart and we can now update the quantity
+  // const updatedProduct = UserCart.changeQuantityOfProduct(request.params.productId, foundProduct.quantity);
+  const updatedProduct = UserCart.changeQuantityOfProduct(request.body)
+
+  // Return success code for updating the product. Return the updated product so the quantity can be tested. 
+  response.writeHead(200, {"Content-Type": "application/json"});
+	return response.end(JSON.stringify(foundProduct));
+})
+
 
 
 
