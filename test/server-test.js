@@ -61,3 +61,66 @@ describe('Products', () => {
       });
     });
 });
+
+describe('Login', () => {
+  describe('/POST login', () => {
+    it('it should POST users login and return access token', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .set({'Content-Type': 'application/json'})
+        .send({
+          username: "lazywolf342",
+          password: "tucker"
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('string');
+          res.body.length.should.be.eql(16);
+          done();
+        });
+    });
+    it('it should return an error if username is invalid', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .set({'Content-Type': 'application/json'})
+        .send({
+          username: "bananna",
+          password: "tucker"
+        })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it('it should return an error if password is invalid', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .set({'Content-Type': 'application/json'})
+        .send({
+          username: "lazywolf342",
+          password: "bananna"
+        })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it('it should return an error if username or password are missing', done => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .set({'Content-Type': 'application/json'})
+        .send({
+          username: "",
+          password: ""
+        })
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+  });
+});
