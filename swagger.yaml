@@ -1,0 +1,61 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: "2.0"
+info:
+  title: Sunglasses.io
+  description: Purchase sunglasses with this great app
+  version: "1.0.0"
+# the domain of the service
+host: localhost:3001
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands Available
+      description: |
+        The brands endpoint returns a list of brands offered by the sunglasses.io store. The response includes the brand and its unique identifier. It is sorted by unique identifier in ascending order.
+      responses:
+        "200":
+          description: An array of brand objects
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brands:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific brand.
+        name:
+          type: string
+          description: The name of the brand.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
