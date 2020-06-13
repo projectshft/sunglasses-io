@@ -6,12 +6,22 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+
 const PORT = 3001;
+let products = [];
 
 //Setup router
 var myRouter = Router();
 
-http.createServer(function (request, response) {
+let server = http.createServer(function (request, response) {
 
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT);
+
+myRouter.get('/products', function(request,response) {
+	// Return all products in the products array
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
+module.exports = server
