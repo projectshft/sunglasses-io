@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const Brands = require('./models/brands-model');
 const Products = require('./models/products-model');
+const UserCart = require('./models/cart-model');
 
 const PORT = 3001;
 
@@ -55,6 +56,64 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
 
   return response.end(JSON.stringify(Products.getProductsByBrandId(selectedBrandId)))
 })
+
+
+//Handle request to return all the products in a user's cart
+myRouter.get('/api/me/cart', function(request,response) {
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(UserCart.getEntireCart()));
+})
+
+
+//Handle request to add a product to the cart, added product will be returned in the response
+myRouter.post('/api/me/cart', function(request,response) {
+  //If product doesn't have an id, return an error
+  if (!request.body.id ){
+		response.writeHead(400);
+		return response.end("Cannot add product to cart");
+  }
+  
+  //Add item to cart and assign a variable to the added item
+  const addedProduct = UserCart.addProduct(request.body);
+
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(addedProduct));
+});
+
+
+//Handle request for testing if a book is successfully removed from the cart
+myRouter.get('/api/me/cart/:productId', function(request,response) {
+  if (UserCart.findProductInCart(request.params.productId)) {
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end();
+
+  } else {
+    response.writeHead(404);
+    return response.end("Item is not in the cart");
+  }
+})
+
+
+
+//Handle request for removing a product from the user's cart by its id (parameter)
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
+  // Check if product is in cart
+  const foundProduct = UserCart.findProductInCart(request.params.productId);
+
+  // If product is not in the cart, return an error
+  if (!foundProduct) {
+    response.writeHead(404);
+    return response.end("Product not found");
+  }
+
+  // At this point, we know the product is in the cart and we can now remove it
+  UserCart.deleteProduct(request.params.productId);
+
+  // Return success code for removing the product
+  response.writeHead(200);
+	return response.end();
+})
+
 
 
 module.exports = server;
