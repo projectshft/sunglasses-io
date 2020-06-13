@@ -129,12 +129,11 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
   }
 
   // At this point, we know the product is in the cart and we can now update the quantity
-  // const updatedProduct = UserCart.changeQuantityOfProduct(request.params.productId, foundProduct.quantity);
   const updatedProduct = UserCart.changeQuantityOfProduct(request.body)
 
   // Return success code for updating the product. Return the updated product so the quantity can be tested. 
   response.writeHead(200, {"Content-Type": "application/json"});
-	return response.end(JSON.stringify(foundProduct));
+	return response.end(JSON.stringify(updatedProduct));
 })
 
 
