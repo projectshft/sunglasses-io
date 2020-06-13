@@ -43,38 +43,28 @@ paths:
     post:
       tags:
         - User
-      summary: Logs user into the system
-      description: ''
-      operationId: loginUser
-      produces:
-        - application/json
+      summary: Login
+      description: 'Logs user into the system'
       parameters:
         - name: username
           in: query
-          description: The user name for login
+          description: The username for login
           required: true
           type: string
         - name: password
           in: query
-          description: The password for login in clear text
+          description: The password for login 
           required: true
           type: string
       responses:
         '200':
-          description: successful operation
+          description: Successfully logged in
           schema:
             type: string
-          headers:
-            X-Rate-Limit:
-              type: integer
-              format: int32
-              description: calls per hour allowed by the user
-            X-Expires-After:
-              type: string
-              format: date-time
-              description: date in UTC when token expires
-        '400':
-          description: Invalid username/password supplied
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /me/cart:
     get:
       summary: View shopping cart
@@ -85,6 +75,10 @@ paths:
       responses:
         '200':
           description: View cart is successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
@@ -223,99 +217,6 @@ definitions:
       name:
         type: string
         description: The name of the brand
-  User:
-    type: object
-    properties:
-      gender:
-        type: string
-        description: Gender of user.
-      cart:
-        type: array
-        description: Shopping cart of the user.
-        items:
-          $ref: '#/definitions/Product'
-      name:
-        type: object
-        description: Full name of user
-        properties:
-          title: 
-            type: string
-            description: Title of user
-          first: 
-            type: string
-            description: First name of user
-          last:
-            type: string
-            description: Last name of user
-      location:
-        type: object
-        description: Location of user
-        properties:
-          street: 
-            type: string
-            description: Street where user is located
-          city: 
-            type: string
-            description: City where user is locatedr
-          state:
-            type: string
-            description: State where user is located
-          postcode:
-            type: number
-            format: int32
-            description: Postal code where user is located
-      email:
-        type: string
-        description: Email address of user
-      login:
-        type: object
-        properties:
-          username:
-            type: string
-            description: Username of user
-          password:
-            type: string
-            description: Password of user
-          salt:
-            type: string
-            description: Encryption for password
-          md5:
-           type: string
-           description: Encryption for password
-          sha1:
-            type: string
-            description: Encryption for password
-          sha256:
-            type: string
-            description: Encryption for password
-      dob:
-        type: string
-        description: User date of birth
-      registered:
-        type: string
-        description: Timestamp of registration
-      phone:
-        type: string
-        description: Main phone number of user
-      cell:
-        type: string
-        description: Cell phone number of user
-      picture:
-        type: object
-        description: Photo of user in multiple sizes
-        properties:
-          large: 
-            type: string
-            description: Image URL for large photo of user
-          medium: 
-            type: string
-            description: Image URL for medium photo of user
-          thumbnail:
-            type: string
-            description: Image URL for small photo of user  
-      nat:
-        type: string
-        description: Network Address Translation
   Error:
     type: object
     properties:
