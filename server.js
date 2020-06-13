@@ -9,6 +9,8 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 let products = [];
+let brands = [];
+var accessTokens = [];
 
 //Setup router
 var myRouter = Router();
@@ -24,15 +26,29 @@ myRouter.get('/products', function(request,response) {
 	return response.end(JSON.stringify(products));
 });
 
-myRouter.get('/brands/:id/products', function(request,response) {
+myRouter.get('/brands', function(request,response) {
 	// Return all products in the products array
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products));
+	return response.end(JSON.stringify(brands));
+});
+
+myRouter.get('/brands/:id/products', function(request,response) {
+
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(brands));
+});
+
+myRouter.post('/products', function(request,response) {
+  const addedProduct = products.push(request.body)
+	
+	// Return success with added product
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(addedProduct));
 });
 
 myRouter.post('/api/login', function(request,response) {
 
-  
+
 });
 
 myRouter.get('/me/cart', function(request,response) {
