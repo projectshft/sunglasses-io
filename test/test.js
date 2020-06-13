@@ -129,8 +129,8 @@ describe('sunglasses', () => {
             .send(product)
             .end((err, res) => {
               res.should.have.status(200);
-              res.body.should.be.an('object');
-              res.body.should.be.eql(product);
+              res.body.should.be.an('array');
+              res.body[0].should.be.eql(product);
               done();
             })
         })

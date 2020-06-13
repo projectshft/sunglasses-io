@@ -156,6 +156,22 @@ myRouter.get('/api/me/cart', function(request, response) {
     response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
+    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    return response.end(JSON.stringify(user.cart));
+  }
+  
+})
+
+myRouter.post('/api/me/cart', function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.end();
+  } else {
+    let user = users.find(user => user.login.username === currentAccessToken.username);
+    let product = request.body;
+    user.cart.push(product);
     response.writeHead(200, { "Content-Type": 'application/json' });
     return response.end(JSON.stringify(user.cart));
   }
