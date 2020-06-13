@@ -7,6 +7,9 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Sunglasses', () => {
+  // beforeEach(() => {
+  //   .removeAll();
+  // });
 
   describe('/GET products', () => {
     it('it should GET all the products', done => {
@@ -20,6 +23,7 @@ describe('Sunglasses', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('Array');
+          res.body.length.should.be.eql(0)
           done();
         })
     })

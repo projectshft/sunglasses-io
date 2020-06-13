@@ -24,4 +24,40 @@ myRouter.get('/products', function(request,response) {
 	return response.end(JSON.stringify(products));
 });
 
+myRouter.get('/brands/:id/products', function(request,response) {
+	// Return all products in the products array
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
+myRouter.post('/api/login', function(request,response) {
+
+  
+});
+
+myRouter.get('/me/cart', function(request,response) {
+	// Return all products in the products array
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
+myRouter.post('/me/cart', function(request,response) {
+	// Return all products in the products array
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
+
+myRouter.delete('/me/cart/:productId', function(request,response) {
+	// Return all products in the products array
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
+myRouter.post('/me/cart/:productId', function(request,response) {
+	// Return all products in the products array
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
 module.exports = server
