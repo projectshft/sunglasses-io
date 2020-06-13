@@ -22,25 +22,41 @@ let server = http.createServer((request, response) => {
 }).listen(PORT);
 
 myRouter.get("/api/brands", (request, response) => {
-    //return all brands
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(brands));
+    if (brands) {
+        //return all brands
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify(brands));
+    } else {
+        response.writeHead(404, "No brands found")
+        response.end();
+    }
+
 });
 
 myRouter.get("/api/brands/:brandId/products", (request, response) => {
-    //find all products with selected brand
-    let brandedProducts = products.filter(product => {
-        return product.categoryId = request.params.brandId;
+    //check if brand exists
+    let brandFound = brands.filter(brand => {
+        return brand.id === request.params.brandId;
     });
+    if (brandFound.length !== 0) {
+        //find all products with selected brand
+        let brandedProducts = products.filter(product => {
+            return product.categoryId === request.params.brandId;
+        });
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(brandedProducts));
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify(brandedProducts));
+
+    } else {
+        response.writeHead(404, "Brand was not found");
+        response.end();
+    }
 });
 
-//   myRouter.get("/api/products", (request, response) => {
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(JSON.stringify());
-//   });
+myRouter.get("/api/products", (request, response) => {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(products));
+});
 
 //   myRouter.post("/api/login", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });
