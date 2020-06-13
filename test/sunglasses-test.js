@@ -62,16 +62,29 @@ describe('/GET brand products', () => {
 });
 
 describe('/GET products', () => {
-  it('should GET a list of all products', done => {
+  it('should GET a list of all products that match query', done => {
     // act
     chai
       .request(server)
-      .get('/api/products')
+      .get('/api/products/awful')
+      .send({ query: 'awful'})
       .end((err, res) => {
         // assert
         res.should.have.status(200);
         res.body.should.be.an('array');
-        res.body.length.should.be.eql(11)
+        res.body.length.should.be.eql(1)
+        done();
+      });
+  });
+  it('should error if no query is passed', done => {
+    // act
+    chai
+      .request(server)
+      .get('/api/products/')
+      .send({ query: '' })
+      .end((err, res) => {
+        // assert
+        res.should.have.status(400);
         done();
       });
   });
@@ -92,6 +105,40 @@ describe('/POST login', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
+        done();
+      });
+  });
+  it('should not create user session for an invalid username or password', done => {
+    let login = {
+        username: 'greenlion23', 
+        password: 'waters' 
+      }
+    
+    // act
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(login)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(401);
+        done();
+      });
+  });
+  it('should not create user session for a blank username or password', done => {
+    let login = {
+        username: '', 
+        password: 'waters' 
+      }
+    
+    // act
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(login)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(400);
         done();
       });
   });

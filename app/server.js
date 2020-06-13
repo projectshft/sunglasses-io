@@ -77,10 +77,36 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
 });
 
 // GET all api products
-myRouter.get('/api/products', function(request, response) {
-  response.writeHead(200, {'Content-Type': 'application/json'})
-  return response.end(JSON.stringify(products))
+myRouter.get('/api/products/:query', function(request, response) {
+  let query = request.params.query
+
+  let result = products.reduce((accumulator, product) => {
+    if (product.description.includes(query) || product.name.includes(query)) {
+      accumulator.push(product)
+    }
+    return accumulator
+  }, [])
+  
+  if (result.length > 0) {
+    response.writeHead(200, {'Content-Type': 'application/json'})
+    return response.end(JSON.stringify(result))
+  } else if (result.length === 0) {
+    response.writeHead(200, {'Content-Type': 'application/json'})
+    return response.end('No results found matching your query')
+  }
 });
+
+myRouter.get('/api/products/', function(request, response) {
+  let query = ''
+
+  if (query === '') {
+    response.writeHead(400, 'incorrectly formatted response')
+    return response.end()
+  }
+  
+});
+
+
 
 // Helpers to get/set our number of failed requests per username
 var getNumberOfFailedLoginRequestsForUsername = function(username) {
