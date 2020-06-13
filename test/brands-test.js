@@ -14,6 +14,19 @@ chai.use(chaiHttp);
 
 describe('Brands', () => {
   describe('/GET Brands', () => {
+    it('it should GET an empty array if there are no brands available', done => {
+      Brands.removeAll();
+      chai
+        .request(server)
+        .get('/api/brands')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(0);
+          done();
+        });
+    });
+
     it('it should GET full array of brands with ids and names', done => {
       let brandsTestArray = [
         {
@@ -44,19 +57,6 @@ describe('Brands', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.should.be.eql(brandsTestArray);
-          done();
-        });
-    });
-
-    it('it should GET an empty array if there are no brands available', done => {
-      Brands.removeAll();
-      chai
-        .request(server)
-        .get('/api/brands')
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.an('array');
-          res.body.length.should.be.eql(0);
           done();
         });
     });
