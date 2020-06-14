@@ -1,4 +1,4 @@
-let cart = [];
+
 
 class UserCart {
   constructor(params) {
@@ -6,20 +6,21 @@ class UserCart {
   }
 
   //for get request to show all items in cart
-  static getEntireCart() {
-    return cart;
+  static getEntireCart(user) {
+    return user.cart;
   }
 
   //for post request to add a product to the cart
-  static addProduct(productToAdd) {
+  static addProduct(productToAdd, user) {
     productToAdd.quantity = 1;
-    cart.push(productToAdd);
-    return productToAdd;
+    user.cart.push(productToAdd);
+    return user.cart;
   }
 
   //for delete request to remove product from the cart
-  static deleteProduct(productId) {
-    cart = cart.filter(product => productId != product.id)
+  static deleteProduct(productId, user) {
+    user.cart = user.cart.filter(product => productId != product.id)
+    return user.cart;
   }
 
   //for clearing the cart during testing
@@ -28,20 +29,21 @@ class UserCart {
   }
 
   // for finding a product in the cart (either to check for its removal or to update it)
-  static findProductInCart(productId) {
-    return cart.find((product => product.id == productId))
+  static findProductInCart(productId, user) {
+    return user.cart.find((product => product.id == productId))
   }
 
   //for post request to change the quantity of a product already in the cart
-  static changeQuantityOfProduct(updatedProduct) {
+  static changeQuantityOfProduct(productId, newQuantity, user) {
     // const foundProduct = cart.find((product => product.id == productId))
 
     // foundProduct.quantity = newQuantity;
     // return foundProduct;
 
-    let product = cart.find((product => product.id == updatedProduct.id))
-    Object.assign(product, updatedProduct);
-    return product;
+    let product = user.cart.find((product => product.id == productId))
+    product.quantity = newQuantity;
+    // Object.assign(product, updatedProduct);
+    return user.cart;
   }
 }
 

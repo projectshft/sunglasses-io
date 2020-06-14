@@ -1,32 +1,11 @@
-let brandsArray = [
-  {
-      "id": "1",
-      "name" : "Oakley"
-  },
-  {
-      "id": "2",
-      "name" : "Ray Ban"
-  },
-  {
-      "id": "3",
-      "name" : "Levi's"
-  },
-  {
-      "id": "4",
-      "name" : "DKNY"
-  },
-  {
-      "id": "5",
-      "name" : "Burberry"
-  }
-]
+
 
 class Brands {
   constructor(params) {
     Object.assign(this, params);
   }
 
-  static getAllBrands() {
+  static getAllBrands(brandsArray) {
     return brandsArray;
   } 
 
@@ -34,7 +13,7 @@ class Brands {
     brandsArray = [];
   }
 
-  static getIdOfSearchedBrand(queryString) {
+  static getIdOfSearchedBrand(queryString, brandsArray) {
     const query = queryString.toLowerCase();
     let brandId;
     brandsArray.forEach(brand => {
