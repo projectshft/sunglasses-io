@@ -10,13 +10,29 @@ chai.use(chaiHttp);
 
 describe('Products', () => {
   describe('/GET Products', () => {
-    it('it should GET an array of products', done => {
+    //possibly take this test out because I don't know where we would request all products without the brand id or query string
+    it('it should GET an array of all products', done => {
       chai
         .request(server)
-        .get('/api/brands')
+        .get('/api/products')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
+          res.body.length.should.be.eql(11);
+          done();
+        });
+    });
+
+    it('it should GET an array of products based on a query', done => {
+      let searchInput = 'ray ban';
+      chai
+        .request(server)
+        .get('/api/products')
+        .query({searchString: searchInput})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(2);
           done();
         });
     });

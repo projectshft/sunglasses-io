@@ -65,8 +65,20 @@ myRouter.get('/api/brands', function(request,response) {
 
 //Handle get request to return all available products
 myRouter.get('/api/products', function(request,response) {
+  const parsedUrl = require('url').parse(request.url, true);
+  
+  if (parsedUrl.query.searchString) {
+    const idOfSearchedBrand = Brands.getIdOfSearchedBrand(parsedUrl.query.searchString);
+
+    const foundProducts = Products.searchProductsByQuery(parsedUrl.query.searchString, idOfSearchedBrand);
+
+    response.writeHead(200, {"Content-Type": "application/json"});
+    
+    return response.end(JSON.stringify(foundProducts));
+  } else {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(Products.getAllProducts()));
+  }
 })
 
 

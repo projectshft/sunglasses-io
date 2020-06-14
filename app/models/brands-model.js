@@ -33,6 +33,17 @@ class Brands {
   static removeAll() {
     brandsArray = [];
   }
+
+  static getIdOfSearchedBrand(queryString) {
+    const query = queryString.toLowerCase();
+    let brandId;
+    brandsArray.forEach(brand => {
+      if (brand.name.toLowerCase().includes(query)) {
+        brandId = brand.id
+      }
+    })
+    return brandId;
+  }
 }
 
 module.exports = Brands;

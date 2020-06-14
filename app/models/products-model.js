@@ -111,6 +111,18 @@ class Products {
     })
     return resultsArray;
   }
+
+  static searchProductsByQuery(queryString, brandId) {
+    let query = queryString.toLowerCase();
+    const resultsArray = [];
+    productsArray.forEach(product => {
+      if (product.name.toLowerCase().includes(query) || product.description.toLowerCase().includes(query) || product.categoryId == brandId) {
+        resultsArray.push(product);
+      }
+    })
+    return resultsArray;
+
+  }
 }
 
 module.exports = Products;
