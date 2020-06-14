@@ -12,8 +12,25 @@ class UserCart {
 
   //for post request to add a product to the cart
   static addProduct(productToAdd, user) {
+  let indexOfProduct = user.cart.indexOf(productToAdd);
+
+  if (indexOfProduct === -1) {
     productToAdd.quantity = 1;
     user.cart.push(productToAdd);
+  } else {
+    let foundProduct = user.cart[indexOfProduct];
+    foundProduct =+ 1;
+  }
+//  let foundProduct = user.cart.find(product => {
+//    product.id == productToAdd.id
+//  })
+
+//  if (foundProduct) {
+//    foundProduct.quantity++;
+//  } else {
+//    productToAdd.quantity = 1;
+//    user.cart.push(productToAdd);
+//  }
     return user.cart;
   }
 
@@ -35,14 +52,10 @@ class UserCart {
 
   //for post request to change the quantity of a product already in the cart
   static changeQuantityOfProduct(productId, newQuantity, user) {
-    // const foundProduct = cart.find((product => product.id == productId))
-
-    // foundProduct.quantity = newQuantity;
-    // return foundProduct;
 
     let product = user.cart.find((product => product.id == productId))
     product.quantity = newQuantity;
-    // Object.assign(product, updatedProduct);
+
     return user.cart;
   }
 }

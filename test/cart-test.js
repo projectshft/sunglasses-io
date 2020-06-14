@@ -1,16 +1,13 @@
-let UserCart = require('../app/models/cart-model');
+let UserCart = require('../app/modules/cart-module');
 
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server');
-
+chai.use(require('chai-things'));
 let should = chai.should();
 
 chai.use(chaiHttp);
 
-beforeEach(() => {
-  UserCart.removeAllProductsFromCart();
-});
 
 describe('User Cart', () => {
   describe('/GET products in cart', () => {

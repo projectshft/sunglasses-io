@@ -1,9 +1,9 @@
-let User = require('../app/models/login-model');
+let User = require('../app/modules/login-module');
 
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server');
-
+chai.use(require('chai-things'));
 let should = chai.should();
 
 chai.use(chaiHttp);
@@ -11,41 +11,8 @@ chai.use(chaiHttp);
 
 describe('/POST User', () => {
   it('it should check if required user properties are present', done => {
-    //arrange a scenario
-    let testUser = {
-      "gender": "female",
-      "cart":[],
-      "name": {
-          "title": "mrs",
-          "first": "susanna",
-          "last": "richards"
-      },
-      "location": {
-          "street": "2343 herbert road",
-          "city": "duleek",
-          "state": "donegal",
-          "postcode": 38567
-      },
-      "email": "susanna.richards@example.com",
-      "login": {
-          "username": "yellowleopard753",
-          "password": "jonjon",
-          "salt": "eNuMvema",
-          "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-          "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-          "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
-      },
-      "dob": "1954-10-09 10:47:17",
-      "registered": "2003-08-03 01:12:24",
-      "phone": "031-941-6700",
-      "cell": "081-032-7884",
-      "picture": {
-          "large": "https://randomuser.me/api/portraits/women/55.jpg",
-          "medium": "https://randomuser.me/api/portraits/med/women/55.jpg",
-          "thumbnail": "https://randomuser.me/api/portraits/thumb/women/55.jpg"
-      },
-      "nat": "IE"
-  };
+
+
     //act  check for required user type (object) and required properties of user (will check login credentials in a separate way)
     chai
       .request(server)

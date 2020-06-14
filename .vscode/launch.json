@@ -18,9 +18,6 @@
                 "${workspaceFolder}/test"
             ],
             "internalConsoleOptions": "openOnSessionStart",
-            "skipFiles": [
-                "<node_internals>/**"
-            ]
         },
         {
             "type": "node",

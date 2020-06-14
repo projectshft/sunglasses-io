@@ -1,14 +1,14 @@
-var http = require('http');
-var fs = require('fs');
+const http = require('http');
+const fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
-const Brands = require('./models/brands-model');
-const Products = require('./models/products-model');
-const UserCart = require('./models/cart-model');
-const User = require('./models/login-model');
+const Brands = require('./modules/brands-module');
+const Products = require('./modules/products-module');
+const UserCart = require('./modules/cart-module');
+const User = require('./modules/login-module');
 
 const PORT = 3001;
 const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449","1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
@@ -31,7 +31,7 @@ let accessTokens = [];
 let failedLoginAttempts = {};
 
 //setup the router
-var myRouter = Router();
+const myRouter = Router();
 myRouter.use(bodyParser.json());
 //added this to get the request.body using postman
 myRouter.use(bodyParser.urlencoded({
@@ -39,34 +39,26 @@ myRouter.use(bodyParser.urlencoded({
 }));
 
 //assign server to a variable for export and start it up
-let server = http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
   // Verify that a valid API Key exists before we let anyone access our API
   if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
     response.writeHead(401, "You need to have a valid API key to use this API");
     return response.end();
   }
+  response.writeHead(200);
   myRouter(request, response, finalHandler(request, response))
 
-}).listen(PORT, (error) => {
-  if (error) {
-    return console.log('Error on server startup: ', error)
-  }
-  fs.readFile('./initial-data/users.json', 'utf8', function (error, data) {
-    if (error) throw error;
-    users = JSON.parse(data);
-    console.log(`Server setup: ${users.length} users loaded`);
-  });
-  fs.readFile('./initial-data/brands.json', 'utf8', function (error, data) {
-    if (error) throw error;
-    brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded`);
-  });
-  fs.readFile('./initial-data/products.json', 'utf8', function (error, data) {
-    if (error) throw error;
-    products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} products loaded`);
-  });
+}).listen(PORT, error => {
+  if (error) throw error;
   console.log(`Server is listening on ${PORT}`);
+
+  brands = JSON.parse(fs.readFileSync("../initial-data/brands.json","utf-8"));
+
+  products = JSON.parse(fs.readFileSync("../initial-data/products.json","utf-8"));
+
+
+  users = JSON.parse(fs.readFileSync("../initial-data/users.json","utf-8"));
+
   user = users[0];
 });
 
@@ -82,7 +74,7 @@ const saveCurrentUser = (currentUser) => {
 
 //Handle get request to return all available brands
 myRouter.get('/api/brands', function (request, response) {
-  if (!brands.length === 0) {
+  if (brands.length) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Brands.getAllBrands(brands)));
   } else {
@@ -100,7 +92,7 @@ myRouter.get('/api/products', function (request, response) {
 
     const foundProducts = Products.searchProductsByQuery(parsedUrl.query.searchString, idOfSearchedBrand, products);
 
-      if (!foundProducts) {
+      if (foundProducts.length === 0) {
         response.writeHead(404);
         return response.end("No products found");
       }
@@ -124,7 +116,7 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
   const selectedBrandId = request.params.id;
 
   //If brand id was not provided in the query, return error
-  if (!selectedBrandId) {
+  if (selectedBrandId == 'null') {
     response.writeHead(400);
     return response.end("Unable to complete request")
   }

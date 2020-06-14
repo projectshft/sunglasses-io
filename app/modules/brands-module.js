@@ -1,5 +1,4 @@
 
-
 class Brands {
   constructor(params) {
     Object.assign(this, params);
@@ -9,9 +8,9 @@ class Brands {
     return brandsArray;
   } 
 
-  static removeAll() {
-    brandsArray = [];
-  }
+  // static removeAll() {
+  //   brandsArray = [];
+  // }
 
   static getIdOfSearchedBrand(queryString, brandsArray) {
     const query = queryString.toLowerCase();
