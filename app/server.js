@@ -210,9 +210,15 @@ myRouter.post('/api/me/cart/:productId', function(request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to this call to continue");
     response.end();
+  } else if (!request.body.quantity || request.body.quantity === "null" || request.body.quantity === "undefined" || request.body.quantity <= 0) {
+    response.writeHead(400, "invalid quantity supplied")
+    response.end();
+  } else if (!products.find(product => request.params.productId === product.id)) {
+    response.writeHead(404, "invalid product id supplied")
+    response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
-    let productId = request.params.id;
+    let productId = request.params.productId;
     let quantity = request.body.quantity;
     let productToUpdate = user.cart.find(product => product.id === productId);
     if(quantity > 0) {

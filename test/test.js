@@ -7,6 +7,7 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('sunglasses', () => {
+
   describe('/GET brands', () => {
     it('it should GET all the brands', done => {
       chai
@@ -20,6 +21,7 @@ describe('sunglasses', () => {
         });
     });
   });
+
   describe('/POST login', () => {
     it('it should log a user into the system', done => {
       let login = {
@@ -41,6 +43,7 @@ describe('sunglasses', () => {
         })
     })
   })
+
   describe('/GET products', () => {
     it('it should get all products', done => {
       chai
@@ -54,6 +57,7 @@ describe('sunglasses', () => {
         })
     })
   })
+
   describe('/GET products from brandID', () => {
     it('it should get all products from a given brand', done => {
       let brandId = 2;
@@ -67,6 +71,7 @@ describe('sunglasses', () => {
           done();
         })
     })
+
     it('it should return an error if there is no brand with that id', done => {
       let brandId = 99;
       chai
@@ -77,6 +82,7 @@ describe('sunglasses', () => {
           done();
         })
     })
+
     it('it should return an error if no brand id is supplied', done => {
       let brandId = null;
       chai
@@ -88,6 +94,7 @@ describe('sunglasses', () => {
         })
     })
   })
+
   describe('/GET me/cart', () => {
     it('it should get all items in a users cart', done => {
       let login = {
@@ -115,6 +122,7 @@ describe('sunglasses', () => {
             })
         })
     })
+
     it('it should return an error if the user is not logged in', done => {
       let accessToken = "";
       chai
@@ -144,6 +152,7 @@ describe('sunglasses', () => {
       "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
       "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
     };
+
     it('it should add an item to a users cart', done => {
       chai
         .request(server)
@@ -163,6 +172,7 @@ describe('sunglasses', () => {
             })
         })
     })
+
     it('it should return an error if the user is not logged in', done => {
       let accessToken = "";
       chai
@@ -174,6 +184,7 @@ describe('sunglasses', () => {
           done();
         })
     })
+
     it('it should return an error if the product to be added does not exist', done => {
       let badProduct = {};
       chai
@@ -212,6 +223,7 @@ describe('sunglasses', () => {
       "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
     }
     let accessToken = "";
+
     it('should delete an item from a users cart', done => {
       chai
         .request(server)
@@ -219,7 +231,7 @@ describe('sunglasses', () => {
         .send(login)
         .end((err, res) => {
           accessToken = res.body;
-          
+
           let productId = product.id;
           chai
             .request(server)
@@ -230,6 +242,7 @@ describe('sunglasses', () => {
             })
         })
     })
+
     it('it should return an error if the user is not logged in', done => {
       let productId = "1";
       let badAccessToken = "";
@@ -241,6 +254,7 @@ describe('sunglasses', () => {
           done();
         })
     })
+
     it('it should return an error if there is no product with that id', done => {
       let productId = 99;
       chai
@@ -251,6 +265,7 @@ describe('sunglasses', () => {
           done();
         })
     })
+
     it('it should return an error if no product id is supplied', done => {
       let productId = null;
       chai
@@ -264,29 +279,31 @@ describe('sunglasses', () => {
   })
 
   describe('/POST me/cart/{productId}', () => {
+    let login = {
+      "username": "yellowleopard753",
+      "password": "jonjon",
+      "salt": "eNuMvema",
+      "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+      "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+      "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+    };
+    let product = {
+      "id": "1",
+      "categoryId": "1",
+      "name": "Superglasses",
+      "description": "The best glasses in the world",
+      "price": 150,
+      "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
+    let accessToken = "";
+
     it('should update the quantity of an item in a users cart', done => {
-      let login = {
-        "username": "yellowleopard753",
-        "password": "jonjon",
-        "salt": "eNuMvema",
-        "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-        "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-        "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
-      };
       chai
         .request(server)
         .post('/api/login')
         .send(login)
         .end((err, res) => {
-          let accessToken = res.body;
-          let product = {
-            "id": "1",
-            "categoryId": "1",
-            "name": "Superglasses",
-            "description": "The best glasses in the world",
-            "price": 150,
-            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-          }
+          accessToken = res.body;
           let productId = product.id;
           chai
             .request(server)
@@ -309,7 +326,54 @@ describe('sunglasses', () => {
             })
         })
     })
+
+    it('it should return an error if the user is not logged in', done => {
+      let badAccessToken = "";
+      let productId = product.id;
+      let quantity = {
+        "quantity": "2"
+      }
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productId}?accessToken=${badAccessToken}`)
+        .send(quantity)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        })
+    })
+
+    it('it should return an error if the quantity object is invalid', done => {
+      let productId = product.id;
+      let quantity = {
+        "asd;afads;": "asdfjhe"
+      }
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .send(quantity)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
+    
+    it('it should return an error if the productId is invalid', done => {
+      let productId = "99";
+      let quantity = {
+        "quantity": "2"
+      }
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .send(quantity)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        })
+    })
   })
 })
+
 
 
