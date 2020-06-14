@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  description: 'An API for the Sunglasses Store.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters.'
+  description: An API for the Sunglasses-io Store. For this sample, you can use the api key `88312679-04c9-4351-85ce-3ed75293b449` to test the authorization filters.
   version: 1.0.0
   title: Sunglasses-io
   termsOfService: ""
@@ -10,19 +10,18 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-host: virtserver.swaggerhub.com
-basePath: /ADH_ProjectShift/Sunglasses-io/1.0.0
+host: localhost:3001
+basePath: /api
 tags:
 - name: Brands
   description: Access to sunglasses brands
 - name: Products
   description: Access to sunglasses product types
 - name: Login
-  description: Access to user login
+  description: Logs in user to create new session and generate token
 - name: User
-  description: Access to user account (specifically for adding to/modifying cart)
+  description: Access to user account (specifically for adding/modifying products in cart)
 schemes:
-- https
 - http
 produces:
 - application/json
@@ -33,17 +32,11 @@ paths:
       - Brands
       summary: Get all brands of sunglasses
       description: |
-        This endpoint will show all brands of sunglasses or only sunglasses specified in query
+        This endpoint will return an array of all available sunglasses brands
       operationId: getSunglassesBrands
       produces:
-      - application/xml
       - application/json
-      parameters:
-      - name: query
-        in: query
-        description: Search query string
-        required: false
-        type: string
+      parameters: []
       responses:
         "200":
           description: operation successful, an array of sunglasses
@@ -51,8 +44,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brands'
-        default:
-          description: Unexpected error
+        "404":
+          description: Brands not available
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -61,17 +54,16 @@ paths:
     get:
       tags:
       - Brands
-      summary: Get product types of each brand
+      summary: Get product available for each brand
       description: |
-        This endpoint will get all the products of a certain brand
+        This endpoint will get all the products of a certain brand by including the brand id as a parameter
       operationId: getProductsBySunglassesBrandId
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: id
         in: path
-        description: The id of the brands to search for products in.
+        description: This brand id will be used to filter products available for that brand
         required: true
         type: string
       responses:
@@ -80,9 +72,13 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Brands'
-        default:
-          description: Unexpected error
+              $ref: '#/definitions/Products'
+        "400":
+          description: Unable to complete request
+          schema:
+            $ref: '#/definitions/Error'
+        "404":
+          description: No products found
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -93,26 +89,25 @@ paths:
       - Products
       summary: Gets product types
       description: |
-        This endpoint will show all product types of sunglasses or only product types specified in query
+        This endpoint will show all product types of sunglasses or only products matching the query
       operationId: getProducts
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: query
         in: query
-        description: Search query string
+        description: Optional search query string. It can be a brand name or description of sunglasses the user wants to search for.
         required: false
         type: string
       responses:
         "200":
-          description: operation successful, an array products types, regardless of brand
+          description: operation successful, an array of all products (no query) or an array of products matching the query
           schema:
             type: array
             items:
               $ref: '#/definitions/Products'
-        default:
-          description: Unexpected error
+        "404":
+          description: No products found
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -121,29 +116,37 @@ paths:
     post:
       tags:
       - Login
-      summary: Creates a user profile
+      summary: Logs in an already registered user
       description: |
-        This can only be done by the logged in user?
-      operationId: createUser
+        This endpoint will check the name and password to log the user in
+      operationId: loginUser
       consumes:
       - application/x-www-form-urlencoded
       produces:
-      - application/xml
       - application/json
       parameters:
       - in: body
         name: body
-        description: Creates user object
+        description: Username and password credentials will be passed in the body
         required: true
         schema:
           $ref: '#/definitions/Login'
       responses:
         "200":
-          description: operation successful, user profile created
+          description: operation successful, user is logged in and access token is returned
+          headers:
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
           schema:
-            type: object
-        default:
-          description: Unexpected error
+            type: string
+        "400":
+          description: Incorrectly formatted response
+          schema:
+            $ref: '#/definitions/Error'
+        "401":
+          description: Invalid username or password
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -154,23 +157,26 @@ paths:
       - User
       summary: Gets user's cart
       description: |
-        This endpoint returns the user's cart after they have been authorized
+        This endpoint returns the user's cart, as an array, after they are already logged in
       operationId: getUserCart
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: api_key
         in: header
         required: true
         type: string
+      - name: accessToken
+        in: query
+        required: true
+        type: string
       responses:
         "200":
-          description: Operation successful, returns user's cart
+          description: Operation successful, returns user's cart as an array
           schema:
             $ref: '#/definitions/User'
-        default:
-          description: Unexpected error
+        "401":
+          description: You need to have access to continue
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -181,23 +187,33 @@ paths:
     post:
       tags:
       - User
-      summary: Add item to authorized user's cart (this is definitely to add item to cart but why no id? params?)
+      summary: Add item to logged-in user's cart
       description: |
-        Adds an item to authorized user's cart (this definitely adds item to cart, but why no id? params?)
+        Adds an item to authorized user's cart. The product to add will be sent in the request body.
       operationId: addItemToCart
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: api_key
         in: header
         required: true
         type: string
+      - name: accessToken
+        in: query
+        required: true
+        type: string
+      - in: body
+        name: productId
+        required: true
+        schema:
+          $ref: '#/definitions/User'
       responses:
         "200":
-          description: successful operation, item added to cart
-        default:
-          description: Unexpected error
+          description: successful operation, product added to cart
+          schema:
+            $ref: '#/definitions/User'
+        "401":
+          description: You need to have access to continue
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -209,33 +225,39 @@ paths:
     post:
       tags:
       - User
-      summary: Change quantity of item in authorized user's cart
+      summary: Change quantity of item in logged-in user's cart
       description: |
-        Change quantity of item in authorized user's cart
+        Change quantity of item in logged-in user's cart, and updated cart will be returned
       operationId: changeItemQuantity
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: api_key
         in: header
         required: true
         type: string
+      - name: accessToken
+        in: query
+        required: true
+        type: string
       - name: productId
         in: path
-        description: Product Id to delete
+        description: Product Id of product to modify (change quantity)
         required: true
-        type: integer
-        format: int64
+        type: string
       responses:
         "200":
-          description: successful operation, item quantity modified
+          description: successful operation, product quantity modified
           schema:
             $ref: '#/definitions/User'
-        default:
-          description: Unexpected error
+        "401":
+          description: You need to have access to continue
           schema:
-            $ref: '#/definitions/User'
+            $ref: '#/definitions/Error'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
       security:
       - api_key: []
       - sunglassesstore_auth:
@@ -244,31 +266,37 @@ paths:
     delete:
       tags:
       - User
-      summary: Delete item(s) from authorized user's cart
+      summary: Delete product from logged-in user's cart
       description: |
-        Deletes an item from authorized user's cart
+        Deletes an item from authorized user's cart and returns the updated cart
       operationId: deleteItem
       produces:
-      - application/xml
       - application/json
       parameters:
       - name: api_key
         in: header
         required: true
         type: string
+      - name: accessToken
+        in: query
+        required: true
+        type: string
       - name: productId
         in: path
         description: Product Id to delete
         required: true
-        type: integer
-        format: int64
+        type: string
       responses:
         "200":
-          description: successful operation, item deleted from cart
+          description: successful operation, product removed from cart
           schema:
             $ref: '#/definitions/User'
-        default:
-          description: Unexpected error
+        "401":
+          description: You need to have access to continue
+          schema:
+            $ref: '#/definitions/Error'
+        "404":
+          description: Product not found
           schema:
             $ref: '#/definitions/Error'
       security:
@@ -279,7 +307,7 @@ paths:
 securityDefinitions:
   sunglassesstore_auth:
     type: oauth2
-    authorizationUrl: http://sunglasses-io.swagger.io/oauth/dialog
+    authorizationUrl: localhost:3001/api/login
     flow: implicit
     scopes:
       write:itemsInCart: add or modify items in cart in your account
@@ -296,8 +324,6 @@ definitions:
         type: string
       name:
         type: string
-    xml:
-      name: Brands
   Products:
     type: object
     properties:
@@ -314,13 +340,8 @@ definitions:
         format: int64
       imageUrls:
         type: array
-        xml:
-          name: imageUrls
-          wrapped: true
         items:
           type: string
-    xml:
-      name: Products
   User:
     type: object
     properties:
@@ -352,8 +373,6 @@ definitions:
         $ref: '#/definitions/Picture'
       nat:
         type: string
-    xml:
-      name: User
   Name:
     type: object
     properties:

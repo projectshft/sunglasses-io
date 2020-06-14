@@ -82,8 +82,13 @@ const saveCurrentUser = (currentUser) => {
 
 //Handle get request to return all available brands
 myRouter.get('/api/brands', function (request, response) {
+  if (!brands.length === 0) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Brands.getAllBrands(brands)));
+  } else {
+    response.writeHead(404)
+    return response.end("Brands not available")
+  }
 })
 
 //Handle get request to return all available products
@@ -94,6 +99,11 @@ myRouter.get('/api/products', function (request, response) {
     const idOfSearchedBrand = Brands.getIdOfSearchedBrand(parsedUrl.query.searchString, brands);
 
     const foundProducts = Products.searchProductsByQuery(parsedUrl.query.searchString, idOfSearchedBrand, products);
+
+      if (!foundProducts) {
+        response.writeHead(404);
+        return response.end("No products found");
+      }
 
     response.writeHead(200, { "Content-Type": "application/json" });
 
@@ -233,7 +243,7 @@ myRouter.get('/api/me/cart', function (request, response) {
 
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue");
+    response.writeHead(401, "You need to have access to continue");
     return response.end();
   } 
   // Check if the current user has access to the cart
@@ -253,7 +263,7 @@ myRouter.post('/api/me/cart', function (request, response) {
 
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue");
+    response.writeHead(401, "You need to have access to continue");
     return response.end();
   } 
 
@@ -313,7 +323,7 @@ myRouter.delete('/api/me/cart/:productId', function (request, response) {
 
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue");
+    response.writeHead(401, "You need to have access to continue");
     return response.end();
   } 
 
@@ -347,7 +357,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
 
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue");
+    response.writeHead(401, "You need to have access to continue");
     return response.end();
   } 
 
