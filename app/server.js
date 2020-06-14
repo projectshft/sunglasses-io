@@ -181,21 +181,37 @@ myRouter.post('/api/me/cart', function(request, response) {
 myRouter.delete('/api/me/cart/:productId', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    console.log('yeet');
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.end();
+  } else {
+    let user = users.find(user => user.login.username === currentAccessToken.username);
+    let productId = request.params.productId;
+    user.cart = user.cart.filter(products => products.id !== productId);
+    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    return response.end();
+  }
+})
+
+myRouter.post('/api/me/cart/:productId', function(request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if(!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
     response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
     let productId = request.params.id;
-    user.cart = user.cart.filter(products => products.id !== productId);
-    response.writeHead(200);
-    return response.end();
+    let quantity = request.body.quantity;
+    let productToUpdate = user.cart.find(product => product.id === productId);
+    if(quantity > 0) {
+      for(let i = 0; i < quantity; i++) {
+        user.cart.push(productToUpdate);
+      }
+    } 
+    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    return response.end(JSON.stringify(user.cart));
   }
-})
-
-myRouter.post('/api/me/cart/:productId', function(request, response) {
-  
 })
 
 

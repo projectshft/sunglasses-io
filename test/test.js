@@ -195,21 +195,23 @@ describe('sunglasses', () => {
             "price": 150,
             "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
           }
+          let productId = product.id;
           chai
             .request(server)
             .post(`/api/me/cart?accessToken=${accessToken}`)
             .send(product)
             .end((err, res) => {
-              res.should.have.status(200);
-              res.body.should.be.an('array');
-              res.body[0].should.be.eql(product);
-              let quantiy = 2;
+              let quantity = {
+                "quantity": "2"
+              }
               chai
                 .request(server)
                 .post(`/api/me/cart/${productId}?accessToken=${accessToken}`)
                 .send(quantity)
                 .end((err, res) => {
                   res.should.have.status(200);
+                  res.body.should.be.an('array');
+                  res.body.length.should.be.eql(3);
                   done();
                 })
             })
