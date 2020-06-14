@@ -19,3 +19,4 @@ const getValidTokenFromRequest = request => {
 
   // const uid = require('rand-token').uid;
 // const newAccessToken = uid(16); //use to create new tokens
+
