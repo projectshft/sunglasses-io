@@ -79,31 +79,31 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
 });
 
 // GET api products
-myRouter.get('/api/products/:query', function(request, response) {
-  // get query from url
-  let query = request.params.query
-  // find query inside description or name strings
-  let result = products.reduce((accumulator, product) => {
-    if (product.description.includes(query) || product.name.includes(query)) {
-      accumulator.push(product)
+myRouter.get('/api/products', function(request, response) {
+  if (request.body.hasOwnProperty('query') && request.body.query != '') {
+    // get query from request body
+    let query = request.body.query
+    // find query inside description or name strings
+    let result = products.reduce((accumulator, product) => {
+      if (product.description.includes(query) || product.name.includes(query)) {
+        accumulator.push(product)
+      }
+      return accumulator
+    }, [])
+    // if there was at least one result found, return result
+    if (result.length > 0) {
+      response.writeHead(200, {'Content-Type': 'application/json'})
+      return response.end(JSON.stringify(result))
+    } else if (result.length === 0) {
+      // else return no results found
+      response.writeHead(200, {'Content-Type': 'application/json'})
+      return response.end('No results found matching your search')
     }
-    return accumulator
-  }, [])
-  // if there was at least one result found, return result
-  if (result.length > 0) {
-    response.writeHead(200, {'Content-Type': 'application/json'})
-    return response.end(JSON.stringify(result))
-  } else if (result.length === 0) {
-    // else return no results found
-    response.writeHead(200, {'Content-Type': 'application/json'})
-    return response.end('No results found matching your search')
-  }
-});
-
-myRouter.get('/api/products/', function(request, response) {
-  // if query empty, return error
+  } else {
+    // if query empty, return error
     response.writeHead(400, 'incorrectly formatted response')
-    return response.end() 
+    return response.end()
+  }
 });
 
 
@@ -184,6 +184,44 @@ myRouter.get('/api/me/cart', function(request, response) {
       // if accessToken legitimate, return cart
       response.writeHead(200, {'Content-Type': 'application/json'})
       return response.end(JSON.stringify(cart))
+    } else {
+      // if accessToken doesn't match, return error
+      response.writeHead(401, "You need to have access to this call to continue");
+      return response.end();
+    }
+  } else {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  }
+});
+
+// POST to api cart
+myRouter.post('/api/me/cart', function(request, response) {
+  if (request.body.hasOwnProperty('accessToken')) {
+    // check if accessToken exists and if it matches any in accessTokens array
+    accessToken = accessTokens.find(token => {
+      if (token == request.body.accessToken) {
+        return true
+      }
+    })
+    if (accessToken) {
+      // check is product exists, and return it
+      let product = products.find(product => {
+        if (product.id == request.body.id) {
+          return true
+        }
+      });
+      if (product) {
+        // if product exists, add it to cart
+        cart.push(product)
+        response.writeHead(200, {'Content-Type': 'application/json'})
+        return response.end()
+      } else {
+        // if product doesn't exist, say so
+        response.writeHead(404, {'Content-Type': 'application/json'})
+        return response.end()
+      }
     } else {
       // if accessToken doesn't match, return error
       response.writeHead(401, "You need to have access to this call to continue");

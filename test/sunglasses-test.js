@@ -66,7 +66,7 @@ describe('/GET products', () => {
     // act
     chai
       .request(server)
-      .get('/api/products/awful')
+      .get('/api/products')
       .send({ query: 'awful'})
       .end((err, res) => {
         // assert
@@ -80,7 +80,7 @@ describe('/GET products', () => {
     // act
     chai
       .request(server)
-      .get('/api/products/')
+      .get('/api/products')
       .send({ query: '' })
       .end((err, res) => {
         // assert
@@ -187,6 +187,57 @@ describe('/POST cart', () => {
     // act
     chai
       .request(server)
+      .post('/api/me/cart')
+      .send({accessToken: '123456', id: 9})
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
+        done();
+      });
+  });
+  it('should not add an item to the cart that does not exist', done => {
+    // act
+    chai
+    .request(server)
+    .post('/api/me/cart')
+    .send({accessToken: '123456', id: 15})
+    .end((err, res) => {
+      // assert
+      res.should.have.status(404);
+      done();
+    });
+  });
+  it('should not allow someone without an access token to add to cart', done => {
+    // act
+    chai
+    .request(server)
+    .post('/api/me/cart')
+    .send({id: 15})
+    .end((err, res) => {
+      // assert
+      res.should.have.status(401);
+      done();
+    });
+  });
+  it('should not allow someone without an access token to add to cart', done => {
+    // act
+    chai
+    .request(server)
+    .post('/api/me/cart')
+    .send({accessToken: 'cat', id: 15})
+    .end((err, res) => {
+      // assert
+      res.should.have.status(401);
+      done();
+    });
+  });
+});
+
+describe('/POST cart', () => {
+  it('should add an item to the cart', done => {
+    // act
+    chai
+      .request(server)
       .post('/api/me/cart/9')
       .send({accessToken: '123456'})
       .end((err, res) => {
@@ -257,7 +308,7 @@ describe('/DELETE products', () => {
               .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an('array');
-                res.body.length.should.be.eql(1)
+                res.body.length.should.be.eql(2)
                 done();
               });
           });
