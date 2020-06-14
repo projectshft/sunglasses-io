@@ -144,6 +144,48 @@ describe('/POST login', () => {
   });
 });
 
+describe('/GET cart', () => {
+  it('should GET all items in the cart', done => {
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(0)
+        done();
+      });
+  });
+});
+
+describe('/POST cart', () => {
+  it('should add an item to the cart', done => {
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/9')
+      .send({accessToken: '123456'})
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
+        done();
+      });
+  });
+  it('should not add an item to the cart that does not exist', done => {
+        chai
+        .request(server)
+        .post('/api/me/cart/15')
+        .send({accessToken: '123456'})
+        .end((err, res) => {
+          // assert
+          res.should.have.status(404);
+          done();
+        });
+  });
+});
+
 
 
 
