@@ -11,7 +11,6 @@ var uid = require('rand-token').uid;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 let brands = [];
-let NumofBrands = 5;
 let users = [];
 let accessTokens = [];
 let failedLoginAttempts = {};
@@ -41,19 +40,14 @@ const server = http.createServer((request, response) => {
   
     //populate users
     users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
-    // hardcode "logged in" user
-    // user = users[0];
     
   });
 
-  // const saveCurrentUser = (currentUser) => {
-  //   // set hardcoded "logged in" user
-  //   users[0] = currentUser;
-  //   fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
-  // }
+  
 
-
-  //RETURNS ALL BRANDS
+  //GET RETURNS ALL BRANDS
+  //No requirements
+  //returns all brands
   router.get("/api/brands", (request, response) => {
     //is there no need for a query since they are all being returned?
     if (!brands) {
@@ -65,13 +59,15 @@ const server = http.createServer((request, response) => {
     });
 
   //GET PRODUCTS BY BRAND ID
+  //requires brand Id in url
+  //returns products by brand ID
   router.get("/api/brands/:id/products", (request, response) => {
     const { id } = request.params;
     let productList = products.filter(product => product.categoryId.includes(id));
     const numId = parseInt(id, 10)
       
-    if (numId >= NumofBrands) { //hardcode number of brands. this says that the number of brands can't be more than 5, probably a better way to do this
-      response.writeHead(404, "That brand does not exist");//return to this code to review
+    if (!productList) { 
+      response.writeHead(404, "That brand does not exist");
       return response.end();
     }
     response.writeHead(200, { "Content-Type": "application/json" });
@@ -79,6 +75,8 @@ const server = http.createServer((request, response) => {
   });
 
   //GET PRODUCTS BY SEARCH
+  //requires query with search term in url
+  //returns products that include query string in description
   router.get("/api/products", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl); //parse the url to get the query
     const { query } = queryString.parse(parsedUrl.query);
@@ -121,8 +119,10 @@ var setNumberOfFailedLoginRequestsForUsername = function(username,numFails) {
   failedLoginAttempts[username] = numFails;
 }
 
-//mainly from auth assignment
-// POST USER LOGIN WITH USERNAME AND PASSWORD
+//From Auth assignment
+//POST USER LOGIN WITH USERNAME AND PASSWORD
+//Requires a valid username and password
+//Returns an accessToken
 router.post('/api/login', function(request,response) {
   // Make sure there is a username and password in the request
   if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
@@ -191,6 +191,8 @@ var getValidTokenFromRequest = function(request) {
 };
  
 // GET USER CART FOR LOGGED IN USER
+//requires a valid token in URL to confirm valid user
+//returns users cart
 router.get('/api/me/cart', function(request,response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
@@ -209,6 +211,9 @@ router.get('/api/me/cart', function(request,response) {
 });
 
 //ADD TO PRODUCT TO CART FOR LOGGED IN USER
+//requires a valid token in URL to confirm valid user
+//requires a valid product id in request body to add to cart
+//returns users cart
 router.post('/api/me/cart', function(request,response) {
   // Make sure there is an accessToken and a productId in the request body
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -219,9 +224,11 @@ router.post('/api/me/cart', function(request,response) {
   } 
   //if there is no product ID in the request body, don't continue
   if (!request.body.productId){
-    response.writeHead(401, "Select an item to add to cart");
+    response.writeHead(403, "Select an item to add to cart");
     return response.end();
-  }
+  } 
+  
+  else {
     //Select the active user
     let user = users.find((user) => {
       return user.login.username == currentAccessToken.username;
@@ -235,15 +242,25 @@ router.post('/api/me/cart', function(request,response) {
       return product.id == request.body.productId
     })
 
+    //add quantity key/value
+    let quantity = {quantity: 1}
+    Object.assign(product, quantity)
+
     //Push selected product to user cart
     cart.push(product)
 
     //return the user's cart
     response.writeHead(200, {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(cart));
-
+  }
 });
 
+//DELETE AN ITEM IN THE USER CART
+//requires a valid token in URL to confirm valid user
+//requires a valid product id in url
+//returns users cart (empty or with less items)
+
+//not working correctly
 router.delete('/api/me/cart/:productId', function(request,response) {
   const { productId } = request.params;
 
@@ -253,19 +270,68 @@ router.delete('/api/me/cart/:productId', function(request,response) {
     response.writeHead(401, "You need to be logged in to view your cart");
     return response.end();
   }
+  if (!productId){
+    response.writeHead(401, "select an item to remove from the cart");
+    return response.end();
+  } else {
     //Select the active user
     let user = users.find((user) => {
       return user.login.username == currentAccessToken.username;
     });
 
-    //filter out item to be deleted from cart
-    let cart = user.cart.filter(product => product.id !== productId)
+    //find the index of the item to be removed and splice it, as this needs to change the user's cart array instead of creating a new array (filter)
+    item = user.cart.find(product => product.id == productId)
+    // cart = user.cart.filter(product => product.id !== productId)
+    let cart = user.cart
+    let index = cart.indexOf(item)
+    cart.splice(index, 1)
+    
 
     //return the user's cart
     response.writeHead(200, {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(cart));
+  }
+});
 
-})
+//POST EDIT QUANTITY OF ITEM IN CART
+//requires a valid token in URL to confirm valid user
+//requires a valid product id in url
+//requires a number to update product quantity in request body
+//returns users cart with updated quanity info for specific item 
+router.post('/api/me/cart/:productId', function(request,response) {
+  const { productId } = request.params;
+
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't a valid access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to be logged in to edit your cart");
+    return response.end();
+  }
+  if (!productId){
+    response.writeHead(403, "select an item to edit from the cart");
+    return response.end();
+  } else {
+    //Select the active user
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+
+    //Select item to be edited from cart, and change quanity to request body
+    let item = user.cart.find(product => product.id == productId)
+
+    if (!request.body.quantity){
+      response.writeHead(401, 'Select a qunatity to update your cart item');
+      return response.end();
+    } else {
+
+      item['quantity']= request.body.quantity
+    
+      //return the user's cart when all if statements pass
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      return response.end(JSON.stringify(user.cart));
+   }
+  }
+});
 
 
 module.exports = server

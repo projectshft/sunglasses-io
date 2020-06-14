@@ -10,7 +10,7 @@ chai.use(require("chai-sorted"));
 
 //GET ALL BRANDS
 describe("/GET brands", () => {
-  it.only("should GET all brands", done => {
+  it("should GET all brands", done => {
     chai
       .request(server)
       .get("/api/brands")
@@ -28,7 +28,7 @@ describe("/GET brands", () => {
 
 //GET ALL PRODUCTS BY BRAND
 describe("/GET products by brand", () => {
-  it.only("should GET all products in a brand", done => {
+  it("should GET all products in a brand", done => {
     chai
       .request(server)
       .get("/api/brands/1/products") //testing for brand id 1
@@ -42,13 +42,15 @@ describe("/GET products by brand", () => {
         done();
         });
     });
-  it.only("fails as expected with unknown id", done => {
+  it("returns empty if no brand is found", done => {
     chai
       .request(server)
-      //property doesn't exist
+      //brand doesnt exist
       .get("/api/brands/7/products") //7 is an unidentified id
       .end((err, res) => {
-        expect(res).to.have.status(404);
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(0);
         done();
         });
     });
@@ -56,7 +58,7 @@ describe("/GET products by brand", () => {
 
 //GET ALL PRODUCTS BY SEARCH
 describe("/GET products", () => {
-  it.only("should GET all products", done => {
+  it("should GET all products", done => {
     chai
       .request(server)
       .get("/api/products")
@@ -70,7 +72,7 @@ describe("/GET products", () => {
         done();
     });
   });
-  it.only("should limit results to those with a query string", done => {
+  it("should limit results to those with a query string", done => {
     chai
       .request(server)
       .get("/api/products?query=sweetest")
@@ -84,7 +86,7 @@ describe("/GET products", () => {
         done();
       });
   });
-  it.only("should return all products if query is missing", done => {
+  it("should return all products if query is missing", done => {
     chai
     .request(server)
     .get("/api/products?query=")//when there is no query provided
@@ -97,12 +99,12 @@ describe("/GET products", () => {
       done();
       });
   });
-  //return to this to add failing condition?
+  
 });
 
 //LOGIN
 describe("/POST user login", () => {
-  it.only("should return 200 response if the user logged in correctly", done => {
+  it("should return 200 response if the user logged in correctly", done => {
     //arrange
     const fullUserCredentials = {
       username: 'yellowleopard753',
@@ -113,14 +115,19 @@ describe("/POST user login", () => {
         .request(server)
         .post("/api/login")
         .send(fullUserCredentials)
+        
         //assert
         .end((err, res) => {
-            expect(err).to.be.null
+            const token = res.body
+            expect(token).to.be.a('string');
+            expect(token).to.have.lengthOf(16);
+            expect("Content-Type", "application/json");
+            expect(err).to.be.null;
             expect(res).to.have.status(200); 
             done();
       });
   })
-  it.only("should return 400 if user is missing a parameter", done => {
+  it("should return 400 if user is missing a parameter", done => {
     const missingUserCredentials = {
       username: 'yellowleopard743',
       password: ''
@@ -136,7 +143,7 @@ describe("/POST user login", () => {
           done();
     });
   })
-  it.only("should return 401 if the login fails", done => {
+  it("should return 401 if the login fails", done => {
     //arrange
     const wrongCredentials = {
       username: "someguy",
@@ -155,18 +162,200 @@ describe("/POST user login", () => {
   })
 });
 
-//GET CART FOR LOGGED IN USER
 
-//TODO test for correctly logged in user
+//Couldn't get beforeEach to work for below tests, did them individually
 
-describe("/GET cart by logged in user", () => {
-  it.only("should return 401 response if the user tries to access cart without being logged in", async function () {
+//GET POST DELETE EDIT CART
+describe("/GET POST DELETE Cart", () => {
+  //set variable for correctly logged in user to be used for each test
+  const fullUserCredentials = {
+    username: 'yellowleopard753',
+    password: 'jonjon'
+  };
+   it("GET the cart for logged in user", async function () { 
     chai
+      .request(server)
+      .post("/api/login")
+      .send(fullUserCredentials)
+      .end((err, res) => {
+        let token = res.body
+        //act
+        chai
         .request(server)
-        .get("/api/me/cart")
+        .get('/api/me/cart?accessToken='+token)
+        .send(token)
         .end((err, res) => {
-            expect(res).to.have.status(401); 
-        
-      });
-  });
+          assert.isNotNull(res.body);
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(token).to.be.a('string');
+          expect(token).to.have.lengthOf(16);
+          expect(res.body).to.be.an("array");
+          expect("Content-Type", "application/json");
+       });
+     });
+   });
+
+   it("POST/ adds item to the cart for logged in user", async function () { 
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(fullUserCredentials)
+      .end((err, res) => {
+        let token = res.body
+        let product = {"productId": "1"}
+        //act
+        chai
+          .request(server)
+          .post('/api/me/cart?accessToken='+token)
+          .send(product)
+          .end((err, res) => {
+            assert.isNotNull(res.body);
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(token).to.be.a('string');
+            expect(token).to.have.lengthOf(16);
+            expect(res.body).to.be.an("array");
+            expect("Content-Type", "application/json");
+       });
+     });
+   });
+
+   it("POST/ edits the quantity of specified product in cart for logged in user", async function () { 
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(fullUserCredentials)
+      .end((err, res) => {
+        let token = res.body
+        let quantity = {"quantity": "3"}
+        //act
+        chai
+          .request(server)
+          .post('/api/me/cart/1?accessToken='+token)
+          .send(quantity)
+          .end((err, res) => {
+            assert.isNotNull(res.body);
+            expect(err).to.be.null;
+            expect(res).to.have.status(200);
+            expect(token).to.be.a('string');
+            expect(token).to.have.lengthOf(16);
+            expect(res.body).to.be.an("array");
+            expect("Content-Type", "application/json");
+            
+       });
+     });
+   });
+
+   it("DELETES item from cart for logged in user", async function () { 
+    chai
+      .request(server)
+      .post("/api/login")
+      .send(fullUserCredentials)
+      .end((err, res) => {
+        let token = res.body
+        //act
+        chai
+        .request(server)
+        .delete('/api/me/cart/1?accessToken='+token)
+        .end((err, res) => {
+          assert.isNotNull(res.body);
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(token).to.be.a('string');
+          expect(token).to.have.lengthOf(16);
+          expect(res.body).to.be.an("array");
+          expect("Content-Type", "application/json");
+       });
+     });
+   });
+
 });
+
+//GET POST EDIT AND DELETE CART WITHOUT LOGIN 
+describe("/ACCESS cart without correct login", () => {
+  it("Should return error if user tries to GET cart without loging in correctly", async function () { 
+    chai
+    .request(server)
+      .post("/api/login")
+      .send()
+      .end((err, res) => {
+        //act
+        chai
+          .request(server)
+          .get('/api/me/cart?accessToken=')
+          .end((err, res) => {
+            expect(res).to.have.status(401);
+            expect("Content-Type", "header");
+        });
+      });
+    });
+  it("Should return error if user tries add to cart without logging in correctly", async function () { 
+    chai
+    .request(server)
+      .post("/api/login")
+      .send()
+      .end((err, res) => {
+        //act
+        chai
+          .request(server)
+          .post('/api/me/cart?accessToken=')
+          .end((err, res) => {
+            expect(res).to.have.status(401);
+            expect("Content-Type", "header");
+        });
+      });
+    });
+  it("Should return error if user tries to delete cart without logging in correctly", async function () { 
+    chai
+    .request(server)
+      .post("/api/login")
+      .send()
+      .end((err, res) => {
+        //act
+        chai
+          .request(server)
+          .delete('/api/me/cart/1?accessToken=')
+          .end((err, res) => {
+            expect(res).to.have.status(401);
+            expect("Content-Type", "header");
+        });
+      });
+    });
+    it("Should return error if user tries to delete cart without logging in correctly", async function () { 
+      chai
+      .request(server)
+        .post("/api/login")
+        .send()
+        .end((err, res) => {
+          //act
+          chai
+            .request(server)
+            .delete('/api/me/cart/1?accessToken=')
+            .end((err, res) => {
+              expect(res).to.have.status(401);
+              expect("Content-Type", "header");
+          });
+        });
+      });    
+    it("Should return error if user tries to edit cart products without logging in correctly", async function () { 
+      chai
+      .request(server)
+        .post("/api/login")
+        .send()
+        .end((err, res) => {
+           //act
+          chai
+            .request(server)
+            .post('/api/me/cart/1?accessToken=')
+            .end((err, res) => {
+              expect(res).to.have.status(401);
+              expect("Content-Type", "header");
+            });
+          });
+        });    
+});
+
+
+
+
