@@ -59,22 +59,26 @@ myRouter.get('/me/cart', function(request,response) {
 });
 
 myRouter.post('/me/cart', function(request,response) {
-	// Return all products in the products array
+  const addedProductToCart = cart.push(request.body)
+
+  // Return all success with added Product
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products));
+	return response.end(JSON.stringify(addedProductToCart));
 });
 
 
 myRouter.delete('/me/cart/:productId', function(request,response) {
-	// Return all products in the products array
+
+  
+
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(products));
 });
 
 myRouter.post('/me/cart/:productId', function(request,response) {
-	// Return all products in the products array
+
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(products));
 });
 
-module.exports = server
+module.exports = {server, products}

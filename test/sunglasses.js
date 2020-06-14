@@ -1,6 +1,7 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('../server');
+let {server, products} = require('../server');
+
 
 let should = chai.should();
 
@@ -8,7 +9,7 @@ chai.use(chaiHttp);
 
 describe('Sunglasses', () => {
   // beforeEach(() => {
-  //   .removeAll();
+  //   products = []
   // });
 
   describe('/GET products', () => {
@@ -81,7 +82,7 @@ describe('Sunglasses', () => {
               done();
             });
         });
-    })
+      })
 
   })
 
@@ -102,6 +103,75 @@ describe('Sunglasses', () => {
         })
     })
   })
+
+  describe('/POST me/cart', () => {
+    it('it should add an item to the cart', done => {
+      //arrange
+      let cart = {
+        "id": "5",
+        "categoryId": "2",
+        "name": "Glasses",
+        "description": "The most normal glasses in the world",
+        "price":150,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+      //act
+      chai
+        .request(server)
+        .post('/me/cart')
+        .send(product)
+        //assert
+        .end((err, res) => {
+          chai
+            .request(server)
+            .get('/me/cart')
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('Array');
+              res.body.length.should.be.eql(1);
+              done();
+            });
+        });
+      })
+    })
+
+    describe('/DELETE me/cart/:productId', () => {
+      it('it should delete an item from the cart', done => {
+        //arrange
+        let cart = {
+          "id": "5",
+          "categoryId": "2",
+          "name": "Glasses",
+          "description": "The most normal glasses in the world",
+          "price":150,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+        chai
+          .request(server)
+          .post('/me/cart')
+          .send(cart)
+          .end((err, res) => {
+            const newlyAddedItem = res.body
+            //act
+            chai
+              .request(server)
+              .delete('/me/cart/'+newlyAddedItem.id)
+              .end((err, res) => {
+                //assert
+                res.should.have.status(200);
+                
+                //check if cart item is deleted
+                chai
+                  .request(server)
+                  .get('/me/cart'+newlyAddedItem.id)
+                  .end((err, res) => {
+                    res.should.have.status(404)
+                    done()
+                  })
+              });
+          });
+        })
+      })
 
 
 })
