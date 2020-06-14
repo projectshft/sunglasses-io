@@ -82,6 +82,26 @@ describe('Sunglasses', () => {
             });
         });
     })
+
   })
+
+  describe('/GET cart', () => {
+    it('it should GET all the items in the cart', done => {
+      //arrange
+
+      //act
+      chai
+        .request(server)
+        .get('/me/cart')
+        //assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('Array');
+          res.body.length.should.be.eql(0)
+          done();
+        })
+    })
+  })
+
 
 })

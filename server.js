@@ -10,6 +10,7 @@ var uid = require('rand-token').uid;
 const PORT = 3001;
 let products = [];
 let brands = [];
+let cart = [];
 var accessTokens = [];
 
 //Setup router
@@ -54,7 +55,7 @@ myRouter.post('/api/login', function(request,response) {
 myRouter.get('/me/cart', function(request,response) {
 	// Return all products in the products array
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products));
+	return response.end(JSON.stringify(cart));
 });
 
 myRouter.post('/me/cart', function(request,response) {
