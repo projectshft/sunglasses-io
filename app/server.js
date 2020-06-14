@@ -206,12 +206,47 @@ myRouter.post('/api/me/cart', function(request,response) {
     }
 });
 
+myRouter.put('/api/me/cart/:productId', function(request,response) {
+  //verifying token
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to log in to update item in cart");
+    return response.end();
+  
+  } else {
+    
+    //Find the correct user cart
+    let user = users.find((user)=>{
+    return user.login.username == currentAccessToken.username
+    })
+    
+    //If cart is empty
+    if (user.cart.length === 0) {
+      response.writeHead(402, "ERROR: Your cart is empty");
+      return response.end();
+    }
+    
+    
+    let productToEdit = user.cart.find((product) => {
+      return product.id === request.params.productId
+    })
+
+    productToEdit.quantity = request.body.quantity
+
+   
+    // Return success with updated product in cart
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart));
+    }
+});
+
 myRouter.delete('/api/me/cart/:productId', function(request,response) {
   //verifying token
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to log in to add item to cart");
+    response.writeHead(401, "You need to log in to remove item from cart");
     return response.end();
   
   } else {
@@ -245,5 +280,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
       return response.end(JSON.stringify(user.cart));
     }
 });
+
+
 
 module.exports = server;

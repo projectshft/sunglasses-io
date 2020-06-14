@@ -212,6 +212,34 @@ describe('User', () => {
 
   });
 
+  describe('/PUT me/cart/:productId', () => {
+    it('it should update the quantity of an item in the users cart', done => {
+      let currentUser = {
+        username: "lazywolf342",
+        password: "tucker"
+      }
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(currentUser)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('string');
+             chai
+              .request(server)
+              .put('/api/me/cart/1/?accessToken=' + res.body)
+              .send({quantity: 2})
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array')
+                res.body[0].quantity.should.be.eql(2)
+                done();
+              });
+          });
+    });
+
+  });
+
   describe('/DELETE me/cart/:productId', () => {
     it('it should DELETE an item in the users cart', done => {
       let currentUser = {
@@ -239,4 +267,7 @@ describe('User', () => {
     });
 
   });
+
+  
+  
 });
