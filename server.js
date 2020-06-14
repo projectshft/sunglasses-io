@@ -68,17 +68,20 @@ myRouter.post('/me/cart', function(request,response) {
 
 
 myRouter.delete('/me/cart/:productId', function(request,response) {
+  const foundCartItem = cart.filter((item => item.id == request.id))
 
-  
+  cart.remove(foundCartItem)
 
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products));
+	return response.end();
 });
 
 myRouter.post('/me/cart/:productId', function(request,response) {
+  const addedProductToCart = cart.push(request.body)
 
+  // Return all success with added Product
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products));
+	return response.end(JSON.stringify(cart));
 });
 
 module.exports = {server, products}
