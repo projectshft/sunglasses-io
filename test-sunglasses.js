@@ -20,6 +20,9 @@ const products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf
 const users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
 const brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
+let currentUser = {};
+
+
 //test for api/brands GET request
 describe('/GET brands', () => {
     //check for array
@@ -466,22 +469,22 @@ describe('/POST login', () => {
     });
 
     // should create token if login successful
-    // it('should return access token if login successful', done => {
-    //     const userLogin = {
-    //         password: 'tucker', 
-    //         username: 'lazywolf342'
-    //     }
+    it('should return access token if login successful', done => {
+        const userLogin = {
+            password: 'tucker', 
+            username: 'lazywolf342'
+        }
         
-    //     chai
-    //         .request(server)
-    //         .post('/api/login')
-    //         .send(userLogin)
-    //         .end((error, response) => {
-    //             expect(response.statusCode).to.equal(200);
-    //             expect(response.body).to.not.be.empty
-    //         });
-    //     done();
-    // });
+        chai
+            .request(server)
+            .post('/api/login')
+            .send(userLogin)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(response.body).to.not.be.empty;
+            });
+        done();
+    });
 
     // should throw error if query parameters are sent
     it('should return error if query parameters are sent', done => {
@@ -521,22 +524,25 @@ describe('/POST login', () => {
 
 // //test for api/me/cart GET request
 // describe('/GET cart', () => {
-    beforeEach(() => {
-        const userLogin = {
-            password: 'tucker', 
-            username: 'lazywolf342'
-        }
-        
-        chai
-            .request(server)
-            .post('/api/login', userLogin)
-            .send(userLogin)
-            .end((error, response) => {
-                expect(response.statusCode).to.equal(200);
-            });
-        done();
-});
-//check for array 
+    
+
+//     beforeEach(() => {
+//         const userLogin = {
+//             password: 'tucker', 
+//             username: 'lazywolf342'
+//         }
+//         chai
+//             .request(server)
+//             .post('/api/login', userLogin)
+//             .send(userLogin)
+//             .end((error, response) => {
+//                 currentUser = response.body
+//                 expect(response.statusCode).to.equal(200);
+//             });
+//         done();
+// });
+
+// //check for array 
 // it('should GET an array', done => {
 //     chai
 //         .request(server)
