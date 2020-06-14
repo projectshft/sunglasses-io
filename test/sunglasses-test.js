@@ -41,24 +41,24 @@ describe('/GET brand products', () => {
   });
   it ('should error if invalid brand id is passed', done => {
     chai
-        .request(server)
-        .get(`/api/brands/6/products`)
-        .end((err, res) => {
-          // assert
-          res.should.have.status(404);
-          done();
-        });
+      .request(server)
+      .get(`/api/brands/6/products`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(404);
+        done();
       });
+    });
   it ('should error if no brand id is passed', done => {
     chai
-        .request(server)
-        .get(`/api/brands//products`)
-        .end((err, res) => {
-          // assert
-          res.should.have.status(404);
-          done();
-        });
-      });  
+      .request(server)
+      .get(`/api/brands//products`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(404);
+        done();
+      });
+    });  
 });
 
 describe('/GET products', () => {
@@ -96,7 +96,6 @@ describe('/POST login', () => {
         username: 'greenlion235', 
         password: 'waters' 
       }
-    
     // act
     chai
       .request(server)
@@ -112,8 +111,7 @@ describe('/POST login', () => {
     let login = {
         username: 'greenlion23', 
         password: 'waters' 
-      }
-    
+      } 
     // act
     chai
       .request(server)
@@ -150,11 +148,35 @@ describe('/GET cart', () => {
     chai
       .request(server)
       .get('/api/me/cart')
+      .send({accessToken: '123456'})
       .end((err, res) => {
         // assert
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(0)
+        done();
+      });
+  });
+  it('should not get cart items if accessToken is invalid', done => {
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .send({accessToken: '12346'})
+      .end((err, res) => {
+        // assert
+        res.should.have.status(401);
+        done();
+      });
+  });
+  it('should not get cart items if accessToken is missing', done => {
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .end((err, res) => {
+        // assert
+        res.should.have.status(401);
         done();
       });
   });
@@ -174,6 +196,7 @@ describe('/POST cart', () => {
       });
   });
   it('should not add an item to the cart that does not exist', done => {
+    // act
     chai
     .request(server)
     .post('/api/me/cart/15')
@@ -185,6 +208,7 @@ describe('/POST cart', () => {
     });
   });
   it('should not allow someone without an access token to add to cart', done => {
+    // act
     chai
     .request(server)
     .post('/api/me/cart/15')
@@ -196,6 +220,7 @@ describe('/POST cart', () => {
     });
   });
   it('should not allow someone without an access token to add to cart', done => {
+    // act
     chai
     .request(server)
     .post('/api/me/cart/15')

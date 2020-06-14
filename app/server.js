@@ -172,8 +172,26 @@ myRouter.post('/api/login', function(request,response) {
 
 // GET api cart
 myRouter.get('/api/me/cart', function(request, response) {
-  response.writeHead(200, {'Content-Type': 'application/json'})
-  return response.end(JSON.stringify(cart))
+  // check if accessToken exists and if it matches any in accessTokens array
+  if (request.body.hasOwnProperty('accessToken')) {
+    accessToken = accessTokens.find(token => {
+      if (token == request.body.accessToken) {
+        return true
+      }
+    })
+    if (accessToken) {
+      response.writeHead(200, {'Content-Type': 'application/json'})
+      return response.end(JSON.stringify(cart))
+    } else {
+      // if accessToken doesn't match, return error
+      response.writeHead(401, "You need to have access to this call to continue");
+      return response.end();
+    }
+  } else {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  }
 });
 
 // POST to api cart
