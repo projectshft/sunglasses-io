@@ -20,14 +20,8 @@ var accessTokens = [];
 var failedLoginAttempts = {};
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
-const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 
 let server = http.createServer(function (request, response) {
-  if (request.method === 'OPTIONS'){
-    response.writeHead(200, CORS_HEADERS);
-    return response.end();
-  }
-
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, (error) => {
   if (error) {
@@ -63,7 +57,7 @@ myRouter.post('/api/login', function(request,response) {
       setNumberOfFailedLoginRequestsForUsername(request.body.username,0);
 
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+      response.writeHead(200, { "Content-Type": "application/json" });
 
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -132,8 +126,6 @@ var getValidTokenFromRequest = function(request) {
 };
 
 myRouter.get('/api/brands', function(request,response) {
-  //response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
-  // Filter out the store issues since that is protected data
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
@@ -143,20 +135,30 @@ myRouter.get('/api/products', function(request, response) {
   return response.end(JSON.stringify(products));
 })
 
+
+
 myRouter.get('/api/brands/:brandId/products', function(request, response) {
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(products.filter(product => product.categoryId === request.params.brandId)));
+  if (!request.params.brandId || request.params.brandId === "null" || request.params.brandId === "undefined") {
+    response.writeHead(400, "Invalid BrandId Supplied" );
+    response.end();
+  } else if (!products.find(product => product.categoryId === request.params.brandId)) {
+    response.writeHead(404, "Brand not found");
+    response.end();
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(products.filter(product => product.categoryId === request.params.brandId)));
+  }
 })
 
 myRouter.get('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.writeHead(401, "You need to have access to this call to continue");
     response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
-    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
   }
   
@@ -166,13 +168,13 @@ myRouter.post('/api/me/cart', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.writeHead(401, "You need to have access to this call to continue");
     response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
     let product = request.body;
     user.cart.push(product);
-    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
   }
   
@@ -182,13 +184,13 @@ myRouter.delete('/api/me/cart/:productId', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.writeHead(401, "You need to have access to this call to continue");
     response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
     let productId = request.params.productId;
     user.cart = user.cart.filter(products => products.id !== productId);
-    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end();
   }
 })
@@ -197,7 +199,7 @@ myRouter.post('/api/me/cart/:productId', function(request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if(!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, "You need to have access to this call to continue", CORS_HEADERS);
+    response.writeHead(401, "You need to have access to this call to continue");
     response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
@@ -209,7 +211,7 @@ myRouter.post('/api/me/cart/:productId', function(request, response) {
         user.cart.push(productToUpdate);
       }
     } 
-    response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
   }
 })

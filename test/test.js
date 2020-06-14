@@ -67,6 +67,26 @@ describe('sunglasses', () => {
           done();
         })
     })
+    it('it should return an error if there is no brand with that id', done => {
+      let brandId = 99;
+      chai
+        .request(server)
+        .get(`/api/brands/${brandId}/products`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        })
+    })
+    it('it should return an error if no brand id is supplied', done => {
+      let brandId = null;
+      chai
+        .request(server)
+        .get(`/api/brands/${brandId}/products`)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
   })
   describe('/GET me/cart', () => {
     it('it should get all items in a users cart', done => {
