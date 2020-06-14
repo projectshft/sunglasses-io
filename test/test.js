@@ -48,6 +48,39 @@ describe("Brands", () => {
         });
     });
   });
+
+  describe("/GET brands/:id/products", () => {
+    it("it should GET all the products for a given brand", (done) => {
+      // assemble
+      const searchCategory = "1";
+      //act
+      chai
+        .request(server)
+        .get(`/api/brands/${searchCategory}/products`)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.should.all.have.keys("id", "categoryId", "name", "description", "price", "imageUrls");
+          res.body.should.all.have.property("categoryId", searchCategory);
+          done();
+        });
+    });
+    it("it should return an error when an invalid value is passed", (done) => {
+      // assemble
+      const searchCategory = "a";
+      //act
+      chai
+        .request(server)
+        .get(`/api/brands/${searchCategory}/products`)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.not.be.an("array");
+          done();
+        });
+    });
+  });
 });
 
 describe("Products", () => {

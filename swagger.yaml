@@ -37,6 +37,37 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: Products available for a brand
+      description: |
+        The brands/{id}/products endpoint returns a list of products associated with the given brand ID. The response includes each product object whose categoryId matches the brandId passed as a query parameter.
+      parameters:
+        - name: id
+          in: path
+          description: Category id for filtering
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: An array of products for a given brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Products"
+        "404":
+          description: Invalid brand ID supplied
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
   /products:
     get:
       tags:

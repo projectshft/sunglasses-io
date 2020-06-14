@@ -41,10 +41,30 @@ let server = http
     console.log(`Server is listening on ${PORT}`);
   });
 
-// Public route - all users of API can access
 myRouter.get("/api/brands", function (request, response) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
+});
+
+myRouter.get("/api/brands/:id/products", function (request, response) {
+  // need to figure out all our possible IDs to test param
+  const brandIds = brands.reduce((idsArray, currentBrand) => {
+    idsArray.push(currentBrand.id);
+    return idsArray;
+  }, []);
+  // if the param id doesn't fit, return a 404
+  if (!brandIds.includes(request.params.id)) {
+    response.writeHead(404, "Invalid brand ID supplied");
+    response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+
+  let productsFilteredByBrand = products.filter((product) => {
+    return product.categoryId === request.params.id;
+  });
+
+  return response.end(JSON.stringify(productsFilteredByBrand));
 });
 
 myRouter.get("/api/products", function (request, response) {
