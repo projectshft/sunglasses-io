@@ -211,4 +211,32 @@ describe('User', () => {
     });
 
   });
+
+  describe('/DELETE me/cart/:productId', () => {
+    it('it should DELETE an item in the users cart', done => {
+      let currentUser = {
+        username: "lazywolf342",
+        password: "tucker"
+      }
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(currentUser)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('string');
+            chai
+              .request(server)
+              .delete('/api/me/cart/1/?accessToken=' + res.body)
+              .send()
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array')
+                res.body.length.should.be.eql(0)
+                done();
+              });
+          });
+    });
+
+  });
 });

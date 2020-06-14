@@ -206,4 +206,44 @@ myRouter.post('/api/me/cart', function(request,response) {
     }
 });
 
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
+  //verifying token
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to log in to add item to cart");
+    return response.end();
+  
+  } else {
+    
+      //Find the correct user cart
+      let user = users.find((user)=>{
+        return user.login.username == currentAccessToken.username
+      })
+
+      if (user.cart.length === 0 ) {
+        response.writeHead(402, "ERROR: Your cart is empty");
+        return response.end();
+      }
+      // Checking to see if product exists in cart
+      
+      let productInCart = user.cart.find((product) => {
+        return product.id === request.params.productId
+      })
+
+      if (!productInCart) {
+        response.writeHead(404, "That product cannot be found");
+        return response.end();
+      }
+
+      user.cart = user.cart.filter((product) => {
+        return product.id !== request.params.productId
+      })
+
+      // Return success with added product in cart
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(user.cart));
+    }
+});
+
 module.exports = server;
