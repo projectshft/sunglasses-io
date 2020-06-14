@@ -72,6 +72,7 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
       }
       return accumulator;
     },[])
+    // return brandProducts
     response.writeHead(200, {'Content-Type': 'application/json'})
     return response.end(JSON.stringify(brandProducts))
   }
@@ -180,6 +181,7 @@ myRouter.get('/api/me/cart', function(request, response) {
       }
     })
     if (accessToken) {
+      // if accessToken legitimate, return cart
       response.writeHead(200, {'Content-Type': 'application/json'})
       return response.end(JSON.stringify(cart))
     } else {
@@ -196,6 +198,44 @@ myRouter.get('/api/me/cart', function(request, response) {
 
 // POST to api cart
 myRouter.post('/api/me/cart/:id', function(request, response) {
+  if (request.body.hasOwnProperty('accessToken')) {
+    // check if accessToken exists and if it matches any in accessTokens array
+    accessToken = accessTokens.find(token => {
+      if (token == request.body.accessToken) {
+        return true
+      }
+    })
+    if (accessToken) {
+      // check is product exists, and return it
+      let product = products.find(product => {
+        if (product.id == request.params.id) {
+          return true
+        }
+      });
+      if (product) {
+        // if product exists, add it to cart
+        cart.push(product)
+        response.writeHead(200, {'Content-Type': 'application/json'})
+        return response.end()
+      } else {
+        // if product doesn't exist, say so
+        response.writeHead(404, {'Content-Type': 'application/json'})
+        return response.end()
+      }
+    } else {
+      // if accessToken doesn't match, return error
+      response.writeHead(401, "You need to have access to this call to continue");
+      return response.end();
+    }
+  } else {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  }
+});
+
+// DELETE from api cart
+myRouter.delete('/api/me/cart/:id', function(request, response) {
   // check if accessToken exists and if it matches any in accessTokens array
   if (request.body.hasOwnProperty('accessToken')) {
     accessToken = accessTokens.find(token => {
@@ -204,16 +244,26 @@ myRouter.post('/api/me/cart/:id', function(request, response) {
       }
     })
     if (accessToken) {
+      // if accessToken legitimate, find the product in list of products
       let product = products.find(product => {
         if (product.id == request.params.id) {
           return true
         }
       });
       if (product) {
-        cart.push(product)
-        response.writeHead(200, {'Content-Type': 'application/json'})
-        return response.end()
+        // if product exists, check to see if it's in the cart
+        if (cart.includes(product)) {
+          // if it is, remove it from the cart
+          cart.splice(cart[product] , 1)
+          response.writeHead(200, {'Content-Type': 'application/json'})
+          return response.end()
+        } else {
+          // if item is not in the cart, say so
+          response.writeHead(404, 'item not found in cart')
+          return response.end()
+        }
       } else {
+        // if item doesn't exist, say so
         response.writeHead(404, {'Content-Type': 'application/json'})
         return response.end()
       }
@@ -231,5 +281,5 @@ myRouter.post('/api/me/cart/:id', function(request, response) {
 
 
 
-
+// export server
 module.exports = server

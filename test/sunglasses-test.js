@@ -233,6 +233,98 @@ describe('/POST cart', () => {
   });
 });
 
+describe('/DELETE products', () => {
+  it('should delete an item from the cart', done => {
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/2')
+      .send({accessToken: '123456'})
+      .end((err, res) => {
+        chai
+          .request(server)
+          .delete('/api/me/cart/2')
+          .send({accessToken: '123456'})
+          .end((err, res) => {
+            // assert
+            res.should.have.status(200);
+            
+            // check it's actually gone
+            chai 
+              .request(server)
+              .get('/api/me/cart')
+              .send({accessToken: '123456'})
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(1)
+                done();
+              });
+          });
+      });
+  });
+
+  it('should not allow a user with an invalid access code to delete an item from the cart', done => {
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/2')
+      .send({accessToken: '123456'})
+      .end((err, res) => {
+        chai
+          .request(server)
+          .delete('/api/me/cart/2')
+          .send({accessToken: '12345'})
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done()
+          });
+      });
+  });
+  it('should not allow a user with no access code to delete an item from the cart', done => {
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/2')
+      .send({accessToken: '123456'})
+      .end((err, res) => {
+        chai
+          .request(server)
+          .delete('/api/me/cart/2')
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done();
+          });
+      });
+  });
+  it('should not allow a user to delete an item from the cart that was never there', done => {
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/3')
+      .send({accessToken: '123456'})
+      .end((err, res) => {
+        // assert
+        res.should.have.status(404);
+        done();
+      });
+  });
+  it('should not allow a user to delete an item from the cart that does not exist', done => {
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/16')
+      .send({accessToken: '123456'})
+      .end((err, res) => {
+        // assert
+        res.should.have.status(404);
+        done();
+      });
+  });
+});
+
 
 
 
