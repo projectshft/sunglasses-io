@@ -141,7 +141,7 @@ describe('User', () => {
           res.body.should.be.an('string');
               chai
               .request(server)
-              .get('/api/me/cart?accessToken='+res.body)
+              .get('/api/me/cart/?accessToken=' + res.body)
               .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an('array')
@@ -175,4 +175,40 @@ describe('User', () => {
     });
   });
   
+  describe('/POST me/cart', () => {
+    it('it should POST items to the users cart', done => {
+      let currentUser = {
+        username: "lazywolf342",
+        password: "tucker"
+      }
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(currentUser)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('string');
+          let addedProduct = {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price": 150,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }
+            chai
+              .request(server)
+              .post('/api/me/cart/?accessToken=' + res.body)
+              .send(addedProduct)
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array')
+                res.body.length.should.be.eql(1)
+                res.body[0].quantity.should.be.eql(1)
+                done();
+              });
+          });
+    });
+
+  });
 });
