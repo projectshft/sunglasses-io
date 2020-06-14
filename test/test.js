@@ -114,8 +114,16 @@ describe('sunglasses', () => {
               done();
             })
         })
-
-
+    })
+    it('it should return an error if the user is not logged in', done => {
+      let accessToken = "";
+      chai
+        .request(server)
+        .get(`/api/me/cart?accessToken=${accessToken}`)
+            .end((err, res) => {
+              res.should.have.status(401);
+              done();
+            })
     })
   })
 
