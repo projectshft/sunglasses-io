@@ -8,8 +8,44 @@ var uid = require('rand-token').uid;
 const Brands = require('./models/brands-model');
 const Products = require('./models/products-model');
 const UserCart = require('./models/cart-model');
+const User = require('./models/login-model');
 
 const PORT = 3001;
+
+var users = [{
+  "gender": "female",
+  "cart": [],
+  "name": {
+      "title": "mrs",
+      "first": "susanna",
+      "last": "richards"
+  },
+  "location": {
+      "street": "2343 herbert road",
+      "city": "duleek",
+      "state": "donegal",
+      "postcode": 38567
+  },
+  "email": "susanna.richards@example.com",
+  "login": {
+      "username": "yellowleopard753",
+      "password": "jonjon",
+      "salt": "eNuMvema",
+      "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+      "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+      "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+  },
+  "dob": "1954-10-09 10:47:17",
+  "registered": "2003-08-03 01:12:24",
+  "phone": "031-941-6700",
+  "cell": "081-032-7884",
+  "picture": {
+      "large": "https://randomuser.me/api/portraits/women/55.jpg",
+      "medium": "https://randomuser.me/api/portraits/med/women/55.jpg",
+      "thumbnail": "https://randomuser.me/api/portraits/thumb/women/55.jpg"
+  },
+  "nat": "IE"
+}];
 
 //setup the router
 var myRouter = Router();
@@ -136,6 +172,57 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
 	return response.end(JSON.stringify(updatedProduct));
 })
 
+//Handle post request to login the user
+myRouter.post('/api/login', function(request,response) {
+   // Make sure there is a username and password in the request (handle the numberOfFailedRequests next, just checking login credentials first)
+  //  if (request.body.email && request.body.login.password && getNumberOfFailedLoginRequestsForUsername(request.body.login.username) < 3) {
+    // check for email and username and password in request
+    if (request.body.email && request.body.login.username && request.body.login.password) {
+    // See if there is a user that has that username and password
+    let user = users.find((user)=>{
+      return user.login.username == request.body.login.username && user.login.password == request.body.login.password;
+    });
+
+    if (user) {
+      // If we found a user, reset our counter of failed logins
+      // setNumberOfFailedLoginRequestsForUsername(request.body.username,0);
+
+      // Write the header because we know we will be returning successful at this point and that the response will be json
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      return response.end(JSON.stringify(user));
+      // We have a successful login, if we already have an existing access token, use that
+      // let currentAccessToken = accessTokens.find((tokenObject) => {
+      //   return tokenObject.username == user.login.username;
+      // });
+
+      // Update the last updated value so we get another time period before expiration
+      // if (currentAccessToken) {
+      //   currentAccessToken.lastUpdated = new Date();
+      //   return response.end(JSON.stringify(currentAccessToken.token));
+      // } else {
+      //   // Create a new token with the user value and a "random" token
+      //   let newAccessToken = {
+      //     username: user.login.username,
+      //     lastUpdated: new Date(),
+      //     token: uid(16)
+      //   }
+      //   accessTokens.push(newAccessToken);
+      //   return response.end(JSON.stringify(newAccessToken.token));
+      // }
+    } else {
+      // Update the number of failed login attempts
+      // let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
+      // setNumberOfFailedLoginRequestsForUsername(request.body.username,++numFailedForUser);
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response, be generic for security purposes
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+});
 
 
 
