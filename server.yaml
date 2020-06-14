@@ -1,0 +1,249 @@
+swagger: '2.0'
+info:
+  title: Sunglasses.io
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to view all the sunglasses brands.
+      parameters:
+        []
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+  
+  /api/brands/{id}/products:
+    get:
+      summary: Brand Products
+      description: |
+        The Brand Products endpoint allows you to view all the products of a selected brand.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand from which to view products
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brand products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Brand not found
+        default:
+          description: Unexpected error
+  
+  /api/products:
+    get:
+      summary: All Products
+      description: >-
+        The Products endpoint returns all the products available in the store.
+      parameters:
+        - name: query
+          in: query
+          description: What type of glasses user wants to see.
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Incorrectly formatted request
+        default:
+          description: Unexpected error
+  
+  /api/login:
+    post:
+      summary: User Login
+      description: |
+        This endpoint allows a user to login to access exclusive information.
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for login
+          required: true
+          type: string
+      tags:
+        - Login
+      responses:
+        '200':
+          description: Successful login
+        '400':
+          description: Username or password not entered
+        '401':
+          description: Incorrect username or password
+        default:
+          description: Unexpected error
+  
+  /api/me/cart:
+    get:
+      summary: Get Cart
+      description: |
+        The Cart endpoint allows you to view all the products of the user's cart.
+      parameters:
+        - name: accessToken
+          in: query
+          description: The accessToken from login
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of cart items
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '401':
+          description: Unauthorized
+        default:
+          description: Unexpected error
+    post:
+      summary: Add to Cart
+      description: |
+        The Add to Cart endpoint allows you to add products to the user's cart.
+      parameters:
+        - name: accessToken
+          in: query
+          description: The accessToken from login
+          required: true
+          type: string
+        - name: id
+          in: query
+          description: The accessToken from login
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Successful addition to cart
+        '401':
+          description: Unauthorized
+        '404':
+          description: Item not found
+        default:
+          description: Unexpected error  
+  
+  /api/me/cart/{id}:
+    post:
+      summary: Add to Cart
+      description: |
+        The Add to Cart endpoint allows you to add products to the user's cart.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the product the user wants to add to the cart
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: The accessToken from login
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Successful addition to cart
+        '401':
+          description: Unauthorized
+        '404':
+          description: Item not found
+        default:
+          description: Unexpected error
+    delete:
+      summary: Delete from Cart
+      description: |
+        The Delete from Cart endpoint allows you to remove products from the user's cart.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the product the user wants to remove from the cart
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: The accessToken from login
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Successful removal from cart
+        '401':
+          description: Unauthorized
+        '404':
+          description: Item not found
+        default:
+          description: Unexpected error
+          
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name the of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the product.
+      categoryId:
+        type: string
+        description: >-
+          Which brand ID the product belongs to.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: A short description of the product.
+      price:
+        type: integer
+        description: The amount the product costs.
+      imageURLs:
+        type: array
+        items: {}
+        description: All of the URLs.
