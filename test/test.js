@@ -120,10 +120,10 @@ describe('sunglasses', () => {
       chai
         .request(server)
         .get(`/api/me/cart?accessToken=${accessToken}`)
-            .end((err, res) => {
-              res.should.have.status(401);
-              done();
-            })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        })
     })
   })
 
@@ -168,11 +168,11 @@ describe('sunglasses', () => {
       chai
         .request(server)
         .post(`/api/me/cart?accessToken=${accessToken}`)
-            .send(product)
-            .end((err, res) => {
-              res.should.have.status(401);
-              done();
-            })
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        })
     })
   })
   describe('/DELETE me/cart/{productId}', () => {
@@ -207,6 +207,17 @@ describe('sunglasses', () => {
               res.should.have.status(200);
               done();
             })
+        })
+    })
+    it('it should return an error if the user is not logged in', done => {
+      let productId = "1";
+      let accessToken = "";
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
         })
     })
   })
