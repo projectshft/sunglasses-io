@@ -3,6 +3,7 @@ const chaiHTTP = require("chai-http");
 const server = require("../app/server");
 const expect = chai.expect;
 const assert = chai.assert;
+const should = chai.should;
 
 chai.use(chaiHTTP);
 chai.use(require("chai-sorted"));
@@ -100,48 +101,72 @@ describe("/GET products", () => {
 });
 
 //LOGIN
-const fullUserCredentials = {
-  username: 'yellowleopard753',
-  password: 'jonjon'
-}
-const missingUserCredentials = {
-  username: 'yellowleopard743',
-  password: ''
-}
-const wrongCredentials = {
-  username: "someguy",
-  password: "password"
-}
-
 describe("/POST user login", () => {
   it.only("should return 200 response if the user logged in correctly", done => {
+    //arrange
+    const fullUserCredentials = {
+      username: 'yellowleopard753',
+      password: 'jonjon'
+    };
+    //act
     chai
-      .request(server)
-      .post("/api/login")
-      .send(fullUserCredentials)
-      .end((err, res) => {
-        expect(res).to.have.status(200); 
-        done();
+        .request(server)
+        .post("/api/login")
+        .send(fullUserCredentials)
+        //assert
+        .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200); 
+            done();
       });
   })
   it.only("should return 400 if user is missing a parameter", done => {
+    const missingUserCredentials = {
+      username: 'yellowleopard743',
+      password: ''
+    }
+    //act
     chai
-    .request(server)
-    .post("/api/login")
-    .send(missingUserCredentials)
-    .end((err, res) => {
-      expect(res).to.have.status(400); 
-      done();
+      .request(server)
+      .post("/api/login")
+      .send(missingUserCredentials)
+      //assert
+      .end((err, res) => {
+          expect(res).to.have.status(400); 
+          done();
     });
   })
   it.only("should return 401 if the login fails", done => {
+    //arrange
+    const wrongCredentials = {
+      username: "someguy",
+      password: "password"
+    }
+    //act
     chai
-    .request(server)
-    .post("/api/login")
-    .send(wrongCredentials)
-    .end((err, res) => {
-      expect(res).to.have.status(401); 
-      done();
+      .request(server)
+      .post("/api/login")
+      .send(wrongCredentials)
+      //assert
+      .end((err, res) => {
+          expect(res).to.have.status(401); 
+          done();
     });
   })
-})
+});
+
+//GET CART FOR LOGGED IN USER
+
+//TODO test for correctly logged in user
+
+describe("/GET cart by logged in user", () => {
+  it.only("should return 401 response if the user tries to access cart without being logged in", async function () {
+    chai
+        .request(server)
+        .get("/api/me/cart")
+        .end((err, res) => {
+            expect(res).to.have.status(401); 
+        
+      });
+  });
+});

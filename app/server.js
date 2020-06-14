@@ -7,6 +7,9 @@ var bodyParser   = require('body-parser');
 const url = require("url");
 var uid = require('rand-token').uid;
 
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+
 let brands = [];
 let NumofBrands = 5;
 let users = [];
@@ -64,11 +67,11 @@ const server = http.createServer((request, response) => {
   //GET PRODUCTS BY BRAND ID
   router.get("/api/brands/:id/products", (request, response) => {
     const { id } = request.params;
-    const productList = products.filter(product => product.categoryId.includes(id));
+    let productList = products.filter(product => product.categoryId.includes(id));
     const numId = parseInt(id, 10)
       
     if (numId >= NumofBrands) { //hardcode number of brands. this says that the number of brands can't be more than 5, probably a better way to do this
-      response.writeHead(404, "That brand does not exist");
+      response.writeHead(404, "That brand does not exist");//return to this code to review
       return response.end();
     }
     response.writeHead(200, { "Content-Type": "application/json" });
@@ -151,7 +154,7 @@ router.post('/api/login', function(request,response) {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
+        return response.end(JSON.stringify(newAccessToken.token,));
       }
     } else {
       // Update the number of failed login attempts
@@ -187,5 +190,72 @@ var getValidTokenFromRequest = function(request) {
   }
 };
  
+// GET USER CART FOR LOGGED IN USER
+router.get('/api/me/cart', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to be logged in to access your cart");
+    return response.end();
+  } 
+    //Select the active user
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+    //return the user's cart
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(user.cart));
+
+});
+
+//ADD TO PRODUCT TO CART FOR LOGGED IN USER
+router.post('/api/me/cart', function(request,response) {
+  // Make sure there is an accessToken and a productId in the request body
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to be logged in to access your cart");
+    return response.end();
+  } 
+  //if there is no product ID in the request body
+  if (!request.body.productId){
+    response.writeHead(401, "Select an item to add to cart");
+    return response.end();
+  }
+    //Select the active user
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+
+    //select the current users cart
+    let cart = user.cart
+
+    //select the product in the body
+    let product = products.find((product) => {
+      return product.id == request.body.productId
+    })
+
+    //Push selected product to user cart
+    cart.push(product)
+
+    //return the user's cart
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(cart));
+
+});
+
+
+
+    // Find the user with that accessToken
+    // let currentAccessToken = accessTokens.find((tokenObject) => {
+    //   return tokenObject.username == user.login.username;
+    // });
+    // let user = users.find((user) => {
+    //   return user.login.username == currentAccessToken.username;
+    // });
+    //Find the product associated with the id
+    // let product = products.find((product) => {
+    //   return products.id == request.body.productId;
+    // })
 
 module.exports = server
