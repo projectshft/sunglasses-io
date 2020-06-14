@@ -189,6 +189,12 @@ myRouter.delete('/api/me/cart/:productId', function(request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to this call to continue");
     response.end();
+  } else if(!request.params.productId || request.params.productId === 'null' || request.params.productId === "undefined") {
+    response.writeHead(400, "invalid product id supplied");
+    response.end();
+  } else if (!products.find(product => product.id === request.params.productId)) {
+    response.writeHead(404, "product not found");
+    response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
     let productId = request.params.productId;

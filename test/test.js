@@ -193,30 +193,33 @@ describe('sunglasses', () => {
         })
     })
   })
+
   describe('/DELETE me/cart/{productId}', () => {
+    let login = {
+      "username": "yellowleopard753",
+      "password": "jonjon",
+      "salt": "eNuMvema",
+      "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+      "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+      "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+    };
+    let product = {
+      "id": "1",
+      "categoryId": "1",
+      "name": "Superglasses",
+      "description": "The best glasses in the world",
+      "price": 150,
+      "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
+    let accessToken = "";
     it('should delete an item from a users cart', done => {
-      let login = {
-        "username": "yellowleopard753",
-        "password": "jonjon",
-        "salt": "eNuMvema",
-        "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-        "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-        "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
-      };
       chai
         .request(server)
         .post('/api/login')
         .send(login)
         .end((err, res) => {
-          let accessToken = res.body;
-          let product = {
-            "id": "1",
-            "categoryId": "1",
-            "name": "Superglasses",
-            "description": "The best glasses in the world",
-            "price": 150,
-            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-          }
+          accessToken = res.body;
+          
           let productId = product.id;
           chai
             .request(server)
@@ -229,16 +232,37 @@ describe('sunglasses', () => {
     })
     it('it should return an error if the user is not logged in', done => {
       let productId = "1";
-      let accessToken = "";
+      let badAccessToken = "";
       chai
         .request(server)
-        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .delete(`/api/me/cart/${productId}?accessToken=${badAccessToken}`)
         .end((err, res) => {
           res.should.have.status(401);
           done();
         })
     })
+    it('it should return an error if there is no product with that id', done => {
+      let productId = 99;
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        })
+    })
+    it('it should return an error if no product id is supplied', done => {
+      let productId = null;
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        })
+    })
   })
+
   describe('/POST me/cart/{productId}', () => {
     it('should update the quantity of an item in a users cart', done => {
       let login = {
