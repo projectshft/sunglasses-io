@@ -2,66 +2,166 @@ const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
 const queryString = require('querystring');
+const url = require('url');
 const Router = require('router');
 const bodyParser = require('body-parser');
 const uid = require('rand-token').uid;
+const { getValidTokenFromRequest } = require('./authentication-helpers.js')
 
 const PORT = 3001;
 
-const products = require('../initial-data/products.json')
-const users = require('../initial-data/users.json')
-const brands = require('../initial-data/brands.json')
+//initial data
+let products = require('../initial-data/products.json');
+let users = require('../initial-data/users.json');
+let brands = require('../initial-data/brands.json');
+
+//data for logged in user
+let currentUser = {};
+let accessTokens = [];
 
 // Setup router
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
 //Setup server
-let server = http.createServer((request, response) => {
+let server = http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response))
 }).listen(PORT);
 
+
 myRouter.get("/api/brands", (request, response) => {
-    if (brands) {
-        //return all brands
-        response.writeHead(200, { "Content-Type": "application/json" });
-        response.end(JSON.stringify(brands));
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+
+    //check if parameters were sent with request
+    if (Object.keys(queryParams).length === 0) {
+        if (brands) {
+            //return all brands
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(brands));
+        } else {
+            response.writeHead(404, "No brands found")
+            response.end();
+        }
     } else {
-        response.writeHead(404, "No brands found")
+        response.writeHead(400, "Invalid request parameters")
         response.end();
     }
-
 });
 
 myRouter.get("/api/brands/:brandId/products", (request, response) => {
-    //check if brand exists
-    let brandFound = brands.filter(brand => {
-        return brand.id === request.params.brandId;
-    });
-    if (brandFound.length !== 0) {
-        //find all products with selected brand
-        let brandedProducts = products.filter(product => {
-            return product.categoryId === request.params.brandId;
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+
+    //check if parameters were sent with request
+    if (Object.keys(queryParams).length === 0) {
+        //check if brand exists
+        let brandFound = brands.filter(brand => {
+            return brand.id === request.params.brandId;
         });
 
-        response.writeHead(200, { "Content-Type": "application/json" });
-        response.end(JSON.stringify(brandedProducts));
+        if (brandFound.length !== 0) {
+            //find all products with selected brand
+            let brandedProducts = products.filter(product => {
+                return product.categoryId === request.params.brandId;
+            });
 
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(brandedProducts));
+
+        } else {
+            response.writeHead(404, "Brand was not found");
+            response.end();
+        }
     } else {
-        response.writeHead(404, "Brand was not found");
+        response.writeHead(400, "Invalid request parameters")
         response.end();
     }
 });
 
 myRouter.get("/api/products", (request, response) => {
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(products));
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKeys = Object.keys(queryParams);
+    const validParams = ['query', 'something'];
+
+    //check if parameter was sent
+    if (queryKeys.length === 0) {
+        //return all products if no parameters specified
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify(products));
+
+    } else {
+        //check if request parameters are valid
+        if (validParams.includes(...queryKeys)) {
+            const searchTerm = queryParams.query.toLowerCase();
+
+            //filter products according to search term
+            let searchResults = products.filter(product => {
+                return product.name.toLowerCase().includes(searchTerm) || product.description.toLowerCase().includes(searchTerm);
+            });
+
+            //return products matching search term
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(searchResults));
+
+        } else {
+            //send error if request parameters were invalid
+            response.writeHead(400, "Invalid request parameters")
+            response.end();
+        }
+    }
 });
 
-//   myRouter.post("/api/login", (request, response) => {
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(JSON.stringify());
-//   });
+myRouter.get("/api/products/:productId", (request, response) => {
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKeys = Object.keys(queryParams);
+
+    //make sure no invalid parameters were sent
+    if (queryKeys.length === 0) {
+        //find requested product
+        const productWithMatchingId = products.find(product => {
+            return product.id === request.params.productId;
+        });
+
+        //check if product was found
+        if (productWithMatchingId) {
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(productWithMatchingId));
+
+        } else {
+            response.writeHead(404, "Product was not found");
+            response.end();
+        }
+    } else {
+        response.writeHead(400, "Invalid request parameters");
+        response.end();
+    }
+});
+
+// myRouter.post("/api/login", (request, response) => {
+//     //for query parameters
+//     const queryParams = queryString.parse(url.parse(request.url).query);
+//     const queryKeys = Object.keys(queryParams);
+//     const requiredParams = ['username', 'password'];
+
+//     if (queryKeys.length !== 0) {
+//         const existingUser = users.find(user => { user.login.username === currentUsername })
+//         const currentPassword = queryParams.password;
+
+//         // if (existingUser) {
+//             response.writeHead(200, { "Content-Type": "application/json" });
+//             response.end();
+//         // }
+
+//     } else {
+//         response.writeHead(400, "Invalid request parameters: username & password are required");
+//         response.end();
+//     }
+
+
+// });
 
 //   myRouter.get("/api/me/cart", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });

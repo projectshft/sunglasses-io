@@ -14,16 +14,11 @@ paths:
     get:
       summary: Products
       description: |
-        The Products endpoint allows you to search products based on a search string or product id, with ability to limit results, by default returns all products
+        The Products endpoint allows you to search products' name and description based on a search string, by default returns all products
       parameters:
         - name: query
           in: query
           description: Search query string
-          required: false
-          type: string
-        - name: productId
-          in: query
-          description: The id of product to find  
           required: false
           type: string
       tags:
@@ -35,6 +30,36 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products/{productId}:
+    get:
+      summary: Product by Id
+      description: |
+        The Product by Id endpoint allows you to search all products by id
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to find
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single product with id matching value of parameters
+          schema:
+            $ref: '#/definitions/Product'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -160,6 +185,14 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: No brands founds
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -184,6 +217,14 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Brand not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -220,7 +261,7 @@ definitions:
   Error:
     type: object
     properties:
-      code:
+      code: 
         type: integer
         format: int32
       message:
