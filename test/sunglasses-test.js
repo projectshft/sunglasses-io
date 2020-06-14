@@ -174,15 +174,37 @@ describe('/POST cart', () => {
       });
   });
   it('should not add an item to the cart that does not exist', done => {
-        chai
-        .request(server)
-        .post('/api/me/cart/15')
-        .send({accessToken: '123456'})
-        .end((err, res) => {
-          // assert
-          res.should.have.status(404);
-          done();
-        });
+    chai
+    .request(server)
+    .post('/api/me/cart/15')
+    .send({accessToken: '123456'})
+    .end((err, res) => {
+      // assert
+      res.should.have.status(404);
+      done();
+    });
+  });
+  it('should not allow someone without an access token to add to cart', done => {
+    chai
+    .request(server)
+    .post('/api/me/cart/15')
+    .send()
+    .end((err, res) => {
+      // assert
+      res.should.have.status(401);
+      done();
+    });
+  });
+  it('should not allow someone without an access token to add to cart', done => {
+    chai
+    .request(server)
+    .post('/api/me/cart/15')
+    .send({accessToken: 'cat'})
+    .end((err, res) => {
+      // assert
+      res.should.have.status(401);
+      done();
+    });
   });
 });
 
