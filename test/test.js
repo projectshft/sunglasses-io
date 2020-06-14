@@ -88,13 +88,13 @@ describe('sunglasses', () => {
             .request(server)
             .get(`/api/me/cart?accessToken=${accessToken}`)
             .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('array');
-            res.body.length.should.be.eql(0);
-            done();
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.length.should.be.eql(0);
+              done();
+            })
         })
-        })
-      
+
 
     })
   })
@@ -120,9 +120,9 @@ describe('sunglasses', () => {
             "categoryId": "1",
             "name": "Superglasses",
             "description": "The best glasses in the world",
-            "price":150,
-            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-          }    
+            "price": 150,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }
           chai
             .request(server)
             .post(`/api/me/cart?accessToken=${accessToken}`)
@@ -136,4 +136,86 @@ describe('sunglasses', () => {
         })
     })
   })
+  describe('/DELETE me/cart/{productId}', () => {
+    it('should delete an item from a users cart', done => {
+      let login = {
+        "username": "yellowleopard753",
+        "password": "jonjon",
+        "salt": "eNuMvema",
+        "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+        "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+        "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+      };
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+          let accessToken = res.body;
+          let product = {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price": 150,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }
+          let productId = product.id;
+          chai
+            .request(server)
+            .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              done();
+            })
+        })
+    })
+  })
+  describe('/POST me/cart/{productId}', () => {
+    it('should update the quantity of an item in a users cart', done => {
+      let login = {
+        "username": "yellowleopard753",
+        "password": "jonjon",
+        "salt": "eNuMvema",
+        "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+        "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+        "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+      };
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+          let accessToken = res.body;
+          let product = {
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price": 150,
+            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }
+          chai
+            .request(server)
+            .post(`/api/me/cart?accessToken=${accessToken}`)
+            .send(product)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body[0].should.be.eql(product);
+              let quantiy = 2;
+              chai
+                .request(server)
+                .post(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+                .send(quantity)
+                .end((err, res) => {
+                  res.should.have.status(200);
+                  done();
+                })
+            })
+        })
+    })
+  })
 })
+
+
