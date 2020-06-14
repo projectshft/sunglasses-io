@@ -217,7 +217,7 @@ router.post('/api/me/cart', function(request,response) {
     response.writeHead(401, "You need to be logged in to access your cart");
     return response.end();
   } 
-  //if there is no product ID in the request body
+  //if there is no product ID in the request body, don't continue
   if (!request.body.productId){
     response.writeHead(401, "Select an item to add to cart");
     return response.end();
@@ -244,18 +244,28 @@ router.post('/api/me/cart', function(request,response) {
 
 });
 
+router.delete('/api/me/cart/:productId', function(request,response) {
+  const { productId } = request.params;
 
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to be logged in to view your cart");
+    return response.end();
+  }
+    //Select the active user
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
 
-    // Find the user with that accessToken
-    // let currentAccessToken = accessTokens.find((tokenObject) => {
-    //   return tokenObject.username == user.login.username;
-    // });
-    // let user = users.find((user) => {
-    //   return user.login.username == currentAccessToken.username;
-    // });
-    //Find the product associated with the id
-    // let product = products.find((product) => {
-    //   return products.id == request.body.productId;
-    // })
+    //filter out item to be deleted from cart
+    let cart = user.cart.filter(product => product.id !== productId)
+
+    //return the user's cart
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(cart));
+
+})
+
 
 module.exports = server
