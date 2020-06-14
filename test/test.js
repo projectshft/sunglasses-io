@@ -68,11 +68,11 @@ describe("Brands", () => {
     });
     it("it should return an error when an invalid value is passed", (done) => {
       // assemble
-      const searchCategory = "a";
+      const invalidCategory = "10";
       //act
       chai
         .request(server)
-        .get(`/api/brands/${searchCategory}/products`)
+        .get(`/api/brands/${invalidCategory}/products`)
         // assert
         .end((err, res) => {
           res.should.have.status(404);
@@ -123,6 +123,86 @@ describe("Products", () => {
           // chose a word likely to appear at least somewhere
           checkFilter(res.body, "sunGLASSES").should.equal(true);
           res.body.should.not.have.lengthOf(0);
+          done();
+        });
+    });
+  });
+});
+
+describe("Login", () => {
+  describe("/POST login ", () => {
+    it("it should reject the request body (and send an error) if user parameter is missing", (done) => {
+      // arrange
+      const badUserLogin = { username: "", password: "password" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(badUserLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+    it("it should reject the request body (and send an error) if password parameter is missing", (done) => {
+      // arrange
+      const badUserLogin = { username: "blah", password: "" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(badUserLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+    it("it should reject the request body (and send an error) if both username and password parameter is missing", (done) => {
+      // arrange
+      const badUserLogin = { username: "", password: "" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(badUserLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+    it("it should reject the request body (and send an error) if user login is incorrect", (done) => {
+      // arrange
+      const badUserLogin = { username: "fake", password: "password" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(badUserLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it("it should have a 200 status if the user's login info is correct", (done) => {
+      // arrange
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
           done();
         });
     });

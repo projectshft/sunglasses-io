@@ -24,7 +24,6 @@ let server = http
     if (error) {
       return console.log("Error on Server Startup: ", error);
     }
-
     // set up our brands in state
     fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
       if (error) throw error;
@@ -37,6 +36,12 @@ let server = http
       if (error) throw error;
       products = JSON.parse(data);
       console.log(`Server setup: ${products.length} products loaded`);
+    });
+
+    fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
+      if (error) throw error;
+      users = JSON.parse(data);
+      console.log(`Server setup: ${users.length} users loaded`);
     });
     console.log(`Server is listening on ${PORT}`);
   });
@@ -92,6 +97,28 @@ myRouter.get("/api/products", function (request, response) {
     currentProducts = products.slice();
   }
   return response.end(JSON.stringify(currentProducts));
+});
+
+myRouter.post("/api/login", function (request, response) {
+  if (request.body.username && request.body.password) {
+    // see if the user exists
+    const user = users.find((user) => {
+      return user.login.username === request.body.username && user.login.password === request.body.password;
+    });
+
+    // kick them out early
+    if (!user) {
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+  } else {
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+
+  return response.end();
 });
 
 module.exports = server;

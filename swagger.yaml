@@ -96,6 +96,37 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - Me
+      summary: Allows access to other parts of application
+      description: |
+        The login endpoint takes parameters of username and password. If the username and password match a user in the system, they will be granted access to use other endpoints that begin wit /api/me.
+      parameters:
+        - in: body
+          name: userLogin
+          description: The username and password
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: Valid username and password, access token will be stored
+        "400":
+          descripiton: Incorrectly formatted request.
+        "401":
+          description: Invalid username or password.
+          schema:
+            type: string
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Brands:
     type: array
@@ -133,6 +164,17 @@ definitions:
           items:
             type: string
             description: a url to an image for the product
+  User:
+    type: object
+    required:
+      - username
+      - passsword
+    properties:
+      userName:
+        type: string
+        description: The user's name
+      password:
+        type: string
   Error:
     type: object
     properties:
