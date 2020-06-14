@@ -149,4 +149,22 @@ var getValidTokenFromRequest = function(request) {
   }
 };
 
+myRouter.get('/api/me/cart', function(request,response) {
+  //verifying token
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to log in to see cart");
+    return response.end();
+  } else {
+    // Check if the username and login match has access to the users cart
+      let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+   
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(user.cart));    
+  }
+});
+
 module.exports = server;

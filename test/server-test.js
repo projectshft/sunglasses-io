@@ -6,7 +6,7 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('Brands', () => {
-    describe('/GET brands', () => {
+    describe('/GET api/brands', () => {
       it('it should GET all the brands', done => {
         chai
           .request(server)
@@ -20,7 +20,7 @@ describe('Brands', () => {
       });
     });
   
-    describe('/GET brands/:id/products', () => {
+    describe('/GET api/brands/:id/products', () => {
         it('it should GET all the products of a specific brand', done => {
           chai
             .request(server)
@@ -47,7 +47,7 @@ describe('Brands', () => {
   });
 
 describe('Products', () => {
-    describe('/GET products', () => {
+    describe('/GET api/products', () => {
       it('it should GET all the products available', done => {
         chai
           .request(server)
@@ -63,7 +63,7 @@ describe('Products', () => {
 });
 
 describe('Login', () => {
-  describe('/POST login', () => {
+  describe('/POST api/login', () => {
     it('it should POST users login and return access token', done => {
       chai
         .request(server)
@@ -123,4 +123,56 @@ describe('Login', () => {
         });
     });
   });
+});
+
+describe('User', () => {
+  describe('/GET me/cart', () => {
+    it('it should GET the cart contents of the current user', done => {
+      let currentUser = {
+        username: "lazywolf342",
+        password: "tucker"
+      }
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(currentUser)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('string');
+              chai
+              .request(server)
+              .get('/api/me/cart?accessToken='+res.body)
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array')
+                res.body.length.should.be.eql(0)
+                done();
+          });
+      });
+    });
+
+  
+    it('it should not GET cart contents of user without access token', done => {
+        let currentUser = {
+          username: "lazywolf342",
+          password: "tucker"
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(currentUser)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('string');
+              chai
+              .request(server)
+              .get('/api/me/cart')
+              .end((err, res) => {
+                res.should.have.status(401);
+                done();
+              });
+          });
+    });
+  });
+  
 });
