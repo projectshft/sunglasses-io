@@ -5,7 +5,9 @@ const chaiEach = require('chai-each');
 const chaiThings = require('chai-things');
 const chaiFuzzy = require('chai-fuzzy');
 
-const server = require('../app/server');
+const server = require('./app/server');
+const fs = require('fs');
+const path = require("path");
 
 //chai plugins
 chai.use(chaiHttp);
@@ -14,9 +16,9 @@ chai.use(chaiThings);
 chai.use(chaiFuzzy);
 
 //data for testing
-const products = require('../initial-data/products.json');
-const users = require('../initial-data/users.json');
-const brands = require('../initial-data/brands.json');
+const products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf-8"));
+const users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
+const brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
 //test for api/brands GET request
 describe('/GET brands', () => {
@@ -331,80 +333,110 @@ describe('/GET products/:productId', () => {
 });
 
 // //test for api/login POST request
-// describe('/POST login', () => {
-//     //response should be successful if username and password exist
-//     it('should return successful response username and password match existing user', done => {
-//         chai
-//             .request(server)
-//             .post('/api/login?password=tucker&username=lazywolf342')
-//             .end((error, response) => {
-//                 expect(response.statusCode).to.equal(200);
-//             });
-//         done();
-//     });
+describe('/POST login', () => {
+    //response should be successful if username and password exist
+    it('should return successful response username and password match existing user', done => {
+        chai
+            .request(server)
+            .post('/api/login?password=tucker&username=lazywolf342')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(response.body).to.have.members({'username': 'lazywolf342'}, {'password': 'tucker'});
+            });
+        done();
+    });
     
-//     //should throw error if parameters are missing
-//     it('should return error if no parameters are sent', done => {
-//         chai
-//             .request(server)
-//             .post('/api/login')
-//             .end((error, response) => {
-//                 expect(response.statusCode).to.equal(400);
-//             });
-//         done();
-//     });
+    //should throw error if parameters are missing
+    it('should return error if no parameters are sent', done => {
+        chai
+            .request(server)
+            .post('/api/login')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+            });
+        done();
+    });
 
-//     //login should require username parameter
-//     it('should return error if username parameter is missing', done => {
-//         chai
-//             .request(server)
-//             .post('/api/login?password=bananas')
-//             .end((error, response) => {
-//                 expect(response.statusCode).to.equal(400);
-//             });
-//         done();
-//     });
+    //login should require username parameter
+    it('should return error if username parameter is missing', done => {
+        chai
+            .request(server)
+            .post('/api/login?password=bananas')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+            });
+        done();
+    });
 
-//     //login should require password parameter
-//     it('should return error if username parameter is missing', done => {
-//         chai
-//             .request(server)
-//             .post('/api/login?username=bananas')
-//             .end((error, response) => {
-//                 expect(response.statusCode).to.equal(400);
-//             });
-//         done();
-//     });
+    //login should require password parameter
+    it('should return error if username parameter is missing', done => {
+        chai
+            .request(server)
+            .post('/api/login?username=bananas')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+            });
+        done();
+    });
 
-//     //should throw error if password is empty
-//     it('should return error if password is empty', done => {
-//         chai
-//             .request(server)
-//             .post('/api/login?password=&username=bananas')
-//             .end((error, response) => {
-//                 expect(response.statusCode).to.equal(400);
-//             });
-//         done();
-//     });
+    //should throw error if password is empty
+    it('should return error if password is empty', done => {
+        chai
+            .request(server)
+            .post('/api/login?username=bananas&password=')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+            });
+        done();
+    });
 
-//     //should throw error if username is empty
-//     it('should return error if password is empty', done => {
-//         chai
-//             .request(server)
-//             .post('/api/login?password=bananas&username=')
-//             .end((error, response) => {
-//                 expect(response.statusCode).to.equal(400);
-//             });
-//         done();
-//     });
+    //should throw error if username is empty
+    it('should return error if password is empty', done => {
+        chai
+            .request(server)
+            .post('/api/login?password=bananas&username=')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+            });
+        done();
+    });
 
-    //should throw error if username doesn't exist
+    // should throw error if username doesn't exist
+    it('should return error if username not found', done => {
+        chai
+            .request(server)
+            .post('/api/login?password=bananas&username=banana')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(401);
+            });
+        done();
+    });
 
-    //should throw error if password doesn't match 
+    // should throw error if password incorrect
+    it('should return error if password is incorrect', done => {
+        chai
+            .request(server)
+            .post('/api/login?password=bananas&username=yellowleopard753')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(401);
+            });
+        done();
+    });
 
-    //should create token if login successful
+    it('should be bananas', done => {
+        chai
+            .request(server)
+            .post('/api/login?stuff=somestuff')
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(bananas);
+            });
+        done();
+    });
 
-    //should throw error if invalid parameters are sent
+
+    // should create token if login successful
+
+    // should throw error if invalid parameters are sent
 
     
    
@@ -412,15 +444,19 @@ describe('/GET products/:productId', () => {
 
     
 
-// });
+});
 
 // //test for api/me/cart GET request
 // describe('/GET cart', () => {
 //     //should get an array
 
-    //array should be empty or contain only objects that match product 
+    //array should be empty if cart is empty
 
     //cart should belong to user
+    
+    //should contain only products in logged in user's cart
+
+    //return error if invalid parameters sent
 
     //cart should 
 
@@ -437,6 +473,20 @@ describe('/GET products/:productId', () => {
 
 // //test for api/me/cart POST request
 // describe('/POST cart', () => {
+
+    //should return error if no product id sent
+
+    //should return error if product doesn't exist
+
+    //return error if invalid parameters sent
+
+    //should return 200 on success
+
+    //should add product to logged in user's cart
+
+    //should not replace any items in cart
+
+
 //     //
 //     it('it should', done => {
 //         chai
@@ -452,6 +502,19 @@ describe('/GET products/:productId', () => {
 // //test for api/me/cart/:productId DELETE request
 // describe('/DELETE cart/:productId', () => {
 //     //
+    //return error if no product with sent id found in cart
+
+     //return error if no product by id exists
+
+    //return success if product is deleted
+
+    //delete item from cart
+
+    //delete no other items from cart
+
+    //return error if invalid parameters sent
+
+    
 //     it('it should', done => {
 //         chai
 //             .request(server)
@@ -466,6 +529,18 @@ describe('/GET products/:productId', () => {
 // //test for /api/me/cart/:productId POST request
 // describe('/POST cart/:productId', () => {
 //     //
+    //change quantity of product in cart
+
+    //change only product selected
+
+    //return success on update
+
+    //return error if product not found in cart
+
+    //return error if no product by id exists
+
+    //return error if invalid parameters sent
+
 //     it('it should', done => {
 //         chai
 //             .request(server)

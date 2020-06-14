@@ -6,14 +6,15 @@ const url = require('url');
 const Router = require('router');
 const bodyParser = require('body-parser');
 const uid = require('rand-token').uid;
-const { getValidTokenFromRequest } = require('./authentication-helpers.js')
+// const { getValidTokenFromRequest } = require('./authentication-helpers.js')
+const path = require("path");
 
 const PORT = 3001;
 
 //initial data
-let products = require('../initial-data/products.json');
-let users = require('../initial-data/users.json');
-let brands = require('../initial-data/brands.json');
+let products = []
+let users = []
+let brands = []
 
 //data for logged in user
 let currentUser = {};
@@ -24,9 +25,23 @@ const myRouter = Router();
 myRouter.use(bodyParser.json());
 
 //Setup server
+// let server = http.createServer(function (request, response) {
+//     myRouter(request, response, finalHandler(request, response))
+// }).listen(PORT);
+
+// This function is a bit simpler...
 let server = http.createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response))
-}).listen(PORT);
+  }).listen(3001, () => {
+    // Load dummy data into server memory for serving
+    products = JSON.parse(fs.readFileSync(path.resolve('app', "../initial-data/products.json"), "utf-8"));
+    // const file = fs.readFileSync(path.resolve('app', "../initial-data/products.json"));
+    // Load all users into users array
+    users = JSON.parse(fs.readFileSync(path.resolve('app', "../initial-data/users.json"), "utf-8"));
+    
+    // Load all brands from file
+    brands = JSON.parse(fs.readFileSync(path.resolve('app', "../initial-data/brands.json"), "utf-8"));
+  });
 
 
 myRouter.get("/api/brands", (request, response) => {
@@ -140,28 +155,31 @@ myRouter.get("/api/products/:productId", (request, response) => {
     }
 });
 
-// myRouter.post("/api/login", (request, response) => {
-//     //for query parameters
-//     const queryParams = queryString.parse(url.parse(request.url).query);
-//     const queryKeys = Object.keys(queryParams);
-//     const requiredParams = ['username', 'password'];
+myRouter.post("/api/login", (request, response) => {
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKeys = Object.keys(queryParams);
+    const requiredParams = ['username', 'password'];
 
-//     if (queryKeys.length !== 0) {
-//         const existingUser = users.find(user => { user.login.username === currentUsername })
-//         const currentPassword = queryParams.password;
+    if (queryKeys.length !== 0) {
+        const existingUser = users.find(user => { user.login.username === queryParams.username })
+        const currentPassword = queryParams.password;
 
-//         // if (existingUser) {
-//             response.writeHead(200, { "Content-Type": "application/json" });
-//             response.end();
-//         // }
+        if (existingUser) {
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end();
+        } else {
+            response.writeHead(401, "Invalid username or password");
+            response.end();
+        }
 
-//     } else {
-//         response.writeHead(400, "Invalid request parameters: username & password are required");
-//         response.end();
-//     }
+    } else {
+        response.writeHead(400, "Invalid request parameters: username & password are required");
+        response.end();
+    }
 
 
-// });
+});
 
 //   myRouter.get("/api/me/cart", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });
