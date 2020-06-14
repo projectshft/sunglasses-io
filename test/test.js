@@ -128,6 +128,14 @@ describe('sunglasses', () => {
   })
 
   describe('/POST me/cart', () => {
+    let product = {
+      "id": "1",
+      "categoryId": "1",
+      "name": "Superglasses",
+      "description": "The best glasses in the world",
+      "price": 150,
+      "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
     it('it should add an item to a users cart', done => {
       let login = {
         "username": "yellowleopard753",
@@ -143,14 +151,6 @@ describe('sunglasses', () => {
         .send(login)
         .end((err, res) => {
           let accessToken = res.body;
-          let product = {
-            "id": "1",
-            "categoryId": "1",
-            "name": "Superglasses",
-            "description": "The best glasses in the world",
-            "price": 150,
-            "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-          }
           chai
             .request(server)
             .post(`/api/me/cart?accessToken=${accessToken}`)
@@ -162,6 +162,17 @@ describe('sunglasses', () => {
               done();
             })
         })
+    })
+    it('it should return an error if the user is not logged in', done => {
+      let accessToken = "";
+      chai
+        .request(server)
+        .post(`/api/me/cart?accessToken=${accessToken}`)
+            .send(product)
+            .end((err, res) => {
+              res.should.have.status(401);
+              done();
+            })
     })
   })
   describe('/DELETE me/cart/{productId}', () => {
