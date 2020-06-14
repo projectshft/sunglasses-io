@@ -5,7 +5,7 @@ var queryString = require("querystring");
 const url = require("url");
 var Router = require("router");
 var bodyParser = require("body-parser");
-var uid = require("rand-token").uid;
+const { v4: uuidv4 } = require("uuid");
 
 const PORT = 8080;
 
@@ -113,12 +113,14 @@ myRouter.post("/api/login", function (request, response) {
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
+
+    newUUID = uuidv4();
   } else {
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
   }
 
-  return response.end();
+  return response.end(JSON.stringify(newUUID));
 });
 
 module.exports = server;

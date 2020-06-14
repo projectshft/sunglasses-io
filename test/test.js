@@ -5,6 +5,7 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 chai.use(require("chai-things"));
+chai.use(require("chai-uuid"));
 
 describe("Brands", () => {
   describe("/GET brands ", () => {
@@ -191,6 +192,21 @@ describe("Login", () => {
           done();
         });
     });
+    it("it should reject the request body (and send an error) if request is formatted incorrectly", (done) => {
+      // arrange
+      const badUserLogin = { user: "fake", pass: "password" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(badUserLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
     it("it should have a 200 status if the user's login info is correct", (done) => {
       // arrange
       const userLogin = { username: "yellowleopard753", password: "jonjon" };
@@ -203,6 +219,22 @@ describe("Login", () => {
         // assert
         .end((err, res) => {
           res.should.have.status(200);
+          done();
+        });
+    });
+    it("it should create an access token after passing authentication challenge", (done) => {
+      // arrange
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a.uuid();
           done();
         });
     });
