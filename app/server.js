@@ -170,6 +170,9 @@ myRouter.post('/api/me/cart', function(request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to this call to continue");
     response.end();
+  } else if (!request.body || Object.keys(request.body).length === 0) {
+    response.writeHead(400, "Invalid product supplied");
+    response.end();
   } else {
     let user = users.find(user => user.login.username === currentAccessToken.username);
     let product = request.body;
