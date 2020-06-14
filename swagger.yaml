@@ -9,7 +9,7 @@ info:
 host: localhost:3001
 # array of all schemes that your API supports
 schemes:
-  - http
+  - https
 # will be prefixed to all paths
 basePath: /api
 produces:
@@ -21,7 +21,7 @@ paths:
         - Brands
       summary: Brands Available
       description: |
-        The brands endpoint returns a list of brands offered by the sunglasses.io store. The response includes the brand and its unique identifier. It is sorted by unique identifier in ascending order.
+        The brands endpoint returns a list of brands offered by the sunglasses.io store. The response includes the brand and its unique identifier.
       responses:
         "200":
           description: An array of brand objects
@@ -29,6 +29,34 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Brands"
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Products in Store
+      description: |
+        The products endpoint returns a list of products offered by the sunglasses.io store. The response includes each product object. If a query is passed, it only includes those products whose description or name includes the query term.
+      parameters:
+        - name: search
+          in: query
+          description: Value that is used for filter of products
+          required: false
+          type: string
+      responses:
+        "200":
+          description: An array of product objects (all of them or filtered by a query term)
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Products"
         "500":
           description: "Server-side error."
           schema:
@@ -49,6 +77,31 @@ definitions:
         name:
           type: string
           description: The name of the brand.
+  Products:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the product.
+        categoryId:
+          type: string
+          description: The category the product belongs to.
+        name:
+          type: string
+          description: The name of the product.
+        descripiton:
+          type: string
+          description: The product description.
+        price:
+          type: number
+          description: The price of the object
+        imageUrls:
+          type: array
+          items:
+            type: string
+            description: a url to an image for the product
   Error:
     type: object
     properties:
