@@ -262,10 +262,62 @@ myRouter.get("/api/me/cart", (request, response) => {
 
 });
 
-//   myRouter.post("/api/me/cart", (request, response) => {
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(JSON.stringify());
-//   });
+myRouter.post("/api/me/cart", (request, response) => {
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKeys = Object.keys(queryParams);
+    const requiredParams = ['accessToken', 'productId'];
+    const currentUserToken = accessTokens.find(token => {
+        return token.username === currentUser.login.username;
+    });
+
+    //check for required parameters were sent and not empty and no invalid parameters sent
+    if (queryKeys.sort().join('') === requiredParams.sort().join('') &&
+    queryParams.accessToken && queryParams.productId) {
+
+        //check if access token is valid
+        if (queryParams.accessToken === currentUserToken.accessToken) {
+
+            //check if product exists
+            productToAdd = products.find(product => {
+                return product.id === queryParams.productId;
+            });
+
+            if (productToAdd) {
+                //successful request
+                response.writeHead(200, { "Content-Type": "application/json" });
+
+                //check if item already exists in cart
+                const productAlreadyInCart = currentUser.cart.find(product => {
+                    return product.id === productToAdd.id;
+                })
+
+                if (productAlreadyInCart) {
+                    productAlreadyInCart.quantity++;
+                    response.end(JSON.stringify(productAlreadyInCart));
+                    
+                } else {
+                    const addedProduct = {
+                        product: productToAdd,
+                        quantity: 1
+                    }
+                    //add to cart
+                    currentUser.cart.push(addedProduct);
+                    response.end(JSON.stringify(addedProduct));
+                }
+            } else {
+                response.writeHead(404, "Product not found");
+                response.end();
+            }
+        } else {
+            response.writeHead(401, "Unauthorized access");
+            response.end();
+        }
+    } else {
+        response.writeHead(400, "Invalid request parameters");
+        response.end();
+    }
+});
 
 //   myRouter.delete("/api/me/cart/:productId", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });

@@ -634,43 +634,165 @@ describe('/GET cart', () => {
 });
 
 // //test for api/me/cart POST request
-// describe('/POST cart', () => {
+describe('/POST cart', () => {
 
-// should only allow access if valid token is sent
-// it('should only allow access if token is sent in request', done => {
-//     chai
-//         .request(server)
-//         .get(`/api/me/cart`)
-//         .end((error, response) => {
-//             expect(response.statusCode).to.equal(400);
-//             done();
-//         });
-// });
+// should only allow access if token is sent
+it('should return error if no token sent in request', done => {
+    chai
+        .request(server)
+        .post(`/api/me/cart?productId=1`)
+        .end((error, response) => {
+            expect(response.statusCode).to.equal(400);
+            done();
+        });
+});
+    //token must be valid
+    it('should return error if token is invalid', done => {
+        chai
+            .request(server)
+            .post(`/api/me/cart?productId=1&accessToken=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(401);
+                done();
+            });
+    });
 
-    //should return error if no product id sent
+    //product id must be sent
+    it('should return error if product id is not sent in request', done => {
+        chai
+            .request(server)
+            .post(`/api/me/cart?accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+                done();
+            });
+    });
 
-    //should return error if product doesn't exist
+    //product id must be valid
+    it('should return error if product id is not found', done => {
+        chai
+            .request(server)
+            .post(`/api/me/cart?accessToken=${userToken.accessToken}&productId=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(404);
+                done();
+            });
+    });
 
     //return error if invalid parameters sent
+    it('should return error if invalid parameters sent', done => {
+        chai
+            .request(server)
+            .post(`/api/me/cart?banana=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+                done();
+            });
+    });
 
     //should return 200 on success
-
-    //should add product to logged in user's cart
+    it('should return 200 if request successful', done => {
+        chai
+            .request(server)
+            .post(`/api/me/cart?productId=1&accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                done();
+            });
+    });
 
     //should not replace any items in cart
+    it('should not replace any items in cart', done => {
+        //find user
+        const loggedInUser = users.find(user => {
+            return user.login.username === userToken.username;
+        });
 
+        //find product
+        const productToAdd = products.find(product => {
+            return product.id === "3";
+        });
 
-//     //
-//     it('it should', done => {
-//         chai
-//             .request(server)
-//             .post('/api/me/cart')
-//             .end((error, response) => {
-//                 expect(response.body).to.be.an();
-//         done();
-//             });
-//     });
-// });
+        //empty cart
+        loggedInUser.cart = [];
+
+        //add test item
+        loggedInUser.cart.push({
+            product: productToAdd,
+            quantity: 1
+        });
+
+        chai
+            .request(server)
+            .post(`/api/me/cart?productId=1&accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                const cartNewLength = users.find(user => {
+                    return user.login.username === userToken.username;
+                }).cart.length
+                expect(response.statusCode).to.equal(200);
+                expect(loggedInUser.cart.length).to.equal(2);
+                done();
+            });
+    });
+
+    //should only update quantity if item already in cart
+    it('should update quantity if product already in cart and not duplicate', done => {
+        //find user
+        const loggedInUser = users.find(user => {
+            return user.login.username === userToken.username;
+        });
+
+        //find product
+        const productToAdd = products.find(product => {
+            product.id === "3";
+        });
+
+        //empty cart
+        loggedInUser.cart = [];
+
+        //add test item
+        loggedInUser.cart.push({
+            product: productToAdd,
+            quantity: 1
+        });
+        
+        chai
+            .request(server)
+            .post(`/api/me/cart?productId=3&accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(loggedInUser.cart.length).to.equal(1);
+                done();
+            });
+    });
+
+    //should add object to cart array
+    it('should add object to cart array with product info and quantity', done => {
+        //find user
+        const loggedInUser = users.find(user => {
+            return user.login.username === userToken.username;
+        });
+
+        //find product
+        const productToAdd = products.find(product => {
+            product.id === "3";
+        });
+
+        //empty cart
+        loggedInUser.cart = [];
+        
+        chai
+            .request(server)
+            .post(`/api/me/cart?productId=3&accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(loggedInUser.cart[0]).to.deep.equal(productToAdd);
+                done();
+            });
+            
+    });
+
+});
 
 // //test for api/me/cart/:productId DELETE request
 // describe('/DELETE cart/:productId', () => {
@@ -679,7 +801,7 @@ describe('/GET cart', () => {
 // it('should only allow access if token is sent in request', done => {
 //     chai
 //         .request(server)
-//         .get(`/api/me/cart`)
+//         .delete(`/api/me/cart`)
 //         .end((error, response) => {
 //             expect(response.statusCode).to.equal(400);
 //             done();
