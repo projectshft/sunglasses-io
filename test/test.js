@@ -278,6 +278,70 @@ describe("Login", () => {
       badRequest();
       limitHit();
     });
+    it("it should allow access after two wrong attempts", (done) => {
+      // arrange
+      const badUserLogin = { username: "greenlion235", password: "water" };
+      const goodUserLogin = { username: "greenlion235", password: "waters" };
+
+      const badRequest = () => {
+        return (
+          chai
+            .request(server)
+            .post("/api/login")
+            .set("content-type", "application/json")
+            .send(badUserLogin)
+            // assert
+            .end((err, res) => {
+              res.should.have.status(401);
+            })
+        );
+      };
+
+      const correctAttempt = () => {
+        return (
+          chai
+            .request(server)
+            .post("/api/login")
+            .set("content-type", "application/json")
+            .send(goodUserLogin)
+            // assert
+            .end((err, res) => {
+              res.should.have.status(200);
+              done();
+            })
+        );
+      };
+
+      // act
+      badRequest();
+      badRequest();
+      correctAttempt();
+    });
+    it("it should return the same access token for consecutive logins completed immediately", (done) => {
+      // arrange
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      let storedId = "";
+      //act
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        // assert
+        .end((err, res) => {
+          storedId = res.body;
+        });
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        // assert
+        .end((err, res) => {
+          res.body.should.equal(storedId);
+          done();
+        });
+    });
   });
 });
 

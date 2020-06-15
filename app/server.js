@@ -17,6 +17,7 @@ let brands = [];
 let products = [];
 let users = [];
 var failedLoginAttempts = {};
+let accessTokens = [];
 
 let server = http
   .createServer(function (request, response) {
@@ -132,8 +133,25 @@ myRouter.post("/api/login", function (request, response) {
       setNumberOfFailedLoginRequestsForUsername(request.body.username, 0);
       response.writeHead(200, { "Content-Type": "application/json" });
 
-      newUUID = uuidv4();
-      return response.end(JSON.stringify(newUUID));
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uuidv4(),
+        };
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
     } else {
       // Update the number of failed login attempts
       let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
