@@ -15,6 +15,7 @@ describe("/GET brands", () => {
       .request(server)
       .get("/api/brands")
       .end((err, res) => {
+        const brands = res.body
         assert.isNotNull(res.body);
         expect(err).to.be.null;
         expect(res).to.have.status(200);
@@ -274,6 +275,7 @@ describe("/GET POST DELETE Cart", () => {
 
 //GET POST EDIT AND DELETE CART WITHOUT LOGIN 
 describe("/ACCESS cart without correct login", () => {
+  //GET CART WITHOUT LOGGING IN
   it("Should return error if user tries to GET cart without loging in correctly", async function () { 
     chai
     .request(server)
@@ -290,7 +292,9 @@ describe("/ACCESS cart without correct login", () => {
         });
       });
     });
-  it("Should return error if user tries add to cart without logging in correctly", async function () { 
+
+  //ADD TO CART WIHTOUT LOGGING IN
+  it("Should return error if user tries POST/ ADD to cart without logging in correctly", async function () { 
     chai
     .request(server)
       .post("/api/login")
@@ -306,23 +310,9 @@ describe("/ACCESS cart without correct login", () => {
         });
       });
     });
-  it("Should return error if user tries to delete cart without logging in correctly", async function () { 
-    chai
-    .request(server)
-      .post("/api/login")
-      .send()
-      .end((err, res) => {
-        //act
-        chai
-          .request(server)
-          .delete('/api/me/cart/1?accessToken=')
-          .end((err, res) => {
-            expect(res).to.have.status(401);
-            expect("Content-Type", "header");
-        });
-      });
-    });
-    it("Should return error if user tries to delete cart without logging in correctly", async function () { 
+
+    //DELETE ITEM FROM CART WITHOUT LOGGIN IN
+    it("Should return error if user tries to DELETE cart without logging in correctly", async function () { 
       chai
       .request(server)
         .post("/api/login")
@@ -338,7 +328,9 @@ describe("/ACCESS cart without correct login", () => {
           });
         });
       });    
-    it("Should return error if user tries to edit cart products without logging in correctly", async function () { 
+
+    //EDIT QUANTITY OF PRODICTS IN CART WITHOUT LOGGING IN
+    it("Should return error if user tries to POST / EDIT cart products without logging in correctly", async function () { 
       chai
       .request(server)
         .post("/api/login")

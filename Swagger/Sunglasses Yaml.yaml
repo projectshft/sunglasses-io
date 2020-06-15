@@ -1,0 +1,306 @@
+swagger: '2.0'
+info:
+  title: Sunglasses IO
+  description: Sunglasses Io Platform
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+
+  /brands:
+    get:
+      summary: Returns all brands
+      description: |
+        The Brands endpoint returns array of all brands
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '400':
+          description: There are no brands to return
+
+            
+  /brands/{id}/products:
+    get:
+      summary: Get products by brand ID
+      description: |
+        This endpoint allows a user to see all products in a given brand.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products by brand ID
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: No products found
+
+            
+  /products:
+    get:
+      summary: Returns products by search string
+      description: |
+        This endpoint returns products based on search string query. If query not provided, all products are returned
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Search information returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: There are no products to return
+
+  /login:
+    post:
+      tags:
+        - User
+      summary: Logs user in with username and password
+      description: |
+       Username and password are required in the request body. Returns 16 digit access token.
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: The user name and password for active user
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserNamePassword'
+      responses:
+        '200':
+          description: Correct username and password used
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/AccessToken'
+        '400':
+          description: Invalid username or password
+        '401':
+          description: Incorrectly formatted response
+
+          
+  /me/cart:
+    get:
+      summary: Returns the shopping cart
+      description: |
+        This endpoint returns the shopping cart of the logged in user. It requires a valid access token in the url
+      parameters:
+        - name: accessToken
+          in: query
+          description: Search query string
+          required: True
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Cart sucessfully returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        '401':
+          description: You need to be logged in to access your cart
+    post: 
+      tags:
+        - Cart
+      summary: Add item to cart
+      description: |
+        Endpoint that allows a logged in user to add an item to their cart. Requires a valid access token in the url, and a valid product id in the request body. Returns updated shopping cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: valid access token
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: valid product id of item to be added
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductToAdd'
+      responses:
+        '200':
+          description: Item successfully added
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        '401':
+          description: You need to be logged in to access your cart
+        '404':
+          description: That product cannot be found
+          
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - Cart
+      summary: Delete item in user cart
+      description: |
+        This endpoint allows a logged in user to delete an exiting item from their cart. It requires an active access token in the url, and the product id of the item to be deleted. It returns the cart.
+      parameters:
+        - name: accessToken
+          in: query
+          description: valid access token
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Item successfully deleted
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        '401':
+          description: You need to be logged in to access your cart
+        '404':
+          description: No item to delete  
+    post: 
+      tags: 
+        - Cart
+      summary: Edit the quantity of item in cart
+      description: |
+        This endpoint allows a logged in user to edit the quantity of an item in their cart. It requires an active access token in the url, and the product id of the item to be edited, and the updated quantity in the request body. It returns the cart. 
+      parameters:
+        - name: accessToken
+          in: query
+          description: valid access token
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: The item that will be edited
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: updated quantity
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UpdateQuantity'
+      responses:
+        '200':
+          description: Item successfully edited
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ShoppingCart'
+        '401':
+          description: You need to be logged in to access your cart
+        '404':
+          description: No item to delete  
+
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a Brand
+      name:
+        type: string
+        description: Description of product.
+        
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: the unique id for a given product
+      catagoryId: 
+        type: string
+        description: the id for the brand
+      name: 
+        type: string
+        description: the name of the product
+      description:
+        type: string
+        description: describes the product
+      price:
+        type: string
+        description: the price of the product
+      imageUrls: 
+        type: array
+        xml:
+          wrapped: true
+        items:
+          type: string
+          xml:
+            name: imageUrl
+      quantity:
+        type: string
+        description: number of items in cart. Starts at 1
+        
+  ProductToAdd:
+    type: object
+    properties:
+      productId:
+        type: string
+        description: the id of the product to be added
+            
+  AccessToken:
+    type: string
+    description: 16 character access token that expires every 15 min. 
+    
+  ShoppingCart:
+    type: object
+    properties:
+      item: 
+        $ref: '#/definitions/Product'
+        
+  UserNamePassword:
+    type: object
+    properties:
+      username:
+        type: string
+        description: active username for user
+      password:
+        type: string
+        description: active password for user
+        
+  UpdateQuantity:
+    type: object
+    properties:
+      quantity:
+        type: string
+        description: new quantity for updated item in cart
+        
+ 

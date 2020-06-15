@@ -51,7 +51,7 @@ const server = http.createServer((request, response) => {
   router.get("/api/brands", (request, response) => {
     //is there no need for a query since they are all being returned?
     if (!brands) {
-      response.writeHead(404, "No brands to return");
+      response.writeHead(404, "There are no brands to return");
       return response.end();
     } else 
         response.writeHead(200, { "Content-Type": "application/json" });
@@ -67,7 +67,7 @@ const server = http.createServer((request, response) => {
     const numId = parseInt(id, 10)
       
     if (!productList) { 
-      response.writeHead(404, "That brand does not exist");
+      response.writeHead(404, "No products can be found");
       return response.end();
     }
     response.writeHead(200, { "Content-Type": "application/json" });
@@ -87,7 +87,7 @@ const server = http.createServer((request, response) => {
 
       //if (!productsToReturn) 
       if (!productsToReturn) {//if the query is defined but there are no goals to return, 404 error || I tried to use (!productsToReturn) but this didn't work
-        response.writeHead(404, "There aren't any goals to return");
+        response.writeHead(404, "There are no products to return");
         return response.end();
       }
     } else {
@@ -224,7 +224,7 @@ router.post('/api/me/cart', function(request,response) {
   } 
   //if there is no product ID in the request body, don't continue
   if (!request.body.productId){
-    response.writeHead(403, "Select an item to add to cart");
+    response.writeHead(404, "That product cannot be found");
     return response.end();
   } 
   
@@ -308,7 +308,7 @@ router.post('/api/me/cart/:productId', function(request,response) {
     return response.end();
   }
   if (!productId){
-    response.writeHead(403, "select an item to edit from the cart");
+    response.writeHead(404, "That product cannot be found");
     return response.end();
   } else {
     //Select the active user
