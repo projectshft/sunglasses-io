@@ -208,7 +208,8 @@ myRouter.post("/api/login", (request, response) => {
                     let newAccessToken = {
                         username: existingUser.login.username,
                         lastUpdated: new Date(),
-                        accessToken: uid(16)
+                        accessToken: uid(16),
+                        cart: existingUser.cart
                     }
 
                     //add to tokens array
@@ -294,7 +295,7 @@ myRouter.post("/api/me/cart", (request, response) => {
 
                 if (productAlreadyInCart) {
                     productAlreadyInCart.quantity++;
-                    response.end();
+                    response.end(JSON.stringify(currentUser.cart));
 
                 } else {
                     const addedProduct = {
@@ -303,7 +304,7 @@ myRouter.post("/api/me/cart", (request, response) => {
                     }
                     //add to cart
                     currentUser.cart.push(addedProduct);
-                    response.end();
+                    response.end(JSON.stringify(currentUser.cart));
                 }
             } else {
                 response.writeHead(404, "Product not found");
@@ -336,7 +337,7 @@ if (queryKey === requiredParam && queryParams.accessToken) {
 
         //check if product exists in cart
         productToDelete = currentUser.cart.find(cartItem => {
-            return cartItem.product.id === queryParams.productId;
+            return cartItem.product.id === request.params.productId;
         });
 
         if (productToDelete) {
@@ -346,7 +347,7 @@ if (queryKey === requiredParam && queryParams.accessToken) {
             //remove product from cart
             const productIndex = currentUser.cart.indexOf(productToDelete);
             currentUser.cart.splice(productIndex, 1);
-            response.end();
+            response.end(JSON.stringify(currentUser.cart));
             
         } else {
             response.writeHead(404, "Product not found");
