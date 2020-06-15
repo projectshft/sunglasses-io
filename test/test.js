@@ -639,7 +639,7 @@ describe("Cart", function () {
           done();
         });
     });
-    describe("deleting individual products", () => {
+    describe("deleting products", () => {
       it("it should allow deleting of the whole cart if the user is logged in", (done) => {
         chai
           .request(server)
@@ -650,7 +650,7 @@ describe("Cart", function () {
             done();
           });
       });
-      it("it should NOT delete a product if user is not authenticated", (done) => {
+      it("it should NOT delete anything if user is not authenticated", (done) => {
         chai
           .request(server)
           .delete("/api/me/cart")
@@ -659,9 +659,40 @@ describe("Cart", function () {
             done();
           });
       });
-      it("it should delete a product if ID matches and user is logged in", (done) => {});
-      it("it should not delete a product if ID matches and user is logged in", (done) => {});
-      it("it should fail if a user is logged in but the product id doesn't exist in cart", (done) => {});
+      it("it should delete a product if ID matches and user is logged in", (done) => {
+        const dummyObject = {
+          categoryId: "4",
+          id: "9",
+          name: "Sugar",
+          price: 125,
+          quantity: 1,
+        };
+        chai
+          .request(server)
+          .delete(`/api/me/cart/9?accessToken=${accessTokenForUrl}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.not.include.something.that.deep.equals(dummyObject);
+            done();
+          });
+      });
+
+      it("it should fail if a user is logged in but the product id doesn't exist in cart", (done) => {
+        const dummyObject = {
+          categoryId: "4",
+          id: "9",
+          name: "Sugar",
+          price: 125,
+          quantity: 1,
+        };
+        chai
+          .request(server)
+          .delete(`/api/me/cart/bananas?accessToken=${accessTokenForUrl}`)
+          .end((err, res) => {
+            res.  should.have.status(404);
+            done();
+          });
+      });
     });
   });
 });

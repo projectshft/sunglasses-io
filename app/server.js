@@ -304,4 +304,33 @@ myRouter.delete("/api/me/cart", function (request, response) {
   }
 });
 
+myRouter.delete("/api/me/cart/:productId", function (request, response) {
+  // we'll need to check if they are logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    // check that the passed Id actually exists in the cart
+    const isPresent = cart.find((product) => {
+      return product.id === request.params.productId;
+    });
+
+    if (!isPresent) {
+      response.writeHead(404, "Invalid product id specified");
+      response.end();
+    }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+
+    // return a cart with all but the one to delete
+    const newCart = cart.filter((product) => {
+      return product.id !== request.params.productId;
+    });
+    return response.end(JSON.stringify(newCart));
+  }
+});
+
 module.exports = server;
