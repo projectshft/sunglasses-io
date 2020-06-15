@@ -275,10 +275,11 @@ myRouter.post('/api/me/cart', function (request, response) {
   const productToAdd = Products.findProductById(products, request.body.id)
   //Add item to cart and assign a variable the updated cart, so we can send it in the response 
   const updatedUser = UserCart.addProduct(productToAdd, user);
+  
 
   response.writeHead(200, { "Content-Type": "application/json" });
-  saveCurrentUser(user);
-  return response.end(JSON.stringify(updatedUser.cart));
+  saveCurrentUser(updatedUser);
+  return response.end(JSON.stringify(productToAdd));
 });
 
 
