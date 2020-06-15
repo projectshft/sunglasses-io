@@ -352,178 +352,253 @@ describe("Login", () => {
 });
 
 describe("Cart", function () {
-  let accessTokenForUrl;
+  describe("GET the cart", () => {
+    let accessTokenForUrl;
 
-  beforeEach(function (done) {
-    const userLogin = { username: "yellowleopard753", password: "jonjon" };
-    // runs once before the first test in this block
-    chai
-      .request(server)
-      .post("/api/login")
-      .set("content-type", "application/json")
-      .send(userLogin)
-      .end((err, res) => {
-        accessTokenForUrl = res.body;
-        done();
+    before(function (done) {
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      // runs once before the first test in this block
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        .end((err, res) => {
+          accessTokenForUrl = res.body;
+          done();
+        });
+    });
+
+    beforeEach(function (done) {
+      // we'll add something so that we can change qty
+      chai
+        .request(server)
+        .post(`/api/me/cart?product=9&accessToken=${accessTokenForUrl}`)
+        .set("content-type", "application/json")
+        // assert
+        .end((err, res) => {
+          done();
+        });
+    });
+
+    afterEach(function (done) {
+      chai
+        .request(server)
+        .delete(`/api/me/cart?accessToken=${accessTokenForUrl}`)
+        .end((err, res) => {
+          done();
+        });
+    });
+
+    describe("/GET /me/cart ", () => {
+      it("it should not return the value of the the cart if a user is not logged in", (done) => {
+        chai
+          .request(server)
+          .get(`/api/me/cart`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status("401");
+            done();
+          });
       });
-  });
-
-  describe("/POST /me/cart ", () => {
-    it("it should POST a random item (that exists in store) to the cart if a user is logged in", (done) => {
-      // assemble
-      // in order to really test, I want to choose a random product among Ids that we have
-      // doing random ensures that we can't beat the test easily
-      let randomProduct = String(Math.floor(Math.random() * 5) + 1);
-
-      //act
-      chai
-        .request(server)
-        .post(`/api/me/cart?product=${randomProduct}&accessToken=${accessTokenForUrl}`)
-        // assert
-        .end((err, res) => {
-          // check that the cart has the item we wanted
-          res.body.should.be.an("array");
-          res.body.should.include.something.that.has.property("id", randomProduct);
-          done();
-        });
-    });
-    it("it should post an item to the cart with all its relevant info", (done) => {
-      // assemble
-      // this test has more to do with the shape of the obj
-      const dummyProduct = {
-        quantity: 1,
-        name: "Glasses",
-        price: 150,
-        categoryId: "2",
-        id: "5",
-      };
-
-      //act
-      chai
-        .request(server)
-        .post(`/api/me/cart?product=5&accessToken=${accessTokenForUrl}`)
-        // assert
-        .end((err, res) => {
-          res.should.have.status(200);
-          // check that the cart has the item we wanted
-          res.body.should.be.an("array");
-          res.body.should.include.something.that.deep.equals(dummyProduct);
-          done();
-        });
-    });
-    it("it should NOT post a random item (that exists in store) to the cart if no user is logged in", (done) => {
-      // assemble
-      // in order to really test, I want to choose a random product among Ids that we have
-      // doing random ensures that we can't beat the test easily
-      let randomProduct = Math.floor(Math.random() * 5) + 1;
-
-      //act
-      chai
-        .request(server)
-        .post(`/api/me/cart?product=${randomProduct}`)
-        // assert
-        .end((err, res) => {
-          res.should.have.status(401);
-          done();
-        });
-    });
-    it("it should NOT allow the user to add to cart if TOKEN_VALIDITY_TIMEOUT has passed ", (done) => {
-      // assemble
-      // we'll go for 15 minutes
-      const setTime = 900001;
-      clock.tick(setTime);
-
-      //act
-      chai
-        .request(server)
-        // remember that our access token was grabbed before this...
-        .post(`/api/me/cart?product=5&accessToken=${accessTokenForUrl}`)
-        // assert
-        .end((err, res) => {
-          res.should.have.status(401);
-          done();
-        });
-    });
-    it("it should NOT allow adding to cart if product number is invalid", (done) => {
-      //act
-      chai
-        .request(server)
-        .post(`/api/me/cart?product=bananas&accessToken=${accessTokenForUrl}`)
-        // assert
-        .end((err, res) => {
-          res.should.have.status(404);
-          done();
-        });
-    });
-  });
-});
-
-describe("GET the cart", () => {
-  let accessTokenForUrl;
-
-  before(function (done) {
-    const userLogin = { username: "yellowleopard753", password: "jonjon" };
-    // runs once before the first test in this block
-    chai
-      .request(server)
-      .post("/api/login")
-      .set("content-type", "application/json")
-      .send(userLogin)
-      .end((err, res) => {
-        accessTokenForUrl = res.body;
-        done();
+      it("it should return the value of the the cart if a user is  logged in", (done) => {
+        chai
+          .request(server)
+          .get(`/api/me/cart?accessToken=${accessTokenForUrl}`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status("200");
+            res.body.should.be.an("array");
+            res.body.should.all.have.property("id");
+            res.body.should.all.have.property("name");
+            res.body.should.all.have.property("price");
+            res.body.should.all.have.property("quantity");
+            res.body.should.all.have.property("categoryId");
+            done();
+          });
       });
+    });
   });
 
-  beforeEach(function (done) {
-    // we'll add something so that we can change qty
-    chai
-      .request(server)
-      .post(`/api/me/cart?product=9&accessToken=${accessTokenForUrl}`)
-      .set("content-type", "application/json")
-      // assert
-      .end((err, res) => {
-        done();
-      });
-  });
+  describe("/POST to the cart", () => {
+    let accessTokenForUrl;
 
-  afterEach(function (done) {
-    chai
-      .request(server)
-      .delete(`/api/me/cart?accessToken=${accessTokenForUrl}`)
-      .end((err, res) => {
-        done();
-      });
-  });
-
-  describe("/GET /me/cart ", () => {
-    it("it should not return the value of the the cart if a user is not logged in", (done) => {
+    beforeEach(function (done) {
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      // runs once before the first test in this block
       chai
         .request(server)
-        .get(`/api/me/cart`)
-        // assert
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
         .end((err, res) => {
-          res.should.have.status("401");
+          accessTokenForUrl = res.body;
           done();
         });
     });
+
+    describe("/POST /me/cart ", () => {
+      it("it should POST a random item (that exists in store) to the cart if a user is logged in", (done) => {
+        // assemble
+        // in order to really test, I want to choose a random product among Ids that we have
+        // doing random ensures that we can't beat the test easily
+        let randomProduct = String(Math.floor(Math.random() * 5) + 1);
+
+        //act
+        chai
+          .request(server)
+          .post(`/api/me/cart?product=${randomProduct}&accessToken=${accessTokenForUrl}`)
+          // assert
+          .end((err, res) => {
+            // check that the cart has the item we wanted
+            res.body.should.be.an("array");
+            res.body.should.include.something.that.has.property("id", randomProduct);
+            done();
+          });
+      });
+      it("it should post an item to the cart with all its relevant info", (done) => {
+        // assemble
+        // this test has more to do with the shape of the obj
+        const dummyProduct = {
+          quantity: 1,
+          name: "Glasses",
+          price: 150,
+          categoryId: "2",
+          id: "5",
+        };
+
+        //act
+        chai
+          .request(server)
+          .post(`/api/me/cart?product=5&accessToken=${accessTokenForUrl}`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status(200);
+            // check that the cart has the item we wanted
+            res.body.should.be.an("array");
+            res.body.should.include.something.that.deep.equals(dummyProduct);
+            done();
+          });
+      });
+      it("it should NOT post a random item (that exists in store) to the cart if no user is logged in", (done) => {
+        // assemble
+        // in order to really test, I want to choose a random product among Ids that we have
+        // doing random ensures that we can't beat the test easily
+        let randomProduct = Math.floor(Math.random() * 5) + 1;
+
+        //act
+        chai
+          .request(server)
+          .post(`/api/me/cart?product=${randomProduct}`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+      it("it should NOT allow the user to add to cart if TOKEN_VALIDITY_TIMEOUT has passed ", (done) => {
+        // assemble
+        // we'll go for 15 minutes
+        const setTime = 900001;
+        clock.tick(setTime);
+
+        //act
+        chai
+          .request(server)
+          // remember that our access token was grabbed before this...
+          .post(`/api/me/cart?product=5&accessToken=${accessTokenForUrl}`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+      it("it should NOT allow adding to cart if product number is invalid", (done) => {
+        //act
+        chai
+          .request(server)
+          .post(`/api/me/cart?product=bananas&accessToken=${accessTokenForUrl}`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status(404);
+            done();
+          });
+      });
+    });
   });
-  describe("/GET /me/cart ", () => {
-    it("it should return the value of the the cart if a user is  logged in", (done) => {
+
+  describe("Updating quantity in cart", () => {
+    let accessTokenForUrl;
+
+    before(function (done) {
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      // runs once before the first test in this block
       chai
         .request(server)
-        .get(`/api/me/cart?accessToken=${accessTokenForUrl}`)
-        // assert
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
         .end((err, res) => {
-          res.should.have.status("200");
-          res.body.should.be.an("array");
-          res.body.should.all.have.property("id");
-          res.body.should.all.have.property("name");
-          res.body.should.all.have.property("price");
-          res.body.should.all.have.property("quantity");
-          res.body.should.all.have.property("categoryId");
+          accessTokenForUrl = res.body;
           done();
         });
+    });
+
+    beforeEach(function (done) {
+      // we'll add something so that we can change qty
+      chai
+        .request(server)
+        .post(`/api/me/cart?product=9&accessToken=${accessTokenForUrl}`)
+        .set("content-type", "application/json")
+        // assert
+        .end((err, res) => {
+          done();
+        });
+    });
+
+    afterEach(function (done) {
+      chai
+        .request(server)
+        .delete(`/api/me/cart?accessToken=${accessTokenForUrl}`)
+        .end((err, res) => {
+          done();
+        });
+    });
+
+    describe("/POST /me/cart/:productId ", () => {
+      it("it should throw an error if the user does not pass an invalid productId", (done) => {
+        let randomNum = String(Math.floor(Math.random() * 5) + 1);
+
+        chai
+          .request(server)
+          .post(`/api/me/cart/bananas/?accessToken=${accessTokenForUrl}&newQuantity=${randomNum}`)
+          // assert
+          .end((err, res) => {
+            res.should.have.status(404);
+            done();
+          });
+      });
+      it("it should update the quantity of an item already in the cart if a user is logged in", (done) => {
+        let randomNum = Math.floor(Math.random() * 5) + 1;
+
+        const dummyObject = {
+          categoryId: "4",
+          id: "9",
+          name: "Sugar",
+          price: 125,
+          quantity: String(randomNum),
+        };
+
+        chai
+          .request(server)
+          .post(`/api/me/cart/9?accessToken=${accessTokenForUrl}&newQuantity=${randomNum}`)
+          // assert
+          .end((err, res) => {
+            res.body.should.be.an("array");
+            res.body.should.include.something.that.deep.equals(dummyObject);
+            done();
+          });
+      });
     });
   });
 });
