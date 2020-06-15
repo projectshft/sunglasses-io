@@ -127,6 +127,31 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
+  /me/cart:
+    post:
+      tags:
+        - Me
+      summary: Allows posting new items to user's cart.
+      description: |
+        The POST /me/cart endpoint adds an item to the state that tracks the logged-in user's cart.
+      parameters:
+        - in: query
+          name: product
+          description: The product id being added
+          required: true
+      responses:
+        "200":
+          description: Successfully added
+        "404":
+          description: Item unable to be added.
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Brands:
     type: array

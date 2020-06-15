@@ -19,6 +19,7 @@ let products = [];
 let users = [];
 var failedLoginAttempts = {};
 let accessTokens = [];
+let cart = {};
 
 let server = http
   .createServer(function (request, response) {
@@ -172,6 +173,19 @@ myRouter.post("/api/login", function (request, response) {
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
   }
+});
+
+myRouter.post("/api/me/cart", function (request, response) {
+  response.writeHead(200, { "Content-Type": "application/json" });
+
+  const queryParams = queryString.parse(url.parse(request.url).query);
+
+  if (queryParams.product) {
+    let productInCart = "product_" + queryParams.product;
+    cart[productInCart] = true;
+  }
+
+  response.end(JSON.stringify(cart));
 });
 
 module.exports = server;
