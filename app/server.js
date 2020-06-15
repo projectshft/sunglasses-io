@@ -216,6 +216,12 @@ myRouter.post("/api/me/cart", function (request, response) {
         return product.id === queryParams.product;
       });
 
+      // we need to send an error if there is no such product
+      if (!productObj) {
+        response.writeHead(404, "Item unable to be added.");
+        response.end();
+      }
+
       // and then transform it to a useful form
       const productToAdd = {
         [productId]: {
