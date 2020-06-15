@@ -8,11 +8,12 @@ var uid = require('rand-token').uid;
 const Brands = require('./modules/brands-module');
 const Products = require('./modules/products-module');
 const UserCart = require('./modules/cart-module');
-const User = require('./modules/login-module');
+const path = require("path");
+
 
 const PORT = 3001;
-const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449","1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; 
+const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449", "1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 // State holding variables that will populate from our json files when we start the server
 let users = [];
@@ -52,33 +53,37 @@ const server = http.createServer(function (request, response) {
   if (error) throw error;
   console.log(`Server is listening on ${PORT}`);
 
-  brands = JSON.parse(fs.readFileSync("../initial-data/brands.json","utf-8"));
+  //uncomment these 3 parse methods when using postman, eg, readFileSync is reading the path from where it's invoked so these won't work for mocha tests (so comment out when running tests)
+  brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
+  products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf-8"));
+  users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
 
-  products = JSON.parse(fs.readFileSync("../initial-data/products.json","utf-8"));
 
-
-  users = JSON.parse(fs.readFileSync("../initial-data/users.json","utf-8"));
-
-  //user = users[0];
+  //uncomment these 3 methods when running mocha tests (and comment out when using postman)
+  // brands = JSON.parse(fs.readFileSync("../initial-data/brands.json", "utf-8"));
+  // products = JSON.parse(fs.readFileSync("../initial-data/products.json", "utf-8"));
+  // users = JSON.parse(fs.readFileSync("../initial-data/users.json", "utf-8"));
 });
+// const file = fs.readFileSync(path.resolve(__dirname, "../file.xml"))
 
-//this is where we "save" our data. 
-//we call this function when we use post/put/delete, and we're overwriting the data
-//after the writeFileSync function runs, the json file holding the users data is updated! that's where we can see changes to our "database" (users.json)
-// even if we restart the server, the data will persist!
+// this function will permanently update our user data
 const saveCurrentUser = (currentUser) => {
   // update the current user in the 'db'
   let indexOfUser = users.findIndex(user => user.login.username == currentUser.login.username)
   users[indexOfUser] = currentUser;
-  
-  fs.writeFileSync("../initial-data/users.json", JSON.stringify(users), "utf-8");
+
+  //uncomment when using postman (and comment out when using mocha)
+  fs.writeFileSync("./initial-data/users.json", JSON.stringify(users), "utf-8");
+
+  //uncomment when testing with mocha (and comment out when using postman)
+  // fs.writeFileSync("../initial-data/users.json", JSON.stringify(users), "utf-8");
 }
 
 //Handle get request to return all available brands
 myRouter.get('/api/brands', function (request, response) {
   if (brands.length) {
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(Brands.getAllBrands(brands)));
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(Brands.getAllBrands(brands)));
   } else {
     response.writeHead(404)
     return response.end("Brands not available")
@@ -94,10 +99,10 @@ myRouter.get('/api/products', function (request, response) {
 
     const foundProducts = Products.searchProductsByQuery(parsedUrl.query.searchString, idOfSearchedBrand, products);
 
-      if (foundProducts.length === 0) {
-        response.writeHead(404);
-        return response.end("No products found");
-      }
+    if (foundProducts.length === 0) {
+      response.writeHead(404);
+      return response.end("No products found");
+    }
 
     response.writeHead(200, { "Content-Type": "application/json" });
 
@@ -135,7 +140,7 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
 })
 
 // Helpers to get/set our number of failed requests per username
-var getNumberOfFailedLoginRequestsForUsername = function(username) {
+var getNumberOfFailedLoginRequestsForUsername = function (username) {
   let currentNumberOfFailedRequests = failedLoginAttempts[username];
   if (currentNumberOfFailedRequests) {
     return currentNumberOfFailedRequests;
@@ -144,22 +149,22 @@ var getNumberOfFailedLoginRequestsForUsername = function(username) {
   }
 }
 
-var setNumberOfFailedLoginRequestsForUsername = function(username,numFails) {
+var setNumberOfFailedLoginRequestsForUsername = function (username, numFails) {
   failedLoginAttempts[username] = numFails;
 }
 
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url,true)
+var getValidTokenFromRequest = function (request) {
+  var parsedUrl = require('url').parse(request.url, true)
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure its valid and not expired
     // we want our tokens to expire so we can be able to protect against people intercepting access tokens and then using them to enter our system. So let's add a check into our nice helper method (in one place only! how awesome!) to make sure that the token isn't old.
     // var accessTokens = [];
- // An access token can look like this:
- // [{
- //   username: 'sean',
- //   lastUpdated: <A valid date>,
- //   token: 'qwertyuiopasdfg1'
- // }]
+    // An access token can look like this:
+    // [{
+    //   username: 'sean',
+    //   lastUpdated: <A valid date>,
+    //   token: 'qwertyuiopasdfg1'
+    // }]
     let currentAccessToken = accessTokens.find((accessToken) => {
       return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
@@ -179,16 +184,16 @@ myRouter.post('/api/login', function (request, response) {
   //
   if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
     // See if there is a user that has that username and password
-    let user = users.find((user)=>{
+    let user = users.find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
     });
 
     if (user) {
       // If we found a user, reset our counter of failed logins
-      setNumberOfFailedLoginRequestsForUsername(request.body.username,0);
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, 0);
 
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.writeHead(200, { 'Content-Type': 'application/json' });
 
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -214,13 +219,13 @@ myRouter.post('/api/login', function (request, response) {
       // Update the number of failed login attempts
       let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
 
-      setNumberOfFailedLoginRequestsForUsername(request.body.username,++numFailedForUser);
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, ++numFailedForUser);
 
       // When a login fails, tell the client in a generic way that either the username or password was wrong
       response.writeHead(401, "Invalid username or password");
       return response.end();
     }
-    
+
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
     response.writeHead(400, "Incorrectly formatted response");
@@ -239,7 +244,7 @@ myRouter.get('/api/me/cart', function (request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to continue");
     return response.end();
-  } 
+  }
   // Check if the current user has access to the cart
   let user = users.find((user) => {
     return user.login.username == currentAccessToken.username;
@@ -259,7 +264,7 @@ myRouter.post('/api/me/cart', function (request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to continue");
     return response.end();
-  } 
+  }
 
   // Check if the current user has access to the store
   let user = users.find((user) => {
@@ -275,7 +280,7 @@ myRouter.post('/api/me/cart', function (request, response) {
   const productToAdd = Products.findProductById(products, request.body.id)
   //Add item to cart and assign a variable the updated cart, so we can send it in the response 
   const updatedUser = UserCart.addProduct(productToAdd, user);
-  
+
 
   response.writeHead(200, { "Content-Type": "application/json" });
   saveCurrentUser(updatedUser);
@@ -283,7 +288,7 @@ myRouter.post('/api/me/cart', function (request, response) {
 });
 
 
-//Handle request for testing if a book is successfully removed from the cart
+//Handle request for testing if a product is successfully removed from the cart
 myRouter.get('/api/me/cart/:productId', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
 
@@ -291,7 +296,7 @@ myRouter.get('/api/me/cart/:productId', function (request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to this call to continue");
     return response.end();
-  } 
+  }
 
   // Check if the current user has access to the store
   let user = users.find((user) => {
@@ -320,7 +325,7 @@ myRouter.delete('/api/me/cart/:productId', function (request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to continue");
     return response.end();
-  } 
+  }
 
   // Check if the current user has access to the store
   let user = users.find((user) => {
@@ -354,7 +359,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     response.writeHead(401, "You need to have access to continue");
     return response.end();
-  } 
+  }
 
   // Check if the current user has access to the store
   let user = users.find((user) => {
