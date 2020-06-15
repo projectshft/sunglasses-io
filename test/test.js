@@ -306,7 +306,7 @@ describe('sunglasses', () => {
     }
     let accessToken = "";
 
-    it('should update the quantity of an item in a users cart', done => {
+    it('should increment the quantity of an item in a users cart if the provided quantity is positive', done => {
       chai
         .request(server)
         .post('/api/login')
@@ -335,7 +335,35 @@ describe('sunglasses', () => {
             })
         })
     })
-
+    it('it should remove the quantity of the specified item from the cart if the quantity is negative', done => {
+      chai
+      .request(server)
+      .post('/api/login')
+      .send(login)
+      .end((err, res) => {
+        accessToken = res.body;
+        let productId = product.id;
+        chai
+          .request(server)
+          .post(`/api/me/cart?accessToken=${accessToken}`)
+          .send(product)
+          .end((err, res) => {
+            let quantity = {
+              "quantity": "-2"
+            }
+            chai
+              .request(server)
+              .post(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+              .send(quantity)
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(1);
+                done();
+              })
+          })
+      })
+  })
     it('it should return an error if the user is not logged in', done => {
       let badAccessToken = "";
       let productId = product.id;

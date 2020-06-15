@@ -230,7 +230,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     response.writeHead(401, "You need to have access to this call to continue");
     response.end();
     // if the supplied quantity is invalid, return a 400 error
-  } else if (!request.body.quantity || request.body.quantity === "null" || request.body.quantity === "undefined" || request.body.quantity <= 0) {
+  } else if (!request.body.quantity || request.body.quantity === "null" || request.body.quantity === "undefined") {
     response.writeHead(400, "invalid quantity supplied")
     response.end();
     // if there is no product with that id, return a 404 errorß
@@ -242,8 +242,24 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     let productId = request.params.productId;
     let quantity = request.body.quantity;
     let productToUpdate = user.cart.find(product => product.id === productId);
-    for (let i = 0; i < quantity; i++) {
-      user.cart.push(productToUpdate);
+    // if quantity is greater than 0, add the items that many times to the cart
+    if (quantity > 0) {
+      for (let i = 0; i < quantity; i++) {
+        user.cart.push(productToUpdate);
+      }
+    } else {
+      // if quantity is less than 0, remove the product that many times from the cart
+      productCount = user.cart.filter(product => product.id === productId).length;
+      // updating quantity to be used in for loop
+      quantity = 0 - quantity;
+      for(let i = 0; i < quantity; i++) {
+        // find the index of the product to be deleted
+        let productIndex = user.cart.findIndex(product => product.id === productId);
+        // if there are no more of that product in the cart, break out of the loop
+        if(productIndex === -1) break;
+        // remove a product from the cart at the specified index
+        user.cart = user.cart.splice(productIndex, 1);
+      }
     }
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
