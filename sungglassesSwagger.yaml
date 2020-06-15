@@ -172,7 +172,7 @@ paths:
         - in: query
           name: quantity
           type: integer
-          description: quantity of item to add to cart
+          description: quantity of item to add or remove from cart
           required: true
       responses:
         '200':

@@ -252,11 +252,13 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
       productCount = user.cart.filter(product => product.id === productId).length;
       // updating quantity to be used in for loop
       quantity = 0 - quantity;
-      for(let i = 0; i < quantity; i++) {
+      for (let i = 0; i < quantity; i++) {
         // find the index of the product to be deleted
         let productIndex = user.cart.findIndex(product => product.id === productId);
         // if there are no more of that product in the cart, break out of the loop
-        if(productIndex === -1) break;
+        // this also handles the case where a user supplies a quantity of products to remove that is 
+        // greater than the quantity of that product in the cart
+        if (productIndex === -1) break;
         // remove a product from the cart at the specified index
         user.cart = user.cart.splice(productIndex, 1);
       }
