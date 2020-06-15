@@ -601,6 +601,69 @@ describe("Cart", function () {
       });
     });
   });
+
+  describe("DELETE", () => {
+    let accessTokenForUrl;
+
+    before(function (done) {
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      // runs once before the first test in this block
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        .end((err, res) => {
+          accessTokenForUrl = res.body;
+          done();
+        });
+    });
+
+    beforeEach(function (done) {
+      // we'll add something so that we can test deleting
+      chai
+        .request(server)
+        .post(`/api/me/cart?product=9&accessToken=${accessTokenForUrl}`)
+        .set("content-type", "application/json")
+        // assert
+        .end((err, res) => {
+          done();
+        });
+    });
+
+    afterEach(function (done) {
+      chai
+        .request(server)
+        .delete(`/api/me/cart?accessToken=${accessTokenForUrl}`)
+        .end((err, res) => {
+          done();
+        });
+    });
+    describe("deleting individual products", () => {
+      it("it should allow deleting of the whole cart if the user is logged in", (done) => {
+        chai
+          .request(server)
+          .delete(`/api/me/cart?accessToken=${accessTokenForUrl}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.empty;
+            done();
+          });
+      });
+      it("it should NOT delete a product if user is not authenticated", (done) => {
+        chai
+          .request(server)
+          .delete("/api/me/cart")
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+      it("it should delete a product if ID matches and user is logged in", (done) => {});
+      it("it should not delete a product if ID matches and user is logged in", (done) => {});
+      it("it should fail if a user is logged in but the product id doesn't exist in cart", (done) => {});
+    });
+  });
 });
 
 const checkFilter = (responseArray, term) => {

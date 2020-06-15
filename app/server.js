@@ -297,6 +297,8 @@ myRouter.delete("/api/me/cart", function (request, response) {
     return response.end();
   } else {
     response.writeHead(200, { "Content-Type": "application/json" });
+
+    // empty the cart if no parameters given
     cart = [];
     response.end(JSON.stringify(cart));
   }
