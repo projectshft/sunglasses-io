@@ -12,7 +12,7 @@ const path = require("path");
 
 
 const PORT = 3001;
-const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449", "1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
+//const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449", "1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 // State holding variables that will populate from our json files when we start the server
@@ -34,7 +34,8 @@ let failedLoginAttempts = {};
 //setup the router
 const myRouter = Router();
 myRouter.use(bodyParser.json());
-//added this to get the request.body using postman
+
+//added this to get the request.body when using postman
 myRouter.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -42,10 +43,10 @@ myRouter.use(bodyParser.urlencoded({
 //assign server to a variable for export and start it up
 const server = http.createServer(function (request, response) {
   // Verify that a valid API Key exists before we let anyone access our API
-  if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
-    response.writeHead(401, "You need to have a valid API key to use this API");
-    return response.end();
-  }
+  // if (!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
+  //   response.writeHead(401, "You need to have a valid API key to use this API");
+  //   return response.end();
+  // }
   response.writeHead(200);
   myRouter(request, response, finalHandler(request, response))
 
@@ -68,10 +69,11 @@ const server = http.createServer(function (request, response) {
 
 // this function will permanently update our user data
 const saveCurrentUser = (currentUser) => {
-  // update the current user in the 'db'
+  // find the index of the current user in the users array, and replace that user with their updated data
   let indexOfUser = users.findIndex(user => user.login.username == currentUser.login.username)
   users[indexOfUser] = currentUser;
 
+  //these writeFileSyncs will permanently update our 'db'(users.json)
   //uncomment when using postman (and comment out when using mocha)
   fs.writeFileSync("./initial-data/users.json", JSON.stringify(users), "utf-8");
 
@@ -94,6 +96,7 @@ myRouter.get('/api/brands', function (request, response) {
 myRouter.get('/api/products', function (request, response) {
   const parsedUrl = require('url').parse(request.url, true);
 
+  //this will check if there is a query in the request url. If so, we will check our brands and products data to find any matches (eg, user could enter 'oakley' or 'best' and get results)
   if (parsedUrl.query.searchString) {
     const idOfSearchedBrand = Brands.getIdOfSearchedBrand(parsedUrl.query.searchString, brands);
 
@@ -105,7 +108,6 @@ myRouter.get('/api/products', function (request, response) {
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
-
     return response.end(JSON.stringify(foundProducts));
 
   } else {
@@ -116,10 +118,10 @@ myRouter.get('/api/products', function (request, response) {
 })
 
 
-//Handle get request to return all available products of a particular brand 
+//Handle get request to return all available products of a particular brand (by brand id)
 myRouter.get('/api/brands/:id/products', function (request, response) {
 
-  //First get the brand from the brand id (query param)
+  //First get the brand id from the request
   const selectedBrandId = request.params.id;
 
   //If brand id was not provided in the query, return error
@@ -128,16 +130,20 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
     return response.end("Unable to complete request")
   }
 
-  // If there are no brands matching the brand Id from the query, return error
-  // if (getProductsByBrandId(selectedBrandId).length == 0) {
-  //   response.writeHead(404);
-  //   return response.end("No products found");
-  // }
+ //find products by the given brand id 
+ const foundProductsArray = Products.getProductsByBrandId(selectedBrandId, products) 
+
+ // If there are no brands matching the brand Id from the query, return error
+  if (foundProductsArray.length === 0) {
+    response.writeHead(404);
+    return response.end("No products found");
+  }
+
   // Return the available products available for the particular brand id
   response.writeHead(200, { "Content-Type": "application/json" });
-
-  return response.end(JSON.stringify(Products.getProductsByBrandId(selectedBrandId, products)))
+  return response.end(JSON.stringify(foundProductsArray));
 })
+
 
 // Helpers to get/set our number of failed requests per username
 var getNumberOfFailedLoginRequestsForUsername = function (username) {
@@ -157,14 +163,6 @@ var getValidTokenFromRequest = function (request) {
   var parsedUrl = require('url').parse(request.url, true)
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure its valid and not expired
-    // we want our tokens to expire so we can be able to protect against people intercepting access tokens and then using them to enter our system. So let's add a check into our nice helper method (in one place only! how awesome!) to make sure that the token isn't old.
-    // var accessTokens = [];
-    // An access token can look like this:
-    // [{
-    //   username: 'sean',
-    //   lastUpdated: <A valid date>,
-    //   token: 'qwertyuiopasdfg1'
-    // }]
     let currentAccessToken = accessTokens.find((accessToken) => {
       return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
@@ -180,8 +178,8 @@ var getValidTokenFromRequest = function (request) {
 
 //Handle post request to login the user
 myRouter.post('/api/login', function (request, response) {
-  // Make sure there is a username and password in the request
-  //
+
+  // Make sure there is a username and password in the request and check for multiple failed login attempts (to prevent brute force attacks)
   if (request.body.username && request.body.password && getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3) {
     // See if there is a user that has that username and password
     let user = users.find((user) => {
@@ -234,8 +232,6 @@ myRouter.post('/api/login', function (request, response) {
 });
 
 
-
-
 //Handle request to return all the products in a user's cart
 myRouter.get('/api/me/cart', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -266,10 +262,11 @@ myRouter.post('/api/me/cart', function (request, response) {
     return response.end();
   }
 
-  // Check if the current user has access to the store
+  // Check if the current user has access 
   let user = users.find((user) => {
     return user.login.username == currentAccessToken.username;
   });
+
   //If product doesn't have an id, return an error
   if (!request.body.id) {
     response.writeHead(400);
@@ -278,10 +275,11 @@ myRouter.post('/api/me/cart', function (request, response) {
 
   //Find the product by id
   const productToAdd = Products.findProductById(products, request.body.id)
+
   //Add item to cart and assign a variable the updated cart, so we can send it in the response 
   const updatedUser = UserCart.addProduct(productToAdd, user);
 
-
+  //save updated user permanently and return the added product
   response.writeHead(200, { "Content-Type": "application/json" });
   saveCurrentUser(updatedUser);
   return response.end(JSON.stringify(productToAdd));
@@ -327,7 +325,7 @@ myRouter.delete('/api/me/cart/:productId', function (request, response) {
     return response.end();
   }
 
-  // Check if the current user has access to the store
+  // Check if the current user has access 
   let user = users.find((user) => {
     return user.login.username == currentAccessToken.username;
   });
@@ -350,6 +348,7 @@ myRouter.delete('/api/me/cart/:productId', function (request, response) {
   return response.end(JSON.stringify(updatedCart));
 })
 
+
 // Handle post request to change quantity of item in cart
 myRouter.post('/api/me/cart/:productId', function (request, response) {
 
@@ -361,7 +360,7 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
     return response.end();
   }
 
-  // Check if the current user has access to the store
+  // Check if the current user has access
   let user = users.find((user) => {
     return user.login.username == currentAccessToken.username;
   });
@@ -378,14 +377,10 @@ myRouter.post('/api/me/cart/:productId', function (request, response) {
   // At this point, we know the product is in the cart and we can now update the quantity
   const updatedCart = UserCart.changeQuantityOfProduct(request.params.productId, request.body.newQuantity, user)
 
-  // Return success code for updating the product. Return the updated product so the quantity can be tested. 
+  // Return success code for updating the product, save users updated cart and return updated cart
   response.writeHead(200, { "Content-Type": "application/json" });
   saveCurrentUser(user);
   return response.end(JSON.stringify(updatedCart));
 })
-
-
-
-
 
 module.exports = server;
