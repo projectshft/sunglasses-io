@@ -353,6 +353,7 @@ describe("Login", () => {
 
 describe("Cart", function () {
   let accessTokenForUrl;
+
   beforeEach(function (done) {
     const userLogin = { username: "yellowleopard753", password: "jonjon" };
     // runs once before the first test in this block
@@ -372,7 +373,7 @@ describe("Cart", function () {
       // assemble
       // in order to really test, I want to choose a random product among Ids that we have
       // doing random ensures that we can't beat the test easily
-      let randomProduct = Math.floor(Math.random() * 5) + 1;
+      let randomProduct = String(Math.floor(Math.random() * 5) + 1);
 
       //act
       chai
@@ -382,7 +383,7 @@ describe("Cart", function () {
         .end((err, res) => {
           // check that the cart has the item we wanted
           res.body.should.be.an("array");
-          res.body.should.include.something.that.has.property(`product_${randomProduct}`);
+          res.body.should.include.something.that.has.property("id", randomProduct);
           done();
         });
     });
@@ -390,12 +391,11 @@ describe("Cart", function () {
       // assemble
       // this test has more to do with the shape of the obj
       const dummyProduct = {
-        product_5: {
-          quantity: 1,
-          name: "Glasses",
-          price: 150,
-          categoryId: "2",
-        },
+        quantity: 1,
+        name: "Glasses",
+        price: 150,
+        categoryId: "2",
+        id: "5",
       };
 
       //act
@@ -448,10 +448,85 @@ describe("Cart", function () {
       //act
       chai
         .request(server)
-        .post(`/api/me/cart?product=1000&accessToken=${accessTokenForUrl}`)
+        .post(`/api/me/cart?product=bananas&accessToken=${accessTokenForUrl}`)
         // assert
         .end((err, res) => {
           res.should.have.status(404);
+          done();
+        });
+    });
+  });
+});
+
+describe("Updating quantity in cart", () => {
+  let accessTokenForUrl;
+
+  before(function (done) {
+    const userLogin = { username: "yellowleopard753", password: "jonjon" };
+    // runs once before the first test in this block
+    chai
+      .request(server)
+      .post("/api/login")
+      .set("content-type", "application/json")
+      .send(userLogin)
+      .end((err, res) => {
+        accessTokenForUrl = res.body;
+        done();
+      });
+  });
+
+  beforeEach(function (done) {
+    // we'll add something so that we can change qty
+    chai
+      .request(server)
+      .post(`/api/me/cart?product=9&accessToken=${accessTokenForUrl}`)
+      .set("content-type", "application/json")
+      // assert
+      .end((err, res) => {
+        done();
+      });
+  });
+
+  afterEach(function (done) {
+    chai
+      .request(server)
+      .delete(`/api/me/cart?accessToken=${accessTokenForUrl}`)
+      .end((err, res) => {
+        done();
+      });
+  });
+
+  describe("/POST /me/cart/:productId ", () => {
+    it("it should throw an error if the user does not pass an invalid productId", (done) => {
+      let randomNum = String(Math.floor(Math.random() * 5) + 1);
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/bananas/?accessToken=${accessTokenForUrl}&newQuantity=${randomNum}`)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+    it("it should update the quantity of an item already in the cart if a user is logged in", (done) => {
+      let randomNum = Math.floor(Math.random() * 5) + 1;
+
+      const dummyObject = {
+        categoryId: "4",
+        id: "9",
+        name: "Sugar",
+        price: 125,
+        quantity: String(randomNum),
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/9?accessToken=${accessTokenForUrl}&newQuantity=${randomNum}`)
+        // assert
+        .end((err, res) => {
+          res.body.should.be.an("array");
+          res.body.should.include.something.that.deep.equals(dummyObject);
           done();
         });
     });

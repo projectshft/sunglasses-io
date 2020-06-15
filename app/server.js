@@ -224,18 +224,67 @@ myRouter.post("/api/me/cart", function (request, response) {
 
       // and then transform it to a useful form
       const productToAdd = {
-        [productId]: {
-          name: productObj.name,
-          quantity: 1,
-          price: productObj.price,
-          categoryId: productObj.categoryId,
-        },
+        name: productObj.name,
+        quantity: 1,
+        price: productObj.price,
+        categoryId: productObj.categoryId,
+        id: productObj.id,
       };
 
       cart.push(productToAdd);
     }
 
     return response.end(JSON.stringify(cart));
+  }
+});
+
+myRouter.post("/api/me/cart/:productId", function (request, response) {
+  // we'll need to check if they are logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    const queryParams = queryString.parse(url.parse(request.url).query);
+
+    let listOfProductIds = cart.reduce((list, product) => {
+      list.push(product.id);
+      return list;
+    }, []);
+
+    if (!listOfProductIds.includes(request.params.productId)) {
+      response.writeHead(404, "Invalid brand ID supplied");
+      response.end();
+    }
+
+    // now we need to change the actual quantity for a matching product
+
+    // find where in the cart we need to make the change
+    let productToChangeIndex = cart.findIndex((product) => {
+      return product.id === request.params.productId;
+    });
+
+    cart[productToChangeIndex]["quantity"] = queryParams.newQuantity;
+
+    response.end(JSON.stringify(cart));
+  }
+});
+
+myRouter.delete("/api/me/cart", function (request, response) {
+  // we'll need to check if they are logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    cart = [];
+    response.end(JSON.stringify(cart));
   }
 });
 
