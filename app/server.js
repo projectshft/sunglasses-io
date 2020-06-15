@@ -274,7 +274,7 @@ myRouter.post("/api/me/cart", (request, response) => {
 
     //check for required parameters were sent and not empty and no invalid parameters sent
     if (queryKeys.sort().join('') === requiredParams.sort().join('') &&
-    queryParams.accessToken && queryParams.productId) {
+        queryParams.accessToken && queryParams.productId) {
 
         //check if access token is valid
         if (queryParams.accessToken === currentUserToken.accessToken) {
@@ -320,53 +320,92 @@ myRouter.post("/api/me/cart", (request, response) => {
     }
 });
 
-  myRouter.delete("/api/me/cart/:productId", (request, response) => {
-//for query parameters
-const queryParams = queryString.parse(url.parse(request.url).query);
-const queryKey = Object.keys(queryParams).join('');
-const requiredParam = 'accessToken';
-const currentUserToken = accessTokens.find(token => {
-    return token.username === currentUser.login.username;
-});
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKey = Object.keys(queryParams).join('');
+    const requiredParam = 'accessToken';
+    const currentUserToken = accessTokens.find(token => {
+        return token.username === currentUser.login.username;
+    });
 
-//check for required parameters were sent and not empty and no invalid parameters sent
-if (queryKey === requiredParam && queryParams.accessToken) {
+    //check for required parameters were sent and not empty and no invalid parameters sent
+    if (queryKey === requiredParam && queryParams.accessToken) {
 
-    //check if access token is valid
-    if (queryParams.accessToken === currentUserToken.accessToken) {
+        //check if access token is valid
+        if (queryParams.accessToken === currentUserToken.accessToken) {
 
-        //check if product exists in cart
-        productToDelete = currentUser.cart.find(cartItem => {
-            return cartItem.product.id === request.params.productId;
-        });
+            //check if product exists in cart
+            productToDelete = currentUser.cart.find(cartItem => {
+                return cartItem.product.id === request.params.productId;
+            });
 
-        if (productToDelete) {
-            //successful request
-            response.writeHead(200, { "Content-Type": "application/json" });
+            if (productToDelete) {
+                //successful request
+                response.writeHead(200, { "Content-Type": "application/json" });
 
-            //remove product from cart
-            const productIndex = currentUser.cart.indexOf(productToDelete);
-            currentUser.cart.splice(productIndex, 1);
-            response.end(JSON.stringify(currentUser.cart));
-            
+                //remove product from cart
+                const productIndex = currentUser.cart.indexOf(productToDelete);
+                currentUser.cart.splice(productIndex, 1);
+                response.end(JSON.stringify(currentUser.cart));
+
+            } else {
+                response.writeHead(404, "Product not found");
+                response.end();
+            }
         } else {
-            response.writeHead(404, "Product not found");
+            response.writeHead(401, "Unauthorized access");
             response.end();
         }
     } else {
-        response.writeHead(401, "Unauthorized access");
+        response.writeHead(400, "Invalid request parameters");
         response.end();
     }
-} else {
-    response.writeHead(400, "Invalid request parameters");
-    response.end();
-}
-  });
+});
 
-//   myRouter.post("/api/me/cart/:productId", (request, response) => {
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(JSON.stringify());
-//   });
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+    //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKey = Object.keys(queryParams).join('');
+    const requiredParam = 'accessToken';
+    const bodyKeys = Object.keys(request.body);
+    const currentUserToken = accessTokens.find(token => {
+        return token.username === currentUser.login.username;
+    });
+
+    //check for required parameters were sent and not empty and no invalid parameters sent
+    if (queryKey === requiredParam && queryParams.accessToken && bodyKeys.length === 1 
+        && request.body.quantity && typeof request.body.quantity === 'number') {
+
+        //check if access token is valid
+        if (queryParams.accessToken === currentUserToken.accessToken) {
+
+            //check if product exists in cart
+            productToUpdate = currentUser.cart.find(cartItem => {
+                return cartItem.product.id === request.params.productId;
+            });
+
+            if (productToUpdate) {
+                //successful request
+                response.writeHead(200, { "Content-Type": "application/json" });
+
+                //edit quantity of product in cart
+                productToUpdate.quantity = request.body.quantity;
+                response.end(JSON.stringify(currentUser.cart));
+
+            } else {
+                response.writeHead(404, "Product not found");
+                response.end();
+            }
+        } else {
+            response.writeHead(401, "Unauthorized access");
+            response.end();
+        }
+    } else {
+        response.writeHead(400, "Invalid request parameters");
+        response.end();
+    }
+});
 
 
 module.exports = server;
