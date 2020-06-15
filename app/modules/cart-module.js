@@ -1,5 +1,4 @@
 
-
 class UserCart {
   constructor(params) {
     Object.assign(this,params)
@@ -20,16 +19,6 @@ class UserCart {
   } else {
     user.cart[indexOfProduct].quantity += 1;
   }
-//  let foundProduct = user.cart.find(product => {
-//    product.id == productToAdd.id
-//  })
-
-//  if (foundProduct) {
-//    foundProduct.quantity++;
-//  } else {
-//    productToAdd.quantity = 1;
-//    user.cart.push(productToAdd);
-//  }
     return user;
   }
 

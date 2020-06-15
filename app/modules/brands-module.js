@@ -8,10 +8,6 @@ class Brands {
     return brandsArray;
   } 
 
-  // static removeAll() {
-  //   brandsArray = [];
-  // }
-
   static getIdOfSearchedBrand(queryString, brandsArray) {
     const query = queryString.toLowerCase();
     let brandId;
