@@ -1,0 +1,280 @@
+swagger: '2.0'
+info:
+  title: Sunglasse.io API
+  description: Documentation to support sunglasses.io
+  version: 1.0.0
+  
+host: localhost:3001
+basePath: /api
+
+schemes:
+  - https
+  
+produces:
+  - application/json
+
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brand types
+      description: The Brands path returns the brands offered on the site
+      parameters:
+        - name: keyword
+          in: query
+          description: Search query
+          required: false
+          type: string
+      responses:
+        200:
+          description: An array of Brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /brands/{id}/products:
+    get:
+      tags:
+      - Brands
+      summary: Products made by each Brand
+      description: The path returns products at a given brand ID
+      parameters:
+        - name: id
+          in: path
+          description: unique brand id
+          required: true
+          type: string
+      responses:
+        200:
+          description: Array of products for brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        404:
+          description: Brand ID could not be found
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /products:
+    get:
+      tags:
+      - Products
+      summary: All products
+      description: The path returns all products available on site
+      parameters:
+        - name: keyword
+          in: query
+          description: Search query
+          required: false
+          type: string
+      responses:
+        200:
+          description: Array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /login:
+    post:
+      tags: 
+        - Login
+      summary: User login
+      description: The path returns the users access token
+      parameters:
+        - name: username
+          in: header
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: header
+          description: The password for login
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful login
+        400:
+          description: username or password missing
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Invalid username or password
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /me/cart:
+    get:
+      tags:
+        - User
+      summary: All items in users cart
+      description: The path returns the cart contents of a logged in user
+      responses:
+        200:
+          description: Array of products in cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: Must be logged in to see cart
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+    
+    post:
+      tags:
+        - User
+      summary: Add item to users cart
+      description: The path adds an item to the cart of a logged in user
+      responses:
+        200:
+          description: Item was added to users cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: Must be logged in to add to cart
+          schema:
+            $ref: '#/definitions/Error'
+        405:
+          description: Will not add item to cart if item is already in the cart
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error' 
+            
+  /me/cart/{productId}:
+    put:
+      tags:
+        - User
+      summary: Updates quantity of item in cart
+      description: Adds/updates quantity a selected item to cart
+      parameters:
+        - name: productId
+          in: path
+          description: Product ID to be added to the cart
+          required: true
+          type: string 
+      responses:
+        200:
+          description: Item added to cart/quantity updated
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        403:
+          description: Can't update quantity of item if cart is empty
+          schema:
+            $ref: '#/definitions/Error'
+        405:
+          description: Can't update quantity of item to 0
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    
+    delete:
+      tags:
+        - User
+      summary: Remove from Cart
+      description: Removes selected item from cart
+      parameters:
+        - name: productId
+          in: path
+          description: Product ID to remove from cart
+          required: true
+          type: string 
+      responses:
+        200:
+          description: Item removed
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        403:
+          description: Can't update quantity of item if cart is empty
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: That product cannot be found
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+    
+      
+      
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for each brand
+      name:
+        type: string
+        description: Name of brand
+        
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for each product
+      categoryId:
+        type: string
+        description: unique identifier of brand
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: number
+        description: Price of product
+      imageUrls:
+        type: array
+        items:
+            type: string
+            description: ImageUrl of product image
+      
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
