@@ -46,6 +46,7 @@ const server = http.createServer((request, response) => {
   
 
   //GET RETURNS ALL BRANDS
+  //localhost:3001/api/brands
   //No requirements
   //returns all brands
   router.get("/api/brands", (request, response) => {
@@ -59,6 +60,7 @@ const server = http.createServer((request, response) => {
     });
 
   //GET PRODUCTS BY BRAND ID
+  //localhost:3001/api/brands/1/products
   //requires correct/existing brand Id in url
   //returns a list of products with the same brand ID
   router.get("/api/brands/:id/products", (request, response) => {
@@ -75,6 +77,7 @@ const server = http.createServer((request, response) => {
   });
 
   //GET PRODUCTS BY SEARCH
+  //localhost:3001/api/products?query=sweetest
   //requires query with search term in url
   //returns products that include query string in description
   router.get("/api/products", (request, response) => {
@@ -121,6 +124,7 @@ var setNumberOfFailedLoginRequestsForUsername = function(username,numFails) {
 
 //From Auth assignment
 //POST USER LOGIN WITH USERNAME AND PASSWORD
+//localhost:3001/api/login
 //Requires a valid username and password
 //Returns an accessToken
 router.post('/api/login', function(request,response) {
@@ -191,6 +195,7 @@ var getValidTokenFromRequest = function(request) {
 };
  
 // GET USER CART FOR LOGGED IN USER
+//localhost:3001/api/me/cart?accessToken=
 //requires a valid token in URL to confirm valid user
 //returns users cart
 router.get('/api/me/cart', function(request,response) {
@@ -211,6 +216,7 @@ router.get('/api/me/cart', function(request,response) {
 });
 
 //ADD TO PRODUCT TO CART FOR LOGGED IN USER
+//localhost:3001/api/me/cart?accessToken=
 //requires a valid token in URL to confirm valid user
 //requires a valid product id in request body to add to cart
 //returns users cart
@@ -256,11 +262,11 @@ router.post('/api/me/cart', function(request,response) {
 });
 
 //DELETE AN ITEM IN THE USER CART
+//localhost:3001/api/me/cart/1?accessToken=
 //requires a valid token in URL to confirm valid user
 //requires a valid product id in url
 //returns users cart (empty or with less items)
 
-//not working correctly
 router.delete('/api/me/cart/:productId', function(request,response) {
   const { productId } = request.params;
 
@@ -294,6 +300,7 @@ router.delete('/api/me/cart/:productId', function(request,response) {
 });
 
 //POST EDIT QUANTITY OF ITEM IN CART
+//localhost:3001/api/me/cart/1?accessToken=
 //requires a valid token in URL to confirm valid user
 //requires a valid product id in url
 //requires a number to update product quantity in request body
