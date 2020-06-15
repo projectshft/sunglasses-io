@@ -19,7 +19,7 @@ let products = [];
 let users = [];
 var failedLoginAttempts = {};
 let accessTokens = [];
-let cart = {};
+let cart = [];
 
 let server = http
   .createServer(function (request, response) {
@@ -209,8 +209,24 @@ myRouter.post("/api/me/cart", function (request, response) {
     const queryParams = queryString.parse(url.parse(request.url).query);
 
     if (queryParams.product) {
-      let productInCart = "product_" + queryParams.product;
-      cart[productInCart] = true;
+      let productId = "product_" + queryParams.product;
+
+      // we need to find the right product
+      const productObj = products.find((product) => {
+        return product.id === queryParams.product;
+      });
+
+      // and then transform it to a useful form
+      const productToAdd = {
+        [productId]: {
+          name: productObj.name,
+          quantity: 1,
+          price: productObj.price,
+          categoryId: productObj.categoryId,
+        },
+      };
+
+      cart.push(productToAdd);
     }
 
     return response.end(JSON.stringify(cart));

@@ -410,9 +410,9 @@ describe("Cart", function () {
         // assert
         .end((err, res) => {
           // check that the cart has the item we wanted
-          res.body.should.be.an("object");
-          res.body.should.have.property(`product_${randomProduct}`);
-          done;
+          res.body.should.be.an("array");
+          res.body.should.include.something.that.has.property(`product_${randomProduct}`);
+          done();
         });
     });
     it("it should NOT post a random item (that exists in store) to the cart if no user is logged in", (done) => {
@@ -433,19 +433,26 @@ describe("Cart", function () {
     });
     it("it should post an item to the cart with all its relevant info", (done) => {
       // assemble
+      // this test has more to do with the shape of the obj
+      const dummyProduct = {
+        product_5: {
+          quantity: 1,
+          name: "Glasses",
+          price: 150,
+          categoryId: "2",
+        },
+      };
+
       //act
       chai
         .request(server)
-        .post("/api/me/cart?product=5")
+        .post(`/api/me/cart?product=5&accessToken=${accessTokenForUrl}`)
         // assert
         .end((err, res) => {
           res.should.have.status(200);
           // check that the cart has the item we wanted
-          res.body.should.be.an("object");
-          res.body.should.have.deep.property("product_5", { quantity: 1 });
-          res.body.should.have.deep.property("product_5", { name: "Glasses" });
-          res.body.should.have.deep.property("product_5", { price: 150 });
-          res.body.should.have.deep.property("product_5", { categoryId: 2 });
+          res.body.should.be.an("array");
+          res.body.should.include.something.that.deep.equals(dummyProduct);
           done();
         });
     });
