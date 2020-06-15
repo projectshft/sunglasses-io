@@ -129,7 +129,6 @@ myRouter.post("/api/login", function (request, response) {
       return user.login.username === request.body.username && user.login.password === request.body.password;
     });
 
-    
     if (user) {
       // If we found a user, reset our counter of failed logins
       setNumberOfFailedLoginRequestsForUsername(request.body.username, 0);
