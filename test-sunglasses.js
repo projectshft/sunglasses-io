@@ -527,26 +527,41 @@ describe('/POST login', () => {
 describe('/GET cart', () => {
 
 
-    before(() => {
+    // beforeEach(done => {
+    //     const userLogin = {
+    //         password: 'tucker',
+    //         username: 'lazywolf342'
+    //     }
+    //     chai
+    //         .request(server)
+    //         .post('/api/login')
+    //         .send(userLogin)
+    //         .end((error, response) => {
+    //             userToken = response.body
+    //             expect(response.statusCode).to.equal(200);
+    //             done();
+    //         });
+    // });
+
+    beforeEach(async function () {
         const userLogin = {
-            password: 'tucker',
-            username: 'lazywolf342'
-        }
-        chai
+                    password: 'tucker',
+                    username: 'lazywolf342'
+                }
+        
+        const res = await chai
             .request(server)
             .post('/api/login')
             .send(userLogin)
-            .end((error, response) => {
-                userToken = response.body
-                expect(response.statusCode).to.equal(200);
-            });
-    });
+      
+        userToken = res.body;
+      });
 
     // //check for array 
     it('should GET an array', done => {
         chai
             .request(server)
-            .get(`/api/me/cart?accessToken=${userToken}`)
+            .get(`/api/me/cart?accessToken=${userToken.accessToken}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
@@ -569,7 +584,7 @@ describe('/GET cart', () => {
     it('should return empty array if user cart is empty', done => {
         chai
             .request(server)
-            .get(`/api/me/cart?accessToken=${userToken}`)
+            .get(`/api/me/cart?accessToken=${userToken.accessToken}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 done();
@@ -580,7 +595,7 @@ describe('/GET cart', () => {
     it('should return cart of logged in user', done => {
         chai
             .request(server)
-            .get(`/api/me/cart?accessToken=${userToken}`)
+            .get(`/api/me/cart?accessToken=${userToken.accessToken}`)
             .end((error, response) => {
                 loggedInUser = users.find(user => {
                     return user.login.username === userToken.username;
@@ -604,6 +619,18 @@ describe('/GET cart', () => {
                 done();
             });
     });
+
+    //should only allow access if token is valid
+    it('should only allow access if token is valid', done => {
+        chai
+            .request(server)
+            .get(`/api/me/cart?accessToken=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(401);
+                done();
+            });
+    });
+
 });
 
 // //test for api/me/cart POST request

@@ -179,7 +179,7 @@ myRouter.post("/api/login", (request, response) => {
         //check if username and password are in body of request &
         //make sure username and password are filled out
         if (bodyKeys.sort().join('') === requiredParams.sort().join('') &&
-        request.body.username && request.body.password) {
+            request.body.username && request.body.password) {
 
             //find user
             const existingUser = users.find(user => {
@@ -191,7 +191,7 @@ myRouter.post("/api/login", (request, response) => {
 
             //check if user exists and password is correct
             if (existingUser && (existingUser.login.password === currentPassword)) {
-                
+
                 response.writeHead(200, { "Content-Type": "application/json" });
                 // login successful, check for existing access token
                 let currentAccessToken = accessTokens.find(token => {
@@ -233,22 +233,34 @@ myRouter.post("/api/login", (request, response) => {
     }
 });
 
-  myRouter.get("/api/me/cart", (request, response) => {
-      //for query parameters
+myRouter.get("/api/me/cart", (request, response) => {
+    //for query parameters
     const queryParams = queryString.parse(url.parse(request.url).query);
     const queryKey = Object.keys(queryParams).join('');
     const requiredParam = 'accessToken'
 
+    //check if token was sent
+    if (queryKey === requiredParam) {
+        //match current user to access token
+        const validToken = accessTokens.find(token => {
+            return token.username === currentUser.login.username;
+        });
 
-      if (queryKey === requiredParam) {
-        response.writeHead(200, { "Content-Type": "application/json" });
-        response.end(JSON.stringify(currentUser.cart));
-      } else {
-          response.writeHead(400, "Invalid parameters");
-          response.end();
-      }
-    
-  });
+        //check if token is valid
+        if (queryParams.accessToken === validToken.accessToken) {
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(currentUser.cart));
+
+        } else {
+            response.writeHead(401, "Invalid authorization");
+            response.end();
+        }
+    } else {
+        response.writeHead(400, "Invalid parameters");
+        response.end();
+    }
+
+});
 
 //   myRouter.post("/api/me/cart", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });
