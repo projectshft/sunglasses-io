@@ -26,11 +26,7 @@ describe('sunglasses', () => {
     it('it should log a user into the system', done => {
       let login = {
         "username": "yellowleopard753",
-        "password": "jonjon",
-        "salt": "eNuMvema",
-        "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-        "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-        "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+        "password": "jonjon"
       };
       chai
         .request(server)
@@ -39,6 +35,35 @@ describe('sunglasses', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('string');
+          res.body.should.not.be.empty;
+          done();
+        })
+    })
+    it('it should return an error if the username or password is invalid', done => {
+      let login = {
+        "username": "yellowleopard753999",
+        "password": "jonjon999"
+      };
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        })
+    })
+    it('it should return an error if the username or password is missing', done => {
+      let login = {
+        "username": "",
+        "password": ""
+      };
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+          res.should.have.status(400);
           done();
         })
     })
@@ -99,11 +124,7 @@ describe('sunglasses', () => {
     it('it should get all items in a users cart', done => {
       let login = {
         "username": "yellowleopard753",
-        "password": "jonjon",
-        "salt": "eNuMvema",
-        "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-        "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-        "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+        "password": "jonjon"
       };
       chai
         .request(server)
@@ -146,11 +167,7 @@ describe('sunglasses', () => {
     }
     let login = {
       "username": "yellowleopard753",
-      "password": "jonjon",
-      "salt": "eNuMvema",
-      "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-      "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-      "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+      "password": "jonjon"
     };
 
     it('it should add an item to a users cart', done => {
@@ -208,11 +225,7 @@ describe('sunglasses', () => {
   describe('/DELETE me/cart/{productId}', () => {
     let login = {
       "username": "yellowleopard753",
-      "password": "jonjon",
-      "salt": "eNuMvema",
-      "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-      "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-      "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+      "password": "jonjon"
     };
     let product = {
       "id": "1",
@@ -281,11 +294,7 @@ describe('sunglasses', () => {
   describe('/POST me/cart/{productId}', () => {
     let login = {
       "username": "yellowleopard753",
-      "password": "jonjon",
-      "salt": "eNuMvema",
-      "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-      "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-      "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+      "password": "jonjon"
     };
     let product = {
       "id": "1",
@@ -357,7 +366,7 @@ describe('sunglasses', () => {
           done();
         })
     })
-    
+
     it('it should return an error if the productId is invalid', done => {
       let productId = "99";
       let quantity = {

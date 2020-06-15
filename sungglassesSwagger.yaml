@@ -1,0 +1,194 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Sunglasses.io API
+  description: API for sunglasses.io project
+  version: "1.0.0"
+# the domain of the service
+host: sunglasses.io
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: get available brands
+      responses: 
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              description: an object describing a product
+  '/brands/{brandId}/products':
+    get:
+      summary: get all products from a given brand
+      parameters:
+        - name: brandId
+          in: path
+          description: ID of brand to return products from
+          required: true
+          type: integer
+      responses: 
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              description: an object describing a product
+        '400':
+          description: Invalid ID Supplied
+        '404':
+          description: brand not found
+  /products:
+    get:
+      summary: get all products
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              description: an object describing a product
+  /login:
+    post:
+      summary: logs a user into the system
+      description: ''
+      parameters: 
+        - in: body
+          name: body
+          required: true
+          schema:
+            type: object
+            description: user login object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: string
+            description: access token from login request
+          headers:
+            X-Rate-Limit:
+              type: integer
+              format: int32
+              description: calls per hour allowed by the user
+            X-Expires-After:
+              type: string
+              format: date-time
+              description: date in UTC when token expires
+        '400':
+          description: Incorrectly formatted response
+        '401':
+          description: Invalid username/password supplied
+  /me/cart:
+    get:
+      summary: gets cart for logged in user
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema: 
+            type: string
+            description: access token for validating that the user is logged in
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              description: an object describing a product from the user's cart
+        '401':
+          description: User must be logged in
+    post:
+      summary: adds an item to the cart
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema: 
+            type: string
+            description: access token for validating that the user is logged in
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              description: an object representing an item in a user's cart
+        '401':
+          description: user must be logged in
+  '/me/cart/{productId}':
+    delete:
+      summary: deletes a product from a users cart
+      description: ''
+      parameters:
+        - name: productId
+          in: path
+          description: ID of a product
+          required: true
+          type: integer
+        - in: body
+          name: body
+          required: true
+          schema: 
+            type: string
+            description: access token for validating that the user is logged in
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: invalid product id supplied
+        '404':
+          description: no product with that id found
+    post:
+      summary: updates a cart item's quantity
+      description: ''
+      parameters:
+        - name: productId
+          in: path
+          description: ID of a product
+          required: true
+          type: integer
+        - name: accessToken
+          in: query
+          description: access token for validating that the user is logged in
+          required: true
+          type: string
+        - in: query
+          name: quantity
+          type: integer
+          description: quantity of item to add to cart
+          required: true
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              description: an object representing an item in the users cart
+        '400':
+          description: invalid product id supplied
+        '404':
+          description: no product with that id found
+      
+          
+      
+      
+    
+      
