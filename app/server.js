@@ -5,7 +5,7 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-const PORT = 8080;
+const PORT = 3001;
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
