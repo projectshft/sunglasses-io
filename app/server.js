@@ -8,6 +8,7 @@ var bodyParser = require("body-parser");
 const { v4: uuidv4 } = require("uuid");
 
 const PORT = 8080;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 // Setup router
 var myRouter = Router();

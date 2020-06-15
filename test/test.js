@@ -2,6 +2,9 @@ let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../app/server");
 let chaiAsPromised = require("chai-as-promised");
+var sinon = require("sinon");
+
+clock = sinon.useFakeTimers();
 
 chai.use(chaiHttp);
 chai.use(require("chai-things"));
@@ -9,6 +12,9 @@ chai.use(require("chai-uuid"));
 chai.use(chaiAsPromised);
 
 let should = chai.should();
+
+// sinon used for access token timeout
+
 describe("Brands", () => {
   describe("/GET brands ", () => {
     it("it should GET all the brands as an array", (done) => {
@@ -342,6 +348,35 @@ describe("Login", () => {
           done();
         });
     });
+    /* it("it should NOT return the same access token for consecutive logins after a set time", (done) => {
+      // arrange
+      const userLogin = { username: "yellowleopard753", password: "jonjon" };
+      const setTime = 900001;
+      let storedId = "";
+
+      chai //act
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        // assert
+        .end((err, res) => {
+          storedId = res.body;
+        });
+
+      clock.tick(setTime);
+      chai
+        .request(server)
+        .post("/api/login")
+        .set("content-type", "application/json")
+        .send(userLogin)
+        // assert
+        .end((err, res) => {
+          res.body.should.not.equal(storedId);
+          clock.restore();
+          done();
+        });
+    }); */
   });
 });
 
