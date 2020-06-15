@@ -18,8 +18,7 @@ class UserCart {
     productToAdd.quantity = 1;
     user.cart.push(productToAdd);
   } else {
-    let foundProduct = user.cart[indexOfProduct];
-    foundProduct =+ 1;
+    user.cart[indexOfProduct].quantity += 1;
   }
 //  let foundProduct = user.cart.find(product => {
 //    product.id == productToAdd.id
@@ -31,7 +30,7 @@ class UserCart {
 //    productToAdd.quantity = 1;
 //    user.cart.push(productToAdd);
 //  }
-    return user.cart;
+    return user;
   }
 
   //for delete request to remove product from the cart

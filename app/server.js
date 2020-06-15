@@ -59,7 +59,7 @@ const server = http.createServer(function (request, response) {
 
   users = JSON.parse(fs.readFileSync("../initial-data/users.json","utf-8"));
 
-  user = users[0];
+  //user = users[0];
 });
 
 //this is where we "save" our data. 
@@ -67,9 +67,11 @@ const server = http.createServer(function (request, response) {
 //after the writeFileSync function runs, the json file holding the users data is updated! that's where we can see changes to our "database" (users.json)
 // even if we restart the server, the data will persist!
 const saveCurrentUser = (currentUser) => {
-  // set hardcoded "logged in" user
-  users[0] = currentUser;
-  fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
+  // update the current user in the 'db'
+  let indexOfUser = users.findIndex(user => user.login.username == currentUser.login.username)
+  users[indexOfUser] = currentUser;
+  
+  fs.writeFileSync("../initial-data/users.json", JSON.stringify(users), "utf-8");
 }
 
 //Handle get request to return all available brands
@@ -272,11 +274,11 @@ myRouter.post('/api/me/cart', function (request, response) {
   //Find the product by id
   const productToAdd = Products.findProductById(products, request.body.id)
   //Add item to cart and assign a variable the updated cart, so we can send it in the response 
-  const updatedCart = UserCart.addProduct(productToAdd, user);
+  const updatedUser = UserCart.addProduct(productToAdd, user);
 
   response.writeHead(200, { "Content-Type": "application/json" });
   saveCurrentUser(user);
-  return response.end(JSON.stringify(updatedCart));
+  return response.end(JSON.stringify(updatedUser.cart));
 });
 
 
