@@ -1,15 +1,12 @@
 ---
 swagger: "2.0"
 info:
-  description: An API for the Sunglasses-io Store. For this sample, you can use the api key `88312679-04c9-4351-85ce-3ed75293b449` to test the authorization filters.
+  description: An API for the Sunglasses-io Store. Getting brands and products requires no authorization, but a username and password is required to login, receive access token, and access the user's cart
   version: 1.0.0
   title: Sunglasses-io
   termsOfService: ""
   contact:
     email: adholton@gmail.com
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
 host: localhost:3001
 basePath: /api
 tags:
@@ -48,15 +45,13 @@ paths:
           description: Brands not available
           schema:
             $ref: '#/definitions/Error'
-      security:
-      - api_key: []
   /brands/{id}/products:
     get:
       tags:
       - Brands
       summary: Get product available for each brand
       description: |
-        This endpoint will get all the products of a certain brand by including the brand id as a parameter
+        This endpoint will get all the products of a certain brand by including the brand id as a parameter in the request url
       operationId: getProductsBySunglassesBrandId
       produces:
       - application/json
@@ -81,8 +76,6 @@ paths:
           description: No products found
           schema:
             $ref: '#/definitions/Error'
-      security:
-      - api_key: []
   /products:
     get:
       tags:
@@ -110,8 +103,6 @@ paths:
           description: No products found
           schema:
             $ref: '#/definitions/Error'
-      security:
-      - api_key: []
   /login:
     post:
       tags:
@@ -149,8 +140,6 @@ paths:
           description: Invalid username or password
           schema:
             $ref: '#/definitions/Error'
-      security:
-      - api_key: []
   /me/cart:
     get:
       tags:
@@ -180,7 +169,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       security:
-      - api_key: []
       - sunglassesstore_auth:
         - write:itemsInCart
         - read:itemsInCart
@@ -189,7 +177,7 @@ paths:
       - User
       summary: Add item to logged-in user's cart
       description: |
-        Adds an item to authorized user's cart. The product to add will be sent in the request body.
+        Adds an item to authorized user's cart. The product to add will be sent in the request body and returned in the response.
       operationId: addItemToCart
       produces:
       - application/json
@@ -217,7 +205,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       security:
-      - api_key: []
       - sunglassesstore_auth:
         - write:itemsInCart
         - read:itemsInCart
@@ -225,9 +212,9 @@ paths:
     post:
       tags:
       - User
-      summary: Change quantity of item in logged-in user's cart
+      summary: Change quantity of a product in logged-in user's cart
       description: |
-        Change quantity of item in logged-in user's cart, and updated cart will be returned
+        Change quantity of a product in logged-in user's cart, and updated cart will be returned
       operationId: changeItemQuantity
       produces:
       - application/json
@@ -259,7 +246,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       security:
-      - api_key: []
       - sunglassesstore_auth:
         - write:itemsInCart
         - read:itemsInCart
@@ -300,7 +286,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
       security:
-      - api_key: []
       - sunglassesstore_auth:
         - write:itemsInCart
         - read:itemsInCart
@@ -312,10 +297,6 @@ securityDefinitions:
     scopes:
       write:itemsInCart: add or modify items in cart in your account
       read:itemsInCart: read items in cart in your account
-  api_key:
-    type: apiKey
-    name: api_key
-    in: header
 definitions:
   Brands:
     type: object
