@@ -196,9 +196,10 @@ describe('User', () => {
             "price": 150,
             "imageUrls": ["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg", "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
           }
+          let token = res.body
             chai
               .request(server)
-              .post('/api/me/cart/?accessToken=' + res.body)
+              .post('/api/me/cart/?accessToken=' + token)
               .send(addedProduct)
               .end((err, res) => {
                 res.should.have.status(200);
@@ -210,7 +211,32 @@ describe('User', () => {
           });
     });
 
-  });
+    it('it should not POST products to users cart without access token', done => {
+      let currentUser = {
+        username: "lazywolf342",
+        password: "tucker"
+      }
+      chai
+      .request(server)
+      .post('/api/login')
+      .send(currentUser)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('string');
+            chai
+            .request(server)
+            .get('/api/me/cart')
+            .end((err, res) => {
+              res.should.have.status(401);
+              done();
+            });
+        });
+    });
+
+    
+
+
+});
 
   describe('/PUT me/cart/:productId', () => {
     it('it should update the quantity of an item in the users cart', done => {
@@ -238,7 +264,7 @@ describe('User', () => {
           });
     });
 
-  });
+});
 
   describe('/DELETE me/cart/:productId', () => {
     it('it should DELETE an item in the users cart', done => {

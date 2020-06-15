@@ -187,7 +187,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     })
     
     if (productInCart) {
-      response.writeHead(401, "That product is aleady in cart");	
+      response.writeHead(405, "That product is aleady in cart");	
       return response.end();
     }
 
@@ -223,8 +223,14 @@ myRouter.put('/api/me/cart/:productId', function(request,response) {
     
     //If cart is empty
     if (user.cart.length === 0) {
-      response.writeHead(402, "ERROR: Your cart is empty");
+      response.writeHead(403, "ERROR: Your cart is empty");
       return response.end();
+    }
+
+    let quantityWanted = request.body.quantity;
+    if (quantityWanted < 1) {
+        response.writeHead(405, "Invalid request. Quantity can't be Zero");
+        return response.end();
     }
     
     
@@ -232,7 +238,7 @@ myRouter.put('/api/me/cart/:productId', function(request,response) {
       return product.id === request.params.productId
     })
 
-    productToEdit.quantity = request.body.quantity
+    productToEdit.quantity = quantityWanted
 
    
     // Return success with updated product in cart
@@ -257,7 +263,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
       })
 
       if (user.cart.length === 0 ) {
-        response.writeHead(402, "ERROR: Your cart is empty");
+        response.writeHead(403, "ERROR: Your cart is empty");
         return response.end();
       }
       // Checking to see if product exists in cart
@@ -270,11 +276,11 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
         response.writeHead(404, "That product cannot be found");
         return response.end();
       }
-
+      
       user.cart = user.cart.filter((product) => {
         return product.id !== request.params.productId
       })
-
+      
       // Return success with added product in cart
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(user.cart));
