@@ -108,7 +108,7 @@ myRouter.get("/api/products", (request, response) => {
     //for query parameters
     const queryParams = queryString.parse(url.parse(request.url).query);
     const queryKeys = Object.keys(queryParams);
-    const validParams = ['query', 'something'];
+    const validParams = ['query'];
 
     //check if parameter was sent
     if (queryKeys.length === 0) {
@@ -179,7 +179,7 @@ myRouter.post("/api/login", (request, response) => {
         //check if username and password are in body of request &
         //make sure username and password are filled out
         if (bodyKeys.sort().join('') === requiredParams.sort().join('') &&
-            request.body.username && request.body.password) {
+        request.body.username && request.body.password) {
 
             //find user
             const existingUser = users.find(user => {
@@ -201,7 +201,7 @@ myRouter.post("/api/login", (request, response) => {
                 // update timestamp to reset time until expiration
                 if (currentAccessToken) {
                     currentAccessToken.lastUpdated = new Date();
-                    response.end(JSON.stringify(currentAccessToken.accessToken));
+                    response.end(JSON.stringify(currentAccessToken));
 
                 } else {
                     // create new token for user if one doesn't exist
@@ -216,7 +216,7 @@ myRouter.post("/api/login", (request, response) => {
 
                     //set current user
                     currentUser = existingUser;
-                    response.end(JSON.stringify(newAccessToken.accessToken));
+                    response.end(JSON.stringify(newAccessToken));
                 }
 
             } else {
@@ -233,10 +233,22 @@ myRouter.post("/api/login", (request, response) => {
     }
 });
 
-//   myRouter.get("/api/me/cart", (request, response) => {
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(JSON.stringify());
-//   });
+  myRouter.get("/api/me/cart", (request, response) => {
+      //for query parameters
+    const queryParams = queryString.parse(url.parse(request.url).query);
+    const queryKey = Object.keys(queryParams).join('');
+    const requiredParam = 'accessToken'
+
+
+      if (queryKey === requiredParam) {
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify(currentUser.cart));
+      } else {
+          response.writeHead(400, "Invalid parameters");
+          response.end();
+      }
+    
+  });
 
 //   myRouter.post("/api/me/cart", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });

@@ -60,6 +60,10 @@ paths:
           description: Invalid request parameters
           schema:
             $ref: '#/definitions/Error'
+        '404':
+          description: Product was not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -83,9 +87,17 @@ paths:
           type: string
       responses:
         '200':
-          description: Successfully logged in
+          description: Successful login
           schema:
-            type: string
+            $ref: '#/definitions/AccessToken'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid username or password
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -258,6 +270,18 @@ definitions:
       name:
         type: string
         description: The name of the brand
+  AccessToken:
+    type: object
+    properties:
+      username: 
+        type: string
+        description: Username of logged in user
+      lastUpdated:
+        type: string
+        description: Timestamp of time token was updated
+      accessToken:
+        type: string
+        description: Unique token to validate user access
   Error:
     type: object
     properties:

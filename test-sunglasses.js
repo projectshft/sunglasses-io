@@ -20,7 +20,7 @@ const products = JSON.parse(fs.readFileSync("./initial-data/products.json", "utf
 const users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
 const brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
-let currentUser = {};
+let userToken = '';
 
 
 //test for api/brands GET request
@@ -33,8 +33,8 @@ describe('/GET brands', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
+                done();
             });
-        done();
     });
 
     //check that all results returned
@@ -45,8 +45,8 @@ describe('/GET brands', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.deep.equal(brands);
+                done();
             });
-        done();
     });
 
     //check that error is returned if parameters sent
@@ -56,8 +56,8 @@ describe('/GET brands', () => {
             .get('/api/brands?query=bananas')
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 });
 
@@ -72,8 +72,8 @@ describe('/GET brands/:id/products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
+                done();
             });
-        done();
     });
 
     //check if each product's category matches brand id
@@ -84,8 +84,8 @@ describe('/GET brands/:id/products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.each.have.property('categoryId').that.equals('2');
+                done();
             });
-        done();
     });
 
     //expect empty array if no brands found
@@ -97,8 +97,8 @@ describe('/GET brands/:id/products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.empty;
+                done();
             });
-        done();
     });
 
     //check if all products with brand are returned
@@ -112,8 +112,8 @@ describe('/GET brands/:id/products', () => {
                     return product.categoryId === "1";
                 });
                 expect(response.body).to.deep.equal(productsFound);
+                done();
             });
-        done();
     });
 
     //should return error if brand does not exist
@@ -124,8 +124,8 @@ describe('/GET brands/:id/products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(404);
                 expect(response.body).to.be.empty
+                done();
             });
-        done();
     });
 
     //check that error is returned if parameters sent
@@ -135,8 +135,8 @@ describe('/GET brands/:id/products', () => {
             .get('/api/brands/1/products?query=bananas')
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 });
 
@@ -150,8 +150,8 @@ describe('/GET products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
+                done();
             });
-        done();
     });
 
     //check that all products are returned if no query
@@ -162,8 +162,8 @@ describe('/GET products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.deep.equal(products);
+                done();
             });
-        done();
     });
 
     //check that search query returns array of products
@@ -174,8 +174,8 @@ describe('/GET products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
+                done();
             });
-        done();
     });
 
     //check that search query will search product name
@@ -195,8 +195,8 @@ describe('/GET products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.deep.equal(brownSunglasses);
+                done();
             });
-        done();
     });
 
     //check that search query will search product description
@@ -216,8 +216,8 @@ describe('/GET products', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.deep.equal(awfulGlasses);
+                done();
             });
-        done();
     });
 
     //check that search query returns only products containing search term
@@ -231,8 +231,8 @@ describe('/GET products', () => {
                     return product.name.includes('best') || product.description.includes('best');
                 });
                 expect(allResultsContainSearchTerm).to.equal(true);
+                done();
             });
-        done();
     });
 
     //check that search query returns all products containing search term
@@ -250,8 +250,8 @@ describe('/GET products', () => {
 
                 //check that filtered results match request results
                 expect(response.body).to.deep.equal(productsContainingSearchTerm);
+                done();
             });
-        done();
     });
 
     //check that error is returned on invalid request
@@ -261,8 +261,8 @@ describe('/GET products', () => {
             .get('/api/products?banana=bananas')
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 });
 
@@ -276,8 +276,8 @@ describe('/GET products/:productId', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('object');
+                done();
             });
-        done();
     });
 
     //check that it returns only a product containing productId
@@ -288,8 +288,8 @@ describe('/GET products/:productId', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.have.property('id').that.equals('2');
+                done();
             });
-        done();
     });
 
     //check that it gets matching product if it exists
@@ -308,8 +308,8 @@ describe('/GET products/:productId', () => {
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.deep.equal(productWithId7);
+                done();
             });
-        done();
     });
 
     //check that it returns error if product doesnt exist
@@ -319,8 +319,8 @@ describe('/GET products/:productId', () => {
             .get('/api/products/bananas')
             .end((error, response) => {
                 expect(response.statusCode).to.equal(404);
+                done();
             });
-        done();
     });
 
     //check that no parameters are sent
@@ -330,8 +330,8 @@ describe('/GET products/:productId', () => {
             .get('/api/products/3/?banana=bananas')
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 });
 
@@ -340,10 +340,10 @@ describe('/POST login', () => {
     //response should be successful if username and password exist
     it('should return successful response username and password match existing user', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
             username: 'lazywolf342'
         }
-        
+
         chai
             .request(server)
             .post('/api/login')
@@ -353,7 +353,7 @@ describe('/POST login', () => {
                 done();
             });
     });
-    
+
     //should throw error if parameters are missing
     it('should return error if no parameters are sent', done => {
         const userLogin = {}
@@ -364,24 +364,24 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 
     //login should require username parameter
     it('should return error if username parameter is missing', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
         }
-        
+
         chai
             .request(server)
             .post('/api/login')
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 
     //login should require password parameter
@@ -389,21 +389,21 @@ describe('/POST login', () => {
         const userLogin = {
             username: 'lazywolf342'
         }
-        
+
         chai
             .request(server)
             .post('/api/login')
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 
     //should throw error if password is empty
     it('should return error if password is empty', done => {
         const userLogin = {
-            password: '', 
+            password: '',
             username: 'lazywolf342'
         }
 
@@ -413,14 +413,14 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 
     //should throw error if username is empty
     it('should return error if username is empty', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
             username: ''
         }
 
@@ -430,14 +430,14 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 
     // should throw error if username doesn't exist
     it('should return error if username not found', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
             username: 'banana'
         }
 
@@ -447,14 +447,14 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(401);
+                done();
             });
-        done();
     });
 
     // should throw error if password incorrect
     it('should return error if password is incorrect', done => {
         const userLogin = {
-            password: 'bananas', 
+            password: 'bananas',
             username: 'lazywolf342'
         }
 
@@ -464,33 +464,33 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(401);
+                done();
             });
-        done();
     });
 
     // should create token if login successful
     it('should return access token if login successful', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
             username: 'lazywolf342'
         }
-        
+
         chai
             .request(server)
             .post('/api/login')
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
-                expect(response.body).to.be.a('string');
+                expect(response.body).to.be.an('object').with.property('accessToken');
                 done();
             });
     });
-    
+
 
     // should throw error if query parameters are sent
     it('should return error if query parameters are sent', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
             username: 'lazywolf342'
         }
 
@@ -500,14 +500,14 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 
-     // should throw error if invalid parameters are sent
-     it('should return error if invalid parameters are sent', done => {
+    // should throw error if invalid parameters are sent
+    it('should return error if invalid parameters are sent', done => {
         const userLogin = {
-            password: 'tucker', 
+            password: 'tucker',
             username: 'lazywolf342',
             banana: 'bananas'
         }
@@ -518,67 +518,107 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
+                done();
             });
-        done();
     });
 });
 
 // //test for api/me/cart GET request
-// describe('/GET cart', () => {
-    
+describe('/GET cart', () => {
 
-//     beforeEach(() => {
-//         const userLogin = {
-//             password: 'tucker', 
-//             username: 'lazywolf342'
-//         }
-//         chai
-//             .request(server)
-//             .post('/api/login', userLogin)
-//             .send(userLogin)
-//             .end((error, response) => {
-//                 currentUser = response.body
-//                 expect(response.statusCode).to.equal(200);
-//             });
-//         done();
-// });
 
-// //check for array 
-// it('should GET an array', done => {
-//     chai
-//         .request(server)
-//         .get('/api/me/cart')
-//         .end((error, response) => {
-//             expect(response.statusCode).to.equal(200);
-//             expect(response.body).to.be.an('array');
-//         });
-//     done();
-// });
+    before(() => {
+        const userLogin = {
+            password: 'tucker',
+            username: 'lazywolf342'
+        }
+        chai
+            .request(server)
+            .post('/api/login')
+            .send(userLogin)
+            .end((error, response) => {
+                userToken = response.body
+                expect(response.statusCode).to.equal(200);
+            });
+    });
+
+    // //check for array 
+    it('should GET an array', done => {
+        chai
+            .request(server)
+            .get(`/api/me/cart?accessToken=${userToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(response.body).to.be.an('array');
+                done();
+            });
+    });
+
+    //should only allow access if valid token is sent
+    it('should only allow access if token is sent in request', done => {
+        chai
+            .request(server)
+            .get(`/api/me/cart`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+                done();
+            });
+    });
 
     //array should be empty if cart is empty
-
+    it('should return empty array if user cart is empty', done => {
+        chai
+            .request(server)
+            .get(`/api/me/cart?accessToken=${userToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                done();
+            });
+    });
 
     //cart should belong to user
-    
-    //should contain only products in logged in user's cart
+    it('should return cart of logged in user', done => {
+        chai
+            .request(server)
+            .get(`/api/me/cart?accessToken=${userToken}`)
+            .end((error, response) => {
+                loggedInUser = users.find(user => {
+                    return user.login.username === userToken.username;
+                });
+                expect(response.statusCode).to.equal(200);
+                const isUserCart = () => {
+                    return response.body.length === 0 ? response.body.length === loggedInUser.cart.length : response.body.length === loggedInUser.cart.length && response.body.includes(...loggedInUser.cart);
+                }
+                expect(isUserCart()).to.equal(true);
+                done();
+            });
+    });
 
     //return error if invalid parameters sent
-
-    //cart should 
-
-//     it('it should', done => {
-//         chai
-//             .request(server)
-//             .get('/api/me/cart')
-//             .end((error, response) => {
-//                 expect(response.body).to.be.an();
-//             });
-//         done();
-//     });
-// });
+    it('should only allow access if token is sent in request', done => {
+        chai
+            .request(server)
+            .get(`/api/me/cart?banana=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+                done();
+            });
+    });
+});
 
 // //test for api/me/cart POST request
 // describe('/POST cart', () => {
+
+// should only allow access if valid token is sent
+// it('should only allow access if token is sent in request', done => {
+//     chai
+//         .request(server)
+//         .get(`/api/me/cart`)
+//         .end((error, response) => {
+//             expect(response.statusCode).to.equal(400);
+//             done();
+//         });
+// });
 
     //should return error if no product id sent
 
@@ -600,13 +640,24 @@ describe('/POST login', () => {
 //             .post('/api/me/cart')
 //             .end((error, response) => {
 //                 expect(response.body).to.be.an();
-//             });
 //         done();
+//             });
 //     });
 // });
 
 // //test for api/me/cart/:productId DELETE request
 // describe('/DELETE cart/:productId', () => {
+
+// //should only allow access if valid token is sent
+// it('should only allow access if token is sent in request', done => {
+//     chai
+//         .request(server)
+//         .get(`/api/me/cart`)
+//         .end((error, response) => {
+//             expect(response.statusCode).to.equal(400);
+//             done();
+//         });
+// });
 //     //
     //return error if no product with sent id found in cart
 
@@ -620,20 +671,31 @@ describe('/POST login', () => {
 
     //return error if invalid parameters sent
 
-    
+
 //     it('it should', done => {
 //         chai
 //             .request(server)
 //             .delete('/api/me/cart/:productId')
 //             .end((error, response) => {
 //                 expect(response.body).to.be.an();
-//             });
 //         done();
+//             });
 //     });
 // });
 
 // //test for /api/me/cart/:productId POST request
 // describe('/POST cart/:productId', () => {
+
+//should only allow access if valid token is sent
+// it('should only allow access if token is sent in request', done => {
+//     chai
+//         .request(server)
+//         .get(`/api/me/cart`)
+//         .end((error, response) => {
+//             expect(response.statusCode).to.equal(400);
+//             done();
+//         });
+// });
 //     //
     //change quantity of product in cart
 
@@ -653,8 +715,8 @@ describe('/POST login', () => {
 //             .post('/api/me/cart/:productId')
 //             .end((error, response) => {
 //                 expect(response.body).to.be.an();
-//             });
 //         done();
+//             });
 //     });
 // });
 
