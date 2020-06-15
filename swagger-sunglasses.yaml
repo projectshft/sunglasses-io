@@ -75,16 +75,12 @@ paths:
       summary: Login
       description: 'Logs user into the system'
       parameters:
-        - name: username
-          in: query
-          description: The username for login
+        - in: body
+          name: login
+          description: The login for user
           required: true
-          type: string
-        - name: password
-          in: query
-          description: The password for login 
-          required: true
-          type: string
+          schema:
+            $ref: '#/definitions/Login'
       responses:
         '200':
           description: Successful login
@@ -109,13 +105,25 @@ paths:
         This endpoint allows user to view the current state of their shopping cart
       tags:
         - Cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: Access token for logged in user
+          required: true
+          type: string
       responses:
         '200':
           description: View cart is successful
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Product'
+            $ref: '#/definitions/ShoppingCart'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid authorization
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -130,11 +138,30 @@ paths:
           description: The id of the product to add
           required: true
           type: string
+        - name: accessToken
+          in: query
+          description: Access token for logged in user
+          required: true
+          type: string
       tags:
         - Cart
       responses:
         '200':
           description: Add to cart is successful
+          schema:
+            $ref: '#/definitions/ShoppingCart'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid authorization
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -150,11 +177,30 @@ paths:
           description: The id of the product to delete
           required: true
           type: string
+        - name: accessToken
+          in: query
+          description: Access token for logged in user
+          required: true
+          type: string
       tags:
         - Cart
       responses:
         '200':
           description: Delete is successful
+          schema:
+            $ref: '#/definitions/ShoppingCart'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid authorization
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -169,16 +215,34 @@ paths:
           description: The id of the product to edit
           required: true
           type: string
-        - name: quantity
+        - in: body
+          name: quantity
+          schema:
+            $ref: '#/definitions/Quantity'
+        - name: accessToken
           in: query
-          description: The 
+          description: Access token for logged in user
           required: true
-          type: number
+          type: string
       tags:
         - Cart
       responses:
         '200':
           description: Update is successful
+          schema:
+            $ref: '#/definitions/ShoppingCart'
+        '400':
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: Invalid authorization
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Product not found
+          schema:
+            $ref: '#/definitions/Error'
         default:
           description: Unexpected error
           schema:
@@ -261,6 +325,18 @@ definitions:
       imageURL:
         type: string
         description: The URL for the image representing the product
+  ShoppingCart:
+    type: array
+    items:
+      type: object
+      description: products in cart
+      properties:
+        product: 
+          $ref: '#/definitions/Product'
+        quantity:
+          type: integer
+          format: int32
+          description: quantity of product in cart
   Brand:
     type: object
     properties:
@@ -270,6 +346,15 @@ definitions:
       name:
         type: string
         description: The name of the brand
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username of user logging in
+      password:
+        type: string
+        description: Password of user logging in
   AccessToken:
     type: object
     properties:
@@ -282,6 +367,15 @@ definitions:
       accessToken:
         type: string
         description: Unique token to validate user access
+      cart: 
+        $ref: '#/definitions/ShoppingCart'
+  Quantity:
+    type: object
+    properties:
+      quantity:
+        type: integer
+        format: int32
+        description: The quantity to update product with
   Error:
     type: object
     properties:

@@ -311,7 +311,7 @@ myRouter.post("/api/me/cart", (request, response) => {
                 response.end();
             }
         } else {
-            response.writeHead(401, "Unauthorized access");
+            response.writeHead(401, "Invalid authorization");
             response.end();
         }
     } else {
