@@ -689,7 +689,7 @@ describe("Cart", function () {
           .request(server)
           .delete(`/api/me/cart/bananas?accessToken=${accessTokenForUrl}`)
           .end((err, res) => {
-            res.  should.have.status(404);
+            res.should.have.status(404);
             done();
           });
       });

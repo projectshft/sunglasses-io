@@ -29,6 +29,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Brands"
+        "404":
+          description: "Invalid brand ID supplied"
         "500":
           description: "Server-side error."
           schema:
@@ -99,7 +101,7 @@ paths:
   /login:
     post:
       tags:
-        - Me
+        - Login
       summary: Allows access to other parts of application
       description: |
         The login endpoint takes parameters of username and password. If the username and password match a user in the system, they will be granted access to use other endpoints that begin wit /api/me.
@@ -114,9 +116,11 @@ paths:
         "200":
           description: Valid username and password, access token will be stored
         "400":
-          descripiton: Incorrectly formatted request.
+          description: Incorrectly formatted request
         "401":
           description: Invalid username or password.
+        "418":
+          description: Too many login attempts.
           schema:
             type: string
         "500":
@@ -127,23 +131,145 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /me/cart:
+  "/me/cart":
+    get:
+      tags:
+        - Me
+      summary: Returns the values in the cart as array
+      description: |
+        The GET /me/cart endpoint returns the current values of the cart.
+      responses:
+        "200":
+          description: Successfully added
+        "401":
+          description: You need to have access to this call to continue
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      tags:
+        - Me
+      summary: Deletes the entire cart
+      description: |
+        The DELETE /me/cart endpoint deletes the entire cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: The user's unique access token after login
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful deleting.
+        "401":
+          description: You need to have access to this call to continue
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
     post:
       tags:
         - Me
       summary: Allows posting new items to user's cart.
       description: |
-        The POST /me/cart endpoint adds an item to the state that tracks the logged-in user's cart.
+        The POST /me/cart endpoint adds an item to the cart in state.
       parameters:
         - in: query
           name: product
           description: The product id being added
           required: true
+          type: string
+        - in: query
+          name: accessToken
+          description: The user's unique access token after login
+          required: true
+          type: string
       responses:
         "200":
           description: Successfully added
+        "401":
+          description: You need to have access to this call to continue
         "404":
           description: Item unable to be added.
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  "/me/cart/{productId}":
+    post:
+      tags:
+        - Me
+      summary: updates the quantity for a product
+      description: |
+        The POST /me/cart endpoint updates the quantity for a product
+      parameters:
+        - name: productId
+          in: path
+          description: The product id being updated
+          required: true
+          type: string
+        - in: query
+          name: accessToken
+          description: The user's unique access token after login
+          required: true
+          type: string
+        - in: query
+          name: newQuantity
+          description: The new quantity for the item
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successfully updated
+        "401":
+          description: You need to have access to this call to continue
+        "404":
+          description: Invalid brand ID supplied.
+        "500":
+          description: "Server-side error."
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      tags:
+        - Me
+      summary: Deletes the specified item from the cart
+      description: |
+        The DELETE /me/cart endpoint removes the specified item from the cart
+      parameters:
+        - name: productId
+          in: path
+          description: The product id being deleted
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: The user's unique access token after login
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful deleting.
+        "404":
+          description: Invalid product id specified.
+        "401":
+          description: You need to have access to this call to continue
         "500":
           description: "Server-side error."
           schema:
@@ -200,6 +326,8 @@ definitions:
         description: The user's name
       password:
         type: string
+  accessToken:
+    type: string
   Error:
     type: object
     properties:
