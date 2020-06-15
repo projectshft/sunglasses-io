@@ -273,6 +273,20 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
   }
 });
 
+myRouter.get("/api/me/cart", function (request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+
+    return response.end(JSON.stringify(cart));
+  }
+});
+
 myRouter.delete("/api/me/cart", function (request, response) {
   // we'll need to check if they are logged in
   let currentAccessToken = getValidTokenFromRequest(request);

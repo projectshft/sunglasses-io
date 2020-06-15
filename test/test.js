@@ -458,7 +458,7 @@ describe("Cart", function () {
   });
 });
 
-describe("Updating quantity in cart", () => {
+describe("GET the cart", () => {
   let accessTokenForUrl;
 
   before(function (done) {
@@ -496,37 +496,32 @@ describe("Updating quantity in cart", () => {
       });
   });
 
-  describe("/POST /me/cart/:productId ", () => {
-    it("it should throw an error if the user does not pass an invalid productId", (done) => {
-      let randomNum = String(Math.floor(Math.random() * 5) + 1);
-
+  describe("/GET /me/cart ", () => {
+    it("it should not return the value of the the cart if a user is not logged in", (done) => {
       chai
         .request(server)
-        .post(`/api/me/cart/bananas/?accessToken=${accessTokenForUrl}&newQuantity=${randomNum}`)
+        .get(`/api/me/cart`)
         // assert
         .end((err, res) => {
-          res.should.have.status(404);
+          res.should.have.status("401");
           done();
         });
     });
-    it("it should update the quantity of an item already in the cart if a user is logged in", (done) => {
-      let randomNum = Math.floor(Math.random() * 5) + 1;
-
-      const dummyObject = {
-        categoryId: "4",
-        id: "9",
-        name: "Sugar",
-        price: 125,
-        quantity: String(randomNum),
-      };
-
+  });
+  describe("/GET /me/cart ", () => {
+    it("it should return the value of the the cart if a user is  logged in", (done) => {
       chai
         .request(server)
-        .post(`/api/me/cart/9?accessToken=${accessTokenForUrl}&newQuantity=${randomNum}`)
+        .get(`/api/me/cart?accessToken=${accessTokenForUrl}`)
         // assert
         .end((err, res) => {
+          res.should.have.status("200");
           res.body.should.be.an("array");
-          res.body.should.include.something.that.deep.equals(dummyObject);
+          res.body.should.all.have.property("id");
+          res.body.should.all.have.property("name");
+          res.body.should.all.have.property("price");
+          res.body.should.all.have.property("quantity");
+          res.body.should.all.have.property("categoryId");
           done();
         });
     });
