@@ -190,7 +190,7 @@ myRouter.post("/api/login", (request, response) => {
             const currentPassword = request.body.password;
 
             //check if user exists and password is correct
-            if (existingUser && existingUser.login.password === currentPassword) {
+            if (existingUser && (existingUser.login.password === currentPassword)) {
                 
                 response.writeHead(200, { "Content-Type": "application/json" });
                 // login successful, check for existing access token
@@ -201,7 +201,8 @@ myRouter.post("/api/login", (request, response) => {
                 // update timestamp to reset time until expiration
                 if (currentAccessToken) {
                     currentAccessToken.lastUpdated = new Date();
-                    return response.end(JSON.stringify(newAccessToken.token));
+                    response.end(JSON.stringify(currentAccessToken.accessToken));
+
                 } else {
                     // create new token for user if one doesn't exist
                     let newAccessToken = {
@@ -215,7 +216,7 @@ myRouter.post("/api/login", (request, response) => {
 
                     //set current user
                     currentUser = existingUser;
-                    return response.end(JSON.stringify(newAccessToken.accessToken));
+                    response.end(JSON.stringify(newAccessToken.accessToken));
                 }
 
             } else {

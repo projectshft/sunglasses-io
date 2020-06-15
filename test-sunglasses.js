@@ -346,12 +346,12 @@ describe('/POST login', () => {
         
         chai
             .request(server)
-            .post('/api/login', userLogin)
+            .post('/api/login')
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
+                done();
             });
-        done();
     });
     
     //should throw error if parameters are missing
@@ -481,10 +481,11 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
-                expect(response.body).to.not.be.empty;
+                expect(response.body).to.be.a('string');
+                done();
             });
-        done();
     });
+    
 
     // should throw error if query parameters are sent
     it('should return error if query parameters are sent', done => {
