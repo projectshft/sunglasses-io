@@ -59,8 +59,8 @@ const server = http.createServer((request, response) => {
     });
 
   //GET PRODUCTS BY BRAND ID
-  //requires brand Id in url
-  //returns products by brand ID
+  //requires correct/existing brand Id in url
+  //returns a list of products with the same brand ID
   router.get("/api/brands/:id/products", (request, response) => {
     const { id } = request.params;
     let productList = products.filter(product => product.categoryId.includes(id));
@@ -271,7 +271,7 @@ router.delete('/api/me/cart/:productId', function(request,response) {
     return response.end();
   }
   if (!productId){
-    response.writeHead(401, "select an item to remove from the cart");
+    response.writeHead(404, "No item to delete");
     return response.end();
   } else {
     //Select the active user
