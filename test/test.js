@@ -1,12 +1,14 @@
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../app/server");
-let should = chai.should();
+let chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiHttp);
 chai.use(require("chai-things"));
 chai.use(require("chai-uuid"));
+chai.use(chaiAsPromised);
 
+let should = chai.should();
 describe("Brands", () => {
   describe("/GET brands ", () => {
     it("it should GET all the brands as an array", (done) => {
@@ -237,6 +239,44 @@ describe("Login", () => {
           res.body.should.be.a.uuid();
           done();
         });
+    });
+    it("it should reject a brute force attack", (done) => {
+      // arrange
+      const badUserLogin = { username: "lazywolf342", password: "blah" };
+
+      const badRequest = () => {
+        return (
+          chai
+            .request(server)
+            .post("/api/login")
+            .set("content-type", "application/json")
+            .send(badUserLogin)
+            // assert
+            .end((err, res) => {
+              res.should.have.status(401);
+            })
+        );
+      };
+
+      const limitHit = () => {
+        return (
+          chai
+            .request(server)
+            .post("/api/login")
+            .set("content-type", "application/json")
+            .send(badUserLogin)
+            // assert
+            .end((err, res) => {
+              res.should.have.status(418);
+              done();
+            })
+        );
+      };
+
+      // act
+      badRequest();
+      badRequest();
+      limitHit();
     });
   });
 });

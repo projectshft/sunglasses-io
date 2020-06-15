@@ -15,6 +15,8 @@ myRouter.use(bodyParser.json());
 
 let brands = [];
 let products = [];
+let users = [];
+var failedLoginAttempts = {};
 
 let server = http
   .createServer(function (request, response) {
@@ -99,28 +101,58 @@ myRouter.get("/api/products", function (request, response) {
   return response.end(JSON.stringify(currentProducts));
 });
 
+// Helpers to get/set our number of failed requests per username
+var getNumberOfFailedLoginRequestsForUsername = function (username) {
+  let currentNumberOfFailedRequests = failedLoginAttempts[username];
+  if (currentNumberOfFailedRequests) {
+    return currentNumberOfFailedRequests;
+  } else {
+    return 0;
+  }
+};
+
+var setNumberOfFailedLoginRequestsForUsername = function (username, numFails) {
+  failedLoginAttempts[username] = numFails;
+};
+
 myRouter.post("/api/login", function (request, response) {
-  if (request.body.username && request.body.password) {
+  if (
+    request.body.username &&
+    request.body.password &&
+    getNumberOfFailedLoginRequestsForUsername(request.body.username) < 3
+  ) {
     // see if the user exists
     const user = users.find((user) => {
       return user.login.username === request.body.username && user.login.password === request.body.password;
     });
 
     // kick them out early
-    if (!user) {
-      response.writeHead(401, "Invalid username or password");
+    if (user) {
+      // If we found a user, reset our counter of failed logins
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, 0);
+      response.writeHead(200, { "Content-Type": "application/json" });
+
+      newUUID = uuidv4();
+      return response.end(JSON.stringify(newUUID));
+    } else {
+      // Update the number of failed login attempts
+      let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
+      setNumberOfFailedLoginRequestsForUsername(request.body.username, ++numFailedForUser);
+
+      // response for brute force attack because I'd like to use error 418
+      if (getNumberOfFailedLoginRequestsForUsername(request.body.username) >= 3) {
+        response.writeHead(418, "Too many login attempts.");
+      } else {
+        response.writeHead(401, "Invalid username or password");
+      }
+
       return response.end();
     }
-
-    response.writeHead(200, { "Content-Type": "application/json" });
-
-    newUUID = uuidv4();
   } else {
+    // response for incorrect data
     response.writeHead(400, "Incorrectly formatted request");
     return response.end();
   }
-
-  return response.end(JSON.stringify(newUUID));
 });
 
 module.exports = server;
