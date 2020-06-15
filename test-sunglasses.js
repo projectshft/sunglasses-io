@@ -526,23 +526,7 @@ describe('/POST login', () => {
 // //test for api/me/cart GET request
 describe('/GET cart', () => {
 
-
-    // beforeEach(done => {
-    //     const userLogin = {
-    //         password: 'tucker',
-    //         username: 'lazywolf342'
-    //     }
-    //     chai
-    //         .request(server)
-    //         .post('/api/login')
-    //         .send(userLogin)
-    //         .end((error, response) => {
-    //             userToken = response.body
-    //             expect(response.statusCode).to.equal(200);
-    //             done();
-    //         });
-    // });
-
+    //login before each test
     beforeEach(async function () {
         const userLogin = {
                     password: 'tucker',
@@ -635,6 +619,20 @@ describe('/GET cart', () => {
 
 // //test for api/me/cart POST request
 describe('/POST cart', () => {
+    //login before each test
+    beforeEach(async function () {
+        const userLogin = {
+                    password: 'tucker',
+                    username: 'lazywolf342'
+                }
+        
+        const res = await chai
+            .request(server)
+            .post('/api/login')
+            .send(userLogin)
+      
+        userToken = res.body;
+      });
 
 // should only allow access if token is sent
 it('should return error if no token sent in request', done => {
@@ -691,7 +689,7 @@ it('should return error if no token sent in request', done => {
     });
 
     //should return 200 on success
-    it('should return 200 if request successful', done => {
+    it('should return 200 if request valid', done => {
         chai
             .request(server)
             .post(`/api/me/cart?productId=1&accessToken=${userToken.accessToken}`)
@@ -793,45 +791,163 @@ it('should return error if no token sent in request', done => {
     });
 
 });
-
+/*
 // //test for api/me/cart/:productId DELETE request
-// describe('/DELETE cart/:productId', () => {
+describe('/DELETE cart/:productId', () => {
+    //login before each test
+    beforeEach(async function () {
+        const userLogin = {
+                    password: 'tucker',
+                    username: 'lazywolf342'
+                }
+        
+        const res = await chai
+            .request(server)
+            .post('/api/login')
+            .send(userLogin)
+      
+        userToken = res.body;
+      });
 
-// //should only allow access if valid token is sent
-// it('should only allow access if token is sent in request', done => {
-//     chai
-//         .request(server)
-//         .delete(`/api/me/cart`)
-//         .end((error, response) => {
-//             expect(response.statusCode).to.equal(400);
-//             done();
-//         });
-// });
-//     //
-    //return error if no product with sent id found in cart
+// should only allow access if token is sent
+it('should return error if no token sent in request', done => {
+    chai
+        .request(server)
+        .delete(`/api/me/cart/1`)
+        .end((error, response) => {
+            expect(response.statusCode).to.equal(400);
+            done();
+        });
+});
+    //token must be valid
+    it('should return error if token is invalid', done => {
+        chai
+            .request(server)
+            .delete(`/api/me/cart/1?accessToken=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(401);
+                done();
+            });
+    });
 
-     //return error if no product by id exists
-
-    //return success if product is deleted
-
-    //delete item from cart
-
-    //delete no other items from cart
+    //product id must be valid
+    it('should return error if product is not in cart', done => {
+        chai
+            .request(server)
+            .delete(`/api/me/cart/bananas?accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(404);
+                done();
+            });
+    });
 
     //return error if invalid parameters sent
+    it('should return error if invalid parameters sent', done => {
+        chai
+            .request(server)
+            .delete(`/api/me/cart?accessToken=${userToken.accessToken}&banana=bananas`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(400);
+                done();
+            });
+    });
 
+    //should return 200 on success
+    it('should return 200 if request valid', done => {
+        chai
+            .request(server)
+            .delete(`/api/me/cart/1/accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                done();
+            });
+    });
 
-//     it('it should', done => {
-//         chai
-//             .request(server)
-//             .delete('/api/me/cart/:productId')
-//             .end((error, response) => {
-//                 expect(response.body).to.be.an();
-//         done();
-//             });
-//     });
-// });
+    //delete item from cart
+    it('should remove product from cart', done => {
+        //find user
+        const loggedInUser = users.find(user => {
+            return user.login.username === userToken.username;
+        });
 
+        //find product 
+        const productToDelete = products.find(product => {
+            return product.id === "3";
+        });
+
+        //find control product
+        const productNotToDelete = products.find(product => {
+            return product.id === "2";
+        });
+
+        //empty cart
+        loggedInUser.cart = [];
+
+        //add test items
+        loggedInUser.cart.push({
+            product: productToDelete,
+            quantity: 1
+        });
+
+        loggedInUser.cart.push({
+            product: productNotToDelete,
+            quantity: 1
+        });
+
+        chai
+            .request(server)
+            .delete(`/api/me/cart/1/accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(loggedInUser.cart.length).to.equal(1)
+                done();
+            });
+    });
+
+    //delete no other items from cart
+    it('should remove only selected product from cart', done => {
+         //find user
+         const loggedInUser = users.find(user => {
+            return user.login.username === userToken.username;
+        });
+
+        //find product 
+        const productToDelete = products.find(product => {
+            return product.id === "3";
+        });
+
+        //find control product
+        const productNotToDelete = products.find(product => {
+            return product.id === "2";
+        });
+
+        //empty cart
+        loggedInUser.cart = [];
+
+        //add test items
+        loggedInUser.cart.push({
+            product: productToDelete,
+            quantity: 1
+        });
+
+        loggedInUser.cart.push({
+            product: productNotToDelete,
+            quantity: 1
+        });
+
+        chai
+            .request(server)
+            .delete(`/api/me/cart/1/accessToken=${userToken.accessToken}`)
+            .end((error, response) => {
+                expect(response.statusCode).to.equal(200);
+                expect(loggedInUser.cart.length).to.equal(1);
+                expect(loggedInUser.cart[0]).to.deep.equal(productNotToDelete);
+                done();
+            });
+    });
+
+});
+*/
 // //test for /api/me/cart/:productId POST request
 // describe('/POST cart/:productId', () => {
 

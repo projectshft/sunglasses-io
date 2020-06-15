@@ -288,14 +288,14 @@ myRouter.post("/api/me/cart", (request, response) => {
                 response.writeHead(200, { "Content-Type": "application/json" });
 
                 //check if item already exists in cart
-                const productAlreadyInCart = currentUser.cart.find(product => {
-                    return product.id === productToAdd.id;
+                const productAlreadyInCart = currentUser.cart.find(cartItem => {
+                    return cartItem.product.id === productToAdd.id;
                 })
 
                 if (productAlreadyInCart) {
                     productAlreadyInCart.quantity++;
-                    response.end(JSON.stringify(productAlreadyInCart));
-                    
+                    response.end();
+
                 } else {
                     const addedProduct = {
                         product: productToAdd,
@@ -303,7 +303,7 @@ myRouter.post("/api/me/cart", (request, response) => {
                     }
                     //add to cart
                     currentUser.cart.push(addedProduct);
-                    response.end(JSON.stringify(addedProduct));
+                    response.end();
                 }
             } else {
                 response.writeHead(404, "Product not found");
@@ -319,10 +319,48 @@ myRouter.post("/api/me/cart", (request, response) => {
     }
 });
 
-//   myRouter.delete("/api/me/cart/:productId", (request, response) => {
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(JSON.stringify());
-//   });
+  myRouter.delete("/api/me/cart/:productId", (request, response) => {
+//for query parameters
+const queryParams = queryString.parse(url.parse(request.url).query);
+const queryKey = Object.keys(queryParams).join('');
+const requiredParam = 'accessToken';
+const currentUserToken = accessTokens.find(token => {
+    return token.username === currentUser.login.username;
+});
+
+//check for required parameters were sent and not empty and no invalid parameters sent
+if (queryKey === requiredParam && queryParams.accessToken) {
+
+    //check if access token is valid
+    if (queryParams.accessToken === currentUserToken.accessToken) {
+
+        //check if product exists in cart
+        productToDelete = currentUser.cart.find(cartItem => {
+            return cartItem.product.id === queryParams.productId;
+        });
+
+        if (productToDelete) {
+            //successful request
+            response.writeHead(200, { "Content-Type": "application/json" });
+
+            //remove product from cart
+            const productIndex = currentUser.cart.indexOf(productToDelete);
+            currentUser.cart.splice(productIndex, 1);
+            response.end();
+            
+        } else {
+            response.writeHead(404, "Product not found");
+            response.end();
+        }
+    } else {
+        response.writeHead(401, "Unauthorized access");
+        response.end();
+    }
+} else {
+    response.writeHead(400, "Invalid request parameters");
+    response.end();
+}
+  });
 
 //   myRouter.post("/api/me/cart/:productId", (request, response) => {
 //     response.writeHead(200, { "Content-Type": "application/json" });
