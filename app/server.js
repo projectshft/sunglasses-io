@@ -175,17 +175,46 @@ myRouter.post("/api/login", function (request, response) {
   }
 });
 
-myRouter.post("/api/me/cart", function (request, response) {
-  response.writeHead(200, { "Content-Type": "application/json" });
-
-  const queryParams = queryString.parse(url.parse(request.url).query);
-
-  if (queryParams.product) {
-    let productInCart = "product_" + queryParams.product;
-    cart[productInCart] = true;
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+  var parsedUrl = require("url").parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure its valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == parsedUrl.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
   }
+};
 
-  response.end(JSON.stringify(cart));
+myRouter.post("/api/me/cart", function (request, response) {
+  // we'll need to check if they are logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    const queryParams = queryString.parse(url.parse(request.url).query);
+
+    if (queryParams.product) {
+      let productInCart = "product_" + queryParams.product;
+      cart[productInCart] = true;
+    }
+
+    return response.end(JSON.stringify(cart));
+  }
 });
 
 module.exports = server;

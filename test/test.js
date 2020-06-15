@@ -380,23 +380,54 @@ describe("Login", () => {
   });
 });
 
-describe("Cart", () => {
+describe("Cart", function () {
+  let accessTokenForUrl;
+  before(function (done) {
+    const userLogin = { username: "yellowleopard753", password: "jonjon" };
+    // runs once before the first test in this block
+    chai
+      .request(server)
+      .post("/api/login")
+      .set("content-type", "application/json")
+      .send(userLogin)
+      .end((err, res) => {
+        accessTokenForUrl = res.body;
+        done();
+      });
+  });
+
   describe("/POST /me/cart ", () => {
-    it("it should POST a random item (that exists in store) to the cart", (done) => {
+    it("it should POST a random item (that exists in store) to the cart if a user is logged in", (done) => {
       // assemble
       // in order to really test, I want to choose a random product among Ids that we have
       // doing random ensures that we can't beat the test easily
       let randomProduct = Math.floor(Math.random() * 5) + 1;
+
+      //act
+      chai
+        .request(server)
+        .post(`/api/me/cart?product=${randomProduct}&accessToken=${accessTokenForUrl}`)
+        // assert
+        .end((err, res) => {
+          // check that the cart has the item we wanted
+          res.body.should.be.an("object");
+          res.body.should.have.property(`product_${randomProduct}`);
+          done;
+        });
+    });
+    it("it should NOT post a random item (that exists in store) to the cart if no user is logged in", (done) => {
+      // assemble
+      // in order to really test, I want to choose a random product among Ids that we have
+      // doing random ensures that we can't beat the test easily
+      let randomProduct = Math.floor(Math.random() * 5) + 1;
+
       //act
       chai
         .request(server)
         .post(`/api/me/cart?product=${randomProduct}`)
         // assert
         .end((err, res) => {
-          res.should.have.status(200);
-          // check that the cart has the item we wanted
-          res.body.should.be.an("object");
-          res.body.should.have.property(`product_${randomProduct}`);
+          res.should.have.status(401);
           done();
         });
     });
