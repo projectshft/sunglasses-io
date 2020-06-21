@@ -1,0 +1,254 @@
+---
+swagger: "2.0"
+info:
+  description: "An API to support the Sunglasses platform"
+  version: "1.0.0"
+  title: "Sunglasses API"
+host: "api.sunglasses.io"
+basePath: "/v1"
+schemes:
+- "https"
+produces:
+- "application/json"
+paths:
+  /products:
+    get:
+      tags:
+      - "Products"
+      summary: "Products"
+      description: "The Products endpoint allows you to search for all products based\
+        \ on input into the search bar.\n"
+      operationId: "productsGET"
+      parameters:
+      - name: "query"
+        in: "query"
+        description: "Search query string"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "An array of products"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Products"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Products"
+  /login:
+    post:
+      tags:
+      - "Login"
+      summary: "Login"
+      description: "Username and Password API"
+      operationId: "loginPOST"
+      parameters:
+      - name: "username"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "OK"
+      security:
+      - {}
+      x-swagger-router-controller: "Login"
+  /brands:
+    get:
+      tags:
+      - "Brands"
+      summary: "Brands"
+      description: "All brand labels should be returned"
+      operationId: "brandsGET"
+      parameters: []
+      responses:
+        "200":
+          description: "Brand list"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brands"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Brands"
+  /brands/id/products:
+    get:
+      tags:
+      - "Brands"
+      summary: "Get brands by id"
+      description: "This endpoint retrieves all products with a specified brand id\n"
+      operationId: "brandsIdProductsGET"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The id of the brand to get"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Product list by brand ID"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Brands"
+  /me/cart:
+    get:
+      tags:
+      - "Cart"
+      summary: "Get the entire cart"
+      description: "Return the entire cart for the logged in user\n"
+      operationId: "meCartGET"
+      parameters:
+      - name: "cart"
+        in: "path"
+        description: "The cart for the logged in user"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Achievement is successful"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+    post:
+      tags:
+      - "Cart"
+      summary: "post an item to the user's cart"
+      description: "This endpoint add's an item to a user's cart. \n"
+      operationId: "meCartPOST"
+      parameters:
+      - name: "cart"
+        in: "path"
+        description: "The cart for the user"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Cart is updated"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+  /me/cart/:productId:
+    post:
+      tags:
+      - "Cart"
+      summary: "Post product to cart"
+      description: "Add item to cart by product Id\n"
+      operationId: "meCartproductIdPOST"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "The id of the product to add"
+        required: true
+        type: "number"
+        format: "int32"
+      responses:
+        "200":
+          description: "jkl;da"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Category"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+    delete:
+      tags:
+      - "Cart"
+      summary: "Delete a cart item by product Id"
+      description: "This endpoint allows a user to delete a cart item by product Id\n"
+      operationId: "meCartproductIdDELETE"
+      parameters:
+      - name: "productId"
+        in: "path"
+        description: "The id of the product to delete from the cart"
+        required: true
+        type: "number"
+        format: "int32"
+      responses:
+        "200":
+          description: "Product is deleted from cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+      x-swagger-router-controller: "Cart"
+definitions:
+  Products:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Unique identifier for products."
+      categoryId:
+        type: "string"
+        description: "The id of the category this product belongs to."
+      description:
+        type: "string"
+        description: "Description of product."
+      name:
+        type: "string"
+        description: "The name of the product"
+      price:
+        type: "integer"
+        format: "int32"
+        description: "The cost of the product"
+      imageURL:
+        type: "string"
+        description: "The URL for the image representing the product"
+    example:
+      price: 0
+      imageURL: "imageURL"
+      name: "name"
+      description: "description"
+      id: "id"
+      categoryId: "categoryId"
+  Category:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "The unique identifier given to the category"
+      name:
+        type: "string"
+        description: "The name of the category"
+    example:
+      name: "name"
+      id: "id"
+  Brands:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Unique identifier for brands."
+      name:
+        type: "string"
+        description: "Name of the brand."
+    example:
+      name: "name"
+      id: "id"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
