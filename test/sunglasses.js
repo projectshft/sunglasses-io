@@ -42,7 +42,7 @@ describe('Sunglasses', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('Array');
-          res.body.length.should.be.eql(0)
+          res.body.length.should.be.eql(5)
           done();
         })
     })
@@ -58,11 +58,6 @@ describe('Sunglasses', () => {
         "description": "The most normal glasses in the world",
         "price":150,
         "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-      }
-
-      let brand = {
-        "id": "2",
-        "name" : "Ray Ban"
       }
 
       //act

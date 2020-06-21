@@ -20,32 +20,38 @@ var myRouter = Router();
 let server = http.createServer(function (request, response) {
 
   myRouter(request, response, finalHandler(request, response))
-}).listen(PORT);
+}).listen(PORT, () => {
+    // Load dummy data into server memory for serving
+    brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
+  
+    // Load all products into products array
+    products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
+    
+    // Load all users into users array
+    users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
+});
 
 myRouter.get('/products', function(request,response) {
-	// Return all products in the products array
+  
+  // Return all products in the products array
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(products));
 });
 
 myRouter.get('/brands', function(request,response) {
-	// Return all products in the products array
+  
+  // Return all brands in the products array
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(brands));
 });
 
 myRouter.get('/brands/:id/products', function(request,response) {
-
+  let brandId = request.params
+  //find out brand id in request
+  //compare it to products categoryId
+  //return back whatever matches
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(brands));
-});
-
-myRouter.post('/products', function(request,response) {
-  const addedProduct = products.push(request.body)
-	
-	// Return success with added product
-	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(addedProduct));
 });
 
 myRouter.post('/api/login', function(request,response) {
@@ -83,7 +89,11 @@ myRouter.post('/api/login', function(request,response) {
 });
 
 myRouter.get('/me/cart', function(request,response) {
-	// Return all products in the products array
+  //look at request for access token
+  //if accesstoken; what user matches accesstoken
+  //return user's cart
+  
+  // Return all products in the products array
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(cart));
 });
@@ -93,7 +103,7 @@ myRouter.post('/me/cart', function(request,response) {
 
   // Return all success with added Product
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(addedProductToCart));
+	return response.end(JSON.stringify(cart));
 });
 
 
