@@ -54,10 +54,11 @@ myRouter.get('/brands/:id/products', function(request,response) {
   //retrieve brand id from request
   let brandId = request.params.id
   
-  //compare brand id to product's categoryId
+  //compare brand id to product's categoryID
+  //to return products with the brand id
   let productMatch = products.filter(product => product.categoryId === brandId)
 
-  if (productMatch. length === 0) {
+  if (productMatch.length === 0) {
     response.writeHead(404, "No products match that Id");
     return response.end();
   }

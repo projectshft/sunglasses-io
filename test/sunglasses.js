@@ -24,7 +24,7 @@ describe('Sunglasses', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('Array');
-          res.body.length.should.be.eql(0)
+          res.body.length.should.be.eql(11)
           done();
         })
     })
@@ -51,31 +51,17 @@ describe('Sunglasses', () => {
   describe('/GET brands/:id/products', () => {
     it('it should GET all the products with selected brand ID', done => {
       //arrange
-      let product = {
-        "id": "5",
-        "categoryId": "2",
-        "name": "Glasses",
-        "description": "The most normal glasses in the world",
-        "price":150,
-        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-      }
 
       //act
       chai
         .request(server)
-        .post('/products')
-        .send(product)
+        .get('/brands/1/products')
         //assert
         .end((err, res) => {
-          chai
-            .request(server)
-            .get('/products')
-            .end((err, res) => {
-              res.should.have.status(200);
-              res.body.should.be.an('Array');
-              res.body.categoryId.should.be.eql(product.categoryId);
-              done();
-            });
+          res.should.have.status(200);
+          res.body.should.be.an('Array');
+          res.body.length.should.be.eql(3);
+          done();
         });
       })
 
