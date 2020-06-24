@@ -116,12 +116,19 @@ myRouter.get('/me/cart', function(request,response) {
   //match access token from body of request to accessTokens array
   let tokenMatch = accessTokens.find((access) => {
     return access.token == token;
-  })
+  });
+
+  //send 401 error if unable to match submitted token to accessTokens array
+  if (!tokenMatch) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "Unable to verify access", CORS_HEADERS);
+    response.end();
+  };
 
   //match username in accessToken array to users array
   let userMatch = users.find((user) =>  {
     return user.login.username == tokenMatch.username
-  })
+  });
 
   //return user's cart
 	response.writeHead(200, { "Content-Type": "application/json" });
@@ -136,7 +143,14 @@ myRouter.post('/me/cart', function(request,response) {
   //match access token from body of request to accessTokens array
   let tokenMatch = accessTokens.find((access) => {
     return access.token == token;
-  })
+  });
+
+  //send 401 error if unable to match submitted token to accessTokens array
+  if (!tokenMatch) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "Unable to verify access", CORS_HEADERS);
+    response.end();
+  };
 
   //match username in accessToken array to users array
   let userMatch = users.find((user) =>  {
@@ -146,14 +160,21 @@ myRouter.post('/me/cart', function(request,response) {
   let productToAdd = products.find((product) => {
     return product.id == productId
   });
-  
-  //add product from request body to user's cart
-  userMatch.cart.push(productToAdd)
 
+  //send 400 error if unable to find product by product ID submitted
+  if (!productToAdd) {
+    
+    response.writeHead(400, "Unable to locate product with submitted ID", CORS_HEADERS);
+    response.end();
+  } else {
+    
+    //add product from request body to user's cart
+    userMatch.cart.push(productToAdd)
+  }
+  
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(productToAdd));
 });
-
 
 myRouter.delete('/me/cart/:productId', function(request,response) {
   //pull from request the access token & product to delete from cart
@@ -163,21 +184,37 @@ myRouter.delete('/me/cart/:productId', function(request,response) {
   //match access token from body of request to accessTokens array
   let tokenMatch = accessTokens.find((access) => {
     return access.token == token;
-  })
+  });
+
+  //send 401 error if unable to match submitted token to accessTokens array
+  if (!tokenMatch) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "Unable to verify access", CORS_HEADERS);
+    response.end();
+  };
 
   //match username in accessToken array to users array
   let userMatch = users.find((user) =>  {
     return user.login.username == tokenMatch.username
-  })
+  });
 
   //find location in array of the first item in cart that matches
   //the product id in the request
   let productToDeleteInCart = userMatch.cart.findIndex((product) => {
     return product.id == productToDelete
   });
-  
-  //remove product from user's cart
-  userMatch.cart.splice(productToDeleteInCart, 1)
+
+  //send 400 error if unable to find product in user's cart by product ID submitted
+  if (productToDeleteInCart > -1) {
+    
+    //remove product from user's cart
+    userMatch.cart.splice(productToDeleteInCart, 1);
+  } else {
+    
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(400, "Unable to locate product with submitted ID", CORS_HEADERS);
+    response.end();
+  }
 
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(`Product successfully deleted`);
@@ -191,7 +228,14 @@ myRouter.post('/me/cart/:productId', function(request,response) {
   //match access token from body of request to accessTokens array
   let tokenMatch = accessTokens.find((access) => {
     return access.token == token;
-  })
+  });
+
+  //send 401 error if unable to match submitted token to accessTokens array
+  if (!tokenMatch) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "Unable to verify access", CORS_HEADERS);
+    response.end();
+  };
 
   //match username in accessToken array to users array
   let userMatch = users.find((user) =>  {
@@ -201,6 +245,13 @@ myRouter.post('/me/cart/:productId', function(request,response) {
   let productToAdd = products.find((product) => {
     return product.id == productId
   });
+
+  //send 400 error if unable to find product by product ID submitted
+  if (!productToAdd) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(400, "Unable to locate product with submitted ID", CORS_HEADERS);
+    response.end();
+  };
   
   //add product from request body to user's cart
   userMatch.cart.push(productToAdd)
