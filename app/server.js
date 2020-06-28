@@ -16,8 +16,53 @@ let users = []
 let brands = []
 
 //data for logged in user
-let currentUser = {};
 let accessTokens = [];
+let failedLoginAttempts = {};
+
+//for query parameters
+const queryParams = (request) => queryString.parse(url.parse(request.url).query);
+const queryKeys = (request) => Object.keys(queryParams(request));
+const bodyKeys = (request) => Object.keys(request.body);
+
+// Helpers to get/set our number of failed requests per username
+const getNumFailedLogins = (username) => {
+    let currentNumberOfFailedRequests = failedLoginAttempts[username];
+    if (currentNumberOfFailedRequests) {
+        return currentNumberOfFailedRequests;
+    } else {
+        return 0;
+    }
+}
+const setNumFailedLogins = function (username, numFails) {
+    failedLoginAttempts[username] = numFails;
+}
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+// Helper method to process access token
+const getValidTokenFromRequest = (request) => {
+    const parsedUrl = require('url').parse(request.url, true);
+    const sentToken = parsedUrl.query.accessToken;
+
+    if (sentToken) {
+        // Verify the access token to make sure its valid and not expired
+        let currentAccessToken = accessTokens.find((accessToken) => {
+            return accessToken.token == sentToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+        });
+        if (currentAccessToken) {
+            return currentAccessToken;
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+};
+
+//Helper method to find user
+const findUser = (currentValidToken) => users.find(user => {
+    return user.login.username === currentValidToken.username;
+});
 
 // Setup router
 const myRouter = Router();
@@ -52,11 +97,8 @@ let server = http.createServer(function (request, response) {
 
 //for getting list of brands
 myRouter.get("/api/brands", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-
     //check if parameters were sent with request
-    if (Object.keys(queryParams).length === 0) {
+    if (queryKeys(request).length === 0) {
         if (brands) {
             //return all brands
             response.writeHead(200, { "Content-Type": "application/json" });
@@ -73,11 +115,8 @@ myRouter.get("/api/brands", (request, response) => {
 
 //for getting products by brand
 myRouter.get("/api/brands/:brandId/products", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-
     //check if parameters were sent with request
-    if (Object.keys(queryParams).length === 0) {
+    if (queryKeys(request).length === 0) {
         //check if brand exists
         let brandFound = brands.filter(brand => {
             return brand.id === request.params.brandId;
@@ -104,21 +143,18 @@ myRouter.get("/api/brands/:brandId/products", (request, response) => {
 
 //for getting all products or searching with query
 myRouter.get("/api/products", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKeys = Object.keys(queryParams);
     const validParams = ['query'];
 
     //check if parameter was sent
-    if (queryKeys.length === 0) {
+    if (queryKeys(request).length === 0) {
         //return all products if no parameters specified
         response.writeHead(200, { "Content-Type": "application/json" });
         response.end(JSON.stringify(products));
 
     } else {
         //check if request parameters are valid
-        if (validParams.includes(...queryKeys)) {
-            const searchTerm = queryParams.query.toLowerCase();
+        if (validParams.includes(...queryKeys(request))) {
+            const searchTerm = queryParams(request).query.toLowerCase();
 
             //filter products according to search term
             let searchResults = products.filter(product => {
@@ -139,12 +175,8 @@ myRouter.get("/api/products", (request, response) => {
 
 //for finding product by id
 myRouter.get("/api/products/:productId", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKeys = Object.keys(queryParams);
-
     //make sure no invalid parameters were sent
-    if (queryKeys.length === 0) {
+    if (queryKeys(request).length === 0) {
         //find requested product
         const productWithMatchingId = products.find(product => {
             return product.id === request.params.productId;
@@ -167,59 +199,71 @@ myRouter.get("/api/products/:productId", (request, response) => {
 
 //for user to login
 myRouter.post("/api/login", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKeys = Object.keys(queryParams);
     const requiredParams = ['username', 'password'];
-    const bodyKeys = Object.keys(request.body);
+    //get user
+    const sentUsername = request.body.username;
+    //get password
+    const sentPassword = request.body.password;
 
     //make sure no invalid parameters sent
-    if (queryKeys.length === 0) {
+    if (queryKeys(request).length === 0) {
+
         //check if username and password are in body of request &
         //make sure username and password are filled out
-        if (bodyKeys.sort().join('') === requiredParams.sort().join('') &&
-            request.body.username && request.body.password) {
-
+        if (bodyKeys(request).sort().join('') === requiredParams.sort().join('') &&
+            sentUsername && sentPassword) {
             //find user
             const existingUser = users.find(user => {
-                return user.login.username.toLowerCase() === request.body.username.toLowerCase();
+                return user.login.username.toLowerCase() === sentUsername.toLowerCase();
             });
 
-            //get password
-            const currentPassword = request.body.password;
+            //check number of failed login attempts
+            numFailedLogins = getNumFailedLogins(sentUsername);
 
-            //check if user exists and password is correct
-            if (existingUser && (existingUser.login.password === currentPassword)) {
+            if (numFailedLogins < 3) {
+                //check if user exists and password is correct
+                if (existingUser && (existingUser.login.password === sentPassword)) {
 
-                response.writeHead(200, { "Content-Type": "application/json" });
-                // login successful, check for existing access token
-                let currentAccessToken = accessTokens.find(token => {
-                    return token.username == existingUser.login.username;
-                });
+                    // If we found a user, reset our counter of failed logins
+                    setNumFailedLogins(sentUsername, 0);
 
-                // update timestamp to reset time until expiration
-                if (currentAccessToken) {
-                    currentAccessToken.lastUpdated = new Date();
-                    response.end(JSON.stringify(currentAccessToken));
+                    // login successful
+                    response.writeHead(200, { "Content-Type": "application/json" });
 
-                } else {
-                    // create new token for user if one doesn't exist
-                    let newAccessToken = {
-                        username: existingUser.login.username,
-                        lastUpdated: new Date(),
-                        accessToken: uid(16),
-                        cart: existingUser.cart
+                    //  check for existing access token
+                    let currentAccessToken = accessTokens.find(token => {
+                        return token.username == existingUser.login.username;
+                    });
+
+                    // update timestamp to reset time until expiration
+                    if (currentAccessToken) {
+                        currentAccessToken.lastUpdated = new Date();
+                        response.end(JSON.stringify(currentAccessToken));
+
+                    } else {
+                        // create new token for user if one doesn't exist
+                        let newAccessToken = {
+                            username: existingUser.login.username,
+                            lastUpdated: new Date(),
+                            token: uid(16)
+                        }
+                        //add to tokens array
+                        accessTokens.push(newAccessToken);
+
+                        //send access token
+                        response.end(JSON.stringify(newAccessToken));
                     }
 
-                    //add to tokens array
-                    accessTokens.push(newAccessToken);
-
-                    //set current user
-                    currentUser = existingUser;
-                    response.end(JSON.stringify(newAccessToken));
+                } else {
+                    //send back error message
+                    response.writeHead(401, "Too many login attempts.");
+                    response.end();
                 }
-
             } else {
+                //update number of failed login attempts
+                setNumFailedLogins(sentUsername, numFailedLogins++)
+
+                //send back error message
                 response.writeHead(401, "Invalid username or password");
                 response.end();
             }
@@ -234,58 +278,46 @@ myRouter.post("/api/login", (request, response) => {
 });
 
 myRouter.get("/api/me/cart", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKey = Object.keys(queryParams).join('');
-    const requiredParam = 'accessToken'
+    //check if token was sent && is valid
+    const currentValidToken = getValidTokenFromRequest(request)
 
-    //check if token was sent
-    if (queryKey === requiredParam) {
-        //match current user to access token
-        const validToken = accessTokens.find(token => {
-            return token.username === currentUser.login.username;
-        });
+    if (currentValidToken) {
+        //find user
+        const currentUser = findUser(currentValidToken);
 
-        //check if token is valid
-        if (queryParams.accessToken === validToken.accessToken) {
-            response.writeHead(200, { "Content-Type": "application/json" });
-            response.end(JSON.stringify(currentUser.cart));
+        //send cart
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.end(JSON.stringify(currentUser.cart));
 
-        } else {
-            response.writeHead(401, "Invalid authorization");
-            response.end();
-        }
     } else {
-        response.writeHead(400, "Invalid parameters");
+        response.writeHead(401, "Invalid authorization");
         response.end();
     }
-
 });
 
 myRouter.post("/api/me/cart", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKeys = Object.keys(queryParams);
     const requiredParams = ['accessToken', 'productId'];
-    const currentUserToken = accessTokens.find(token => {
-        return token.username === currentUser.login.username;
-    });
+    const sentParams = queryParams(request);
 
-    //check for required parameters were sent and not empty and no invalid parameters sent
-    if (queryKeys.sort().join('') === requiredParams.sort().join('') &&
-        queryParams.accessToken && queryParams.productId) {
+    //check if token is valid
+    const currentValidToken = getValidTokenFromRequest(request)
+    if (currentValidToken) {
 
-        //check if access token is valid
-        if (queryParams.accessToken === currentUserToken.accessToken) {
+        //check for required parameters were sent and not empty and no invalid parameters sent
+        if (queryKeys(request).sort().join('') === requiredParams.sort().join('') &&
+            sentParams.accessToken && sentParams.productId) {
 
             //check if product exists
             productToAdd = products.find(product => {
-                return product.id === queryParams.productId;
+                return product.id === sentParams.productId;
             });
 
             if (productToAdd) {
                 //successful request
                 response.writeHead(200, { "Content-Type": "application/json" });
+
+                //get user
+                const currentUser = findUser(currentValidToken);
 
                 //check if item already exists in cart
                 const productAlreadyInCart = currentUser.cart.find(cartItem => {
@@ -310,29 +342,28 @@ myRouter.post("/api/me/cart", (request, response) => {
                 response.end();
             }
         } else {
-            response.writeHead(401, "Invalid authorization");
+            response.writeHead(400, "Invalid request parameters");
             response.end();
         }
     } else {
-        response.writeHead(400, "Invalid request parameters");
+        response.writeHead(401, "Invalid authorization");
         response.end();
     }
 });
 
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKey = Object.keys(queryParams).join('');
+    const sentToken = queryParams(request).accessToken
+    const queryKey = queryKeys(request).join('');
     const requiredParam = 'accessToken';
-    const currentUserToken = accessTokens.find(token => {
-        return token.username === currentUser.login.username;
-    });
 
-    //check for required parameters were sent and not empty and no invalid parameters sent
-    if (queryKey === requiredParam && queryParams.accessToken) {
+    //check if token is valid
+    const currentValidToken = getValidTokenFromRequest(request)
+    if (currentValidToken) {
 
-        //check if access token is valid
-        if (queryParams.accessToken === currentUserToken.accessToken) {
+        //check for required parameters were sent and not empty and no invalid parameters sent
+        if (queryKey === requiredParam && sentToken) {
+            //find user
+            const currentUser = findUser(currentValidToken);
 
             //check if product exists in cart
             productToDelete = currentUser.cart.find(cartItem => {
@@ -353,31 +384,26 @@ myRouter.delete("/api/me/cart/:productId", (request, response) => {
                 response.end();
             }
         } else {
-            response.writeHead(401, "Unauthorized access");
+            response.writeHead(400, "Invalid request parameters");
             response.end();
         }
     } else {
-        response.writeHead(400, "Invalid request parameters");
+        response.writeHead(401, "Unauthorized access");
         response.end();
     }
 });
 
 myRouter.post("/api/me/cart/:productId", (request, response) => {
-    //for query parameters
-    const queryParams = queryString.parse(url.parse(request.url).query);
-    const queryKey = Object.keys(queryParams).join('');
-    const requiredParam = 'accessToken';
-    const bodyKeys = Object.keys(request.body);
-    const currentUserToken = accessTokens.find(token => {
-        return token.username === currentUser.login.username;
-    });
 
-    //check for required parameters were sent and not empty and no invalid parameters sent
-    if (queryKey === requiredParam && queryParams.accessToken && bodyKeys.length === 1 
-        && request.body.quantity && typeof request.body.quantity === 'number') {
+    //check if token is valid
+    const currentValidToken = getValidTokenFromRequest(request);
+    if (currentValidToken) {
 
-        //check if access token is valid
-        if (queryParams.accessToken === currentUserToken.accessToken) {
+        //check for required parameters were sent and not empty and no invalid parameters sent
+        if (bodyKeys(request).join('') === 'quantity' && typeof request.body.quantity === 'number'
+            && queryKeys(request).length === 1) {
+            //find user
+            const currentUser = findUser(currentValidToken);
 
             //check if product exists in cart
             productToUpdate = currentUser.cart.find(cartItem => {
@@ -397,11 +423,11 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
                 response.end();
             }
         } else {
-            response.writeHead(401, "Unauthorized access");
+            response.writeHead(400, "Invalid request parameters");
             response.end();
         }
     } else {
-        response.writeHead(400, "Invalid request parameters");
+        response.writeHead(401, "Unauthorized access");
         response.end();
     }
 });

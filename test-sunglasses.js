@@ -481,7 +481,7 @@ describe('/POST login', () => {
             .send(userLogin)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
-                expect(response.body).to.be.an('object').with.property('accessToken');
+                expect(response.body).to.be.an('object').with.property('token');
                 done();
             });
     });
@@ -545,7 +545,7 @@ describe('/GET cart', () => {
     it('should GET an array', done => {
         chai
             .request(server)
-            .get(`/api/me/cart?accessToken=${userToken.accessToken}`)
+            .get(`/api/me/cart?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
@@ -553,13 +553,13 @@ describe('/GET cart', () => {
             });
     });
 
-    //should only allow access if valid token is sent
+    //should only allow access if token is sent
     it('should only allow access if token is sent in request', done => {
         chai
             .request(server)
             .get(`/api/me/cart`)
             .end((error, response) => {
-                expect(response.statusCode).to.equal(400);
+                expect(response.statusCode).to.equal(401);
                 done();
             });
     });
@@ -568,7 +568,7 @@ describe('/GET cart', () => {
     it('should return empty array if user cart is empty', done => {
         chai
             .request(server)
-            .get(`/api/me/cart?accessToken=${userToken.accessToken}`)
+            .get(`/api/me/cart?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 done();
@@ -579,7 +579,7 @@ describe('/GET cart', () => {
     it('should return cart of logged in user', done => {
         chai
             .request(server)
-            .get(`/api/me/cart?accessToken=${userToken.accessToken}`)
+            .get(`/api/me/cart?accessToken=${userToken.token}`)
             .end((error, response) => {
                 loggedInUser = users.find(user => {
                     return user.login.username === userToken.username;
@@ -593,18 +593,7 @@ describe('/GET cart', () => {
             });
     });
 
-    //return error if invalid parameters sent
-    it('should only allow access if token is sent in request', done => {
-        chai
-            .request(server)
-            .get(`/api/me/cart?banana=bananas`)
-            .end((error, response) => {
-                expect(response.statusCode).to.equal(400);
-                done();
-            });
-    });
-
-    //should only allow access if token is valid
+    //should only allow access if sent token is valid
     it('should only allow access if token is valid', done => {
         chai
             .request(server)
@@ -617,7 +606,7 @@ describe('/GET cart', () => {
 
 });
 
-// //test for api/me/cart POST request
+//test for api/me/cart POST request
 describe('/POST cart', () => {
     //login before each test && get cart
     beforeEach(async function () {
@@ -640,7 +629,7 @@ describe('/POST cart', () => {
             .request(server)
             .post(`/api/me/cart?productId=1`)
             .end((error, response) => {
-                expect(response.statusCode).to.equal(400);
+                expect(response.statusCode).to.equal(401);
                 done();
             });
     });
@@ -659,7 +648,7 @@ describe('/POST cart', () => {
     it('should return error if product id is not sent in request', done => {
         chai
             .request(server)
-            .post(`/api/me/cart?accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
                 done();
@@ -670,7 +659,7 @@ describe('/POST cart', () => {
     it('should return error if product id is not found', done => {
         chai
             .request(server)
-            .post(`/api/me/cart?accessToken=${userToken.accessToken}&productId=bananas`)
+            .post(`/api/me/cart?accessToken=${userToken.token}&productId=bananas`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(404);
                 done();
@@ -681,7 +670,7 @@ describe('/POST cart', () => {
     it('should return error if invalid parameters sent', done => {
         chai
             .request(server)
-            .post(`/api/me/cart?banana=bananas`)
+            .post(`/api/me/cart?accessToken=${userToken.token}&banana=bananas`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
                 done();
@@ -692,7 +681,7 @@ describe('/POST cart', () => {
     it('should return 200 if request valid', done => {
         chai
             .request(server)
-            .post(`/api/me/cart?productId=1&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?productId=1&accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 done();
@@ -703,7 +692,7 @@ describe('/POST cart', () => {
     it('should return array if request successful', done => {
         chai
             .request(server)
-            .post(`/api/me/cart?productId=1&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?productId=1&accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.body).to.be.an('array');
                 done();
@@ -712,24 +701,40 @@ describe('/POST cart', () => {
 
     //should send error if item already in cart
     it('should update quantity if product already in cart and not duplicate', done => {
-        //get item in cart to test
-        const cartTestItem = userToken.cart[0].product;
-        const cartStartingLength = userToken.cart.length;
+        //select item to test
+        cartTestItem = products[0];
 
         chai
             .request(server)
-            .post(`/api/me/cart?productId=${cartTestItem.id}&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?productId=${cartTestItem.id}&accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
-                expect(response.body.length).to.equal(cartStartingLength);
-                done();
+                //get quantity of item added 
+                const testItemQuantity = response.body.find(item => {
+                    return item.product.id === cartTestItem.id;
+                }).quantity;
+
+                //add same item to cart again
+                chai
+                    .request(server)
+                    .post(`/api/me/cart?productId=${cartTestItem.id}&accessToken=${userToken.token}`)
+                    .end((error, response) => {
+                        expect(response.statusCode).to.equal(200);
+                        //get array of items in cart with test id
+                        const addedItem = response.body.filter(item => {
+                            return item.product.id === cartTestItem.id;
+                        });
+                        expect(addedItem.length).to.equal(1);
+                        expect(addedItem[0].quantity).to.equal(testItemQuantity + 1);
+                        done();
+                    });
             });
     });
 
     //should add object to cart array
     it('should add object to cart array with product info and quantity', done => {
         //find user
-        const loggedInUser = users.find(user => {
+        const testUser = users.find(user => {
             return user.login.username === userToken.username;
         });
 
@@ -739,11 +744,11 @@ describe('/POST cart', () => {
         });
 
         //empty cart
-        loggedInUser.cart = [];
+        testUser.cart = [];
 
         chai
             .request(server)
-            .post(`/api/me/cart?productId=3&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?productId=3&accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(loggedInUser.cart[0]).to.deep.equal(productToAdd);
@@ -773,7 +778,7 @@ describe('/DELETE cart/:productId', () => {
 
         const postRes = await chai
             .request(server)
-            .post(`/api/me/cart?productId=4&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?productId=4&accessToken=${userToken.token}`)
 
         userToken.cart = postRes.body;
     });
@@ -784,7 +789,7 @@ describe('/DELETE cart/:productId', () => {
             .request(server)
             .delete(`/api/me/cart/4`)
             .end((error, response) => {
-                expect(response.statusCode).to.equal(400);
+                expect(response.statusCode).to.equal(401);
                 done();
             });
     });
@@ -803,7 +808,7 @@ describe('/DELETE cart/:productId', () => {
     it('should return error if product is not in cart', done => {
         chai
             .request(server)
-            .delete(`/api/me/cart/bananas?accessToken=${userToken.accessToken}`)
+            .delete(`/api/me/cart/bananas?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(404);
                 done();
@@ -814,7 +819,7 @@ describe('/DELETE cart/:productId', () => {
     it('should return error if invalid parameters sent', done => {
         chai
             .request(server)
-            .delete(`/api/me/cart/4?accessToken=${userToken.accessToken}&banana=bananas`)
+            .delete(`/api/me/cart/4?accessToken=${userToken.token}&banana=bananas`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
                 done();
@@ -825,7 +830,7 @@ describe('/DELETE cart/:productId', () => {
     it('should return 200 if request valid', done => {
         chai
             .request(server)
-            .delete(`/api/me/cart/4?accessToken=${userToken.accessToken}`)
+            .delete(`/api/me/cart/4?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 done();
@@ -836,7 +841,7 @@ describe('/DELETE cart/:productId', () => {
     it('should return array if request successful', done => {
         chai
             .request(server)
-            .delete(`/api/me/cart/4?accessToken=${userToken.accessToken}`)
+            .delete(`/api/me/cart/4?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body).to.be.an('array');
@@ -848,7 +853,7 @@ describe('/DELETE cart/:productId', () => {
     it('should remove product from cart', done => {
         chai
             .request(server)
-            .delete(`/api/me/cart/4?accessToken=${userToken.accessToken}`)
+            .delete(`/api/me/cart/4?accessToken=${userToken.token}`)
             .end((error, response) => {
                 //check for item in updated cart
                 const isItemInCart = response.body.find(cartItem => {
@@ -867,7 +872,7 @@ describe('/DELETE cart/:productId', () => {
 
         chai
             .request(server)
-            .delete(`/api/me/cart/4?accessToken=${userToken.accessToken}`)
+            .delete(`/api/me/cart/4?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
                 expect(response.body.length).to.equal(startingCartLength - 1);
@@ -897,7 +902,7 @@ describe('/POST cart/:productId', () => {
         //add an item to the cart
         const postRes = await chai
             .request(server)
-            .post(`/api/me/cart?productId=5&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart?productId=5&accessToken=${userToken.token}`)
 
         userToken.cart = postRes.body;
     });
@@ -913,7 +918,7 @@ describe('/POST cart/:productId', () => {
             .post(`/api/me/cart/5`)
             .send(testQuantity)
             .end((error, response) => {
-                expect(response.statusCode).to.equal(400);
+                expect(response.statusCode).to.equal(401);
                 done();
             });
     });
@@ -922,7 +927,7 @@ describe('/POST cart/:productId', () => {
     it('should return error if no quantity sent in request', done => {
         chai
             .request(server)
-            .post(`/api/me/cart/5?accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart/5?accessToken=${userToken.token}`)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
                 done();
@@ -945,7 +950,7 @@ describe('/POST cart/:productId', () => {
     it('should return error if product is not in cart', done => {
         chai
             .request(server)
-            .post(`/api/me/cart/bananas?&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart/bananas?&accessToken=${userToken.token}`)
             .send(testQuantity)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(404);
@@ -957,7 +962,7 @@ describe('/POST cart/:productId', () => {
     it('should return error if invalid parameters sent', done => {
         chai
             .request(server)
-            .post(`/api/me/cart/5?accessToken=${userToken.accessToken}&banana=bananas`)
+            .post(`/api/me/cart/5?accessToken=${userToken.token}&banana=bananas`)
             .send(testQuantity)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(400);
@@ -969,7 +974,7 @@ describe('/POST cart/:productId', () => {
     it('should return 200 if request valid', done => {
         chai
             .request(server)
-            .post(`/api/me/cart/5?&accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart/5?&accessToken=${userToken.token}`)
             .send(testQuantity)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
@@ -981,7 +986,7 @@ describe('/POST cart/:productId', () => {
     it('should return array if request successful', done => {
         chai
             .request(server)
-            .post(`/api/me/cart/5?accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart/5?accessToken=${userToken.token}`)
             .send(testQuantity)
             .end((error, response) => {
                 expect(response.statusCode).to.equal(200);
@@ -1001,7 +1006,7 @@ describe('/POST cart/:productId', () => {
 
         chai
             .request(server)
-            .post(`/api/me/cart/5?accessToken=${userToken.accessToken}`)
+            .post(`/api/me/cart/5?accessToken=${userToken.token}`)
             .send(testQuantity)
             .end((error, response) => {
                 //find changed product
