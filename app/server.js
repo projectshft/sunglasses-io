@@ -22,10 +22,12 @@ const PORT = 3001;
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-let server = http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   res.writeHead(200);
   myRouter(req, res, finalHandler(req, res));
-}).listen(PORT, err => {
+})
+
+server.listen(PORT, err => {
   if (err) throw err;
   console.log(`server running on port ${PORT}`);
   //populate categories  
@@ -60,8 +62,22 @@ myRouter.get('/brands', (req, res) => {
     })
   }
 
-  res.writeHead(200, { "Content-Type": "application/json" });
-  return res.end(JSON.stringify(brandsToReturn));
+  if (brandsToReturn.length === 0) {
+    res.writeHead(404, "There are no matching brands for your search");
+    return err;
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(brandsToReturn));
+  }
 });
+
+
+// GET /api/brands/:id/products
+// GET /api/products
+// POST /api/login
+// GET /api/me/cart
+// POST /api/me/cart
+// DELETE /api/me/cart/:productId
+// POST /api/me/cart/:productId
 
 module.exports = server;

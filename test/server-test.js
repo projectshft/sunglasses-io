@@ -53,5 +53,16 @@ describe('/GET brands', () => {
       });
     });
 
+  it("returns an error message if no brands match the search", done =>{
+    chai
+    .request(server)
+    //property doesn't exist
+    .get("/brands?query=adsfasd")
+    .end((err, res) => {
+      expect(res).to.have.status(404);
+      done();
+    });
+  });
+  
 });
 
