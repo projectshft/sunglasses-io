@@ -2,7 +2,7 @@
 
 const chai = require("chai");
 const chaiHTTP = require("chai-http");
-const server = require("../server");
+const server = require("../app/server");
 const expect = chai.expect;
 const assert = chai.assert;
 let should = chai.should();
@@ -13,16 +13,45 @@ chai.use(chaiHTTP);
 
 // GET ALL BRANDS
 describe('/GET brands', () => {
-  it('it should GET all the brands', done => {
+  it('should GET all the brands specified', done => {
     chai
       .request(server)
       .get('/brands')
       .end((err, res) => {
+        expect(err).to.be.null;
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(5);
         done();
       });
   });
+
+  it('should only return brands specified by the query string', done => {
+    chai
+      .request(server)
+      .get('/brands?query=Oakley') // get lowerCase functionality
+      .end((err, res) => {
+ //       expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
+  it("returns all brands if query is missing", done => {
+    chai
+      .request(server)
+      //property doesn't exist
+      .get("/brands?query=")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+    });
+
 });
 

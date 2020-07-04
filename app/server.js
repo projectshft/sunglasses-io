@@ -1,9 +1,11 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser  = require('body-parser');
+  
+const http = require("http");
+const finalHandler = require("finalhandler");
+const Router = require("router");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+const url = require("url");
+const querystring = require("querystring");
 var uid = require('rand-token').uid;
 
 //const Brand = require('./app/models/brand')
@@ -20,7 +22,7 @@ const PORT = 3001;
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-let server = http.createServer(function (req, res) {
+let server = http.createServer((req, res) => {
   res.writeHead(200);
   myRouter(req, res, finalHandler(req, res));
 }).listen(PORT, err => {
@@ -39,10 +41,27 @@ let server = http.createServer(function (req, res) {
 });
 
 
-myRouter.get('/brands', function(rep, res) {
+myRouter.get('/brands', (req, res) => {
+
+  const parsedUrl = url.parse(req.originalUrl);
+  const { query } = querystring.parse(parsedUrl.query);
   // Return all brands in the db
+
+  let brandsToReturn = [];
+
+  if (!query) {
+    brandsToReturn = brands;
+  } else {
+    brands.map((brand) => {
+      // standardizing all queries by going to lowercase
+      if (brand.name === query) {
+        brandsToReturn.push(brand);
+      }
+    })
+  }
+
   res.writeHead(200, { "Content-Type": "application/json" });
-  return res.end(JSON.stringify(brands));
+  return res.end(JSON.stringify(brandsToReturn));
 });
 
 module.exports = server;
