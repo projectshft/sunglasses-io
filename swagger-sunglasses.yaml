@@ -14,7 +14,7 @@ paths:
     get:
       tags:
         - Brands
-      summary: Get all brands
+      summary: Search all brands by query string, return all if no query
       description: ""
       parameters:
         - name: query
@@ -33,6 +33,24 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /brands/:id/products:
+    get:
+      tags:
+      summary: Get a single product by id
+      description: ""
+      parameters:
+        - name:
+        in: query
+        description:
+        require
+  /products
+  /login
+  /me/cart
+    get:
+    post:
+  /me/cart/:productId
+    delete:
+    post:
 
 definitions:
   Product:

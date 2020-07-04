@@ -3,7 +3,7 @@ let currentId = 1;
 
 class Brand  {
   constructor(params) {
-    Object.assign(this,params);
+    Object.assign(this, params);
   }
 
   static getAll() {
