@@ -64,15 +64,38 @@ myRouter.get('/brands', (req, res) => {
 
   if (brandsToReturn.length === 0) {
     res.writeHead(404, "There are no matching brands for your search");
-    return err;
+    return res.send();
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(brandsToReturn));
   }
 });
 
-
 // GET /api/brands/:id/products
+myRouter.get('/brands/:id/products', (req, res) => {
+  const { id } = req.params;
+
+  let productsToReturn = [];
+
+  products.map((product) => {
+
+      if (product.categoryId === id) {
+        productsToReturn.push(product);
+      }
+    })
+
+
+  if (productsToReturn.length === 0) {
+    res.writeHead(404, "There are no matching products for your search");
+    return err;
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(productsToReturn));
+  }
+
+});
+
+
 // GET /api/products
 // POST /api/login
 // GET /api/me/cart

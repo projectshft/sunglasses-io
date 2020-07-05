@@ -29,20 +29,34 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '404':
+          description: No brands found in database according to specifications
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /brands/:id/products:
+  /brands/{id}/products:
     get:
-      tags:
-      summary: Get a single product by id
+      tags: Brands
+      summary: Get all products belonging to a brand by categoryId
       description: ""
       parameters:
-        - name:
-        in: query
-        description:
-        require
+        - name: id
+          in: path
+          description: The categoryId of the products to send back
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products with the same brand id
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /products
   /login
   /me/cart
