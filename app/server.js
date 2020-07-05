@@ -64,7 +64,7 @@ myRouter.get('/brands', (req, res) => {
 
   if (brandsToReturn.length === 0) {
     res.writeHead(404, "There are no matching brands for your search");
-    return res.send();
+    return res.end();
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(brandsToReturn));
@@ -86,8 +86,8 @@ myRouter.get('/brands/:id/products', (req, res) => {
 
 
   if (productsToReturn.length === 0) {
-    res.writeHead(404, "There are no matching products for your search");
-    return err;
+    res.writeHead(404, "Id not found");
+    return res.end();
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(productsToReturn));

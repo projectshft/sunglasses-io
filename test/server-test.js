@@ -8,11 +8,10 @@ const assert = chai.assert;
 let should = chai.should();
 
 chai.use(chaiHTTP);
-//chai.use(require("chai-sorted"));
 
 // GET ALL BRANDS
 describe('/GET brands', () => {
-  it('should GET all the brands specified', done => {
+  it.only('should GET all the brands specified', done => {
     chai
       .request(server)
       .get('/brands')
@@ -26,7 +25,7 @@ describe('/GET brands', () => {
   });
 
 
-  it('should only return brands specified by the query string', done => {
+  it.only('should only return brands specified by the query string', done => {
     chai
       .request(server)
       .get('/brands?query=Oakley') // get lowerCase functionality
@@ -39,7 +38,7 @@ describe('/GET brands', () => {
       });
   });
 
-  it("returns all brands if query is missing", done => {
+  it.only("returns all brands if query is missing", done => {
     chai
       .request(server)
       //property doesn't exist
@@ -53,16 +52,16 @@ describe('/GET brands', () => {
       });
     });
 
-  // it("returns an error message if no brands match the search", done =>{
-  //   chai
-  //   .request(server)
-  //   //property doesn't exist
-  //   .get("/brands?query=adsfasd")
-  //   .end((err, res) => {
-  //     res.should.have.status(404);
-  //     done();
-  //   });
-  // });
+  it.only("returns an error message if no brands match the search", done =>{
+    chai
+    .request(server)
+    //property doesn't exist
+    .get("/brands?query=adsfasd")
+    .end((err, res) => {
+      expect(res).to.have.status(404);
+      done();
+    });
+  });
 
 });
 
@@ -80,4 +79,17 @@ describe('/GET brands/:id/products', () => {
         done();
       });
     });
+
+    
+    it.only("returns an error message if no products match the id", done =>{
+      chai
+      .request(server)
+      //property doesn't exist
+      .get("/brands/one/products")
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+      });
+    });
+
 });
