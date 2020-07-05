@@ -8,6 +8,9 @@ const url = require("url");
 const querystring = require("querystring");
 var uid = require('rand-token').uid;
 
+let accessTokens = [];
+
+
 //const Brand = require('./app/models/brand')
 
 // State holding variables
@@ -38,11 +41,10 @@ server.listen(PORT, err => {
 
   //populate users
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
-  // hardcode "logged in" user
-  user = users[0];
+
 });
 
-
+// Public
 myRouter.get('/brands', (req, res) => {
 
   const parsedUrl = url.parse(req.originalUrl);
@@ -71,6 +73,7 @@ myRouter.get('/brands', (req, res) => {
   }
 });
 
+// Public
 // GET /api/brands/:id/products
 myRouter.get('/brands/:id/products', (req, res) => {
   const { id } = req.params;
@@ -95,6 +98,7 @@ myRouter.get('/brands/:id/products', (req, res) => {
 
 });
 
+// Public
 // GET /api/products
 myRouter.get('/products', (req, res) => {
 
@@ -104,7 +108,7 @@ myRouter.get('/products', (req, res) => {
 
   let productsToReturn = [];
 
-  // avenue one
+  // Both name and description
   if (name && description) {
     products.map((product) => {
       if ((product.name.toLowerCase()).includes(name.toLowerCase()) &&
@@ -112,7 +116,7 @@ myRouter.get('/products', (req, res) => {
         productsToReturn.push(product);
       }
     })
-  // two
+  // Name, no description
   } else if (name && !description) {
     products.map((product) => {
       // standardizing all queries by going to lowercase
@@ -120,7 +124,7 @@ myRouter.get('/products', (req, res) => {
         productsToReturn.push(product);
       }
     })
-  //three
+  //Description, no name
   } else if (!name && description) {
     products.map((product) => {
       if ((product.description.toLowerCase()).includes(description.toLowerCase())) {
@@ -141,10 +145,67 @@ myRouter.get('/products', (req, res) => {
   }
 });
 
+//Public
 // POST /api/login
+myRouter.post('/login', (req, res) => {
+
+  if (req.body.username && req.body.password) {
+    let user = users.find((user)=>{
+      return user.login.username == req.body.username && user.login.password == req.body.password;
+    });
+    if (user) {
+      // No CORS for this project. Keep object to return access token
+      res.writeHead(200, {'Content-Type': 'application/json'});
+
+      // Check if logged-in user has an access token
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update user's access token with new timestamp
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return res.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return res.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      // Login failure
+      res.writeHead(401, "Invalid username or password");
+      return res.end();
+    }
+
+  } else {
+    // Incorrect formatting
+    res.writeHead(400, "Incorrectly formatted response");
+    return res.end();
+  }
+});
+
 // GET /api/me/cart
+myRouter.get('/me/cart', (req, res) => { 
+
+});
+
+
 // POST /api/me/cart
+myRouter.post('/me/cart/', (req, res) => { 
+  
+});
 // DELETE /api/me/cart/:productId
+myRouter.delete('/me/cart/:productId', (req, res) => { 
+  
+});
 // POST /api/me/cart/:productId
+myRouter.delete('/me/cart/:productId', (req, res) => { 
+  
+});
 
 module.exports = server;

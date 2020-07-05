@@ -149,3 +149,50 @@ describe('/GET products', () => {
   });
 
 });
+
+describe('/POST login', () => {
+
+  it.only('should POST an access token on successful login', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({
+        "username": "yellowleopard753",
+        "password": "jonjon"
+      })
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.a('string');
+        expect("Content-Type", "application/json");
+        done();
+      });
+  });
+
+  it.only('should return a 401 on an unsuccesful login', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({
+        "username": "Joe",
+        "password": "Krall"
+      })
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it.only('should return a 400 on an unsuccesful login', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({})
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(400);
+        done();
+      });
+  });
+});

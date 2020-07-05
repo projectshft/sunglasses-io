@@ -88,7 +88,32 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /login
+  /login:
+    post:
+      tags:
+        - user
+      summary: Logs user into the system
+      description: ''
+      parameters:
+        - name: username
+          in: body
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: body
+          description: The password for login
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation returns an access token that does not expire
+          schema:
+            type: string
+        '401':
+          description: Invalid username/password supplied
+        '400':
+          description: Incorrect formatting
   /me/cart
     get:
     post:
@@ -128,7 +153,6 @@ definitions:
       name:
         type: string
         description: The name of the brand of sunglasses.
-
   Error:
     type: object
     properties:
