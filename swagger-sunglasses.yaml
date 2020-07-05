@@ -53,11 +53,41 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Brand'
+        '404':
+          description: No brand id matches the id in path
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
   /products
+    get:
+      tags: Products
+      summary: Get all products specified by search query
+      description: ""
+      parameters:
+        - name: name
+          in: query
+          description: Compare search term to product name
+          required: true
+          type: string
+        - name: description
+          in: query
+          description: Compare search term to product description
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products matching search criteria
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404':
+          description: No product matches the query string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /login
   /me/cart
     get:

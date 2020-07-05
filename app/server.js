@@ -56,7 +56,7 @@ myRouter.get('/brands', (req, res) => {
   } else {
     brands.map((brand) => {
       // standardizing all queries by going to lowercase
-      if (brand.name === query) {
+      if (brand.name.toLowerCase() === query.toLowerCase()) {
         brandsToReturn.push(brand);
       }
     })
@@ -75,28 +75,72 @@ myRouter.get('/brands', (req, res) => {
 myRouter.get('/brands/:id/products', (req, res) => {
   const { id } = req.params;
 
-  let productsToReturn = [];
+  let productsToReturnById = [];
 
   products.map((product) => {
 
       if (product.categoryId === id) {
-        productsToReturn.push(product);
+        productsToReturnById.push(product);
       }
     })
 
 
-  if (productsToReturn.length === 0) {
+  if (productsToReturnById.length === 0) {
     res.writeHead(404, "Id not found");
+    return res.end();
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(productsToReturnById));
+  }
+
+});
+
+// GET /api/products
+myRouter.get('/products', (req, res) => {
+
+  const parsedUrl = url.parse(req.originalUrl);
+  const { name, description } = querystring.parse(parsedUrl.query);
+
+
+  let productsToReturn = [];
+
+  // avenue one
+  if (name && description) {
+    products.map((product) => {
+      if ((product.name.toLowerCase()).includes(name.toLowerCase()) &&
+      (product.description.toLowerCase()).includes(description.toLowerCase())) {
+        productsToReturn.push(product);
+      }
+    })
+  // two
+  } else if (name && !description) {
+    products.map((product) => {
+      // standardizing all queries by going to lowercase
+      if ((product.name.toLowerCase()).includes(name.toLowerCase())) {
+        productsToReturn.push(product);
+      }
+    })
+  //three
+  } else if (!name && description) {
+    products.map((product) => {
+      if ((product.description.toLowerCase()).includes(description.toLowerCase())) {
+        productsToReturn.push(product);
+      }
+    })
+  // return all if unspecified
+  } else {
+    productsToReturn = products;
+  }
+
+  if (productsToReturn.length === 0) {
+    res.writeHead(404, "There are no matching products for your search");
     return res.end();
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(productsToReturn));
   }
-
 });
 
-
-// GET /api/products
 // POST /api/login
 // GET /api/me/cart
 // POST /api/me/cart

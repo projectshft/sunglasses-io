@@ -30,7 +30,7 @@ describe('/GET brands', () => {
       .request(server)
       .get('/brands?query=Oakley') // get lowerCase functionality
       .end((err, res) => {
- //       expect(err).to.be.null;
+        // expect(err).to.be.null;
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(1);
@@ -91,5 +91,61 @@ describe('/GET brands/:id/products', () => {
         done();
       });
     });
+
+});
+
+// GET ALL PRODUCTS
+describe('/GET products', () => {
+  it.only('should GET all the products specified', done => {
+    chai
+      .request(server)
+      .get('/products')
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(11);
+        done();
+      });
+  });
+
+
+  it.only('should only return products specified by the query string', done => {
+    chai
+      .request(server)
+      .get('/products?name=butter&description=world')
+      .end((err, res) => {
+ //       expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
+  it.only("returns all products if query is missing", done => {
+    chai
+      .request(server)
+      //property doesn't exist
+      .get("/products?query=")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(11);
+        done();
+      });
+    });
+
+  it.only("returns an error message if no products match the search", done =>{
+    chai
+    .request(server)
+    //property doesn't exist
+    .get("/products?name=animal&description=crackers")
+    .end((err, res) => {
+      expect(res).to.have.status(404);
+      done();
+    });
+  });
 
 });
