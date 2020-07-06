@@ -50,7 +50,26 @@ server.listen(PORT, err => {
 
 });
 
-// Public
+// Helper function for checking if user is logged in
+const findUser = (req) => {
+
+  let user;
+
+  let currentAccessToken = accessTokens.find(accessToken => {
+    return accessToken.token == req.body.token;
+  }); 
+
+  if (currentAccessToken) {
+    user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+   });
+  }
+
+  return user;
+}
+
+
+// Public route
 myRouter.get('/brands', (req, res) => {
 
   const parsedUrl = url.parse(req.originalUrl);
@@ -200,28 +219,17 @@ myRouter.post('/login', (req, res) => {
 // GET /api/me/cart
 myRouter.get('/me/cart', (req, res) => { 
 
-  let currentAccessToken = accessTokens.find(accessToken => {
-    return accessToken.token == req.body.token;
-  }); 
-
-  if (!currentAccessToken) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    res.writeHead(401, "You need to have access to this call to continue");
-    return res.end();
-  } else {
-    let user = users.find((user) => {
-      return user.login.username == currentAccessToken.username;
-    });
+    let user = findUser(req);
 
     if (!user) {
       // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-      res.writeHead(403, "User not recognized");
+      res.writeHead(401, "You need to have access to this call to continue");
       return res.end();
     } else {
       res.writeHead(200, {'Content-Type': 'application/json'});
       return res.end(JSON.stringify(user.cart));
     }
-  }
+  
 });
 
 

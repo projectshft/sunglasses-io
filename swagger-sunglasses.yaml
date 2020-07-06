@@ -114,6 +114,10 @@ paths:
           description: Invalid username/password supplied
         '400':
           description: Incorrect formatting
+                default:
+        description: Unexpected error
+        schema:
+          $ref: '#/definitions/Error'
   /me/cart
     get:
       summary: Returns all items in the cart
@@ -129,8 +133,7 @@ paths:
         '200':
           description: Returns all items in the cart
           schema:
-
-            $ref: '#/definitions/User'
+            type: array
         default:
           description: Unexpected error
           schema:
@@ -140,7 +143,12 @@ paths:
       tags:
         - User
       responses:
-
+        '200':
+          description: Successfully adds an item to the user's cart array
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /me/cart/:productId
     delete:
     post:
