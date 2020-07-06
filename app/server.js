@@ -8,20 +8,16 @@ const url = require("url");
 const querystring = require("querystring");
 var uid = require('rand-token').uid;
 
-let accessTokens = [
-        {
-          username: 'yellowleopard753',
-          lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
-          token: 'P180Xz67vPBraYsD'
-        }
-    ]; // for testing
+// accessToken added for testing testing
+let accessTokens = [{
+  username: 'yellowleopard753',
+  lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)',
+  token: 'P180Xz67vPBraYsD'
+}];
 
-
-//const Brand = require('./app/models/brand')
 
 // State holding variables
 let brands = [];
-let user = {};
 let products = [];
 let users = [];
 
@@ -69,6 +65,7 @@ const findUser = (req) => {
   return user;
 }
 
+// Helper function for finding product by productId
 const findProduct = (req) => {
 
   let product = products.find((product) => {
@@ -79,12 +76,13 @@ const findProduct = (req) => {
 }
 
 
-// Public route
+// Public routes //
+
+// Gets all brands specified by query
 myRouter.get('/brands', (req, res) => {
 
   const parsedUrl = url.parse(req.originalUrl);
   const { query } = querystring.parse(parsedUrl.query);
-  // Return all brands in the db
 
   let brandsToReturn = [];
 
@@ -99,6 +97,7 @@ myRouter.get('/brands', (req, res) => {
     })
   }
 
+  // check if any brands matching query were pushed to brandsToReturn
   if (brandsToReturn.length === 0) {
     res.writeHead(404, "There are no matching brands for your search");
     return res.end();
@@ -108,8 +107,7 @@ myRouter.get('/brands', (req, res) => {
   }
 });
 
-// Public
-// GET /api/brands/:id/products
+
 myRouter.get('/brands/:id/products', (req, res) => {
   const { id } = req.params;
 
@@ -124,7 +122,7 @@ myRouter.get('/brands/:id/products', (req, res) => {
 
 
   if (productsToReturnById.length === 0) {
-    res.writeHead(404, "Id not found");
+    res.writeHead(404, "id not found");
     return res.end();
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -133,7 +131,7 @@ myRouter.get('/brands/:id/products', (req, res) => {
 
 });
 
-// Public
+
 // GET /api/products
 myRouter.get('/products', (req, res) => {
 
@@ -180,8 +178,8 @@ myRouter.get('/products', (req, res) => {
   }
 });
 
-//Public
-// POST /api/login
+
+// login page 
 myRouter.post('/login', (req, res) => {
 
   if (req.body.username && req.body.password) {
@@ -189,7 +187,7 @@ myRouter.post('/login', (req, res) => {
       return user.login.username == req.body.username && user.login.password == req.body.password;
     });
     if (user) {
-      // No CORS for this project. Keep object to return access token
+      // No CORS for this project
       res.writeHead(200, {'Content-Type': 'application/json'});
 
       // Check if logged-in user has an access token
@@ -202,7 +200,7 @@ myRouter.post('/login', (req, res) => {
         currentAccessToken.lastUpdated = new Date();
         return res.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // Create a new token with the user value and a "random" token
+        // Create a new token with the user value and toke
         let newAccessToken = {
           username: user.login.username,
           lastUpdated: new Date(),
@@ -226,13 +224,14 @@ myRouter.post('/login', (req, res) => {
   }
 });
 
-// GET /api/me/cart
+// Private functions //
+
 myRouter.get('/me/cart', (req, res) => { 
 
     let user = findUser(req);
 
     if (!user) {
-      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      // If there isn't an access token in the request, throw error
       res.writeHead(401, "You need to have access to this call to continue");
       return res.end();
     } else {
@@ -243,14 +242,13 @@ myRouter.get('/me/cart', (req, res) => {
 });
 
 
-// POST /api/me/cart
 myRouter.post('/me/cart/', (req, res) => { 
 
   let user = findUser(req);
   let product = findProduct(req);
 
   if (!user) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    // If there isn't an access token in the request, throw error
     res.writeHead(401, "You need to have access to this call to continue");
     return res.end();
   } else if (!product) {
@@ -271,7 +269,7 @@ myRouter.delete('/me/cart/:productId', (req, res) => {
   const { productId } = req.params;
 
   if (!user) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    // If there isn't an access token in the request, throw error
     res.writeHead(401, "You need to have access to this call to continue");
     return res.end();
   } else { 
@@ -304,16 +302,20 @@ myRouter.post('/me/cart/:productId', (req, res) => {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
     res.writeHead(401, "You need to have access to this call to continue");
     return res.end();
+
+  // Throw error if the quantity is less than zero
   } else if (req.body.quantity < 0) {
     res.writeHead(400, "Invalid quantity entered");
     return res.end();
   } else {
 
-    // Create new array based on filtering 
+    // Create newCart based on filtering out 
+    // all instances of the selected product from the cart
     let newCart = user.cart.filter((product) => {
       return product.id !== productId;
     })
 
+    // push the desired product quantity to newCart 
     for (i = 0; i < req.body.quantity; i++) {
       newCart.push(products.find((product) => product.id === productId))
     }
