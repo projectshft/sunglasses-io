@@ -305,7 +305,7 @@ myRouter.post('/me/cart/:productId', (req, res) => {
     res.writeHead(401, "You need to have access to this call to continue");
     return res.end();
   } else if (req.body.quantity < 0) {
-    res.writeHead(400, "Invalid quantity");
+    res.writeHead(400, "Invalid quantity entered");
     return res.end();
   } else {
 

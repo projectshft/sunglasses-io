@@ -11,7 +11,7 @@ chai.use(chaiHTTP);
 
 // GET ALL BRANDS
 describe('/GET brands', () => {
-  it.only('should GET all the brands specified', done => {
+  it.only('should get all the brands specified', done => {
     chai
       .request(server)
       .get('/brands')
@@ -67,7 +67,7 @@ describe('/GET brands', () => {
 
 // GET ALL PRODUCTS MATCHING BRAND ID
 describe('/GET brands/:id/products', () => {
-  it.only('should get all products by brand id specified', done => {
+  it.only('should get all products matching brand id', done => {
     chai
       .request(server)
       .get('/brands/1/products')
@@ -96,7 +96,7 @@ describe('/GET brands/:id/products', () => {
 
 // GET ALL PRODUCTS
 describe('/GET products', () => {
-  it.only('should GET all the products specified', done => {
+  it.only('should get all the products specified', done => {
     chai
       .request(server)
       .get('/products')
@@ -152,7 +152,7 @@ describe('/GET products', () => {
 
 describe('/POST login', () => {
 
-  it.only('should POST an access token on successful login', done => {
+  it.only('should post an access token on successful login', done => {
     chai
       .request(server)
       .post('/login')

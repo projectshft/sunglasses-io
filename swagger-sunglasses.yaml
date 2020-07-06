@@ -135,6 +135,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Product'
+          '401': 
+            description: missing access token
         default:
           description: Unexpected error
           schema:
@@ -153,6 +155,10 @@ paths:
       responses:
         '200':
           description: Successfully adds an item to the user's cart array
+        '401': 
+          description: missing access token
+        '404':
+          description: item does not exist
         default:
           description: Unexpected error
           schema:
@@ -177,6 +183,10 @@ paths:
       responses:
         '200':
           description: Successfully deletes the item from the user's cart array
+        '401': 
+          description: missing access token
+        '404':
+          description: item does not exist in cart
         default:
           description: Unexpected error
           schema:
@@ -199,7 +209,11 @@ paths:
             $ref: '#/definitions/CartOps'
       responses:
         '200':
-          description: Successfully changes the quanity of the item int the user's cart array
+          description: Successfully changes the quantity of the item int the user's cart array
+        '401': 
+          description: missing access token
+        '400':
+          description: invalid quantity error      
         default:
           description: Unexpected error
           schema:
