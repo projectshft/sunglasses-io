@@ -184,7 +184,7 @@ describe('/POST login', () => {
       });
   });
 
-  it.only('should return a 400 on an unsuccesful login', done => {
+  it.only('should return a 400 on an incorrectly formatted login', done => {
     chai
       .request(server)
       .post('/login')
@@ -195,4 +195,41 @@ describe('/POST login', () => {
         done();
       });
   });
+});
+
+describe('/GET me/cart', () => {
+  it.only('should show the user cart if the user is logged in', done => {
+    chai
+      .request(server)
+      .get('/me/cart')
+      .send(        
+        {
+          username: 'yellowleopard753',
+          lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+          token: 'P180Xz67vPBraYsD'
+        }
+      )
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
+    it.only('should return a 401 if there is no access token', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .send(        
+          {}
+        )
+        .end((err, res) => {
+          expect(err).to.be.null;
+          res.should.have.status(401);
+          done();
+        });
+    });
+
 });

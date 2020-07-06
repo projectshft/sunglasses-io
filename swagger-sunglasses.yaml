@@ -116,7 +116,31 @@ paths:
           description: Incorrect formatting
   /me/cart
     get:
+      summary: Returns all items in the cart
+      tags:
+        - User
+      parameters:
+        - name: token
+          in: body
+          description: access token for user
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Returns all items in the cart
+          schema:
+
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
     post:
+      summary: Add an item to the cart
+      tags:
+        - User
+      responses:
+
   /me/cart/:productId
     delete:
     post:

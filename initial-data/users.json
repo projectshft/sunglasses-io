@@ -1,7 +1,14 @@
 [
     {
         "gender": "female",
-        "cart":[],
+        "cart":[ {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }],
         "name": {
             "title": "mrs",
             "first": "susanna",

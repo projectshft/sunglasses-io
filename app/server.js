@@ -8,7 +8,13 @@ const url = require("url");
 const querystring = require("querystring");
 var uid = require('rand-token').uid;
 
-let accessTokens = [];
+let accessTokens = [
+        {
+          username: 'yellowleopard753',
+          lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+          token: 'P180Xz67vPBraYsD'
+        }
+    ]; // for testing
 
 
 //const Brand = require('./app/models/brand')
@@ -174,6 +180,8 @@ myRouter.post('/login', (req, res) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
+        console.log(accessTokens);
+        console.log(newAccessToken)
         return res.end(JSON.stringify(newAccessToken.token));
       }
     } else {
@@ -192,6 +200,28 @@ myRouter.post('/login', (req, res) => {
 // GET /api/me/cart
 myRouter.get('/me/cart', (req, res) => { 
 
+  let currentAccessToken = accessTokens.find(accessToken => {
+    return accessToken.token == req.body.token;
+  }); 
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, "You need to have access to this call to continue");
+    return res.end();
+  } else {
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+
+    if (!user) {
+      // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+      res.writeHead(403, "User not recognized");
+      return res.end();
+    } else {
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      return res.end(JSON.stringify(user.cart));
+    }
+  }
 });
 
 
