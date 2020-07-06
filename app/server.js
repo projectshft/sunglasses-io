@@ -55,17 +55,27 @@ const findUser = (req) => {
 
   let user;
 
-  let currentAccessToken = accessTokens.find(accessToken => {
-    return accessToken.token == req.body.token;
-  }); 
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token == req.body.token;
+    });
 
-  if (currentAccessToken) {
-    user = users.find((user) => {
-      return user.login.username == currentAccessToken.username;
-   });
-  }
+    if (currentAccessToken) {
+      user = users.find((user) => {
+        return user.login.username == currentAccessToken.username;
+      });
+    }
+  
 
   return user;
+}
+
+const findProduct = (req) => {
+
+  let product = products.find((product) => {
+    return product.id == req.body.productId;
+  })
+
+  return product;
 }
 
 
@@ -235,15 +245,84 @@ myRouter.get('/me/cart', (req, res) => {
 
 // POST /api/me/cart
 myRouter.post('/me/cart/', (req, res) => { 
-  
+
+  let user = findUser(req);
+  let product = findProduct(req);
+
+  if (!user) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, "You need to have access to this call to continue");
+    return res.end();
+  } else if (!product) {
+      res.writeHead(404, "Product not found");
+      return res.end();
+    } else {
+      user.cart.push(product);
+      res.writeHead(200, "Product successfully added");
+      return res.end();
+    } 
+
 });
+
 // DELETE /api/me/cart/:productId
 myRouter.delete('/me/cart/:productId', (req, res) => { 
-  
+
+  let user = findUser(req);
+  const { productId } = req.params;
+
+  if (!user) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, "You need to have access to this call to continue");
+    return res.end();
+  } else { 
+    // Create new array based on filtering 
+    let cartWithoutDeletedItem = user.cart.filter((product) => {
+      return product.id !== productId;
+    })
+      // check: if filtered cart is the same length as user's cart, nothing was deleted
+      // Send error message
+      if (cartWithoutDeletedItem.length === user.cart.length) {
+        res.writeHead(404, "Product not found in cart");
+        return res.end();
+      } else {
+        user.cart = cartWithoutDeletedItem;
+        res.writeHead(200, "Product successfully deleted");
+        return res.end();
+    }
+  }
+
 });
+
 // POST /api/me/cart/:productId
-myRouter.delete('/me/cart/:productId', (req, res) => { 
+myRouter.post('/me/cart/:productId', (req, res) => { 
   
+  let user = findUser(req);
+  const { productId } = req.params;
+
+
+  if (!user) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    res.writeHead(401, "You need to have access to this call to continue");
+    return res.end();
+  } else if (req.body.quantity < 0) {
+    res.writeHead(400, "Invalid quantity");
+    return res.end();
+  } else {
+
+    // Create new array based on filtering 
+    let newCart = user.cart.filter((product) => {
+      return product.id !== productId;
+    })
+
+    for (i = 0; i < req.body.quantity; i++) {
+      newCart.push(products.find((product) => product.id === productId))
+    }
+
+    user.cart = newCart;
+    res.writeHead(200, "Product quantity successfully updated");
+    return res.end();
+  }
+
 });
 
 module.exports = server;

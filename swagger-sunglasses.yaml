@@ -142,6 +142,18 @@ paths:
       summary: Add an item to the cart
       tags:
         - User
+      parameters:
+        - name: token
+          in: body
+          description: access token for user
+          required: true
+          type: string
+        - name: productId
+          in: body
+          description: id of product that needs to be added to the cart
+          required: true
+          schema:
+            $ref: '#/definitions/Product'
       responses:
         '200':
           description: Successfully adds an item to the user's cart array
@@ -149,9 +161,59 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/cart/:productId
+  /me/cart/{productId}
     delete:
+      summary: Delete an item to the cart
+      tags:
+        - User
+      parameters:
+        - name: token
+          in: body
+          description: access token for user
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: id of product that needs to be deleted
+          required: true
+          schema:
+            $ref: '#/definitions/Product'
+      responses:
+        '200':
+          description: Successfully deletes the item from the user's cart array
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
     post:
+      summary: Change an item's quantity in the cart
+      tags:
+        - User
+      parameters:
+        - name: token
+          in: body
+          description: access token for user
+          required: true
+          type: string
+        - name: productId
+          in: path
+          description: id of product that needs to be deleted
+          required: true
+          schema:
+            $ref: '#/definitions/Product'
+        - name: quantity
+          in: body
+          description: the user's desired quantity (cannot be zero)
+          required: true
+          schema:
+            type: int32
+      responses:
+        '200':
+          description: Successfully changes the quanity of the item int the user's cart array
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 definitions:
   Product:

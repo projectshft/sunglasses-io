@@ -198,7 +198,7 @@ describe('/POST login', () => {
 });
 
 describe('/GET me/cart', () => {
-  it.only('should show the user cart if the user is logged in', done => {
+  it.only('should show the contents of the cart if the user is logged in', done => {
     chai
       .request(server)
       .get('/me/cart')
@@ -213,7 +213,7 @@ describe('/GET me/cart', () => {
         expect(err).to.be.null;
         res.should.have.status(200);
         res.body.should.be.an('array');
-        res.body.length.should.be.eql(1);
+        res.body.length.should.be.eql(2);
         done();
       });
   });
@@ -226,10 +226,175 @@ describe('/GET me/cart', () => {
           {}
         )
         .end((err, res) => {
-          expect(err).to.be.null;
           res.should.have.status(401);
           done();
         });
     });
 
+});
+
+describe('/POST me/cart', () => {
+  it.only('should add a product to the cart', done => {
+    chai
+      .request(server)
+      .post('/me/cart')
+      .send(        
+        {
+          username: 'yellowleopard753',
+          lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+          token: 'P180Xz67vPBraYsD',
+          productId: '1'
+        }
+      )
+      .end((err, res) => {
+        expect(err).to.be.null;
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        expect("Content-Type", "application/json");
+        done();
+      });
+  });
+
+    it.only('should return a 401 if there is no matching access token', done => {
+      chai
+        .request(server)
+        .post('/me/cart')
+        .send(        
+          {          
+            productId: '1'
+          }
+        )
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+
+    it.only('should return a 404 if the item does not exist', done => {
+      chai
+        .request(server)
+        .post('/me/cart')
+        .send(        
+          {          
+            username: 'yellowleopard753',
+            lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+            token: 'P180Xz67vPBraYsD',
+            productId: '3242'
+          }
+        )
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+
+});
+
+describe('/DELETE me/cart/:productId', () =>  {
+  it.only('should delete a product from the cart', done => {
+  chai
+    .request(server)
+    .delete('/me/cart/3')
+    .send(        
+      {
+        username: 'yellowleopard753',
+        lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+        token: 'P180Xz67vPBraYsD',
+      }
+    )
+    .end((err, res) => {
+      expect(err).to.be.null;
+      res.should.have.status(200);
+      expect("Content-Type", "application/json");
+      done();
+    });
+
+  });
+
+  it.only('should return a 401 if there is no matching access token', done => {
+    chai
+      .request(server)
+      .delete('/me/cart/3')
+      .send(        
+        {}
+      )
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it.only('should return a 404 if the item is not in the cart', done => {
+    chai
+      .request(server)
+      .delete('/me/cart/13')
+      .send(        
+        {          
+          username: 'yellowleopard753',
+          lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+          token: 'P180Xz67vPBraYsD',
+        }
+      )
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
+  
+});
+
+describe('/POST me/cart/:productId', () =>  {
+  it.only('Change the quantity of an item in the cart', done => {
+  chai
+    .request(server)
+    .post('/me/cart/3')
+    .send(        
+      {
+        username: 'yellowleopard753',
+        lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+        token: 'P180Xz67vPBraYsD',
+        quantity: 6
+      }
+    )
+    .end((err, res) => {
+      expect(err).to.be.null;
+      res.should.have.status(200);
+      expect("Content-Type", "application/json");
+      done();
+    });
+
+  });
+
+  it.only('should return a 401 if there is no matching access token', done => {
+    chai
+      .request(server)
+      .post('/me/cart/3')
+      .send(        
+        {}
+      )
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+
+  it.only('should return a 400 if the quantity passed in is less than 0', done => {
+    chai
+      .request(server)
+      .post('/me/cart/13')
+      .send(        
+        {          
+          username: 'yellowleopard753',
+          lastUpdated: 'Sun Jul 05 2020 19:18:49 GMT-0400 (Eastern Daylight Time)', 
+          token: 'P180Xz67vPBraYsD',
+          quantity: -1
+        }
+      )
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
+  
 });
