@@ -1,0 +1,268 @@
+swagger: '2.0'
+info:
+  description: 'API spec for Sunglasses.IO. The shadiest store on the internets!'
+  version: 1.0.0
+  title: Sunglasses.IO
+  termsOfService: 'http://sunglasses.io/goodluck/'
+  contact: 
+    email: pjfoley@gmail.com
+  license: 
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: sunglasses.io
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  '/brands':
+    get:
+      summary: Brands of products
+      description: |
+        Endpoint returns information about the brands available
+        Response includes the brand name, display name, price
+        and description.
+      parameters:
+        - name: number
+          in: query
+          description: Optionally return first *number* of brands.
+          required: false
+          type: string
+          format: string
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of brand names
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  '/brands/{brandId}/products':
+    get:
+      summary: Products categorized by brands
+      description: |
+        Endpoint returns information about the brands available
+        Response includes the brand name, display name, price
+        image, and description.
+      parameters:
+        - name: brandId
+          in: path
+          description: Return products listed under brand name
+          required: true
+          type: string
+          format: string
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of products limited by brand name
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  '/products':
+    get:
+      summary: Products and product search
+      description: |
+        Endpoint returns information about the products
+        Response includes the brand name, display name, price, image
+        and description.
+      parameters:
+        - name: search
+          in: query
+          description: Optionally search for product.
+          required: false
+          type: string
+          format: string
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of products, limited by search or all
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/login':
+    post:
+      summary: Login User
+      description: Endpoint for logging into account
+      parameters:
+        - name: username
+          in: query
+          description: unique username 
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: fancy formatted password
+          required: true
+          type: string
+      tags:
+        - Login
+      responses:
+        200:
+          description: Login OK. Access token sent
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Login'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/me/cart':
+    get:
+      summary: Contents of shopping cart
+      description: Cart endpoint returns content of cart, including quantities of each item and price. Empty if no login
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Shopping cart found
+          schema:
+            type: array
+            items: 
+              $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add product to shopping cart. Requires login
+      description: Cart endpoint returns content of cart, including quantities of each item and price
+      parameters:
+        - name: prodId
+          in: query
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Item added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/me/cart/{prodId}':
+    post:
+      summary: Update quantity of product in cart
+      description: Cart endpoint changes quantity of item in cart. Returns cart.
+      parameters:
+        - name: prodId
+          in: path
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          required: true
+          type: number
+          description: Should be total number desired.
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Shopping cart found
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete product from shopping cart
+      description: Cart endpoint to delete item from cart. Requires user to be logged in
+      parameters:
+      - name: prodId
+        in: path
+        required: true
+        type: string
+      tags:
+        - Cart
+      responses:
+        200:
+          description: Item deleted from cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+definitions:
+  Brands:
+    type: object
+    properties:
+      brand:
+        type: string
+        description: A brand name
+      brand_id:
+        type: number
+        description: brandId for api searches
+      logo:
+        type: string
+        description: Image URL representing the logo.
+  Product:
+    type: object
+    properties:
+      product_id:
+        type: string
+        description: Product ID code.
+      description:
+        type: string
+        description: Description of product.
+      display_name:
+        type: string
+        description: Display name of product.
+      price:
+        type: number
+        description: Price
+      image:
+        type: string
+        description: Image URL representing the product.
+  Cart:
+    type: object
+    properties:
+      product:
+        type: string
+        description: Name of product
+      product_id:
+        type: string
+        description: Product ID code
+      quantity:
+        type: number
+        description: Quantity in cart
+      price:
+        type: number
+        description: Price
+  Login:
+    type: object
+    properties:
+      access_token:
+        type: string
+        description: Unique access token
+
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+
+
