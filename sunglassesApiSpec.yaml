@@ -221,6 +221,10 @@ definitions:
       product_id:
         type: string
         description: Product ID code.
+      brand_id:
+        type: number
+      brand_name:
+        type: string
       description:
         type: string
         description: Description of product.
@@ -230,9 +234,11 @@ definitions:
       price:
         type: number
         description: Price
-      image:
-        type: string
-        description: Image URL representing the product.
+      images:
+        type: array
+        items: 
+          type: string
+        description: Image URLs representing the product.
   Cart:
     type: object
     properties:
