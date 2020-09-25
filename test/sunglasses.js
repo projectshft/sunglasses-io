@@ -14,3 +14,22 @@ let should = chai.should();
 // beforeEach(() => {
 //   Sunglasses.removeAll();
 // });
+
+//test1
+describe('Brands', () => {
+  describe('/GET brands', () => {
+    it('it should GET all the sunglasses brands', (done) => {
+      // act
+      chai
+        .request(server)
+        .get('/brands')
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(0);
+          done();
+        });
+    });
+  });
+});

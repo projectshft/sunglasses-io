@@ -14,28 +14,30 @@ produces:
   
   
 paths:
+
+
   /brands:
     get:
       tags:
         - 'Brands'
       summary: 'Brands of Sunglasses'
       description: |
-        The Brands endpoint returns information about brands of sunglasses sold by Sunglasses-io. The response includes the brand name and its associated id.
+        The Brands endpoint returns information about all brands of sunglasses sold by Sunglasses-io. The response includes all of the brand names and their associated ids.
       parameters:
-        - name: 'brand'
+        - name: 'brands'
           in: 'query'
-          description: 'A brand of sunglasses.'
+          description: 'Brands of sunglasses.'
           required: true
           type: 'string'
       responses:
         '200':
-          description: 'Successful operation. The queried brand is returned as an object with an id.'
+          description: 'An array of brands.'
           schema:
-            type: 'object'
+            type: 'array'
             items:
               $ref: '#/definitions/Brands'
         '404':
-          description: '404: brand not found error'
+          description: '404: brands not found error'
           schema:
             $ref: '#/definitions/Error'
             
@@ -55,13 +57,13 @@ paths:
           type: 'string'
       responses:
         200:
-          description: 'An object containing product details.'
+          description: 'An array of products.'
           schema:
-            type: 'object'
+            type: 'array'
             items:
               $ref: '#/definitions/Products'
         '404':
-          description: '404: product not found error'
+          description: '404: products not found error'
           schema:
             $ref: '#/definitions/Error'
             
@@ -103,8 +105,6 @@ paths:
               description: "date in UTC when token expires"
         "400":
           description: "Invalid username/password supplied"
-  
-  
   /goals:
     get:
       summary: Goals
@@ -297,43 +297,40 @@ paths:
             $ref: '#/definitions/Error'
 definitions:
   Brands:
-    type: object
+    type: 'object'
     properties:
-      product_id:
-        type: string
-        description: Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles.
-      description:
-        type: string
-        description: Description of product.
-      display_name:
-        type: string
-        description: Display name of product.
-      capacity:
-        type: string
-        description: Capacity of product. For example, 4 people.
-      image:
-        type: string
-        description: Image URL representing the product.
-        
-  Products:
-    type: object
-    properties:
-      product_id:
-        type: string
-        description: Unique identifier representing a specific product for a given latitude & longitude. For example, uberX in San Francisco will have a different product_id than uberX in Los Angeles.
-      description:
-        type: string
-        description: Description of product.
-      display_name:
-        type: string
-        description: Display name of product.
-      capacity:
-        type: string
-        description: Capacity of product. For example, 4 people.
-      image:
-        type: string
-        description: Image URL representing the product.
+      id:
+        type: 'string'
+        description: 'Unique identifier representing a specific brand. For example, Oakley will have a different id than Ray Ban.'
+      name:
+        type: 'string'
+        description: 'Brand name.'
 
+ 
+  Products:
+    type: 'object'
+    properties:
+      id:
+        type: 'string'
+        description: 'Unique identifier representing a specific product. For example, Superglasses will have a different product_id than Black Sunglasses.'
+      categoryId:
+        type: 'string'
+        description: 'A linking field that associates a product with a brand. For example, the value in the categoryId field for Superglasses (a product) will match the value in the id field for Oakley (its associated brand).'
+      name:
+        type: 'string'
+        description: 'Display name of product.'
+      description:
+        type: 'string'
+        description: 'Description of product.'
+      price:
+        type: 'number'
+        description: 'Price of product.'
+      imageUrls:
+        type: 'array'
+        description: 'An array of image URLs representing the product.'
+        items:
+          type: 'string'
+          description: 'Image URLs for the product.'
 
 
   Goal:
