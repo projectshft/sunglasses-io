@@ -12,12 +12,12 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 // beforeEach(() => {
-//   Sunglasses.removeAll();
+//   brands.removeAll();
+//   products.removeAll();
 // });
 
-// test 1
+// test 1: response is all brands
 describe('GET/ brands', () => {
-  console.log('test 1: get all brands');
   it('should GET all the sunglasses brands', (done) => {
     // act
     chai
@@ -30,15 +30,14 @@ describe('GET/ brands', () => {
         expect("Content-Type", "application/json");
         res.should.have.status(200);
         res.body.should.be.an('array');
-        res.body.length.should.be.eql(0);
+        res.body.length.should.be.eql(5);
         done();
       });
   });
 });
 
-// test2
+// test 2: response is all products
 describe('GET/ products', () => {
-  console.log('test 2: get all products');
   it('should GET all the sunglasses products', (done) => {
     // act
     chai
@@ -51,8 +50,28 @@ describe('GET/ products', () => {
         expect("Content-Type", "application/json");
         res.should.have.status(200);
         res.body.should.be.an('array');
-        res.body.length.should.be.eql(0);
+        res.body.length.should.be.eql(11);
         done();
       });
   });
 });
+
+// test 3: uery term is a brand, response is all products of that brand
+// describe('GET/ products by brand id', () => {
+//   it('should GET all the products associated with a brand of sunglasses', (done) => {
+//     // act
+//     chai
+//       .request(server)
+//       .get('/api/brands/1/products')
+//       // assert
+//       .end((err, res) => {
+//         assert.isNotNull(res.body);
+//         expect(err).to.be.null;
+//         expect("Content-Type", "application/json");
+//         res.should.have.status(200);
+//         res.body.should.be.an('array');
+//         res.body.length.should.be.eql(0);
+//         done();
+//       });
+//   });
+// });

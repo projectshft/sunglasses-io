@@ -28,10 +28,10 @@ server.listen(PORT, err => {
   console.log(`server running on port ${PORT}`);
 
  // populate brands  
-  // brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
+  brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
 
   // //populate products
-  // products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
+  products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
   
   // //populate users
   // users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
@@ -58,5 +58,15 @@ router.get('/api/products', function (request, response) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(products));
 });
+
+// router.get('/api/brands/:id/products', function (request, response) {
+//   // Return all products associated with a brand of sunglasses 
+//   if (!products) {
+//     response.writeHead(404, "There aren't any products to return");
+//     return response.end();
+//   }
+//   response.writeHead(200, { "Content-Type": "application/json" });
+//   return response.end(JSON.stringify(products));
+// });
 
 module.exports = server;
