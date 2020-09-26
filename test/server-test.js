@@ -5,6 +5,8 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server.js');
 let should = chai.should();
+let sinon = require('sinon');
+let testToken = '';
 chai.use(chaiHttp);
 
 
@@ -21,7 +23,7 @@ describe('GET /brands should return', () => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(5);
-        var names = [];
+        // var names = [];  // this isn't working
         // res.forEach(function(item) {names.push(item.name);});
         // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
@@ -73,12 +75,11 @@ describe('GET /products should return', () => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(11);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
+       
         done();
       });
   });
+
   it('Products based on search term', done => {
 
     chai
@@ -91,9 +92,7 @@ describe('GET /products should return', () => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(1);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
+       
         done();
       });
   });
@@ -107,13 +106,13 @@ describe('POST /login should process login', () => {
       // arrange  
       .request(server)
       // act
-      .post('/api/login')
+      .post('/api/login?username=greenlion235&password=waters')
+      //.send({ username: 'greenlion235', password: 'waters'})
       .end((err, res) => {
         // assert
+        testToken = res.body;
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
+        res.body.should.be.a('string'); 
         done();
       });
   });
@@ -124,16 +123,39 @@ describe('POST /login should process login', () => {
       // arrange  
       .request(server)
       // act
-      .post('/api/login')
+      .post('/api/login?username=badlogin&password=badpass')
       .end((err, res) => {
         // assert
-        res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
+        // expect(res.body).to.equal({});  //but it is an empty obj
+        res.should.have.status(401);
         done();
       });
   });
+
+  // attempt login with Sinon for better implementation testing
+  // let Auth = {
+  //   attempt() {
+  //     // implementation here
+  //   }
+  // };
+  
+  // class Unauthorized {}
+  
+  // function login(credentials) {
+  //   return Auth.attempt(credentials).then(
+  //     auth => {
+  //       return auth.user;
+  //     },
+  //     () => {
+  //       throw new Unauthorized();
+  //     }
+  //   );
+  // }
+  // describe('the login function', () => {
+  //   it('should resolve with the user if authenticated', () => {});
+  
+  //   it('should reject with Unauthorized if unauthenticated', () => {});
+  // });
   // this isn't in spec and is at-risk for implmentation
   /* it('expires and removes token on /logout', done => {
 
@@ -145,9 +167,6 @@ describe('POST /login should process login', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   }); */
@@ -164,9 +183,6 @@ describe('GET /cart return cart contents', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -181,9 +197,6 @@ describe('GET /cart return cart contents', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -200,9 +213,6 @@ describe('POST /cart adds product to cart', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -217,9 +227,6 @@ describe('POST /cart adds product to cart', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -236,9 +243,6 @@ describe('DELETE /cart/:productId removes product from cart', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -253,9 +257,6 @@ describe('DELETE /cart/:productId removes product from cart', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -272,9 +273,6 @@ describe('POST /cart/:productId removes product from cart', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });
@@ -289,9 +287,6 @@ describe('POST /cart/:productId removes product from cart', () => {
       .end((err, res) => {
         // assert
         res.should.have.status(200);
-        var names = [];
-        // res.forEach(function(item) {names.push(item.name);});
-        // expect(names).to.have.members(['Oakley', 'Ray Ban', 'Levi\'s', 'DKNY', 'Burberry']);
         done();
       });
   });

@@ -5,15 +5,15 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-//const TOKEN_VALIDITY_TIMEOUT = 900000 // 15 minutes
+const TOKEN_VALIDITY_TIMEOUT = 900000 // 15 minutes
 const PORT = 3001;
 // states
 brands = [];
 products = [];
 users = [];
 cart = [];
-//var accessTokens = [];
-//var failedLoginAttempts = {};
+var accessTokens = [];
+//var failedLoginAttempts = {};  
 
 // Setup router
 var myRouter = Router();
@@ -98,17 +98,52 @@ myRouter.get('/api/products', function(request,response) {
 
 // Login
 // -Verify username and password, issue token
-myRouter.get('/api/login', function(request,response) {
-  response.writeHead(418, { "Content-Type": "application/json" });
+myRouter.post('/api/login', function(request,response) {
   var parsedUrl = require('url').parse(request.url,true)
-  console.log('proper parsing test ', parsedUrl);
+  console.log('Username Password parsing ', parsedUrl);
   if (parsedUrl.query.username && parsedUrl.query.password) {
     
-    // TODO integrate login code
-    
+    let user = users.find((user)=>{
+      return user.login.username == parsedUrl.query.username && user.login.password == parsedUrl.query.password;
+    });
+    if (user) {
+      // TODO count failed logins
+
+      // Write the header because as 200
+      response.writeHead(200, {'Content-Type': 'application/json'});
+
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = Date.now();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a uid16 token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: Date.now(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      // TODO error / track failed login attempts
+      
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
   } else {
-    return response.end('TODO Fail Message');
-}});    
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+});    
 
 // Cart -- login required
 // -Verify valid token, then allow access
