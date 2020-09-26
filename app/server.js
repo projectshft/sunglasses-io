@@ -6,7 +6,7 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
-const PORT = 3001;
+const PORT = 8080;
 
 let sunglasses = [];
 let brands = [];
@@ -24,7 +24,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, err => {
     if(err) throw err;
-    console.log(`server running on port ${PORT}`);
+    // console.log(`server running on port ${PORT}`);
 
     sunglasses = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
 
