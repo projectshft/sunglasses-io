@@ -1,7 +1,3 @@
-// products[i].categoryId = brands[i].id
-
-// let Brands = require('../app/models/brands');
-
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../app/server');
@@ -11,13 +7,10 @@ const assert = chai.assert;
 const should = chai.should();
 
 chai.use(chaiHttp);
-// beforeEach(() => {
-//   brands.removeAll();
-//   products.removeAll();
-// });
 
-// test 1: response is all brands
+//GET BRANDS
 describe('GET/ brands', () => {
+  // test: response is all brands
   it('should GET all the sunglasses brands', (done) => {
     // act
     chai
@@ -27,7 +20,7 @@ describe('GET/ brands', () => {
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
-        expect("Content-Type", "application/json");
+        expect('Content-Type', 'application/json');
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(5);
@@ -36,42 +29,100 @@ describe('GET/ brands', () => {
   });
 });
 
-// test 2: response is all products
-describe('GET/ products', () => {
-  it('should GET all the sunglasses products', (done) => {
+//GET PRODUCTS
+describe('GET/ products by a query term', () => {
+  // test: get products by a query term
+  it('should limit results to those with a query string', (done) => {
     // act
     chai
       .request(server)
-      .get('/api/products')
+      .get('/api/products/Peanut Butter')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
-        expect("Content-Type", "application/json");
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
+  it('should return all products if no product matches query string', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/products/Cats')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(11);
         done();
       });
   });
+
+  // TO WORK ON
+  // it('should be case insensitive') .get ('api/products/peanut butter')
+  // it('should return multiple products if they match the query string', (done) => {
+  //   // act
+  //   chai
+  //     .request(server)
+  //     .get('/api/products/glas')
+  //     // assert
+  //     .end((err, res) => {
+  //       assert.isNotNull(res.body);
+  //       expect(err).to.be.null;
+  //       expect('Content-Type', 'application/json');
+  //       res.should.have.status(200);
+  //       res.body.should.be.an('array');
+  //       res.body.length.should.be.eql(1);
+  //       done();
+  //     });
+  // });
 });
 
-// test 3: uery term is a brand, response is all products of that brand
-// describe('GET/ products by brand id', () => {
-//   it('should GET all the products associated with a brand of sunglasses', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .get('/api/brands/1/products')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect("Content-Type", "application/json");
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(0);
-//         done();
-//       });
-//   });
-// });
+describe('POST/ user login', () => {
+  it('should allow existing users to login', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/login/yellowleopard753/jonjon')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
+  // TO WORK ON: Allow 3 mistakes before locking out
+  it('should throw an error when invalid username/pswd combination entered', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/login/MissMaddie/jonjon')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(400);
+        // res.body.should.be.an('array');
+        // res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
+})
+
+
+describe
