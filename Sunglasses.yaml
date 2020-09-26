@@ -21,6 +21,8 @@ paths:
       summary: 'Brands of sunglasses sold by Sungasses-io'
       description: |
         The GET brands endpoint returns information about all brands of sunglasses sold by Sunglasses-io. The response includes all of the brand names and their associated ids.
+      produces:
+      - "application/json"
       responses:
         '200':
           description: 'An array of brands.'
@@ -40,6 +42,8 @@ paths:
       summary: 'Sunglasses products sold by Sunglasses-io limited by brand'
       description: |
         The GET products by brand endpoint returns information about all sunglasses products sold by Sunglasses-io limited by a brand. The response includes the brand name, product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+      produces:
+      - "application/json"
       parameters:
         - name: 'brandId'
           in: 'path'
@@ -66,6 +70,8 @@ paths:
       summary: 'Sunglasses products sold by Sunglasses-io'
       description: |
         The Products endpoint returns information about the sunglasses products offered by Sunglasses-io. If the search term (which will be checked in lower case) is included in one or more product names, those products will be returned. The response includes the product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
+      produces:
+      - "application/json"
       parameters:
         - name: 'searchTerm'
           in: 'query'
@@ -89,9 +95,8 @@ paths:
       tags:
       - "POST user data to log existing user into the system"
       summary: "Logs user into the system"
-      description: "|
-      The login endpoint supports user login and generates an access token."
-      operationId: "loginUser"
+      description: |
+      The login endpoint supports user login and generates an access token.
       produces:
       - "application/json"
       parameters:
@@ -118,33 +123,23 @@ paths:
           
   /me/cart:
     get:
-      summary: Goals
+      tags: 'GET shopping cart'
+      summary: 'The shopping cart for a validated user'
       description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+        The GET cart endpoint returns the contents of a validated user's shopping cart. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
       parameters:
-        - name: query
-          in: query
-          description: Search query string
+        - name: 'accessToken'
+          in: 'query'
+          description: 'An access token for a validated user'
           required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.  
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
-      tags:
-        - Goals
+          type: 'string'
       responses:
         '200':
-          description: An array of goals
+          description: 'Shopping cart'
           schema:
-            type: string
-
+            type: 'array'
+            items: 
+              $ref: '#/definitions/Products'
 
             
             
@@ -352,59 +347,10 @@ definitions:
 
 
   Cart:
-    type: object
-    properties:
-      id:
-        type: string
-        description: Unique identifier for a goal.
-      categoryId:
-        type: string
-        description: The id of the category this goal belongs to.
-      description:
-        type: string
-        description: Description of product.
-      upVotes:
-        type: integer
-        format: int32
-        description: The number of up votes given to a goal
-      downVotes:
-        type: integer
-        format: int32
-        description: The number of down votes given to a goal
-      imageURL:
-        type: string
-        description: The URL for the image representing the goal
-      dateCreated:
-        type: string
-        format: date-time
-        description: The date the goal was created
-        
-  User:
-    type: object
-    properties:
-      first_name:
-        type: string
-        description: First name of the Uber user.
-      last_name:
-        type: string
-        description: Last name of the Uber user.
-      email:
-        type: string
-        description: Email address of the Uber user
-      acceptedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      achievedGoals:
-        items:
-          $ref: '#/definitions/Goal'
-      giftedGoals:
-        items:
-          $ref: '#/definitions/Goal'    
-      challengedGoals:
-        items:
-          $ref: '#/definitions/Goal'    
-          
-          
+    type: 'array'
+    items: 'Products'
+      $ref: '#/definitions/Products'
+
   Error:
     type: 'string'
     properties:

@@ -16,9 +16,11 @@ let products = [];
 let cart = [];
 let users = [];
 // let user = {};
-let accessTokens = [];
-let failedLoginAttempts = {};
+// let accessTokens = [];
 
+//a hardcoded access token for testing
+let accessTokens = [{'username':'yellowleopard753', 'lastUpdated': 'Sat Sep 26 2020 18:04:31 GMT-0400 (Eastern Daylight Time)', 'token': '12345678abcdefgh'}];
+let failedLoginAttempts = {};
 
 const PORT = 3001;
 
@@ -38,20 +40,18 @@ server.listen(PORT, (err) => {
   brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
 
   // populate empty brands
-  brands_empty = JSON.parse(fs.readFileSync('initial-data/brands_empty.json', 'utf-8'));
+  brands_empty = JSON.parse(
+    fs.readFileSync('initial-data/brands_empty.json', 'utf-8')
+  );
 
   //populate products
   products = JSON.parse(fs.readFileSync('initial-data/products.json', 'utf-8'));
 
   //populate users
-  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
-  
-  // hard code "logged in" user
-  // user = users[0];
+  users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
 
   //hard code one item in cart
   // cart = [products[0]];
-
 });
 
 router.get('/api/brands', (request, response) => {
@@ -67,7 +67,7 @@ router.get('/api/brands', (request, response) => {
 router.get('/api/brands_empty', (request, response) => {
   // Error if there are no brands
   if (brands_empty.length === 0) {
-    response.writeHead(204, "There are no brands to return");
+    response.writeHead(204, 'There are no brands to return');
     return response.end();
   }
   response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -78,8 +78,8 @@ router.get('/api/brands/:brandId/products', (request, response) => {
   // Return all products associated with a brand of sunglasses
   const { brandId } = request.params;
   const selectedBrand = [];
-  brands.forEach(brand => {
-    if (brand.id == brandId) { 
+  brands.forEach((brand) => {
+    if (brand.id == brandId) {
       selectedBrand.push(brand);
     }
   });
@@ -90,11 +90,11 @@ router.get('/api/brands/:brandId/products', (request, response) => {
     }
     return productsByBrandId;
   });
-    
+
   if (selectedBrand.length === 0) {
     response.writeHead(204, 'That brand or product was not found');
     return response.end();
-  }  
+  }
   if (productsByBrandId.length === 0) {
     response.writeHead(204, 'That brand or product was not found');
     return response.end();
@@ -121,49 +121,62 @@ router.get('/api/products', (request, response) => {
       }
     });
     if (productsToReturn.length === 0) {
-      response.writeHead(204, "No matching products found. Please search again", { "Content-Type": "application/json" });
+      response.writeHead(
+        204,
+        'No matching products found. Please search again',
+        { 'Content-Type': 'application/json' }
+      );
       return response.end();
     } else {
-      response.writeHead(200, "Product found", { "Content-Type": "application/json" });
+      response.writeHead(200, 'Product found', {
+        'Content-Type': 'application/json',
+      });
       return response.end(JSON.stringify(productsToReturn));
     }
   }
-  response.writeHead(204, "No matching products found. Please search again", { "Content-Type": "application/json" });
+  response.writeHead(204, 'No matching products found. Please search again', {
+    'Content-Type': 'application/json',
+  });
   return response.end();
 });
 
-
-
 // Helpers to get/set our number of failed requests per username
-let getNumberOfFailedLoginRequestsForUsername = function(username) {
+let getNumberOfFailedLoginRequestsForUsername = function (username) {
   let currentNumberOfFailedRequests = failedLoginAttempts[username];
   if (currentNumberOfFailedRequests) {
     return currentNumberOfFailedRequests;
   } else {
     return 0;
   }
-}
+};
 
-let setNumberOfFailedLoginRequestsForUsername = function(username, numFails) {
+let setNumberOfFailedLoginRequestsForUsername = function (username, numFails) {
   failedLoginAttempts[username] = numFails;
-}
+};
 
 // Login call
-router.post('/api/login', (request,response) => {
-  let parsedUrl = require('url').parse(request.url,true)
+router.post('/api/login', (request, response) => {
+  let parsedUrl = require('url').parse(request.url, true);
 
   // Make sure there is a username and password in the request & that #of failed attempts<3
-  if (parsedUrl.query.username && parsedUrl.query.password && getNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username) < 3) {
+  if (
+    parsedUrl.query.username &&
+    parsedUrl.query.password &&
+    getNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username) < 3
+  ) {
     // See if there is a user that has that username and password
-    let user = users.find((user)=>{
-      return user.login.username == parsedUrl.query.username && user.login.password == parsedUrl.query.password;
+    let user = users.find((user) => {
+      return (
+        user.login.username == parsedUrl.query.username &&
+        user.login.password == parsedUrl.query.password
+      );
     });
     if (user) {
       // If we found a user, reset our counter of failed logins
       setNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username, 0);
 
       // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.writeHead(200, { 'Content-Type': 'application/json' });
 
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -179,33 +192,42 @@ router.post('/api/login', (request,response) => {
         let newAccessToken = {
           username: user.login.username,
           lastUpdated: new Date(),
-          token: uid(16)
-        }
+          token: uid(16),
+        };
         accessTokens.push(newAccessToken);
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
       // Update the number of failed login attempts
-      let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(request.body.username);
-      setNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username, ++numFailedForUser);
+      let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(
+        request.body.username
+      );
+      setNumberOfFailedLoginRequestsForUsername(
+        parsedUrl.query.username,
+        ++numFailedForUser
+      );
       // When a login fails, tell the client in a generic way that either the username or password was wrong
-      response.writeHead(401, "Invalid username or password entered");
+      response.writeHead(401, 'Invalid username or password entered');
       return response.end();
     }
   } else {
     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the input parameters
-    response.writeHead(400, "Invalid username or password entry syntax");
+    response.writeHead(400, 'Invalid username or password entry syntax');
     return response.end();
   }
 });
 
 // Helper method to process access token
-let getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url,true)
+let getValidTokenFromRequest = function (request) {
+  let parsedUrl = require('url').parse(request.url, true);
+
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure its valid and not expired
     let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+      return (
+        accessToken.token == parsedUrl.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
     });
     if (currentAccessToken) {
       return currentAccessToken;
@@ -217,7 +239,22 @@ let getValidTokenFromRequest = function(request) {
   }
 };
 
-
-
-
+// Only logged in users can access their cart
+router.get('/api/me/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, 'You need to have access to this call to continue');
+    return response.end();
+  } else {
+    // Find cart for the valid user
+    let userCart = users.find((user) => {
+      if (user.login.username == currentAccessToken.username) {
+        return user.cart;
+      }
+    });
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(userCart));
+  }
+});
 module.exports = server;

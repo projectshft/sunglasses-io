@@ -144,7 +144,7 @@ describe('GET/ products by a search term', () => {
         done();
       });
   });
-  
+
   it('should ERROR if query string is blank', (done) => {
     // act
     chai
@@ -229,42 +229,29 @@ describe('POST/ user login', () => {
 });
 
 //NOT DONE
-// describe('GET/ currentUser cart', () => {
-//   // test: response is all brands
-//   it('should GET the cart contents for currentUser', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .get('/me/cart')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(5);
-//         done();
-//       });
-//   });
+//TODO: inlude access token in request call
 
-//   it('should FAIL if currentUser is not logged in', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .get('/me/cart')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(5);
-//         done();
-//       });
-//   });
-// });
+describe('GET/ user cart', () => {
+  // test: response is all brands
+  it('should GET the cart contents for a user with a valid access token', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart?username=yellowleopard753&lastUpdated=Sat Sep 26 2020 18:04:31 GMT-0400 (Eastern Daylight Time)&accessToken=12345678abcdefgh')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        done();
+      });
+  });
+
+// //   it('should FAIL if currentUser is not logged in', (done) => {
+
+});
 
 //NOT DONE
 // describe('POST/ a new item to currentUser cart', () => {
