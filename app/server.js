@@ -49,14 +49,12 @@ router.get("/v1/sunglasses", (request, response) => {
         queryLowerCase = query.toLowerCase();
 
         glassesToReturn = sunglasses.filter(item => {
-            // item.description.toLowerCase();
             descLowerCase = item.description.toLowerCase();
 
             return descLowerCase.includes(queryLowerCase)
         });
 
         sunglasses.filter(item => {
-            // item.name.toLowerCase();  
             nameLowerCase = item.name.toLowerCase();              /////////CASE INSENSITIVITY NOT WORKING!!
 
             if(nameLowerCase.includes(queryLowerCase) && !glassesToReturn.includes(item)) {
@@ -84,8 +82,12 @@ router.get("/v1/brands", (request, response) => {
     const { query, sort } = queryString.parse(parsedUrl.query);
     let brandsToReturn = [];
     if (query !== undefined) {
+        queryLowerCase = query.toLowerCase();
+
         brandsToReturn = brands.filter(item => {
-            item.name.includes(query)
+            nameLowerCase = item.name.toLowerCase();
+
+            nameLowerCase.includes(queryLowerCase)
         });
 
         if (!brandsToReturn) {
@@ -111,8 +113,10 @@ router.get("/v1/me", (request, response) => {
     return response.end(JSON.stringify(user));
 });
 
-// router.post("/me/add-to-cart", (request, response) => {
-//     const {}
+// router.post("/v1/me/add-to-cart", (request, response) => {
+//     const { productId } = request.params;
+//     const product = product.find(product => product.id == productId);
+
 // })
 
 module.exports = server;
