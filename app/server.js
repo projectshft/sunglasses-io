@@ -46,16 +46,16 @@ router.get("/v1/sunglasses", (request, response) => {
     const { query, sort } = queryString.parse(parsedUrl.query);
     let glassesToReturn = [];
     if (query !== undefined) {
-        queryLowerCase = query.toLowerCase();
+        let queryLowerCase = query.toLowerCase();
 
         glassesToReturn = sunglasses.filter(item => {
-            descLowerCase = item.description.toLowerCase();
+           let descLowerCase = item.description.toLowerCase();
 
             return descLowerCase.includes(queryLowerCase)
         });
 
         sunglasses.filter(item => {
-            nameLowerCase = item.name.toLowerCase();              /////////CASE INSENSITIVITY NOT WORKING!!
+            let nameLowerCase = item.name.toLowerCase();
 
             if(nameLowerCase.includes(queryLowerCase) && !glassesToReturn.includes(item)) {
                 glassesToReturn.push(item)
@@ -82,12 +82,12 @@ router.get("/v1/brands", (request, response) => {
     const { query, sort } = queryString.parse(parsedUrl.query);
     let brandsToReturn = [];
     if (query !== undefined) {
-        queryLowerCase = query.toLowerCase();
+       let queryLowerCase = query.toLowerCase();
 
         brandsToReturn = brands.filter(item => {
-            nameLowerCase = item.name.toLowerCase();
+           let nameLowerCase = item.name.toLowerCase();
 
-            nameLowerCase.includes(queryLowerCase)
+            return nameLowerCase.includes(queryLowerCase)
         });
 
         if (!brandsToReturn) {
