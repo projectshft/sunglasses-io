@@ -68,7 +68,16 @@ describe("/GET sunglasses", () => {
                 done();
             });
     });
-
+    it("fails when unrecognized property", done => {
+       chai
+            .request(server)
+            .get("/v1/sunglasses?sort=edible")
+            .end((err,res) => {
+                expect(err).to.not.be.null;
+                expect(res).to.have.status(404);
+                done();
+            });
+    });
 });
 
 
