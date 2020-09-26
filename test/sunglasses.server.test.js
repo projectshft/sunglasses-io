@@ -95,10 +95,7 @@ describe('GET/ products by brand Id', () => {
 });
 
 //GET PRODUCTS
-//TODO: parseUrl
-//TODO: make search comparisons case sensitive
-//TODO: return multiple matches
-describe('GET/ products by a query term', () => {
+describe('GET/ products by a search term', () => {
   it('should return unique results that match unique query string (a 1:1 match)', (done) => {
     // act
     chai
@@ -128,7 +125,7 @@ describe('GET/ products by a query term', () => {
         expect('Content-Type', 'application/json');
         res.should.have.status(200);
         res.body.should.be.an('array');
-        // res.body.length.should.be.eql(1);
+        res.body.length.should.be.eql(6);
         done();
       });
   });
@@ -138,6 +135,20 @@ describe('GET/ products by a query term', () => {
     chai
       .request(server)
       .get('/api/products?searchTerm=Cats')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
+  it('should ERROR if query string is blank', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/products?searchTerm=')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);

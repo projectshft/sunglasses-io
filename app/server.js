@@ -109,10 +109,12 @@ router.get('/api/products', (request, response) => {
 
   //confirm that search term was entered
   if (parsedUrl.query.searchTerm) {
-    // See if there is an exact match and password
+    // convert search term to lower case
     let searchTermLC = parsedUrl.query.searchTerm.toLowerCase();
     products.forEach((product) => {
+      //convert product names to lower case
       let productNameLC = product.name.toLowerCase();
+      //find matches and push to array of productsToReturn
       if (productNameLC.includes(searchTermLC)) {
         productsToReturn.push(product);
         return productsToReturn;
@@ -126,6 +128,8 @@ router.get('/api/products', (request, response) => {
       return response.end(JSON.stringify(productsToReturn));
     }
   }
+  response.writeHead(204, "No matching products found. Please search again", { "Content-Type": "application/json" });
+  return response.end();
 });
 
 
