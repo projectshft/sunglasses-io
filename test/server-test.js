@@ -111,6 +111,7 @@ describe('POST /login should process login', () => {
       .end((err, res) => {
         // assert
         testToken = res.body;
+        console.log('testToken ', testToken);
         res.should.have.status(200);
         res.body.should.be.a('string'); 
         done();
@@ -137,12 +138,12 @@ describe('POST /login should process login', () => {
 
 describe('GET /cart return cart contents', () => {
   it('requires valid token to return results', done => {
-   console.log('testToken here ', testToken);
+   console.log(`about to try /api/cart?accessToken=${testToken}`);
     chai
       // arrange  
       .request(server)
       // act
-      .get('/api/cart?accessToken=${testToken')
+      .get(`/api/cart?accessToken=${testToken}`)
       .end((err, res) => {
         // assert
         res.should.have.status(200);
