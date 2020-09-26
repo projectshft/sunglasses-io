@@ -1,5 +1,33 @@
 let { expect } = require('chai');
 let ShoppingCart = require('../modules/shopping-cart')
+let Sunglasses = require('../app/models/sunglasses')
+
+let chai = require('chai');
+let chaiHttp = require('chai-http');
+let server = require('../app/server');
+let should = chai.should();
+
+chai.use(chaiHttp);
+
+// beforeEach(() => {
+//     Sunglasses.removeAll();
+// })
+
+describe('Sunglasses', () => {
+    describe('/Get sunglasses', () => {
+        it('should GET all the sunglasses', done => {
+            chai
+            .request(server)
+            .get('/sunglasses')
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(0);
+                done();
+            });
+        });
+    });
+});
 
 describe('The shopping cart', () => {
     describe('subtotal should', () => {

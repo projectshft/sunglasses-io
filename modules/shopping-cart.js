@@ -7,4 +7,7 @@ module.exports = class ShoppingCart {
             return accumulatedSubtotal + item.quantity * item.price;
         }, 0)
     }
+    add(item) {
+        this._items.push(item);
+    }
 }
