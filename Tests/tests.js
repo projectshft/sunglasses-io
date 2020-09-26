@@ -121,7 +121,16 @@ describe("/GET brands", () => {
                 done();
             });
     });
-    
+    it("fails when no brands match query", done => {
+        chai
+            .request(server)
+            .get("/v1/brands?query=Apple")
+            .end((err, res) => {
+                expect(err).to.not.be.null;
+                expect(res).to.have.status(404);
+                done();
+            });
+    });
 });
 
 
