@@ -1,10 +1,11 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const uid = require('rand-token').uid;
+const url = require("url");
 
 const PORT = 8080;
 
@@ -33,6 +34,45 @@ server.listen(PORT, err => {
     users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
 
     user = users[0];
-})
+});
+
+const saveCurrentUSer = (currentUser) => {
+    users[0] = currentUser;
+    fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
+}
+
+router.get("/sunglasses", (request, response) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    const { query, sort } = queryString.parse(parsedUrl.query);
+    let glassesToReturn = [];
+    if (query !== undefined) {
+        glassesToReturn = sunglasses.filter(item => item.description.includes(query));
+
+        if(!glassesToReturn) {
+            response.writeHead(404, "There are no glasses that match your search");
+            return response.end();
+        }
+    } else {
+        glassesToReturn = sunglasses;
+    }
+    if (sort !== undefined) {
+        glassesToReturn.sort((a, b) => a[sort] - b[sort]);
+    }
+    response.writeHead(200, {"constent-Type": "application/json"});
+    return response.end(JSON.stringify(glassesToReturn));
+});
+
+router.get("/me", (request, response) => {
+    if(!user) {
+        response.writeHead(404, "User not found");
+        return response.end();
+    }
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user));
+});
+
+// router.post("/me/add-to-cart", (request, response) => {
+//     const {}
+// })
 
 module.exports = server;
