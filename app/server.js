@@ -7,7 +7,7 @@ const Router = require('router');
 const bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
-//15 minute timeout set for login access token
+//timeout set for login access token
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 //state holding variables
@@ -222,7 +222,7 @@ let getValidTokenFromRequest = function (request) {
   let parsedUrl = require('url').parse(request.url, true);
 
   if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure its valid and not expired
+    // Verify the access token to make sure is valid and not expired
     let currentAccessToken = accessTokens.find((accessToken) => {
       return (
         accessToken.token == parsedUrl.query.accessToken &&
@@ -244,17 +244,20 @@ router.get('/api/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, 'You need to have access to this call to continue');
+    response.writeHead(401, 'You need to be logged in to continue');
     return response.end();
   } else {
     // Find cart for the valid user
-    let userCart = users.find((user) => {
+    let userCart;
+    users.find((user) => {
       if (user.login.username == currentAccessToken.username) {
-        return user.cart;
+        userCart = user.cart;
       }
     });
     response.writeHead(200, { 'Content-Type': 'application/json' });
     return response.end(JSON.stringify(userCart));
   }
 });
+
+
 module.exports = server;

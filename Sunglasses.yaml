@@ -115,9 +115,12 @@ paths:
             type: "string"
         "400":
           description: "Invalid username or password entry syntax"
+          schema:
+            $ref: '#/definitions/Error'
         "401":
           description: "Invalid username or password entered"
-          
+          schema:
+            $ref: '#/definitions/Error'
           
   /me/cart:
     get:
@@ -139,8 +142,11 @@ paths:
             type: 'array'
             items: 
               $ref: '#/definitions/Products'
-
-
+        '401':
+          description: "You need to be logged in to continue"
+          schema:
+            $ref: '#/definitions/Error'
+            
     post:
       tags:
       - 'POST new product to shopping cart'

@@ -228,16 +228,13 @@ describe('POST/ user login', () => {
   });
 });
 
-//NOT DONE
-//TODO: inlude access token in request call
-
+//GET cart
 describe('GET/ user cart', () => {
-  // test: response is all brands
   it('should GET the cart contents for a user with a valid access token', (done) => {
     // act
     chai
       .request(server)
-      .get('/api/me/cart?username=yellowleopard753&lastUpdated=Sat Sep 26 2020 18:04:31 GMT-0400 (Eastern Daylight Time)&accessToken=12345678abcdefgh')
+      .get('/api/me/cart?accessToken=12345678abcdefgh')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
@@ -245,6 +242,36 @@ describe('GET/ user cart', () => {
         expect('Content-Type', 'application/json');
         res.should.have.status(200);
         res.body.should.be.an('array');
+        done();
+      });
+  });
+
+  it('should ERROR if access token is not valid', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart?accessToken=1234567887654321')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if no access token is provided', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart?accessToken=')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
         done();
       });
   });
