@@ -148,15 +148,15 @@ describe("/POST add to cart", () => {
                 done();
             });
     });
-    // it. only("should not let user add an item that doesnt exist", done => {
-    //     chai
-    //         .request(server)
-    //         .post("/v1/me/sunglasses/50/add-to-cart")
-    //         .end((err, res) => {
-    //             expect(res).to.have.status(404);
-    //             done();
-    //         });
-    // });
+    it.only("should not let user add an item that doesnt exist", done => {
+        chai
+            .request(server)
+            .post("/v1/me/products/50/add-to-cart")
+            .end((err, res) => {
+                expect(res).to.have.status(404);
+                done();
+            });
+    });
 });
 
 
