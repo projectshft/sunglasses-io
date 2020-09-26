@@ -58,7 +58,7 @@ router.get("/sunglasses", (request, response) => {
     if (sort !== undefined) {
         glassesToReturn.sort((a, b) => a[sort] - b[sort]);
     }
-    response.writeHead(200, {"constent-Type": "application/json"});
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(glassesToReturn));
 });
 
