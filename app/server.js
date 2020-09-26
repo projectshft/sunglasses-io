@@ -46,18 +46,20 @@ router.get("/v1/sunglasses", (request, response) => {
     const { query, sort } = queryString.parse(parsedUrl.query);
     let glassesToReturn = [];
     if (query !== undefined) {
-        query.toLowerCase();
+        queryLowerCase = query.toLowerCase();
 
         glassesToReturn = sunglasses.filter(item => {
-            item.description.toLowerCase();
+            // item.description.toLowerCase();
+            descLowerCase = item.description.toLowerCase();
 
-            return item.description.includes(query)
+            return descLowerCase.includes(queryLowerCase)
         });
 
         sunglasses.filter(item => {
-            item.name.toLowerCase();                /////////CASE INSENSITIVITY NOT WORKING!!
+            // item.name.toLowerCase();  
+            nameLowerCase = item.name.toLowerCase();              /////////CASE INSENSITIVITY NOT WORKING!!
 
-            if(item.name.includes(query) && !glassesToReturn.includes(item)) {
+            if(nameLowerCase.includes(queryLowerCase) && !glassesToReturn.includes(item)) {
                 glassesToReturn.push(item)
             }
         });

@@ -26,7 +26,7 @@ describe("/GET sunglasses", () => {
     it.only("should limit results to those with case insensitive query string", done => {
         chai
             .request(server)
-            .get("/v1/sunglasses?query=best")
+            .get("/v1/sunglasses?query=BesT")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -40,7 +40,7 @@ describe("/GET sunglasses", () => {
     it.only("should return products with case insensitive query string in name", done => {
         chai
             .request(server)
-            .get("/v1/sunglasses?query=Super")
+            .get("/v1/sunglasses?query=SupEr")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
