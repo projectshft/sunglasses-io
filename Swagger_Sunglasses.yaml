@@ -6,11 +6,11 @@ info:
 host: api.sunglasses.com
 schemes:
   - https
-basePath: /v1
+basePath: /api
 produces:
   - application/json
 paths:
-  /api/brands:
+  /brands:
     get:
       summary: Brands
       description: |
@@ -28,6 +28,85 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /brands/{brandId}/products:
+    get:
+      summary: Products of a brand
+      description: |
+        This endpoint returns the products associated with a specific brand
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the certain brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products associated with that brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint lets a user search for specific products based on a search term
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        '400':
+          description: Incorrect search parameters
+          schema:
+            $ref: '#/definitions/Error'  
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
+  /login:
+    post:
+      summary: User login
+      description: |
+        The Login endpoint logs a user into the website
+      parameters:
+        - name: Login
+          in: body
+          description: Logging in the user
+          required: true
+          schema:
+            $ref: '#/definitions/Login'
+      tags:
+        - Login
+      responses:
+        '200':
+          description: Successfully logs a user into the system
+          schema:
+              $ref: '#/definitions/AccessToken'
+        '401':
+          description: Incorrect username and password
+          schema:
+            $ref: '#/definitions/Error'  
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'  
 definitions:
   Brands:
     type: object
@@ -38,6 +117,45 @@ definitions:
       name:
         type: string
         description: The name of the brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a certain product
+      categoryId:
+        type: string
+        description: Unique identifier for the brand of the product
+      name:
+        type: string
+        description: The name of the product  
+      description:
+        type: string
+        description: The description of the product
+      price:
+        type: integer
+        description: The price of the product
+      imageUrls:
+        type: string
+        description: The URL associated with this product
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: The username of the person logging in
+      password:
+        type: string
+        description: The password of the person logging in
+  AccessToken:
+    type: object
+    properties:
+      username:
+        type: string
+        description: The username associated to the logged in user
+      token:
+        type: string
+        description: A token that associates a logged in user
   Error:
     type: object
     properties:
