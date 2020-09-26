@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: 'Sunglasses API'
   description: 'See your app clearly with the Sunglasses API'
@@ -14,21 +14,13 @@ produces:
   
   
 paths:
-
-
   /brands:
     get:
       tags:
         - 'GET brands'
-      summary: 'Brands of Sunglasses'
+      summary: 'Brands of sunglasses sold by Sungasses-io'
       description: |
-        The Brands endpoint returns information about all brands of sunglasses sold by Sunglasses-io. The response includes all of the brand names and their associated ids.
-      parameters:
-        - name: 'query'
-          in: 'query'
-          description: 'Brands of sunglasses.'
-          required: false
-          type: 'string'
+        The GET brands endpoint returns information about all brands of sunglasses sold by Sunglasses-io. The response includes all of the brand names and their associated ids.
       responses:
         '200':
           description: 'An array of brands.'
@@ -41,15 +33,15 @@ paths:
           schema:
             $ref: '#/definitions/Error'
             
-  /brands/{id}/products:
+  /brands/{brandId}/products:
     get:
       tags:
         - 'GET products by brand Id'
-      summary: 'Brands of Sunglasses'
+      summary: 'Sunglasses products sold by Sunglasses-io limited by brand'
       description: |
-        The get products by brand endpoint returns information about all products of sunglasses associated with a brand sold by Sunglasses-io. The response includes the brand name, product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+        The GET products by brand endpoint returns information about all sunglasses products sold by Sunglasses-io limited by a brand. The response includes the brand name, product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
       parameters:
-        - name: 'id'
+        - name: 'brandId'
           in: 'path'
           description: 'The id of a brand of sunglasses.'
           required: true
@@ -62,24 +54,21 @@ paths:
             items:
               $ref: '#/definitions/Products'
         '204':
-          description: '204: That brand was not found'
+          description: '204: That brand or product was not found'
           schema:
             $ref: '#/definitions/Error'
-        '204':
-          description: '204: No products were found for that brand'
-          schema:
-            $ref: '#/definitions/Error'
+
             
-  /products/{productId}:
+  /products:
     get:
       tags:
-        - 'GET products by a query term'
-      summary: 'Sunglasses Products'
+        - 'GET products by a search term'
+      summary: 'Sunglasses products sold by Sunglasses-io'
       description: |
-        The Products endpoint returns information about the sunglasses products offered by Sunglasses-io. If the search term matches a product name, that product will be returned. If no product names match the search term, all products will be returned. The response includes the product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
+        The Products endpoint returns information about the sunglasses products offered by Sunglasses-io. If the search term (which will be checked in lower case) is included in one or more product names, those products will be returned. The response includes the product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
       parameters:
-        - name: 'productId'
-          in: 'path'
+        - name: 'searchTerm'
+          in: 'query'
           description: 'A product search query string.'
           required: true
           type: 'string'
@@ -98,10 +87,10 @@ paths:
   /login:
     post:
       tags:
-      - "user"
+      - "POST user data to log existing user into the system"
       summary: "Logs user into the system"
       description: "|
-      The login endpoint supports user login."
+      The login endpoint supports user login and generates an access token."
       operationId: "loginUser"
       produces:
       - "application/json"
@@ -118,20 +107,13 @@ paths:
         type: "string"
       responses:
         "200":
-          description: "successful operation"
+          description: "Successful operation. Access token generated and number of failed login responses set to 0"
           schema:
             type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
         "400":
-          description: "Invalid username/password supplied"
+          description: "Invalid username or password entry syntax"
+        "401":
+          description: "Invalid username or password entered"
           
           
   /me/cart:
@@ -161,16 +143,12 @@ paths:
         '200':
           description: An array of goals
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Goal'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+            type: string
+
+
             
             
-  /me/cart/{productId}:
+  /me/cart:
     post:
       tags:
       - User
@@ -189,13 +167,13 @@ paths:
             $ref: '#/definitions/Error'
             
             
-  /me/cart/{productId}:
+  /me/cart/{productId}/deleteProductFromCart:
     delete:
       summary: Accept a Goal
       description: |
         This endpoint allows you accept a given goal
       parameters:
-        - name: id
+        - name: productId
           in: path
           description: The id of the goal to accept
           required: true
@@ -211,14 +189,14 @@ paths:
             $ref: '#/definitions/Error'
             
             
-  /me/cart/{productId}/{productQuantity}:
+  /me/cart/{productId}:
     post:
       summary: Achieve a Goal
       description: |
         This endpoint allows you achieve a given goal
       parameters:
-        - name: id
-          in: path
+        - name: 'productId'
+          in: 'query'
           description: The id of the goal to achieve
           required: true
           type: string

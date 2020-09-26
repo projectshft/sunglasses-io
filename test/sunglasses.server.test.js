@@ -144,6 +144,7 @@ describe('GET/ products by a search term', () => {
         done();
       });
   });
+  
   it('should ERROR if query string is blank', (done) => {
     // act
     chai
