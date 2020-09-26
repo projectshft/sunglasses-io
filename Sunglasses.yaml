@@ -37,14 +37,14 @@ paths:
             items:
               $ref: '#/definitions/Brands'
         '204':
-          description: '204: no content for brands found (an empty array)'
+          description: '204: There are no brands to return'
           schema:
             $ref: '#/definitions/Error'
             
   /brands/{id}/products:
     get:
       tags:
-        - 'GET products by brand'
+        - 'GET products by brand Id'
       summary: 'Brands of Sunglasses'
       description: |
         The get products by brand endpoint returns information about all products of sunglasses associated with a brand sold by Sunglasses-io. The response includes the brand name, product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
@@ -62,7 +62,11 @@ paths:
             items:
               $ref: '#/definitions/Products'
         '204':
-          description: '204: no content found'
+          description: '204: That brand was not found'
+          schema:
+            $ref: '#/definitions/Error'
+        '204':
+          description: '204: No products were found for that brand'
           schema:
             $ref: '#/definitions/Error'
             
@@ -80,13 +84,16 @@ paths:
           required: true
           type: 'string'
       responses:
-        200:
+        '200':
           description: 'Products'
           schema:
             type: 'array'
             items:
               $ref: '#/definitions/Products'
-    
+        '204':
+          description: '204: No matching products found. Please search again'
+          schema:
+            $ref: '#/definitions/Error'
   
   /login:
     post:
