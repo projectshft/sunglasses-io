@@ -5,7 +5,7 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server.js');
 let should = chai.should();
-let sinon = require('sinon');
+// let sinon = require('sinon');
 let testToken = '';
 chai.use(chaiHttp);
 
@@ -131,55 +131,18 @@ describe('POST /login should process login', () => {
         done();
       });
   });
-
-  // attempt login with Sinon for better implementation testing
-  // let Auth = {
-  //   attempt() {
-  //     // implementation here
-  //   }
-  // };
-  
-  // class Unauthorized {}
-  
-  // function login(credentials) {
-  //   return Auth.attempt(credentials).then(
-  //     auth => {
-  //       return auth.user;
-  //     },
-  //     () => {
-  //       throw new Unauthorized();
-  //     }
-  //   );
-  // }
-  // describe('the login function', () => {
-  //   it('should resolve with the user if authenticated', () => {});
-  
-  //   it('should reject with Unauthorized if unauthenticated', () => {});
-  // });
-  // this isn't in spec and is at-risk for implmentation
-  /* it('expires and removes token on /logout', done => {
-
-    chai
-      // arrange  
-      .request(server)
-      // act
-      .post('/api/logout') // for future notes: https://tinyurl.com/yy9ypzzw
-      .end((err, res) => {
-        // assert
-        res.should.have.status(200);
-        done();
-      });
-  }); */
 });
+  
+
 
 describe('GET /cart return cart contents', () => {
   it('requires valid token to return results', done => {
-
+   console.log('testToken here ', testToken);
     chai
       // arrange  
       .request(server)
       // act
-      .post('/api/cart')
+      .get('/api/cart?accessToken=${testToken')
       .end((err, res) => {
         // assert
         res.should.have.status(200);
@@ -193,7 +156,7 @@ describe('GET /cart return cart contents', () => {
       // arrange  
       .request(server)
       // act
-      .post('/api/cart')
+      .get('/api/cart')
       .end((err, res) => {
         // assert
         res.should.have.status(200);
@@ -291,3 +254,43 @@ describe('POST /cart/:productId removes product from cart', () => {
       });
   });
 });
+
+
+// attempt login with Sinon for better implementation testing
+  // let Auth = {
+  //   attempt() {
+  //     // implementation here
+  //   }
+  // };
+  
+  // class Unauthorized {}
+  
+  // function login(credentials) {
+  //   return Auth.attempt(credentials).then(
+  //     auth => {
+  //       return auth.user;
+  //     },
+  //     () => {
+  //       throw new Unauthorized();
+  //     }
+  //   );
+  // }
+  // describe('the login function', () => {
+  //   it('should resolve with the user if authenticated', () => {});
+  
+  //   it('should reject with Unauthorized if unauthenticated', () => {});
+  // });
+  // this isn't in spec and is at-risk for implmentation
+  /* it('expires and removes token on /logout', done => {
+
+    chai
+      // arrange  
+      .request(server)
+      // act
+      .post('/api/logout') // for future notes: https://tinyurl.com/yy9ypzzw
+      .end((err, res) => {
+        // assert
+        res.should.have.status(200);
+        done();
+      });
+  }); */
