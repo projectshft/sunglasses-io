@@ -43,10 +43,33 @@ let server = http.createServer(function (request, response) {
 
 // create route for brands, will return an array of objects aka the brands
 myRouter.get('/api/brands', function(request,response) {
-  response.writeHead(200, { "Content-Type": "application/json" });
-  // return the brands
-  return response.end(JSON.stringify(brands));
+  if (brands) {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    // return the brands
+    return response.end(JSON.stringify(brands));
+  }
 });
+// create route to get products related to a certain brand
+myRouter.get('/api/brands/:brandId/products', function(request, response) {
+  //verify that the brandId exists and matches with an Id we have
+  let brand = brands.find((brand) => {
+    return brand.id == request.params.brandId
+  })
+  //if the brand does not exist, return an error
+  if (!brand) {
+    response.writeHead(404, "The brand ID is incorrect");
+    response.end()
+  }
+  else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    let productsAssociatedWithThisBrand = products.filter((product) => {
+      return product.categoryId === request.params.brandId
+    })
+    // return all of the products associated with the brand
+    return response.end(JSON.stringify(productsAssociatedWithThisBrand))
+  }
+  
+})
 
 
 module.exports = server;

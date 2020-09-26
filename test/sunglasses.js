@@ -9,7 +9,7 @@ chai.use(chaiHttp);
 
 // tests for the brands GET endpoint 
 describe('/GET brands', () => {
-    // check for the correct array returned
+    // check for the correct array of all brands
     it('it should GET all the brands', done => {
         chai
         .request(server)
@@ -28,13 +28,24 @@ describe('/GET brands', () => {
 describe('GET brands/:id/products', () => {
     // check for an array
     it('it should return an array', done => {
-        chai.request(server)
+        chai
+        .request(server)
         .get('/api/brands/3/products')
         .end((err, res) => {
             res.should.have.status(200);
             res.body.should.be.an('array');
             done();
         })
+    })
+    //check for a correct error to be thrown
+    it('it should return an error if the brand does not exist', done => {
+        chai
+        .request(server)
+        .get('/api/brands/7/products')
+        .end((err, res) => {
+            res.should.have.status(404);
+            done();
+        })       
     })
 
 })
