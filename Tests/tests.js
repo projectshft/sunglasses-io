@@ -12,7 +12,7 @@ describe("/GET products", () => {
     it.only("should GET all products", done => {
         chai
         .request(server)
-        .get('/v1/products')
+        .get('/api/products')
         .end((err, res) => {
             assert.isNotNull(res.body);
             expect(err).to.be.null;
@@ -26,7 +26,7 @@ describe("/GET products", () => {
     it.only("should limit results to those with case insensitive query string", done => {
         chai
             .request(server)
-            .get("/v1/products?query=BesT")
+            .get("/api/products?query=BesT")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -40,7 +40,7 @@ describe("/GET products", () => {
     it.only("should return products with case insensitive query string in name", done => {
         chai
             .request(server)
-            .get("/v1/products?query=SupEr")
+            .get("/api/products?query=SupEr")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -54,7 +54,7 @@ describe("/GET products", () => {
     it.only("returns all products if query is missing", done => {
         chai
             .request(server)
-            .get("/v1/products?query=")
+            .get("/api/products?query=")
             .end((err, res) => {
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
@@ -67,7 +67,7 @@ describe("/GET products", () => {
     it.only("should sort results when given sort parameter", done => {
         chai
             .request(server)
-            .get("/v1/products?sort=price")
+            .get("/api/products?sort=price")
             .end((err,res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -82,7 +82,7 @@ describe("/GET products", () => {
     it("fails when unrecognized property", done => {
        chai
             .request(server)
-            .get("/v1/products?sort=edible")
+            .get("/api/products?sort=edible")
             .end((err,res) => {
                 expect(err).to.not.be.null;
                 expect(res).to.have.status(404);
@@ -96,7 +96,7 @@ describe("/GET brands", () => {
     it.only("should GET all brands", done => {
         chai
             .request(server)
-            .get("/v1/brands")
+            .get("/api/brands")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -110,7 +110,7 @@ describe("/GET brands", () => {
     it.only("should limit results to those with case insensitive query string", done => {
         chai
             .request(server)
-            .get("/v1/brands?query=ray")
+            .get("/api/brands?query=ray")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -124,7 +124,7 @@ describe("/GET brands", () => {
     it("fails when no brands match query", done => {
         chai
             .request(server)
-            .get("/v1/brands?query=Apple")
+            .get("/api/brands?query=Apple")
             .end((err, res) => {
                 expect(err).to.not.be.null;
                 expect(res).to.have.status(404);
@@ -133,13 +133,28 @@ describe("/GET brands", () => {
     });
 });
 
+describe("/GET products by brand", () => {
+    it.only("should return all products of specified brand", done => {
+        chai
+            .request(server)
+            .get("/api/brands/1/products")
+            .end((err, res) => {
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(3);
+                done();
+            });
+    });
+});
 
 
 describe("/POST add to cart", () => {
     it.only("should POST added item to cart", done => {
         chai
             .request(server)
-            .post("/v1/me/products/1/add-to-cart")
+            .post("/api/me/products/1/add-to-cart")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -148,16 +163,17 @@ describe("/POST add to cart", () => {
                 done();
             });
     });
-    it.only("should not let user add an item that doesnt exist", done => {
+    it.only("should not let user add product that doesnt exist", done => {
         chai
             .request(server)
-            .post("/v1/me/products/50/add-to-cart")
+            .post("/api/me/products/50/add-to-cart")
             .end((err, res) => {
                 expect(res).to.have.status(404);
                 done();
             });
     });
 });
+
 
 
 

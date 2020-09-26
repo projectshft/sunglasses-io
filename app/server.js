@@ -41,7 +41,7 @@ const saveCurrentUser = (currentUser) => {
     fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
 }
 
-router.get("/v1/products", (request, response) => {
+router.get("/api/products", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query, sort } = queryString.parse(parsedUrl.query);
     let glassesToReturn = [];
@@ -77,7 +77,7 @@ router.get("/v1/products", (request, response) => {
     return response.end(JSON.stringify(glassesToReturn));
 });
 
-router.get("/v1/brands", (request, response) => {
+router.get("/api/brands", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query, sort } = queryString.parse(parsedUrl.query);
     let brandsToReturn = [];
@@ -104,7 +104,7 @@ router.get("/v1/brands", (request, response) => {
     return response.end(JSON.stringify(brandsToReturn));
 })
 
-router.get("/v1/me", (request, response) => {
+router.get("/api/me", (request, response) => {
     if(!user) {
         response.writeHead(404, "User not found");
         return response.end();
@@ -114,7 +114,7 @@ router.get("/v1/me", (request, response) => {
 });
 
 //ADD A PRODUCT TO USER CART
-router.post("/v1/me/products/:productId/add-to-cart", (request, response) => {
+router.post("/api/me/products/:productId/add-to-cart", (request, response) => {
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
     if(!product) {
