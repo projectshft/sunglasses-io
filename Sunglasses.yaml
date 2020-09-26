@@ -16,8 +16,8 @@ produces:
 paths:
   /brands:
     get:
-      tags:
-        - 'GET brands'
+      tags: 
+        - 'GET brands of sunglasses'
       summary: 'Brands of sunglasses sold by Sungasses-io'
       description: |
         The GET brands endpoint returns information about all brands of sunglasses sold by Sunglasses-io. The response includes all of the brand names and their associated ids.
@@ -96,9 +96,7 @@ paths:
       - "POST user data to log existing user into the system"
       summary: "Logs user into the system"
       description: |
-      The login endpoint supports user login and generates an access token.
-      produces:
-      - "application/json"
+        The login endpoint supports user login and generates an access token. 
       parameters:
       - name: "username"
         in: "query"
@@ -123,8 +121,9 @@ paths:
           
   /me/cart:
     get:
-      tags: 'GET shopping cart'
-      summary: 'The shopping cart for a validated user'
+      tags: 
+        - 'GET shopping cart'
+      summary: 'View shopping cart for a validated user'
       description: |
         The GET cart endpoint returns the contents of a validated user's shopping cart. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
       parameters:
@@ -135,46 +134,45 @@ paths:
           type: 'string'
       responses:
         '200':
-          description: 'Shopping cart'
+          description: 'Contents of shopping cart'
           schema:
             type: 'array'
             items: 
               $ref: '#/definitions/Products'
 
-            
-            
-  /me/cart:
+
     post:
       tags:
-      - User
-      summary: User Profile
-      description: >-
-        The User Profile endpoint returns information about the Uber user that
-        has authorized with the application.
+      - 'POST new product to shopping cart'
+      summary: 'Add product to shopping cart of validated user'
+      description: |
+        This endpoint...
       responses:
         '200':
-          description: Profile information for a user
+          description: 'Contents of shopping cart'
           schema:
-            $ref: '#/definitions/User'
+            type: 'array'
+            items: 
+              $ref: '#/definitions/Products'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
             
             
-  /me/cart/{productId}/deleteProductFromCart:
+  /me/cart/{productId}:
     delete:
-      summary: Accept a Goal
+      tags:
+        - 'DELETE a product from shopping cart'
+      summary: 'DELETE product from shopping cart of a validated user'
       description: |
-        This endpoint allows you accept a given goal
+        This endpoint .......
       parameters:
         - name: productId
           in: path
-          description: The id of the goal to accept
+          description: 'The id of the product to delete'
           required: true
           type: string
-      tags:
-        - User
       responses:
         '200':
           description: Acceptance is successful
@@ -184,130 +182,30 @@ paths:
             $ref: '#/definitions/Error'
             
             
-  /me/cart/{productId}:
     post:
-      summary: Achieve a Goal
+      tags:
+        - 'POST a new quantity to a product in a shopping cart'
+      summary: 'Change the quantity of a product in the shopping cart of a validated user'
       description: |
-        This endpoint allows you achieve a given goal
+        This endpoint ...
       parameters:
         - name: 'productId'
+          in: path
+          description: 'The id of the product to change'
+          required: true
+          type: 'string'
+        - name: 'quantity'
           in: 'query'
-          description: The id of the goal to achieve
+          description: 'A numeric value for the new quantity'
           required: true
-          type: string
-      tags:
-        - User
+          type: 'number'
       responses:
         '200':
-          description: Achievement is successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-            
-            
-            
-  /me/goals/{id}/challenge/{userId}:
-    post:
-      summary: Challenge a Goal
-      description: |
-        This endpoint allows you challenge a user for given goal
-      parameters:
-        - name: id
-          in: path
-          description: The id of the goal to achieve
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user to challenge
-          required: true
-          type: string
-      tags:
-        - User
-      responses:
-        '200':
-          description: Challenge is successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /me/goals/{id}/gift/{userId}:
-    post:
-      summary: Gift a Goal
-      description: |
-        This endpoint allows you gift a given goal
-      parameters:
-        - name: id
-          in: path
-          description: The id of the goal to gift
-          required: true
-          type: string
-        - name: userId
-          in: path
-          description: The id user to gift the goal to
-          required: true
-          type: string
-      tags:
-        - User
-      responses:
-        '200':
-          description: Achievement is successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /categories:
-    get:
-      summary: Categories
-      description: >
-        Categories define groupings of goals for browsing.
-      parameters:
-        - name: limit
-          in: query
-          description: The number of results to limit the search to
-          required: false
-          type: number
-          format: int32
-      tags:
-        - Categories
-      responses:
-        '200':
-          description: An array of categories
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Category'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  /categories/{id}/goals:
-    get:
-      summary: Goals in Category
-      description: >
-        All the goals in a given category
-      parameters:
-        - name: id
-          in: path
-          description: The id of the category to search for goals in.
-          required: true
-          type: string
-      tags:
-        - Categories
-      responses:
-        '200':
-          description: An array of goals in the category
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Goal'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          description: 'Quantity successfully changed'
 
-
+            
+            
+            
 definitions:
   Brands:
     type: 'object'
@@ -317,9 +215,8 @@ definitions:
         description: 'Unique identifier representing a specific brand. For example, Oakley will have a different id than Ray Ban.'
       name:
         type: 'string'
-        description: 'Brand name.'
+        description: 'Brand name'
 
- 
   Products:
     type: 'object'
     properties:
@@ -344,12 +241,6 @@ definitions:
         items:
           type: 'string'
           description: 'Image URLs for the product.'
-
-
-  Cart:
-    type: 'array'
-    items: 'Products'
-      $ref: '#/definitions/Products'
 
   Error:
     type: 'string'
