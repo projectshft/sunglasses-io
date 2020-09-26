@@ -48,6 +48,12 @@ router.get("/v1/sunglasses", (request, response) => {
     if (query !== undefined) {
         glassesToReturn = sunglasses.filter(item => item.description.includes(query));
 
+        sunglasses.filter(item => {
+            if(item.name.includes(query) && !glassesToReturn.includes(item)) {
+                glassesToReturn.push(item)
+            }
+        });
+
         if(!glassesToReturn) {
             response.writeHead(404, "There are no glasses that match your search");
             return response.end();
