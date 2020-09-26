@@ -10,7 +10,6 @@ chai.use(chaiHttp);
 
 //GET BRANDS
 describe('GET/ brands', () => {
-  // test: response is all brands
   it('should GET all the sunglasses brands', (done) => {
     // act
     chai
@@ -46,7 +45,6 @@ describe('GET/ brands', () => {
 
 //GET PRODUCTS BY BRAND ID
 describe('GET/ products by brand Id', () => {
-  // test: response is all brands
   it('should GET all the products from one brand of sunglasses', (done) => {
     // act
     chai
@@ -97,13 +95,15 @@ describe('GET/ products by brand Id', () => {
 });
 
 //GET PRODUCTS
+//TODO: parseUrl
+//TODO: make search comparisons case sensitive
+//TODO: return multiple matches
 describe('GET/ products by a query term', () => {
-  // test: get products by a query term
-  it('should limit results to those with a query string', (done) => {
+  it('should return unique results that match unique query string (a 1:1 match)', (done) => {
     // act
     chai
       .request(server)
-      .get('/api/products/Peanut Butter')
+      .get('/api/products?searchTerm=Peanut%20Butter')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
@@ -116,11 +116,28 @@ describe('GET/ products by a query term', () => {
       });
   });
 
+  it('should return multiple results that match unique query string (a 1:many match)', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/products?searchTerm=Glasses')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        // res.body.length.should.be.eql(1);
+        done();
+      });
+  });
+
   it('should ERROR if no product matches query string', (done) => {
     // act
     chai
       .request(server)
-      .get('/api/products/Cats')
+      .get('/api/products?searchTerm=Cats')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
@@ -130,64 +147,74 @@ describe('GET/ products by a query term', () => {
         done();
       });
   });
-
-  // TO WORK ON
-  // it('should be case insensitive') .get ('api/products/peanut butter')
-  // it('should return multiple products if they match the query string', (done) => {
-  //   // act
-  //   chai
-  //     .request(server)
-  //     .get('/api/products/glas')
-  //     // assert
-  //     .end((err, res) => {
-  //       assert.isNotNull(res.body);
-  //       expect(err).to.be.null;
-  //       expect('Content-Type', 'application/json');
-  //       res.should.have.status(200);
-  //       res.body.should.be.an('array');
-  //       res.body.length.should.be.eql(1);
-  //       done();
-  //     });
-  // });
 });
 
-//NOT DONE
-// describe('POST/ user login', () => {
-//   it('should allow existing users to login', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .get('/api/login/yellowleopard753/jonjon')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(1);
-//         done();
-//       });
-//   });
+//POST LOGIN REQUEST
+//TODO: ERROR when access token times out
+//TODO: ERROR when >=3 login attempts
+describe('POST/ user login', () => {
+  it('should allow existing users to login', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/api/login?username=yellowleopard753&password=jonjon')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        //returning an access token string
+        res.body.should.be.a('string');
+        done();
+      });
+  });
 
-  // TO WORK ON: Allow 3 mistakes before locking out
-//   it('should throw an error when invalid username/pswd combination entered', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .get('/api/login/MissMaddie/jonjon')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(400);
-//         // res.body.should.be.an('array');
-//         // res.body.length.should.be.eql(1);
-//         done();
-//       });
-//   });
-// });
+  it('should ERROR when invalid username/pswd combination entered', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/api/login/?username=MissMaddie&password=jonjon')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR when username is excluded', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/api/login/?username=&password=jonjon')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(400);
+        done();
+      });
+  });
+
+  it('should ERROR when password is excluded', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/api/login/?username=yellowleopard753&password=')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(400);
+        done();
+      });
+  });
+});
 
 //NOT DONE
 // describe('GET/ currentUser cart', () => {
