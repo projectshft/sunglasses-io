@@ -34,28 +34,10 @@ definitions:
     properties:
       id:
         type: string
-        description: Unique identifier for a goal.
-      categoryId:
+        description: Unique identifier for a brand
+      name:
         type: string
-        description: The id of the category this goal belongs to.
-      description:
-        type: string
-        description: Description of product.
-      upVotes:
-        type: integer
-        format: int32
-        description: The number of up votes given to a goal
-      downVotes:
-        type: integer
-        format: int32
-        description: The number of down votes given to a goal
-      imageURL:
-        type: string
-        description: The URL for the image representing the goal
-      dateCreated:
-        type: string
-        format: date-time
-        description: The date the goal was created
+        description: The name of the brand
   Error:
     type: object
     properties:
