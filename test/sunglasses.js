@@ -25,7 +25,7 @@ describe('/GET brands', () => {
 })
 
 //tests for brands/:id/products GET endpoint
-describe('GET brands/:id/products', () => {
+describe('/GET brands/:id/products', () => {
     // check for an array
     it('it should return an array', done => {
         chai
@@ -47,5 +47,30 @@ describe('GET brands/:id/products', () => {
             done();
         })       
     })
+})
 
+//tests for products GET endpoint
+describe('/GET products', () => {
+    // check for an array 
+    it('it should return an array', done => {
+        chai
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            done();
+        });
+    });
+    //check for all 11 product objects within the array
+    it('it should return all products if no search query is inputted', done => {
+        chai
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.length.should.be.eql(11);
+            done();
+        });
+    })
 })
