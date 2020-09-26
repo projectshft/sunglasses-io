@@ -23,7 +23,7 @@ describe("/GET sunglasses", () => {
             done();
         });
     });
-    it.only("should limit results to those with a query string", done => {
+    it.only("should limit results to those with case insensitive query string", done => {
         chai
             .request(server)
             .get("/v1/sunglasses?query=best")
@@ -37,6 +37,20 @@ describe("/GET sunglasses", () => {
                 done();
             });
     });
+    it.only("should return products with case insensitive query string in name", done => {
+        chai
+            .request(server)
+            .get("/v1/sunglasses?query=Super")
+            .end((err, res) => {
+                assert.isNotNull(res.body);
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(1);
+                done();
+            })
+    })
     it.only("returns all products if query is missing", done => {
         chai
             .request(server)
@@ -93,7 +107,7 @@ describe("/GET brands", () => {
                 done();
             });
     });
-    
+
 });
 
 

@@ -46,9 +46,17 @@ router.get("/v1/sunglasses", (request, response) => {
     const { query, sort } = queryString.parse(parsedUrl.query);
     let glassesToReturn = [];
     if (query !== undefined) {
-        glassesToReturn = sunglasses.filter(item => item.description.includes(query));
+        query.toLowerCase();
+
+        glassesToReturn = sunglasses.filter(item => {
+            item.description.toLowerCase();
+
+            return item.description.includes(query)
+        });
 
         sunglasses.filter(item => {
+            item.name.toLowerCase();                /////////CASE INSENSITIVITY NOT WORKING!!
+
             if(item.name.includes(query) && !glassesToReturn.includes(item)) {
                 glassesToReturn.push(item)
             }
@@ -61,6 +69,7 @@ router.get("/v1/sunglasses", (request, response) => {
     } else {
         glassesToReturn = sunglasses;
     }
+
     if (sort !== undefined) {
         glassesToReturn.sort((a, b) => a[sort] - b[sort]);
     }
