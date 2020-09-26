@@ -19,15 +19,15 @@ paths:
   /brands:
     get:
       tags:
-        - 'Brands'
+        - 'GET brands'
       summary: 'Brands of Sunglasses'
       description: |
         The Brands endpoint returns information about all brands of sunglasses sold by Sunglasses-io. The response includes all of the brand names and their associated ids.
       parameters:
-        - name: 'brands'
+        - name: 'query'
           in: 'query'
           description: 'Brands of sunglasses.'
-          required: true
+          required: false
           type: 'string'
       responses:
         '200':
@@ -36,37 +36,60 @@ paths:
             type: 'array'
             items:
               $ref: '#/definitions/Brands'
-        '404':
-          description: '404: brands not found error'
+        '204':
+          description: '204: no content for brands found (an empty array)'
           schema:
             $ref: '#/definitions/Error'
             
-            
-  /products:
+  /brands/{id}/products:
     get:
       tags:
-        - 'Products'
-      summary: 'Product Types of Sunglasses'
+        - 'GET products by brand'
+      summary: 'Brands of Sunglasses'
       description: |
-        The Products endpoint returns information about the product types of sunglasses offered by Sunglasses-io. The response includes the product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+        The get products by brand endpoint returns information about all products of sunglasses associated with a brand sold by Sunglasses-io. The response includes the brand name, product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
       parameters:
-        - name: 'product'
-          in: 'query'
-          description: 'A product name.'
+        - name: 'id'
+          in: 'path'
+          description: 'The id of a brand of sunglasses.'
           required: true
           type: 'string'
       responses:
-        200:
-          description: 'An array of products.'
+        '200':
+          description: 'An array of products of a certain brand.'
           schema:
             type: 'array'
             items:
               $ref: '#/definitions/Products'
-        '404':
-          description: '404: products not found error'
+        '204':
+          description: '204: no content found'
           schema:
             $ref: '#/definitions/Error'
             
+  /products/{productId}:
+    get:
+      tags:
+        - 'GET products by a query term'
+      summary: 'Sunglasses Products'
+      description: |
+        The Products endpoint returns information about the sunglasses products offered by Sunglasses-io. If the search term matches a product name, that product will be returned. If no product names match the search term, all products will be returned. The response includes the product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
+      parameters:
+        - name: 'productId'
+          in: 'path'
+          description: 'A product search query string.'
+          required: true
+          type: 'string'
+      responses:
+        200:
+          description: 'Products'
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/Products'
+    
+            
+      
+ 
             
   /login:
     post:
@@ -105,6 +128,8 @@ paths:
               description: "date in UTC when token expires"
         "400":
           description: "Invalid username/password supplied"
+          
+          
   /goals:
     get:
       summary: Goals
@@ -139,14 +164,16 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+            
+            
   /me:
     get:
+      tags:
+      - User
       summary: User Profile
       description: >-
         The User Profile endpoint returns information about the Uber user that
         has authorized with the application.
-      tags:
-        - User
       responses:
         '200':
           description: Profile information for a user
@@ -395,12 +422,7 @@ definitions:
         items:
           $ref: '#/definitions/Goal'        
   Error:
-    type: object
+    type: 'string'
     properties:
-      code:
-        type: integer
-        format: int32
       message:
-        type: string
-      fields:
-        type: string
+        type: 'string'
