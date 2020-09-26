@@ -63,12 +63,12 @@ router.get("/v1/sunglasses", (request, response) => {
 });
 
 router.get("/v1/brands", (request, response) => {
-    const parsedUrl = url.parse(requet.originalUrl);
+    const parsedUrl = url.parse(request.originalUrl);
     const { query, sort } = queryString.parse(parsedUrl.query);
     let brandsToReturn = [];
     if (query !== undefined) {
-        brandsToReturn = brands.filter(category => {
-            category.name.includes(query)
+        brandsToReturn = brands.filter(item => {
+            item.name.includes(query)
         });
 
         if (!brandsToReturn) {
