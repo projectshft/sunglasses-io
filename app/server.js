@@ -62,6 +62,29 @@ router.get("/v1/sunglasses", (request, response) => {
     return response.end(JSON.stringify(glassesToReturn));
 });
 
+router.get("/v1/brands", (request, response) => {
+    const parsedUrl = url.parse(requet.originalUrl);
+    const { query, sort } = queryString.parse(parsedUrl.query);
+    let brandsToReturn = [];
+    if (query !== undefined) {
+        brandsToReturn = brands.filter(category => {
+            category.name.includes(query)
+        });
+
+        if (!brandsToReturn) {
+            response.writeHead(404, "No brands match query");
+            return response.end();
+        }
+    } else {
+        brandsToReturn = brands;
+    }
+    if (sort !== undefined) {
+        brandsToReturn.sort((a, b) => a[sort] - b[sort]);
+    }
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(brandsToReturn));
+})
+
 router.get("/v1/me", (request, response) => {
     if(!user) {
         response.writeHead(404, "User not found");
