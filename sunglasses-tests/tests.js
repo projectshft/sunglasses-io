@@ -14,7 +14,7 @@ describe('The shopping cart', () => {
 
         it('be the sum of the price * quantity for all the items', () => {
             //arrange
-            let shoppingCart = new shoppingCart([
+            let shoppingCart = new ShoppingCart([
                 {
                     id: 1,
                     quantity: 5,
@@ -38,27 +38,61 @@ describe('The shopping cart', () => {
             expect(shoppingCart.subtotal).to.equal(95);
         });
     });
-});
 
-describe('add method should', () => {
-    it('store the item in the shopping cart', () => {
-        //arrange
-        let shoppingCart = new ShoppingCart ([
-            {
-                id: 1,
-                quantity: 4,
-                price: 50
-            }
-        ]);
-
-        //act
-        shoppingCart.add({
-            id: 2,
-            quantity: 2,
-            price: 30
+    describe('add method should', () => {
+        it('store the item in the shopping cart', () => {
+            //arrange
+            let shoppingCart = new ShoppingCart ([
+                {
+                    id: 1,
+                    quantity: 4,
+                    price: 50
+                }
+            ]);
+    
+            //act
+            shoppingCart.add({
+                id: 2,
+                quantity: 2,
+                price: 30
+            });
+    
+            //assert
+            expect(shoppingCart._items).to.be.an('array');
+            expect(shoppingCart._items).to.deep.equal([
+                {
+                    id: 1,
+                    quantity: 4,
+                    price: 50
+                },
+                {
+                    id: 2,
+                    quantity: 2,
+                    price: 30
+                }
+            ]);
         });
 
-        //assert
+        it('return the item added to the shopping cart', () => {
+            let shoppingCart = new ShoppingCart([
+                {
+                    id: 1,
+                    quantity: 4,
+                    price: 50
+                },
+            ]);
 
+            let item = {
+                id: 2,
+                quantity: 2,
+                price: 30
+            };
+
+            let addedItem = shoppingCart.add(item);
+
+            expect(addedItem).to.equal(item)
+        })
     })
-})
+});
+
+
