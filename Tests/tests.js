@@ -53,7 +53,22 @@ describe("/GET sunglasses", () => {
                 done();
             });
     });
-    
+    it.only("should sort results when given sort parameter", done => {
+        chai
+            .request(server)
+            .get("/v1/sunglasses?sort=price")
+            .end((err,res) => {
+                assert.isNotNull(res.body);
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(11);
+                expect(res.body).to.be.sortedBy("price");
+                done();
+            });
+    });
+
 });
 
 
