@@ -1,0 +1,68 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the up and coming Sunglasses platform
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint returns all brands available to a customer
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a goal.
+      categoryId:
+        type: string
+        description: The id of the category this goal belongs to.
+      description:
+        type: string
+        description: Description of product.
+      upVotes:
+        type: integer
+        format: int32
+        description: The number of up votes given to a goal
+      downVotes:
+        type: integer
+        format: int32
+        description: The number of down votes given to a goal
+      imageURL:
+        type: string
+        description: The URL for the image representing the goal
+      dateCreated:
+        type: string
+        format: date-time
+        description: The date the goal was created
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

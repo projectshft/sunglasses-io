@@ -5,4 +5,4 @@ let server = require('../app/server');
 
 let should = chai.should();
 
-// chai.use(chaiHttp);
+chai.use(chaiHttp);
