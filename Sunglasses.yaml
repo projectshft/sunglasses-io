@@ -87,10 +87,7 @@ paths:
             items:
               $ref: '#/definitions/Products'
     
-            
-      
- 
-            
+  
   /login:
     post:
       tags:
@@ -130,7 +127,7 @@ paths:
           description: "Invalid username/password supplied"
           
           
-  /goals:
+  /me/cart:
     get:
       summary: Goals
       description: |
@@ -166,8 +163,8 @@ paths:
             $ref: '#/definitions/Error'
             
             
-  /me:
-    get:
+  /me/cart/{productId}:
+    post:
       tags:
       - User
       summary: User Profile
@@ -183,8 +180,10 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/goals/{id}/accept:
-    post:
+            
+            
+  /me/cart/{productId}:
+    delete:
       summary: Accept a Goal
       description: |
         This endpoint allows you accept a given goal
@@ -203,7 +202,9 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/goals/{id}/achieve:
+            
+            
+  /me/cart/{productId}/{productQuantity}:
     post:
       summary: Achieve a Goal
       description: |
@@ -223,6 +224,9 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+            
+            
+            
   /me/goals/{id}/challenge/{userId}:
     post:
       summary: Challenge a Goal
@@ -322,6 +326,8 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+
+
 definitions:
   Brands:
     type: 'object'
@@ -360,7 +366,7 @@ definitions:
           description: 'Image URLs for the product.'
 
 
-  Goal:
+  Cart:
     type: object
     properties:
       id:
@@ -387,16 +393,7 @@ definitions:
         type: string
         format: date-time
         description: The date the goal was created
-  Category:
-    type: object
-    properties:
-      id:
-        type: string
-        description: >-
-          The unique identifier given to the category
-      name:
-        type: string
-        description: The name of the category
+        
   User:
     type: object
     properties:
@@ -420,7 +417,9 @@ definitions:
           $ref: '#/definitions/Goal'    
       challengedGoals:
         items:
-          $ref: '#/definitions/Goal'        
+          $ref: '#/definitions/Goal'    
+          
+          
   Error:
     type: 'string'
     properties:

@@ -29,6 +29,27 @@ describe('GET/ brands', () => {
   });
 });
 
+//NOT DONE
+describe('GET/ products by brand Id', () => {
+  // test: response is all brands
+  it('should GET all the products from one brand of sunglasses', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/brands/1/products')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+});
+
 //GET PRODUCTS
 describe('GET/ products by a query term', () => {
   // test: get products by a query term
@@ -49,6 +70,7 @@ describe('GET/ products by a query term', () => {
       });
   });
 
+  //this should return AN ERROR if no genuine match
   it('should return all products if no product matches query string', (done) => {
     // act
     chai
@@ -86,6 +108,7 @@ describe('GET/ products by a query term', () => {
   // });
 });
 
+//NOT DONE
 describe('POST/ user login', () => {
   it('should allow existing users to login', (done) => {
     // act
@@ -121,8 +144,138 @@ describe('POST/ user login', () => {
         done();
       });
   });
+});
 
-})
+//NOT DONE
+describe('GET/ currentUser cart', () => {
+  // test: response is all brands
+  it('should GET the cart contents for currentUser', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/me/cart')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
 
+  it('should FAIL if currentUser is not logged in', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/me/cart')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+});
 
-describe
+//NOT DONE
+describe('POST/ a new item to currentUser cart', () => {
+  // test: response is all brands
+  it('should POST a new product to the currentUser cart', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/me/cart/1')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+});
+
+//NOT DONE
+describe('DELETE/ an item from currentUser cart', () => {
+  // test: response is all brands
+  it('should DELETE an item from currentUser cart', (done) => {
+    // act
+    chai
+      .request(server)
+      .delete('/me/cart/1')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+
+  it('should FAIL if currentUser is not logged in', (done) => {
+    // act
+    chai
+      .request(server)
+      .delete('/me/cart/1')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+});
+
+describe('POST/ a new quantity of an item in currentUser cart', () => {
+  // test: response is all brands
+  it('should POST a new quantity of an item in currentUser cart', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/me/cart/1/4')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+
+  it('should FAIL if currentUser is not logged in', (done) => {
+    // act
+    chai
+      .request(server)
+      .post('/me/cart/1/4')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(5);
+        done();
+      });
+  });
+});
