@@ -41,6 +41,13 @@ let server = http.createServer(function (request, response) {
   console.log(`Server is listening on ${PORT}`);
 });
 
+// create route for brands, will return an array of objects aka the brands
+myRouter.get('/api/brands', function(request,response) {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  // return the brands
+  return response.end(JSON.stringify(brands));
+});
+
 
 module.exports = server;
 
