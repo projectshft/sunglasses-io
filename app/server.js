@@ -41,7 +41,7 @@ const saveCurrentUSer = (currentUser) => {
     fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
 }
 
-router.get("/sunglasses", (request, response) => {
+router.get("/v1/sunglasses", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { query, sort } = queryString.parse(parsedUrl.query);
     let glassesToReturn = [];
@@ -62,7 +62,7 @@ router.get("/sunglasses", (request, response) => {
     return response.end(JSON.stringify(glassesToReturn));
 });
 
-router.get("/me", (request, response) => {
+router.get("/v1/me", (request, response) => {
     if(!user) {
         response.writeHead(404, "User not found");
         return response.end();
