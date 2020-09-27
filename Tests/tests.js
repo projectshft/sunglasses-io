@@ -171,7 +171,7 @@ describe("/POST add to cart", () => {
     it.only("should POST added item to cart", done => {
         chai
             .request(server)
-            .post("/api/me/cart/1")
+            .post("/api/me/cart?productId=1")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -183,7 +183,7 @@ describe("/POST add to cart", () => {
     it.only("should not let user add product that doesnt exist", done => {
         chai
             .request(server)
-            .post("/api/me/cart/50")
+            .post("/api/me/cart?productId=50")
             .end((err, res) => {
                 expect(res).to.have.status(404);
                 done();

@@ -131,6 +131,7 @@ router.post("/api/login", (request, response) => {
 
 });
 
+//GET USER CART
 router.get("/api/me/cart", (request, response) => {     ///////NEEDS TO RETURN CART FOR A USER
     if(!user) {
         response.writeHead(404, "User not found");
@@ -140,11 +141,12 @@ router.get("/api/me/cart", (request, response) => {     ///////NEEDS TO RETURN C
     return response.end(JSON.stringify(user.cart));
 });
 
-
 //ADD A PRODUCT TO USER CART
-router.post("/api/me/cart/:productId", (request, response) => {
-    const { productId } = request.params;
+router.post("/api/me/cart", (request, response) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    const { productId } = queryString.parse(parsedUrl.query);
     const product = products.find(item => item.id == productId);
+    
     if(!product) {
         response.writeHead(404, "Product not Found");
         return response.end();
