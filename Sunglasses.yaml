@@ -128,13 +128,7 @@ paths:
         - 'GET shopping cart'
       summary: 'View shopping cart for a validated user'
       description: |
-        The GET cart endpoint returns the contents of a validated user's shopping cart. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
-      parameters:
-        - name: 'accessToken'
-          in: 'query'
-          description: 'An access token for a validated user'
-          required: false
-          type: 'string'
+        The GET cart endpoint returns the contents of a validated user's shopping cart. Validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
       responses:
         '200':
           description: 'Contents of shopping cart'
@@ -144,9 +138,7 @@ paths:
               $ref: '#/definitions/Products'
         '401':
           description: "You need to be logged in to continue"
-          schema:
-            $ref: '#/definitions/Error'
-            
+
     post:
       tags:
       - 'POST new product to shopping cart'

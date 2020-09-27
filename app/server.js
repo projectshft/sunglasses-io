@@ -7,8 +7,8 @@ const Router = require('router');
 const bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
-//timeout set for login access token
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+// 2 day timeout set for login access token
+const TOKEN_VALIDITY_TIMEOUT = 2 * 24 * 60 * 60 * 1000;
 
 //state holding variables
 let brands = [];
@@ -22,7 +22,7 @@ let users = [];
 let accessTokens = [
   {
     username: 'yellowleopard753',
-    lastUpdated: 'Sat Sep 26 2020 22:19:31 GMT-0400 (Eastern Daylight Time)',
+    lastUpdated: 'Wed Sep 23 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
     token: '12345678abcdefgh',
   },
 ];
@@ -55,7 +55,6 @@ server.listen(PORT, (err) => {
 
   //populate users
   users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
-
 });
 
 router.get('/api/brands', (request, response) => {
@@ -210,7 +209,7 @@ router.post('/api/login', (request, response) => {
     } else {
       // Update the number of failed login attempts
       let numFailedForUser = getNumberOfFailedLoginRequestsForUsername(
-        request.body.username
+        parsedUrl.query.username
       );
       setNumberOfFailedLoginRequestsForUsername(
         parsedUrl.query.username,
@@ -229,18 +228,29 @@ router.post('/api/login', (request, response) => {
 
 // Helper method to process access token
 let getValidTokenFromRequest = function (request) {
-  let parsedUrl = require('url').parse(request.url, true);
-
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure is valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return (
-        accessToken.token == parsedUrl.query.accessToken &&
-        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
-      );
+  let newValidAccessToken;
+  if (request.body.token) {
+    // Verify the access token in the request to make sure is valid and not expired
+    accessTokens.find((accessToken) => {
+      let now = new Date();
+      //need to convert to date string to compare with request body date format
+      let requestTokenDate = new Date(request.body.lastUpdated);
+      if (
+        //verify that the request token matches a valid token
+        accessToken.token == request.body.token &&
+        //verify that the request update date is valid
+        now - requestTokenDate < TOKEN_VALIDITY_TIMEOUT
+      ) {
+        //create a new current token and update date
+        newValidAccessToken = {
+          username: request.body.username,
+          lastUpdated: new Date(),
+          token: request.body.token,
+        };
+      }
     });
-    if (currentAccessToken) {
-      return currentAccessToken;
+    if (newValidAccessToken) {
+      return newValidAccessToken;
     } else {
       return null;
     }

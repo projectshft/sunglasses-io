@@ -181,6 +181,7 @@ describe('GET/ products by a search term', () => {
 //TODO: ERROR when >=3 login attempts
 describe('POST/ user login', () => {
   it('should allow existing users to login', (done) => {
+    //arrange: a valid query string
     // act
     chai
       .request(server)
@@ -198,6 +199,7 @@ describe('POST/ user login', () => {
   });
 
   it('should ERROR when invalid username/pswd combination entered', (done) => {
+    //arrange: invalid username/pswd in query string  
     // act
     chai
       .request(server)
@@ -213,6 +215,7 @@ describe('POST/ user login', () => {
   });
 
   it('should ERROR when username is excluded', (done) => {
+    //arrange: no username in query string
     // act
     chai
       .request(server)
@@ -228,6 +231,7 @@ describe('POST/ user login', () => {
   });
 
   it('should ERROR when password is excluded', (done) => {
+    //arrange: no password in query string
     // act
     chai
       .request(server)
@@ -245,11 +249,19 @@ describe('POST/ user login', () => {
 
 //GET cart
 describe('GET/ user cart', () => {
-  it('should GET the cart contents for a user with a valid access token', (done) => {
+  it('should GET cart for user with valid access token', (done) => {
+    //arrange: a valid, current token
+    let accessToken =
+    {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };        
     // act
     chai
       .request(server)
-      .get('/api/me/cart?accessToken=12345678abcdefgh')
+      .get('/api/me/cart')
+      .send(accessToken)
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
@@ -261,11 +273,42 @@ describe('GET/ user cart', () => {
       });
   });
 
-  it('should ERROR if access token is not valid', (done) => {
+  it('should ERROR if access token is out of date', (done) => {
+    //arrange: an outdated token
+    let accessToken =
+    {
+      username: 'yellowleopard753',
+      lastUpdated: 'Wed Sep 23 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };        
     // act
     chai
       .request(server)
-      .get('/api/me/cart?accessToken=1234567887654321')
+      .get('/api/me/cart')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token is not valid', (done) => {
+    //arrange: access does not match hardcoded token for user in server
+    let accessToken =
+    {
+      username: 'yellowleopard753',
+      lastUpdated: 'Wed Sep 23 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '1234567891234567',
+    }; 
+    // act
+    chai
+      .request(server)
+      .get('/api/me/cart')
+      .send(accessToken)
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
@@ -277,10 +320,12 @@ describe('GET/ user cart', () => {
   });
 
   it('should ERROR if no access token is provided', (done) => {
+    //arrange: no access token provided.
+
     // act
     chai
       .request(server)
-      .get('/api/me/cart?accessToken=')
+      .get('/api/me/cart')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
