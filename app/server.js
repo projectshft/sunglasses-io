@@ -81,11 +81,14 @@ myRouter.get('/api/products', function(request,response) {
   // must get search query from the original url
   const parsedUrl = url.parse(request.originalUrl);
   const query = queryString.parse(parsedUrl.query);
-  //if query exists, filter products array to return products matching query
+  //if query exists, reduce products array to return products that match that products description or name
   if (query.search !== undefined) {
-      productsReturned = products.filter(product => {
-        return product.name == query.search
-    })
+      productsReturned = products.reduce((accumulator, product) => {
+        if (product.name.includes(query.search) || product.description.includes(query.search)) {
+          accumulator.push(product)
+        }
+        return accumulator
+    }, [])
     // if no products are returned, throw an error
     if (productsReturned.length === 0) {
       response.writeHead(400, 'No products match your search')
