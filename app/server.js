@@ -105,7 +105,7 @@ router.get("/api/brands", (request, response) => {
 })
 
 router.get("/api/brands/:id/products", (request, response) => {
-    const parsedUrl = url.parse(request.originalUrl);
+    // const parsedUrl = url.parse(request.originalUrl);
     // const { query } = queryString.parse(parsedUrl.query);
     const { id } = request.params;
     const brand = brands.find(item => item.id == id)
@@ -124,7 +124,11 @@ router.get("/api/brands/:id/products", (request, response) => {
     return response.end(JSON.stringify(productsToReturn));
 });
 
-router.get("/api/me", (request, response) => {
+router.post("/api/login", (request, response) => {
+
+});
+
+router.get("/api/me/cart", (request, response) => {
     if(!user) {
         response.writeHead(404, "User not found");
         return response.end();
@@ -133,8 +137,9 @@ router.get("/api/me", (request, response) => {
     return response.end(JSON.stringify(user));
 });
 
+
 //ADD A PRODUCT TO USER CART
-router.post("/api/me/products/:productId/add-to-cart", (request, response) => {
+router.post("/api/me/products/:productId/add-to-cart", (request, response) => { /////CHANGE ROUTE AND MAKE IT WORK!!!
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
     if(!product) {
