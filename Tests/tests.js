@@ -150,6 +150,22 @@ describe("/GET products by brand", () => {
 });
 
 //CART TESTS
+//RETURN CART
+describe("/GET cart", () => {
+    it.only("should GET user cart", done => {
+        chai
+            .request(server)
+            .post("/api/me/cart")
+            .end((err, res) => {
+                assert.isNotNull(res.body);
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                done();
+            });
+    });
+});
+
 //ADD ITEM
 describe("/POST add to cart", () => {
     it.only("should POST added item to cart", done => {
