@@ -107,6 +107,7 @@ router.get('/api/brands/:brandId/products', (request, response) => {
   return response.end(JSON.stringify(productsByBrandId));
 });
 
+//only included for error testing; not in Swagger API definitions
 router.get('/api/brands//products', (request, response) => {
   response.writeHead(400, 'Missing brandId in request');
   return response.end();
@@ -143,7 +144,7 @@ router.get('/api/products', (request, response) => {
       return response.end(JSON.stringify(productsToReturn));
     }
   }
-  response.writeHead(204, 'No matching products found. Please search again', {
+  response.writeHead(400, 'Search term required. Please try again', {
     'Content-Type': 'application/json',
   });
   return response.end();
@@ -261,21 +262,88 @@ let getValidTokenFromRequest = function (request) {
 
 // Only logged in users can access their cart
 router.get('/api/me/cart', (request, response) => {
+  //check for username in token
+  if (!request.body.username) {
+    response.writeHead(401, 'You need valid login credentials to continue');
+    return response.end();
+  }
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
-    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
-    response.writeHead(401, 'You need to be logged in to continue');
+    // If there isn't a valid access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, 'You need valid login credentials to continue');
     return response.end();
   } else {
-    // Find cart for the valid user
     let userCart;
     users.find((user) => {
+      //confirm that username assigned to token is valid
       if (user.login.username == currentAccessToken.username) {
+        //if valid, grab cart
         userCart = user.cart;
+        return userCart;
+      } else {
+        //if not, error out
+        response.writeHead(401, 'You need valid login credentials to continue');
+        return response.end();
       }
     });
     response.writeHead(200, { 'Content-Type': 'application/json' });
     return response.end(JSON.stringify(userCart));
+  }
+});
+
+router.post('/api/me/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, 'You need valid login credentials to continue');
+    return response.end();
+  } else {
+    // Find cart for the valid user
+    let userCart = [];
+    users.find((user) => {
+      //confirm that username assigned to token is valid
+      if (user.login.username == currentAccessToken.username) {
+        //if valid, grab cart
+        userCart = user.cart;
+        return userCart;
+      } else {
+        //if not, error out
+        response.writeHead(401, 'You need valid login credentials to continue');
+        return response.end();
+      }
+    });
+
+    let parsedUrl = require('url').parse(request.url, true);
+    //check that productId was included
+    if (!parsedUrl.query.productId) {
+      response.writeHead(400, 'ProductId required. Please search again', {
+        'Content-Type': 'application/json',
+      });
+      return response.end();
+    }
+
+    let firstUserCartlength = userCart.length;
+    let newUserCart = userCart;
+
+    products.forEach((product) => {
+      //find matching product and push into cart
+      if (product.id === parsedUrl.query.productId) {
+        newUserCart.push(product);
+        return newUserCart;
+      }
+    });
+
+    if (newUserCart.length === firstUserCartlength) {
+      response.writeHead(
+        204,
+        'No matching products found. Please search again',
+        { 'Content-Type': 'application/json' }
+      );
+      return response.end();
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(newUserCart));
+    }
   }
 });
 
