@@ -50,6 +50,7 @@ myRouter.get('/api/brands', function(request,response) {
     return response.end(JSON.stringify(brands));
   }
 });
+
 // create route to get products related to a certain brand
 myRouter.get('/api/brands/:brandId/products', function(request, response) {
   //verify that the brandId exists and matches with an Id we have
@@ -69,7 +70,8 @@ myRouter.get('/api/brands/:brandId/products', function(request, response) {
     // return all of the products associated with the brand
     return response.end(JSON.stringify(productsAssociatedWithThisBrand))
   } 
-})
+});
+
 // create route for products, utilizes a search query, if none is given returns all products
 myRouter.get('/api/products', function(request,response) {
   // need to create some if statements for search query 
@@ -79,6 +81,12 @@ myRouter.get('/api/products', function(request,response) {
     return response.end(JSON.stringify(products));
   }
 });
+
+// create a route for user login
+myRouter.post('/api/login', function(request,response) {
+  
+})
+
 
 
 module.exports = server;

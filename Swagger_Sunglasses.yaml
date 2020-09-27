@@ -99,6 +99,10 @@ paths:
           description: Successfully logs a user into the system
           schema:
               $ref: '#/definitions/AccessToken'
+        '400':
+          description: Incorrectly formatted request
+          schema:
+            $ref: '#/definitions/Error'
         '401':
           description: Incorrect username and password
           schema:
@@ -106,7 +110,109 @@ paths:
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'  
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: shows values in the user's cart
+      description: |
+        The GET me/cart endpoint returns the current items in the cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: The access token given during login
+          required: true
+          type: string
+      tags:
+        - User-Cart
+      responses:
+        '200':
+          description: Shows a list of your current cart items
+        '401':
+          description: Error, you don't have access to this cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Adding to your cart
+      description: |
+        The POST me/cart endpoint adds new products to your cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: The access token given during login
+          required: true
+          type: string
+      tags:
+        - User-Cart
+      responses:
+        '200':
+          description: Successfully adds a product to your cart
+        '401':
+          description: Error, you don't have access to this cart
+        '404':
+          description: Product not available
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    post:
+      summary: add certain product to cart
+      description: |
+        This endpoint allows you to add products to your cart based on their productId
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the certain product
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: The access token given during login
+          required: true
+          type: string
+      tags:
+        - User-Cart
+      responses:
+        '200':
+          description: Successfully adds a product to your cart
+        '401':
+          description: Error, you don't have access to this cart
+        '404':
+          description: Product not available
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: deletes a certain product from your cart
+      description: |
+        This endpoint allows you to delete products from your cart based on their productId
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the certain product
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: The access token given during login
+          required: true
+          type: string
+      tags:
+        - User-Cart
+      responses:
+        '200':
+          description: Successfully deleted a product in your cart
+        '401':
+          description: Error, you don't have access to this cart
+        '404':
+          description: Product not available
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 definitions:
   Brands:
     type: object
