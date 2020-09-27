@@ -67,9 +67,16 @@ myRouter.get('/api/brands/:brandId/products', function(request, response) {
     })
     // return all of the products associated with the brand
     return response.end(JSON.stringify(productsAssociatedWithThisBrand))
-  }
-  
+  } 
 })
+// create route for products, utilizes a search query, if none is given returns all products
+myRouter.get('/api/products', function(request,response) {
+  if (products) {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    // return the products
+    return response.end(JSON.stringify(products));
+  }
+});
 
 
 module.exports = server;
