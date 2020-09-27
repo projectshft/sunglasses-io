@@ -104,6 +104,26 @@ router.get("/api/brands", (request, response) => {
     return response.end(JSON.stringify(brandsToReturn));
 })
 
+router.get("/api/brands/:id/products", (request, response) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    // const { query } = queryString.parse(parsedUrl.query);
+    const { id } = request.params;
+    const brand = brands.find(item => item.id == id)
+    let productsToReturn = [];
+
+    if (!brand) {
+        response.writeHead(404, "Brand not Found");
+        return response.end();
+    }
+
+    productsToReturn = products.filter(item => {
+        return item.categoryId == brand.id
+    });
+    
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(productsToReturn));
+});
+
 router.get("/api/me", (request, response) => {
     if(!user) {
         response.writeHead(404, "User not found");
