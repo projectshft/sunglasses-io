@@ -13,7 +13,6 @@ let products = [];
 let brands = [];
 let user = {};
 let users = [];
-let clear;
 
 const router = Router();
 router.use(bodyParser.json());
@@ -36,7 +35,7 @@ server.listen(PORT, err => {
 
     user = users[0];
 
-    clear = () => user.cart = [];
+   
 });
 
 const saveCurrentUser = (currentUser) => {
@@ -52,7 +51,7 @@ router.get("/api/products", (request, response) => {
         let queryLowerCase = query.toLowerCase();
 
         glassesToReturn = products.filter(item => {
-           let descLowerCase = item.description.toLowerCase();
+            let descLowerCase = item.description.toLowerCase();
 
             return descLowerCase.includes(queryLowerCase)
         });
@@ -151,11 +150,10 @@ router.post("/api/me/cart", (request, response) => {
         response.writeHead(404, "Product not Found");
         return response.end();
     }
-    response.writeHead(200);
-    clear();
+    response.writeHead(200, {"Content-Type": "application/json"});
     user.cart.push(product);
     saveCurrentUser(user);
-    return response.end();
+    return response.end(JSON.stringify(user.cart));
 });
 
 //DELETE PRODUCT FROM USER CART
@@ -167,13 +165,14 @@ router.delete("/api/me/cart/:productId", (request, response) => {
         return response.end();
     }
 
-    let filteredCart = user.cart.filter(item => item !== product) 
-    response.writeHead(200);
+    let filteredCart = user.cart.filter(item => item.id !== productId) 
+    response.writeHead(200, {"Content-Type": "application/json"});
     user.cart = filteredCart;
     saveCurrentUser(user);
-    return response.end();
+    return response.end(JSON.stringify(user.cart));
 })
 
+//CHANGE ITEM QUANTITY
 router.post("/api/me/cart/:productId", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
     const { add, remove } = queryString.parse(parsedUrl.query);

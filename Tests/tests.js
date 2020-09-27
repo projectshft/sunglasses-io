@@ -3,9 +3,14 @@ const chaiHttp = require('chai-http');
 const server = require('../app/server');
 const expect = chai.expect;
 const assert = chai.assert;
+let sinon = require('sinon');
 
 chai.use(chaiHttp);
 chai.use(require("chai-sorted"));
+
+// beforeEach(() => {
+
+// })
 
 //GET Products
 describe("/GET products", () => {
@@ -206,10 +211,12 @@ describe("/DELETE item from cart", () => {
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
                 expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(0);
                 done();
             });
     });
-    it.only("should not ler user delete item that doesnt exist", done => {
+    it.only("should not let user delete item that doesnt exist", done => {
         chai
             .request(server)
             .delete("/api/me/cart/50")
