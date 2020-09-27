@@ -15,6 +15,7 @@ let users = [];
 //hardcoded token for testing purposes
 let accessTokens = [{
   username: 'lazywolf342',
+  lastUpdated: new Date(),
   token: 'atoken32'
 }];
 let cart = [];
@@ -202,5 +203,33 @@ myRouter.get('/api/me/cart', function(request,response) {
   }
 });
 
+// create route to add products to a users cart
+myRouter.post('/api/me/cart', function(request,response) {
+  let loggedInUsersToken = getValidTokenFromRequest(request);
+  // if user is not logged in (no access token), throw error
+  if (!loggedInUsersToken){
+    response.writeHead(401, 'You do not have access to this cart, please login');
+    return response.end()
+  } 
+  else {
+    //checks if the request id matches up with the a product id
+    let productToAdd = products.find(productToAdd => {
+      if (productToAdd.id == request.body.id) {
+        return true
+      }
+    });
+    // if a match is found, pushes that item to our cart
+    if (productToAdd) {
+      cart.push(productToAdd)
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end()
+    }
+    // if it doesn't match, throws an error
+    else {
+      response.writeHead(404, 'Cannot find product to add to the cart');
+      return response.end()
+    }
+  }
+});
 module.exports = server;
 

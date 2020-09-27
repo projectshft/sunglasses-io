@@ -190,7 +190,7 @@ describe('/GET me/cart', () => {
         });
     });
     // throw error if user does not have access token
-    it('it should not GET cart if user is without access token', done => {
+    it('it should not GET cart if user is without an access token', done => {
         chai
         .request(server)
         .get('/api/me/cart')
@@ -199,4 +199,50 @@ describe('/GET me/cart', () => {
             done();
         });
     });
+});
+
+// tests for the users cart POST endpoint 
+describe('/POST me/cart', () => {
+    //testable data
+    let product = {
+        "id": "6",
+        "categoryId": "3",
+        "name": "glas",
+        "description": "Pretty awful glasses",
+        "price":10,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    };
+    let fakeProduct = {};
+    // add a product to the cart
+    it('it should add a product to the cart', done => {
+       chai
+       .request(server)
+       .post('/api/me/cart?token=atoken32')
+       .send(product)
+       .end((err, res) => {
+           res.should.have.status(200);
+           done();
+       });
+   });
+   // throw error if user does not have access token
+   it('it should not  add a product to the cart if user is without an access token', done => {
+       chai
+       .request(server)
+       .post('/api/me/cart')
+       .end((err, res) => {
+           res.should.have.status(401);
+           done();
+       });
+   });
+   // throw an error if that product doesn't exist
+   it('should not add a non existent product to the cart', done => {
+    chai
+    .request(server)
+    .post('/api/me/cart?token=atoken32')
+    .send(fakeProduct)
+    .end((err, res) => {
+        res.should.have.status(404);
+        done();
+    });
+});
 });
