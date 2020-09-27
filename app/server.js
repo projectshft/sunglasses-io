@@ -132,8 +132,7 @@ myRouter.get('/api/products', function (request, response) {
 // Login
 // -Verify username and password, issue token
 myRouter.post('/api/login', function (request, response) {
-  var parsedUrl = require('url').parse(request.url, true)
-  console.log('Username Password parsing ', parsedUrl);
+  var parsedUrl = require('url').parse(request.url, true);
   if (parsedUrl.query.username && parsedUrl.query.password) {
 
     let user = users.find((user) => {
@@ -182,10 +181,9 @@ myRouter.post('/api/login', function (request, response) {
 
 // Cart -- login required
 // -Verify valid token, then allow access
-myRouter.get('/api/cart', function (request, response) {
+myRouter.get('/api/me/cart', function (request, response) {
   // check for token
   // else send login required error 401
-  console.log('access tokens ', accessTokens);
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(401, "Please log in to access your cart");
@@ -201,17 +199,38 @@ myRouter.get('/api/cart', function (request, response) {
 
 
 // -Add product to shopping cart
-myRouter.post('/api/cart', function (request, response) {
-  response.writeHead(418, {
-    "Content-Type": "application/json"
-  });
+myRouter.post('/api/me/cart', function (request, response) {
   // check for token
-  // add product to cart (parseUrl)
+  // add product to cart (query prodId)
   // else send login required error 401
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "Please log in to add items to your cart");
+    return response.end();
+  } else {
+    var parsedUrl = require('url').parse(request.url, true);
+    // confirm query exists
+    if (parsedUrl.query.prodId) {
+      // confirm product id exists
+      if (products.find(item => item.id === parsedUrl.query.prodId)) {
+        if (!cart) { cart = [] };
+         let totalProdsInCart = cart.push({
+           item: parsedUrl.query.prodId,
+           quantity: 1
+         }); // TODO push more fields to this
+        response.writeHead(200, `Product ID ${parsedUrl.query.prodId} added to cart. ${totalProdsInCart} items in cart.`);
+        return response.end();
+      } else {
+        // invalid product
+        response.writeHead(200, "Call succeeded, but product is invalid");
+        return response.end();
+      }
+    };
+  }
 });
 
 // -Update quantity of product in cart
-myRouter.post('/api/cart/:prodId', function (request, response) {
+myRouter.post('/api/me/cart/:prodId', function (request, response) {
   response.writeHead(418, {
     "Content-Type": "application/json"
   });
@@ -223,7 +242,7 @@ myRouter.post('/api/cart/:prodId', function (request, response) {
 });
 
 // -Delete product from cart
-myRouter.delete('/api/cart/:prodId', function (request, response) {
+myRouter.delete('/me/cart/:prodId', function (request, response) {
   response.writeHead(418, {
     "Content-Type": "application/json"
   });

@@ -136,14 +136,13 @@ describe('POST /login should process login', () => {
   
 
 
-describe('GET /cart return cart contents', () => {
+describe('GET /api/me/cart return cart contents', () => {
   it('requires valid token to return results', done => {
-   console.log(`about to try /api/cart?accessToken=${testToken}`);
     chai
       // arrange  
       .request(server)
       // act
-      .get(`/api/cart?accessToken=${testToken}`)
+      .get(`/api/me/cart?accessToken=${testToken}`)
       .end((err, res) => {
         // assert
         res.should.have.status(200);
@@ -157,23 +156,23 @@ describe('GET /cart return cart contents', () => {
       // arrange  
       .request(server)
       // act
-      .get('/api/cart')
+      .get('/api/me/cart')
       .end((err, res) => {
         // assert
-        res.should.have.status(200);
+        res.should.have.status(401);
         done();
       });
   });
 });
 
-describe('POST /cart adds product to cart', () => {
+describe('POST /api/me/cart adds product to cart', () => {
   it('requires valid token to add product', done => {
 
     chai
       // arrange  
       .request(server)
       // act
-      .post('/api/me/cart')
+      .post(`/api/me/cart?prodId=5&accessToken=${testToken}`)
       .end((err, res) => {
         // assert
         res.should.have.status(200);
