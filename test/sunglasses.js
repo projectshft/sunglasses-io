@@ -176,26 +176,27 @@ describe('/POST login', () => {
 });
 
 // tests for the users cart GET endpoint 
-// describe('/GET me/cart', () => {
-//      // check for an array
-//      it('it should GET an array', done => {
-//         chai
-//         .request(server)
-//         .get('/api/me/cart')
-//         .end((err, res) => {
-//             res.should.have.status(200);
-//             res.body.should.be.an('array');
-//             done();
-//         });
-//     });
-//     // throw error if user does not have access token
-//     it('it should not GET cart if user is without access token', done => {
-//         chai
-//         .request(server)
-//         .get('/api/me/cart')
-//         .end((err, res) => {
-//             res.should.have.status(401);
-//             done();
-//         });
-//     });
-// });
+describe('/GET me/cart', () => {
+     // check for items in the cart
+     it('it should GET items in the cart', done => {
+        chai
+        .request(server)
+        .get('/api/me/cart?token=atoken32')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            res.body.length.should.be.eql(0);
+            done();
+        });
+    });
+    // throw error if user does not have access token
+    it('it should not GET cart if user is without access token', done => {
+        chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+            res.should.have.status(401);
+            done();
+        });
+    });
+});

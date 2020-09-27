@@ -259,6 +259,9 @@ definitions:
       username:
         type: string
         description: The username associated to the logged in user
+      lastUpdated:
+        type: string
+        description: The username associated to the logged in user
       token:
         type: string
         description: A token that associates a logged in user

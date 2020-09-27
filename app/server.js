@@ -12,7 +12,12 @@ const url = require('url');
 let brands = [];
 let products = [];
 let users = [];
-let accessTokens = [];
+//hardcoded token for testing purposes
+let accessTokens = [{
+  username: 'lazywolf342',
+  token: 'atoken32'
+}];
+let cart = [];
 let failedLoginAttempts = {};
 
 const PORT = 3001;
@@ -168,10 +173,10 @@ myRouter.post('/api/login', function(request,response) {
 // Helper method to process access token
 var getValidTokenFromRequest = function(request) {
   var parsedUrl = url.parse(request.url, true)
-  if (parsedUrl.query.accessToken) {
+  if (parsedUrl.query.token) {
     // Verify the access token to make sure its valid and not expired
     let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken;
+      return accessToken.token == parsedUrl.query.token;
     });
     if (currentAccessToken) {
       return currentAccessToken;
@@ -183,9 +188,19 @@ var getValidTokenFromRequest = function(request) {
   }
 };
 
-
-
-
+// create route to get products in a users cart
+myRouter.get('/api/me/cart', function(request,response) {
+  let loggedInUsersToken = getValidTokenFromRequest(request);
+  // if user is not logged in (no access token), throw error
+  if (!loggedInUsersToken){
+    response.writeHead(401, 'You do not have access to this cart, please login');
+    return response.end()
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    // return the cart
+    return response.end(JSON.stringify(cart));
+  }
+});
 
 module.exports = server;
 
