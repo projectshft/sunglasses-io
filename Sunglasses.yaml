@@ -122,8 +122,8 @@ paths:
           description: "Successful login. Access token generated and number of failed login responses set to 0"
           schema:
             type: "object"
-            schema:
-            $ref: '#/definitions/AccessToken'
+            items: 
+              $ref: '#/definitions/AccessToken'
         "400":
           description: "Invalid username or password entry syntax"
           schema:
@@ -178,7 +178,7 @@ paths:
             type: 'array'
             items: 
               $ref: '#/definitions/Products'
-        '204'
+        '204':
           description: 'No matching products found. Please search again'
           schema:
             $ref: '#/definitions/Error'
