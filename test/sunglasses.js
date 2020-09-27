@@ -96,6 +96,7 @@ describe('/GET products', () => {
 
 // tests for the login POST endpoint 
 describe('/POST login', () => {
+    //successfully logs in an existing user
     it('it should log a user in if valid credentials are given', done => {
         let login = {
             username: "lazywolf342",
@@ -110,6 +111,7 @@ describe('/POST login', () => {
             done();
         });  
     });
+    //throw error if username/password are incorrect
     it('it should NOT log a user in and send an error if login credentials are incorrect', done => {
         let login = {
             username: "lazywolf342",
@@ -124,6 +126,7 @@ describe('/POST login', () => {
             done();
         });  
     });
+    //throw error if password and username are missing
     it('it should NOT log a user in and send an error if username and password are blank', done => {
         let login = {
             username: "",
@@ -138,6 +141,7 @@ describe('/POST login', () => {
             done();
         });  
     });
+    //throw error if username is missing
     it('it should NOT log a user in and send an error if username is missing', done => {
         let login = {
             username: "",
@@ -152,6 +156,7 @@ describe('/POST login', () => {
             done();
         });  
     });
+    //throw error if password is missing
     it('it should NOT log a user in and send an error if password is missing', done => {
         let login = {
             username: "lazywolf342",
