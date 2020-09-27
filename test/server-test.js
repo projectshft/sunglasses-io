@@ -75,7 +75,7 @@ describe('GET /products should return', () => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(11);
-       
+
         done();
       });
   });
@@ -92,7 +92,7 @@ describe('GET /products should return', () => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body.length.should.be.eql(1);
-       
+
         done();
       });
   });
@@ -113,7 +113,7 @@ describe('POST /login should process login', () => {
         testToken = res.body;
         console.log('testToken ', testToken);
         res.should.have.status(200);
-        res.body.should.be.a('string'); 
+        res.body.should.be.a('string');
         done();
       });
   });
@@ -133,7 +133,7 @@ describe('POST /login should process login', () => {
       });
   });
 });
-  
+
 
 
 describe('GET /api/me/cart return cart contents', () => {
@@ -186,10 +186,54 @@ describe('POST /api/me/cart adds product to cart', () => {
       // arrange  
       .request(server)
       // act
-      .post('/api/me/cart')
+      .post(`/api/me/cart?prodId=5&accessToken=bonkers`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(401);
+        done();
+      });
+  });
+});
+
+describe('POST /cart/:productId updates quantity of item in cart', () => {
+  it('requires valid token to update product quantities in cart', done => {
+
+    chai
+      // arrange  
+      .request(server)
+      // act
+      .post(`/api/me/cart/5/?quantity=30&accessToken=${testToken}`)
       .end((err, res) => {
         // assert
         res.should.have.status(200);
+        done();
+      });
+  });
+
+  it('denies product quantity update in cart if no valid token', done => {
+
+    chai
+      // arrange  
+      .request(server)
+      // act
+      .post(`/api/me/cart/5/?quantity=30&accessToken=bonkers`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('returns error item not in cart', done => {
+
+    chai
+      // arrange  
+      .request(server)
+      // act
+      .post(`/api/me/cart/4/?quantity=30&accessToken=${testToken}`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(400);
         done();
       });
   });
@@ -202,7 +246,7 @@ describe('DELETE /cart/:productId removes product from cart', () => {
       // arrange  
       .request(server)
       // act
-      .delete('/api/me/cart/1')
+      .delete(`/api/me/cart/1`)
       .end((err, res) => {
         // assert
         res.should.have.status(200);
@@ -216,81 +260,53 @@ describe('DELETE /cart/:productId removes product from cart', () => {
       // arrange  
       .request(server)
       // act
-      .delete('/api/me/cart/1')
+      .delete(`/api/me/cart/1`)
       .end((err, res) => {
         // assert
-        res.should.have.status(200);
+        res.should.have.status(401);
         done();
       });
   });
 });
 
-describe('POST /cart/:productId removes product from cart', () => {
-  it('requires valid token to remove product', done => {
 
-    chai
-      // arrange  
-      .request(server)
-      // act
-      .post('/api/me/cart/1')
-      .end((err, res) => {
-        // assert
-        res.should.have.status(200);
-        done();
-      });
-  });
-
-  it('denies product removal from cart if no valid token', done => {
-
-    chai
-      // arrange  
-      .request(server)
-      // act
-      .post('/api/me/cart/1')
-      .end((err, res) => {
-        // assert
-        res.should.have.status(200);
-        done();
-      });
-  });
-});
 
 
 // attempt login with Sinon for better implementation testing
-  // let Auth = {
-  //   attempt() {
-  //     // implementation here
-  //   }
-  // };
-  
-  // class Unauthorized {}
-  
-  // function login(credentials) {
-  //   return Auth.attempt(credentials).then(
-  //     auth => {
-  //       return auth.user;
-  //     },
-  //     () => {
-  //       throw new Unauthorized();
-  //     }
-  //   );
-  // }
-  // describe('the login function', () => {
-  //   it('should resolve with the user if authenticated', () => {});
-  
-  //   it('should reject with Unauthorized if unauthenticated', () => {});
-  // });
-  // this isn't in spec and is at-risk for implmentation
-  /* it('expires and removes token on /logout', done => {
+// let Auth = {
+//   attempt() {
+//     // implementation here
+//   }
+// };
 
-    chai
-      // arrange  
-      .request(server)
-      // act
-      .post('/api/logout') // for future notes: https://tinyurl.com/yy9ypzzw
-      .end((err, res) => {
-        // assert
-        res.should.have.status(200);
-        done();
-      });
-  }); */
+// class Unauthorized {}
+
+// function login(credentials) {
+//   return Auth.attempt(credentials).then(
+//     auth => {
+//       return auth.user;
+//     },
+//     () => {
+//       throw new Unauthorized();
+//     }
+//   );
+// }
+// describe('the login function', () => {
+//   it('should resolve with the user if authenticated', () => {});
+
+//   it('should reject with Unauthorized if unauthenticated', () => {});
+// });
+// this isn't in spec and is at-risk for implmentation
+/* it('expires and removes token on /logout', done => {
+
+  chai
+    // arrange  
+    .request(server)
+    // act
+    .post('/api/logout') // for future notes: https://tinyurl.com/yy9ypzzw
+    .end((err, res) => {
+      // assert
+      res.should.have.status(200);
+      done();
+    });
+}); */

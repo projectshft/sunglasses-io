@@ -199,10 +199,10 @@ myRouter.get('/api/me/cart', function (request, response) {
 
 
 // -Add product to shopping cart
-myRouter.post('/api/me/cart', function (request, response) {
   // check for token
   // add product to cart (query prodId)
   // else send login required error 401
+myRouter.post('/api/me/cart', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(401, "Please log in to add items to your cart");
@@ -212,12 +212,14 @@ myRouter.post('/api/me/cart', function (request, response) {
     // confirm query exists
     if (parsedUrl.query.prodId) {
       // confirm product id exists
-      if (products.find(item => item.id === parsedUrl.query.prodId)) {
+      if (selectedProd = products.find(item => item.id === parsedUrl.query.prodId)) {
         if (!cart) { cart = [] };
          let totalProdsInCart = cart.push({
-           item: parsedUrl.query.prodId,
+           item: selectedProd.id,
+           name: selectedProd.name,
+           price: selectedProd.price,
            quantity: 1
-         }); // TODO push more fields to this
+         }); // possible TODO check if already in cart, sum qty
         response.writeHead(200, `Product ID ${parsedUrl.query.prodId} added to cart. ${totalProdsInCart} items in cart.`);
         return response.end();
       } else {
@@ -230,15 +232,44 @@ myRouter.post('/api/me/cart', function (request, response) {
 });
 
 // -Update quantity of product in cart
-myRouter.post('/api/me/cart/:prodId', function (request, response) {
-  response.writeHead(418, {
-    "Content-Type": "application/json"
-  });
   // parseUrl and params
   // check for token
   // check for existing product
   // increment product to cart
   // else send login required error 401
+myRouter.post('/api/me/cart/:prodId', function (request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  console.log(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "Please log in to modify items to your cart");
+    return response.end();
+  
+  } else {
+    
+    var parsedUrl = require('url').parse(request.url, true);
+    // confirm query exists
+    if (request.params.prodId) {
+
+      // confirm cart has item
+      if ((selectedCartItem = cart.findIndex(item => item.item === request.params.prodId)) >= 0) { 
+        cart[selectedCartItem].quantity = parsedUrl.query.quantity;
+        response.writeHead(200, `Product ID ${request.params.prodId} has a new quantity of ${parsedUrl.query.quantity}.`);
+        console.log('resulting cart', cart);
+         return response.end();
+       } else {
+         // invalid product
+         response.writeHead(400, "Call succeeded, but product is invalid");
+         return response.end();
+       };
+       
+      } else {
+         // invalid cart
+        response.writeHead(400, "Cart is empty or item not found in cart.");
+        return response.end();
+       }
+      // confirm product id exists
+      
+    };
 });
 
 // -Delete product from cart
