@@ -161,6 +161,8 @@ describe("/GET cart", () => {
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
                 expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array");
+                expect(res.body).to.have.lengthOf(0);
                 done();
             });
     });
@@ -177,6 +179,8 @@ describe("/POST add to cart", () => {
                 expect(err).to.be.null;
                 expect(res).to.have.status(200);
                 expect("Content-Type", "application/json");
+                expect(res.body).to.be.an("array")
+                expect(res.body).to.have.lengthOf(1);
                 done();
             });
     });
@@ -216,6 +220,19 @@ describe("/DELETE item from cart", () => {
     });
 });
 
-
-
+//CHANGE PRODUCT QUANTITY
+describe("/POST change item quantity", () => {
+    it.only("should POST item difference to cart", done => {
+        chai
+            .request(server)
+            .post("/api/me/cart/1")
+            .end((err, res) => {
+                assert.isNotNull(res.body);
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                done();
+            });
+    });
+});
 

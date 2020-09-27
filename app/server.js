@@ -166,9 +166,36 @@ router.delete("/api/me/cart/:productId", (request, response) => {
         response.writeHead(404, "Product not Found");
         return response.end();
     }
-    let cartToReturn = user.cart.filter(item => item !== product) 
+
+    let filteredCart = user.cart.filter(item => item !== product) 
     response.writeHead(200);
-    user.cart = cartToReturn;
+    user.cart = filteredCart;
+    saveCurrentUser(user);
+    return response.end();
+})
+
+router.post("/api/me/cart/:productId", (request, response) => {
+    const parsedUrl = url.parse(request.originalUrl);
+    const { add, remove } = queryString.parse(parsedUrl.query);
+    const { productId } = request.params;
+    const product = products.find(item => item.id == productId);
+    if(!product) {
+        response.writeHead(404, "product not Found");
+        return response.end();
+    }
+    if (add) {
+        for (let i = 1; i < add; i++) {
+            user.cart.push(product)
+        };
+    }
+    if (remove) {
+        let productIndex = user.cart.indexOf(product)
+
+        for (let j = 1; j < remove; j++) {
+            user.cart.splice(productIndex, 1);
+        }
+    }
+    response.writeHead(200);
     saveCurrentUser(user);
     return response.end();
 })
