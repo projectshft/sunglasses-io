@@ -9,7 +9,7 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 //GET BRANDS
-describe('GET/ brands', () => {
+describe('GET/ brands of sunglasses', () => {
   it('should GET all the sunglasses brands', (done) => {
     // act
     chai
@@ -214,13 +214,12 @@ describe('POST/ user login', () => {
         expect(err).to.be.null;
         expect('Content-Type', 'application/json');
         res.should.have.status(200);
-        //returning an access token string
-        res.body.should.be.a('string');
+        res.body.should.be.an('object');
         done();
       });
   });
 
-  it('should ERROR when invalid username/pswd combination entered', (done) => {
+  it('should ERROR when invalid username/password combination entered', (done) => {
     //arrange: invalid username/pswd in query string
     // act
     chai
@@ -268,8 +267,21 @@ describe('POST/ user login', () => {
       });
   });
 
-//TODO: ERROR when access token times out
-//TODO: ERROR when >=3 login attempts
+  it('should ERROR when >=3 failed login attempts', (done) => {
+    //arrange: hardcoded 3 failed attempts in server for this new user. Invalid password in query string
+    // act
+    chai
+      .request(server)
+      .post('/api/login/?username=ArtFreak123&password=ILoveArt')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(403);
+        done();
+      });
+  });
 });
 
 //GET CART
@@ -515,12 +527,54 @@ describe('POST/ product to currentUser cart', () => {
       });
   });
 
+  it('should ERROR if access token is missing a date', (done) => {
+    //arrange: valid username and accessToken.token, but missing date. Valid productId.
+    let accessToken = {
+      username: 'yellowleopard753',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart?productId=2')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
   it('should ERROR if access token (accessToken.token) is not valid', (done) => {
-    //arrange: valid username and date; invalid accessToken.token. Valid productId.
+    //arrange: valid username and date but accessToken.token invalid. Valid productId.
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
       token: 'mumbojumbo',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart?productId=2')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token (accessToken.token) is missing', (done) => {
+    //arrange: valid username and date but accessToken.token missing. Valid productId.
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
     };
     // act
     chai
@@ -599,7 +653,7 @@ describe('POST/ product to currentUser cart', () => {
 
 describe('DELETE/ product from currentUser cart', () => {
   it('should DELETE a product from the currentUser cart', (done) => {
-    //arrange: a valid, current token with valid user; valid productId to delete
+    //arrange: a valid, current token with valid user. Valid productId to delete
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -623,7 +677,7 @@ describe('DELETE/ product from currentUser cart', () => {
   });
 
   it('should ERROR if no product matches productId', (done) => {
-    //arrange: a valid, current token with valid user; invalid productId to delete
+    //arrange: a valid, current token with valid user. Invalid productId to delete
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -645,7 +699,7 @@ describe('DELETE/ product from currentUser cart', () => {
   });
 
   it('should ERROR if productId is entered as letters', (done) => {
-    //arrange: a valid, current token with valid user; invalid productId to delete
+    //arrange: a valid, current token with valid user. Invalid productId to delete
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -666,17 +720,155 @@ describe('DELETE/ product from currentUser cart', () => {
       });
   });
 
-  //TODO: All user validation errors
-  //ERROR if access token is out of date 401
-  //ERROR if access token (accessToken.token) is not valid 401
-  //ERROR if no access token is provided 401
-  //ERROR if access token does not contain username 401
-  //ERROR if access token contains invalid username 401
+  it('should ERROR if access token is out of date', (done) => {
+    //arrange: valid username and accessToken.token, but out of date. Valid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Wed Sep 23 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token is missing a date', (done) => {
+    //arrange: valid username and accessToken.token, but missing date. Valid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token (accessToken.token) is not valid', (done) => {
+    //arrange: valid username and date, but accessToken.token invalid. Valid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: 'mumbojumbo',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token (accessToken.token) is missing', (done) => {
+    //arrange: valid username and date, but accessToken.token missing. Valid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if no access token is provided', (done) => {
+    //arrange: no accessToken. Valid productId to delete
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token does not contain username', (done) => {
+    //arrange: valid date and accessToken.token, but no username. Valid productId to delete
+    let accessToken = {
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token contains invalid username', (done) => {
+    //arrange: valid date and accessToken.token, but invalid username. Valid productId to delete
+    let accessToken = {
+      username: 'Banana',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
 });
 
 describe('POST/ a new quantity of an item to currentUser cart', () => {
   it('should POST a new quantity of an item to currentUser cart', (done) => {
-    //arrange: a valid, current token with valid user; valid productId to add
+    //arrange: a valid, current token with valid user. Valid productId & numberToAdd
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -700,7 +892,7 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
   });
 
   it('should RETURN currentUser cart if no numberToAdd is included', (done) => {
-    //arrange: a valid, current token with valid user; no numberToAdd
+    //arrange: a valid, current token with valid user. No numberToAdd
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -724,7 +916,7 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
   });
 
   it('should ERROR if no product matches productId', (done) => {
-    //arrange: a valid, current token with valid user; invalid productId
+    //arrange: a valid, current token with valid user. Invalid productId. Valid numberToAdd
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -746,7 +938,7 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
   });
 
   it('should ERROR if productId is entered as letters', (done) => {
-    //arrange: a valid, current token with valid user; invalid productId
+    //arrange: a valid, current token with valid user. Invalid productId. Valid numberToAdd
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -766,10 +958,107 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
         done();
       });
   });
-  //TODO: All user validation errors
-  //ERROR if access token is out of date 401
-  //ERROR if access token (accessToken.token) is not valid 401
-  //ERROR if no access token is provided 401
-  //ERROR if access token does not contain username 401
-  //ERROR if access token contains invalid username 401
+
+  it('should ERROR if access token is out of date', (done) => {
+    //arrange: valid username and accessToken.token, but out of date. Valid productId & numberToAdd
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Wed Sep 23 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=2')
+      .send(accessToken)
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token (accessToken.token) is not valid', (done) => {
+    //arrange: valid username and date, but accessToken.token invalid. Valid productId & numberToAdd
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: 'someGarbage87',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=2')
+      .send(accessToken)
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if no access token is provided', (done) => {
+    //arrange: no accessToken. Valid productId & numberToAdd
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=2')
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token does not contain username', (done) => {
+    //arrange: valid date and accessToken.token, but no username. Valid productId & numberToAdd
+    let accessToken = {
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=2')
+      .send(accessToken)
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
+
+  it('should ERROR if access token contains invalid username', (done) => {
+    //arrange: valid date and accessToken.token, but invalid username. Valid productId & numberToAdd
+    let accessToken = {
+      username: 'BananaBanana',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=2')
+      .send(accessToken)
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(401);
+        done();
+      });
+  });
 });

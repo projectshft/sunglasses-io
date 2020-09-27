@@ -113,5 +113,39 @@
       "thumbnail": "https://randomuser.me/api/portraits/thumb/women/54.jpg"
     },
     "nat": "ES"
+  },
+  {
+    "gender": "male",
+    "cart": [],
+    "name": {
+      "title": "mr",
+      "first": "pablo",
+      "last": "picasso"
+    },
+    "location": {
+      "street": "7934 avenida de salamanca",
+      "city": "madrid",
+      "state": "aragón",
+      "postcode": 43314
+    },
+    "email": "pablo.picasso@example.com",
+    "login": {
+      "username": "ArtFreak123",
+      "password": "sunflowers",
+      "salt": "w10ZFgoO",
+      "md5": "19f6fb510c58be44b2df1816d88b739d",
+      "sha1": "18e545aee27156ee6be35596631353a14ee03007",
+      "sha256": "2b23b25939ece8ba943fe9abcb3074105867c267d122081a2bc6322f935ac809"
+    },
+    "dob": "1947-03-05 15:23:07",
+    "registered": "2004-07-19 02:44:19",
+    "phone": "903-556-986",
+    "cell": "696-867-013",
+    "picture": {
+      "large": "https://randomuser.me/api/portraits/women/54.jpg",
+      "medium": "https://randomuser.me/api/portraits/med/women/54.jpg",
+      "thumbnail": "https://randomuser.me/api/portraits/thumb/women/54.jpg"
+    },
+    "nat": "ES"
   }
 ]

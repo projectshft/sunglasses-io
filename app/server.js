@@ -2,7 +2,6 @@ const http = require('http');
 const fs = require('fs');
 const url = require('url');
 const finalHandler = require('finalhandler');
-// var queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
@@ -24,11 +23,16 @@ let accessTokens = [
     token: '12345678abcdefgh',
   },
 ];
-let failedLoginAttempts = {};
+
+//hardcoding failed attempts for testing
+let failedLoginAttempts = {
+  'yellowleopard753': 0,
+  'ArtFreak123': 3
+};
 
 const PORT = 3001;
 
-// Setup router
+// Set up router
 const router = Router();
 router.use(bodyParser.json());
 
@@ -43,7 +47,7 @@ server.listen(PORT, (err) => {
   // populate brands
   brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
 
-  // populate empty brands
+  // populate empty brands for testing only
   brands_empty = JSON.parse(
     fs.readFileSync('initial-data/brands_empty.json', 'utf-8')
   );
@@ -56,36 +60,40 @@ server.listen(PORT, (err) => {
 });
 
 router.get('/api/brands', (request, response) => {
-  // Return all brands in the db
+  //if no brands, error
   if (brands.length === 0) {
     response.writeHead(204, "There aren't any brands to return");
     return response.end();
   }
+  //else, return the whole array
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
 //only included for error testing; not in Swagger API definitions
 router.get('/api/brands_empty', (request, response) => {
-  // Error if there are no brands
+  //if no brands, error
   if (brands_empty.length === 0) {
     response.writeHead(204, 'There are no brands to return');
     return response.end();
   }
+  //else, return all brands
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  return response.end(JSON.stringify(brands));
+  return response.end(JSON.stringify(brands_empty));
 });
 
 router.get('/api/brands/:brandId/products', (request, response) => {
-  // Return all products associated with a brand of sunglasses
+  // grab the brandId from the request
   const { brandId } = request.params;
 
+  //find brand
   const selectedBrand = [];
   brands.forEach((brand) => {
     if (brand.id == brandId) {
       selectedBrand.push(brand);
     }
   });
+  //find products
   const productsByBrandId = [];
   products.forEach((product) => {
     if (product.categoryId == brandId) {
@@ -108,6 +116,7 @@ router.get('/api/brands/:brandId/products', (request, response) => {
 
 //only included for error testing; not in Swagger API definitions
 router.get('/api/brands//products', (request, response) => {
+  //a router path missing the brandId
   response.writeHead(400, 'Missing brandId in request');
   return response.end();
 });
@@ -116,7 +125,7 @@ router.get('/api/products', (request, response) => {
   let parsedUrl = require('url').parse(request.url, true);
   let productsToReturn = [];
 
-  //confirm that search term was entered
+  //confirm that search term was entered; error if not
   if (parsedUrl.query.searchTerm) {
     // convert search term to lower case
     let searchTermLC = parsedUrl.query.searchTerm.toLowerCase();
@@ -137,7 +146,7 @@ router.get('/api/products', (request, response) => {
       );
       return response.end();
     } else {
-      response.writeHead(200, 'Product found', {
+      response.writeHead(200, {
         'Content-Type': 'application/json',
       });
       return response.end(JSON.stringify(productsToReturn));
@@ -163,12 +172,16 @@ let setNumberOfFailedLoginRequestsForUsername = function (username, numFails) {
   failedLoginAttempts[username] = numFails;
 };
 
-// Login call
 router.post('/api/login', (request, response) => {
   let parsedUrl = require('url').parse(request.url, true);
 
+  // check number of failed attempts and error if >= 3
+  if (getNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username) >= 3) {
+    response.writeHead(403, 'Forbidden. Too many failed login attempts');
+    return response.end();
+  }
   // Make sure there is a username and password in the request & that #of failed attempts<3
-  if (
+    if (
     parsedUrl.query.username &&
     parsedUrl.query.password &&
     getNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username) < 3
@@ -181,7 +194,7 @@ router.post('/api/login', (request, response) => {
       );
     });
     if (user) {
-      // If we found a user, reset our counter of failed logins
+      // If we found a user, reset the counter of failed logins
       setNumberOfFailedLoginRequestsForUsername(parsedUrl.query.username, 0);
 
       // Write the header because we know we will be returning successful at this point and that the response will be json
@@ -195,7 +208,7 @@ router.post('/api/login', (request, response) => {
       // Update the last updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
+        return response.end(JSON.stringify(currentAccessToken));
       } else {
         // Create a new token with the user value and a "random" token
         let newAccessToken = {
@@ -204,7 +217,7 @@ router.post('/api/login', (request, response) => {
           token: uid(16),
         };
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
+        return response.end(JSON.stringify(newAccessToken));
       }
     } else {
       // Update the number of failed login attempts
