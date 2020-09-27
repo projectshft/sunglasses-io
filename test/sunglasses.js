@@ -74,24 +74,26 @@ describe('/GET products', () => {
         });
     });
     // check for the correct product to return when that search is done
-    // it('it should GET the products that contain the search query given', done => {
-    // const peanutButter = [ {
-    //     "id": "10",
-    //     "categoryId": "5",
-    //     "name": "Peanut Butter",
-    //     "description": "The stickiest glasses in the world",
-    //     "price":103,
-    //     "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-    // }]
-    //     chai
-    //     .request(server)
-    //     .get('/api/products?search=Peanut')
-    //     .end((err, res) => {
-    //         res.should.have.status(200);
-    //         res.body.should.eql(peanutButter)
-    //         done();
-    //     });
-    // });
+    it('it should GET the products that contain the search query given', done => {
+        chai
+        .request(server)
+        .get('/api/products?search=Habanero')
+        .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.have.lengthOf(1);
+            done();
+        });
+    });
+    // throw error if no product matchs seach query
+    it('it should throw error if search query does not match any products', done => {
+        chai
+        .request(server)
+        .get('/api/products?search=nothing')
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        });
+    });
 });
 
 // tests for the login POST endpoint 
@@ -172,3 +174,28 @@ describe('/POST login', () => {
         });  
     });
 });
+
+// tests for the users cart GET endpoint 
+// describe('/GET me/cart', () => {
+//      // check for an array
+//      it('it should GET an array', done => {
+//         chai
+//         .request(server)
+//         .get('/api/me/cart')
+//         .end((err, res) => {
+//             res.should.have.status(200);
+//             res.body.should.be.an('array');
+//             done();
+//         });
+//     });
+//     // throw error if user does not have access token
+//     it('it should not GET cart if user is without access token', done => {
+//         chai
+//         .request(server)
+//         .get('/api/me/cart')
+//         .end((err, res) => {
+//             res.should.have.status(401);
+//             done();
+//         });
+//     });
+// });

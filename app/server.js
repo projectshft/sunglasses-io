@@ -76,12 +76,28 @@ myRouter.get('/api/brands/:brandId/products', function(request, response) {
 
 // create route for products, utilizes a search query, if none is given returns all products
 myRouter.get('/api/products', function(request,response) {
-  // need to create some if statements for search query 
-  if (products) {
-    response.writeHead(200, { "Content-Type": "application/json" });
-    // return the products
-    return response.end(JSON.stringify(products));
+  // create blank array for products returned
+  let productsReturned = [];
+  // must get search query from the original url
+  const parsedUrl = url.parse(request.originalUrl);
+  const query = queryString.parse(parsedUrl.query);
+  //if query exists, filter products array to return products matching query
+  if (query.search !== undefined) {
+      productsReturned = products.filter(product => {
+        return product.name == query.search
+    })
+    // if no products are returned, throw an error
+    if (productsReturned.length === 0) {
+      response.writeHead(400, 'No products match your search')
+      return response.end();
+    }
+  } else {
+    // if no search query is utilized, return all products
+    productsReturned = products;
   }
+  response.writeHead(200, { "Content-Type": "application/json" });
+    // return the products
+    return response.end(JSON.stringify(productsReturned));     
 });
 
 // Helpers to get/set our number of failed requests per username
@@ -145,6 +161,26 @@ myRouter.post('/api/login', function(request,response) {
     return response.end();
   }
 });
+
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = url.parse(request.url, true)
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure its valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+
 
 
 
