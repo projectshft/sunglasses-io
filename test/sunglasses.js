@@ -22,7 +22,7 @@ describe('/GET brands', () => {
             done();
         });
     });
-})
+});
 
 //tests for brands/:id/products GET endpoint
 describe('/GET brands/:id/products', () => {
@@ -35,8 +35,8 @@ describe('/GET brands/:id/products', () => {
             res.should.have.status(200);
             res.body.should.be.an('array');
             done();
-        })
-    })
+        });
+    });
     //check for a correct error to be thrown
     it('it should GET an error if the brand does not exist', done => {
         chai
@@ -45,9 +45,9 @@ describe('/GET brands/:id/products', () => {
         .end((err, res) => {
             res.should.have.status(404);
             done();
-        })       
-    })
-})
+        });       
+    });
+});
 
 //tests for products GET endpoint
 describe('/GET products', () => {
@@ -74,22 +74,96 @@ describe('/GET products', () => {
         });
     });
     // check for the correct product to return when that search is done
-    it('it should GET the products that contain the search query given', done => {
-    const peanutButter = [ {
-        "id": "10",
-        "categoryId": "5",
-        "name": "Peanut Butter",
-        "description": "The stickiest glasses in the world",
-        "price":103,
-        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-    }]
+    // it('it should GET the products that contain the search query given', done => {
+    // const peanutButter = [ {
+    //     "id": "10",
+    //     "categoryId": "5",
+    //     "name": "Peanut Butter",
+    //     "description": "The stickiest glasses in the world",
+    //     "price":103,
+    //     "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    // }]
+    //     chai
+    //     .request(server)
+    //     .get('/api/products?search=Peanut')
+    //     .end((err, res) => {
+    //         res.should.have.status(200);
+    //         res.body.should.eql(peanutButter)
+    //         done();
+    //     });
+    // });
+});
+
+// tests for the login POST endpoint 
+describe('/POST login', () => {
+    it('it should log a user in if valid credentials are given', done => {
+        let login = {
+            username: "lazywolf342",
+            password: "tucker",
+        }
         chai
         .request(server)
-        .get('/api/products?search=Peanut')
+        .post('/api/login')
+        .send(login)
         .end((err, res) => {
             res.should.have.status(200);
-            res.body.should.eql(peanutButter)
             done();
-        });
-    })
-})
+        });  
+    });
+    it('it should NOT log a user in and send an error if login credentials are incorrect', done => {
+        let login = {
+            username: "lazywolf342",
+            password: "nottucker",
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+            res.should.have.status(401);
+            done();
+        });  
+    });
+    it('it should NOT log a user in and send an error if username and password are blank', done => {
+        let login = {
+            username: "",
+            password: "",
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        });  
+    });
+    it('it should NOT log a user in and send an error if username is missing', done => {
+        let login = {
+            username: "",
+            password: "tucker",
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        });  
+    });
+    it('it should NOT log a user in and send an error if password is missing', done => {
+        let login = {
+            username: "lazywolf342",
+            password: "",
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(login)
+        .end((err, res) => {
+            res.should.have.status(400);
+            done();
+        });  
+    });
+});

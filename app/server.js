@@ -7,7 +7,8 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 // to generate access tokens
 var uid = require('rand-token').uid;
-// variables
+const url = require('url');
+
 let brands = [];
 let products = [];
 let users = [];
@@ -71,6 +72,7 @@ myRouter.get('/api/brands/:brandId/products', function(request, response) {
 })
 // create route for products, utilizes a search query, if none is given returns all products
 myRouter.get('/api/products', function(request,response) {
+  // need to create some if statements for search query 
   if (products) {
     response.writeHead(200, { "Content-Type": "application/json" });
     // return the products
