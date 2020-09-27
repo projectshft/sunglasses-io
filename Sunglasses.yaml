@@ -105,6 +105,8 @@ paths:
       summary: "Logs user into the system"
       description: |
         The login endpoint supports user login and generates an access token. 
+      produces:
+      - "application/json"
       parameters:
       - name: "username"
         in: "query"
@@ -137,6 +139,8 @@ paths:
       summary: 'View shopping cart for a validated user'
       description: |
         The GET cart endpoint returns the contents of a validated user's shopping cart. Validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands. 
+      produces:
+      - "application/json"
       responses:
         '200':
           description: 'Contents of shopping cart'
@@ -154,6 +158,8 @@ paths:
       summary: 'Add product to shopping cart of validated user'
       description: |
         The POST new item to a cart endpoint returns the contents of a validated user's shopping cart, including one new item added as a query parameter. User validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+      produces:
+      - "application/json"
       parameters:
         - name: 'productId'
           in: 'query'
@@ -187,43 +193,70 @@ paths:
         - 'DELETE a product from shopping cart'
       summary: 'DELETE product from shopping cart of a validated user'
       description: |
-        This endpoint .......
-      parameters:
-        - name: productId
-          in: path
-          description: 'The id of the product to delete'
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Acceptance is successful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-            
-            
-    post:
-      tags:
-        - 'POST a new quantity to a product in a shopping cart'
-      summary: 'Change the quantity of a product in the shopping cart of a validated user'
-      description: |
-        This endpoint ...
+        The DELETE item from a cart endpoint returns the contents of a validated user's shopping cart, minus one deleted product included in the path. User validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+      produces:
+      - "application/json"
       parameters:
         - name: 'productId'
-          in: path
-          description: 'The id of the product to change'
+          in: 'path'
+          description: 'The id of the product to delete'
           required: true
           type: 'string'
-        - name: 'quantity'
+      responses:
+        '200':
+          description: 'Contents of shopping cart, minus deleted product'
+          schema:
+            type: 'array'
+            items: 
+              $ref: '#/definitions/Products'
+        '204':
+          description: 'Cart empty or product not found. No deletion'
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: 'ProductId required'
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: "You need valid login credentials to continue"
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - 'POST/ a new quantity of an item to currentUser cart'
+      summary: 'Add a submitted quantity of an item to the shopping cart of a validated user'
+      description: |
+         The POST a new quantity of an item in a cart endpoint returns the contents of a validated user's shopping cart, including changes from adding a set amount (a query string) of one product (whose productId is included in the path). User validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+      parameters:
+        - name: 'productId'
+          in: 'path'
+          description: 'The id of the product to change in quantity'
+          required: true
+          type: 'string'
+        - name: 'numberToAdd'
           in: 'query'
-          description: 'A numeric value for the new quantity'
+          description: 'The number to add to quantity in the cart. If product not already in cart, an amount of product equal to numberToAdd will be added'
           required: true
           type: 'number'
       responses:
         '200':
-          description: 'Quantity successfully changed'
-
+          description: 'Contents of shopping cart, including additional products'
+          schema:
+            type: 'array'
+            items: 
+              $ref: '#/definitions/Products'
+        '204':
+          description: 'Product not found. No addition'
+          schema:
+            $ref: '#/definitions/Error'
+        '400':
+          description: 'ProductId required'
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
+          description: "You need valid login credentials to continue"
+          schema:
+            $ref: '#/definitions/Error'
             
             
             

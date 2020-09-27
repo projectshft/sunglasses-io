@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const url = require('url');
 const finalHandler = require('finalhandler');
-var queryString = require('querystring');
+// var queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
@@ -13,10 +13,8 @@ const TOKEN_VALIDITY_TIMEOUT = 2 * 24 * 60 * 60 * 1000;
 //state holding variables
 let brands = [];
 let products = [];
-// let cart = [];
 let users = [];
-// let user = {};
-// let accessTokens = [];
+
 
 //a hardcoded access token for testing
 let accessTokens = [
@@ -67,6 +65,7 @@ router.get('/api/brands', (request, response) => {
   return response.end(JSON.stringify(brands));
 });
 
+//only included for error testing; not in Swagger API definitions
 router.get('/api/brands_empty', (request, response) => {
   // Error if there are no brands
   if (brands_empty.length === 0) {
@@ -322,6 +321,7 @@ router.post('/api/me/cart', (request, response) => {
       return response.end();
     }
 
+    //save length of original cart
     let firstUserCartlength = userCart.length;
     let newUserCart = userCart;
 
@@ -332,11 +332,208 @@ router.post('/api/me/cart', (request, response) => {
         return newUserCart;
       }
     });
-
+    //check if new and original carts are same length; error if so
+    //because this means no products matched and no items were added
     if (newUserCart.length === firstUserCartlength) {
       response.writeHead(
         204,
         'No matching products found. Please search again',
+        { 'Content-Type': 'application/json' }
+      );
+      return response.end();
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(newUserCart));
+    }
+  }
+});
+
+router.delete('/api/me/cart/:productId', (request, response) => {router.delete('/api/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, 'You need valid login credentials to continue');
+    return response.end();
+  } else {
+    // Find cart for the valid user
+    let userCart = [];
+    users.find((user) => {
+      //confirm that username assigned to token is valid
+      if (user.login.username == currentAccessToken.username) {
+        //if valid, grab cart
+        userCart = user.cart;
+        return userCart;
+      } else {
+        //if not, error out
+        response.writeHead(401, 'You need valid login credentials to continue');
+        return response.end();
+      }
+    });
+
+    let productIdToDelete = request.params.productId;
+    //check that productId was included
+    if (!productIdToDelete) {
+      response.writeHead(400, 'ProductId required', {
+        'Content-Type': 'application/json',
+      });
+      return response.end();
+    }
+
+    //save length of original cart
+    let firstUserCartlength = userCart.length;
+    //check if cart is empty at start and error if so
+    if (firstUserCartlength === 0) {
+      response.writeHead(204, 'Cart empty or product not found. No deletion',
+        { 'Content-Type': 'application/json' }
+      );
+      return response.end();
+    }
+
+    let newUserCart = userCart;
+    products.find((product) => {
+      //find matching product and push into cart
+      if (product.id === productIdToDelete) {
+        let indexToDelete = products.indexOf(product);
+        newUserCart.splice(indexToDelete, 1);
+        return newUserCart;
+      }
+    });
+    //if new cart and original cart remain the same length; error
+    //because no matching products were found to delete
+    if (newUserCart.length === firstUserCartlength) {
+      response.writeHead(
+        204,
+        'Cart empty or product not found. No deletion',
+        { 'Content-Type': 'application/json' }
+      );
+      return response.end();
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(newUserCart));
+    }
+  }
+});
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, 'You need valid login credentials to continue');
+    return response.end();
+  } else {
+    // Find cart for the valid user
+    let userCart = [];
+    users.find((user) => {
+      //confirm that username assigned to token is valid
+      if (user.login.username == currentAccessToken.username) {
+        //if valid, grab cart
+        userCart = user.cart;
+        return userCart;
+      } else {
+        //if not, error out
+        response.writeHead(401, 'You need valid login credentials to continue');
+        return response.end();
+      }
+    });
+
+    let productIdToDelete = request.params.productId;
+    //check that productId was included
+    if (!productIdToDelete) {
+      response.writeHead(400, 'ProductId required. Please search again', {
+        'Content-Type': 'application/json',
+      });
+      return response.end();
+    }
+
+    //save length of original cart
+    let firstUserCartlength = userCart.length;
+    //check if cart is empty at start and error if so
+    if (firstUserCartlength === 0) {
+      response.writeHead(204, 'Cart empty or product not found. No deletion',
+        { 'Content-Type': 'application/json' }
+      );
+      return response.end();
+    }
+
+    let newUserCart = userCart;
+    products.find((product) => {
+      //find matching product and push into cart
+      if (product.id === productIdToDelete) {
+        let indexToDelete = products.indexOf(product);
+        newUserCart.splice(indexToDelete, 1);
+        return newUserCart;
+      }
+    });
+    //if new cart and original cart remain the same length; error
+    //because no matching products were found to delete
+    if (newUserCart.length === firstUserCartlength) {
+      response.writeHead(
+        204,
+        'Cart empty or product not found. No deletion',
+        { 'Content-Type': 'application/json' }
+      );
+      return response.end();
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(newUserCart));
+    }
+  }
+});
+
+router.post('/api/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, 'You need valid login credentials to continue');
+    return response.end();
+  } else {
+    // Find cart for the valid user
+    let userCart = [];
+    users.find((user) => {
+      //confirm that username assigned to token is valid
+      if (user.login.username == currentAccessToken.username) {
+        //if valid, grab cart
+        userCart = user.cart;
+        return userCart;
+      } else {
+        //if not, error out
+        response.writeHead(401, 'You need valid login credentials to continue');
+        return response.end();
+      }
+    });
+
+    let parsedUrl = require('url').parse(request.url, true);
+    if (!parsedUrl.query.numberToAdd) {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(userCart));
+    }
+
+    let quantityToAdd = Number(parsedUrl.query.numberToAdd);
+    
+    let productIdToAdd = request.params.productId;
+    //check that productId was included
+    if (!productIdToAdd) {
+      response.writeHead(400, 'ProductId required', {
+        'Content-Type': 'application/json',
+      });
+      return response.end();
+    }
+
+    let firstUserCartlength = userCart.length;
+    let newUserCart = userCart;
+    products.find((product) => {
+      //find matching product and push into cart
+      if (product.id === productIdToAdd) {
+        for (let i = 0; i < quantityToAdd; i++) {
+          newUserCart.push(product);
+        }
+        return newUserCart;
+      }
+    });
+    //if new cart and original cart remain the same length; error
+    //because no matching products were found
+    if (newUserCart.length === firstUserCartlength) {
+      response.writeHead(
+        204,
+        'Product not found. No addition',
         { 'Content-Type': 'application/json' }
       );
       return response.end();

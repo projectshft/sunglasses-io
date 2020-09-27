@@ -28,6 +28,7 @@ describe('GET/ brands', () => {
   });
 
   it('should ERROR if there are no brands', (done) => {
+    //arrange: an empty array of brands
     // act
     chai
       .request(server)
@@ -46,6 +47,7 @@ describe('GET/ brands', () => {
 //GET PRODUCTS BY BRAND ID
 describe('GET/ products by brand Id', () => {
   it('should GET all the products from one brand of sunglasses', (done) => {
+    //arrange: a valid brandId in path
     // act
     chai
       .request(server)
@@ -62,7 +64,8 @@ describe('GET/ products by brand Id', () => {
       });
   });
 
-  it('should ERROR if brand does not exist', (done) => {
+  it('should ERROR if brandId does not exist', (done) => {
+    //arrange: an invalid brandId in path
     // act
     chai
       .request(server)
@@ -77,7 +80,24 @@ describe('GET/ products by brand Id', () => {
       });
   });
 
+  it('should ERROR if brandId is a letter instead of number', (done) => {
+    //arrange: an invalid brandId in path -- letters
+    // act
+    chai
+      .request(server)
+      .get('/api/brands/Adidas/products')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
+
   it('should ERROR if no products are found for the brand', (done) => {
+    //arrange: a valid brandId with no associated products
     // act
     chai
       .request(server)
@@ -93,6 +113,7 @@ describe('GET/ products by brand Id', () => {
   });
 
   it('should ERROR if no brandId is included', (done) => {
+    //arrange: omit brandId
     // act
     chai
       .request(server)
@@ -111,6 +132,7 @@ describe('GET/ products by brand Id', () => {
 //GET PRODUCTS
 describe('GET/ products by a search term', () => {
   it('should return unique results that match unique query string (a 1:1 match)', (done) => {
+    //arrange: valid searchTerm
     // act
     chai
       .request(server)
@@ -128,6 +150,7 @@ describe('GET/ products by a search term', () => {
   });
 
   it('should return multiple results that match unique query string (a 1:many match)', (done) => {
+    //arrange: valid searchTerm w/ multiple matches
     // act
     chai
       .request(server)
@@ -145,10 +168,11 @@ describe('GET/ products by a search term', () => {
   });
 
   it('should ERROR if no product matches query string', (done) => {
+    //arrange: a searchTerm with no product matches
     // act
     chai
       .request(server)
-      .get('/api/products?searchTerm=Cats')
+      .get('/api/products?searchTerm=gibberish123')
       // assert
       .end((err, res) => {
         assert.isNotNull(res.body);
@@ -160,6 +184,7 @@ describe('GET/ products by a search term', () => {
   });
 
   it('should ERROR if query string is blank', (done) => {
+    //arrange: searchTerm omitted
     // act
     chai
       .request(server)
@@ -176,11 +201,9 @@ describe('GET/ products by a search term', () => {
 });
 
 //POST LOGIN REQUEST
-//TODO: ERROR when access token times out
-//TODO: ERROR when >=3 login attempts
 describe('POST/ user login', () => {
   it('should allow existing users to login', (done) => {
-    //arrange: a valid query string
+    //arrange: a valid username/password query string
     // act
     chai
       .request(server)
@@ -244,10 +267,13 @@ describe('POST/ user login', () => {
         done();
       });
   });
+
+//TODO: ERROR when access token times out
+//TODO: ERROR when >=3 login attempts
 });
 
-//GET cart
-describe('GET/ user cart', () => {
+//GET CART
+describe('GET/ currentUser cart', () => {
   it('should GET cart for user with valid access token', (done) => {
     //arrange: a valid, current token with valid user
     let accessToken = {
@@ -353,7 +379,7 @@ describe('GET/ user cart', () => {
   });
 
   it('should ERROR if access token contains invalid username', (done) => {
-    //arrange: current, valie token with invalid username
+    //arrange: current, valid token with invalid username
     let accessToken = {
       username: 'MissMaddieWiggums',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -375,9 +401,10 @@ describe('GET/ user cart', () => {
   });
 });
 
-describe('POST/ a new item to currentUser cart', () => {
+//POST PRODUCT TO A CART
+describe('POST/ product to currentUser cart', () => {
   it('should POST a new product to the currentUser cart', (done) => {
-    //arrange: a valid, current token with valid user
+    //arrange: a valid, current token with valid user; valid productId to add
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -400,7 +427,7 @@ describe('POST/ a new item to currentUser cart', () => {
       });
   });
 
-  it('should ERROR if no product matches query string', (done) => {
+  it('should ERROR if no productId matches query string', (done) => {
     //arrange: a valid, current token with valid user. Invalid productId
     let accessToken = {
       username: 'yellowleopard753',
@@ -422,8 +449,30 @@ describe('POST/ a new item to currentUser cart', () => {
       });
   });
 
+  it('should ERROR if productId is a letter instead of number', (done) => {
+    //arrange: a valid, current token with valid user. Letters for productId
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart?productId=beard_wax')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
+
   it('should ERROR if productId query string is blank', (done) => {
-    //arrange: a valid, current token with valid user. No
+    //arrange: a valid, current token with valid user. No productId query string
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -546,80 +595,181 @@ describe('POST/ a new item to currentUser cart', () => {
         done();
       });
   });
-
 });
 
-//NOT DONE
-// describe('DELETE/ an item from currentUser cart', () => {
-//   // test: response is all brands
-//   it('should DELETE an item from currentUser cart', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .delete('/me/cart/1')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(5);
-//         done();
-//       });
-//   });
+describe('DELETE/ product from currentUser cart', () => {
+  it('should DELETE a product from the currentUser cart', (done) => {
+    //arrange: a valid, current token with valid user; valid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert : we expect cart.length = 1 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
+        done();
+      });
+  });
 
-//   it('should FAIL if currentUser is not logged in', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .delete('/me/cart/1')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(5);
-//         done();
-//       });
-//   });
-// });
+  it('should ERROR if no product matches productId', (done) => {
+    //arrange: a valid, current token with valid user; invalid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/18')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
 
-// describe('POST/ a new quantity of an item in currentUser cart', () => {
-//   // test: response is all brands
-//   it('should POST a new quantity of an item in currentUser cart', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .post('/me/cart/1/4')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(5);
-//         done();
-//       });
-//   });
+  it('should ERROR if productId is entered as letters', (done) => {
+    //arrange: a valid, current token with valid user; invalid productId to delete
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/Sneakers')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
 
-//   it('should FAIL if currentUser is not logged in', (done) => {
-//     // act
-//     chai
-//       .request(server)
-//       .post('/me/cart/1/4')
-//       // assert
-//       .end((err, res) => {
-//         assert.isNotNull(res.body);
-//         expect(err).to.be.null;
-//         expect('Content-Type', 'application/json');
-//         res.should.have.status(200);
-//         res.body.should.be.an('array');
-//         res.body.length.should.be.eql(5);
-//         done();
-//       });
-//   });
-// });
+  //TODO: All user validation errors
+  //ERROR if access token is out of date 401
+  //ERROR if access token (accessToken.token) is not valid 401
+  //ERROR if no access token is provided 401
+  //ERROR if access token does not contain username 401
+  //ERROR if access token contains invalid username 401
+});
+
+describe('POST/ a new quantity of an item to currentUser cart', () => {
+  it('should POST a new quantity of an item to currentUser cart', (done) => {
+    //arrange: a valid, current token with valid user; valid productId to add
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=2')
+      .send(accessToken)
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(3);
+        done();
+      });
+  });
+
+  it('should RETURN currentUser cart if no numberToAdd is included', (done) => {
+    //arrange: a valid, current token with valid user; no numberToAdd
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/18')
+      .send(accessToken)
+      // assert : we expect cart.length = 3 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(3);
+        done();
+      });
+  });
+
+  it('should ERROR if no product matches productId', (done) => {
+    //arrange: a valid, current token with valid user; invalid productId
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/18?numberToAdd=2')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
+
+  it('should ERROR if productId is entered as letters', (done) => {
+    //arrange: a valid, current token with valid user; invalid productId
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/FleaCollar?numberToAdd=2')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(204);
+        done();
+      });
+  });
+  //TODO: All user validation errors
+  //ERROR if access token is out of date 401
+  //ERROR if access token (accessToken.token) is not valid 401
+  //ERROR if no access token is provided 401
+  //ERROR if access token does not contain username 401
+  //ERROR if access token contains invalid username 401
+});
