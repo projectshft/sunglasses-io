@@ -149,13 +149,13 @@ describe("/GET products by brand", () => {
     });
 });
 
-//CART TESTS
+//CART TESTS:
 //RETURN CART
 describe("/GET cart", () => {
     it.only("should GET user cart", done => {
         chai
             .request(server)
-            .post("/api/me/cart")
+            .get("/api/me/cart")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;

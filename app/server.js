@@ -108,7 +108,7 @@ router.get("/api/brands", (request, response) => {
 })
 
 router.get("/api/brands/:id/products", (request, response) => {
-    // const parsedUrl = url.parse(request.originalUrl);
+    // const parsedUrl = url.parse(request.originalUrl);            /////IF SEARCH QUERY ENABLED YOULL NEED THIS
     // const { query } = queryString.parse(parsedUrl.query);
     const { id } = request.params;
     const brand = brands.find(item => item.id == id)
@@ -142,7 +142,7 @@ router.get("/api/me/cart", (request, response) => {     ///////NEEDS TO RETURN C
 
 
 //ADD A PRODUCT TO USER CART
-router.post("/api/me/cart/:productId", (request, response) => { /////CHANGE ROUTE AND MAKE IT WORK!!!
+router.post("/api/me/cart/:productId", (request, response) => {
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
     if(!product) {
