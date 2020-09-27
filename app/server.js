@@ -6,6 +6,7 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const url = require("url");
+const ShoppingCart = require('./models/shopping-cart')
 
 const PORT = 8080;
 
@@ -79,7 +80,7 @@ router.get("/api/products", (request, response) => {
     return response.end(JSON.stringify(glassesToReturn));
 });
 
-router.get("/api/brands", (request, response) => {
+router.get("/api/brands", (request, response) => {                           /////add a limit parameter
     const parsedUrl = url.parse(request.originalUrl);
     const { query, sort } = queryString.parse(parsedUrl.query);
     let brandsToReturn = [];
@@ -131,7 +132,7 @@ router.post("/api/login", (request, response) => {
 });
 
 //GET USER CART
-router.get("/api/me/cart", (request, response) => {     ///////NEEDS TO RETURN CART FOR A USER
+router.get("/api/me/cart", (request, response) => {  
     if(!user) {
         response.writeHead(404, "User not found");
         return response.end();
@@ -175,7 +176,7 @@ router.delete("/api/me/cart/:productId", (request, response) => {
 //CHANGE ITEM QUANTITY
 router.post("/api/me/cart/:productId", (request, response) => {
     const parsedUrl = url.parse(request.originalUrl);
-    const { add, remove } = queryString.parse(parsedUrl.query);
+    const { add, remove } = queryString.parse(parsedUrl.query);         //////add can be 0 so it can be pased as required parameter with remove
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
     if(!product) {
@@ -194,9 +195,9 @@ router.post("/api/me/cart/:productId", (request, response) => {
             user.cart.splice(productIndex, 1);
         }
     }
-    response.writeHead(200);
+    response.writeHead(200, {"Content-Type": "application/json"});
     saveCurrentUser(user);
-    return response.end();
+    return response.end(JSON.stringify(user.cart));
 })
 
 module.exports = server;

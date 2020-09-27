@@ -3,14 +3,14 @@ const chaiHttp = require('chai-http');
 const server = require('../app/server');
 const expect = chai.expect;
 const assert = chai.assert;
-let sinon = require('sinon');
+let ShoppingCart = require('../app/models/shopping-cart')
 
 chai.use(chaiHttp);
 chai.use(require("chai-sorted"));
 
-// beforeEach(() => {
-
-// })
+beforeEach(() => {
+    ShoppingCart.clearCart();
+})
 
 //GET Products
 describe("/GET products", () => {
