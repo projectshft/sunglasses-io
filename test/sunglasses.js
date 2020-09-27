@@ -236,13 +236,48 @@ describe('/POST me/cart', () => {
    });
    // throw an error if that product doesn't exist
    it('should not add a non existent product to the cart', done => {
-    chai
-    .request(server)
-    .post('/api/me/cart?token=atoken32')
-    .send(fakeProduct)
-    .end((err, res) => {
-        res.should.have.status(404);
-        done();
-    });
+      chai
+      .request(server)
+      .post('/api/me/cart?token=atoken32')
+      .send(fakeProduct)
+      .end((err, res) => {
+          res.should.have.status(404);
+          done();
+       });
+   });
 });
+
+
+// tests for the users cart POST endpoint 
+describe('/POST me/cart/:productId', () => {
+    // add a product to the cart
+    it('it should add a product to the cart', done => {
+       chai
+       .request(server)
+       .post('/api/me/cart/10?token=atoken32')
+       .end((err, res) => {
+           res.should.have.status(200);
+           done();
+       });
+   });
+   // throw error if user does not have access token
+   it('it should not  add a product to the cart if user is without an access token', done => {
+       chai
+       .request(server)
+       .post('/api/me/cart/10')
+       .end((err, res) => {
+           res.should.have.status(401);
+           done();
+       });
+   });
+   // throw an error if that product doesn't exist
+   it('should not add a non existent product to the cart', done => {
+      chai
+      .request(server)
+      .post('/api/me/cart/69?token=atoken32')
+      .end((err, res) => {
+          res.should.have.status(404);
+          done();
+       });
+   });
 });
