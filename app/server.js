@@ -13,13 +13,19 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 //state holding variables
 let brands = [];
 let products = [];
-let cart = [];
+// let cart = [];
 let users = [];
 // let user = {};
 // let accessTokens = [];
 
 //a hardcoded access token for testing
-let accessTokens = [{'username':'yellowleopard753', 'lastUpdated': 'Sat Sep 26 2020 18:04:31 GMT-0400 (Eastern Daylight Time)', 'token': '12345678abcdefgh'}];
+let accessTokens = [
+  {
+    username: 'yellowleopard753',
+    lastUpdated: 'Sat Sep 26 2020 22:19:31 GMT-0400 (Eastern Daylight Time)',
+    token: '12345678abcdefgh',
+  },
+];
 let failedLoginAttempts = {};
 
 const PORT = 3001;
@@ -50,8 +56,6 @@ server.listen(PORT, (err) => {
   //populate users
   users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
 
-  //hard code one item in cart
-  // cart = [products[0]];
 });
 
 router.get('/api/brands', (request, response) => {
@@ -77,6 +81,7 @@ router.get('/api/brands_empty', (request, response) => {
 router.get('/api/brands/:brandId/products', (request, response) => {
   // Return all products associated with a brand of sunglasses
   const { brandId } = request.params;
+
   const selectedBrand = [];
   brands.forEach((brand) => {
     if (brand.id == brandId) {
@@ -101,6 +106,11 @@ router.get('/api/brands/:brandId/products', (request, response) => {
   }
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(productsByBrandId));
+});
+
+router.get('/api/brands//products', (request, response) => {
+  response.writeHead(400, 'Missing brandId in request');
+  return response.end();
 });
 
 router.get('/api/products', (request, response) => {
@@ -258,6 +268,5 @@ router.get('/api/me/cart', (request, response) => {
     return response.end(JSON.stringify(userCart));
   }
 });
-
 
 module.exports = server;

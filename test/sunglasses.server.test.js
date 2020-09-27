@@ -91,6 +91,21 @@ describe('GET/ products by brand Id', () => {
         done();
       });
   });
+  
+  it('should ERROR if no brandId is included', (done) => {
+    // act
+    chai
+      .request(server)
+      .get('/api/brands//products')
+      // assert
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(400); 
+        done();
+      });
+  });
 
 });
 
