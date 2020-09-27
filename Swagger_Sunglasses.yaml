@@ -3,7 +3,7 @@ info:
   title: Sunglasses API
   description: An API to support the up and coming Sunglasses platform
   version: 1.0.0
-host: sunglasses.io
+host: locahost:3001
 schemes:
   - https
 basePath: /api
