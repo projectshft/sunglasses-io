@@ -240,13 +240,26 @@ describe('POST /cart/:productId updates quantity of item in cart', () => {
 });
 
 describe('DELETE /cart/:productId removes product from cart', () => {
+  it('returns error item not in cart', done => {
+
+    chai
+      // arrange  
+      .request(server)
+      // act
+      .delete(`/api/me/cart/4/?quantity=30&accessToken=${testToken}`)
+      .end((err, res) => {
+        // assert
+        res.should.have.status(400);
+        done();
+      });
+  });
   it('requires valid token to remove product', done => {
 
     chai
       // arrange  
       .request(server)
       // act
-      .delete(`/api/me/cart/1`)
+      .delete(`/api/me/cart/5/?accessToken=${testToken}`)
       .end((err, res) => {
         // assert
         res.should.have.status(200);
@@ -260,7 +273,7 @@ describe('DELETE /cart/:productId removes product from cart', () => {
       // arrange  
       .request(server)
       // act
-      .delete(`/api/me/cart/1`)
+      .delete(`/api/me/cart/5/?accessToken=bonkers`)
       .end((err, res) => {
         // assert
         res.should.have.status(401);

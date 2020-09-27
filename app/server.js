@@ -31,7 +31,6 @@ var getValidTokenFromRequest = function (request) {
       return accessToken.token == parsedUrl.query.accessToken //&& ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
     if (currentAccessToken) {
-      console.log('token was found valid');
       return currentAccessToken;
     } else {
       return null;
@@ -101,8 +100,6 @@ myRouter.get('/api/brands/:brandId/products', function (request, response) {
   response.writeHead(200, {
     "Content-Type": "application/json"
   });
-  // console.log('proper parsing test ', parsedUrl);
-  // console.log('query test', request.params.brandId)
   if (request.params.brandId) {
     let niceResults = products.filter(item => item.categoryId === request.params.brandId);
     return response.end(JSON.stringify(niceResults));
@@ -119,7 +116,6 @@ myRouter.get('/api/products', function (request, response) {
     "Content-Type": "application/json"
   });
   var parsedUrl = require('url').parse(request.url, true)
-  console.log('proper parsing test ', parsedUrl);
   if (parsedUrl.query.search) {
     let niceResults = products.filter(item => item.name === parsedUrl.query.search);
     // TODO make a robust search of some type
@@ -239,9 +235,8 @@ myRouter.post('/api/me/cart', function (request, response) {
   // else send login required error 401
 myRouter.post('/api/me/cart/:prodId', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
-  console.log(request);
   if (!currentAccessToken) {
-    response.writeHead(401, "Please log in to modify items to your cart");
+    response.writeHead(401, "Please log in to modify items in your cart");
     return response.end();
   
   } else {
@@ -254,7 +249,6 @@ myRouter.post('/api/me/cart/:prodId', function (request, response) {
       if ((selectedCartItem = cart.findIndex(item => item.item === request.params.prodId)) >= 0) { 
         cart[selectedCartItem].quantity = parsedUrl.query.quantity;
         response.writeHead(200, `Product ID ${request.params.prodId} has a new quantity of ${parsedUrl.query.quantity}.`);
-        console.log('resulting cart', cart);
          return response.end();
        } else {
          // invalid product
@@ -273,14 +267,43 @@ myRouter.post('/api/me/cart/:prodId', function (request, response) {
 });
 
 // -Delete product from cart
-myRouter.delete('/me/cart/:prodId', function (request, response) {
-  response.writeHead(418, {
-    "Content-Type": "application/json"
-  });
   // parseUrl and params
   // check for token
   // check for existing product
-  // increment product to cart
+  // delete product from cart
   // else send login required error 401
+myRouter.delete('/api/me/cart/:prodId', function (request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(401, "Please log in to modify items in your cart");
+    return response.end();
+  
+  } else {
+    
+    var parsedUrl = require('url').parse(request.url, true);
+    // confirm query exists
+    if (request.params.prodId) {
+
+      // confirm cart has item
+      if ((selectedCartItem = cart.findIndex(item => item.item === request.params.prodId)) >= 0) { 
+        cart.splice(selectedCartItem,1);
+        response.writeHead(200, `Product ID ${request.params.prodId} has been removed from your cart.`);
+        console.log('final cart', cart);
+         return response.end();
+       } else {
+         // invalid product
+         response.writeHead(400, "Call succeeded, but product is invalid");
+         return response.end();
+       };
+       
+      } else {
+         // invalid cart
+        response.writeHead(400, "Cart is empty or item not found in cart.");
+        return response.end();
+       }
+      // confirm product id exists
+      
+    };
+
 });
 module.exports = server;
