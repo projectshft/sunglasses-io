@@ -149,12 +149,13 @@ describe("/GET products by brand", () => {
     });
 });
 
-
+//CART TESTS
+//ADD ITEM
 describe("/POST add to cart", () => {
     it.only("should POST added item to cart", done => {
         chai
             .request(server)
-            .post("/api/me/products/1/add-to-cart")
+            .post("/api/me/cart/1")
             .end((err, res) => {
                 assert.isNotNull(res.body);
                 expect(err).to.be.null;
@@ -166,7 +167,7 @@ describe("/POST add to cart", () => {
     it.only("should not let user add product that doesnt exist", done => {
         chai
             .request(server)
-            .post("/api/me/products/50/add-to-cart")
+            .post("/api/me/cart/50")
             .end((err, res) => {
                 expect(res).to.have.status(404);
                 done();
@@ -174,6 +175,30 @@ describe("/POST add to cart", () => {
     });
 });
 
+//DELETE ITEM
+describe("/DELETE item from cart", () => {
+    it.only("should DELETE item from cart", done => {
+        chai
+            .request(server)
+            .delete("/api/me/cart/1")
+            .end((err, res) => {
+                assert.isNotNull(res.body);
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "application/json");
+                done();
+            });
+    });
+    it.only("should not ler user delete item that doesnt exist", done => {
+        chai
+            .request(server)
+            .delete("/api/me/cart/50")
+            .end((err, res) => {
+                expect(res).to.have.status(404);
+                done();
+            });
+    });
+});
 
 
 

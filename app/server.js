@@ -13,6 +13,7 @@ let products = [];
 let brands = [];
 let user = {};
 let users = [];
+let clear;
 
 const router = Router();
 router.use(bodyParser.json());
@@ -34,6 +35,8 @@ server.listen(PORT, err => {
     users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
 
     user = users[0];
+
+    clear = () => user.cart = [];
 });
 
 const saveCurrentUser = (currentUser) => {
@@ -128,18 +131,18 @@ router.post("/api/login", (request, response) => {
 
 });
 
-router.get("/api/me/cart", (request, response) => {
+router.get("/api/me/cart", (request, response) => {     ///////NEEDS TO RETURN CART FOR A USER
     if(!user) {
         response.writeHead(404, "User not found");
         return response.end();
     }
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user));
+    return response.end(JSON.stringify(user.cart));
 });
 
 
 //ADD A PRODUCT TO USER CART
-router.post("/api/me/products/:productId/add-to-cart", (request, response) => { /////CHANGE ROUTE AND MAKE IT WORK!!!
+router.post("/api/me/cart/:productId", (request, response) => { /////CHANGE ROUTE AND MAKE IT WORK!!!
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
     if(!product) {
@@ -147,9 +150,25 @@ router.post("/api/me/products/:productId/add-to-cart", (request, response) => { 
         return response.end();
     }
     response.writeHead(200);
+    clear();
     user.cart.push(product);
     saveCurrentUser(user);
     return response.end();
 });
+
+//DELETE PRODUCT FROM USER CART
+router.delete("/api/me/cart/:productId", (request, response) => {
+    const { productId } = request.params;
+    const product = products.find(item => item.id == productId);
+    if(!product) {
+        response.writeHead(404, "Product not Found");
+        return response.end();
+    }
+    let cartToReturn = user.cart.filter(item => item !== product) 
+    response.writeHead(200);
+    user.cart = cartToReturn;
+    saveCurrentUser(user);
+    return response.end();
+})
 
 module.exports = server;
