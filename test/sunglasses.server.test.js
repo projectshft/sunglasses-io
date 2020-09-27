@@ -276,8 +276,6 @@ describe('GET/ user cart', () => {
       });
   });
 
-// //   it('should FAIL if currentUser is not logged in', (done) => {
-
 });
 
 //NOT DONE
