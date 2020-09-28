@@ -262,6 +262,7 @@ describe('POST/ user login', () => {
 });
 
 //GET CART
+//not RESTful bc accessToken is served in the body of the request
 describe('GET/ currentUser cart', () => {
   it('should GET cart for user with valid access token', (done) => {
     //arrange: a valid, current token with valid user
@@ -377,6 +378,7 @@ describe('GET/ currentUser cart', () => {
 });
 
 //POST PRODUCT TO A CART
+//not RESTful bc accessToken is served in the body of the request
 describe('POST/ product to currentUser cart', () => {
   it('should POST a new product to the currentUser cart', (done) => {
     //arrange: a valid, current token with valid user; valid productId to add
@@ -584,6 +586,8 @@ describe('POST/ product to currentUser cart', () => {
   });
 });
 
+//DELETE ITEM FROM CART
+//not RESTful bc accessToken is served in the body of the request
 describe('DELETE/ product from currentUser cart', () => {
   it('should DELETE a product from the currentUser cart', (done) => {
     //arrange: a valid, current token with valid user. Valid productId to delete
@@ -796,6 +800,8 @@ describe('DELETE/ product from currentUser cart', () => {
   });
 });
 
+//POST NEW QUANTITY OF ITEMS TO CART
+//not RESTful bc accessToken is served in the body of the request
 describe('POST/ a new quantity of an item to currentUser cart', () => {
   it('should POST a new quantity of an item to currentUser cart', (done) => {
     //arrange: a valid, current token with valid user. Valid productId & numberToAdd
@@ -993,3 +999,4 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
 
 //ADDITIONAL POSSIBLE TESTS:
 //CHECK that token is 16 valid chars
+//Confirm that all the loops are working for users that are not yellowleopard (first user)
