@@ -308,7 +308,6 @@ describe('/DELETE me/cart/:productId', () => {
        .request(server)
        .post('/api/me/cart/10?token=atoken32')
        .end((err, res) => {
-           //delete that item from the cart
            chai
            .request(server)
            .delete('/api/me/cart/10?token=atoken31')
