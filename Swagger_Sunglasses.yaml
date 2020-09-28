@@ -12,7 +12,7 @@ produces:
 paths:
   /brands:
     get:
-      summary: Brands
+      summary: Returns all brands
       description: |
         The Brands endpoint returns all brands available to a customer
       tags:
@@ -30,7 +30,7 @@ paths:
             $ref: '#/definitions/Error'
   /brands/{brandId}/products:
     get:
-      summary: Products of a brand
+      summary: Returns products of a brand
       description: |
         This endpoint returns the products associated with a specific brand
       parameters:
@@ -54,7 +54,7 @@ paths:
             $ref: '#/definitions/Error'
   /products:
     get:
-      summary: Products
+      summary: Returns all products
       description: |
         The Products endpoint lets a user search for specific products based on a search term
       parameters:
@@ -113,7 +113,7 @@ paths:
             $ref: '#/definitions/Error'
   /me/cart:
     get:
-      summary: shows values in the user's cart
+      summary: Returns the products in the user's cart
       description: |
         The GET me/cart endpoint returns the current items in the cart
       parameters:
@@ -134,7 +134,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     post:
-      summary: Adding to your cart
+      summary: Adds to your cart
       description: |
         The POST me/cart endpoint adds new products to your cart
       parameters:
@@ -158,7 +158,7 @@ paths:
             $ref: '#/definitions/Error'
   /me/cart/{productId}:
     post:
-      summary: add certain product to cart
+      summary: Adds a certain product to your cart
       description: |
         This endpoint allows you to add products to your cart based on their productId
       parameters:
@@ -186,7 +186,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
     delete:
-      summary: deletes a certain product from your cart
+      summary: Deletes a certain product from your cart
       description: |
         This endpoint allows you to delete products from your cart based on their productId
       parameters:
@@ -261,7 +261,7 @@ definitions:
         description: The username associated to the logged in user
       lastUpdated:
         type: string
-        description: The username associated to the logged in user
+        description: Date/time the access token was created/refreshed
       token:
         type: string
         description: A token that associates a logged in user
