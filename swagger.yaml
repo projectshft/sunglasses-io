@@ -1,0 +1,289 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses IO platform
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint allows you to search products and sort them by property
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - categoryId
+              - name
+              - price
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: User Login
+      description: The Login endpoint authorizes a user to use application.
+      tags:
+        - Login
+      responses:
+        '200':
+          description: User logged in successfully
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: User Profile
+      description: The User Profile endpoint returns information about the user that has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/me/cart':
+    get:
+      summary: User Cart
+      description: |
+        This endpoint returns the cart for the given user
+      tags:
+        - User
+      responses:
+        '200':
+          description: Cart  retrieval successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add product to cart
+      description: This endpoint allows user to add an item to their cart
+      tags:
+        - Add
+      responses:
+        '200':
+          description: Product added successfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/me/cart/{productId}':
+    delete:
+      summary: Delete product from user cart
+      description: |
+        This endpoint allows you to delete an item from a user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to delete
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Item deleted successfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Change item quantity
+      description: This endpoint allows you to change the quantity of an item in the cart
+      parameters:
+        - name: add
+          in: query
+          description: Amount of times to add item
+          required: true
+          type: number
+          format: int32
+        - name: remove
+          in: query
+          description: Amount of times to remove item
+          required: true
+          type: number
+          format: int32
+        - name: productId
+          in: path
+          description: The id of the product whose quantity is being changed
+          required: true
+          type: string
+      tags:
+        - Item Quantity
+      responses:
+        '200':
+          description: Item quantity changed successfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        Brands define groupings of sunglasses for browsing.
+      parameters:
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - name
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of Brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  '/brands/{id}/products':
+    get:
+      summary: Products in Category
+      description: |
+        All the products from a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the category to search for products in.
+          required: true
+          type: string
+      tags:
+        - By Brand
+      responses:
+        '200':
+          description: An array of products from the brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price for the product.
+      imageUrls:
+        type: string
+        description: The URLs for the image representing the product.
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the user.
+      cart:
+        type: array
+        items:
+            type: object
+        description: User's cart.
+      name: 
+        type: object
+        description: User's title, first, and last name
+      location:
+        type: object
+        description: User's mailing address
+      email:
+        type: string
+        description: User's Email address
+      login:
+        type: object
+        description: User's login information
+      dob:
+        type: string
+        description: User's date of birth
+      registered:
+        type: string
+        description: User's register date
+      phone:
+        type: string
+        description: User's home phone number
+      cell:
+        type: string
+        description: User's cell phone number
+      picture:
+        type: object
+        description: User's pictures
+      nat:
+        type: string
+        description: User's nationality
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
