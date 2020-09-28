@@ -6,11 +6,12 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const url = require("url");
-const ShoppingCart = require('./models/shopping-cart')
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const PORT = 8080;
 
-let failedLogins = 0;
+let failedLogins = {};
 let accessTokens = [];
 let products = [];
 let brands = [];
@@ -19,13 +20,13 @@ let user = {};
 
 const router = Router();
 router.use(bodyParser.json());
-
+// router.use(bodyParser.urlencoded({
+//     extended: true
+// }));
 
 const server = http.createServer((req, res) => {
     res.writeHead(200)
     router(req, res, finalHandler(req, res));
-
-    // myRouter(request, response, finalHandler(request, response));
 });
 
 server.listen(PORT, err => {
@@ -52,15 +53,16 @@ server.listen(PORT, err => {
 });
 
 const saveCurrentUser = (currentUser) => {
-    users[0] = currentUser;
+    user = currentUser;
     fs.writeFileSync("initial-data/users.json", JSON.stringify(users), "utf-8");
 }
 
-const getValidToken = (request) {
+const getValidToken = (request) => {
     const parsedUrl = require('url').parse(request.url, true);
-    if (parsedUrl.query.accessToken) {
+    const queryToken = parsedUrl.query.accessToken
+    if (queryToken) {
         let currentAccessToken = accessTokens.find(accessToken => {
-            return accessToken.token == parsedUrl.query.accessToken;
+            return accessToken.token == queryToken; //&&((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         });
         if (currentAccessToken) {
             return currentAccessToken;
@@ -70,6 +72,19 @@ const getValidToken = (request) {
     } else {
         return null;
     }
+};
+
+const getFailedLogins = (email) => {
+    let currentFailedRequests = failedLogins[email];
+    if (currentFailedRequests) {
+        return currentFailedRequests;
+    } else {
+        return 0;
+    }
+}
+
+const setFailedLoginsForUser = (email, fails) => {
+    failedLogins[email] = fails;
 }
 
 router.get("/", (request, response) => {
@@ -160,27 +175,29 @@ router.get("/api/brands/:id/products", (request, response) => {
 });
 
 router.post("/api/login", (request, response) => {
-    loginCounter = failedLogins[request.body.username]
+    const parsedUrl = url.parse(request.originalUrl);            
+    const { email, password } = queryString.parse(parsedUrl.query);
+    loginCounter = getFailedLogins(email)
     if (!loginCounter) {
         loginCounter = 0;
     }
-    if (request.body.username && request.body.password && loginCounter < 3) {
-        let user = users.find((user) => {
-            return user.login.username == request.body.username && 
-            user.login.password == request.body.password;
+    if (email && password && loginCounter < 3) {
+        user = users.find((user) => {
+            return user.email == email && 
+            user.login.password == password;
         });
         if (user) {
-            loginCounter = 0;
+            setFailedLoginsForUser(email, 0);
             response.writeHead(200, {"Content-Type": "application/json"});
             let currentAccessToken = accessTokens.find(token => {
-                return token.username == user.login.username;
+                return token.email == email;
             });
             if (currentAccessToken) {
-                correntAccessToken.lastUpdated = new Date();
+                currentAccessToken.lastUpdated = new Date();
                 return response.end(JSON.stringify(currentAccessToken.token));
             } else {
                 let newAccessToken = {
-                    username: user.login.username,
+                    email: user.email,
                     lastUpdated: new Date(),
                     token: uid(16)
                 }
@@ -189,11 +206,7 @@ router.post("/api/login", (request, response) => {
             }
         } else {
             let numFailed = loginCounter;
-            if (numFailed) {
-                loginCounter++;
-            } else {
-                loginCounter = 1;
-            }
+            setFailedLoginsForUser(email, ++numFailed)
             response.writeHead(401, "Invalid username or password");
             return response.end();
         }
@@ -205,6 +218,11 @@ router.post("/api/login", (request, response) => {
 
 //GET USER CART
 router.get("/api/me/cart", (request, response) => {  
+    // let currentAccessToken = getValidToken(request);
+    // if(!currentAccessToken) {
+    //     response.writeHead(403, "You do not have access to this call")
+    //     return response.end();
+    // } 
     if(!user) {
         response.writeHead(404, "User not found");
         return response.end();
@@ -215,10 +233,14 @@ router.get("/api/me/cart", (request, response) => {
 
 //ADD A PRODUCT TO USER CART
 router.post("/api/me/cart", (request, response) => {
-    const parsedUrl = url.parse(request.originalUrl);
+    const parsedUrl = url.parse(request.originalUrl);                           ////ADD 403 RETURNS IN TESTS
     const { productId } = queryString.parse(parsedUrl.query);
     const product = products.find(item => item.id == productId);
-    
+    // let currentAccessToken = getValidToken(request);
+    // if(!currentAccessToken) {
+    //     response.writeHead(403, "You do not have access to this call")
+    //     return response.end();
+    // } 
     if(!product) {
         response.writeHead(404, "Product not Found");
         return response.end();
@@ -233,6 +255,11 @@ router.post("/api/me/cart", (request, response) => {
 router.delete("/api/me/cart/:productId", (request, response) => {
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
+    // let currentAccessToken = getValidToken(request);
+    // if(!currentAccessToken) {
+    //     response.writeHead(403, "You do not have access to this call")
+    //     return response.end();
+    // } 
     if(!product) {
         response.writeHead(404, "Product not Found");
         return response.end();
@@ -251,6 +278,11 @@ router.post("/api/me/cart/:productId", (request, response) => {
     const { add, remove } = queryString.parse(parsedUrl.query);         //////add can be 0 so it can be pased as required parameter with remove
     const { productId } = request.params;
     const product = products.find(item => item.id == productId);
+    // let currentAccessToken = getValidToken(request);
+    // if(!currentAccessToken) {
+    //     response.writeHead(403, "You do not have access to this call")
+    //     return response.end();
+    // } 
     if(!product) {
         response.writeHead(404, "product not Found");
         return response.end();

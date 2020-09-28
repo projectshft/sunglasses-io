@@ -3,14 +3,14 @@ const chaiHttp = require('chai-http');
 const server = require('../app/server');
 const expect = chai.expect;
 const assert = chai.assert;
-let ShoppingCart = require('../app/models/shopping-cart')
+// let ShoppingCart = require('../app/models/shopping-cart')
 
 chai.use(chaiHttp);
 chai.use(require("chai-sorted"));
 
-beforeEach(() => {
-    ShoppingCart.clearCart();
-})
+// beforeEach(() => {
+//     ShoppingCart.clearCart();
+// })
 
 //GET Products
 describe("/GET products", () => {
@@ -152,6 +152,42 @@ describe("/GET products by brand", () => {
                 done();
             });
     });
+    it("fails when no brand is found", done => {
+        chai
+            .request(server)
+            .get("/api/brands/20/products")
+            .end((err, res) => {
+                expect(err).to.not.be.null;
+                expect(res).to.have.status(404);
+                done();
+            });
+    });
+});
+
+//USER TESTS:
+describe("/GET user login", () => {
+    it.only("should return api access token", done => {
+        chai
+            .request(server)
+            .post("/api/login?email=salvador.jordan@example.com&password=tucker")
+            .end((err, res) => {
+                expect(err).to.be.null;
+                expect(res).to.have.status(200);
+                expect("Content-Type", "string");
+                expect(res.body).to.be.a("string");
+                done();
+            });
+    });
+    it("fails as expected when login data is incorrect", done => {
+        chai
+            .request(server)
+            .get("api/login?email=FakeEmail&password=Fakepassword")
+            .end((err, res) => {
+                expect(err).to.not.be.null;
+                expect(res).to.have.status(403);
+                done();
+            })
+    })
 });
 
 //CART TESTS:
@@ -201,6 +237,8 @@ describe("/POST add to cart", () => {
 });
 
 //DELETE ITEM
+//To see if this test works comment out the beforeEach function.
+//add to cart adds the item and delete removes it
 describe("/DELETE item from cart", () => {
     it.only("should DELETE item from cart", done => {
         chai
