@@ -212,7 +212,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     return response.end()
   } 
   else {
-    //checks if the request id matches up with the a product id
+    //checks if the request id matches up with the product id
     let productToAdd = products.find(productToAdd => {
       if (productToAdd.id == request.body.id) {
         return true
@@ -222,7 +222,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     if (productToAdd) {
       cart.push(productToAdd)
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end()
+      return response.end(JSON.stringify(cart))
     }
     // if it doesn't match, throws an error
     else {
@@ -241,7 +241,7 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
     return response.end()
   } 
   else {
-    //checks if the request id matches up with the a product id
+    //checks if the request id matches up with the product id
     let productToAdd = products.find(productToAdd => {
       if (productToAdd.id == request.params.productId) {
         return true
@@ -251,11 +251,43 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
     if (productToAdd) {
       cart.push(productToAdd)
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end()
+      return response.end(JSON.stringify(cart))
     }
     // if it doesn't match, throws an error
     else {
       response.writeHead(404, 'This product is unavailable');
+      return response.end()
+    }
+  }
+});
+
+// create route to delete products from a users cart
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
+  let loggedInUsersToken = getValidTokenFromRequest(request);
+  // if user is not logged in (no access token), throw error
+  if (!loggedInUsersToken){
+    response.writeHead(401, 'You do not have access to this cart, please login');
+    return response.end()
+  } 
+  else {
+    //checks if the request id matches up with the product id
+    let productToDelete = products.find(productToDelete => {
+      if (productToDelete.id == request.params.productId) {
+        return true
+      }
+    });
+    if (productToDelete) {
+      // if a match is found, check to see if that product is in the cart
+      if(cart.includes(productToDelete)) {
+        // if true, remove it from the cart
+        cart.splice(productToDelete, 1)
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(cart))
+      }     
+    }
+    // if it doesn't match, throws an error
+    else {
+      response.writeHead(404, 'Cannot delete a product not in your cart');
       return response.end()
     }
   }

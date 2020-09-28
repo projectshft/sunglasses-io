@@ -281,3 +281,56 @@ describe('/POST me/cart/:productId', () => {
        });
    });
 });
+
+// tests for the users cart DELETE endpoint 
+describe('/DELETE me/cart/:productId', () => {
+    // delete a product from the cart
+    it('it should delete a product in the cart', done => {
+        // add an item first
+       chai
+       .request(server)
+       .post('/api/me/cart/10?token=atoken32')
+       .end((err, res) => {
+           //delete that item from the cart
+           chai
+           .request(server)
+           .delete('/api/me/cart/10?token=atoken32')
+           .end((err, res) => {
+           res.should.have.status(200);
+           done();
+           });
+        });
+    });
+   // throw error if user does not have access token
+   it('it should not  add a product to the cart if user is without an access token', done => {
+       // add an item first
+       chai
+       .request(server)
+       .post('/api/me/cart/10?token=atoken32')
+       .end((err, res) => {
+           //delete that item from the cart
+           chai
+           .request(server)
+           .delete('/api/me/cart/10?token=atoken31')
+           .end((err, res) => {
+           res.should.have.status(401);
+           done();
+           });
+        });
+    });
+   // throw an error if that product doesn't exist
+   it('should not delete a non existent product from the cart', done => {
+        chai
+        .request(server)
+        .post('/api/me/cart/10?token=atoken32')
+        .end((err, res) => {
+            chai
+            .request(server)
+            .delete('/api/me/cart/69?token=atoken31')
+            .end((err, res) => {
+            res.should.have.status(401);
+            done();
+            });
+        });
+    });
+});
