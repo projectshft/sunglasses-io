@@ -60,24 +60,25 @@ server.listen(PORT, (err) => {
 });
 
 router.get('/api/brands', (request, response) => {
-  //if no brands, error
-  if (brands.length === 0) {
-    response.writeHead(204, "There aren't any brands to return");
+  //if brands array is not found, error
+  if (!brands) {
+    response.writeHead(404, "Brands resource not found");
     return response.end();
   }
-  //else, return the whole array
+  //if no brands, return empty array
+  //else, return all the brands
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 });
 
 //only included for error testing; not in Swagger API definitions
 router.get('/api/brands_empty', (request, response) => {
-  //if no brands, error
-  if (brands_empty.length === 0) {
-    response.writeHead(204, 'There are no brands to return');
+  if (!brands_empty) {
+    response.writeHead(404, "Brands resource not found");
     return response.end();
   }
-  //else, return all brands
+  //if no brands, return empty array
+  //else, return all the brands
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands_empty));
 });
@@ -85,6 +86,12 @@ router.get('/api/brands_empty', (request, response) => {
 router.get('/api/brands/:brandId/products', (request, response) => {
   // grab the brandId from the request
   const { brandId } = request.params;
+  //check that brandId is numeric
+  if (brandId.match(/[A-Z|a-z]/i)) {
+      response.writeHead(400, 'Invalid brandId');
+      return response.end();
+    } 
+
 
   //find brand
   const selectedBrand = [];
@@ -103,11 +110,11 @@ router.get('/api/brands/:brandId/products', (request, response) => {
   });
 
   if (selectedBrand.length === 0) {
-    response.writeHead(204, 'That brand or product was not found');
+    response.writeHead(404, 'That brand or product was not found');
     return response.end();
   }
   if (productsByBrandId.length === 0) {
-    response.writeHead(204, 'That brand or product was not found');
+    response.writeHead(404, 'That brand or product was not found');
     return response.end();
   }
   response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -117,7 +124,7 @@ router.get('/api/brands/:brandId/products', (request, response) => {
 //only included for error testing; not in Swagger API definitions
 router.get('/api/brands//products', (request, response) => {
   //a router path missing the brandId
-  response.writeHead(400, 'Missing brandId in request');
+  response.writeHead(400, 'Invalid brandId');
   return response.end();
 });
 
@@ -139,11 +146,7 @@ router.get('/api/products', (request, response) => {
       }
     });
     if (productsToReturn.length === 0) {
-      response.writeHead(
-        204,
-        'No matching products found. Please search again',
-        { 'Content-Type': 'application/json' }
-      );
+      response.writeHead(404, 'No products found');
       return response.end();
     } else {
       response.writeHead(200, {

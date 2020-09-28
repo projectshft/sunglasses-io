@@ -27,7 +27,7 @@ describe('GET/ brands of sunglasses', () => {
       });
   });
 
-  it('should ERROR if there are no brands', (done) => {
+  it('should GET an empty array if that is the state of the resource', (done) => {
     //arrange: an empty array of brands
     // act
     chai
@@ -38,7 +38,8 @@ describe('GET/ brands of sunglasses', () => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
         expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(0);
         done();
       });
   });
@@ -72,10 +73,7 @@ describe('GET/ products by brand Id', () => {
       .get('/api/brands/100/products')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(404);
         done();
       });
   });
@@ -88,10 +86,7 @@ describe('GET/ products by brand Id', () => {
       .get('/api/brands/Adidas/products')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(400);
         done();
       });
   });
@@ -104,10 +99,7 @@ describe('GET/ products by brand Id', () => {
       .get('/api/brands/6/products')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(404);
         done();
       });
   });
