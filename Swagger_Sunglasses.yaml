@@ -208,7 +208,7 @@ paths:
         '401':
           description: Error, you don't have access to this cart
         '404':
-          description: Product not available
+          description: Can't delete a product not in your cart
         default:
           description: Unexpected error
           schema:
