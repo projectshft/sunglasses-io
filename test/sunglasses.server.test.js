@@ -78,12 +78,12 @@ describe('GET/ products by brand Id', () => {
       });
   });
 
-  it('should ERROR if brandId is a letter instead of number', (done) => {
+  it('should ERROR if brandId contains letters or special characters', (done) => {
     //arrange: an invalid brandId in path -- letters
     // act
     chai
       .request(server)
-      .get('/api/brands/Adidas/products')
+      .get('/api/brands/Adida$/products')
       // assert
       .end((err, res) => {
         res.should.have.status(400);
@@ -167,10 +167,7 @@ describe('GET/ products by a search term', () => {
       .get('/api/products?searchTerm=gibberish123')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(404);
         done();
       });
   });
@@ -183,9 +180,6 @@ describe('GET/ products by a search term', () => {
       .get('/api/products?searchTerm=')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(400);
         done();
       });
@@ -207,6 +201,9 @@ describe('POST/ user login', () => {
         expect('Content-Type', 'application/json');
         res.should.have.status(200);
         res.body.should.be.an('object');
+        res.body.should.have.property('username');
+        res.body.should.have.property('lastUpdated');
+        res.body.should.have.property('token');
         done();
       });
   });
@@ -219,9 +216,6 @@ describe('POST/ user login', () => {
       .post('/api/login/?username=MissMaddie&password=jonjon')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -235,9 +229,6 @@ describe('POST/ user login', () => {
       .post('/api/login/?username=&password=jonjon')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(400);
         done();
       });
@@ -251,9 +242,6 @@ describe('POST/ user login', () => {
       .post('/api/login/?username=yellowleopard753&password=')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(400);
         done();
       });
@@ -267,9 +255,6 @@ describe('POST/ user login', () => {
       .post('/api/login/?username=ArtFreak123&password=ILoveArt')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(403);
         done();
       });
@@ -297,6 +282,7 @@ describe('GET/ currentUser cart', () => {
         expect('Content-Type', 'application/json');
         res.should.have.status(200);
         res.body.should.be.an('array');
+        res.body.length.should.be.eql(1);
         done();
       });
   });
@@ -315,9 +301,6 @@ describe('GET/ currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -337,9 +320,6 @@ describe('GET/ currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -353,9 +333,6 @@ describe('GET/ currentUser cart', () => {
       .get('/api/me/cart')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -374,9 +351,6 @@ describe('GET/ currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -396,9 +370,6 @@ describe('GET/ currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -445,15 +416,12 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(404);
         done();
       });
   });
 
-  it('should ERROR if productId is a letter instead of number', (done) => {
+  it('should ERROR if productId contains letters or special characters', (done) => {
     //arrange: a valid, current token with valid user. Letters for productId
     let accessToken = {
       username: 'yellowleopard753',
@@ -463,14 +431,11 @@ describe('POST/ product to currentUser cart', () => {
     // act
     chai
       .request(server)
-      .post('/api/me/cart?productId=beard_wax')
+      .post('/api/me/cart?productId=$un&any')
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(400);
         done();
       });
   });
@@ -489,9 +454,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(400);
         done();
       });
@@ -511,9 +473,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -532,9 +491,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -554,9 +510,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -575,9 +528,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -591,9 +541,6 @@ describe('POST/ product to currentUser cart', () => {
       .post('/api/me/cart?productId=2')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -612,9 +559,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -634,9 +578,6 @@ describe('POST/ product to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -668,6 +609,30 @@ describe('DELETE/ product from currentUser cart', () => {
       });
   });
 
+  it('should RETURN an empty cart if cart started out empty', (done) => {
+    //arrange: a valid, current token with valid user. Valid productId to delete
+    let accessToken = {
+      username: 'lazywolf342',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: 'SixT33n8J03ei4mw',
+    };
+    // act
+    chai
+      .request(server)
+      .delete('/api/me/cart/1')
+      .send(accessToken)
+      // assert : we expect cart.length = 1 because of additions and deletions in previous tests
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect('Content-Type', 'application/json');
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(0);
+        done();
+      });
+  });
+  
   it('should ERROR if no product matches productId', (done) => {
     //arrange: a valid, current token with valid user. Invalid productId to delete
     let accessToken = {
@@ -682,15 +647,12 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(404);
         done();
       });
   });
 
-  it('should ERROR if productId is entered as letters', (done) => {
+  it('should ERROR if productId contains letters or special characters', (done) => {
     //arrange: a valid, current token with valid user. Invalid productId to delete
     let accessToken = {
       username: 'yellowleopard753',
@@ -700,14 +662,11 @@ describe('DELETE/ product from currentUser cart', () => {
     // act
     chai
       .request(server)
-      .delete('/api/me/cart/Sneakers')
+      .delete('/api/me/cart/$neakerZ')
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(400);
         done();
       });
   });
@@ -726,9 +685,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -747,9 +703,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -769,9 +722,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -790,9 +740,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -806,9 +753,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .delete('/api/me/cart/1')
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -827,9 +771,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -849,9 +790,6 @@ describe('DELETE/ product from currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -884,7 +822,7 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
   });
 
   it('should RETURN currentUser cart if no numberToAdd is included', (done) => {
-    //arrange: a valid, current token with valid user. No numberToAdd
+    //arrange: a valid, current token with valid user. Valid productId. No numberToAdd
     let accessToken = {
       username: 'yellowleopard753',
       lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
@@ -893,7 +831,7 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
     // act
     chai
       .request(server)
-      .post('/api/me/cart/18')
+      .post('/api/me/cart/1')
       .send(accessToken)
       // assert : we expect cart.length = 3 because of additions and deletions in previous tests
       .end((err, res) => {
@@ -921,15 +859,12 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(404);
         done();
       });
   });
 
-  it('should ERROR if productId is entered as letters', (done) => {
+  it('should ERROR if productId contains letters or special characters', (done) => {
     //arrange: a valid, current token with valid user. Invalid productId. Valid numberToAdd
     let accessToken = {
       username: 'yellowleopard753',
@@ -939,14 +874,30 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
     // act
     chai
       .request(server)
-      .post('/api/me/cart/FleaCollar?numberToAdd=2')
+      .post('/api/me/cart/FleaCo*{{ar?numberToAdd=2')
       .send(accessToken)
       // assert
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
-        res.should.have.status(204);
+        res.should.have.status(400);
+        done();
+      });
+  });
+
+  it('should ERROR if numberToAdd contains letters or special characters', (done) => {
+    //arrange: a valid, current token with valid user. Valid productId. Invalid numberToAdd
+    let accessToken = {
+      username: 'yellowleopard753',
+      lastUpdated: 'Sun Sep 27 2020 08:44:00 GMT-0400 (Eastern Daylight Time)',
+      token: '12345678abcdefgh',
+    };
+    // act
+    chai
+      .request(server)
+      .post('/api/me/cart/1?numberToAdd=$3v3N')
+      .send(accessToken)
+      // assert
+      .end((err, res) => {
+        res.should.have.status(400);
         done();
       });
   });
@@ -965,9 +916,6 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
       .send(accessToken)
       // assert : we expect cart.length = 3 because of additions and deletions in previous tests
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -987,9 +935,6 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
       .send(accessToken)
       // assert : we expect cart.length = 3 because of additions and deletions in previous tests
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -1003,9 +948,6 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
       .post('/api/me/cart/1?numberToAdd=2')
       // assert : we expect cart.length = 3 because of additions and deletions in previous tests
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -1024,9 +966,6 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
       .send(accessToken)
       // assert : we expect cart.length = 3 because of additions and deletions in previous tests
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
@@ -1046,11 +985,11 @@ describe('POST/ a new quantity of an item to currentUser cart', () => {
       .send(accessToken)
       // assert : we expect cart.length = 3 because of additions and deletions in previous tests
       .end((err, res) => {
-        assert.isNotNull(res.body);
-        expect(err).to.be.null;
-        expect('Content-Type', 'application/json');
         res.should.have.status(401);
         done();
       });
   });
 });
+
+//ADDITIONAL POSSIBLE TESTS:
+//CHECK that token is 16 valid chars

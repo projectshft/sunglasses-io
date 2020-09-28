@@ -30,8 +30,8 @@ paths:
             type: 'array'
             items:
               $ref: '#/definitions/Brands'
-        '204':
-          description: 'There are no brands to return'
+        '404':
+          description: 'Brands resource not found'
           schema:
             $ref: '#/definitions/Error'
             
@@ -57,15 +57,15 @@ paths:
             type: 'array'
             items:
               $ref: '#/definitions/Products'
-        '204':
+        '400':
+          description: 'Invalid brandId'
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: 'That brand or product was not found'
           schema:
             $ref: '#/definitions/Error'
-        '400':
-          description: 'Missing brandId in request'
-          schema:
-            $ref: '#/definitions/Error'
-
+ 
   /products:
     get:
       tags:
@@ -88,15 +88,15 @@ paths:
             type: 'array'
             items:
               $ref: '#/definitions/Products'
-        '204':
-          description: 'No matching products found. Please search again'
-          schema:
-            $ref: '#/definitions/Error'
         '400':
-          description: 'Search term required. Please try again'
+          description: 'Search term required'
           schema:
             $ref: '#/definitions/Error'
-            
+        '404':
+          description: 'No products found'
+          schema:
+            $ref: '#/definitions/Error'       
+  
   /login:
     post:
       tags:
@@ -178,18 +178,18 @@ paths:
             type: 'array'
             items: 
               $ref: '#/definitions/Products'
-        '204':
-          description: 'No matching products found. Please search again'
-          schema:
-            $ref: '#/definitions/Error'
         '400':
-          description: 'ProductId required. Please search again'
+          description: 'Valid productId required'
           schema:
             $ref: '#/definitions/Error'
         '401':
           description: "You need valid login credentials to continue"
           schema:
             $ref: '#/definitions/Error'
+        '404':
+          description: 'No products found'
+          schema:
+            $ref: '#/definitions/Error'   
 
   /me/cart/{productId}:
     delete:
@@ -197,7 +197,7 @@ paths:
         - 'DELETE/ product from currentUser cart'
       summary: 'DELETE product from shopping cart of a validated user'
       description: |
-        The DELETE item from a cart endpoint returns the contents of a validated user's shopping cart, minus one deleted product included in the path. User validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
+        The DELETE item from a cart endpoint returns the contents of a validated user's shopping cart, minus one deleted product included in the path. If a cart is empty at start, that empty cart will be returned. User validation requires that the body of the request contain a valid username and access token. The response includes product id, name, description, price, imageUrls, and a categoryId that links the products to their associated brands.
       produces:
       - "application/json"
       parameters:
@@ -213,18 +213,19 @@ paths:
             type: 'array'
             items: 
               $ref: '#/definitions/Products'
-        '204':
-          description: 'Cart empty or product not found. No deletion'
-          schema:
-            $ref: '#/definitions/Error'
         '400':
-          description: 'ProductId required'
+          description: 'Valid productId'
           schema:
             $ref: '#/definitions/Error'
         '401':
           description: "You need valid login credentials to continue"
           schema:
             $ref: '#/definitions/Error'
+        '404':
+          description: "Product not found"
+          schema:
+            $ref: '#/definitions/Error'
+          
     post:
       tags:
         - 'POST/ a new quantity of an item to currentUser cart'
@@ -251,16 +252,16 @@ paths:
             type: 'array'
             items: 
               $ref: '#/definitions/Products'
-        '204':
-          description: 'Product not found. No addition'
-          schema:
-            $ref: '#/definitions/Error'
         '400':
-          description: 'ProductId required'
+          description: 'Valid productId and numberToAdd required'
           schema:
             $ref: '#/definitions/Error'
         '401':
           description: "You need valid login credentials to continue"
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: 'Product not found'
           schema:
             $ref: '#/definitions/Error'
             
