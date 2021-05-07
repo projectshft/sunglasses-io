@@ -45,6 +45,8 @@ const addProduct = (query, cart) => {
   return newProduct;
 }
 
+//Server Init
+
 let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, () => {
@@ -53,10 +55,12 @@ let server = http.createServer(function (request, response) {
   users = JSON.parse(fs.readFileSync("./initial-data/users.json","utf-8"));
 });
 
+
 myRouter.get('/api/brands', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json"});
   return response.end(JSON.stringify(brands));
 })
+
 
 myRouter.get('/api/brands/:id/products', (request, response) => {
   const brand = brands.find(brand => brand.id === request.params.id);
@@ -70,6 +74,7 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json"});
   return response.end(JSON.stringify(returnPackage));
 })
+
 
 myRouter.get('/api/products', (request, response) => {
   const query = queryParse(request)
@@ -95,6 +100,7 @@ myRouter.get('/api/products', (request, response) => {
   return response.end(JSON.stringify(glassesMatch));
 })
 
+
 myRouter.post('/api/login', (request, response) => {
   const username = request.body.username;
   
@@ -112,7 +118,6 @@ myRouter.post('/api/login', (request, response) => {
       response.writeHead(403, { "Content-Type": "application/json"});
       return response.end('Too many failed login attempts');
     }
-    
     response.writeHead(401, { "Content-Type": "application/json"});
     return response.end('Invaild username or password');
   }
@@ -140,6 +145,7 @@ myRouter.post('/api/login', (request, response) => {
   return response.end(JSON.stringify(currentAccessToken.token));
 })
 
+
 myRouter.get('/api/me/cart', (request, response) => {
   let goodToken = checkToken(request);
   if (!goodToken){
@@ -151,6 +157,7 @@ myRouter.get('/api/me/cart', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json"});
   return response.end(JSON.stringify(currentUser.cart));
 })
+
 
 myRouter.post('/api/me/cart', (request, response) => {
   const query = queryParse(request);
@@ -172,6 +179,7 @@ myRouter.post('/api/me/cart', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json"});
   return response.end(JSON.stringify(newCart));
 })
+
 
 myRouter.put('/api/me/cart/', (request, response) => {
   const query = queryParse(request);
@@ -196,6 +204,7 @@ myRouter.put('/api/me/cart/', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json"});
   return response.end(JSON.stringify(newCart));
 })
+
 
 myRouter.delete('/api/me/cart/', (request, response) => {
   const query = queryParse(request);
