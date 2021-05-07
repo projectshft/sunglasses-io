@@ -8,6 +8,10 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
+let brands = [];
+let products = [];
+let users = [];
+
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -26,13 +30,13 @@ http.createServer(function (request, response) {
   
   fs.readFile("initial-data/products.json", "utf8", (error, data) => {
     if (error) throw error;
-    brands = JSON.parse(data);
+    products = JSON.parse(data);
     console.log(`Server loaded products file`)
   })
   
   fs.readFile("initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
-    brands = JSON.parse(data);
+    users = JSON.parse(data);
     console.log(`Server loaded users file`)
   })
 
@@ -44,7 +48,7 @@ myRouter.get('/v1/products', (request, response) => {
 })
 
 myRouter.get('/v1/brands', (request, response) => {
-  return;
+  return response.end();
 })
 
 myRouter.get('/v1/brands/:brandId/products', (request, response) => {
