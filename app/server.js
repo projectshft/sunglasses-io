@@ -48,4 +48,38 @@ router.get("/v1/brands", (request, response) => {
   return response.end(JSON.stringify(brandsToReturn));
 });
 
+router.get("/v1/brands/:brandId/products", (request, response) => {
+  const { brandId } = request.params;
+  const brand = brands.find(brand => brand.id == brandId);
+  if (!brand) {
+    response.writeHead(404, "That brand does not exist");
+    return response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const relatedProducts = products.filter(
+    product => product.brandId === brandId
+  );
+  return response.end(JSON.stringify(relatedProducts));
+});
+
+router.get("/v1/products", (request, response) => {
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query } = querystring.parse(parsedUrl.query);
+  let productsToReturn = [];
+  if (query !== undefined) {
+    productsToReturn = products.filter(product =>
+      product.description.includes(query)
+
+    );
+    if (!productsToReturn) {
+      response.writeHead(404, "There aren't any products to return");
+      return response.end();
+    }
+  } else {
+    productsToReturn = products;
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(productsToReturn));
+});
+
 module.exports = server;

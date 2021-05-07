@@ -18,6 +18,12 @@
                 "${workspaceFolder}/tests"
             ],
             "internalConsoleOptions": "openOnSessionStart"
-        }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Sunglasses.io",
+            "program": "${workspaceRoot}/app/server.js"
+        },
     ]
 }
