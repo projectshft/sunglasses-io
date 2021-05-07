@@ -6,8 +6,14 @@ class Brand {
     Object.assign(this,params);
   }
 
+  static addBrands(newBrandsArr) {
+    newBrandsArr.forEach(newBrand => {
+      this.addBrand(newBrand);
+    });
+  }
+
   static addBrand(newBrand) {
-    newBrand.id = currentId;
+    newBrand.id = currentId.toString();
     currentId++;
     brands.push(newBrand)
     return newBrand;

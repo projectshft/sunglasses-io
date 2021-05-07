@@ -6,11 +6,12 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 let Brand = require('./models/brands');
+let Product = require('./models/products');
 
 const PORT = 3001;
-let brands = [];
-let products = [];
-let users = [];
+// let brands = [];
+// let products = [];
+// let users = [];
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -22,9 +23,10 @@ let server = http.createServer(function (request, response) {
     return console.log("Error on server startup: ", error);
   }
 
-  brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8"));
-  products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));
-  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));
+  // Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
+  // products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));
+  // users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));
+
 });
 
 myRouter.get('/v1/products', (request, response) => {
@@ -33,13 +35,19 @@ myRouter.get('/v1/products', (request, response) => {
 
 myRouter.get('/v1/brands', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
-  // const brands = Brand.getAll();
+  const brands = Brand.getAll();
   return response.end(JSON.stringify(brands));
 })
 
 myRouter.get('/v1/brands/:brandId/products', (request, response) => {
-  response.writeHead(404, "no brand with that id found");
-  return response.end();
+  const selectedBrand = Brand.getBrand(request.params.brandId);
+  if(!selectedBrand) {
+    response.writeHead(404, "no brand with that id found");
+    return response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" })
+  const productsForSelectedBrand = Product.getAll().filter((product) => product.categoryId == selectedBrand.id);
+  return response.end(JSON.stringify(productsForSelectedBrand));
 })
 
 myRouter.post('/v1/login', (request, response) => {

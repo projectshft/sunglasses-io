@@ -5,6 +5,7 @@ var fs = require('fs');
 let should = chai.should();
 let { expect } = chai;
 let Brand = require('../app/models/brands');
+let Product = require('../app/models/products');
 // mocha test/server-test.js --watch
 
 chai.use(chaiHttp);
@@ -22,7 +23,7 @@ describe("When a request to provide a list of products is received", () => {
     describe("which matches no products", () => {
       describe("the response", () => {
         it("should return an empty array", done => {
-
+          done();
         })
       })
     })
@@ -39,7 +40,8 @@ describe("When a request to provide a list of products is received", () => {
 
 describe("When a brands request is received", () => {
   beforeEach(() => {
-    //Brand.removeAll();
+    Brand.removeAll();
+    Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
   });
   describe("the response", () => {
     it("should return the current list of brands", done => {
@@ -65,6 +67,15 @@ describe("When a brands request is received", () => {
 })
 
 describe("When a request for the products of a certain brand is received", () => {
+  beforeEach(() => {
+    Brand.removeAll();
+    Brand.resetId();
+    Product.removeAll();
+    Product.resetId();
+    // Loads the initial data
+    Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
+    Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  })
   describe("and an invalid brand id is given", () => {
     describe("the response", () => {
       it("should return a 404 error and state 'no brand with that id found'", done => {
@@ -89,19 +100,58 @@ describe("When a request for the products of a certain brand is received", () =>
       describe("the response", () => {
         it("should return an empty array", done => {
           // arrange
-          
-          // let brandsList = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8"))
-          // brandsList.forEach(element => {
-          //   Brand.addBrand(element)
-          // });
-          done();
+          const newBrandWithoutProducts = Brand.addBrand({"name": "Old Navy"})
+          // act
+          chai
+            .request(server)
+            .get(`/v1/brands/${newBrandWithoutProducts.id}/products`)
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.should.have.lengthOf(0);
+              done();
+            })
         })
       })
     })
     describe("and the brand has products", () => {
       describe("the response", () => {
         it("should return an array of products from that company", done => {
-          done();
+          // arrange
+          let brandWithProducts = {
+            "id": "2",
+            "name" : "Ray Ban"
+          }
+          let productsForbrand = [
+            {
+              "id": "4",
+              "categoryId": "2",
+              "name": "Better glasses",
+              "description": "The best glasses in the world",
+              "price":1500,
+              "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+            },
+            {
+              "id": "5",
+              "categoryId": "2",
+              "name": "Glasses",
+              "description": "The most normal glasses in the world",
+              "price":150,
+              "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }]
+          // act
+          chai
+            .request(server)
+            .get(`/v1/brands/${brandWithProducts.id}/products`)
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.should.have.lengthOf(2);
+              res.body.should.deep.equal(productsForbrand);
+              done();
+            })
         })
       })
     })

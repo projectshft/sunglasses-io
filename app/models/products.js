@@ -6,26 +6,34 @@ class Product {
     Object.assign(this, params);
   }
 
-  static addProduct(newBrand) {
-    newProduct.id = currentId;
+  static addProducts(newProductsArr) {
+    newProductsArr.forEach(newProduct => {
+      this.addProduct(newProduct);
+    });
+  }
+
+  static addProduct(newProduct) {
+    newProduct.id = currentId.toString();
     currentId++;
-    brands.push(newBrand)
-    return newBrand;
+    products.push(newProduct)
+    return newProduct;
   }
 
   static removeAll() {
-    brands = [];
+    products = [];
   }
 
   static resetId() {
     currentId = 1;
   }
 
-  static getBrand(brandId) {
-    return brands.find((brand=>brand.id == brandId))
+  static getProduct(productId) {
+    return products.find((product=>product.id == productId))
   }
 
   static getAll() {
-    return brands
+    return products
   }
 }
+
+module.exports = Product;
