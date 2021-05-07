@@ -148,6 +148,11 @@ paths:
           description: The product id to add to the cart
           required: true
           type: string
+        - name: quantity
+          in: query
+          description: The number of that item to add to cart
+          required: true
+          type: string
       tags:
         - Cart
       responses:
@@ -159,14 +164,13 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /me/cart/{productId}:
-    post:
+    put:
       summary: Update quantity of item in cart
       description: |
         This endpoint allows you to update the quantity of an item in the shopping cart
       parameters:
         - name: productId
-          in: path
+          in: query
           description: The id of the product to update
           required: true
           type: string
@@ -197,7 +201,7 @@ paths:
         This endpoint allows you to delete an item from the cart
       parameters:
         - name: productId
-          in: path
+          in: query
           description: The id of the product to delete
           required: true
           type: string
