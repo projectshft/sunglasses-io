@@ -54,4 +54,30 @@ describe("Sunglasses", () => {
         });
     });
   });
+
+  // describe("/POST user login", () => {
+  //   it("it should POST the user logging in", (done) => {
+  //     chai
+  //       .request(server)
+  //       .post("/v1/login")
+  //       .end((err, res) => {
+  //         res.should.have.status(200);
+  //         done();
+  //       })
+  //   })
+  // })
+
+  describe("/GET user's cart", () => {
+    it("it should GET all the products in the cart", (done) => {
+      chai
+        .request(server)
+        .get("/v1/me/cart")
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          // should include a name and quantity
+          done();
+        })
+    })
+  })
 });
