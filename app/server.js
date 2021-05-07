@@ -38,3 +38,35 @@ http.createServer(function (request, response) {
 
   console.log(`Server is listening on port ${PORT}`);
 });
+
+myRouter.get('/v1/products', (request, response) => {
+  return;
+})
+
+myRouter.get('/v1/brands', (request, response) => {
+  return;
+})
+
+myRouter.get('/v1/brands/:brandId/products', (request, response) => {
+  return;
+})
+
+myRouter.post('/v1/login', (request, response) => {
+  return;
+})
+
+myRouter.get('/v1/me/cart', (request, response) => {
+  return;
+})
+
+myRouter.post('/v1/me/cart', (request, response) => {
+  return;
+})
+
+myRouter.post('/v1/me/cart/:cartProductId', (request, response) => {
+  return;
+})
+
+myRouter.delete('/v1/me/cart/:cartProductId', (request, response) => {
+  return;
+})
