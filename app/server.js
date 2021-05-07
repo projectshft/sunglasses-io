@@ -44,7 +44,8 @@ myRouter.get('/v1/brands', (request, response) => {
 })
 
 myRouter.get('/v1/brands/:brandId/products', (request, response) => {
-  return;
+  response.writeHead(404, "no brand with that id found");
+  return response.end();
 })
 
 myRouter.post('/v1/login', (request, response) => {

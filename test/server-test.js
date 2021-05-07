@@ -5,7 +5,7 @@ var fs = require('fs');
 let should = chai.should();
 let { expect } = chai;
 let Brand = require('../app/models/brands');
-// mocha server-test.js --watch
+// mocha test/server-test.js --watch
 
 chai.use(chaiHttp);
 
@@ -37,15 +37,45 @@ describe("When a brands request is received", () => {
 })
 
 describe("When a request for the products of a certain brand is received", () => {
-  describe("and an invalid brand id is given", () => {
+  beforeEach(() => {
+    Brand.removeAll();
 
+  });
+  
+  describe("and an invalid brand id is given", () => {
+    describe("the response", () => {
+      it("should return a 404 error and state 'no brand with that id found'", done => {
+        // arrange
+        let brandsList = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8"))
+        brandsList.forEach(element => {
+          Brand.addBrand(element)
+        });
+        const invalidBrandId = 'a';
+        // act
+        chai
+          .request(server)
+          .get(`/v1/brands/${invalidBrandId}/products`)
+          .end((err, res) => {
+            //assert
+            res.should.have.status(404);
+            //TODO Something to test the error message
+            done();
+          })
+      })
+    })
   })
+
   describe("and a valid brand id is given", () => {
     describe("but the brand has no associated products", () => {
-
+      describe("the response", () => {
+        it("should return an empty array", done => {
+          // arrange
+          done();
+        })
+      })
     })
     describe("and the brand has products", () => {
-      
+
     })
   })
 })
