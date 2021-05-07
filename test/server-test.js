@@ -11,10 +11,26 @@ let Product = require('../app/models/products');
 chai.use(chaiHttp);
 
 describe("When a request to provide a list of products is received", () => {
+  beforeEach(() => {
+    Product.removeAll();
+    Product.resetId();
+    Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  })
   describe("And no query parameter is provided", () => {
     describe("the response", () => {
       it("should return an array of all products", done => {
-        done();
+        // arrange
+        const fullProductList = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));
+        // act
+        chai
+          .request(server)
+          .get('/v1/products')
+          .end((err, res) => {
+            // assert
+            res.should.have.status(200);
+            res.body.should.be.deep.equal(fullProductList);
+            done();
+          })
       })
     })
   })
@@ -23,7 +39,19 @@ describe("When a request to provide a list of products is received", () => {
     describe("which matches no products", () => {
       describe("the response", () => {
         it("should return an empty array", done => {
-          done();
+          // arrange
+          const queryWithNoMatch = "lskdjflksjl";
+          // act
+          chai
+            .request(server)
+            .get(`/v1/products?query=${queryWithNoMatch}`)
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.should.be.an('array');
+              res.should.have.lengthOf(0);
+              done();
+            })
         })
       })
     })
@@ -31,7 +59,26 @@ describe("When a request to provide a list of products is received", () => {
     describe("which matches with products", () => {
       describe("the response", () => {
         it("should return an array with only the products matching the query", done => {
-          done();
+          // arrange
+          const queryWithMatch = "normal";
+          const match = [{
+            "id": "5",
+            "categoryId": "2",
+            "name": "Glasses",
+            "description": "The most normal glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }];
+          // act
+          chai
+            .request(server)
+            .get(`/v1/products?query=${queryWithMatch}`)
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.should.deep.equal(match);
+              done();
+            })
         })
       })
     })
@@ -41,6 +88,7 @@ describe("When a request to provide a list of products is received", () => {
 describe("When a brands request is received", () => {
   beforeEach(() => {
     Brand.removeAll();
+    Brand.resetId();
     Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
   });
   describe("the response", () => {
