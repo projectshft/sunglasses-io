@@ -8,7 +8,7 @@ var uid = require('rand-token').uid;
 let Brand = require('./models/brands');
 
 const PORT = 3001;
-
+let brands = [];
 let products = [];
 let users = [];
 
@@ -21,16 +21,10 @@ let server = http.createServer(function (request, response) {
   if (error) {
     return console.log("Error on server startup: ", error);
   }
-  
-  fs.readFile("initial-data/products.json", "utf8", (error, data) => {
-    if (error) throw error;
-    products = JSON.parse(data);
-  })
-  
-  fs.readFile("initial-data/users.json", "utf8", (error, data) => {
-    if (error) throw error;
-    users = JSON.parse(data);
-  })
+
+  brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8"));
+  products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));
+  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));
 });
 
 myRouter.get('/v1/products', (request, response) => {
@@ -39,7 +33,7 @@ myRouter.get('/v1/products', (request, response) => {
 
 myRouter.get('/v1/brands', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
-  const brands = Brand.getAll();
+  // const brands = Brand.getAll();
   return response.end(JSON.stringify(brands));
 })
 

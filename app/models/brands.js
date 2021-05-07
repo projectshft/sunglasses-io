@@ -17,6 +17,10 @@ class Brand {
     brands = [];
   }
 
+  static resetId() {
+    currentId = 1;
+  }
+
   static getBrand(brandId) {
     return brands.find((brand=>brand.id == brandId))
   }
