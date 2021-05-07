@@ -5,42 +5,32 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
+let Brand = require('./models/brands');
 
 const PORT = 3001;
 
-let brands = [];
 let products = [];
 let users = [];
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, error => {
   if (error) {
     return console.log("Error on server startup: ", error);
   }
-
-  fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
-    if (error) throw error;
-    brands = JSON.parse(data);
-    console.log(`Server loaded brands file`)
-  })
   
   fs.readFile("initial-data/products.json", "utf8", (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
-    console.log(`Server loaded products file`)
   })
   
   fs.readFile("initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
-    console.log(`Server loaded users file`)
   })
-
-  console.log(`Server is listening on port ${PORT}`);
 });
 
 myRouter.get('/v1/products', (request, response) => {
@@ -48,7 +38,9 @@ myRouter.get('/v1/products', (request, response) => {
 })
 
 myRouter.get('/v1/brands', (request, response) => {
-  return response.end();
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const brands = Brand.getAll();
+  return response.end(JSON.stringify(brands));
 })
 
 myRouter.get('/v1/brands/:brandId/products', (request, response) => {
@@ -74,3 +66,5 @@ myRouter.post('/v1/me/cart/:cartProductId', (request, response) => {
 myRouter.delete('/v1/me/cart/:cartProductId', (request, response) => {
   return;
 })
+
+module.exports = server;
