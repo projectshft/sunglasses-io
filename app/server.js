@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
+const url = require('url');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
@@ -22,7 +23,8 @@ let server = http.createServer(function (request, response) {
   if (error) {
     return console.log("Error on server startup: ", error);
   }
-
+  Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
   // Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
   // products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));
   // users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));
@@ -30,7 +32,14 @@ let server = http.createServer(function (request, response) {
 });
 
 myRouter.get('/v1/products', (request, response) => {
-  return;
+  
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const { query } = queryString.parse(url.parse(request.url).query)
+  if(query) {
+    const productsMatchingQuery = Product.getAll().filter((product) => product.description.includes(query));
+    return response.end(JSON.stringify(productsMatchingQuery));
+  }
+  return response.end(JSON.stringify(Product.getAll()));
 })
 
 myRouter.get('/v1/brands', (request, response) => {

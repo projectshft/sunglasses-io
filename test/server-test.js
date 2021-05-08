@@ -44,12 +44,13 @@ describe("When a request to provide a list of products is received", () => {
           // act
           chai
             .request(server)
-            .get(`/v1/products?query=${queryWithNoMatch}`)
+            .get(`/v1/products`)
+            .query({query: queryWithNoMatch})
             .end((err, res) => {
               // assert
               res.should.have.status(200);
-              res.should.be.an('array');
-              res.should.have.lengthOf(0);
+              res.body.should.be.an('array');
+              res.body.should.have.lengthOf(0);
               done();
             })
         })
@@ -76,7 +77,7 @@ describe("When a request to provide a list of products is received", () => {
             .end((err, res) => {
               // assert
               res.should.have.status(200);
-              res.should.deep.equal(match);
+              res.body.should.deep.equal(match);
               done();
             })
         })
