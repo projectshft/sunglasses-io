@@ -1,0 +1,338 @@
+swagger: "2.0"
+info:
+  title: Parsity Sunglasses Store API
+  description: An API to support the my awesome sunglasses store
+  version: 1.0.0
+host: api.sunglassesio.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to search for certain sunglass brands and their associated products
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        "404":
+          description: That brand cannot be found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Products of a brand
+      description: |
+        The products of a given Brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for products in.
+          required: true
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - brandId
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of a brands products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Products
+      description: |
+        All the products available in the store
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - id
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            $ref: "#/definitions/Product"
+        "404":
+          description: That product cannot be found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Login
+      description: Logs user into store
+      parameters:
+        - name: username
+          in: query
+          description: username for login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: password for login
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: User login successful
+          schema:
+            type: string
+        "401":
+          description: invalid username or password
+        "400":
+          description: please enter both username and password
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: returns the cart
+      description: |
+        Allows user to view cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: add item to the cart
+      description: |
+        Allows user to add an item to the cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: An product object
+          schema:
+            items:
+              $ref: "#/definitions/Product"
+        "403":
+          description: You must be logged in to add to your cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      summary: delete product from cart
+      description: allows user to delete an item from the cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: delete item from cart
+          required: true
+          type: integer
+      responses:
+        "404":
+          description: product not found
+    post:
+      summary: change quantity of product in cart
+      description: allows user to update quantity of an item in the cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: item from cart to be updated
+          required: true
+          type: integer
+        - name: quantity
+          in: query
+          description: item from cart to be updated
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: updated cart
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand.
+  Cart:
+    type: array
+    items:
+      properties:
+        productId:
+          type: integer
+          description: specific product
+        quantity:
+          type: integer
+          description: quantity of product in cart
+  Product:
+    type: object
+    properties:
+      productId:
+        type: integer
+        description: Unique identifier for a product.
+      brandId:
+        type: integer
+        description: The name of the correllated brand.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: A description of the product.
+      price:
+        type: number
+        description: The price of the product.
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of user.
+      cart:
+        $ref: "#/definitions/Cart"
+      name:
+        $ref: "#/definitions/Name"
+        description: user name
+      location:
+        $ref: "#/definitions/Location"
+        description: user street address
+      email:
+        type: string
+        description: user email address
+      login:
+        $ref: "#/definitions/Login"
+      dob:
+        type: string
+        description: user date of birth
+      registered:
+        type: string
+        description: date user registered
+      phone:
+        type: string
+        description: user phone number
+      cell:
+        type: string
+        description: user cell phone number
+      nat:
+        type: string
+        description: users nationality
+  Name:
+    type: object
+    properties:
+      title:
+        type: string
+      first:
+        type: string
+      last:
+        type: string
+  Location:
+    type: object
+    properties:
+      street:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      postcode:
+        type: integer
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      salt:
+        type: string
+      md5:
+        type: string
+      sha1:
+        type: string
+      sha256:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
