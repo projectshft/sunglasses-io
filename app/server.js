@@ -9,6 +9,7 @@ var uid = require('rand-token').uid;
 let Brand = require('./models/brands');
 let Product = require('./models/products');
 let User = require('./models/users');
+let Token = require('./models/tokens');
 
 const PORT = 3001;
 // let brands = [];
@@ -17,6 +18,9 @@ const PORT = 3001;
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
+myRouter.use(bodyParser.urlencoded({
+  extended: true
+}));
 
 let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
@@ -59,7 +63,25 @@ myRouter.get('/v1/brands/:brandId/products', (request, response) => {
 })
 
 myRouter.post('/v1/login', (request, response) => {
-  return response.end();
+  const { username, password } = request.body;
+  if(!username || !password) {
+    response.writeHead(400, "Must provide username and password")
+    return response.end();
+  }
+  const userList = User.getAll();
+  const matchedUser = userList.find((user) => (user.login.username === username) && (user.login.password === password))
+  if(!matchedUser) {
+    response.writeHead(401, "username or password not found");
+    return response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" })
+  const newToken = {
+    username,
+    token: uid(16)
+  }
+  Token.addToken(newToken);
+  return response.end(JSON.stringify(newToken));
 })
 
 myRouter.get('/v1/me/cart', (request, response) => {
