@@ -8,6 +8,7 @@ var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 let Brand = require('./models/brands');
 let Product = require('./models/products');
+let User = require('./models/users');
 
 const PORT = 3001;
 // let brands = [];
@@ -25,9 +26,7 @@ let server = http.createServer(function (request, response) {
   }
   Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
   Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
-  // Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
-  // products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf8"));
-  // users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf8"));
+  User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
 
 });
 
@@ -60,23 +59,23 @@ myRouter.get('/v1/brands/:brandId/products', (request, response) => {
 })
 
 myRouter.post('/v1/login', (request, response) => {
-  return;
+  return response.end();
 })
 
 myRouter.get('/v1/me/cart', (request, response) => {
-  return;
+  return response.end();
 })
 
 myRouter.post('/v1/me/cart', (request, response) => {
-  return;
+  return response.end();
 })
 
 myRouter.post('/v1/me/cart/:cartProductId', (request, response) => {
-  return;
+  return response.end();
 })
 
 myRouter.delete('/v1/me/cart/:cartProductId', (request, response) => {
-  return;
+  return response.end();
 })
 
 module.exports = server;

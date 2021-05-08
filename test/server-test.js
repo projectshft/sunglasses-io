@@ -6,6 +6,7 @@ let should = chai.should();
 let { expect } = chai;
 let Brand = require('../app/models/brands');
 let Product = require('../app/models/products');
+let User = require('../app/models/users');
 // mocha test/server-test.js --watch
 
 chai.use(chaiHttp);
@@ -208,24 +209,64 @@ describe("When a request for the products of a certain brand is received", () =>
 })
 
 describe("When a login request is received", () => {
+  beforeEach(() => {
+    User.removeAll();
+    User.resetId();
+    User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
+  })
   describe("and the username and/or password is missing", () => {
     describe("the response", () => {
       it("should return a 400 error and state 'Must provide username and password", done => {
-        done();
+        // arrange
+        const loginWithNoPassword = {username: 'bob', password: ''}
+        // act
+        chai
+          .request(server)
+          .post('/v1/login')
+          .send(loginWithNoPassword)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(400);
+            done();
+          })
       })
     })
   })
   describe("and the username and password don't match to any user", () => {
     describe("the response", () => {
       it("should return a 401 error and state 'username or password not found'", done => {
-        done();
+        // arrange
+        const loginInfoWithNoMatch = {username: "greenlion235", password: "wrongPassword"}
+        // act
+        chai
+          .request(server)
+          .post('/v1/login')
+          .send(loginInfoWithNoMatch)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done();
+          })
       })
     })
   })
   describe("and the username and password match to a user", () => {
     describe('the response', () => {
       it("should return a valid access token", done => {
-        done();
+        // arrange
+        const correctLogin = {username: "greenlion235", password: "waters"}
+        // act
+        chai
+          .request(server)
+          .post('/v1/login')
+          .send(correctLogin)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(200);
+            res.body.should.be.a("string");
+            res.body.should.have.lengthOf(16);
+            done();
+          })
       })
     })
   })
