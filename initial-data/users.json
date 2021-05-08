@@ -1,7 +1,20 @@
 [
     {
         "gender": "female",
-        "cart": [],
+        "cart": [
+            {
+                "name": "Better glasses",
+                "quantity": 3
+            },
+            {
+                "name": "Glasses",
+                "quantity": 3
+            },
+            {
+                "name": "glas",
+                "quantity": 3
+            }
+        ],
         "name": {
             "title": "mrs",
             "first": "susanna",
