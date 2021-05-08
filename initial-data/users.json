@@ -3,8 +3,16 @@
         "gender": "female",
         "cart": [
             {
+                "id": "4",
+                "brandId": "2",
                 "name": "Better glasses",
-                "quantity": 3
+                "description": "The best glasses in the world",
+                "price": 1500,
+                "imageUrls": [
+                    "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                    "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+                    "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+                ]
             },
             {
                 "name": "Glasses",
