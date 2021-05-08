@@ -38,4 +38,17 @@ myRouter.get('/api/products', function(request, response) {
 	return response.end(JSON.stringify(products))
 })
 
+myRouter.get('/api/brands/:id/products', function(request, response) {
+	const id = request.params.id
+	const requestedBrand = brands.find(brand => brand.id == id)
+	if (!requestedBrand) {
+		response.writeHead(404);	
+		return response.end("Requested brand not found");
+	} else {
+		const requestedBrandProducts = products.filter(product => product.categoryId == requestedBrand.id)
+		response.writeHead(200, { "Content-Type": "application/json" });
+		return response.end(JSON.stringify(requestedBrandProducts))
+	}
+})
+
 module.exports = server;
