@@ -10,20 +10,10 @@ var uid = require('rand-token').uid;
 let brands = [];
 let products = [];
 let users = [];
-let carts = [{
-  username: "yellowleopard753",
-  items: []
-}];
-let accessTokens = [
-  {
-    token: "nUsoGOs8UX2r2PVY",
-    username: "yellowleopard753",
-    lastUpdated: "1234"
-  }
-];
+let carts = [];
+let accessTokens = [];
 
 const newAccessToken = uid(16);
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const router = Router();
 router.use(bodyParser.json());
@@ -109,7 +99,7 @@ router.post("/v1/login", (request, response) => {
 
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
+        return response.end(JSON.stringify({ token: currentAccessToken.token }));
       } else {
         let newAccessToken = {
           username: user.login.username,
@@ -117,8 +107,7 @@ router.post("/v1/login", (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
-
+        return response.end(JSON.stringify({ token: newAccessToken.token }));
       }
     } else {
       response.writeHead(401, "Invalid username or password");
@@ -131,11 +120,10 @@ router.post("/v1/login", (request, response) => {
   }
 })
 
-var getValidTokenFromRequest = function (request) {
+const getValidTokenFromRequest = function (request) {
   if (request.headers.currentaccesstoken) {
     let currentAccessToken = accessTokens.find((accessToken) =>
       accessToken.token == request.headers.currentaccesstoken
-      // && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     );
 
     if (currentAccessToken) {
@@ -149,11 +137,6 @@ var getValidTokenFromRequest = function (request) {
 };
 
 router.get("/v1/me/cart", (request, response) => {
-  // accessToken http header has the token
-  // Find the token in the accessTokens array
-  // If it doesn't exist, then return 401
-  // If it does exist, then use that username to
-  // get the authenticated user from users.json using the username
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -169,11 +152,10 @@ router.get("/v1/me/cart", (request, response) => {
     response.writeHead(401, "The user does not exist");
     return response.end();
   } else {
-    console.log(user);
     response.writeHead(200, { 'Content-Type': 'application/json' });
     return response.end(JSON.stringify(user.cart));
   }
-})
+});
 
 router.post("/v1/me/cart", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -197,49 +179,17 @@ router.post("/v1/me/cart", (request, response) => {
       response.writeHead(404, "That product does not exist");
       return response.end();
     }
-    response.writeHead(200);
 
-    if (request.body.quantity > 1) {
+    if (request.body.quantity >= 1) {
       addedProduct.quantity = request.body.quantity;
       user.cart.push(addedProduct);
     } else {
-      response.writeHead(401, "That quantity is not valid");
+      response.writeHead(404, "That quantity is not valid");
     }
-    return response.end();
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(user.cart));
   }
 });
-
-router.delete("/v1/me/cart/:productId", (request, response) => {
-  let currentAccessToken = getValidTokenFromRequest(request);
-
-  if (!currentAccessToken) {
-    response.writeHead(401, "You don't have access, please log in");
-    return response.end();
-  }
-
-  let user = users.find((user) => {
-    return user.login.username === currentAccessToken.username;
-  });
-
-  if (!user) {
-    response.writeHead(401, "The user does not exist");
-    return response.end();
-  } else {
-    console.log(user);
-    const { productId } = request.params;
-    const product = user.cart.find(product => product.id == productId);
-    console.log(product);
-
-    if (!product) {
-      response.writeHead(404, "That product is not in the cart");
-      return response.end();
-    }
-    const productToRemove = user.cart.indexOf(product);
-    user.cart.splice(productToRemove, 1);
-    response.writeHead(200);
-    return response.end();
-  }
-})
 
 router.post("/v1/me/cart/:productId", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -259,7 +209,6 @@ router.post("/v1/me/cart/:productId", (request, response) => {
   } else {
     const { productId } = request.params;
     const foundProduct = user.cart.find(product => product.id == productId);
-    console.log(user.cart);
 
     if (!foundProduct) {
       response.writeHead(404, "That product is not in the cart");
@@ -268,17 +217,46 @@ router.post("/v1/me/cart/:productId", (request, response) => {
     const indexOfItemInCart = user.cart.findIndex(i => i.id === productId);
     let cart = user.cart;
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-
-    if (request.body.quantity > 1) {
+    if (request.body.quantity >= 1) {
       cart[indexOfItemInCart].quantity = request.body.quantity;
     } else {
-      response.writeHead(401, "That quantity is not valid");
+      response.writeHead(404, "That quantity is not valid");
       return response.end();
     }
-    return response.end(JSON.stringify(cart));
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(user.cart));
   }
-})
+});
+
+router.delete("/v1/me/cart/:productId", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "You don't have access, please log in");
+    return response.end();
+  }
+
+  let user = users.find((user) => {
+    return user.login.username === currentAccessToken.username;
+  });
+
+  if (!user) {
+    response.writeHead(401, "The user does not exist");
+    return response.end();
+  } else {
+    const { productId } = request.params;
+    const product = user.cart.find(product => product.id == productId);
+
+    if (!product) {
+      response.writeHead(404, "That product is not in the cart");
+      return response.end();
+    }
+    const productToRemove = user.cart.indexOf(product);
+    user.cart.splice(productToRemove, 1);
+    response.writeHead(200);
+    return response.end();
+  }
+});
 
 module.exports = server;
 
