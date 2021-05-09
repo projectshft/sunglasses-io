@@ -531,6 +531,15 @@ describe("When a request to add an item to the shopping cart is received", () =>
 })
 
 describe("When a request to modify the quantity of a shopping cart item is received", () => {
+  beforeEach(() => {
+    User.removeAll();
+    User.resetId();
+    Token.removeAll();
+    Product.removeAll();
+    Product.resetId();
+    User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
+    Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  })
   describe("But an invalid or no access token is provided", () => {
     describe("the response", () => {
       it("should be a 401 error stating, 'must be logged in to modify shopping cart'", done => {
@@ -541,7 +550,7 @@ describe("When a request to modify the quantity of a shopping cart item is recei
         // act
         chai
           .request(server)
-          .post(`/v1/me/cart${productToModifyInCart.id}`)
+          .post(`/v1/me/cart/${productToModifyInCart.id}`)
           .query(badAccessToken)
           .send(newQuantity)
           .end((err, res) => {
@@ -582,7 +591,7 @@ describe("When a request to modify the quantity of a shopping cart item is recei
 
     describe("But a quantity exceeding the available quantity is provided", () => {
       describe("the response", () => {
-        it("should be a 409 error stating, 'desired quantity exceeds quantity available", done => {
+        it("should be a 409 error stating, 'desired quantity exceeds quantity available'", done => {
           // arrange
           const validToken = {
             username: "greenlion235",
