@@ -57,6 +57,17 @@ describe('Products', () => {
         done();
       });
   })
+  it('It should limit results to those which description contains the querry string', (done) => {
+    chai
+      .request(server)
+      .get('/api/products?query=best')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.be.eql(4);
+        done();
+      });
+  })
 })
 })
 

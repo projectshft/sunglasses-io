@@ -1,7 +1,8 @@
 var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
-//var queryString = require('querystring');
+var querystring = require('querystring');
+const url = require("url");
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
@@ -37,8 +38,22 @@ myRouter.get('/api/brands', function(request,response) {
 })
 
 myRouter.get('/api/products', function(request, response) {
+	const parsedUrl = url.parse(request.originalUrl);
+	console.log(parsedUrl);
+	console.log('tessssst')
+  const { query } = querystring.parse(parsedUrl.query);
+	let productsToReturn = [];
+	if (query !== undefined) {
+    productsToReturn = products.filter(product => product.description.includes(query));
+	if (!productsToReturn) {
+			response.writeHead(404, "There aren't any product descriptions containing that search term");
+			return response.end();
+	} 
+	} else {
+		productsToReturn = products;
+	}
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products))
+	return response.end(JSON.stringify(productsToReturn))
 })
 
 myRouter.get('/api/brands/:id/products', function(request, response) {
