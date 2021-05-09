@@ -19,6 +19,10 @@ class User {
     return newUser;
   }
 
+  static getUser(username) {
+    return users.find((user) => user.login.username === username)
+  }
+
   static getAll() {
     return users
   }
@@ -30,8 +34,6 @@ class User {
   static resetId() {
     currentId = 1;
   }
-  
-  static validateUsernameAndPassword(username, password) {}
 }
 
 module.exports = User;

@@ -2,11 +2,13 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server');
 var fs = require('fs');
+var uid = require('rand-token').uid;
 let should = chai.should();
 let { expect } = chai;
 let Brand = require('../app/models/brands');
 let Product = require('../app/models/products');
 let User = require('../app/models/users');
+const Token = require('../app/models/tokens');
 // mocha test/server-test.js --watch
 
 chai.use(chaiHttp);
@@ -69,6 +71,7 @@ describe("When a request to provide a list of products is received", () => {
             "name": "Glasses",
             "description": "The most normal glasses in the world",
             "price":150,
+            "quantityAvailable": 0,
             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
           }];
           // act
@@ -180,6 +183,7 @@ describe("When a request for the products of a certain brand is received", () =>
               "name": "Better glasses",
               "description": "The best glasses in the world",
               "price":1500,
+              "quantityAvailable": 0,
               "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
             },
             {
@@ -188,6 +192,7 @@ describe("When a request for the products of a certain brand is received", () =>
               "name": "Glasses",
               "description": "The most normal glasses in the world",
               "price":150,
+              "quantityAvailable": 0,
               "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
           }]
           // act
@@ -264,8 +269,8 @@ describe("When a login request is received", () => {
             // assert
             res.should.have.status(200);
             res.body.should.be.an("object");
-            res.body.token.should.be.a("string")
-            res.body.token.should.have.lengthOf(16);
+            res.body.accessToken.should.be.a("string")
+            res.body.accessToken.should.have.lengthOf(16);
             done();
           })
       })
@@ -274,10 +279,30 @@ describe("When a login request is received", () => {
 })
 
 describe("When a request for the current shopping cart is received", () => {
+  beforeEach(() => {
+    User.removeAll();
+    User.resetId();
+    Token.removeAll();
+    Product.removeAll();
+    Product.resetId();
+    User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
+    Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  })
   describe("and no or invalid access token is provided", () => {
     describe("the response", () => {
       it("should be a 401 error stating 'Must be logged in to access shopping cart", done => {
-        done();
+        // arrange
+        const badAccessToken = {accessToken: 'ksdfkljsd'};
+        // act
+        chai
+          .request(server)
+          .get('/v1/me/cart')
+          .query(badAccessToken)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done();
+          })
       })
     })
   })
@@ -286,7 +311,24 @@ describe("When a request for the current shopping cart is received", () => {
     describe("but the shopping cart is empty", () => {
       describe("the reponse", () => {
         it("should return an empty array", done => {
-          done ();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          // act 
+          chai
+            .request(server)
+            .get('/v1/me/cart')
+            .query({accessToken: validToken.accessToken})
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.should.have.lengthOf(0);
+              done();
+            })
         })
       })
     })
@@ -294,6 +336,45 @@ describe("When a request for the current shopping cart is received", () => {
     describe("and there are items in the shopping cart", () => {
       describe("the response", () => {
         it("should return an array of the items in the shopping cart", done => {
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const currentUser = User.getUser(validToken.username);
+          //TODO fill in expected cart
+          const expectedCart = [
+            {
+              "id": "4",
+              "categoryId": "2",
+              "name": "Better glasses",
+              "description": "The best glasses in the world",
+              "price":1500,
+              "quantityAvailable": 0,
+              "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+            },
+            {
+              "id": "5",
+              "categoryId": "2",
+              "name": "Glasses",
+              "description": "The most normal glasses in the world",
+              "price":150,
+              "quantityAvailable": 0,
+              "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }]
+          currentUser.cart = expectedCart;
+          // act
+          chai
+            .request(server)
+            .get('/v1/me/cart')
+            .query({accessToken: validToken.accessToken})
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.should.deep.equal(expectedCart);
+            })
           done();
         })
       })

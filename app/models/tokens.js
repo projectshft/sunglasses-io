@@ -10,8 +10,16 @@ class Token {
     return token;
   }
 
+  static getToken(accessToken) {
+    return tokens.find((token=>token.accessToken == accessToken))
+  }
+
   static getAll() {
     return tokens;
+  }
+
+  static removeAll() {
+    tokens = [];
   }
 }
 

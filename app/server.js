@@ -78,14 +78,22 @@ myRouter.post('/v1/login', (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" })
   const newToken = {
     username,
-    token: uid(16)
+    accessToken: uid(16)
   }
   Token.addToken(newToken);
   return response.end(JSON.stringify(newToken));
 })
 
 myRouter.get('/v1/me/cart', (request, response) => {
-  return response.end();
+  const { accessToken } = queryString.parse(url.parse(request.url).query);
+  const token = Token.getToken(accessToken);
+  if (!token) {
+    response.writeHead(401, "Must be logged in to access shopping cart");
+    return response.end();
+  }
+  response.writeHead(200, { "Content-Type": "application/json" })
+  const cart = User.getUser(token.username).cart;
+  return response.end(JSON.stringify(cart));
 })
 
 myRouter.post('/v1/me/cart', (request, response) => {
