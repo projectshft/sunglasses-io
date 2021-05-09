@@ -189,11 +189,22 @@ router.post("/v1/me/cart", (request, response) => {
     response.writeHead(401, "The user does not exist");
     return response.end();
   } else {
-    console.log(user);
-    let product = products[0];
+
+    const productId = request.body.productId;
+    const addedProduct = products.find(product => product.id == productId);
+
+    if (!addedProduct) {
+      response.writeHead(404, "That product does not exist");
+      return response.end();
+    }
     response.writeHead(200);
-    product.quantity = 1;
-    user.cart.push(product);
+
+    if (request.body.quantity > 1) {
+      addedProduct.quantity = request.body.quantity;
+      user.cart.push(addedProduct);
+    } else {
+      response.writeHead(401, "That quantity is not valid");
+    }
     return response.end();
   }
 });
@@ -246,8 +257,6 @@ router.post("/v1/me/cart/:productId", (request, response) => {
     response.writeHead(401, "The user does not exist");
     return response.end();
   } else {
-    console.log(user);
-
     const { productId } = request.params;
     const foundProduct = user.cart.find(product => product.id == productId);
     console.log(user.cart);
@@ -256,16 +265,17 @@ router.post("/v1/me/cart/:productId", (request, response) => {
       response.writeHead(404, "That product is not in the cart");
       return response.end();
     }
-    const indexOfItemInCart = user.cart.findIndex(i => i.id === request.body.product.id);
+    const indexOfItemInCart = user.cart.findIndex(i => i.id === productId);
     let cart = user.cart;
-
-    // if the product exists, change the quantity to the one requested.
 
     response.writeHead(200, { "Content-Type": "application/json" });
 
-    cart.splice(indexOfItemInCart, 1, request.body.product);
-    // const updatedCart = Object.assign(user.cart, { updatedProduct });
-    console.log(cart);
+    if (request.body.quantity > 1) {
+      cart[indexOfItemInCart].quantity = request.body.quantity;
+    } else {
+      response.writeHead(401, "That quantity is not valid");
+      return response.end();
+    }
     return response.end(JSON.stringify(cart));
   }
 })
