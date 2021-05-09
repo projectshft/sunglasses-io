@@ -383,10 +383,32 @@ describe("When a request for the current shopping cart is received", () => {
 })
 
 describe("When a request to add an item to the shopping cart is received", () => {
+  beforeEach(() => {
+    User.removeAll();
+    User.resetId();
+    Token.removeAll();
+    Product.removeAll();
+    Product.resetId();
+    User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
+    Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  })
   describe("But an invalid or no access token is provided", () => {
     describe("the reponse", () => {
       it("should be a 401 error stating that 'Must be logged in to modify shopping cart'", done => {
-        done();
+        // arrange
+        const badAccessToken = {accessToken: 'ksdfkljsd'};
+        const productToAddToCart = {id: "4"};
+        // act
+        chai
+          .request(server)
+          .post('/v1/me/cart')
+          .query(badAccessToken)
+          .send(productToAddToCart)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done();
+          })
       })
     })
   })
@@ -395,7 +417,24 @@ describe("When a request to add an item to the shopping cart is received", () =>
     describe("But an invalid product id is provided", () => {
       describe("the response", () => {
         it("should be a 404 error stating 'product not found'", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const invalidProductToAddToCart = {id: "abd"};
+          // act
+          chai
+            .request(server)
+            .post('/v1/me/cart')
+            .query({accessToken: validToken.accessToken})
+            .send(invalidProductToAddToCart)
+            .end((err, res) => {
+              // assert
+              res.should.have.status(404);
+              done();
+            })
         })
       })
     })
@@ -403,7 +442,36 @@ describe("When a request to add an item to the shopping cart is received", () =>
     describe("But the product isn't available", () => {
       describe("the response", () => {
         it("should be a 409 error stating 'product is not available'", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          //Add the unavailable product
+          const unavailableProduct = Product.addProduct({
+            "categoryId": "1",
+            "name": "hard to find product",
+            "description": "Product is never in stock",
+            "price": 150,
+            "quantityAvailable": 0,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          })
+          // act
+          chai
+            .request(server)
+            .post('/v1/me/cart')
+            .query({accessToken: validToken.accessToken})
+            .send({id: unavailableProduct.id})
+            .end((err, res) => {
+              // assert
+              res.should.have.status(409);
+              done();
+            })
         })
       })
     })
@@ -411,7 +479,51 @@ describe("When a request to add an item to the shopping cart is received", () =>
     describe("And the product is available", () => {
       describe('the response', () => {
         it("should return the shopping cart with the new item added", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          //Add the unavailable product
+          const availableProduct = Product.addProduct({
+            "categoryId": "1",
+            "name": "popular product",
+            "description": "We have a ton in stock",
+            "price": 150,
+            "quantityAvailable": 20,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          })
+          const expectedShoppingCart = [{
+            "categoryId": "1",
+            "name": "popular product",
+            "description": "We have a ton in stock",
+            "price": 150,
+            "quantityAvailable": 20,
+            "quantity": 1,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          }];
+          // act
+          chai
+            .request(server)
+            .post('/v1/me/cart')
+            .query({accessToken: validToken.accessToken})
+            .send({id: availableProduct.id})
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.body.should.be.an("array");
+              res.body.should.deep.equal(expectedShoppingCart);
+              done();
+            })
         })
       })
     })
