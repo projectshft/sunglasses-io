@@ -18,7 +18,7 @@
     "name": "Black Sunglasses",
     "description": "The best glasses in the world",
     "price": 100,
-    "quantityAvailable": 0,
+    "quantityAvailable": 5,
     "imageUrls": [
       "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
       "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
@@ -31,7 +31,7 @@
     "name": "Brown Sunglasses",
     "description": "The best glasses in the world",
     "price": 50,
-    "quantityAvailable": 0,
+    "quantityAvailable": 10,
     "imageUrls": [
       "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
       "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",

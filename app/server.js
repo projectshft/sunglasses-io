@@ -147,8 +147,23 @@ myRouter.post('/v1/me/cart/:productId', (request, response) => {
   return response.end(JSON.stringify(cart));
 })
 
-myRouter.delete('/v1/me/cart/:cartProductId', (request, response) => {
-  return response.end();
+myRouter.delete('/v1/me/cart/:productId', (request, response) => {
+  const { accessToken } = queryString.parse(url.parse(request.url).query);
+  const token = Token.getToken(accessToken);
+  if (!token) {
+    response.writeHead(401, "Must be logged in to access shopping cart");
+    return response.end();
+  }
+  const cart = User.getUser(token.username).cart;
+  const indexOfCartItemToRemove = cart.findIndex((item) => item.id === request.params.productId);
+  if(indexOfCartItemToRemove === -1) {
+    response.writeHead(404, "Product not found");
+    return response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" })
+  cart.splice(indexOfCartItemToRemove,1)
+  return response.end(JSON.stringify(cart));
 })
 
 module.exports = server;

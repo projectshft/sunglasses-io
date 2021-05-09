@@ -673,19 +673,56 @@ describe("When a request to modify the quantity of a shopping cart item is recei
 })
 
 describe("When a request to delete an item from the shopping cart is received", () => {
+  beforeEach(() => {
+    User.removeAll();
+    User.resetId();
+    Token.removeAll();
+    Product.removeAll();
+    Product.resetId();
+    User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
+    Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
+  })
   describe("But an invalid or no access token is provided", () => {
     describe("the response", () => {
       it("should be a 401 error stating, 'must be logged in to modify shopping cart'", done => {
-        done();
+        // arrange
+        const badAccessToken = {accessToken: 'ksdfkljsd'};
+        const productToDeleteInCart = {id: "4"};
+        // act
+        chai
+          .request(server)
+          .delete(`/v1/me/cart/${productToDeleteInCart.id}`)
+          .query(badAccessToken)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done();
+          })
       })
     })
   })
 
   describe("And a valid access token is provided", () => {
-    describe("But an invalid cartItem identifier is provided", () => {
+    describe("But an invalid product identifier is provided", () => {
       describe("the response", () => {
         it("should be a 404 error stating, 'product not found in cart'", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const idForProductNotInCart = {id: "4"};
+          // act
+          chai
+            .request(server)
+            .delete(`/v1/me/cart/${idForProductNotInCart.id}`)
+            .query({accessToken: validToken.accessToken})
+            .end((err, res) => {
+              // assert
+              res.should.have.status(404);
+              done();
+            })
         })
       })
     })
@@ -693,7 +730,68 @@ describe("When a request to delete an item from the shopping cart is received", 
     describe("And a valid cartItem identifier is provided", () => {
       describe("the response", () => {
         it("should return the updated shopping cart without the deleted item", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const initialCart = [{
+            "id": "2",
+            "categoryId": "1",
+            "name": "Black Sunglasses",
+            "description": "The best glasses in the world",
+            "price": 100,
+            "quantityAvailable": 5,
+            "quantity": 1,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          },
+          {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price": 50,
+            "quantityAvailable": 10,
+            "quantity": 1,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          }]
+          User.getUser(validToken.username).cart = initialCart;
+          const idForProductToDelete = {id: "3"};
+          const expectedShoppingCart = [{
+            "id": "2",
+            "categoryId": "1",
+            "name": "Black Sunglasses",
+            "description": "The best glasses in the world",
+            "price": 100,
+            "quantityAvailable": 5,
+            "quantity": 1,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          }];
+          // act
+          chai
+            .request(server)
+            .delete(`/v1/me/cart/${idForProductToDelete.id}`)
+            .query({accessToken: validToken.accessToken})
+            .end((err, res) => {
+              // assert
+              res.should.have.status(200);
+              res.body.should.be.an("array");
+              res.body.should.deep.equal(expectedShoppingCart);
+              done();
+            })
         })
       })
     })
