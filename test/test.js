@@ -73,7 +73,7 @@ describe('Login', () => {
       .send(testUser)
       .end((err, res) => {
         res.should.have.status(200);
- 
+        
         done();
       });
   })
@@ -109,15 +109,78 @@ describe('Login', () => {
 })
 
 describe('Cart', () => {
-  describe('/GER /api/me/cart', () => {
+  let accessToken = ''
+  before('login a user', () => {
+    let testUser = {username: 'lazywolf342', password: 'tucker'};
+    chai
+      .request(server)
+      .post('/api/me/login')
+      .send(testUser)
+      .end((err, res) => {
+        accessToken = res.body
+      });
+  })
+  describe('/GET /api/me/cart', () => {
   it('It should GET a logged-in users shopping cart', (done) => {
     chai
       .request(server)
       .get('/api/me/cart')
+      .set('accessToken', accessToken)
       .end((err, res) => {
         res.should.have.status(200);
         done();
       });
     })
   })
+  describe('/POST /api/me/cart', () => {
+    it('It should POST an item to a logged-in users shopping cart', (done) => {
+      let testItem = {
+        productId: 1,
+        quantity: 1
+      }
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('accessToken', accessToken)
+        .send(testItem)
+        .end((err, res) => {
+          console.log(res.body[0])
+          res.should.have.status(200);
+          done();
+        });
+      })
+    })
+  describe('/POST /api/me/cart/:productId', () => {
+      it('It should POST an item, updated item quantity for logged-in users shopping cart', (done) => {
+        let testItem = {
+          productId: '1',
+          quantity: 5
+        }
+        chai
+          .request(server)
+          .post('/api/me/cart/1')
+          .set('accessToken', accessToken)
+          .send(testItem)
+          .end((err, res) => {
+            console.log(res.body[0])
+            res.should.have.status(200);
+            done();
+          });
+        })
+      })
+  describe('/DELETE /api/me/cart/:productId', () => {
+    it('It should DELETE a product by Id for a logged in user', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/1')
+        .set('accessToken', accessToken)
+        .end((err, res) => {
+          console.log(res.body[0])
+          res.should.have.status(200);
+          done();
+        });
+      })
+    })
+  
 })
+

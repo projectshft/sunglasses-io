@@ -121,14 +121,14 @@ myRouter.post('/api/me/login', function(request, response) {
 
 // Helper method to process access token
 var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url,true)
-  if (parsedUrl.query.accessToken) {
+  var token = request.headers.accesstoken
+  if (token) {
     // Verify the access token to make sure its valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    let currentAccessToken = accessTokens.find((item) => {
+      return item.token == token /* && ((new Date) - item.lastUpdated) < TOKEN_VALIDITY_TIMEOUT; */
     });
     if (currentAccessToken) {
-      return currentAccessToken;
+      return currentAccessToken
     } else {
       return null;
     }
@@ -138,7 +138,151 @@ var getValidTokenFromRequest = function(request) {
 };
 
 
+// Only logged in users can access a specific store's issues if they have access
+myRouter.get('/api/me/cart', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
 
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+		//Access the current users cart
+		let userCart = user.cart
+    if (!userCart) {
+      // If there isn't a user cart, then return a 404
+      response.writeHead(404, "That cart cannot be found", CORS_HEADERS);
+      return response.end();
+    }
+		else {
+			response.writeHead(200, {'Content-Type': 'application/json'});
+      return response.end(JSON.stringify(userCart));
+		}
+    
+  } 
+});
+
+myRouter.post('/api/me/cart', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+		//Access the current users cart
+		let userCart = user.cart
+    if (!userCart) {
+      // If there isn't a user cart, then return a 404
+      response.writeHead(404, "That cart cannot be found", CORS_HEADERS);
+      return response.end();
+    }
+		else {
+			response.writeHead(200, {'Content-Type': 'application/json'});
+			const itemToAdd = products.find((product) => {
+				return product.id == request.body.productId
+			})
+			itemToAdd.quantity = parseInt(request.body.quantity)
+			const itemToAddAsArray = [itemToAdd];
+		//add conditional logic here
+			userCart.push(itemToAddAsArray)
+      return response.end(JSON.stringify(userCart));
+		}
+    
+  } 
+});
+
+myRouter.post('/api/me/cart/:productId', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+	const  productId  = request.params.productId
+	const  quantity = request.body.quantity
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+		//Access the current users cart
+		let userCart = user.cart
+    if (!userCart) {
+      // If there isn't a user cart, then return a 404
+      response.writeHead(404, "That cart cannot be found");
+      return response.end();
+    }
+		else {
+			response.writeHead(200, {'Content-Type': 'application/json'});
+	
+			const itemQuantityToChange = userCart[0].find((item) => {
+				return item.id == productId
+			})
+			console.log(userCart[0][0].quantity)
+			console.log(itemQuantityToChange)
+			if (quantity >= 1) {
+				itemQuantityToChange.quantity = quantity
+			} else {
+				response.writeHead(404, "1 is the minimum acceptable cart quantity. To remove an item, press delete. ");
+				return response.end();
+			}
+	//console.log(itemQuantityToChange)
+		console.log(userCart)
+		//add conditional logic here
+      return response.end(JSON.stringify(userCart));
+		}
+  } 
+});
+
+
+myRouter.delete('/api/me/cart/:productId', function(request,response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+	const  productId  = request.params.productId
+
+  if (!currentAccessToken) {
+    // If there isn't an access token in the request, we know that the user isn't logged in, so don't continue
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    // Verify that the user exists to know if we should continue processing
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+		//Access the current users cart
+		let userCart = user.cart
+    if (!userCart) {
+      // If there isn't a user cart, then return a 404
+      response.writeHead(404, "That cart cannot be found");
+      return response.end();
+    }
+		else {
+			response.writeHead(200, {'Content-Type': 'application/json'});
+	
+		/* 	const itemQuantityToChange = userCart[0].find((item) => {
+				return item.id == productId
+			}) */
+
+			var filtered = userCart[0].filter(function(value, index, arr){ 
+        return value.id !== productId;
+    });
+			console.log(filtered)
+			userCart = filtered
+	//console.log(itemQuantityToChange)
+		console.log(userCart)
+		//add conditional logic here
+      return response.end(JSON.stringify(userCart));
+		}
+  } 
+});
 
 
 
