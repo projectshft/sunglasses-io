@@ -500,6 +500,7 @@ describe("When a request to add an item to the shopping cart is received", () =>
           })
           const expectedShoppingCart = [{
             "categoryId": "1",
+            "id": availableProduct.id,
             "name": "popular product",
             "description": "We have a ton in stock",
             "price": 150,

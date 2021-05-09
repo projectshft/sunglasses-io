@@ -97,7 +97,29 @@ myRouter.get('/v1/me/cart', (request, response) => {
 })
 
 myRouter.post('/v1/me/cart', (request, response) => {
-  return response.end();
+  const { accessToken } = queryString.parse(url.parse(request.url).query);
+  const token = Token.getToken(accessToken);
+  if (!token) {
+    response.writeHead(401, "Must be logged in to access shopping cart");
+    return response.end();
+  }
+
+  const {id} = request.body;
+  const productToAdd = Product.getProduct(id);
+  if(!productToAdd) {
+    response.writeHead(404, "Product not found");
+    return response.end();
+  }
+
+  if(productToAdd.quantityAvailable <= 0) {
+    response.writeHead(409, "Product is not available");
+    return response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" })
+  const cart = User.getUser(token.username).cart;
+  cart.push({...productToAdd, quantity: 1})
+  return response.end(JSON.stringify(cart));
 })
 
 myRouter.post('/v1/me/cart/:cartProductId', (request, response) => {
