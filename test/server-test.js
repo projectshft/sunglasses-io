@@ -485,7 +485,6 @@ describe("When a request to add an item to the shopping cart is received", () =>
             accessToken: uid(16)
           }
           Token.addToken(validToken);
-          //Add the unavailable product
           const availableProduct = Product.addProduct({
             "categoryId": "1",
             "name": "popular product",
@@ -535,16 +534,48 @@ describe("When a request to modify the quantity of a shopping cart item is recei
   describe("But an invalid or no access token is provided", () => {
     describe("the response", () => {
       it("should be a 401 error stating, 'must be logged in to modify shopping cart'", done => {
-        done();
+        // arrange
+        const badAccessToken = {accessToken: 'ksdfkljsd'};
+        const productToModifyInCart = {id: "4"};
+        const newQuantity = {quantity: 2};
+        // act
+        chai
+          .request(server)
+          .post(`/v1/me/cart${productToModifyInCart.id}`)
+          .query(badAccessToken)
+          .send(newQuantity)
+          .end((err, res) => {
+            // assert
+            res.should.have.status(401);
+            done();
+          })
       })
     })
   })
 
   describe("And a valid access token is provided", () => {
-    describe("But an invalid cartItem identifier is provided", () => {
+    describe("But an invalid product identifier is provided", () => {
       describe("the response", () => {
         it("should be a 404 error stating, 'product not found in cart'", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const idForProductNotInCart = {id: "4"};
+          const newQuantity = {quantity: 2};
+          // act
+          chai
+            .request(server)
+            .post(`/v1/me/cart/${idForProductNotInCart.id}`)
+            .query({accessToken: validToken.accessToken})
+            .send(newQuantity)
+            .end((err, res) => {
+              // assert
+              res.should.have.status(404);
+              done();
+            })
         })
       })
     })
@@ -552,15 +583,80 @@ describe("When a request to modify the quantity of a shopping cart item is recei
     describe("But a quantity exceeding the available quantity is provided", () => {
       describe("the response", () => {
         it("should be a 409 error stating, 'desired quantity exceeds quantity available", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const productWithLimitedQuantity = Product.addProduct({
+            "categoryId": "1",
+            "name": "popular product",
+            "description": "very limited stock",
+            "price": 150,
+            "quantityAvailable": 2,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          })
+          const newQuantity = {quantity: 5};
+          // act
+          chai.request(server).post('/v1/me/cart').query({accessToken: validToken.accessToken}).send({id: productWithLimitedQuantity.id}).end((err, res) => {
+            chai
+              .request(server)
+              .post(`/v1/me/cart/${productWithLimitedQuantity.id}`)
+              .query({accessToken: validToken.accessToken})
+              .send(newQuantity)
+              .end((err, res) => {
+                // assert
+                res.should.have.status(409);
+                done();
+              })
+          })
         })
       })
     })
 
-    describe("And a valid cartItem identifier and quantity are provided", () => {
+    describe("And a valid product identifier and quantity are provided", () => {
       describe("the response", () => {
         it("should return the shopping cart with the updated quantity", done => {
-          done();
+          // arrange
+          const validToken = {
+            username: "greenlion235",
+            accessToken: uid(16)
+          }
+          Token.addToken(validToken);
+          const productWithLargeQuantity = Product.addProduct({
+            "categoryId": "1",
+            "name": "popular product",
+            "description": "Lots in stock",
+            "price": 150,
+            "quantityAvailable": 50,
+            "imageUrls": [
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+              "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+            ]
+          });
+          const expectedShoppingCart = [{...productWithLargeQuantity, quantity: 5}];
+          const newQuantity = {quantity: 5};
+          // act
+          chai.request(server).post('/v1/me/cart').query({accessToken: validToken.accessToken}).send({id: productWithLargeQuantity.id}).end((err, res) => {
+            chai
+              .request(server)
+              .post(`/v1/me/cart/${productWithLargeQuantity.id}`)
+              .query({accessToken: validToken.accessToken})
+              .send(newQuantity)
+              .end((err, res) => {
+                // assert
+                res.should.have.status(200);
+                res.body.should.be.an("array");
+                res.body.should.deep.equal(expectedShoppingCart);
+                done();
+              })
+          })
         })
       })
     })
