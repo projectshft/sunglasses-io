@@ -59,7 +59,7 @@ const getValidTokenFromreq = (req) => {
       return item.token == token && ((new Date) - item.lastUpdated) < TOKEN_VALIDITY_TIMEOUT; 
     });
     if (currentAccessToken) {
-      return currentAccessToken
+      return currentAccessToken;
     } else {
       return null;
     };
@@ -80,9 +80,9 @@ const getCartForValidAccessToken = (currentAccessToken, res) => {
 		res.writeHead(401, "You need to have access to this call to continue");
 		return res.end();
 	} else {
-		const user = verifyUser(currentAccessToken)
-		let userCart = user.cart
-		return userCart
+		const user = verifyUser(currentAccessToken);
+		let userCart = user.cart;
+		return userCart;
 	};
 };
 
@@ -226,7 +226,7 @@ myRouter.post('/api/me/cart/:productId', (req, res) => {
 	if (!itemToAdd) {
 		res.writeHead(404, "Invalid productId.");
 		return res.end();
-	}
+	};
 	let productInCartToChange = userCart.find(product => product.id == productId);
 	if (!productInCartToChange) {
 		res.writeHead(404, "Item not in user cart.");
@@ -235,10 +235,8 @@ myRouter.post('/api/me/cart/:productId', (req, res) => {
 		productInCartToChange.quantity = parseInt(quantity)
 		success(res);
 		return res.end(JSON.stringify(userCart));
-	}
-
+	};
 });
-
 
 myRouter.delete('/api/me/cart/:productId', (req,res) => {
   let currentAccessToken = getValidTokenFromreq(req);
@@ -248,7 +246,7 @@ myRouter.delete('/api/me/cart/:productId', (req,res) => {
 	if (!itemToRemove) {
 		res.writeHead(404, "Invalid productId.");
 		return res.end();
-	}
+	};
 	let isProductInCart = userCart.find(product => product.id == productId);
 	if (!isProductInCart) {
 		res.writeHead(404, "Item not in user cart.");

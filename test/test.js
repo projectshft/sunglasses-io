@@ -34,7 +34,7 @@ describe('Brands', () => {
           should.not.exist(err);
           done();
         });
-    })
+    });
     it('It should return 404 for an invalid brand id', done => {
       chai
         .request(server)
@@ -44,7 +44,7 @@ describe('Brands', () => {
           should.not.exist(err);
           done();
         });
-    })
+    });
   });
 });
 describe('Products', () => {
@@ -94,7 +94,7 @@ describe('Products', () => {
           should.not.exist(err)
           done();
         });
-    })
+    });
   });
 });
 describe('Login', () => {
@@ -197,7 +197,7 @@ describe('Cart', () => {
           should.not.exist(err);
           done();
         });
-      });
+    });
     it('It should return 401 if request is made withiout an accesstoken', (done) => {
       chai
         .request(server)
@@ -207,7 +207,7 @@ describe('Cart', () => {
           should.not.exist(err);
           done();
         });
-      });
+    });
     it('It should return 401 if request is made with invalid accesstoken', (done) => {
       chai
         .request(server)
@@ -218,8 +218,8 @@ describe('Cart', () => {
           should.not.exist(err);
           done();
         });
-      });
     });
+  });
   describe('/POST /api/me/cart', () => {
     let validProduct = {
       productId: 1,
@@ -227,7 +227,7 @@ describe('Cart', () => {
     let invalidProduct = {
       productId: 100,
     };
-    it('It should POST a product to a logged-in users shopping cart', (done) => {
+    it('It should POST a product to a logged-in users shopping cart with default quantity 1', (done) => {
       chai
         .request(server)
         .post('/api/me/cart')
@@ -237,25 +237,26 @@ describe('Cart', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eq(1);
-          should.not.exist(err)
+          res.body[0].quantity.should.be.eql(1);
+          should.not.exist(err);
           done();
         });
-      });
-      it('It should increase product quantity by 1 if product already exists in user cart', (done) => {
-        chai
-          .request(server)
-          .post('/api/me/cart')
-          .set('accessToken', accessToken)
-          .send(validProduct)
-          .end((err, res) => {
-            res.should.have.status(200);
-            res.body.should.be.an('array');
-            res.body.length.should.be.eq(1);
-            res.body[0].quantity.should.be.eql(2);
-            should.not.exist(err)
-            done();
-          });
+    });
+    it('It should increase product quantity by 1 if product already exists in user cart', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .set('accessToken', accessToken)
+        .send(validProduct)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eq(1);
+          res.body[0].quantity.should.be.eql(2);
+          should.not.exist(err);
+          done();
         });
+    });
     it('It should return 401 if request is made withiout an accesstoken', (done) => {
       chai
         .request(server)
@@ -306,62 +307,62 @@ describe('Cart', () => {
             should.not.exist(err);
             done();
           });
-        })
-        it('It should return 404 for invalid productId', (done) => {
-          chai
-            .request(server)
-            .post('/api/me/cart/100?quantity=5')
-            .set('accessToken', accessToken)
-            .end((err, res) => {
-              res.should.have.status(404);
-              should.not.exist(err)
-              done();
-            });
-          })
-          it('It should return 404 for quantity < 1', (done) => {
-            chai
-              .request(server)
-              .post('/api/me/cart/1?quantity=-5')
-              .set('accessToken', accessToken)
-              .end((err, res) => {
-                res.should.have.status(404);
-                should.not.exist(err)
-                done();
-              });
-            })
-            it('It should return 404 for invalid quantity format', (done) => {
-              chai
-                .request(server)
-                .post('/api/me/cart/1?quantity=dog')
-                .set('accessToken', accessToken)
-                .end((err, res) => {
-                  res.should.have.status(404);
-                  should.not.exist(err)
-                  done();
-                });
-              })
-          it('It should return 401 if request is made withiout an accesstoken', (done) => {
-            chai
-              .request(server)
-              .post('/api/me/cart/1?quantity=5')
-              .end((err, res) => {
-                res.should.have.status(401);
-                should.not.exist(err)
-                done();
-              });
-            })
-          it('It should return 401 if request is made with invalid accesstoken', (done) => {
-            chai
-              .request(server)
-              .post('/api/me/cart/1?quantity=5')
-              .set('accessToken', '12345')
-              .end((err, res) => {
-                res.should.have.status(401);
-                should.not.exist(err)
-                done();
-              });
-            })
-      })
+      });
+      it('It should return 404 for invalid productId', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart/100?quantity=5')
+          .set('accessToken', accessToken)
+          .end((err, res) => {
+            res.should.have.status(404);
+            should.not.exist(err)
+            done();
+          });
+      });
+      it('It should return 404 for quantity < 1', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart/1?quantity=-5')
+          .set('accessToken', accessToken)
+          .end((err, res) => {
+            res.should.have.status(404);
+            should.not.exist(err);
+            done();
+          });
+      });
+      it('It should return 404 for invalid quantity format', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart/1?quantity=dog')
+          .set('accessToken', accessToken)
+          .end((err, res) => {
+            res.should.have.status(404);
+            should.not.exist(err);
+            done();
+          });
+      });
+      it('It should return 401 if request is made withiout an accesstoken', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart/1?quantity=5')
+          .end((err, res) => {
+            res.should.have.status(401);
+            should.not.exist(err)
+            done();
+          });
+      });
+      it('It should return 401 if request is made with invalid accesstoken', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart/1?quantity=5')
+          .set('accessToken', '12345')
+          .end((err, res) => {
+            res.should.have.status(401);
+            should.not.exist(err)
+            done();
+          });
+      });
+  });
   describe('/DELETE /api/me/cart/:productId', () => {
     it('It should DELETE a product by Id for a logged in user', (done) => {
       chai
@@ -371,53 +372,53 @@ describe('Cart', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          should.not.exist(err)
+          res.body.length.should.be.eq(0);
+          should.not.exist(err);
           done();
         });
-      })
-      it('It should return 404 for invalid productId', (done) => {
-        chai
-          .request(server)
-          .delete('/api/me/cart/dog')
-          .set('accessToken', accessToken)
-          .end((err, res) => {
-            res.should.have.status(404);
-            should.not.exist(err)
-            done();
-          });
-        })
-        it('It should return 404 for valid productId where product is not in users cart', (done) => {
-          chai
-            .request(server)
-            .delete('/api/me/cart/2')
-            .set('accessToken', accessToken)
-            .end((err, res) => {
-              res.should.have.status(404);
-              should.not.exist(err)
-              done();
-            });
-          })
-        it('It should return 401 if request is made withiout an accesstoken', (done) => {
-          chai
-            .request(server)
-            .delete('/api/me/cart/1')
-            .end((err, res) => {
-              res.should.have.status(401);
-              should.not.exist(err)
-              done();
-            });
-          })
-        it('It should return 401 if request is made with invalid accesstoken', (done) => {
-          chai
-            .request(server)
-            .delete('/api/me/cart/1')
-            .set('accessToken', '12345')
-            .end((err, res) => {
-              res.should.have.status(401);
-              should.not.exist(err)
-              done();
-            });
-          })
-    })
-})
-
+    });
+    it('It should return 404 for invalid productId', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/dog')
+        .set('accessToken', accessToken)
+        .end((err, res) => {
+          res.should.have.status(404);
+          should.not.exist(err);
+          done();
+        });
+    });
+    it('It should return 404 for valid productId where product is not in users cart', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/2')
+        .set('accessToken', accessToken)
+        .end((err, res) => {
+          res.should.have.status(404);
+          should.not.exist(err);
+          done();
+        });
+    });
+    it('It should return 401 if request is made withiout an accesstoken', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/1')
+        .end((err, res) => {
+          res.should.have.status(401);
+          should.not.exist(err);
+          done();
+        });
+    });
+    it('It should return 401 if request is made with invalid accesstoken', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/1')
+        .set('accessToken', '12345')
+        .end((err, res) => {
+          res.should.have.status(401);
+          should.not.exist(err);
+          done();
+        });
+    });
+  });
+});
