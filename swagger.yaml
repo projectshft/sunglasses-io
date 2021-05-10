@@ -21,15 +21,6 @@ paths:
           description: Search query string
           required: false
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - id
       tags:
         - Brands
       responses:
@@ -56,15 +47,6 @@ paths:
           description: The id of the brand to search for products in.
           required: true
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - brandId
       tags:
         - Brands
       responses:
@@ -91,15 +73,6 @@ paths:
           description: Search query string
           required: false
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - id
       tags:
         - Products
       responses:
