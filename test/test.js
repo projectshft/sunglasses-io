@@ -97,7 +97,6 @@ describe('Products', () => {
   })
 })
 })
-
 describe('Login', () => {
   describe('/POST /api/me/login', () => {
   it('It should return accesstoken with valid login', (done) => {
@@ -187,7 +186,6 @@ describe('Login', () => {
   })
 })
 })
-
 describe('Cart', () => {
   let accessToken = ''
   before('login a user', () => {
@@ -233,15 +231,18 @@ describe('Cart', () => {
     })
 
   describe('/POST /api/me/cart', () => {
+    let validProduct = {
+      productId: 1,
+    }
+    let invalidProduct = {
+      productId: 100,
+    }
     it('It should POST a product to a logged-in users shopping cart', (done) => {
-      let testProduct = {
-        productId: 1,
-      }
       chai
         .request(server)
         .post('/api/me/cart')
         .set('accessToken', accessToken)
-        .send(testProduct)
+        .send(validProduct)
         .end((err, res) => {
           res.should.have.status(200);
           should.not.exist(err)
@@ -252,6 +253,7 @@ describe('Cart', () => {
         chai
           .request(server)
           .get('/api/me/cart')
+          .send(validProduct)
           .end((err, res) => {
             res.should.have.status(401);
             done();
@@ -261,14 +263,26 @@ describe('Cart', () => {
         chai
           .request(server)
           .get('/api/me/cart')
+          .send(validProduct)
           .set('accessToken', '12345')
           .end((err, res) => {
             res.should.have.status(401);
             done();
           });
         })
+        it('It should return 401 if request is made with invalid product', (done) => {
+          chai
+          .request(server)
+          .post('/api/me/cart')
+          .set('accessToken', accessToken)
+          .send(validProduct)
+          .end((err, res) => {
+            res.should.have.status(200);
+            should.not.exist(err)
+            done();
+            });
+          })
     })
-
   describe('/POST /api/me/cart/:productId', () => {
       it('It should POST an item, updating item quantity for logged-in users shopping cart', (done) => {
         chai
@@ -343,6 +357,7 @@ describe('Cart', () => {
         .set('accessToken', accessToken)
         .end((err, res) => {
           res.should.have.status(200);
+          console.log(res.body)
           should.not.exist(err)
           done();
         });
