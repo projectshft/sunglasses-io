@@ -36,5 +36,4 @@ class Brand {
   }
 } 
 
-//Exports the Book for use elsewhere.
 module.exports = Brand;

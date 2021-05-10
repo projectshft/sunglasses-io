@@ -128,7 +128,7 @@ describe("When a request for the products of a certain brand is received", () =>
   })
   describe("and an invalid brand id is given", () => {
     describe("the response", () => {
-      it("should return a 404 error and state 'no brand with that id found'", done => {
+      it("should return a 404 error", done => {
         // arrange
         const invalidBrandId = 'a';
         // act
@@ -218,7 +218,7 @@ describe("When a login request is received", () => {
   })
   describe("and the username and/or password is missing", () => {
     describe("the response", () => {
-      it("should return a 400 error and state 'Must provide username and password", done => {
+      it("should return a 400 error", done => {
         // arrange
         const loginWithNoPassword = {username: 'bob', password: ''}
         // act
@@ -236,7 +236,7 @@ describe("When a login request is received", () => {
   })
   describe("and the username and password don't match to any user", () => {
     describe("the response", () => {
-      it("should return a 401 error and state 'username or password not found'", done => {
+      it("should return a 401 error", done => {
         // arrange
         const loginInfoWithNoMatch = {username: "greenlion235", password: "wrongPassword"}
         // act
@@ -287,7 +287,7 @@ describe("When a request for the current shopping cart is received", () => {
   })
   describe("and no or invalid access token is provided", () => {
     describe("the response", () => {
-      it("should be a 401 error stating 'Must be logged in to access shopping cart", done => {
+      it("should be a 401 error", done => {
         // arrange
         const badAccessToken = {accessToken: 'ksdfkljsd'};
         // act
@@ -391,7 +391,7 @@ describe("When a request to add an item to the shopping cart is received", () =>
   })
   describe("But an invalid or no access token is provided", () => {
     describe("the reponse", () => {
-      it("should be a 401 error stating that 'Must be logged in to modify shopping cart'", done => {
+      it("should be a 401 error", done => {
         // arrange
         const badAccessToken = {accessToken: 'ksdfkljsd'};
         const productToAddToCart = {id: "4"};
@@ -413,7 +413,7 @@ describe("When a request to add an item to the shopping cart is received", () =>
   describe("And a valid access token is provided", () => {
     describe("But an invalid product id is provided", () => {
       describe("the response", () => {
-        it("should be a 404 error stating 'product not found'", done => {
+        it("should be a 404 error", done => {
           // arrange
           const validToken = {
             username: "greenlion235",
@@ -438,7 +438,7 @@ describe("When a request to add an item to the shopping cart is received", () =>
 
     describe("But the product isn't available", () => {
       describe("the response", () => {
-        it("should be a 409 error stating 'product is not available'", done => {
+        it("should be a 409 error", done => {
           // arrange
           const validToken = {
             username: "greenlion235",
@@ -539,7 +539,7 @@ describe("When a request to modify the quantity of a shopping cart item is recei
   })
   describe("But an invalid or no access token is provided", () => {
     describe("the response", () => {
-      it("should be a 401 error stating, 'must be logged in to modify shopping cart'", done => {
+      it("should be a 401 error", done => {
         // arrange
         const badAccessToken = {accessToken: 'ksdfkljsd'};
         const productToModifyInCart = {id: "4"};
@@ -562,7 +562,7 @@ describe("When a request to modify the quantity of a shopping cart item is recei
   describe("And a valid access token is provided", () => {
     describe("But an invalid product identifier is provided", () => {
       describe("the response", () => {
-        it("should be a 404 error stating, 'product not found in cart'", done => {
+        it("should be a 404 error", done => {
           // arrange
           const validToken = {
             username: "greenlion235",
@@ -588,7 +588,7 @@ describe("When a request to modify the quantity of a shopping cart item is recei
 
     describe("But a quantity exceeding the available quantity is provided", () => {
       describe("the response", () => {
-        it("should be a 409 error stating, 'desired quantity exceeds quantity available'", done => {
+        it("should be a 409 error", done => {
           // arrange
           const validToken = {
             username: "greenlion235",
@@ -681,7 +681,7 @@ describe("When a request to delete an item from the shopping cart is received", 
   })
   describe("But an invalid or no access token is provided", () => {
     describe("the response", () => {
-      it("should be a 401 error stating, 'must be logged in to modify shopping cart'", done => {
+      it("should be a 401 error", done => {
         // arrange
         const badAccessToken = {accessToken: 'ksdfkljsd'};
         const productToDeleteInCart = {id: "4"};
@@ -702,7 +702,7 @@ describe("When a request to delete an item from the shopping cart is received", 
   describe("And a valid access token is provided", () => {
     describe("But an invalid product identifier is provided", () => {
       describe("the response", () => {
-        it("should be a 404 error stating, 'product not found in cart'", done => {
+        it("should be a 404 error", done => {
           // arrange
           const validToken = {
             username: "greenlion235",
