@@ -4,7 +4,7 @@ var finalHandler = require('finalhandler');
 var querystring = require('querystring');
 const url = require("url");
 var Router = require('router');
-var bodyParser   = require('body-parser');
+var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
 // state holding variables
@@ -16,28 +16,26 @@ let accessTokens = [];
 let failedLoginAttempts = {};
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
- /*------------------------- Setup router ------------------------- */
+/*---------------- Router Setup ------------------*/
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
 let server = http.createServer((req, res) => {
-	res.writeHead(200);
   myRouter(req, res, finalHandler(req, res));
 }).listen(PORT, err => {
 	if (err) throw err;
-	console.log(`server running on port ${PORT}`);
-	//populate state holding variables
+	// Populate state holding variables
 	brands = JSON.parse(fs.readFileSync('./initial-data/brands.json', 'utf8'));
 	products = JSON.parse(fs.readFileSync('./initial-data/products.json', 'utf8'));
 	users = JSON.parse(fs.readFileSync('./initial-data/users.json', 'utf8'));
 });
 
 
-/*------------------------- Helper functions ------------------------- */
-//success response writeHead
+/*-------------- Helper Functions ----------------*/
+// Success response writeHead
 const success = (res) => res.writeHead(200, { "Content-Type": "application/json" });
 
-//to GET number of failed requests per username
+// to GET number of failed requests per username
 const getNumFailedLoginReqForUsername = (username) => {
   let currentNumberOfFailedRequests = failedLoginAttempts[username];
   if (currentNumberOfFailedRequests) {
@@ -47,12 +45,12 @@ const getNumFailedLoginReqForUsername = (username) => {
   };
 };
 
-//to SET number of failed requests per username
+// to SET number of failed requests per username
 const setNumbFailedLoginReqForUsername = (username, numFails) => {
   failedLoginAttempts[username] = numFails;
 };
 
-//to GET access token from req
+// to GET access token from req
 const getValidTokenFromreq = (req) => {
   const token = req.headers.accesstoken;
   if (token) {
@@ -89,41 +87,19 @@ const getCartForValidAccessToken = (currentAccessToken, res) => {
 };
 
 // to add a quantity of product to a user cart	
-const handleCartProductQuantity = (productId, quantity, userCart) => {
-	const itemToAdd = products.find(product => product.id == productId);
+const handleCartProductQuantity = (itemToAdd, userCart, quantity) => {
 	itemToAdd.quantity = parseInt(quantity);
-	const itemToAddAsArray = [itemToAdd];
 	userCart.push(itemToAdd);
 };
 
-/*------------------------------ Routes -------------------------------- */
+/*---------------- Routes ------------------*/
 // GET brands
 myRouter.get('/api/brands', (req, res) => {
 	success(res);
   return res.end(JSON.stringify(brands));
 });
 
-// GET products
-myRouter.get('/api/products', (req, res) => {
-	const parsedUrl = url.parse(req.originalUrl);
-  const { query } = querystring.parse(parsedUrl.query);
-	let productsToReturn = [];
-
-	if (query !== undefined) {
-    productsToReturn = products.filter(product => product.description.includes(query));
-		if (!productsToReturn) {
-			res.writeHead(404, "There aren't any product descriptions containing that search term");
-			return res.end();
-		}; 
-	} else {
-			productsToReturn = products
-		};
-
-	success(res);
-	return res.end(JSON.stringify(productsToReturn));
-});
-
-// GET products by ID
+// GET products by Brand ID
 myRouter.get('/api/brands/:id/products', (req, res) => {
 	const { id } = req.params;
 	const reqBrand = brands.find(brand => brand.id == id);
@@ -135,6 +111,24 @@ myRouter.get('/api/brands/:id/products', (req, res) => {
 		success(res);
 		return res.end(JSON.stringify(reqBrandProducts));
 	};
+});
+
+// GET products
+myRouter.get('/api/products', (req, res) => {
+	const parsedUrl = url.parse(req.originalUrl);
+  const { query } = querystring.parse(parsedUrl.query);
+	let productsToReturn = [];
+	if (query !== undefined) {
+    productsToReturn = products.filter(product => product.description.includes(query));
+		if (productsToReturn.length == 0) {
+			res.writeHead(404, "There aren't any product descriptions containing that search term");
+			return res.end();
+		}; 
+	} else {
+			productsToReturn = products
+		};
+	success(res);
+	return res.end(JSON.stringify(productsToReturn));
 });
 
 // POST login credentials
@@ -174,7 +168,7 @@ myRouter.post('/api/me/login', (req, res) => {
     };
   } else {
     // Login failed, missing parameter
-    res.writeHead(400, "Login failed.");
+    res.writeHead(400, "Login failed, missing parameter");
     return res.end();
   };
 });
@@ -186,71 +180,77 @@ myRouter.get('/api/me/cart', (req, res) => {
     res.writeHead(401, "Aceess requires login");
     return res.end();
   } else {
-		const user = verifyUser(currentAccessToken) 
-		let userCart = user.cart 	
-    if (!userCart) {
-      res.writeHead(404, "That cart cannot be found");
-      return res.end();
-    } else {
-			success(res);
-      return res.end(JSON.stringify(userCart));
+		const user = verifyUser(currentAccessToken);
+		let userCart = user.cart;
+		success(res);
+		return res.end(JSON.stringify(userCart));
 		};
-  }; 
 });
 
 // POST to a logged-in user cart
 myRouter.post('/api/me/cart', (req, res) => {
   let currentAccessToken = getValidTokenFromreq(req);
-	const { quantity, productId } = req.body
-	let userCart = getCartForValidAccessToken(currentAccessToken, res)
-	if (!userCart) {
-		res.writeHead(404, "That cart cannot be found");
-		return res.end();
-	} else {
+	if (!currentAccessToken) {
+    res.writeHead(401, "Aceess requires login");
+    return res.end();
+  } else {
+		let productId = req.body.productId;
+		let itemToAdd = products.find(product => product.id == productId);
+		let userCart = getCartForValidAccessToken(currentAccessToken, res);
+		if (!itemToAdd) {
+			res.writeHead(404, "Invalid productId.");
+			return res.end();
+		};
 		success(res);
-		handleCartProductQuantity(productId, quantity, userCart)
+		handleCartProductQuantity(itemToAdd, userCart, 1);
 		return res.end(JSON.stringify(userCart));
-	};
+		};
 });
 
 // POST to a loegged-in user cart, product quantity change
 myRouter.post('/api/me/cart/:productId', (req, res) => {
+	const parsedUrl = url.parse(req.originalUrl);
+  const { quantity } = querystring.parse(parsedUrl.query);
+	if (isNaN(quantity)) {
+		res.writeHead(404, "Quantity must be an integer");
+		return res.end();
+	};
   let currentAccessToken = getValidTokenFromreq(req);
 	const productId = req.params.productId;
-	const quantity = req.body.quantity;
 	let userCart = getCartForValidAccessToken(currentAccessToken, res);
-	if (!userCart) {
-		res.writeHead(404, "That cart cannot be found");
+	if (quantity < 1 ) {
+		res.writeHead(404, "1 is the min. valid cart quantity.");
 		return res.end();
-	} else {
-		if (quantity < 1) {
-			res.writeHead(404, "1 is the min. valid cart quantity.");
-			return res.end();
-		};
-		success(res);
-		handleCartProductQuantity(productId, quantity, userCart);
-		return res.end(JSON.stringify(userCart));
 	};
+	let itemToAdd = products.find(product => product.id == productId);
+	if (!itemToAdd) {
+		res.writeHead(404, "Invalid productId.");
+		return res.end();
+	}
+	success(res);
+	handleCartProductQuantity(itemToAdd, userCart, quantity);
+	return res.end(JSON.stringify(userCart));
 });
 
 
 myRouter.delete('/api/me/cart/:productId', (req,res) => {
   let currentAccessToken = getValidTokenFromreq(req);
-	const productId  = req.params.productId
+	const productId  = req.params.productId;
 	let userCart = getCartForValidAccessToken(currentAccessToken, res);
-	if (!userCart) {
-    res.writeHead(404, "That cart cannot be found");
-    return res.end();
-    } else {
-			let cartWithoutDeletedProduct = userCart.filter(product => product.id !== productId);
-			if (!cartWithoutDeletedProduct) {
-				res.writeHead(404, "Invalid productId.");
-				return res.end();
-			};
-			success(res);
-			userCart = cartWithoutDeletedProduct
-      return res.end(JSON.stringify(userCart));
-		};
+	let itemToRemove = products.find(product => product.id == productId);
+	if (!itemToRemove) {
+		res.writeHead(404, "Invalid productId.");
+		return res.end();
+	}
+	let isProductInCart = userCart.find(product => product.id == productId);
+	if (!isProductInCart) {
+		res.writeHead(404, "Item not in user cart.");
+		return res.end();
+	};
+	let cartWithoutDeletedProduct = userCart.filter(product => product.id !== productId);
+	success(res);
+	userCart = cartWithoutDeletedProduct
+	return res.end(JSON.stringify(userCart));
 });
 
 module.exports = server;
