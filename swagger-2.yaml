@@ -1,0 +1,277 @@
+swagger: '2.0'
+info:
+  title: sunglasses io API
+  description: An API to return brand/product information for a sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to obtain a list of all brands in the store.
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+     get:
+      summary: Products for a specific brand
+      description: |
+        This endpoint returns products for a given brand id.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products for a speicfic brand id
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Invalid id
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Returns products
+      description: |
+        The Products endpoint allows you to obtain a list of all products in the store, filtered by an optional search query. If search query is undefined or empty, all prodcuts will be returned.
+      tags:
+        - Products
+      parameters:
+        - in: query
+          name: query
+          type: string
+          required: false
+          description: Filter products by search term found in product descriptions.
+      responses:
+        '200':
+          description: An array of requested products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '404':
+          description: Query does not exist in any product descriptions
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Gets items in user cart
+      description: |
+        This endpoint returns a users shopping cart for a logged in user. Valid accesstoken required.
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of products in a user shopping cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductInCart'
+        '401':
+          description: Request made without accesstoken or invalid accesstoken
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Adds a product to the user cart. 
+      description: |
+        This endpoint allows you to post a product to the user cart. If the product already exists in the cart, product quantity is increased by 1. Product must be an object with keys productId value integer associated with product.
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of products in a user shopping cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductInCart'
+        '401':
+          description: Request made without accesstoken or invalid accesstoken
+        '404':
+          description: Request made with invalid productId
+  /me/cart/{productId}:
+    parameters:
+      - in: path
+        name: productId
+        type: integer
+        required: true
+        description: The product ID.
+    post:
+      summary: Changes the item quantity of a product in the cart
+      description: |
+        This allows you to change the item quantity in the cart
+      parameters:
+        - in: query
+          name: quantity
+          type: integer
+          minimum: 0
+          description: The desired quantity
+          required: true
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of products in a user shopping cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductInCart'
+        '401':
+          description: Request made without accesstoken or invalid accesstoken
+        '404':
+          description: Request made with invalid productId
+        '400':
+          description: Request made with invalid quantity
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Deletes a product in the cart by productId
+      description: |
+        This endpoint deletes a product in the cart by productId.
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Product delete from cart is succesful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductInCart'
+        '401':
+          description: Request made without accesstoken or invalid accesstoken
+        '404':
+          description: Request made with invalid productId
+  /me/login:
+    post:
+      summary: User login
+      description: |
+        Thie endpoint accepts a users login credentials and returns an accesstoken. Maximum of 3 invalid login attempts allowed for given username. Login should be an object with with keys username and password, values as strings.
+      tags:
+        - Login
+      responses:
+        '200':
+          description: A user log in is successful.
+          schema:
+            type: string
+        '400':
+          description: Missing login parameter.
+        '401':
+          description: Invalid login parameter or more than 3 unsuccessful attempts.
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: >-
+          The unique identifier given to the brand.
+      name:
+        type: string
+        description: The name of the brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: >-
+          The unique identifier given to the product.
+      categoryId:
+        type: integer
+        format: int32
+        description:  >-
+          The unique identifier given to the brand.
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: The description of the product
+      price:
+        type: integer
+        format: int32
+        description: The price of the product
+      brand:
+        type: string
+        description: The products' brand
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: The products' image urls
+  ProductInCart:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: >-
+          The unique identifier given to the product.
+      categoryId:
+        type: integer
+        format: int32
+        description:  >-
+          The unique identifier given to the brand.
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: The description of the product
+      price:
+        type: integer
+        format: int32
+        description: The price of the product
+      brand:
+        type: string
+        description: The products' brand
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: The products' image urls
+      quantity:
+        type: integer
+        format: int32
+        description: The price of the product
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

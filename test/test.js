@@ -319,24 +319,24 @@ describe('Cart', () => {
             done();
           });
       });
-      it('It should return 404 for quantity < 1', (done) => {
+      it('It should return 400 for quantity < 1', (done) => {
         chai
           .request(server)
           .post('/api/me/cart/1?quantity=-5')
           .set('accessToken', accessToken)
           .end((err, res) => {
-            res.should.have.status(404);
+            res.should.have.status(400);
             should.not.exist(err);
             done();
           });
       });
-      it('It should return 404 for invalid quantity format', (done) => {
+      it('It should return 400 for invalid quantity format', (done) => {
         chai
           .request(server)
           .post('/api/me/cart/1?quantity=dog')
           .set('accessToken', accessToken)
           .end((err, res) => {
-            res.should.have.status(404);
+            res.should.have.status(400);
             should.not.exist(err);
             done();
           });
@@ -388,7 +388,7 @@ describe('Cart', () => {
           done();
         });
     });
-    it('It should return 404 for valid productId where product is not in users cart', (done) => {
+    it('It should return 400 for valid productId where product is not in users cart', (done) => {
       chai
         .request(server)
         .delete('/api/me/cart/2')

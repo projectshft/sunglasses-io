@@ -212,14 +212,14 @@ myRouter.post('/api/me/cart/:productId', (req, res) => {
 	const parsedUrl = url.parse(req.originalUrl);
   const { quantity } = querystring.parse(parsedUrl.query);
 	if (isNaN(quantity)) {
-		res.writeHead(404, "Quantity must be an integer");
+		res.writeHead(400, "Quantity must be an integer");
 		return res.end();
 	};
   let currentAccessToken = getValidTokenFromreq(req);
 	const productId = req.params.productId;
 	let userCart = getCartForValidAccessToken(currentAccessToken, res);
 	if (quantity < 1 ) {
-		res.writeHead(404, "1 is the min. valid cart quantity.");
+		res.writeHead(400, "1 is the min. valid cart quantity.");
 		return res.end();
 	};
 	let itemToAdd = products.find(product => product.id == productId);
