@@ -86,12 +86,6 @@ const getCartForValidAccessToken = (currentAccessToken, res) => {
 	};
 };
 
-// to add a quantity of product to a user cart	
-const handleCartProductQuantity = (itemToAdd, userCart, quantity) => {
-	itemToAdd.quantity = parseInt(quantity);
-	userCart.push(itemToAdd);
-};
-
 /*---------------- Routes ------------------*/
 // GET brands
 myRouter.get('/api/brands', (req, res) => {
@@ -201,8 +195,14 @@ myRouter.post('/api/me/cart', (req, res) => {
 			res.writeHead(404, "Invalid productId.");
 			return res.end();
 		};
+		let isItemAlreadyInCart = userCart.find(product => product.id == productId)
+		if (!isItemAlreadyInCart) {
+			itemToAdd.quantity = 1
+			userCart.push(itemToAdd)
+		} else {
+			isItemAlreadyInCart.quantity++
+		}
 		success(res);
-		handleCartProductQuantity(itemToAdd, userCart, 1);
 		return res.end(JSON.stringify(userCart));
 		};
 });
@@ -227,9 +227,16 @@ myRouter.post('/api/me/cart/:productId', (req, res) => {
 		res.writeHead(404, "Invalid productId.");
 		return res.end();
 	}
-	success(res);
-	handleCartProductQuantity(itemToAdd, userCart, quantity);
-	return res.end(JSON.stringify(userCart));
+	let productInCartToChange = userCart.find(product => product.id == productId);
+	if (!productInCartToChange) {
+		res.writeHead(404, "Item not in user cart.");
+		return res.end();
+	} else {
+		productInCartToChange.quantity = parseInt(quantity)
+		success(res);
+		return res.end(JSON.stringify(userCart));
+	}
+
 });
 
 
