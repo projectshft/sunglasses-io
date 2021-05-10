@@ -100,9 +100,6 @@ describe("When a brands request is received", () => {
     it("should return the current list of brands", done => {
       //arrange
       let brandsList = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8"));
-      // brandsList.forEach(element => {
-      //   Brand.addBrand(element)
-      // });
       //act
       chai
         .request(server)

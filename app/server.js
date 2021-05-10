@@ -31,11 +31,9 @@ let server = http.createServer(function (request, response) {
   Product.addProducts(JSON.parse(fs.readFileSync("initial-data/products.json", "utf8")));
   Brand.addBrands(JSON.parse(fs.readFileSync("initial-data/brands.json", "utf8")));
   User.addUsers(JSON.parse(fs.readFileSync("initial-data/users.json", "utf8")));
-
 });
 
 myRouter.get('/v1/products', (request, response) => {
-  
   response.writeHead(200, { "Content-Type": "application/json" });
   const { query } = queryString.parse(url.parse(request.url).query)
   if(query) {

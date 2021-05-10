@@ -32,12 +32,6 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
-        "404":
-          description: No products found
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
   /brands:
     get:
       tags:
@@ -72,26 +66,35 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
-        "400":
-          description: No Brand with that ID Found
         "404":
-          description: No Products Found
+          description: No Brand with that id Found
   /login:
     post:
       tags:
         - Login
       summary: Logs user into system
       description: |
-        Upon provision of a correct username and password, this endpoint logs the user into the system.
+        Upon provision of a correct username and password, this endpoint returns an access token for the user.
+      parameters:
+        - name: user
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
       responses:
         "200":
           description: Access token
           schema:
-            type: string
+            $ref: "#/definitions/Token"
         "400":
           description: Username or Password is missing
-        "404":
-          description: No username found matching that username and password
+        "401":
+          description: No user found matching that username and password
   /me/cart:
     get:
       tags:
@@ -100,32 +103,54 @@ paths:
       description: |
         This endpoint retrieves the list of products currently in the user's shopping cart
       security: []
+      parameters:
+        - name: accessToken
+          in: query
+          description: Access Token for user
+          required: true
+          type: string
       responses:
         "200":
-          description: An array of products
+          description: An array of products in the user's cart
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: "#/definitions/CartItem"
         "401":
-          description: Must be logged in to access cart (No access token provided)
-        "404":
-          description: Nothing in users cart
+          description: Invalid or no access token provided
     post:
       tags:
         - Shopping Cart
       summary: Adds a product to shopping cart
       description: |
-        This endpoint adds a product to the user's shopping cart
+        This endpoint adds a product to the user's shopping cart and returns the updated shopping cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: Access Token for user
+          required: true
+          type: string
+        - name: Id
+          description: The id of the product to add to the user's cart
+          in: body
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
       responses:
         "200":
           description: Updated array of products in shopping cart
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: "#/definitions/CartItem"
         "401":
-          description: Must be logged in to modify cart (No access token provided)
+          description: Invalid or no access token provided
+        "404":
+          description: Product not found
         "409":
           description: Product is not available
   /me/cart/{productId}:
@@ -134,24 +159,38 @@ paths:
         - Shopping Cart
       summary: Updates the quantity of specified product in shopping cart
       description: |
-        This endpoint updates the quantity of the specified product in the user's shopping cart
+        This endpoint updates the quantity of the specified product in the user's shopping cart and returns the update shopping cart
       parameters:
+        - name: accessToken
+          in: query
+          description: Access Token for user
+          required: true
+          type: string
         - name: productId
           in: path
           description: Unique identifier for the product
           type: string
           required: true
+        - name: quantity
+          in: body
+          schema:
+            type: object
+            required:
+              - quantity
+            properties:
+              quantity:
+                type: string
       responses:
         "200":
           description: Updated array of products in shopping cart
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: "#/definitions/CartItem"
         "401":
-          description: Must be logged in to modify cart (Invalid access token)
+          description: Invalid or no access token provided
         "404":
-          description: No product with that id found
+          description: No product with that id found in shopping cart
         "409":
           description: Cart quantity cannot exceed available quantity
     delete:
@@ -159,8 +198,13 @@ paths:
         - Shopping Cart
       summary: Removes specified product from shopping cart
       description: |
-        Removes specified product from user's shopping cart
+        This endpoint removes specified product from user's shopping cart and returns the updated shopping cart.
       parameters:
+        - name: accessToken
+          in: query
+          description: Access Token for user
+          required: true
+          type: string
         - name: productId
           in: path
           description: Unique identifier for the product
@@ -172,9 +216,9 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: "#/definitions/CartItem"
         "401":
-          description: No access token provided
+          description: Invalid or no access token provided
         "404":
           description: No product in shopping cart with that id found
 definitions:
@@ -206,6 +250,38 @@ definitions:
         items:
           type: string
         description: Urls for images of the product.
+  CartItem:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      brandId:
+        type: string
+        description: The id of the brand that makes this product.
+      description:
+        type: string
+        description: Description of product.
+      name:
+        type: string
+        description: The name of the product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the product.
+      quantityAvailable:
+        type: integer
+        format: int32
+        description: The quantity of items in stock for the product.
+      quantity:
+        type: integer
+        format: int32
+        description: The quantity of this item in the users cart
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Urls for images of the product.
   Brand:
     type: object
     properties:
@@ -215,6 +291,15 @@ definitions:
       name:
         type: string
         description: Name of the brand
+  Token:
+    type: object
+    properties:
+      username:
+        type: string
+        description: username for user
+      accessToken:
+        type: string
+        description: access token for user
   Error:
     type: object
     properties:
