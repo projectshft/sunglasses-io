@@ -12,229 +12,258 @@ produces:
 paths:
   /brands:
     get:
-      summary: Brands
-      description: |
-        The brands enpoint gets all the available brands
-      parameters:
-        - name: brands
-          in: query
-          description: brands query
-          required: true
-          type: string
       tags:
-        - brands
+        - "brands"
+      summary: "Gets all the Brands"
+      description: ""
+      produces:
+        - "application/json"
       responses:
         "200":
-          description: An array of brands
+          description: "Succesfull operation"
           schema:
-            $ref: "#/definitions/Brands"
+            type: "array"
+            items:
+              $ref: "#/definitions/brands"
+        "400":
+          description: "Invalid request"
         default:
           description: "Unexpected Error"
           schema:
-           $ref: "#/definitions/Error"
+            $ref: "#/definitions/Error"
   /brands/{id}/products:
     get:
-      summary: Products of each brand
-      description: >
-        All products in a given brand
-      parameters:
-        - name: id
-          id: id  
-          in: path
-          description: the id of the brand to search for products in
-          required: true
-          type: string
       tags:
-        - Brands Catagories
+        - "products"
+      summary: "Finds products by brand id"
+      description: "returns all the products associated with passed in brand id"
+      operationId: "getProductsByBrandId"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "get all products related to brand id"
+          required: true
+          type: "integer"
+          format: "int64"
       responses:
         "200":
-          description: An array of products in the brand
+          description: "succesfull operation"
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Brands"
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/products"
+        "404":
+          description: 'No products found for the brand Id'
   /products:
     get:
-      summary: Products
-      description: |
-        The products endpoint gets all the available products
-      parameters:
-        - name: products
-          in: query
-          description: products query
-          required: true
-          type: string
       tags:
-        - products
-      responses:
-        "200":
-          description: An array of products
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
-  /me/login:
-    get:
-      tags: 
-      - user
-      summary: Logs user into the system
+        - "products"
+      summary: "Gets all the products"
       description: ""
-      parameters:
-      - name: Email
-        in: query
-        description: The Email for login
-        required: true
-        type: string
-      - name: password
-        in: "query"
-        description: the password for for login in clear text
-        required: true
-        type: string
-      responses:
-        "200":
-          description: Login is successful
-          default:
-            description: Unexpected error
-            schema:
-              $ref: "#/definitions/Error"
-  /me/cart:
-    get:
-      summary: Users Cart
-      description: |
-        The User Profile endpoint returns information about the users cart
-      parameters:
-        - name: cart
-          in: path
-          description: The cart of the logged in user
-      tags:
-        - User
-      responses:
-        "200":
-          description: Cart information for a user
-          schema:
-            $ref: "#/definitions/User"
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
-  /me/cart/{id}:
-    post:
-      tags:
-      - "store"
-      summary: "Place an order for a product"
-      description: ""
-      operationId: "placeOrder"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "order placed for purchasing a product"
-        required: true
-        schema:
-          $ref: "#/definitions/Order"
+      produces: 
+        - "application/json"
       responses:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Order"
+            type: "array"
+            items:
+              $ref: "#/definitions/products"
+
         "400":
-          description: "Invalid Order"
-  /me/cart/delete/{id}:
+          description: "Invalid request"
+        default:
+          description: "Unexpected Error"
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags: 
+        - "login"
+      summary: "logs user in"
+      description: "logs user in and generates access token"
+      consumes:
+        - "application/json"
+
+      parameters:
+        - in: "body"
+          name: "login"
+          schema:
+            type: "string"
+            required:
+              - "username"
+              - "password"
+            properties:
+              username:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        "200":
+          description: "successfull operation"
+          schema:
+            type: "string"
+        "401":
+          description: "Incorrect username or password"     
+        "400":
+          description: "Invalid inputs please fill out inputs correctly"
+  /me/cart:
+    get:
+      tags: 
+        - "cart"
+      summary: "Gets the logged in users cart"
+      description: ""
+      operationId: "userCart"
+      produces: 
+      - "application/json"
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/cart"
+  /me/cart/{productId}:
     delete:
       tags:
-      - "delete"
-      summary: Deletes a product from the cart
-      description: ""
+        - "cart"
+      summary: "Deletes the product from cart"
+      operationId: "deleteItem"
+      consumes:
+      - "application/json"
       parameters:
-      - name: id
-        in: path
-        description: the id of the product
-        required: true
-        type: string
-      responses:
-        "200":
-          description: Delete succesful
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
-  /me/cart/add/{id}:
-    post:
-      tags:
-      - post product
-      summary: update item in cart
-      description: |
-        This endpoint updates an item in the cart
-      parameters:
-        - name: id
-          in: path
-          description: The id of the product thats updated
+        - name: "productId"
+          in: "path"
+          description: "get all products related to brand id"
           required: true
+          type: "integer"
+          format: "int64"
+      security:
+      - BasicAuth: []
       responses:
         "200":
-          description: Achievement is successful
+          description: "item deleted"
+        "404":
+          description: "Item not found"
         default:
-          description: Unexpected error
+          description: "Unexpected Error"
           schema:
-            $ref: "#/definitions/Error"
-  
-
-    get:
-      summary: Goals in Category
-      description: >
-        All the goals in a given category
-      parameters:
-        - name: id
-          in: path
-          description: The id of the category to search for goals in.
-          required: true
-          type: string
+            $ref: "#/definitions/Error"   
+     post: 
       tags:
-        - Categories
+        - "cart"
+      summary: "Adds a product to cart"
+      operationId: "addItem"  
+      consumes:
+      - "application/json" 
+      parameters:
+        - name: "productId"
+          in: "path"
+          description: "get all products related to brand id"
+          required: true
+          type: "integer"
+          format: "int64"
+      security:
+      - BasicAuth: []
       responses:
         "200":
-          description: An array of goals in the category
+          description: "Item added"
           schema:
-            type: array
+            type: "array"
             items:
-              $ref: "#/definitions/Goal"
+              $ref: "#/definitions/cart"
+        "404":
+          description: "Item not found"
         default:
-          description: Unexpected error
+          description: "Unexpected Error"
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Error"  
+
 definitions:
-    Brands:
-      type: object
-      properties:
-        id: 
-         type: string
-         description: Unique identifier for a brand.
-      description: ""
-       type: string
-       description: Description of product. 
-    Products:
-      type: object
-      properties:
-        id: id
-        description: Products
-        type: Array
-      description: Description of product. 
-    Error:
-     type: object
-     properties:
+  brands:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        example: "Oakley"
+  products:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      brandId: 
+        type: "integer"
+        format: "int64"
+      name:
+       type: "string"
+       description: "QDogs Glasses"
+      description: 
+        example: "They bark"
+      price:
+        type: "integer"
+        format: "int64"
+      imageUrls:
+        type: "array"
+        items:
+         type: "string"
+         description: "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+  Error:
+    type: object
+    properties:
       code:
         type: integer
         format: int32
       message:
-        type: string
+        type: "string"
       fields:
-        type: string
-  
+        type: "string"
+  cart:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      brandId: 
+        type: "integer"
+        format: "int64"
+      name:
+       type: "string"
+       description: "QDogs Glasses"
+      description: 
+        example: "They bark"
+      price:
+        type: "integer"
+        format: "int64"
+      imageUrls:
+        type: "array"
+        items:
+         type: "string"
+         description: "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+      quantity:
+        type: "integer"
+        format: "int64"
+        
+securityDefinitions:
+  BasicAuth:
+    type: basic
 
 
+// GET /api/brands
 
+// GET /api/brands/:id/products
 
+// GET /api/products
+
+// POST /api/login
+
+// GET /api/me/cart
+
+// DELETE /api/me/cart/:productId
+// POST /api/me/cart/:productId
 
