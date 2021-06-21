@@ -27,20 +27,20 @@ router.get("/brands", (request, response) => {
   return response.end(JSON.stringify(Sunglasses.getBrands()));
 });
 
-// router.get("/brands/:id/products", (request, response) => {
-//   // Find brand products to return
-//   const foundBrandProducts = Sunglasses.getProduct(request.params.id);
+router.get("/brands/:id/products", (request, response) => {
+  // Find brand products to return
+  const foundBrandProducts = Sunglasses.getBrandProducts(request.params.id);
 
-//   // Return 404 if not found
-//   if (!foundBrandProducts) {
-//     response.writeHead(404);
-//     return response.end("Brand Not Found");
-//   }
+  // Return 404 if not found
+  if (!foundBrandProducts) {
+    response.writeHead(404);
+    return response.end("Brand Not Found");
+  }
 
-//   // Return all products in a brand
-//   response.writeHead(200, { "Content-Type": "application/json" });
-//   return response.end(JSON.stringify(foundBrandProducts));
-// });
+  // Return all products in a brand
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(foundBrandProducts));
+});
 
 router.get("/products", (request, response) => {
   // Return all products

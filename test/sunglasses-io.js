@@ -21,4 +21,17 @@ describe("Sunglasses", () => {
         });
     });
   });
+
+  describe("/GET products", () => {
+    it("should get all the products", (done) => {
+      chai
+        .request(server)
+        .get("/brands")
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("array");
+          done();
+        });
+    });
+  });
 });
