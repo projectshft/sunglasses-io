@@ -4,7 +4,8 @@
   "description": "This project has been created by a student at Project Shift, a software engineering fellowship located in Downtown Durham.  The work in this repository is wholly of the student based on a sample starter project that can be accessed by looking at the repository that this project forks.",
   "main": "server.js",
   "scripts": {
-    "start": "node app/server.js"
+    "start": "node app/server.js",
+    "test": "mocha"
   },
   "keywords": [],
   "author": "Lauren Nicholls",
@@ -28,5 +29,9 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
+    "mocha": "^7.2.0"
+  }
 }
