@@ -10,7 +10,7 @@ class Sunglasses {
     return brandData;
   }
 
-  static foundBrandProducts(brandId) {
+  static getBrandProducts(brandId) {
     let brandProducts = productData.filter((product) => {
       product.categoryId == brandId;
     });

@@ -5,7 +5,10 @@ const queryString = require("querystring");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
+
 const Sunglasses = require("./models/sunglasses-io");
+const brandData = require("./initial-data/brands.json");
+const productData = require("./initial-data/products.json");
 
 const PORT = 3001;
 
@@ -21,28 +24,31 @@ const server = http
   .listen(PORT);
 
 // Routes
-router.get("/brands", (request, response) => {
+router.get("/api/brands", (request, response) => {
   // Return all brands
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Sunglasses.getBrands()));
 });
 
-router.get("/brands/:id/products", (request, response) => {
-  // Find brand products to return
-  const foundBrandProducts = Sunglasses.getBrandProducts(request.params.id);
+router.get("/api/brands/:id/products", (request, response) => {
+  console.log(request.params.id);
+  // Return all products in a brand
+  const { id } = request.params;
+  const brandId = brandData.find((brand) => brand.id == id);
 
-  // Return 404 if not found
-  if (!foundBrandProducts) {
+  if (!brandId) {
     response.writeHead(404);
     return response.end("Brand Not Found");
+  } else {
+    const brandProducts = productData.filter(
+      (product) => product.categoryId == id
+    );
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(brandProducts));
   }
-
-  // Return all products in a brand
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(foundBrandProducts));
 });
 
-router.get("/products", (request, response) => {
+router.get("/api/products", (request, response) => {
   // Return all products
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Sunglasses.getProducts()));

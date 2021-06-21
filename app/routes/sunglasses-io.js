@@ -5,7 +5,7 @@ function getBrands(request, response) {
 }
 
 function getBrandProducts(request, response) {
-  response.send("Get Brand Products Working!");
+  response.send(Sunglasses.getBrandProducts());
 }
 
 function getProducts(request, response) {
