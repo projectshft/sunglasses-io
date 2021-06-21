@@ -1,4 +1,5 @@
 const brandData = require("../initial-data/brands.json");
+const productData = require("../initial-data/products.json");
 
 class Sunglasses {
   constructor(params) {
@@ -7,6 +8,10 @@ class Sunglasses {
 
   static getBrands() {
     return brandData;
+  }
+
+  static getProducts() {
+    return productData;
   }
 }
 

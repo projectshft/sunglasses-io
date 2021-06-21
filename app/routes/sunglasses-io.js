@@ -4,4 +4,8 @@ function getBrands(request, response) {
   response.send(Sunglasses.getBrands());
 }
 
-module.exports = { getBrands };
+function getProducts(request, response) {
+  response.send(Sunglasses.getProducts());
+}
+
+module.exports = { getBrands, getProducts };

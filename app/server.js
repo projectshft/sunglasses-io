@@ -42,13 +42,11 @@ router.get("/brands", (request, response) => {
 //   return response.end(JSON.stringify(foundBrandProducts));
 // });
 
-// router.get("/products", (request, response) => {
-//   const getAllProducts = Brands.getProducts(request.params);
-
-//   // Return all products
-//   response.writeHead(200, { "Content-Type": "application/json" });
-//   return response.end(JSON.stringify(getAllProducts));
-// });
+router.get("/products", (request, response) => {
+  // Return all products
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(Sunglasses.getProducts()));
+});
 
 // router.post("/login", (request, response) => {
 //   // Login call
