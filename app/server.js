@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const url = require('url');
 const { uid } = require('rand-token');
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 // token timeout after 15 minutes
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
@@ -30,15 +30,20 @@ const server = http.createServer((req, res) => {
 });
 
 // server listening
-server.listen(3001, (err) => {
-  if (err) throw err;
-  console.log(`Server running on http://localhost:${PORT}`);
 
-  brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
-  products = JSON.parse(fs.readFileSync('initial-data/products.json', 'utf-8'));
-  cart = JSON.parse(fs.readFileSync('initial-data/cart.json', 'utf-8'));
-  users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
-});
+if (!module.parent) {
+  server.listen(PORT, (err) => {
+    if (err) throw err;
+    console.log(`Server running on http://localhost:${PORT}`);
+
+    brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
+    products = JSON.parse(
+      fs.readFileSync('initial-data/products.json', 'utf-8')
+    );
+    cart = JSON.parse(fs.readFileSync('initial-data/cart.json', 'utf-8'));
+    users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
+  });
+}
 
 // helper function for token in request and token timeout
 const getValidTokenFromRequest = function (req) {
@@ -61,16 +66,19 @@ const getValidTokenFromRequest = function (req) {
 };
 
 router.get('/api', (request, response) => {
-  response.end('Hello World!');
+  response.writeHead(200).end('Hello World!');
 });
 
 // get all the brands
-router.get('/api/brands', (re, res) => {
+router.get('/api/brands', (req, res, err) => {
   let brandsToReturn = [];
   brandsToReturn = brands;
-  return res
-    .writeHead(200, { 'Content-Type': 'application/json' })
-    .end(JSON.stringify(brandsToReturn));
+
+  if (!brandsToReturn) {
+    res.writeHead(404, 'No brands found');
+  } else {
+    res.writeHead(200).end(JSON.stringify(brandsToReturn));
+  }
 });
 
 // gets the products with the same brand id
@@ -82,7 +90,9 @@ router.get('/api/brands/:brandId/products', (req, res) => {
   if (!brandId) {
     return res.writeHead(404, 'No products found with that brand Id').res.end();
   }
-  return res.end(JSON.stringify(productsForBrand));
+  return res
+    .writeHead(200, 'Content-Type', 'application/json')
+    .end(JSON.stringify(productsForBrand));
 });
 
 // gets all the products
@@ -122,7 +132,9 @@ router.post('/api/login', (req, res) => {
         token: uid(16),
       };
       accessTokens.push(newAccessToken);
-      return res.end(JSON.stringify(newAccessToken.token));
+      return res
+        .writeHead(200, 'Login Successful')
+        .end(JSON.stringify(newAccessToken.token));
     }
     // else if the either fields do not match give a general error
 
@@ -138,19 +150,15 @@ router.get('/api/me/cart', (req, res) => {
   const currentAccessToken = getValidTokenFromRequest(req);
 
   if (!currentAccessToken) {
-    return res
-      .writeHead(
-        401,
-        'You need to have a valid access token to access this call'
-      )
-      .end();
+    return res.writeHead(
+      401,
+      'You need to have a valid access token to access this call'
+    );
   }
 
   cart = JSON.parse(fs.readFileSync('initial-data/cart.json', 'utf-8'));
 
-  return res
-    .writeHead(200, { 'Content-Type': 'application/json' })
-    .end(JSON.stringify(cart));
+  res.writeHead(200).end(JSON.stringify(cart));
 });
 
 // adds a product to the cart with product id
@@ -249,7 +257,7 @@ module.exports = server;
 
 // GET /api/brands
 
-// GET /api/brands/:id/products
+// GET /api/brands/:brandId/products
 
 // GET /api/products
 
@@ -257,5 +265,6 @@ module.exports = server;
 
 // GET /api/me/cart
 
-// DELETE /api/me/cart/:productId
 // POST /api/me/cart/:productId
+
+// DELETE /api/me/cart/:productId
