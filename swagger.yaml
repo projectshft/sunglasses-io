@@ -151,7 +151,7 @@ paths:
           description: "Unexpected Error"
           schema:
             $ref: "#/definitions/Error"   
-     post: 
+    post: 
       tags:
         - "cart"
       summary: "Adds a product to cart"
@@ -252,18 +252,3 @@ definitions:
 securityDefinitions:
   BasicAuth:
     type: basic
-
-
-// GET /api/brands
-
-// GET /api/brands/:id/products
-
-// GET /api/products
-
-// POST /api/login
-
-// GET /api/me/cart
-
-// DELETE /api/me/cart/:productId
-// POST /api/me/cart/:productId
-
