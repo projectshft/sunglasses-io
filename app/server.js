@@ -9,7 +9,7 @@ const { uid } = require('rand-token');
 const PORT = process.env.PORT || 5000;
 
 // token timeout after 15 minutes
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+const TOKEN_VALIDITY_TIMEOUT = 1440 * 60 * 1000;
 
 // access tokens object array
 const accessTokens = [];
@@ -17,8 +17,9 @@ const accessTokens = [];
 // set varaibles to be accessed inside functions
 let brands = [];
 let products = [];
-let users = [];
 let cart = [];
+
+const writeHead = { 'Content-Type': 'application/json' };
 
 const router = Router();
 router.use(bodyParser.json());
@@ -41,7 +42,6 @@ if (!module.parent) {
       fs.readFileSync('initial-data/products.json', 'utf-8')
     );
     cart = JSON.parse(fs.readFileSync('initial-data/cart.json', 'utf-8'));
-    users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
   });
 }
 
@@ -49,11 +49,11 @@ if (!module.parent) {
 const getValidTokenFromRequest = function (req) {
   const parsedUrl = url.parse(req.url, true);
 
-  if (parsedUrl.query.accessToken) {
+  if (parsedUrl.query.validToken) {
     // Verify the access token to make sure it's valid and not expired
     const currentAccessToken = accessTokens.find(
       (accessToken) =>
-        accessToken.token == parsedUrl.query.accessToken &&
+        accessToken.token == parsedUrl.query.validToken &&
         new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
     );
 
@@ -99,13 +99,12 @@ router.get('/api/brands/:brandId/products', (req, res) => {
 router.get('/api/products', (req, res) => {
   let productsToReturn = [];
   productsToReturn = products;
-  return res
-    .writeHead(200, { 'Content-Type': 'application/json' })
-    .end(JSON.stringify(productsToReturn));
+  return res.writeHead(200, writeHead).end(JSON.stringify(productsToReturn));
 });
 
 // logins the user in after checking if they are in database
 router.post('/api/login', (req, res) => {
+  const users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
   if (req.body.username && req.body.password) {
     const user = users.find(
       (userI) =>
@@ -123,7 +122,9 @@ router.post('/api/login', (req, res) => {
       // if there is an existing access token just update the date
       if (currAccessToken) {
         currAccessToken.lastUpdated = new Date();
-        return res.end(JSON.stringify(currAccessToken.token));
+        return res
+          .writeHead(200, writeHead, 'success')
+          .end(JSON.stringify(currAccessToken.token));
       }
 
       const newAccessToken = {
@@ -133,7 +134,7 @@ router.post('/api/login', (req, res) => {
       };
       accessTokens.push(newAccessToken);
       return res
-        .writeHead(200, 'Login Successful')
+        .writeHead(200, writeHead)
         .end(JSON.stringify(newAccessToken.token));
     }
     // else if the either fields do not match give a general error
@@ -150,15 +151,17 @@ router.get('/api/me/cart', (req, res) => {
   const currentAccessToken = getValidTokenFromRequest(req);
 
   if (!currentAccessToken) {
-    return res.writeHead(
-      401,
-      'You need to have a valid access token to access this call'
-    );
+    return res
+      .writeHead(
+        401,
+        'You need to have a valid access token to access this call'
+      )
+      .end();
   }
 
   cart = JSON.parse(fs.readFileSync('initial-data/cart.json', 'utf-8'));
 
-  res.writeHead(200).end(JSON.stringify(cart));
+  return res.writeHead(200, writeHead).end(JSON.stringify(cart));
 });
 
 // adds a product to the cart with product id
@@ -178,30 +181,46 @@ router.post('/api/me/cart/:productId', (req, res) => {
   // grab the query parameter
   const { productId } = req.params;
 
-  // sets an intitail quantity
-  const quantity = 0;
-  // finds our associated product
-  const getProduct = products.find((i) => i.id == productId);
-
-  // increments by one
-  getProduct.quantity = quantity + 1;
-
   // gets the current cart
   const currentCart = JSON.parse(
     fs.readFileSync('initial-data/cart.json', 'utf-8')
   );
 
-  // if the argument is true then push to current cart and then write to our cart database
-  if (getProduct) {
-    currentCart.push(getProduct);
-    const json = JSON.stringify(currentCart);
-    fs.writeFile('initial-data/cart.json', json, 'utf8', () => {});
+  // gets the products
+  const products = JSON.parse(
+    fs.readFileSync('initial-data/products.json', 'utf-8')
+  );
 
-    return res
-      .writeHead(200, { 'Content-Type': 'application/json' })
-      .end('added');
+  // finds our associated products
+  const getProduct = products.find((i) => i.id == productId);
+
+  // gets the correct item in the cart
+  const updatedCart = currentCart.find((i) => i.id == getProduct.id);
+
+  // if there is no item in the cart then add it and write it
+  if (!updatedCart) {
+    getProduct.quantity = 1;
+
+    currentCart.push(getProduct);
+
+    const jsonCart = JSON.stringify(currentCart);
+
+    fs.writeFile('initial-data/cart.json', jsonCart, 'utf8', () => {});
+    return res.writeHead(200, writeHead).end(JSON.stringify(currentCart));
   }
-  return res.writeHead(400, 'product not found').end('product not found');
+
+  // else there is an existing item in cart then update the quantity and send and write it to cart
+  const changeItemInCartIndex = currentCart.findIndex(
+    (i) => i.id == updatedCart.id
+  );
+
+  currentCart[changeItemInCartIndex].quantity += 1;
+
+  const jsonCart = JSON.stringify(currentCart);
+
+  fs.writeFile('initial-data/cart.json', jsonCart, 'utf8', () => {});
+
+  return res.writeHead(200, writeHead).end(jsonCart);
 });
 
 // deletes an item from the cart
@@ -242,29 +261,10 @@ router.delete('/api/me/cart/:productId', (req, res) => {
     // write the current cart to database
     fs.writeFile('initial-data/cart.json', json, 'utf8', () => {});
 
-    return res
-      .writeHead(200, { 'Content-Type': 'application/json' })
-      .end('product removed');
+    return res.writeHead(200, writeHead).end(json);
   }
 
-  return res
-    .writeHead(400, 'product not found')
-    .end('product not found')
-    .end('product not found');
+  return res.writeHead(400, writeHead).end('product not found');
 });
 
 module.exports = server;
-
-// GET /api/brands
-
-// GET /api/brands/:brandId/products
-
-// GET /api/products
-
-// POST /api/login
-
-// GET /api/me/cart
-
-// POST /api/me/cart/:productId
-
-// DELETE /api/me/cart/:productId

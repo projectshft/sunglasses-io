@@ -1,5 +1,3 @@
-const { expect } = require('chai');
-const fs = require('fs');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../app/server');
@@ -7,13 +5,6 @@ const server = require('../app/server');
 const should = chai.should();
 
 chai.use(chaiHttp);
-
-beforeEach(async () => {
-  JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
-  JSON.parse(fs.readFileSync('initial-data/products.json', 'utf-8'));
-  JSON.parse(fs.readFileSync('initial-data/cart.json', 'utf-8'));
-  const users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
-});
 
 // tests to get all the brands
 describe('/GET all the brands', () => {
@@ -34,7 +25,8 @@ describe('/GET products of brand ID', () => {
   it('It should GET all products for given brand id', (done) => {
     chai
       .request(server)
-      .get('/api/brands/:brandId/products')
+      .get('/api/brands/1/products')
+
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an('object');
@@ -56,9 +48,10 @@ describe('/GET all the products', () => {
   });
 });
 
-describe('POST logging in', () => {
-  const inValidLogin = { username: 'greenlion235', password: 'waters' };
+describe('/POST logging in', () => {
+  const inValidLogin = { username: 'wrong-user', password: 'wrong-pass' };
   const validLogin = { username: 'greenlion235', password: 'waters' };
+
   it('It should return a 401 error if incorrect credentails', (done) => {
     chai
       .request(server)
@@ -78,11 +71,104 @@ describe('POST logging in', () => {
       .send(validLogin)
       .end((err, res) => {
         res.should.have.status(200);
+        res.body.should.be.a('string');
+        res.body.should.have.lengthOf(16);
         done();
       });
   });
 });
 
+describe(' Users cart', () => {
+  let validToken;
+  before('login', () => {
+    const validLogin = { username: 'greenlion235', password: 'waters' };
+    chai
+      .request(server)
+      .post('/api/login')
+      .send(validLogin)
+      .end((err, res) => {
+        validToken = res.body;
+      });
+  });
+  describe('/GET users cart', () => {
+    it('it should get the logged in users cart', (done) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .query({ validToken })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+    it('it should return an error if the token is invalid or missing', (done) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+  });
+  describe('/Post adds to cart', () => {
+    it('it should add an item to users cart', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart/1')
+        .query({ validToken })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('array');
+          done();
+        });
+    });
+    it('it should give an error if the user is not logged in', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart/1')
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.res.statusMessage.should.be.a('string');
+          done();
+        });
+    });
+    it('it should give an error 404 if product is not found', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart/')
+        .query({ validToken })
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.res.statusMessage.should.be.a('string');
+          done();
+        });
+    });
+  });
+  describe('/Delete deletes items in cart', () => {
+    it('it should delete an item from logged in users cart', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/1')
+        .query({ validToken })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('array');
+          done();
+        });
+    });
+    it('it should return an error if the token is invalid or missing', (done) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+  });
+});
 // GET /api/brands passing
 
 // GET /api/brands/:brandId/products
@@ -96,61 +182,3 @@ describe('POST logging in', () => {
 // POST /api/me/cart/:productId
 
 // DELETE /api/me/cart/:productId
-
-//   // tests that it get all the products
-//   describe('/GET Products', () => {
-//     it('it should GET all the Products', (done) => {
-//       chai
-//         .request(server)
-//         .get('/api/products')
-//         .end((err, res) => {
-//           res.should.have.status(200);
-//           res.body.should.be.a('array');
-//           res.body.length.should.be.eql(11);
-//           done();
-//         });
-//     });
-//   });
-
-//   // tests that it gets the cart
-//   describe('/GET Cart', () => {
-//     it('it should GET all the Cart', (done) => {
-//       chai
-//         .request(server)
-//         .get('/api/me/cart')
-//         .end((err, res) => {
-//           res.should.have.status(200);
-//           res.body.should.be.a('array');
-//           done();
-//         });
-//     });
-//   });
-
-//   // tests that it gets the products with the related id
-//   describe('/GET Products', () => {
-//     it('it should GET all the Products related to brand id', (done) => {
-//       chai
-//         .request(server)
-//         .get('/api/brands/:brandId/products')
-//         .end((err, res) => {
-//           res.should.have.status(200);
-//           res.body.should.be.a('object');
-//           done();
-//         });
-//     });
-//   });
-// });
-
-// // tests that it can add to cart
-// describe('/POST Product', () => {
-//   it('should be added to cart', (done) => {
-//     chai
-//       .request(server)
-//       .post('/api/me/cart/:productId')
-//       .end((err, res) => {
-//         res.should.have.status(200);
-
-//         done();
-//       });
-//   });
-// });
