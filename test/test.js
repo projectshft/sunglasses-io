@@ -21,6 +21,7 @@ describe('/GET all the brands', () => {
   });
 });
 
+// tests to get the products by related to brand id
 describe('/GET products of brand ID', () => {
   it('It should GET all products for given brand id', (done) => {
     chai
@@ -35,6 +36,7 @@ describe('/GET products of brand ID', () => {
   });
 });
 
+// gets all  the products
 describe('/GET all the products', () => {
   it('It should GET all the products', (done) => {
     chai
@@ -48,6 +50,7 @@ describe('/GET all the products', () => {
   });
 });
 
+// tests logging
 describe('/POST logging in', () => {
   const inValidLogin = { username: 'wrong-user', password: 'wrong-pass' };
   const validLogin = { username: 'greenlion235', password: 'waters' };
@@ -78,8 +81,11 @@ describe('/POST logging in', () => {
   });
 });
 
+// tests the logged in users cart
 describe(' Users cart', () => {
   let validToken;
+
+  // tests and logs the user in and tests for inccorect credintials
   before('login', () => {
     const validLogin = { username: 'greenlion235', password: 'waters' };
     chai
@@ -90,6 +96,8 @@ describe(' Users cart', () => {
         validToken = res.body;
       });
   });
+
+  // gets uthe users cart
   describe('/GET users cart', () => {
     it('it should get the logged in users cart', (done) => {
       chai
@@ -112,6 +120,8 @@ describe(' Users cart', () => {
         });
     });
   });
+
+  // tests the adding to cart
   describe('/Post adds to cart', () => {
     it('it should add an item to users cart', (done) => {
       chai
@@ -146,6 +156,8 @@ describe(' Users cart', () => {
         });
     });
   });
+
+  // tests the deletion of an item from cart
   describe('/Delete deletes items in cart', () => {
     it('it should delete an item from logged in users cart', (done) => {
       chai
