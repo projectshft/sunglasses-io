@@ -18,6 +18,8 @@ describe("Sunglasses", () => {
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an("array");
+          response.body[0].should.have.keys("id", "name");
+          response.body.length.should.be.eql(5);
           done();
         });
     });
@@ -32,20 +34,23 @@ describe("Sunglasses", () => {
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an("array");
+          response.body[0].should.have.keys(
+            "id",
+            "categoryId",
+            "name",
+            "description",
+            "price",
+            "imageUrls"
+          );
+          response.body.length.should.be.eql(3);
           done();
         });
     });
 
     it("should return a 404 error if brandId is not found", (done) => {
-      var get404BrandId = () => {
-        let randomNumber = Math.floor(Math.random() * 10);
-        if (brandData.find((brand) => brand.id !== randomNumber)) {
-          return randomNumber;
-        }
-      };
       chai
         .request(server)
-        .get(`/api/brands/${get404BrandId}/products`)
+        .get("/api/brands/6/products")
         .end((error, response) => {
           response.should.have.status(404);
           done();
@@ -64,5 +69,11 @@ describe("Sunglasses", () => {
           done();
         });
     });
+
+    // NEED TO ADD QUERY TESTS TO THIS
+  });
+
+  describe("/POST login", () => {
+    // Work on this one
   });
 });

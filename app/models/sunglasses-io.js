@@ -10,15 +10,17 @@ class Sunglasses {
     return brandData;
   }
 
-  static getBrandProducts(brandId) {
-    let brandProducts = productData.filter((product) => {
-      product.categoryId == brandId;
-    });
+  static getBrandProducts(brandProducts) {
     return brandProducts;
   }
 
   static getProducts() {
     return productData;
+  }
+
+  static getCart(userData) {
+    let cart = userData.cart;
+    return cart;
   }
 }
 

@@ -16,6 +16,7 @@ let accessTokens = [];
 let failedLoginAttempts = {};
 
 const PORT = 3001;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 // Setup Router
 const router = Router();
@@ -29,7 +30,8 @@ const server = http
   .listen(PORT);
 
 // HELPER FUNCTIONS
-var getNumOfFailedLoginRequestsForUsername = function (username) {
+// Helpers to get/set our number of failed requests per username
+const getNumOfFailedLoginRequestsForUsername = function (username) {
   let currentNumberOfFailedRequests = failedLoginAttempts[username];
   if (currentNumberOfFailedRequests) {
     return currentNumberOfFailedRequests;
@@ -38,20 +40,20 @@ var getNumOfFailedLoginRequestsForUsername = function (username) {
   }
 };
 
-var setNumOfFailedLoginRequestsForUsername = function (username, numFails) {
+const setNumOfFailedLoginRequestsForUsername = function (username, numFails) {
   failedLoginAttempts[username] = numFails;
 };
 
-var getValidTokenFromRequest = function (request) {
-  var parsedUrl = require("url").parse(request.url, true);
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure its valid and not expired
+// Helper method to process access token
+const getValidTokenFromRequest = function (request) {
+  if (request.headers.currentaccesstoken) {
     let currentAccessToken = accessTokens.find((accessToken) => {
       return (
-        accessToken.token == parsedUrl.query.accessToken &&
+        accessToken.token == request.headers.currentaccesstoken &&
         new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
       );
     });
+
     if (currentAccessToken) {
       return currentAccessToken;
     } else {
@@ -66,11 +68,11 @@ var getValidTokenFromRequest = function (request) {
 router.get("/api/brands", (request, response) => {
   // Return all brands
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(Sunglasses.getBrands()));
+  const getBrands = Sunglasses.getBrands();
+  return response.end(JSON.stringify(getBrands));
 });
 
 router.get("/api/brands/:id/products", (request, response) => {
-  console.log(request.params.id);
   // Return all products in a brand
   const { id } = request.params;
   const brandId = brandData.find((brand) => brand.id == id);
@@ -82,20 +84,25 @@ router.get("/api/brands/:id/products", (request, response) => {
     const brandProducts = productData.filter(
       (product) => product.categoryId == id
     );
+    const getBrandProducts = Sunglasses.getBrandProducts(brandProducts);
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(brandProducts));
+    return response.end(JSON.stringify(getBrandProducts));
   }
 });
 
 router.get("/api/products", (request, response) => {
   // Return all products
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(Sunglasses.getProducts()));
+  const getProducts = Sunglasses.getProducts();
+  return response.end(JSON.stringify(getProducts));
+
+  // NEED TO ADD QUERY PARAMS TO THIS?
 });
 
-router.post("/login", (request, response) => {
+router.post("/api/login", (request, response) => {
   // Make sure there is a username and password in the request
-  const { username, password } = request.body;
+  let { username, password } = request.body;
+
   if (
     username &&
     password &&
@@ -103,12 +110,13 @@ router.post("/login", (request, response) => {
   ) {
     // See if there is a user that has that username and password
     let user = userData.find((user) => {
-      user.login.username == username && user.login.password == password;
+      return user.login.username == username && user.login.password == password;
     });
 
     if (user) {
       // If we found a user, reset our counter of failed logins
       setNumOfFailedLoginRequestsForUsername(username, 0);
+      // DO I NEED TO HAVE NUMBER OF FAILED ATTEMPTS IN ACCESS TOKEN ARRAY?
 
       // Write the header because we know we will be returning successful at this point and that the response will be json
       response.writeHead(200, { "Content-Type": "application/json" });
@@ -117,7 +125,6 @@ router.post("/login", (request, response) => {
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == username;
       });
-
       // Update the latest updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
@@ -152,9 +159,21 @@ router.post("/login", (request, response) => {
   }
 });
 
-// router.get("/me/cart", (request, response) => {
-//   // Fetch shopping cart
-// });
+router.get("/api/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "Authentication error");
+    return response.end("Please log in again");
+  } else {
+    let currentUsername = currentAccessToken.username;
+    let userData = userData.find(
+      (user) => user.login.username == currentUsername
+    );
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(Sunglasses.getCart(userData)));
+  }
+});
 
 // router.post("/me/cart", (request, response) => {
 //   // Create cart
