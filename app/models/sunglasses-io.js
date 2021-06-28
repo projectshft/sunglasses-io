@@ -14,7 +14,14 @@ class Sunglasses {
     return brandProducts;
   }
 
-  static getProducts() {
+  static getProducts(query) {
+    const relatedProducts = productData.filter((product) => {
+      return (
+        product.description.toLowerCase().includes(query.toLowerCase()) ||
+        product.name.toLowerCase().includes(query.toLowerCase())
+      );
+    });
+    console.log(relatedProducts);
     return productData;
   }
 

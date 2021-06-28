@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const finalHandler = require("finalhandler");
 const queryString = require("querystring");
+const url = require("url");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
@@ -93,11 +94,17 @@ router.get("/api/brands/:id/products", (request, response) => {
 
 router.get("/api/products", (request, response) => {
   // Return all products
-  response.writeHead(200, { "Content-Type": "application/json" });
-  const getProducts = Sunglasses.getProducts();
-  return response.end(JSON.stringify(getProducts));
+  const parsedUrl = url.parse(request.url, true);
+  const query = parsedUrl.query.q;
 
-  // NEED TO ADD QUERY PARAMS TO THIS?
+  if (!query) {
+    response.writeHead(404);
+    return response.end("No Products Found");
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    const getRelatedProducts = Sunglasses.getProducts(query);
+    return response.end(JSON.stringify(getRelatedProducts));
+  }
 });
 
 router.post("/api/login", (request, response) => {
@@ -172,8 +179,9 @@ router.get("/api/me/cart", (request, response) => {
   } else {
     let currentUsername = currentAccessToken.username;
     let user = userData.find((user) => user.login.username == currentUsername);
+    let cart = Sunglasses.getCart(user);
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
+    return response.end(JSON.stringify(cart));
   }
 });
 
