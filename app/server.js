@@ -46,14 +46,15 @@ const setNumOfFailedLoginRequestsForUsername = function (username, numFails) {
 
 // Helper method to process access token
 const getValidTokenFromRequest = function (request) {
-  if (request.headers.currentaccesstoken) {
+  const token = request.headers["access-token"];
+  if (token) {
     let currentAccessToken = accessTokens.find((accessToken) => {
       return (
-        accessToken.token == request.headers.currentaccesstoken &&
+        accessToken.token == token &&
         new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
       );
     });
-
+    console.log("currentAccessToken", currentAccessToken);
     if (currentAccessToken) {
       return currentAccessToken;
     } else {
@@ -116,7 +117,6 @@ router.post("/api/login", (request, response) => {
     if (user) {
       // If we found a user, reset our counter of failed logins
       setNumOfFailedLoginRequestsForUsername(username, 0);
-      // DO I NEED TO HAVE NUMBER OF FAILED ATTEMPTS IN ACCESS TOKEN ARRAY?
 
       // Write the header because we know we will be returning successful at this point and that the response will be json
       response.writeHead(200, { "Content-Type": "application/json" });
@@ -137,7 +137,10 @@ router.post("/api/login", (request, response) => {
           token: uid(16),
         };
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
+        console.log("accesstokens", accessTokens);
+        response.writeHead(200, { "Content-Type": "application/json" });
+        response.setHeader("accessToken", newAccessToken.token);
+        // return response.end();
       }
     } else {
       // Update the number of failed login attempts
@@ -161,17 +164,16 @@ router.post("/api/login", (request, response) => {
 
 router.get("/api/me/cart", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
+  console.log(currentAccessToken);
 
   if (!currentAccessToken) {
     response.writeHead(401, "Authentication error");
     return response.end("Please log in again");
   } else {
     let currentUsername = currentAccessToken.username;
-    let userData = userData.find(
-      (user) => user.login.username == currentUsername
-    );
+    let user = userData.find((user) => user.login.username == currentUsername);
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(Sunglasses.getCart(userData)));
+    return response.end(JSON.stringify(user.cart));
   }
 });
 
