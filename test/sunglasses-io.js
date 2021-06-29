@@ -10,13 +10,6 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("Sunglasses", () => {
-  //Before each test we empty the database
-  // beforeEach((done) => {
-  //   Sunglasses.remove({}, (err) => {
-  //     done();
-  //   });
-  // });
-
   describe("/GET brands", () => {
     it("should get all the brands", (done) => {
       chai
@@ -124,7 +117,7 @@ describe("Sunglasses", () => {
   describe("/GET cart", () => {
     let accessToken = "";
     let loginData = { username: "greenlion235", password: "waters" };
-    // DO I NEED DONE HERE?
+
     before("login user", (done) => {
       chai
         .request(server)
@@ -144,7 +137,6 @@ describe("Sunglasses", () => {
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an("array");
-          // response.body.length.should.be.equal();
           done();
         });
     });
@@ -164,13 +156,21 @@ describe("Sunglasses", () => {
   describe("/POST add item to cart", () => {
     let accessToken = "";
     let loginData = { username: "greenlion235", password: "waters" };
-    let product = {
+    let productOne = {
       id: "1",
       categoryId: "1",
       name: "Superglasses",
       description: "The best glasses in the world",
       price: 150,
     };
+    let productTwo = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      description: "The best glasses in the world",
+      price: 100,
+    };
+
     before("login user", (done) => {
       chai
         .request(server)
@@ -182,17 +182,69 @@ describe("Sunglasses", () => {
         });
     });
 
+    after("all tests are run reset access token", (done) => {
+      // How do you reset values - When it refreshes the tests break...
+      done();
+    });
+
     it("should add item to cart", (done) => {
       chai
         .request(server)
         .post("/api/me/cart")
         .set("access-token", accessToken)
-        .send(product)
+        .send(productOne)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("array");
+          response.body.length.should.be.equal(1);
+          response.body[0].should.have.keys(
+            "id",
+            "categoryId",
+            "name",
+            "price",
+            "quantity"
+          );
+          done();
+        });
+    });
+
+    it("should increase product count by one if adding duplicate item to cart", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .set("access-token", accessToken)
+        .send(productOne)
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an("array");
           response.body[0].should.be.an("object");
+          response.body.length.should.be.equal(1);
+          response.body[0].quantity.should.be.equal(2);
           response.body[0].should.have.keys(
+            "id",
+            "categoryId",
+            "name",
+            "price",
+            "quantity"
+          );
+          done();
+        });
+    });
+
+    it("should add multiple items to cart", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .set("access-token", accessToken)
+        .send(productTwo)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("array");
+          response.body[1].should.be.an("object");
+          response.body[1].quantity.should.be.equal(1);
+          response.body[1].id.should.be.equal("2");
+          response.body.length.should.be.equal(2);
+          response.body[1].should.have.keys(
             "id",
             "categoryId",
             "name",
@@ -208,7 +260,7 @@ describe("Sunglasses", () => {
         .request(server)
         .post("/api/me/cart")
         .set("access-token", "invalidToken")
-        .send(product)
+        .send(productOne)
         .end((error, response) => {
           response.should.have.status(401);
         });
@@ -229,27 +281,125 @@ describe("Sunglasses", () => {
 
   describe("/DELETE delete item in cart", () => {
     let accessToken = "";
-    before(
+    let loginData = { username: "greenlion235", password: "waters" };
+    let productIdToDelete = 1;
+
+    before("login user", (done) => {
       chai
         .request(server)
-        .get("/api/me/login")
-        .send({ username: "greenlion235", password: "waters" })
+        .post("/api/login")
+        .send(loginData)
         .end((error, response) => {
           accessToken = response.body;
-        })
-    );
+          done();
+        });
+    });
+
+    it("should delete an item from the cart based on productId", (done) => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productIdToDelete}`)
+        .set("access-token", accessToken)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("array");
+          response.body[0].should.be.an("object");
+          response.body.length.should.be.equal(1);
+          response.body[0].id.should.be.equal("2");
+          response.body[0].should.have.keys(
+            "id",
+            "categoryId",
+            "name",
+            "price",
+            "quantity"
+          );
+          done();
+        });
+    });
+
+    it("should return a 404 error if productId is not found in cart", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart/5")
+        .set("access-token", accessToken)
+        .end((error, response) => {
+          response.should.have.status(404);
+        });
+      done();
+    });
+
+    it("should return a 401 error if no access token provided", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart/1")
+        .set("access-token", "invalidToken")
+        .end((error, response) => {
+          response.should.have.status(401);
+        });
+      done();
+    });
   });
 
   describe("/POST update item in cart", () => {
     let accessToken = "";
-    before(
+    let loginData = { username: "greenlion235", password: "waters" };
+    let productIdToUpdate = 2;
+    let updatedProductQuantity = { quantity: 5 };
+
+    before("login user", (done) => {
       chai
         .request(server)
-        .get("/api/me/login")
-        .send({ username: "greenlion235", password: "waters" })
+        .post("/api/login")
+        .send(loginData)
         .end((error, response) => {
           accessToken = response.body;
-        })
-    );
+          done();
+        });
+    });
+
+    it("should only update the product that matches the id provided", (done) => {
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productIdToUpdate}`)
+        .set("access-token", accessToken)
+        .send(updatedProductQuantity)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an("array");
+          response.body[0].should.be.an("object");
+          response.body.length.should.be.equal(1);
+          response.body[0].quantity.should.be.equal(5);
+          response.body[0].should.have.keys(
+            "id",
+            "categoryId",
+            "name",
+            "price",
+            "quantity"
+          );
+        });
+      done();
+    });
+
+    it("should return a 404 error if productId is not found in cart", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/5")
+        .set("access-token", accessToken)
+        .end((error, response) => {
+          response.should.have.status(404);
+        });
+      done();
+    });
+
+    it("should return a 401 error if no access token provided", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .set("access-token", "invalidToken")
+        .end((error, response) => {
+          response.should.have.status(401);
+        });
+      done();
+    });
   });
 });

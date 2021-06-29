@@ -55,6 +55,7 @@ class Sunglasses {
       } else {
         cart.push({
           id: product.id,
+          categoryId: product.categoryId,
           name: product.name,
           price: product.price,
           quantity: 1,
