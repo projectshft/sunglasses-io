@@ -20,4 +20,15 @@ function addProduct(request, response) {
   response.send(Sunglasses.addProduct());
 }
 
-module.exports = { getBrands, getProducts, getBrandProducts, getCart };
+function deleteProduct(request, response) {
+  response.send(Sunglasses.deleteProduct());
+}
+
+module.exports = {
+  getBrands,
+  getProducts,
+  getBrandProducts,
+  getCart,
+  addProduct,
+  deleteProduct,
+};

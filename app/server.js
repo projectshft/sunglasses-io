@@ -11,7 +11,6 @@ const Sunglasses = require("./models/sunglasses-io");
 const brandData = require("./initial-data/brands.json");
 const productData = require("./initial-data/products.json");
 const userData = require("./initial-data/users.json");
-const { addProduct } = require("./models/sunglasses-io");
 
 // State holding variables
 let accessTokens = [];
@@ -199,13 +198,34 @@ router.post("/api/me/cart", (request, response) => {
     });
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(addProduct(product, userCart)));
+    return response.end(
+      JSON.stringify(Sunglasses.addProduct(product, userCart))
+    );
   }
 });
 
-// router.delete("/me/cart/:productId", (request, response) => {
-//   // Delete item from cart
-// });
+router.delete("/api/me/cart/:productId", (request, response) => {
+  try {
+    let currentAccessToken = getValidTokenFromRequest(request);
+
+    if (!currentAccessToken) {
+      response.writeHead(401, "Authentication error");
+      return response.end("Please log in again");
+    } else {
+      let username = currentAccessToken.username;
+      let userCart = userData.find((user) => {
+        return user.login.username === username;
+      }).cart;
+      const { productId } = request.params;
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify(Sunglasses.deleteProduct(productId, userCart))
+      );
+    }
+  } catch (e) {
+    console.error(e);
+  }
+});
 
 // router.post("/me/cart/:productId", (request, response) => {
 //   // Add item to cart

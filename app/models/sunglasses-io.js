@@ -56,6 +56,14 @@ class Sunglasses {
       }
     }
   }
+
+  static deleteProduct(productId, userCart) {
+    let itemToRemoveIndex = userCart.findIndex((item) => item.id === productId);
+    console.log("index", itemToRemoveIndex);
+    userCart.splice(itemToRemoveIndex, 1);
+    console.log("cart", userCart);
+    return userCart;
+  }
 }
 
 module.exports = Sunglasses;
