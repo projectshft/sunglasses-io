@@ -1,5 +1,6 @@
 const brandData = require("../initial-data/brands.json");
 const productData = require("../initial-data/products.json");
+const userData = require("../initial-data/users.json");
 
 class Sunglasses {
   constructor(params) {
@@ -14,6 +15,10 @@ class Sunglasses {
     return brandProducts;
   }
 
+  static getAllProducts() {
+    return productData;
+  }
+
   static getProducts(query) {
     const relatedProducts = productData.filter((product) => {
       return (
@@ -24,8 +29,9 @@ class Sunglasses {
     return relatedProducts;
   }
 
-  static getCart(userData) {
-    let cart = userData.cart;
+  static getCart(username) {
+    let user = userData.find((user) => user.login.username == username);
+    let cart = user.cart;
     return cart;
   }
 
@@ -33,6 +39,7 @@ class Sunglasses {
     if (Array.isArray(cart) && !cart.length) {
       cart.push({
         id: product.id,
+        categoryId: product.categoryId,
         name: product.name,
         price: product.price,
         quantity: 1,
@@ -64,15 +71,11 @@ class Sunglasses {
   }
 
   static updateProduct(productId, quantity, userCart) {
-    try {
-      let matchedItem = userCart.find((item) => {
-        return item.id === productId;
-      });
-      matchedItem.quantity = quantity;
-      return userCart;
-    } catch (e) {
-      console.error(e);
-    }
+    let matchedItem = userCart.find((item) => {
+      return item.id === productId;
+    });
+    matchedItem.quantity = quantity;
+    return userCart;
   }
 }
 

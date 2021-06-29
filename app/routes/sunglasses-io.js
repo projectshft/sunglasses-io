@@ -8,6 +8,10 @@ function getBrandProducts(request, response) {
   response.send(Sunglasses.getBrandProducts());
 }
 
+function getAllProducts(request, response) {
+  response.send(Sunglasses.getAllProducts());
+}
+
 function getProducts(request, response) {
   response.send(Sunglasses.getProducts());
 }
@@ -30,8 +34,9 @@ function updateProduct(request, response) {
 
 module.exports = {
   getBrands,
-  getProducts,
   getBrandProducts,
+  getAllProducts,
+  getProducts,
   getCart,
   addProduct,
   deleteProduct,
