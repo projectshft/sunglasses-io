@@ -11,6 +11,7 @@ const Sunglasses = require("./models/sunglasses-io");
 const brandData = require("./initial-data/brands.json");
 const productData = require("./initial-data/products.json");
 const userData = require("./initial-data/users.json");
+const { addProduct } = require("./models/sunglasses-io");
 
 // State holding variables
 let accessTokens = [];
@@ -55,7 +56,6 @@ const getValidTokenFromRequest = function (request) {
         new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
       );
     });
-    console.log("currentAccessToken", currentAccessToken);
     if (currentAccessToken) {
       return currentAccessToken;
     } else {
@@ -93,7 +93,7 @@ router.get("/api/brands/:id/products", (request, response) => {
 });
 
 router.get("/api/products", (request, response) => {
-  // Return all products
+  // Return all products related to query
   const parsedUrl = url.parse(request.url, true);
   const query = parsedUrl.query.q;
 
@@ -125,16 +125,15 @@ router.post("/api/login", (request, response) => {
       // If we found a user, reset our counter of failed logins
       setNumOfFailedLoginRequestsForUsername(username, 0);
 
-      // Write the header because we know we will be returning successful at this point and that the response will be json
-      response.writeHead(200, { "Content-Type": "application/json" });
-
       // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == username;
       });
+
       // Update the latest updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
+        response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
         // Create a new token with the user value and a "random" token
@@ -144,10 +143,9 @@ router.post("/api/login", (request, response) => {
           token: uid(16),
         };
         accessTokens.push(newAccessToken);
-        console.log("accesstokens", accessTokens);
-        response.writeHead(200, { "Content-Type": "application/json" });
         response.setHeader("accessToken", newAccessToken.token);
-        // return response.end();
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end();
       }
     } else {
       // Update the number of failed login attempts
@@ -171,7 +169,6 @@ router.post("/api/login", (request, response) => {
 
 router.get("/api/me/cart", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-  console.log(currentAccessToken);
 
   if (!currentAccessToken) {
     response.writeHead(401, "Authentication error");
@@ -185,9 +182,26 @@ router.get("/api/me/cart", (request, response) => {
   }
 });
 
-// router.post("/me/cart", (request, response) => {
-//   // Create cart
-// });
+router.post("/api/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "Authentication error");
+    return response.end("Please log in again");
+  } else {
+    const username = currentAccessToken.username;
+    const userCart = userData.find((user) => {
+      return user.login.username === username;
+    }).cart;
+    const productId = request.body.id;
+    const product = productData.find((product) => {
+      return product.id === productId;
+    });
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(addProduct(product, userCart)));
+  }
+});
 
 // router.delete("/me/cart/:productId", (request, response) => {
 //   // Delete item from cart

@@ -16,4 +16,8 @@ function getCart(request, response) {
   response.send(Sunglasses.getCart());
 }
 
+function addProduct(request, response) {
+  response.send(Sunglasses.addProduct());
+}
+
 module.exports = { getBrands, getProducts, getBrandProducts, getCart };

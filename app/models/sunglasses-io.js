@@ -21,13 +21,40 @@ class Sunglasses {
         product.name.toLowerCase().includes(query.toLowerCase())
       );
     });
-    console.log(relatedProducts);
-    return productData;
+    return relatedProducts;
   }
 
   static getCart(userData) {
     let cart = userData.cart;
     return cart;
+  }
+
+  static addProduct(product, cart) {
+    if (Array.isArray(cart) && !cart.length) {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+      });
+      return cart;
+    } else {
+      let matchedItem = cart.find((item) => {
+        return item.id === product.id;
+      });
+      if (matchedItem) {
+        matchedItem.quantity++;
+        return cart;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+        });
+        return cart;
+      }
+    }
   }
 }
 
