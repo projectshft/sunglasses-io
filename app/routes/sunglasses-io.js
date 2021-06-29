@@ -24,6 +24,10 @@ function deleteProduct(request, response) {
   response.send(Sunglasses.deleteProduct());
 }
 
+function updateProduct(request, response) {
+  response.send(Sunglasses.updateProduct());
+}
+
 module.exports = {
   getBrands,
   getProducts,
@@ -31,4 +35,5 @@ module.exports = {
   getCart,
   addProduct,
   deleteProduct,
+  updateProduct,
 };

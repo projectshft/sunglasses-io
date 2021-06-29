@@ -59,10 +59,20 @@ class Sunglasses {
 
   static deleteProduct(productId, userCart) {
     let itemToRemoveIndex = userCart.findIndex((item) => item.id === productId);
-    console.log("index", itemToRemoveIndex);
     userCart.splice(itemToRemoveIndex, 1);
-    console.log("cart", userCart);
     return userCart;
+  }
+
+  static updateProduct(productId, quantity, userCart) {
+    try {
+      let matchedItem = userCart.find((item) => {
+        return item.id === productId;
+      });
+      matchedItem.quantity = quantity;
+      return userCart;
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 

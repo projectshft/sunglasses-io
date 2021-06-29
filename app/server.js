@@ -205,8 +205,28 @@ router.post("/api/me/cart", (request, response) => {
 });
 
 router.delete("/api/me/cart/:productId", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "Authentication error");
+    return response.end("Please log in again");
+  } else {
+    let username = currentAccessToken.username;
+    let userCart = userData.find((user) => {
+      return user.login.username === username;
+    }).cart;
+    const { productId } = request.params;
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify(Sunglasses.deleteProduct(productId, userCart))
+    );
+  }
+});
+
+router.post("/api/me/cart/:productId", (request, response) => {
   try {
     let currentAccessToken = getValidTokenFromRequest(request);
+    let { quantity } = request.body;
 
     if (!currentAccessToken) {
       response.writeHead(401, "Authentication error");
@@ -219,16 +239,12 @@ router.delete("/api/me/cart/:productId", (request, response) => {
       const { productId } = request.params;
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify(Sunglasses.deleteProduct(productId, userCart))
+        JSON.stringify(Sunglasses.updateProduct(productId, quantity, userCart))
       );
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 });
-
-// router.post("/me/cart/:productId", (request, response) => {
-//   // Add item to cart
-// });
 
 module.exports = server;
