@@ -107,6 +107,7 @@ router.get("/api/products", (request, response) => {
 });
 
 router.post("/api/login", (request, response) => {
+  // Handle user login
   // Make sure there is a username and password in the request
   let { username, password } = request.body;
 
@@ -167,6 +168,7 @@ router.post("/api/login", (request, response) => {
 });
 
 router.get("/api/me/cart", (request, response) => {
+  // Initialize cart
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -182,6 +184,7 @@ router.get("/api/me/cart", (request, response) => {
 });
 
 router.post("/api/me/cart", (request, response) => {
+  // Add items to cart
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -196,15 +199,20 @@ router.post("/api/me/cart", (request, response) => {
     const product = productData.find((product) => {
       return product.id === productId;
     });
-
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify(Sunglasses.addProduct(product, userCart))
-    );
+    if (!product) {
+      response.writeHead(404);
+      return response.end("Product Not Found");
+    } else {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify(Sunglasses.addProduct(product, userCart))
+      );
+    }
   }
 });
 
 router.delete("/api/me/cart/:productId", (request, response) => {
+  // remove items from cart
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -216,35 +224,40 @@ router.delete("/api/me/cart/:productId", (request, response) => {
       return user.login.username === username;
     }).cart;
     const { productId } = request.params;
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify(Sunglasses.deleteProduct(productId, userCart))
-    );
+    if (!userCart.find((item) => item.id === productId)) {
+      response.writeHead(404);
+      return response.end("Product Not In Your Cart");
+    } else {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify(Sunglasses.deleteProduct(productId, userCart))
+      );
+    }
   }
 });
 
 router.post("/api/me/cart/:productId", (request, response) => {
-  try {
-    let currentAccessToken = getValidTokenFromRequest(request);
-    let { quantity } = request.body;
+  // Update items in cart
+  let currentAccessToken = getValidTokenFromRequest(request);
+  let { quantity } = request.body;
 
-    if (!currentAccessToken) {
-      response.writeHead(401, "Authentication error");
-      return response.end("Please log in again");
+  if (!currentAccessToken) {
+    response.writeHead(401, "Authentication error");
+    return response.end("Please log in again");
+  } else {
+    let username = currentAccessToken.username;
+    let userCart = userData.find((user) => {
+      return user.login.username === username;
+    }).cart;
+    const { productId } = request.params;
+    if (!userCart.find((item) => item.id === productId)) {
+      response.writeHead(404);
+      return response.end("Product Not In Cart");
     } else {
-      let username = currentAccessToken.username;
-      let userCart = userData.find((user) => {
-        return user.login.username === username;
-      }).cart;
-      const { productId } = request.params;
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(
         JSON.stringify(Sunglasses.updateProduct(productId, quantity, userCart))
       );
     }
-  } catch (err) {
-    console.error(err);
   }
 });
-
-module.exports = server;
