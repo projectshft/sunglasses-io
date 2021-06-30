@@ -1,5 +1,7 @@
 const http = require("http");
 const finalHandler = require("finalhandler");
+const fs = require("fs");
+var queryString = require("querystring");
 const url = require("url");
 const Router = require("router");
 const bodyParser = require("body-parser");
@@ -26,7 +28,7 @@ const server = http
   .createServer((request, response) => {
     router(request, response, finalHandler(request, response));
   })
-  .listen(PORT);
+  .listen(PORT, (err) => {});
 
 // HELPER FUNCTIONS
 // Helpers to get/set our number of failed requests per username

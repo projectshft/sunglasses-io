@@ -1,0 +1,260 @@
+swagger: "2.0"
+info:
+  title: Sunglasses-io
+  description: An API to support the Sunglasses-io platform.
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - brands
+      summary: The Brands endpoint allows you to search for all available brands.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - products
+      summary: This endpoint allows you to see the products of a certain brand.
+      parameters:
+        - name: id
+          in: path
+          description: Brand Id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Products"
+        404:
+          description: Brand Not Found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - Products
+      summary: This endpoint allows you to see products based on a query.
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: query
+          description: query parameter used to filter products
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Products"
+        404:
+          description: Products Not Found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - login
+      summary: This endpoint returns information about the user that has authorized with the application.
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Users"
+        400:
+          description: Incorrectly formatted response
+        401:
+          description: Invalid username/password or too many failed attempts
+        default:
+          description: Unexpected error
+  /me/cart:
+    get:
+      tags:
+        - me
+      summary: This endpoint allows the user to view their cart.
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Users"
+        401:
+          description: Authentication error
+        default:
+          description: Unexpected error
+    post:
+      tags:
+        - me
+      summary: This endpoint allows the user to add items to their cart.
+      responses:
+        200:
+          description: OK
+        401:
+          description: Authentication error
+        404:
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/me/cart/{productId}:
+    delete:
+      tags:
+        - me
+      summary: This endpoint allows the user to remove items from their cart.
+      parameters:
+        - name: productId
+          in: path
+          description: product Id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Users"
+        401:
+          description: Authentication error
+        404:
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - me
+      summary: This endpoint allows that user to update an item in their cart.
+      parameters:
+        - name: productId
+          in: path
+          description: product Id
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: OK
+        401:
+          description: Authentication error
+        404:
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Users:
+    type: object
+    properties:
+      gender:
+        type: string
+      cart:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            categoryId:
+              type: integer
+            name:
+              type: string
+            price:
+              type: integer
+      name:
+        type: object
+      location:
+        type: object
+      email:
+        type: string
+      login:
+        type: object
+      dob:
+        type: string
+      registered:
+        type: string
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+      nap:
+        type: string
+    required:
+      - name
+      - location
+      - email
+      - login
+      - dob
+      - registered
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    required:
+      - id
+      - name
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+      categoryId:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: integer
+      imageUrls:
+        type: array
+        items:
+          type: string
+    required:
+      - id
+      - categoryId
+      - name
+      - price
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
