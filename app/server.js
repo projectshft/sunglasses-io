@@ -1,13 +1,11 @@
 const http = require("http");
-const fs = require("fs");
 const finalHandler = require("finalhandler");
-const queryString = require("querystring");
 const url = require("url");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 
-const Sunglasses = require("./models/sunglasses-io");
+const Sunglasses = require("./models");
 const brandData = require("./initial-data/brands.json");
 const productData = require("./initial-data/products.json");
 const userData = require("./initial-data/users.json");
@@ -17,7 +15,7 @@ let accessTokens = [];
 let failedLoginAttempts = {};
 
 const PORT = 3001;
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 // Setup Router
 const router = Router();
@@ -33,47 +31,35 @@ const server = http
 // HELPER FUNCTIONS
 // Helpers to get/set our number of failed requests per username
 const getNumOfFailedLoginRequestsForUsername = function (username) {
-  try {
-    let currentNumberOfFailedRequests = failedLoginAttempts[username];
-    if (currentNumberOfFailedRequests) {
-      return currentNumberOfFailedRequests;
-    } else {
-      return 0;
-    }
-  } catch (e) {
-    console.error(e);
+  let currentNumberOfFailedRequests = failedLoginAttempts[username];
+  if (currentNumberOfFailedRequests) {
+    return currentNumberOfFailedRequests;
+  } else {
+    return 0;
   }
 };
 
 const setNumOfFailedLoginRequestsForUsername = function (username, numFails) {
-  try {
-    failedLoginAttempts[username] = numFails;
-  } catch (e) {
-    console.error(e);
-  }
+  failedLoginAttempts[username] = numFails;
 };
 
 // Helper method to process access token
 const getValidTokenFromRequest = function (request) {
-  try {
-    const token = request.headers["access-token"];
-    if (token) {
-      let currentAccessToken = accessTokens.find((accessToken) => {
-        return (
-          accessToken.token == token &&
-          new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
-        );
-      });
-      if (currentAccessToken) {
-        return currentAccessToken;
-      } else {
-        return null;
-      }
+  const token = request.headers["access-token"];
+  if (token) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == token &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
     } else {
       return null;
     }
-  } catch (e) {
-    console.error(e);
+  } else {
+    return null;
   }
 };
 
@@ -94,10 +80,7 @@ router.get("/api/brands/:id/products", (request, response) => {
     response.writeHead(404);
     return response.end("Brand Not Found");
   } else {
-    const brandProducts = productData.filter(
-      (product) => product.categoryId == id
-    );
-    const getBrandProducts = Sunglasses.getBrandProducts(brandProducts);
+    const getBrandProducts = Sunglasses.getBrandProducts(id);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(getBrandProducts));
   }
@@ -196,7 +179,7 @@ router.get("/api/me/cart", (request, response) => {
     response.writeHead(401, "Authentication error");
     return response.end("Please log in again");
   } else {
-    let username = currentAccessToken.username;
+    let { username } = currentAccessToken;
     let cart = Sunglasses.getCart(username);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(cart));

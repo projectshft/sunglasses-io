@@ -3,16 +3,12 @@ const productData = require("../initial-data/products.json");
 const userData = require("../initial-data/users.json");
 
 class Sunglasses {
-  constructor(params) {
-    Object.assign(this, params);
-  }
-
   static getBrands() {
     return brandData;
   }
 
-  static getBrandProducts(brandProducts) {
-    return brandProducts;
+  static getBrandProducts(id) {
+    return productData.filter((product) => product.categoryId == id);
   }
 
   static getAllProducts() {
