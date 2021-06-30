@@ -123,68 +123,69 @@ router.get("/api/products", (request, response) => {
   }
 });
 
+// Handle user login
 router.post("/api/login", (request, response) => {
-  try {
-    // Handle user login
-    // Make sure there is a username and password in the request
-    let { username, password } = request.body;
-    if (
-      username &&
-      password &&
-      getNumOfFailedLoginRequestsForUsername(username) < 3
-    ) {
-      // See if there is a user that has that username and password
-      let user = userData.find((user) => {
-        return (
-          user.login.username == username && user.login.password == password
-        );
+  // Make sure there is a username and password in the request
+  let { username, password } = request.body;
+  if (!username || !password) {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    response.writeHead(400);
+    return response.end("Incorrectly formatted response");
+  }
+
+  if (
+    username &&
+    password &&
+    getNumOfFailedLoginRequestsForUsername(username) < 3
+  ) {
+    // See if there is a user that has that username and password
+    let user = userData.find((user) => {
+      return user.login.username == username && user.login.password == password;
+    });
+
+    if (user) {
+      // If we found a user, reset our counter of failed logins
+      setNumOfFailedLoginRequestsForUsername(username, 0);
+
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == username;
       });
 
-      if (user) {
-        // If we found a user, reset our counter of failed logins
-        setNumOfFailedLoginRequestsForUsername(username, 0);
-
-        // We have a successful login, if we already have an existing access token, use that
-        let currentAccessToken = accessTokens.find((tokenObject) => {
-          return tokenObject.username == username;
-        });
-
-        // Update the latest updated value so we get another time period
-        if (currentAccessToken) {
-          currentAccessToken.lastUpdated = new Date();
-          response.writeHead(200, { "Content-Type": "application/json" });
-          return response.end(JSON.stringify(currentAccessToken.token));
-        } else {
-          // Create a new token with the user value and a "random" token
-          let newAccessToken = {
-            username: username,
-            lastUpdated: new Date(),
-            token: uid(16),
-          };
-          accessTokens.push(newAccessToken);
-          response.writeHead(200, { "Content-Type": "application/json" });
-          return response.end(JSON.stringify(newAccessToken.token));
-        }
+      // Update the latest updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // Update the number of failed login attempts
-        let numFailedAttemptsForUser =
-          getNumOfFailedLoginRequestsForUsername(username);
-        setNumOfFailedLoginRequestsForUsername(
-          username,
-          ++numFailedAttemptsForUser
-        );
-
-        // When a login fails, tell the client in a generic way that either the username or password was wrong
-        response.writeHead(401, "Invalid username or password");
-        return response.end();
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: username,
+          lastUpdated: new Date(),
+          token: uid(16),
+        };
+        accessTokens.push(newAccessToken);
+        response.writeHead(200, { "Content-Type": "application/json" });
+        return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
-      // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-      response.writeHead(400, "Incorrectly formatted response");
-      return response.end();
+      // Update the number of failed login attempts
+      let numFailedAttemptsForUser =
+        getNumOfFailedLoginRequestsForUsername(username);
+      setNumOfFailedLoginRequestsForUsername(
+        username,
+        ++numFailedAttemptsForUser
+      );
+
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      response.writeHead(401);
+      return response.end("Invalid username or password");
     }
-  } catch (e) {
-    console.error(e);
+  } else {
+    if (getNumOfFailedLoginRequestsForUsername(username) >= 3) {
+      response.writeHead(401);
+      return response.end("Too many failed attempts");
+    }
   }
 });
 

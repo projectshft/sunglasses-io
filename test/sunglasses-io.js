@@ -1,15 +1,19 @@
-let Sunglasses = require("../app/models/sunglasses-io");
 const brandData = require("../app/initial-data/brands.json");
 
 let chai = require("chai");
 let chaiHttp = require("chai-http");
-let server = require("../app/server");
 
 let should = chai.should();
 
 chai.use(chaiHttp);
 
-describe("Sunglasses", () => {
+describe("Everything", () => {
+  let server;
+  beforeEach(() => {
+    delete require.cache[require.resolve("../app/server")];
+    server = require("../app/server");
+  });
+
   describe("/GET brands", () => {
     it("should get all the brands", (done) => {
       chai
@@ -110,15 +114,89 @@ describe("Sunglasses", () => {
     });
   });
 
-  describe("/POST login user", () => {
-    // Work on this one
+  describe("/POST successful login user", () => {
+    let loginData = { username: "greenlion235", password: "waters" };
+
+    it("should login a user with valid login data and a current access token", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send(loginData)
+        .end((error, response) => {
+          response.should.have.status(200);
+          done();
+        });
+    });
+  });
+
+  describe("/POST login user 3 bad attempts", () => {
+    let accessToken = "";
+    let loginData = { username: "greenlion235", password: "waters" };
+    let badLoginData = { username: "greenlion235", password: "notThePassword" };
+
+    it("should not allow a user to login after 3 incorrect attempts", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send(badLoginData)
+        .end((error, response) => {
+          chai
+            .request(server)
+            .post("/api/login")
+            .send(badLoginData)
+            .end((error, response) => {
+              chai
+                .request(server)
+                .post("/api/login")
+                .send(badLoginData)
+                .end((error, response) => {
+                  chai
+                    .request(server)
+                    .post("/api/login")
+                    .send(loginData)
+                    .set("access-token", accessToken)
+                    .end((error, response) => {
+                      response.should.have.status(401);
+                      done();
+                    });
+                });
+            });
+        });
+    });
+  });
+
+  describe("/POST login user missing or incorrect data", () => {
+    let missingLoginData = { username: "greenlion235" };
+    let badLoginData = { username: "greenlion235", password: "notThePassword" };
+
+    it("should return a 401 error if either username or password are invalid", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send(badLoginData)
+        .end((error, response) => {
+          response.should.have.status(401);
+          done();
+        });
+    });
+
+    it("should return a 400 error if missing username or login", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send(missingLoginData)
+        .end((error, response) => {
+          response.should.have.status(400);
+          done();
+        });
+    });
   });
 
   describe("/GET cart", () => {
     let accessToken = "";
     let loginData = { username: "greenlion235", password: "waters" };
 
-    before("login user", (done) => {
+    beforeEach("login user", (done) => {
       chai
         .request(server)
         .post("/api/login")
@@ -148,8 +226,8 @@ describe("Sunglasses", () => {
         .set("access-token", "invalidToken")
         .end((error, response) => {
           response.should.have.status(401);
+          done();
         });
-      done();
     });
   });
 
@@ -171,7 +249,7 @@ describe("Sunglasses", () => {
       price: 100,
     };
 
-    before("login user", (done) => {
+    beforeEach("login user", (done) => {
       chai
         .request(server)
         .post("/api/login")
@@ -180,11 +258,6 @@ describe("Sunglasses", () => {
           accessToken = response.body;
           done();
         });
-    });
-
-    after("all tests are run reset access token", (done) => {
-      // How do you reset values - When it refreshes the tests break...
-      done();
     });
 
     it("should add item to cart", (done) => {
@@ -263,35 +336,63 @@ describe("Sunglasses", () => {
         .send(productOne)
         .end((error, response) => {
           response.should.have.status(401);
+          done();
         });
-      done();
     });
 
     it("should return a 401 error if no access token provided", (done) => {
       chai
         .request(server)
         .post("/api/me/cart")
-        .set("access-token", "invalidToken")
         .end((error, response) => {
           response.should.have.status(401);
+          done();
         });
-      done();
     });
   });
 
   describe("/DELETE delete item in cart", () => {
     let accessToken = "";
     let loginData = { username: "greenlion235", password: "waters" };
+    let productOne = {
+      id: "1",
+      categoryId: "1",
+      name: "Superglasses",
+      description: "The best glasses in the world",
+      price: 150,
+    };
+    let productTwo = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      description: "The best glasses in the world",
+      price: 100,
+    };
     let productIdToDelete = 1;
 
-    before("login user", (done) => {
+    beforeEach("login user", (done) => {
       chai
         .request(server)
         .post("/api/login")
         .send(loginData)
         .end((error, response) => {
           accessToken = response.body;
-          done();
+          chai
+            .request(server)
+            .post("/api/me/cart")
+            .set("access-token", accessToken)
+            .send(productOne)
+            .end((error, response) => {
+              chai
+                .request(server)
+                .post("/api/me/cart")
+                .set("access-token", accessToken)
+                .send(productTwo)
+                .end((error, response) => {
+                  response.should.have.status(200);
+                  done();
+                });
+            });
         });
     });
 
@@ -324,8 +425,8 @@ describe("Sunglasses", () => {
         .set("access-token", accessToken)
         .end((error, response) => {
           response.should.have.status(404);
+          done();
         });
-      done();
     });
 
     it("should return a 401 error if no access token provided", (done) => {
@@ -335,25 +436,54 @@ describe("Sunglasses", () => {
         .set("access-token", "invalidToken")
         .end((error, response) => {
           response.should.have.status(401);
+          done();
         });
-      done();
     });
   });
 
   describe("/POST update item in cart", () => {
     let accessToken = "";
-    let loginData = { username: "greenlion235", password: "waters" };
+    let loginData = { username: "yellowleopard753", password: "jonjon" };
+    let productOne = {
+      id: "1",
+      categoryId: "1",
+      name: "Superglasses",
+      description: "The best glasses in the world",
+      price: 150,
+    };
+    let productTwo = {
+      id: "2",
+      categoryId: "1",
+      name: "Black Sunglasses",
+      description: "The best glasses in the world",
+      price: 100,
+    };
     let productIdToUpdate = 2;
     let updatedProductQuantity = { quantity: 5 };
 
-    before("login user", (done) => {
+    beforeEach("login user", (done) => {
       chai
         .request(server)
         .post("/api/login")
         .send(loginData)
         .end((error, response) => {
           accessToken = response.body;
-          done();
+          chai
+            .request(server)
+            .post("/api/me/cart")
+            .set("access-token", accessToken)
+            .send(productOne)
+            .end((error, response) => {
+              chai
+                .request(server)
+                .post("/api/me/cart")
+                .set("access-token", accessToken)
+                .send(productTwo)
+                .end((error, response) => {
+                  response.should.have.status(200);
+                  done();
+                });
+            });
         });
     });
 
@@ -367,8 +497,9 @@ describe("Sunglasses", () => {
           response.should.have.status(200);
           response.body.should.be.an("array");
           response.body[0].should.be.an("object");
-          response.body.length.should.be.equal(1);
-          response.body[0].quantity.should.be.equal(5);
+          response.body.length.should.be.equal(2);
+          response.body[1].quantity.should.be.equal(5);
+          response.body[0].quantity.should.be.equal(1);
           response.body[0].should.have.keys(
             "id",
             "categoryId",
@@ -376,8 +507,8 @@ describe("Sunglasses", () => {
             "price",
             "quantity"
           );
+          done();
         });
-      done();
     });
 
     it("should return a 404 error if productId is not found in cart", (done) => {
@@ -387,8 +518,8 @@ describe("Sunglasses", () => {
         .set("access-token", accessToken)
         .end((error, response) => {
           response.should.have.status(404);
+          done();
         });
-      done();
     });
 
     it("should return a 401 error if no access token provided", (done) => {
@@ -398,8 +529,8 @@ describe("Sunglasses", () => {
         .set("access-token", "invalidToken")
         .end((error, response) => {
           response.should.have.status(401);
+          done();
         });
-      done();
     });
   });
 });
