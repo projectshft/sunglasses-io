@@ -47,12 +47,12 @@ let server = http
     console.log(`Server is listening on ${PORT}`);
   });
 
-myRouter.get("/brands", (req, res) => {
+myRouter.get("/api/brands", (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(state.brands));
 });
 
-myRouter.get("/brands/:id/products", (req, res) => {
+myRouter.get("/api/brands/:id/products", (req, res) => {
   const id = req.params.id;
 
   if (!state.brands.some((brand) => brand.id === id)) {
@@ -66,6 +66,11 @@ myRouter.get("/brands/:id/products", (req, res) => {
 
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(productsForBrand));
+});
+
+myRouter.get("/api/products", (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(state.products));
 });
 
 module.exports = server;

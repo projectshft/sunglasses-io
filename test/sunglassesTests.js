@@ -12,7 +12,7 @@ describe("Sunglasses.io", () => {
     it("should list all the brands in the store", (done) => {
       chai
         .request(server)
-        .get("/brands")
+        .get("/api/brands")
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -25,7 +25,7 @@ describe("Sunglasses.io", () => {
     it("should return a list of all products from a specific brand", (done) => {
       chai
         .request(server)
-        .get("/brands/1/products")
+        .get("/api/brands/1/products")
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -54,9 +54,22 @@ describe("Sunglasses.io", () => {
 
       chai
         .request(server)
-        .get(`/brands/${invalidBrandId()}/products`)
+        .get(`/api/brands/${invalidBrandId()}/products`)
         .end((err, res) => {
           res.should.have.status(404);
+          done();
+        });
+    });
+  });
+
+  describe("When requesting all products from the store", () => {
+    it("should return a list of all products from the store", (done) => {
+      chai
+        .request(server)
+        .get("/api/products")
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
           done();
         });
     });
