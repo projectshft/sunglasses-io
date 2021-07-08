@@ -15,6 +15,8 @@ const state = {
   accessTokens: [],
 };
 
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
 //Setup Initial State
 fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
   if (error) throw error;
@@ -113,5 +115,44 @@ myRouter.post("/api/login", (req, res) => {
     return res.end();
   }
 });
+
+myRouter.get("/api/me/cart", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+
+  if (!currentAccessToken) {
+    res.writeHead(401, "You must be logged in to view the cart");
+    return res.end();
+  }
+
+  let user = state.users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(user.cart));
+});
+
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+  var parsedUrl = require("url").parse(request.url, true);
+
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = state.accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == parsedUrl.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 module.exports = server;

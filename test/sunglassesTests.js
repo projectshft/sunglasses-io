@@ -124,7 +124,7 @@ describe("Sunglasses.io", () => {
       chai
         .request(server)
         .get("/api/me/cart")
-        .query("invalidToken")
+        .query({ accessToken: "invalidToken" })
         .end((err, res) => {
           res.should.have.status(401, "You must be logged in to view the cart");
           done();
@@ -135,7 +135,7 @@ describe("Sunglasses.io", () => {
       chai
         .request(server)
         .get("/api/me/cart")
-        .query(token)
+        .query({ accessToken: token })
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
