@@ -41,6 +41,11 @@ server.listen(PORT, () => {
   );
 });
 
+myRouter.get("/", function (request, response) {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(products));
+});
+
 myRouter.get("/v1/sunglasses", function (request, response) {
   //query params from query string
   const queryParams = queryString.parse(url.parse(request.url).query);
