@@ -73,6 +73,45 @@ myRouter.get("/api/products", (req, res) => {
   res.end(JSON.stringify(state.products));
 });
 
-myRouter.post("/api/login", (req, res) => {});
+myRouter.post("/api/login", (req, res) => {
+  if (req.body.username && req.body.password) {
+    let user = state.users.find((user) => {
+      return (
+        user.login.username == req.body.username &&
+        user.login.password == req.body.password
+      );
+    });
+    if (user) {
+      res.writeHead(200, { "Content-Type": "application/json" });
+
+      // We have a successful login, if we already have an existing access token, use that
+      let currentAccessToken = state.accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return res.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16),
+        };
+        state.accessTokens.push(newAccessToken);
+        return res.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      res.writeHead(401, "Invalid username or password");
+      return res.end();
+    }
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    res.writeHead(400, "Incorrectly formatted response");
+    return res.end();
+  }
+});
 
 module.exports = server;
