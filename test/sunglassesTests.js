@@ -74,4 +74,46 @@ describe("Sunglasses.io", () => {
         });
     });
   });
+
+  describe("When requesting to login", () => {
+    it("should return an error if login credentials are incorrect", (done) => {
+      fs.readFile("initial-data/users.json", "utf8", (error, data) => {
+        if (error) throw error;
+        let users = JSON.parse(data);
+        let username = users[0].login.username;
+        let password = users[0].login.password;
+
+        chai
+          .request(server)
+          .post(`/api/login`)
+          .set("content-type", "application/json")
+          .send({ username, password: password + password })
+          .end((err, res) => {
+            res.should.have.status(401, "Invalid username or password");
+            done();
+          });
+      });
+    });
+
+    it("should provide an access token if login credentials are valid", (done) => {
+      fs.readFile("initial-data/users.json", "utf8", (error, data) => {
+        if (error) throw error;
+        let users = JSON.parse(data);
+        let username = users[0].login.username;
+        let password = users[0].login.password;
+
+        chai
+          .request(server)
+          .post(`/api/login`)
+          .set("content-type", "application/json")
+          .send({ username, password })
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.a("string");
+            res.body.length.should.be.eql(16);
+            done();
+          });
+      });
+    });
+  });
 });

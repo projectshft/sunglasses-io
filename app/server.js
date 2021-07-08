@@ -73,4 +73,6 @@ myRouter.get("/api/products", (req, res) => {
   res.end(JSON.stringify(state.products));
 });
 
+myRouter.post("/api/login", (req, res) => {});
+
 module.exports = server;
