@@ -47,4 +47,9 @@ let server = http
     console.log(`Server is listening on ${PORT}`);
   });
 
+myRouter.get("/brands", (request, response) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(JSON.stringify(state.brands));
+});
+
 module.exports = server;
