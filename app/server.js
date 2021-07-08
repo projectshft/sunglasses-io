@@ -47,9 +47,25 @@ let server = http
     console.log(`Server is listening on ${PORT}`);
   });
 
-myRouter.get("/brands", (request, response) => {
-  response.writeHead(200, { "Content-Type": "application/json" });
-  response.end(JSON.stringify(state.brands));
+myRouter.get("/brands", (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(state.brands));
+});
+
+myRouter.get("/brands/:id/products", (req, res) => {
+  const id = req.params.id;
+
+  if (!state.brands.some((brand) => brand.id === id)) {
+    res.writeHead(404, "Brand not found");
+    res.end();
+  }
+
+  const productsForBrand = state.products.filter(
+    (product) => product.categoryId === id
+  );
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(productsForBrand));
 });
 
 module.exports = server;
