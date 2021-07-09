@@ -38,7 +38,7 @@ describe("Sunglasses", () => {
       let query = "?query=glasses";
       chai
         .request(server)
-        .get(`/v1/sunglasses${query}`)
+        .get(`/api/products${query}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -54,7 +54,7 @@ describe("Brands", () => {
     it("it should GET all brands", (done) => {
       chai
         .request(server)
-        .get("/v1/brands")
+        .get("/api/brands")
         .end((err, res) => {
           expect(res).to.have.status(200);
           res.body.should.be.an("array");
@@ -68,7 +68,7 @@ describe("Brands", () => {
       let categoryId = 1;
       chai
         .request(server)
-        .get(`/v1/brands/${categoryId}/sunglasses`)
+        .get(`/api/brands/${categoryId}/products`)
         .end((err, res) => {
           expect(res).to.have.status(200);
           res.body.should.be.an("array");

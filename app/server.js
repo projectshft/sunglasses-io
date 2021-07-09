@@ -16,17 +16,36 @@ let user = {};
 let users = [];
 let brands = [];
 
+const VALID_API_KEYS = [
+  "88312679-04c9-4351-85ce-3ed75293b449",
+  "1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7",
+];
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "Origin, X-Requested-With, Content-Type, Accept, X-Authentication",
+};
+
 //setup router
 let myRouter = Router();
 myRouter.use(bodyParser.json());
 
 const server = http.createServer(function (request, response) {
+  //preflight
+  if (request.method === "OPTIONS") {
+    response.writeHead(200, CORS_HEADERS);
+    return response.end();
+  }
+
   response.writeHead(200);
   myRouter(request, response, finalHandler(request, response));
 });
 
-server.listen(PORT, () => {
-  console.log("Server is running.");
+server.listen(PORT, (error) => {
+  if (error) {
+    return console.log("Error on server startup:.", error);
+  }
   //load data onto server
   products = JSON.parse(
     fs.readFileSync("./initial-data/products.json", "utf-8")
@@ -38,6 +57,7 @@ server.listen(PORT, () => {
   //load all categories
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
+  console.log("Server is running.");
   console.log(`${products.length} sunglasses loaded.`);
   console.log(`${users.length} users loaded.`);
   console.log(`${brands.length} brands loaded.`);
@@ -46,10 +66,11 @@ server.listen(PORT, () => {
 //sunglasses
 myRouter.get("/", function (request, response) {
   response.writeHead(200, { "Content-Type": "application/json" });
+
   return response.end(JSON.stringify(products));
 });
 
-myRouter.get("/v1/sunglasses", function (request, response) {
+myRouter.get("/api/products", function (request, response) {
   //query params from query string
   const queryParams = queryString.parse(url.parse(request.url).query);
   let productsToReturn = [];
@@ -68,12 +89,12 @@ myRouter.get("/v1/sunglasses", function (request, response) {
 });
 
 //brands
-myRouter.get("/v1/brands", function (request, response) {
+myRouter.get("/api/brands", function (request, response) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
 
-myRouter.get("/v1/brands/:categoryId/sunglasses", function (request, response) {
+myRouter.get("/api/brands/:categoryId/products", function (request, response) {
   let brandProducts = [];
 
   let brandProduct = products.filter((p) => {
