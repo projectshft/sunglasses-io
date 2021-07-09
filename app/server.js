@@ -177,6 +177,11 @@ myRouter.post("/api/me/cart", function (request, response) {
     return accessToken.token === request.headers.access_token;
   });
 
+  if (!token) {
+    response.writeHead(403, "Not authorized.");
+    response.end("You must be logged in to access cart.");
+  }
+
   let product = request.body;
 
   if (!product.price) {
@@ -194,6 +199,10 @@ myRouter.post("/api/me/cart", function (request, response) {
 });
 
 myRouter.post("/api/me/cart/:productId", function (request, response) {
+  let token = accessTokens.find((accessToken) => {
+    return accessToken.token === request.headers.access_token;
+  });
+
   let product = products.find((p) => {
     return p.id === request.params.productId;
   });
@@ -203,8 +212,11 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
     return response.end("No sunglasses with that Id found.");
   }
 
-  //if product
+  let user = users.find((user) => {
+    return token.username === user.login.username;
+  });
   user.cart.push(product);
+
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
 });

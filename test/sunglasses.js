@@ -130,6 +130,30 @@ describe("User cart", () => {
   });
 
   describe("/POST to user cart", () => {
+    it("should NOT POST sunglasses to cart if not logged in", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(403);
+          done();
+        });
+    });
+
     it("should POST sunglasses to cart", (done) => {
       let product = {
         id: "1",
@@ -174,6 +198,7 @@ describe("User cart", () => {
       chai
         .request(server)
         .post(`/api/me/cart/`)
+        .set("access_token", accessToken)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(400);
@@ -200,15 +225,11 @@ describe("User cart", () => {
       chai
         .request(server)
         .post(`/api/me/cart/${product.id}`)
+        .set("access_token", accessToken)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(200);
           res.body.should.be.an("array");
-          //res.body.should.have.property("categoryId");
-          //res.body.should.have.property("name");
-          //res.body.should.have.property("description");
-          //res.body.should.have.property("price");
-          //res.body.should.have.property("imageUrls");
           done();
         });
     });
@@ -232,6 +253,7 @@ describe("User cart", () => {
       chai
         .request(server)
         .post(`/api/me/cart/${product.id}`)
+        .set("access_token", accessToken)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(400);
