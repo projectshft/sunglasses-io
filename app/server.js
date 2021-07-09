@@ -114,13 +114,26 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
   }
 });
 
-//user--me
+//user
 myRouter.get("/api/me/cart", function (request, response) {
   if (!user) {
     response.writeHead(404, "No user found.");
     response.end();
   }
 
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user.cart));
+});
+
+myRouter.post("/api/me/cart", function (request, response) {
+  let product = request.body;
+
+  if (!product.price) {
+    response.writeHead(400);
+    return response.end("Product has no price.");
+  }
+
+  user.cart.push(product);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
 });

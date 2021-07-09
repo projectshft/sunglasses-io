@@ -93,7 +93,64 @@ describe("User", () => {
     });
   });
 
-  describe("/POST User", () => {
+  describe("/POST to user", () => {
+    it("should POST sunglasses to cart", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          res.body.should.be.an("array");
+          //res.body.should.have.property("categoryId");
+          //res.body.should.have.property("name");
+          //res.body.should.have.property("description");
+          //res.body.should.have.property("price");
+          //res.body.should.have.property("imageUrls");
+          done();
+        });
+    });
+  });
+
+  describe("/POST to user", () => {
+    it("should NOT POST sunglasses to cart if product has no price", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe("/POST to user", () => {
     it("it should POST sunglasses based on ID to user cart", (done) => {
       let product = {
         id: "1",
@@ -125,7 +182,7 @@ describe("User", () => {
     });
   });
 
-  describe("/POST User", () => {
+  describe("/POST to user", () => {
     it("it should NOT POST sunglasses if no ID is found", (done) => {
       let product = {
         id: "20",
