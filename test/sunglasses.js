@@ -1,7 +1,3 @@
-//let Product = require("../app/products");
-//let products = require("../app/products");
-//let productsToReturn = require("../app/products");
-
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../app/server");
@@ -10,6 +6,32 @@ const { expect } = require("chai");
 let should = chai.should();
 
 chai.use(chaiHttp);
+
+describe("LOGIN", () => {
+  describe("/POST USER", () => {
+    it("should NOT POST user login if no username or password", (done) => {
+      chai
+        .request(server)
+        .post(`/api/login`)
+        .send({ username: "", password: "" })
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
+
+    it("should POST user login if valid username and password", (done) => {
+      chai
+        .request(server)
+        .post(`/api/login`)
+        .send({ username: "yellowleopard753", password: "jonjon" })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+  });
+});
 
 describe("Sunglasses", () => {
   describe("/GET sunglasses", () => {

@@ -15,6 +15,10 @@ let products = [];
 let user = {};
 let users = [];
 let brands = [];
+const newAccessToken = uid(16);
+let accessTokens = [];
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 const VALID_API_KEYS = [
   "88312679-04c9-4351-85ce-3ed75293b449",
@@ -62,6 +66,73 @@ server.listen(PORT, (error) => {
   console.log(`${users.length} users loaded.`);
   console.log(`${brands.length} brands loaded.`);
 });
+
+//login
+myRouter.post("/api/login", (request, response) => {
+  // username and password in request
+  if (request.body.username && request.body.password) {
+    // See if there is a user that has that username and password
+    let user = users.find((user) => {
+      return (
+        user.login.username == request.body.username &&
+        user.login.password == request.body.password
+      );
+    });
+    if (user) {
+      response.writeHead(200, { "Content-Type": "application/json" });
+
+      // check for existing token
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16),
+        };
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  } else {
+    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+});
+
+// Helper method to process access token
+const getValidTokenFromRequest = function (request) {
+  const parsedUrl = require("url").parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == parsedUrl.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 //sunglasses
 myRouter.get("/", function (request, response) {
