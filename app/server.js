@@ -15,7 +15,7 @@ const PORT = 3001;
 let products = [];
 let user = {};
 let users = [];
-let categories = [];
+let brands = [];
 
 //setup router
 let myRouter = Router();
@@ -37,11 +37,10 @@ server.listen(PORT, () => {
   //current user will be user[0] initially
   user = users[0];
   //load all categories
-  categories = JSON.parse(
-    fs.readFileSync("./initial-data/brands.json", "utf-8")
-  );
+  brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 });
 
+//sunglasses
 myRouter.get("/", function (request, response) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(products));
@@ -63,6 +62,23 @@ myRouter.get("/v1/sunglasses", function (request, response) {
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsToReturn));
+});
+
+//brands
+myRouter.get("/v1/brands", function (request, response) {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(brands));
+});
+
+//user--me
+myRouter.get("/v1/me", function (request, response) {
+  if (!user) {
+    response.writeHead(404, "No user found.");
+    response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user));
 });
 
 module.exports = server;

@@ -1,6 +1,6 @@
 //let Product = require("../app/products");
-let products = require("../app/products");
-let productsToReturn = require("../app/products");
+//let products = require("../app/products");
+//let productsToReturn = require("../app/products");
 
 let chai = require("chai");
 let chaiHttp = require("chai-http");
@@ -18,7 +18,7 @@ describe("Sunglasses", () => {
         .request(server)
         .get("/")
         .end((err, res) => {
-          res.should.have.status(200);
+          expect(res).to.have.status(200);
           res.body.should.be.an("array");
           //res.body.length.should.be.eql(0);
           done();
@@ -30,9 +30,52 @@ describe("Sunglasses", () => {
   //i want a to test that the res is a 200 and returns an array but that's giving me errors
   //i think this just tests that the .get and .query give v1/sunglasses?=glasses
   describe("/GET searched sunglasses", () => {
-    it("it should GET sunglasses based on search", (done) => {
+    it("it should GET search query", (done) => {
       chai.request(server).get("v1/sunglasses").query({ query: "glasses" });
       done();
+    });
+    it("should get searched sunglasses", (done) => {
+      chai
+        .request(server)
+        .get("v1/sunglasses")
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          //res.body.length.should.be.eql(0);
+          done();
+        });
+    });
+  });
+});
+
+describe("Brands", () => {
+  describe("/GET Brands", () => {
+    it("it should GET all brands", (done) => {
+      chai
+        .request(server)
+        .get("/v1/brands")
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          res.body.should.be.an("array");
+          //res.body.length.should.be.eql(0);
+          done();
+        });
+    });
+  });
+});
+
+describe("User", () => {
+  describe("/GET User", () => {
+    it("it should GET current user", (done) => {
+      chai
+        .request(server)
+        .get("/v1/me")
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          res.body.should.be.an("object");
+          //res.body.length.should.be.eql(0);
+          done();
+        });
     });
   });
 });
