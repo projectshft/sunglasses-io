@@ -73,6 +73,10 @@ myRouter.post("/api/me/cart", (req, res) => {
   addItemToCart(req, res);
 });
 
+myRouter.delete("/api/me/cart/:productId", (req, res) => {
+  deleteItemFromCart(req, res);
+});
+
 // HELPER MEHTODS
 // Helper method to process access token
 var getValidTokenFromRequest = function (request) {
@@ -219,6 +223,33 @@ const addItemToCart = (req, res) => {
   //add the product to the users cart
   user.cart.push(product);
   res.writeHead(200, "Success: Product added to the user's cart");
+  res.end();
+};
+
+//Helper function to delete an item from the users cart
+const deleteItemFromCart = (req, res) => {
+  checkIfLoggedIn(req, res);
+  const productId = req.params.productId;
+
+  //return an error if the product Id doesn't match a product in the store
+  if (!state.products.find((p) => p.id === productId)) {
+    res.writeHead(400, "Invalid Request: No valid product ID provided");
+    return res.end();
+  }
+
+  //return an error if the product is not in the user's cart
+  const user = currentUser(req, res);
+  if (!user.cart.find((p) => p.id === productId)) {
+    res.writeHead(400, "Invalid Request: Product is not in cart");
+    return res.end();
+  }
+
+  //delete the product from the user's cart
+  user.cart = user.cart.filter((p) => p.id !== productId);
+  res.writeHead(
+    200,
+    "Success: Product successfully deleted from the user's cart"
+  );
   res.end();
 };
 

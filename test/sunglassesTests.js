@@ -266,21 +266,7 @@ describe("Sunglasses.io", () => {
         });
     });
 
-    it("should return an error if no product is provided", (done) => {
-      chai
-        .request(server)
-        .delete("/api/me/cart")
-        .query({ accessToken: token })
-        .end((err, res) => {
-          res.should.have.status(
-            400,
-            "Invalid Request: No valid product ID provided"
-          );
-          done();
-        });
-    });
-
-    it("should return an error if the product doesn't exist in the store", (done) => {
+    it("should return an error if the product ID doesn't exist in the store", (done) => {
       chai
         .request(server)
         .delete("/api/me/cart/12345")
@@ -297,7 +283,7 @@ describe("Sunglasses.io", () => {
     it("should return an error if the product is not in the user’s cart", (done) => {
       chai
         .request(server)
-        .delete("/api/me/cart/2")
+        .delete("/api/me/cart/3")
         .query({ accessToken: token })
         .end((err, res) => {
           res.should.have.status(
