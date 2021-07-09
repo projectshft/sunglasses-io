@@ -110,7 +110,7 @@ describe("User", () => {
 
       chai
         .request(server)
-        .post(`/api/me/${product.id}/cart`)
+        .post(`/api/me/cart/${product.id}`)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(200);
@@ -142,7 +142,7 @@ describe("User", () => {
 
       chai
         .request(server)
-        .post(`/api/me/${product.id}/cart`)
+        .post(`/api/me/cart/${product.id}`)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(400);

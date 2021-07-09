@@ -125,9 +125,9 @@ myRouter.get("/api/me/cart", function (request, response) {
   return response.end(JSON.stringify(user.cart));
 });
 
-myRouter.post("/api/me/:id/cart", function (request, response) {
+myRouter.post("/api/me/cart/:productId", function (request, response) {
   let product = products.find((p) => {
-    return p.id === request.params.id;
+    return p.id === request.params.productId;
   });
 
   if (!product) {
