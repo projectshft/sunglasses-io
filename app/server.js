@@ -114,18 +114,29 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
   }
 });
 
-// /v1/login
-//sets user
-//will need token and possible api key?
-//address CORS
-
 //user--me
-myRouter.get("/v1/me", function (request, response) {
+myRouter.get("/api/me/cart", function (request, response) {
   if (!user) {
     response.writeHead(404, "No user found.");
     response.end();
   }
 
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user));
+});
+
+myRouter.post("/api/me/:id/cart", function (request, response) {
+  let product = products.find((p) => {
+    return p.id === request.params.id;
+  });
+
+  if (!product) {
+    response.writeHead(400, "No product Id found.");
+    return response.end("No sunglasses with that Id found.");
+  }
+
+  //if product
+  user.cart.push(product);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user));
 });
