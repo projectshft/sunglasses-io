@@ -245,10 +245,8 @@ describe("Sunglasses.io", () => {
         .set("content-type", "application/json")
         .send(product)
         .end((err, res) => {
-          res.should.have.status(
-            200,
-            "Success: Product added to the user's cart"
-          );
+          res.should.have.status(200);
+          res.body.should.be.an("array");
           done();
         });
     });
@@ -300,10 +298,8 @@ describe("Sunglasses.io", () => {
         .delete("/api/me/cart/1")
         .query({ accessToken: token })
         .end((err, res) => {
-          res.should.have.status(
-            200,
-            "Success: Product successfully deleted from the user's cart"
-          );
+          res.should.have.status(200);
+          res.body.should.be.an("array");
           done();
         });
     });

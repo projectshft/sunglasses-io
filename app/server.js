@@ -229,8 +229,8 @@ const addItemToCart = (req, res) => {
   let cartItem = { product, quantity: 1 };
   product.quantityInCart = 1;
   user.cart.push(cartItem);
-  res.writeHead(200, "Success: Product added to the user's cart");
-  res.end();
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(user.cart));
 };
 
 //Helper method to delete an item from the users cart
@@ -253,11 +253,8 @@ const deleteItemFromCart = (req, res) => {
 
   //delete the product from the user's cart
   user.cart = user.cart.filter((p) => p.id !== productId);
-  res.writeHead(
-    200,
-    "Success: Product successfully deleted from the user's cart"
-  );
-  res.end();
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(user.cart));
 };
 
 //Helper method to update the quantity of an item in the user's cart
