@@ -122,7 +122,7 @@ myRouter.get("/api/me/cart", function (request, response) {
   }
 
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(user));
+  return response.end(JSON.stringify(user.cart));
 });
 
 myRouter.post("/api/me/:id/cart", function (request, response) {
@@ -138,7 +138,27 @@ myRouter.post("/api/me/:id/cart", function (request, response) {
   //if product
   user.cart.push(product);
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(user));
+  return response.end(JSON.stringify(user.cart));
+});
+
+myRouter.delete("/api/me/cart/:productId", function (request, response) {
+  let cart = user.cart;
+
+  let productToRemove = cart.findIndex(
+    (product) => product.id === request.params.productId
+  );
+
+  cart.splice(productToRemove, 1);
+
+  if (productToRemove === -1) {
+    response.writeHead(400, "No product Id found.");
+    return response.end("No sunglasses with that Id found in your cart.");
+  }
+
+  //if productsToKeep
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(cart));
 });
 
 module.exports = server;

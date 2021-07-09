@@ -86,7 +86,7 @@ describe("User", () => {
         .get("/api/me/cart")
         .end((err, res) => {
           expect(res).to.have.status(200);
-          res.body.should.be.an("object");
+          res.body.should.be.an("array");
           //res.body.length.should.be.eql(0);
           done();
         });
@@ -114,8 +114,7 @@ describe("User", () => {
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(200);
-          res.body.cart.should.be.an("array");
-          //res.body.should.have.property("id");
+          res.body.should.be.an("array");
           //res.body.should.have.property("categoryId");
           //res.body.should.have.property("name");
           //res.body.should.have.property("description");
@@ -144,6 +143,57 @@ describe("User", () => {
       chai
         .request(server)
         .post(`/api/me/${product.id}/cart`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
+  });
+
+  describe("/DELETE User item from cart", () => {
+    it("it should DELETE user sunglasses based on ID", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${product.id}`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+  });
+  describe("/NOT DELETE User item from cart", () => {
+    it("it should NOT DELETE user sunglasses if ID not present", (done) => {
+      let product = {
+        id: "20",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${product.id}`)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(400);
