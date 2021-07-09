@@ -130,7 +130,7 @@ describe("User cart", () => {
   });
 
   describe("/POST to user cart", () => {
-    it("should NOT POST sunglasses to cart if not logged in", (done) => {
+    it("should NOT POST product to cart if not logged in", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -154,7 +154,7 @@ describe("User cart", () => {
         });
     });
 
-    it("should POST sunglasses to cart", (done) => {
+    it("should POST product to cart", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -207,8 +207,32 @@ describe("User cart", () => {
     });
   });
 
-  describe("/POST to user", () => {
-    it("it should POST sunglasses based on ID to user cart", (done) => {
+  describe("/POST product with ID to user cart", () => {
+    it("should NOT POST product to cart if not logged in", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(403);
+          done();
+        });
+    });
+
+    it("it should POST product to cart if ID present", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -236,7 +260,7 @@ describe("User cart", () => {
   });
 
   describe("/POST to user", () => {
-    it("it should NOT POST sunglasses if no ID is found", (done) => {
+    it("it should NOT POST product if no ID present", (done) => {
       let product = {
         id: "20",
         categoryId: "1",
