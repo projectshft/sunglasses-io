@@ -7,7 +7,6 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 const { report } = require("process");
-//const Product = require("./products");
 
 const PORT = 3001;
 
@@ -38,6 +37,10 @@ server.listen(PORT, () => {
   user = users[0];
   //load all categories
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
+
+  console.log(`${products.length} sunglasses loaded.`);
+  console.log(`${users.length} users loaded.`);
+  console.log(`${brands.length} brands loaded.`);
 });
 
 //sunglasses
@@ -89,6 +92,11 @@ myRouter.get("/v1/brands/:categoryId/sunglasses", function (request, response) {
     response.end(JSON.stringify(brandProducts));
   }
 });
+
+// /v1/login
+//sets user
+//will need token and possible api key?
+//address CORS
 
 //user--me
 myRouter.get("/v1/me", function (request, response) {
