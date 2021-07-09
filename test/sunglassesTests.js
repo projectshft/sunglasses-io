@@ -144,7 +144,7 @@ describe("Sunglasses.io", () => {
     });
   });
 
-  describe("When adding an itm to the user's cart", () => {
+  describe("When adding an item to the user's cart", () => {
     it("should return an error if the user is not logged in", (done) => {
       chai
         .request(server)
@@ -162,7 +162,10 @@ describe("Sunglasses.io", () => {
         .post("/api/me/cart")
         .query({ accessToken: token })
         .end((err, res) => {
-          res.should.have.status(400, "Invalid Request: No product provided");
+          res.should.have.status(
+            400,
+            "Invalid Request: No valid product provided"
+          );
           done();
         });
     });
@@ -186,7 +189,7 @@ describe("Sunglasses.io", () => {
         .end((err, res) => {
           res.should.have.status(
             400,
-            "Invalid Request: Invalid product provided"
+            "Invalid Request: No valid product provided"
           );
           done();
         });

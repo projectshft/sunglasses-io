@@ -190,7 +190,7 @@ const getAllProducts = (req, res) => {
 //Helper method to get the users cart
 const getCart = (req, res) => {
   checkIfLoggedIn(req, res);
-  let user = currentUser(req);
+  let user = currentUser(req, res);
 
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(user.cart));
@@ -199,10 +199,27 @@ const getCart = (req, res) => {
 //Helper method to add an item to the users cart
 const addItemToCart = (req, res) => {
   checkIfLoggedIn(req, res);
-  if (!req.body.id) {
-    res.writeHead(400, "Invalid Request: No product provided");
+
+  let product = req.body;
+  //return an error if there is no product match in the store
+  if (
+    !state.products.find((p) => JSON.stringify(p) === JSON.stringify(product))
+  ) {
+    res.writeHead(400, "Invalid Request: No valid product provided");
     return res.end();
   }
+
+  //return an error if the product is already in the users cart
+  const user = currentUser(req, res);
+  if (user.cart.find((p) => JSON.stringify(p) === JSON.stringify(product))) {
+    res.writeHead(400, "Invalid Request: Product already in cart");
+    return res.end();
+  }
+
+  //add the product to the users cart
+  user.cart.push(product);
+  res.writeHead(200, "Success: Product added to the user's cart");
+  res.end();
 };
 
 module.exports = server;
