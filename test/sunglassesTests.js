@@ -226,11 +226,11 @@ describe("Sunglasses.io", () => {
 
     it("should add the product to the user’s cart", (done) => {
       let product = {
-        id: "2",
-        categoryId: "1",
-        name: "Black Sunglasses",
-        description: "The best glasses in the world",
-        price: 100,
+        id: "10",
+        categoryId: "5",
+        name: "Peanut Butter",
+        description: "The stickiest glasses in the world",
+        price: 103,
         imageUrls: [
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
