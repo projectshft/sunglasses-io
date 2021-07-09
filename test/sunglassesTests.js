@@ -253,4 +253,73 @@ describe("Sunglasses.io", () => {
         });
     });
   });
+
+  describe("When deleting an item from the user's cart", () => {
+    it("should return an error if the user is not logged in", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart/1")
+        .query({ accessToken: "invalidToken" })
+        .end((err, res) => {
+          res.should.have.status(401, "You must be logged in to view the cart");
+          done();
+        });
+    });
+
+    it("should return an error if no product is provided", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: No valid product ID provided"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the product doesn't exist in the store", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart/12345")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: No valid product ID provided"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the product is not in the user’s cart", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart/2")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Product is not in cart"
+          );
+          done();
+        });
+    });
+
+    it("should delete the product from the user’s cart", (done) => {
+      chai
+        .request(server)
+        .delete("/api/me/cart/1")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            200,
+            "Success: Product successfully deleted from the user's cart"
+          );
+          done();
+        });
+    });
+  });
 });
