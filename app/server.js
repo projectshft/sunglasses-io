@@ -101,12 +101,12 @@ myRouter.post("/api/login", (request, response) => {
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
-      // When a login fails, tell the client in a generic way that either the username or password was wrong
+      // incorrect password or username
       response.writeHead(401, "Invalid username or password");
       return response.end();
     }
   } else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+    // incorrect formatting
     response.writeHead(400, "Incorrectly formatted response");
     return response.end();
   }

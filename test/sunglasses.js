@@ -8,7 +8,7 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("LOGIN", () => {
-  describe("/POST USER", () => {
+  describe("/POST login", () => {
     it("should NOT POST user login if no username or password", (done) => {
       chai
         .request(server)
@@ -20,6 +20,17 @@ describe("LOGIN", () => {
         });
     });
 
+    it("should NOT POST user login if username or password is incorrect", (done) => {
+      chai
+        .request(server)
+        .post(`/api/login`)
+        .send({ username: "yellowleopard753", password: "123" })
+        .end((err, res) => {
+          expect(res).to.have.status(401);
+          done();
+        });
+    });
+
     it("should POST user login if valid username and password", (done) => {
       chai
         .request(server)
@@ -27,6 +38,7 @@ describe("LOGIN", () => {
         .send({ username: "yellowleopard753", password: "jonjon" })
         .end((err, res) => {
           expect(res).to.have.status(200);
+          expect(res.body).to.be.a("string");
           done();
         });
     });
@@ -115,7 +127,7 @@ describe("User", () => {
     });
   });
 
-  describe("/POST to user", () => {
+  describe("/POST to user cart", () => {
     it("should POST sunglasses to cart", (done) => {
       let product = {
         id: "1",
