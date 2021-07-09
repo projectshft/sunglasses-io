@@ -308,4 +308,120 @@ describe("Sunglasses.io", () => {
         });
     });
   });
+
+  describe("When updating the quantity of an item in the user's cart", () => {
+    it("should return an error if the user is not logged in", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .query({ accessToken: "invalidToken" })
+        .end((err, res) => {
+          res.should.have.status(401, "You must be logged in to view the cart");
+          done();
+        });
+    });
+
+    it("should return an error if the product ID doesn't exist in the store", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/12345")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: No valid product ID provided"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the product is not in the user’s cart", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/3")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Product is not in cart"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the quantity is not provided", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Quantity was not provided"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the quantity provided is not a number", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send({ quantity: "abc" })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Quantity provided is not a number"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the quantity provided is less than 0", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send({ quantity: -1 })
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Quantity provided is less than 0"
+          );
+          done();
+        });
+    });
+
+    it("should delete the item in the cart if the quantity is changed to 0", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send({ quantity: 0 })
+        .end((err, res) => {
+          res.should.have.status(
+            200,
+            "Success: Quantity changed to 0 and item deleted from cart"
+          );
+          done();
+        });
+    });
+
+    it("should update the quantity of the product in the user's cart", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart/1")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send(5)
+        .end((err, res) => {
+          res.should.have.status(200, "Success: Quantity of product changed");
+          done();
+        });
+    });
+  });
 });

@@ -204,7 +204,7 @@ const getCart = (req, res) => {
 const addItemToCart = (req, res) => {
   checkIfLoggedIn(req, res);
 
-  let product = req.body;
+  let product = { ...req.body };
   //return an error if there is no product match in the store
   if (
     !state.products.find((p) => JSON.stringify(p) === JSON.stringify(product))
@@ -220,8 +220,10 @@ const addItemToCart = (req, res) => {
     return res.end();
   }
 
-  //add the product to the users cart
-  user.cart.push(product);
+  //add the product to the users cart with a quantityInCart property
+  let cartItem = { product, quantity: 1 };
+  product.quantityInCart = 1;
+  user.cart.push(cartItem);
   res.writeHead(200, "Success: Product added to the user's cart");
   res.end();
 };
