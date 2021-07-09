@@ -143,4 +143,17 @@ describe("Sunglasses.io", () => {
         });
     });
   });
+
+  describe("When adding an itm to the user's cart", () => {
+    it("should return an error if the user is not logged in", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({ accessToken: "invalidToken" })
+        .end((err, res) => {
+          res.should.have.status(401, "You must be logged in to view the cart");
+          done();
+        });
+    });
+  });
 });

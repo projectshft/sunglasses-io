@@ -50,32 +50,74 @@ let server = http
   });
 
 myRouter.get("/api/brands", (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(state.brands));
+  getBrands(req, res);
 });
 
 myRouter.get("/api/brands/:id/products", (req, res) => {
-  const id = req.params.id;
-
-  if (!state.brands.some((brand) => brand.id === id)) {
-    res.writeHead(404, "Brand not found");
-    res.end();
-  }
-
-  const productsForBrand = state.products.filter(
-    (product) => product.categoryId === id
-  );
-
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(productsForBrand));
+  getProductsForABrand(req, res);
 });
 
 myRouter.get("/api/products", (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(state.products));
+  getAllProducts(req, res);
 });
 
 myRouter.post("/api/login", (req, res) => {
+  login(req, res);
+});
+
+myRouter.get("/api/me/cart", (req, res) => {
+  getCart(req, res);
+});
+
+myRouter.post("/api/me/cart", (req, res) => {
+  addItemToCart(req, res);
+});
+
+// HELPER MEHTODS
+// Helper method to process access token
+var getValidTokenFromRequest = function (request) {
+  var parsedUrl = require("url").parse(request.url, true);
+
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = state.accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == parsedUrl.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+//Helper method to check if user is logged in
+const checkIfLoggedIn = (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+
+  if (!currentAccessToken) {
+    res.writeHead(401, "You must be logged in to view the cart");
+    return res.end();
+  }
+};
+
+//Helper method to find current user
+const currentUser = (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+
+  return state.users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
+};
+
+//Helper method to attempt login
+const login = (req, res) => {
   if (req.body.username && req.body.password) {
     let user = state.users.find((user) => {
       return (
@@ -114,45 +156,47 @@ myRouter.post("/api/login", (req, res) => {
     res.writeHead(400, "Incorrectly formatted response");
     return res.end();
   }
-});
+};
 
-myRouter.get("/api/me/cart", (req, res) => {
-  let currentAccessToken = getValidTokenFromRequest(req);
+//Helper method to get brands
+const getBrands = (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(state.brands));
+};
 
-  if (!currentAccessToken) {
-    res.writeHead(401, "You must be logged in to view the cart");
-    return res.end();
+//Helper method to get products for a brand
+const getProductsForABrand = (req, res) => {
+  const id = req.params.id;
+
+  if (!state.brands.some((brand) => brand.id === id)) {
+    res.writeHead(404, "Brand not found");
+    res.end();
   }
 
-  let user = state.users.find((user) => {
-    return user.login.username == currentAccessToken.username;
-  });
+  const productsForBrand = state.products.filter(
+    (product) => product.categoryId === id
+  );
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(productsForBrand));
+};
+
+//Helper method to get all products from the store
+const getAllProducts = (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(state.products));
+};
+
+//Helper method to get the users cart
+const getCart = (req, res) => {
+  checkIfLoggedIn(req, res);
+  let user = currentUser(req);
 
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(user.cart));
-});
-
-// Helper method to process access token
-var getValidTokenFromRequest = function (request) {
-  var parsedUrl = require("url").parse(request.url, true);
-
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure it's valid and not expired
-    let currentAccessToken = state.accessTokens.find((accessToken) => {
-      return (
-        accessToken.token == parsedUrl.query.accessToken &&
-        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
-      );
-    });
-
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
 };
+
+//Helper method to add an item to the users cart
+const addItemToCart = (req, res) => {};
 
 module.exports = server;
