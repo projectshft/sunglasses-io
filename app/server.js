@@ -70,6 +70,26 @@ myRouter.get("/v1/brands", function (request, response) {
   return response.end(JSON.stringify(brands));
 });
 
+myRouter.get("/v1/brands/:categoryId/sunglasses", function (request, response) {
+  let brandProducts = [];
+
+  let brandProduct = products.filter((p) => {
+    return p.categoryId === request.params.categoryId;
+  });
+
+  if (brandProduct !== undefined) {
+    brandProducts.push(brandProduct);
+  }
+
+  if (brandProducts.length === 0) {
+    response.writeHead(404, "No sunglasses brand found.");
+    response.end();
+  } else {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(brandProducts));
+  }
+});
+
 //user--me
 myRouter.get("/v1/me", function (request, response) {
   if (!user) {

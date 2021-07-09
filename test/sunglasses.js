@@ -35,9 +35,10 @@ describe("Sunglasses", () => {
       done();
     });
     it("should get searched sunglasses", (done) => {
+      let query = "?query=glasses";
       chai
         .request(server)
-        .get("v1/sunglasses")
+        .get(`/v1/sunglasses${query}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -58,6 +59,19 @@ describe("Brands", () => {
           expect(res).to.have.status(200);
           res.body.should.be.an("array");
           //res.body.length.should.be.eql(0);
+          done();
+        });
+    });
+  });
+  describe("/GET Brands", () => {
+    it("it should GET sunglasses based on brand", (done) => {
+      let categoryId = 1;
+      chai
+        .request(server)
+        .get(`/v1/brands/${categoryId}/sunglasses`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          res.body.should.be.an("array");
           done();
         });
     });
