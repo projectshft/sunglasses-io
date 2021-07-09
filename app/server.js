@@ -210,9 +210,7 @@ const addItemToCart = (req, res) => {
 
   let product = { ...req.body };
   //return an error if there is no product match in the store
-  if (
-    !state.products.find((p) => JSON.stringify(p) === JSON.stringify(product))
-  ) {
+  if (!state.products.find((p) => p.id === product.id)) {
     res.writeHead(400, "Invalid Request: No valid product provided");
     return res.end();
   }
