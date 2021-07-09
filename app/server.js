@@ -20,28 +20,11 @@ let accessTokens = [];
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-const VALID_API_KEYS = [
-  "88312679-04c9-4351-85ce-3ed75293b449",
-  "1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7",
-];
-
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "Origin, X-Requested-With, Content-Type, Accept, X-Authentication",
-};
-
 //setup router
 let myRouter = Router();
 myRouter.use(bodyParser.json());
 
 const server = http.createServer(function (request, response) {
-  //preflight
-  if (request.method === "OPTIONS") {
-    response.writeHead(200, CORS_HEADERS);
-    return response.end();
-  }
-
   response.writeHead(200);
   myRouter(request, response, finalHandler(request, response));
 });
@@ -57,7 +40,7 @@ server.listen(PORT, (error) => {
   //load all users
   users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
   //current user will be user[0] initially
-  user = users[0];
+  //user = users[0];
   //load all categories
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
@@ -71,14 +54,15 @@ server.listen(PORT, (error) => {
 myRouter.post("/api/login", (request, response) => {
   // username and password in request
   if (request.body.username && request.body.password) {
-    // See if there is a user that has that username and password
-    let user = users.find((user) => {
+    // See if there is a user in users that has that username and password
+    let currentUser = users.find((user) => {
       return (
         user.login.username == request.body.username &&
         user.login.password == request.body.password
       );
     });
-    if (user) {
+    if (currentUser) {
+      user = currentUser;
       response.writeHead(200, { "Content-Type": "application/json" });
 
       // check for existing token
@@ -91,7 +75,8 @@ myRouter.post("/api/login", (request, response) => {
         currentAccessToken.lastUpdated = new Date();
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // new token with the user value and a "random" token
+        // new token with the user value and token
+        user = currentUser;
         let newAccessToken = {
           username: user.login.username,
           lastUpdated: new Date(),
@@ -112,35 +97,18 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
-// Helper method to process access token
-const getValidTokenFromRequest = function (request) {
-  const parsedUrl = require("url").parse(request.url, true);
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure it's valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return (
-        accessToken.token == parsedUrl.query.accessToken &&
-        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
-      );
-    });
+//token helper methods
+const findToken = (request) => {
+  return accessTokens.find(
+    (token) => token.token === request.headers.access_token
+  );
+};
 
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
+const findCurrentUser = (token) => {
+  return users.find((user) => token.username === user.login.username);
 };
 
 //sunglasses
-myRouter.get("/", function (request, response) {
-  response.writeHead(200, { "Content-Type": "application/json" });
-
-  return response.end(JSON.stringify(products));
-});
-
 myRouter.get("/api/products", function (request, response) {
   //query params from query string
   const queryParams = queryString.parse(url.parse(request.url).query);
@@ -187,16 +155,28 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
 
 //user
 myRouter.get("/api/me/cart", function (request, response) {
-  if (!user) {
-    response.writeHead(404, "No user found.");
-    response.end();
+  let token = accessTokens.find((accessToken) => {
+    return accessToken.token === request.headers.access_token;
+  });
+
+  if (!token) {
+    response.writeHead(403, "Not authorized.");
+    response.end("You must be logged in to access cart.");
   }
+
+  let user = users.find((user) => {
+    return token.username === user.login.username;
+  });
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
 });
 
 myRouter.post("/api/me/cart", function (request, response) {
+  let token = accessTokens.find((accessToken) => {
+    return accessToken.token === request.headers.access_token;
+  });
+
   let product = request.body;
 
   if (!product.price) {
@@ -204,7 +184,11 @@ myRouter.post("/api/me/cart", function (request, response) {
     return response.end("Product has no price.");
   }
 
+  let user = users.find((user) => {
+    return token.username === user.login.username;
+  });
   user.cart.push(product);
+
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
 });

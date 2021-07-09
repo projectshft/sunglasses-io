@@ -46,23 +46,6 @@ describe("LOGIN", () => {
 });
 
 describe("Sunglasses", () => {
-  describe("/GET sunglasses", () => {
-    it("it should GET all sunglasses", (done) => {
-      chai
-        .request(server)
-        .get("/")
-        .end((err, res) => {
-          expect(res).to.have.status(200);
-          res.body.should.be.an("array");
-          //res.body.length.should.be.eql(0);
-          done();
-        });
-    });
-  });
-
-  //getting a green check here but i don't think this is testing what i want
-  //i want a to test that the res is a 200 and returns an array but that's giving me errors
-  //i think this just tests that the .get and .query give v1/sunglasses?=glasses
   describe("/GET searched sunglasses", () => {
     it("it should GET search query", (done) => {
       chai.request(server).get("v1/sunglasses").query({ query: "glasses" });
@@ -112,16 +95,35 @@ describe("Brands", () => {
   });
 });
 
-describe("User", () => {
-  describe("/GET User", () => {
-    it("it should GET current user", (done) => {
+describe("User cart", () => {
+  let accessToken = "";
+  before("login", () => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({ username: "yellowleopard753", password: "jonjon" })
+      .end((err, res) => {
+        accessToken = res.body;
+      });
+  });
+
+  describe("/GET user cart", () => {
+    it("NOT allow user to see cart if not logged in", (done) => {
       chai
         .request(server)
         .get("/api/me/cart")
         .end((err, res) => {
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(403);
+          done();
+        });
+    });
+    it("allows logged in user to see cart", (done) => {
+      chai
+        .request(server)
+        .get("/api/me/cart")
+        .set("access_token", accessToken)
+        .end((err, res) => {
           res.body.should.be.an("array");
-          //res.body.length.should.be.eql(0);
           done();
         });
     });
@@ -145,15 +147,11 @@ describe("User", () => {
       chai
         .request(server)
         .post(`/api/me/cart/`)
+        .set("access_token", accessToken)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(200);
           res.body.should.be.an("array");
-          //res.body.should.have.property("categoryId");
-          //res.body.should.have.property("name");
-          //res.body.should.have.property("description");
-          //res.body.should.have.property("price");
-          //res.body.should.have.property("imageUrls");
           done();
         });
     });
