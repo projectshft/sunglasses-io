@@ -155,8 +155,6 @@ myRouter.delete("/api/me/cart/:productId", function (request, response) {
     return response.end("No sunglasses with that Id found in your cart.");
   }
 
-  //if productsToKeep
-
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(cart));
 });
