@@ -5,6 +5,7 @@ var queryString = require("querystring");
 var Router = require("router");
 var bodyParser = require("body-parser");
 var uid = require("rand-token").uid;
+const { RSA_NO_PADDING } = require("constants");
 
 const PORT = 3001;
 
@@ -75,6 +76,10 @@ myRouter.post("/api/me/cart", (req, res) => {
 
 myRouter.delete("/api/me/cart/:productId", (req, res) => {
   deleteItemFromCart(req, res);
+});
+
+myRouter.post("/api/me/cart/:productId", (req, res) => {
+  updateProductQuantityInCart(req, res);
 });
 
 // HELPER MEHTODS
@@ -228,7 +233,7 @@ const addItemToCart = (req, res) => {
   res.end();
 };
 
-//Helper function to delete an item from the users cart
+//Helper method to delete an item from the users cart
 const deleteItemFromCart = (req, res) => {
   checkIfLoggedIn(req, res);
   const productId = req.params.productId;
@@ -253,6 +258,55 @@ const deleteItemFromCart = (req, res) => {
     "Success: Product successfully deleted from the user's cart"
   );
   res.end();
+};
+
+//Helper method to update the quantity of an item in the user's cart
+const updateProductQuantityInCart = (req, res) => {
+  checkIfLoggedIn(req, res);
+  const productId = req.params.productId;
+
+  //return an error if the product Id doesn't match a product in the store
+  if (!state.products.find((p) => p.id === productId)) {
+    res.writeHead(400, "Invalid Request: No valid product ID provided");
+    return res.end();
+  }
+
+  //return an error if the product is not in the user's cart
+  const user = currentUser(req, res);
+  if (!user.cart.find((p) => p.id === productId)) {
+    res.writeHead(400, "Invalid Request: Product is not in cart");
+    return res.end();
+  }
+
+  const newQuantityInCart = req.body.quantity;
+
+  //return an error if quantity is not an integer
+  if (!Number.isInteger(newQuantityInCart)) {
+    res.writeHead(400, "Invalid Request: Quantity provided is not an integer");
+    return res.end();
+  }
+
+  //return an error if quantity is less than 0
+  if (newQuantityInCart < 0) {
+    res.writeHead(400, "Invalid Request: Quantity provided is less than 0");
+    return res.end();
+  }
+
+  //if new quantity is 0, delete the item from the cart
+  if (newQuantityInCart === 0) {
+    user.cart = user.cart.filter((p) => p.id !== productId);
+    res.writeHead(
+      200,
+      "Success: Quantity changed to 0 and item deleted from cart"
+    );
+    return res.end();
+  }
+
+  //update the quantity of the product in the user's cart
+  const product = user.cart.find((p) => p.id === productId);
+  product.quantityInCart = newQuantityInCart;
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(user.cart));
 };
 
 module.exports = server;

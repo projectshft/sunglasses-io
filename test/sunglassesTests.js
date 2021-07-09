@@ -283,7 +283,7 @@ describe("Sunglasses.io", () => {
     it("should return an error if the product is not in the user’s cart", (done) => {
       chai
         .request(server)
-        .delete("/api/me/cart/3")
+        .delete("/api/me/cart/4")
         .query({ accessToken: token })
         .end((err, res) => {
           res.should.have.status(
@@ -338,7 +338,7 @@ describe("Sunglasses.io", () => {
     it("should return an error if the product is not in the user’s cart", (done) => {
       chai
         .request(server)
-        .post("/api/me/cart/3")
+        .post("/api/me/cart/4")
         .query({ accessToken: token })
         .end((err, res) => {
           res.should.have.status(
@@ -349,21 +349,7 @@ describe("Sunglasses.io", () => {
         });
     });
 
-    it("should return an error if the quantity is not provided", (done) => {
-      chai
-        .request(server)
-        .post("/api/me/cart/1")
-        .query({ accessToken: token })
-        .end((err, res) => {
-          res.should.have.status(
-            400,
-            "Invalid Request: Quantity was not provided"
-          );
-          done();
-        });
-    });
-
-    it("should return an error if the quantity provided is not a number", (done) => {
+    it("should return an error if the quantity provided is not an integer", (done) => {
       chai
         .request(server)
         .post("/api/me/cart/1")
@@ -373,7 +359,7 @@ describe("Sunglasses.io", () => {
         .end((err, res) => {
           res.should.have.status(
             400,
-            "Invalid Request: Quantity provided is not a number"
+            "Invalid Request: Quantity provided is not an integer"
           );
           done();
         });
@@ -398,7 +384,7 @@ describe("Sunglasses.io", () => {
     it("should delete the item in the cart if the quantity is changed to 0", (done) => {
       chai
         .request(server)
-        .post("/api/me/cart/1")
+        .post("/api/me/cart/2")
         .query({ accessToken: token })
         .set("content-type", "application/json")
         .send({ quantity: 0 })
@@ -414,12 +400,13 @@ describe("Sunglasses.io", () => {
     it("should update the quantity of the product in the user's cart", (done) => {
       chai
         .request(server)
-        .post("/api/me/cart/1")
+        .post("/api/me/cart/3")
         .query({ accessToken: token })
         .set("content-type", "application/json")
-        .send(5)
+        .send({ quantity: 5 })
         .end((err, res) => {
-          res.should.have.status(200, "Success: Quantity of product changed");
+          res.should.have.status(200);
+          res.body.should.be.an("array");
           done();
         });
     });
