@@ -81,8 +81,8 @@ myRouter.post("/api/me/cart/:productId", (req, res) => {
   updateProductQuantityInCart(req, res);
 });
 
-// HELPER MEHTODS
-// Helper method to process access token
+// HELPER FUNCTIONS
+// Helper function to process access token
 var getValidTokenFromRequest = function (request) {
   var parsedUrl = require("url").parse(request.url, true);
 
@@ -105,7 +105,7 @@ var getValidTokenFromRequest = function (request) {
   }
 };
 
-//Helper method to check if user is logged in
+//Helper function to check if user is logged in
 const checkIfLoggedIn = (req, res) => {
   let currentAccessToken = getValidTokenFromRequest(req);
 
@@ -115,7 +115,7 @@ const checkIfLoggedIn = (req, res) => {
   }
 };
 
-//Helper method to find current user
+//Helper function to find current user
 const currentUser = (req, res) => {
   let currentAccessToken = getValidTokenFromRequest(req);
 
@@ -124,7 +124,7 @@ const currentUser = (req, res) => {
   });
 };
 
-//Helper method to attempt login
+//Helper function to attempt login
 const login = (req, res) => {
   if (req.body.username && req.body.password) {
     let user = state.users.find((user) => {
@@ -166,13 +166,13 @@ const login = (req, res) => {
   }
 };
 
-//Helper method to get brands
+//Helper function to get brands
 const getBrands = (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(state.brands));
 };
 
-//Helper method to get products for a brand
+//Helper function to get products for a brand
 const getProductsForABrand = (req, res) => {
   const id = req.params.id;
 
@@ -189,13 +189,13 @@ const getProductsForABrand = (req, res) => {
   res.end(JSON.stringify(productsForBrand));
 };
 
-//Helper method to get all products from the store
+//Helper function to get all products from the store
 const getAllProducts = (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(state.products));
 };
 
-//Helper method to get the users cart
+//Helper function to get the users cart
 const getCart = (req, res) => {
   checkIfLoggedIn(req, res);
   let user = currentUser(req, res);
@@ -204,7 +204,7 @@ const getCart = (req, res) => {
   res.end(JSON.stringify(user.cart));
 };
 
-//Helper method to add an item to the users cart
+//Helper function to add an item to the users cart
 const addItemToCart = (req, res) => {
   checkIfLoggedIn(req, res);
 
@@ -229,7 +229,7 @@ const addItemToCart = (req, res) => {
   res.end(JSON.stringify(user.cart));
 };
 
-//Helper method to delete an item from the users cart
+//Helper function to delete an item from the users cart
 const deleteItemFromCart = (req, res) => {
   checkIfLoggedIn(req, res);
   const productId = req.params.productId;
@@ -253,7 +253,7 @@ const deleteItemFromCart = (req, res) => {
   res.end(JSON.stringify(user.cart));
 };
 
-//Helper method to update the quantity of an item in the user's cart
+//Helper function to update the quantity of an item in the user's cart
 const updateProductQuantityInCart = (req, res) => {
   checkIfLoggedIn(req, res);
   const productId = req.params.productId;
