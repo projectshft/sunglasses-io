@@ -102,7 +102,7 @@ const checkIfLoggedIn = (req, res) => {
   let currentAccessToken = getValidTokenFromRequest(req);
 
   if (!currentAccessToken) {
-    res.writeHead(401, "You must be logged in to view the cart");
+    res.writeHead(401, "You must be logged in to perfom this action");
     return res.end();
   }
 };
@@ -197,6 +197,12 @@ const getCart = (req, res) => {
 };
 
 //Helper method to add an item to the users cart
-const addItemToCart = (req, res) => {};
+const addItemToCart = (req, res) => {
+  checkIfLoggedIn(req, res);
+  if (!req.body.id) {
+    res.writeHead(400, "Invalid Request: No product provided");
+    return res.end();
+  }
+};
 
 module.exports = server;

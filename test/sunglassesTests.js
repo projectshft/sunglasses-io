@@ -155,5 +155,99 @@ describe("Sunglasses.io", () => {
           done();
         });
     });
+
+    it("should return an error if no product is provided", (done) => {
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({ accessToken: token })
+        .end((err, res) => {
+          res.should.have.status(400, "Invalid Request: No product provided");
+          done();
+        });
+    });
+
+    it("should return an error if the product doesn't exist in the store", (done) => {
+      let product = {
+        id: "fake",
+        categoryId: "fake",
+        name: "Fake Product",
+        description: "",
+        price: 0,
+        imageUrls: [],
+      };
+
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Invalid product provided"
+          );
+          done();
+        });
+    });
+
+    it("should return an error if the product is already in the user’s cart", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(
+            400,
+            "Invalid Request: Product already in cart"
+          );
+          done();
+        });
+    });
+
+    it("should add the product to the user’s cart", (done) => {
+      let product = {
+        id: "2",
+        categoryId: "1",
+        name: "Black Sunglasses",
+        description: "The best glasses in the world",
+        price: 100,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({ accessToken: token })
+        .set("content-type", "application/json")
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(
+            200,
+            "Success: Product added to the user's cart"
+          );
+          done();
+        });
+    });
   });
 });
