@@ -219,15 +219,14 @@ const addItemToCart = (req, res) => {
 
   //return an error if the product is already in the users cart
   const user = currentUser(req, res);
-  if (user.cart.find((p) => JSON.stringify(p) === JSON.stringify(product))) {
+  if (user.cart.find((p) => p.id === product.id)) {
     res.writeHead(400, "Invalid Request: Product already in cart");
     return res.end();
   }
 
   //add the product to the users cart with a quantityInCart property
-  let cartItem = { product, quantity: 1 };
   product.quantityInCart = 1;
-  user.cart.push(cartItem);
+  user.cart.push(product);
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify(user.cart));
 };
@@ -291,11 +290,8 @@ const updateProductQuantityInCart = (req, res) => {
   //if new quantity is 0, delete the item from the cart
   if (newQuantityInCart === 0) {
     user.cart = user.cart.filter((p) => p.id !== productId);
-    res.writeHead(
-      200,
-      "Success: Quantity changed to 0 and item deleted from cart"
-    );
-    return res.end();
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(user.cart));
   }
 
   //update the quantity of the product in the user's cart
