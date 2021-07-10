@@ -15,10 +15,7 @@ let products = [];
 //let user = {};
 let users = [];
 let brands = [];
-
 let accessTokens = [];
-
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 //setup router
 let myRouter = Router();
@@ -141,6 +138,25 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
 });
 
 //user
+myRouter.get("/api/me", function (request, response) {
+  let token = accessTokens.find((accessToken) => {
+    return accessToken.token === request.headers.access_token;
+  });
+
+  if (!token) {
+    response.writeHead(403, "Not authorized.");
+    response.end("You must be logged in to access cart.");
+  }
+
+  let user = users.find((user) => {
+    return token.username === user.login.username;
+  });
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user));
+});
+
+//user cart
 myRouter.get("/api/me/cart", function (request, response) {
   let token = accessTokens.find((accessToken) => {
     return accessToken.token === request.headers.access_token;
@@ -179,12 +195,14 @@ myRouter.post("/api/me/cart", function (request, response) {
   let user = users.find((user) => {
     return token.username === user.login.username;
   });
+
   user.cart.push(product);
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
 });
 
+//make this change quantity in cart
 myRouter.post("/api/me/cart/:productId", function (request, response) {
   let token = accessTokens.find((accessToken) => {
     return accessToken.token === request.headers.access_token;
@@ -207,10 +225,26 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
   let user = users.find((user) => {
     return token.username === user.login.username;
   });
-  user.cart.push(product);
 
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(user.cart));
+  let counter = 0;
+
+  let productCount = user.cart.forEach((p) => {
+    if (p.id === product.id) {
+      counter++;
+    }
+    return counter;
+  });
+
+  if (!counter) {
+    response.writeHead(400, "Product not found.");
+    return response.end("You must add product to cart to increase quantity.");
+  }
+
+  if (counter > 0) {
+    user.cart.push(product);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(user.cart));
+  }
 });
 
 myRouter.delete("/api/me/cart/:productId", function (request, response) {

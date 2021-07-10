@@ -117,14 +117,14 @@ describe("User cart", () => {
           done();
         });
     });
-    it("allows logged in user to see cart", (done) => {
+    it("allows logged in user to view profile", (done) => {
       chai
         .request(server)
         .get("/api/me/cart")
         .set("access_token", accessToken)
         .end((err, res) => {
           expect(res).to.have.status(200);
-          res.body.should.be.an("array");
+          res.body.should.be.an("object");
           done();
         });
     });
@@ -208,6 +208,7 @@ describe("User cart", () => {
     });
   });
 
+  //change to test for quantity?
   describe("/POST product with ID to user cart", () => {
     it("should NOT POST product to cart if not logged in", (done) => {
       let product = {
