@@ -45,13 +45,9 @@ describe("LOGIN", () => {
   });
 });
 
-describe("Sunglasses", () => {
-  describe("/GET searched sunglasses", () => {
-    it("it should GET search query", (done) => {
-      chai.request(server).get("v1/sunglasses").query({ query: "glasses" });
-      done();
-    });
-    it("should get searched sunglasses", (done) => {
+describe("Products", () => {
+  describe("/GET searched products", () => {
+    it("should get searched products", (done) => {
       let query = "?query=glasses";
       chai
         .request(server)
@@ -59,6 +55,28 @@ describe("Sunglasses", () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
+          done();
+        });
+    });
+
+    it("should NOT get searched products if they are not in data", (done) => {
+      let query = "?query=dog";
+      chai
+        .request(server)
+        .get(`/api/products${query}`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+
+    it("should NOT get searched products if search field blank", (done) => {
+      let query = "?query=";
+      chai
+        .request(server)
+        .get(`/api/products${query}`)
+        .end((err, res) => {
+          res.should.have.status(400);
           done();
         });
     });

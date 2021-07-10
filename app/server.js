@@ -12,7 +12,6 @@ const PORT = 3001;
 
 // State holding variables
 let products = [];
-//let user = {};
 let users = [];
 let brands = [];
 let accessTokens = [];
@@ -34,7 +33,7 @@ server.listen(PORT, (error) => {
   products = JSON.parse(
     fs.readFileSync("./initial-data/products.json", "utf-8")
   );
-  //load all users
+
   users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
 
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
@@ -69,7 +68,7 @@ myRouter.post("/api/login", (request, response) => {
         response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // new token with the user value and token
+        // new token
         let newAccessToken = {
           username: currentUser.login.username,
           lastUpdated: new Date(),
@@ -92,19 +91,31 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
-//sunglasses
+//products
 myRouter.get("/api/products", function (request, response) {
   //query params from query string
   const queryParams = queryString.parse(url.parse(request.url).query);
   let productsToReturn = [];
 
+  if (!queryParams.query) {
+    response.writeHead(400, "Bad request.");
+    return response.end("No product searched.");
+  }
+
   productsToReturn = products.filter((product) => {
-    return product.description.includes(queryParams.query);
+    let products;
+    if (
+      product.name.toLowerCase() === queryParams.query ||
+      product.description.toLowerCase().includes(queryParams.query)
+    ) {
+      products = product;
+    }
+    return products;
   });
 
   if (productsToReturn.length === 0) {
-    response.writeHead(404, "No sunglasses found.");
-    return response.end();
+    response.writeHead(404, "No products found.");
+    return response.end("No product by that name found.");
   }
 
   response.writeHead(200, { "Content-Type": "application/json" });
@@ -188,10 +199,10 @@ myRouter.post("/api/me/cart", function (request, response) {
   let product = request.body;
 
   if (!product.price) {
-    response.writeHead(400);
+    response.writeHead(400, "Bad request");
     return response.end("Product has no price.");
   } else if (!product.name) {
-    response.writeHead(400);
+    response.writeHead(400, "Bad request");
     return response.end("Product has no price.");
   }
 
@@ -234,7 +245,7 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
   });
 
   if (!counter) {
-    response.writeHead(400, "Product not found.");
+    response.writeHead(400);
     return response.end("You must add product to cart to increase quantity.");
   }
 
@@ -259,13 +270,11 @@ myRouter.delete("/api/me/cart/:productId", function (request, response) {
     return token.username === user.login.username;
   });
 
-  let cart = user.cart;
-
-  let productToRemove = cart.findIndex(
+  let productToRemove = user.cart.findIndex(
     (product) => product.id === request.params.productId
   );
 
-  cart.splice(productToRemove, 1);
+  user.cart.splice(productToRemove, 1);
 
   if (productToRemove === -1) {
     response.writeHead(400, "No product Id found.");
