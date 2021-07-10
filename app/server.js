@@ -29,7 +29,7 @@ server.listen(PORT, (error) => {
   if (error) {
     return console.log("Error on server startup:.", error);
   }
-  //load data onto server
+  //load data
   products = JSON.parse(
     fs.readFileSync("./initial-data/products.json", "utf-8")
   );
@@ -68,7 +68,7 @@ myRouter.post("/api/login", (request, response) => {
         response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // new token
+        // new token if no currentAccessToken present
         let newAccessToken = {
           username: currentUser.login.username,
           lastUpdated: new Date(),
@@ -103,14 +103,14 @@ myRouter.get("/api/products", function (request, response) {
   }
 
   productsToReturn = products.filter((product) => {
-    let products;
+    let filteredProduct;
     if (
       product.name.toLowerCase() === queryParams.query ||
       product.description.toLowerCase().includes(queryParams.query)
     ) {
-      products = product;
+      filteredProduct = product;
     }
-    return products;
+    return filteredProduct;
   });
 
   if (productsToReturn.length === 0) {
@@ -148,20 +148,31 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
   }
 });
 
-//user
-myRouter.get("/api/me", function (request, response) {
+//helper methods for user cart routes
+const checkForToken = (request) => {
   let token = accessTokens.find((accessToken) => {
     return accessToken.token === request.headers.access_token;
   });
+  return token;
+};
+
+const checkForUser = (token) => {
+  let user = users.find((user) => {
+    return token.username === user.login.username;
+  });
+  return user;
+};
+
+//user
+myRouter.get("/api/me", function (request, response) {
+  let token = checkForToken(request);
 
   if (!token) {
     response.writeHead(403, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
-  let user = users.find((user) => {
-    return token.username === user.login.username;
-  });
+  let user = checkForUser(token);
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user));
@@ -169,27 +180,21 @@ myRouter.get("/api/me", function (request, response) {
 
 //user cart
 myRouter.get("/api/me/cart", function (request, response) {
-  let token = accessTokens.find((accessToken) => {
-    return accessToken.token === request.headers.access_token;
-  });
+  let token = checkForToken(request);
 
   if (!token) {
     response.writeHead(403, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
-  let user = users.find((user) => {
-    return token.username === user.login.username;
-  });
+  let user = checkForUser(token);
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
 });
 
 myRouter.post("/api/me/cart", function (request, response) {
-  let token = accessTokens.find((accessToken) => {
-    return accessToken.token === request.headers.access_token;
-  });
+  let token = checkForToken(request);
 
   if (!token) {
     response.writeHead(403, "Not authorized.");
@@ -210,9 +215,7 @@ myRouter.post("/api/me/cart", function (request, response) {
     return response.end("Bad request");
   }
 
-  let user = users.find((user) => {
-    return token.username === user.login.username;
-  });
+  let user = checkForUser(token);
 
   user.cart.push(product);
 
@@ -221,9 +224,7 @@ myRouter.post("/api/me/cart", function (request, response) {
 });
 
 myRouter.post("/api/me/cart/:productId", function (request, response) {
-  let token = accessTokens.find((accessToken) => {
-    return accessToken.token === request.headers.access_token;
-  });
+  let token = checkForToken(request);
 
   if (!token) {
     response.writeHead(403, "Not authorized.");
@@ -234,9 +235,7 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
     return p.id === request.params.productId;
   });
 
-  let user = users.find((user) => {
-    return token.username === user.login.username;
-  });
+  let user = checkForUser(token);
 
   let productInCart = user.cart.find((p) => {
     return p.id === product.id;
@@ -255,18 +254,14 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
 });
 
 myRouter.delete("/api/me/cart/:productId", function (request, response) {
-  let token = accessTokens.find((accessToken) => {
-    return accessToken.token === request.headers.access_token;
-  });
+  let token = checkForToken(request);
 
   if (!token) {
     response.writeHead(403, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
-  let user = users.find((user) => {
-    return token.username === user.login.username;
-  });
+  let user = checkForUser(token);
 
   let productIndex = user.cart.findIndex(
     (product) => product.id === request.params.productId
