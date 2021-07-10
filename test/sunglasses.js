@@ -304,6 +304,7 @@ describe("User cart", () => {
       chai
         .request(server)
         .delete(`/api/me/cart/${product.id}`)
+        .set("access_token", accessToken)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(200);
@@ -329,6 +330,7 @@ describe("User cart", () => {
       chai
         .request(server)
         .delete(`/api/me/cart/${product.id}`)
+        .set("access_token", accessToken)
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(400);

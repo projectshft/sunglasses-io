@@ -190,6 +190,11 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
     return accessToken.token === request.headers.access_token;
   });
 
+  if (!token) {
+    response.writeHead(403, "Not authorized.");
+    response.end("You must be logged in to access cart.");
+  }
+
   let product = products.find((p) => {
     return p.id === request.params.productId;
   });
@@ -209,6 +214,19 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
 });
 
 myRouter.delete("/api/me/cart/:productId", function (request, response) {
+  let token = accessTokens.find((accessToken) => {
+    return accessToken.token === request.headers.access_token;
+  });
+
+  if (!token) {
+    response.writeHead(403, "Not authorized.");
+    response.end("You must be logged in to access cart.");
+  }
+
+  let user = users.find((user) => {
+    return token.username === user.login.username;
+  });
+
   let cart = user.cart;
 
   let productToRemove = cart.findIndex(
