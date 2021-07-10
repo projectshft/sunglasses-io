@@ -123,6 +123,7 @@ describe("User cart", () => {
         .get("/api/me/cart")
         .set("access_token", accessToken)
         .end((err, res) => {
+          expect(res).to.have.status(200);
           res.body.should.be.an("array");
           done();
         });
@@ -334,6 +335,29 @@ describe("User cart", () => {
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(400);
+          done();
+        });
+    });
+    it("it should NOT DELETE user sunglasses if user is not logged in", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${product.id}`)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(403);
           done();
         });
     });
