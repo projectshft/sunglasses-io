@@ -190,6 +190,9 @@ myRouter.post("/api/me/cart", function (request, response) {
   if (!product.price) {
     response.writeHead(400);
     return response.end("Product has no price.");
+  } else if (!product.name) {
+    response.writeHead(400);
+    return response.end("Product has no price.");
   }
 
   let user = users.find((user) => {
@@ -217,18 +220,13 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
     return p.id === request.params.productId;
   });
 
-  if (!product) {
-    response.writeHead(400, "No product Id found.");
-    return response.end("No sunglasses with that Id found.");
-  }
-
   let user = users.find((user) => {
     return token.username === user.login.username;
   });
 
   let counter = 0;
 
-  let productCount = user.cart.forEach((p) => {
+  user.cart.forEach((p) => {
     if (p.id === product.id) {
       counter++;
     }

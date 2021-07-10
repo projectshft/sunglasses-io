@@ -59,7 +59,6 @@ describe("Sunglasses", () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
-          //res.body.length.should.be.eql(0);
           done();
         });
     });
@@ -75,12 +74,10 @@ describe("Brands", () => {
         .end((err, res) => {
           expect(res).to.have.status(200);
           res.body.should.be.an("array");
-          //res.body.length.should.be.eql(0);
           done();
         });
     });
-  });
-  describe("/GET Brands", () => {
+
     it("it should GET sunglasses based on brand", (done) => {
       let categoryId = 1;
       chai
@@ -120,11 +117,22 @@ describe("User cart", () => {
     it("allows logged in user to view profile", (done) => {
       chai
         .request(server)
-        .get("/api/me/cart")
+        .get("/api/me")
         .set("access_token", accessToken)
         .end((err, res) => {
           expect(res).to.have.status(200);
           res.body.should.be.an("object");
+          done();
+        });
+    });
+    it("allows logged in user to view cart", (done) => {
+      chai
+        .request(server)
+        .get("/api/me/cart")
+        .set("access_token", accessToken)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          res.body.should.be.an("array");
           done();
         });
     });
@@ -180,9 +188,7 @@ describe("User cart", () => {
           done();
         });
     });
-  });
 
-  describe("/POST to user", () => {
     it("should NOT POST sunglasses to cart if product has no price", (done) => {
       let product = {
         id: "1",
@@ -206,9 +212,30 @@ describe("User cart", () => {
           done();
         });
     });
+    it("should NOT POST sunglasses to cart if product has no name", (done) => {
+      let product = {
+        id: "1",
+        categoryId: "1",
+        description: "The best glasses in the world",
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/`)
+        .set("access_token", accessToken)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
   });
 
-  //change to test for quantity?
   describe("/POST product with ID to user cart", () => {
     it("should NOT POST product to cart if not logged in", (done) => {
       let product = {
@@ -230,6 +257,31 @@ describe("User cart", () => {
         .send(product)
         .end((err, res) => {
           expect(res).to.have.status(403);
+          done();
+        });
+    });
+
+    it("it should NOT POST product if product ID not in cart", (done) => {
+      let product = {
+        id: "3",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+        ],
+      };
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/${product.id}`)
+        .set("access_token", accessToken)
+        .send(product)
+        .end((err, res) => {
+          expect(res).to.have.status(400);
           done();
         });
     });
@@ -261,33 +313,6 @@ describe("User cart", () => {
     });
   });
 
-  describe("/POST to user", () => {
-    it("it should NOT POST product if no ID present", (done) => {
-      let product = {
-        id: "20",
-        categoryId: "1",
-        name: "Superglasses",
-        description: "The best glasses in the world",
-        price: 150,
-        imageUrls: [
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-        ],
-      };
-
-      chai
-        .request(server)
-        .post(`/api/me/cart/${product.id}`)
-        .set("access_token", accessToken)
-        .send(product)
-        .end((err, res) => {
-          expect(res).to.have.status(400);
-          done();
-        });
-    });
-  });
-
   describe("/DELETE User item from cart", () => {
     it("it should DELETE user sunglasses if ID present", (done) => {
       let product = {
@@ -313,8 +338,7 @@ describe("User cart", () => {
           done();
         });
     });
-  });
-  describe("/NOT DELETE User item from cart", () => {
+
     it("it should NOT DELETE user sunglasses if ID not present", (done) => {
       let product = {
         id: "20",
