@@ -135,7 +135,7 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
     return p.categoryId === request.params.categoryId;
   });
 
-  if (brandProduct !== undefined) {
+  if (brandProduct) {
     brandProducts.push(brandProduct);
   }
 
@@ -198,12 +198,16 @@ myRouter.post("/api/me/cart", function (request, response) {
 
   let product = request.body;
 
-  if (!product.price) {
+  if (
+    !product.id ||
+    !product.categoryId ||
+    !product.name ||
+    !product.description ||
+    !product.price ||
+    !product.imageUrls
+  ) {
     response.writeHead(400, "Bad request");
-    return response.end("Product has no price.");
-  } else if (!product.name) {
-    response.writeHead(400, "Bad request");
-    return response.end("Product has no price.");
+    return response.end("Bad request");
   }
 
   let user = users.find((user) => {
@@ -216,7 +220,6 @@ myRouter.post("/api/me/cart", function (request, response) {
   return response.end(JSON.stringify(user.cart));
 });
 
-//make this change quantity in cart
 myRouter.post("/api/me/cart/:productId", function (request, response) {
   let token = accessTokens.find((accessToken) => {
     return accessToken.token === request.headers.access_token;
@@ -235,21 +238,16 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
     return token.username === user.login.username;
   });
 
-  let counter = 0;
-
-  user.cart.forEach((p) => {
-    if (p.id === product.id) {
-      counter++;
-    }
-    return counter;
+  let productInCart = user.cart.find((p) => {
+    return p.id === product.id;
   });
 
-  if (!counter) {
+  if (!productInCart) {
     response.writeHead(400);
     return response.end("You must add product to cart to increase quantity.");
   }
 
-  if (counter > 0) {
+  if (productInCart) {
     user.cart.push(product);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
@@ -270,19 +268,19 @@ myRouter.delete("/api/me/cart/:productId", function (request, response) {
     return token.username === user.login.username;
   });
 
-  let productToRemove = user.cart.findIndex(
+  let productIndex = user.cart.findIndex(
     (product) => product.id === request.params.productId
   );
 
-  user.cart.splice(productToRemove, 1);
+  user.cart.splice(productIndex, 1);
 
-  if (productToRemove === -1) {
+  if (productIndex === -1) {
     response.writeHead(400, "No product Id found.");
     return response.end("No sunglasses with that Id found in your cart.");
   }
 
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(cart));
+  return response.end(JSON.stringify(user.cart));
 });
 
 module.exports = server;
