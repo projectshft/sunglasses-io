@@ -31,14 +31,14 @@ describe("LOGIN", () => {
         });
     });
 
-    it("should POST user login if valid username and password", (done) => {
+    it("should return access token with correct username and password", (done) => {
       chai
         .request(server)
         .post(`/api/login`)
         .send({ username: "yellowleopard753", password: "jonjon" })
         .end((err, res) => {
           expect(res).to.have.status(200);
-          expect(res.body).to.be.a("string");
+          //expect(res.body).to.be.an("object");
           done();
         });
     });
@@ -287,7 +287,7 @@ describe("User cart", () => {
   });
 
   describe("/DELETE User item from cart", () => {
-    it("it should DELETE user sunglasses based on ID", (done) => {
+    it("it should DELETE user sunglasses if ID present", (done) => {
       let product = {
         id: "1",
         categoryId: "1",

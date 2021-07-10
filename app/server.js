@@ -12,10 +12,10 @@ const PORT = 3001;
 
 // State holding variables
 let products = [];
-let user = {};
+//let user = {};
 let users = [];
 let brands = [];
-const newAccessToken = uid(16);
+
 let accessTokens = [];
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
@@ -39,9 +39,7 @@ server.listen(PORT, (error) => {
   );
   //load all users
   users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
-  //current user will be user[0] initially
-  //user = users[0];
-  //load all categories
+
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 
   console.log("Server is running.");
@@ -61,52 +59,41 @@ myRouter.post("/api/login", (request, response) => {
         user.login.password == request.body.password
       );
     });
-    if (currentUser) {
-      user = currentUser;
-      response.writeHead(200, { "Content-Type": "application/json" });
 
+    if (currentUser) {
       // check for existing token
       let currentAccessToken = accessTokens.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
+        return tokenObject.username == currentUser.login.username;
       });
 
       // Update the last updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
+        response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
         // new token with the user value and token
-        user = currentUser;
         let newAccessToken = {
-          username: user.login.username,
+          username: currentUser.login.username,
           lastUpdated: new Date(),
           token: uid(16),
         };
+
         accessTokens.push(newAccessToken);
+        response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
       // incorrect password or username
       response.writeHead(401, "Invalid username or password");
-      return response.end();
+      return response.end("Invalid username or password.");
     }
   } else {
     // incorrect formatting
     response.writeHead(400, "Incorrectly formatted response");
-    return response.end();
+    return response.end("Bad request");
   }
 });
-
-//token helper methods
-const findToken = (request) => {
-  return accessTokens.find(
-    (token) => token.token === request.headers.access_token
-  );
-};
-
-const findCurrentUser = (token) => {
-  return users.find((user) => token.username === user.login.username);
-};
 
 //sunglasses
 myRouter.get("/api/products", function (request, response) {
