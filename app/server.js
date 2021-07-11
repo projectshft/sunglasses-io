@@ -6,7 +6,6 @@ const url = require("url");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
-const { report } = require("process");
 
 const PORT = 3001;
 
