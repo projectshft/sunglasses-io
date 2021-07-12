@@ -48,7 +48,7 @@ describe("LOGIN", () => {
 describe("Products", () => {
   describe("/GET searched products", () => {
     it("should get searched products", (done) => {
-      let query = "?query=glasses";
+      let query = "?query=Superglasses";
       chai
         .request(server)
         .get(`/api/products${query}`)

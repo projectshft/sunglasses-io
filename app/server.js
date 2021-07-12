@@ -104,8 +104,10 @@ myRouter.get("/api/products", function (request, response) {
   productsToReturn = products.filter((product) => {
     let filteredProduct;
     if (
-      product.name.toLowerCase() === queryParams.query ||
-      product.description.toLowerCase().includes(queryParams.query)
+      product.name.toLowerCase() === queryParams.query.toLowerCase() ||
+      product.description
+        .toLowerCase()
+        .includes(queryParams.query.toLowerCase())
     ) {
       filteredProduct = product;
     }
