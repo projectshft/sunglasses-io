@@ -122,13 +122,22 @@ describe("User cart", () => {
       });
   });
 
-  describe("/GET user cart", () => {
+  describe("/GET user info", () => {
+    it("NOT allow user to see profile if not logged in", (done) => {
+      chai
+        .request(server)
+        .get("/api/me")
+        .end((err, res) => {
+          expect(res).to.have.status(401);
+          done();
+        });
+    });
     it("NOT allow user to see cart if not logged in", (done) => {
       chai
         .request(server)
         .get("/api/me/cart")
         .end((err, res) => {
-          expect(res).to.have.status(403);
+          expect(res).to.have.status(401);
           done();
         });
     });
@@ -176,7 +185,7 @@ describe("User cart", () => {
         .post(`/api/me/cart/`)
         .send(product)
         .end((err, res) => {
-          expect(res).to.have.status(403);
+          expect(res).to.have.status(401);
           done();
         });
     });
@@ -207,7 +216,7 @@ describe("User cart", () => {
         });
     });
 
-    it("should NOT POST sunglasses to cart if product has no id", (done) => {
+    it("should NOT POST product to cart if product has no id", (done) => {
       let product = {
         categoryId: "1",
         name: "Superglasses",
@@ -231,7 +240,7 @@ describe("User cart", () => {
         });
     });
 
-    it("should NOT POST sunglasses to cart if product has no categoryId", (done) => {
+    it("should NOT POST product to cart if product has no categoryId", (done) => {
       let product = {
         id: "1",
         name: "Superglasses",
@@ -255,7 +264,7 @@ describe("User cart", () => {
         });
     });
 
-    it("should NOT POST sunglasses to cart if product has no price", (done) => {
+    it("should NOT POST product to cart if product has no price", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -278,7 +287,7 @@ describe("User cart", () => {
           done();
         });
     });
-    it("should NOT POST sunglasses to cart if product has no name", (done) => {
+    it("should NOT POST product to cart if product has no name", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -301,7 +310,7 @@ describe("User cart", () => {
         });
     });
 
-    it("should NOT POST sunglasses to cart if product has no description", (done) => {
+    it("should NOT POST product to cart if product has no description", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -325,7 +334,7 @@ describe("User cart", () => {
         });
     });
 
-    it("should NOT POST sunglasses to cart if product has no images", (done) => {
+    it("should NOT POST product to cart if product has no images", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -366,7 +375,7 @@ describe("User cart", () => {
         .post(`/api/me/cart/`)
         .send(product)
         .end((err, res) => {
-          expect(res).to.have.status(403);
+          expect(res).to.have.status(401);
           done();
         });
     });
@@ -424,7 +433,7 @@ describe("User cart", () => {
   });
 
   describe("/DELETE User item from cart", () => {
-    it("it should DELETE user sunglasses if ID present", (done) => {
+    it("it should DELETE user product if ID present", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -449,7 +458,7 @@ describe("User cart", () => {
         });
     });
 
-    it("it should NOT DELETE user sunglasses if ID not present", (done) => {
+    it("it should NOT DELETE user product if ID not present", (done) => {
       let product = {
         id: "20",
         categoryId: "1",
@@ -473,7 +482,7 @@ describe("User cart", () => {
           done();
         });
     });
-    it("it should NOT DELETE user sunglasses if user is not logged in", (done) => {
+    it("it should NOT DELETE user product if user is not logged in", (done) => {
       let product = {
         id: "1",
         categoryId: "1",
@@ -492,7 +501,7 @@ describe("User cart", () => {
         .delete(`/api/me/cart/${product.id}`)
         .send(product)
         .end((err, res) => {
-          expect(res).to.have.status(403);
+          expect(res).to.have.status(401);
           done();
         });
     });

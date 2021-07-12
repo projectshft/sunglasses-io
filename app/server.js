@@ -150,13 +150,6 @@ myRouter.get("/api/brands/:categoryId/products", function (request, response) {
 });
 
 //helper methods for user cart routes
-const checkForToken = (request) => {
-  let token = accessTokens.find((accessToken) => {
-    return accessToken.token === request.headers.access_token;
-  });
-  return token;
-};
-
 const checkForUser = (token) => {
   let user = users.find((user) => {
     return token.username === user.login.username;
@@ -164,12 +157,19 @@ const checkForUser = (token) => {
   return user;
 };
 
+const checkForToken = (request) => {
+  let token = accessTokens.find((accessToken) => {
+    return accessToken.token === request.headers.access_token;
+  });
+  return token;
+};
+
 //user
 myRouter.get("/api/me", function (request, response) {
   let token = checkForToken(request);
 
   if (!token) {
-    response.writeHead(403, "Not authorized.");
+    response.writeHead(401, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
@@ -184,7 +184,7 @@ myRouter.get("/api/me/cart", function (request, response) {
   let token = checkForToken(request);
 
   if (!token) {
-    response.writeHead(403, "Not authorized.");
+    response.writeHead(401, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
@@ -198,7 +198,7 @@ myRouter.post("/api/me/cart", function (request, response) {
   let token = checkForToken(request);
 
   if (!token) {
-    response.writeHead(403, "Not authorized.");
+    response.writeHead(401, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
@@ -228,7 +228,7 @@ myRouter.post("/api/me/cart/:productId", function (request, response) {
   let token = checkForToken(request);
 
   if (!token) {
-    response.writeHead(403, "Not authorized.");
+    response.writeHead(401, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
@@ -258,7 +258,7 @@ myRouter.delete("/api/me/cart/:productId", function (request, response) {
   let token = checkForToken(request);
 
   if (!token) {
-    response.writeHead(403, "Not authorized.");
+    response.writeHead(401, "Not authorized.");
     response.end("You must be logged in to access cart.");
   }
 
