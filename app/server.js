@@ -83,7 +83,7 @@ myRouter.post("/api/me/cart/:productId", (req, res) => {
 
 // HELPER FUNCTIONS
 // Helper function to process access token
-var getValidTokenFromRequest = function (request) {
+const getValidTokenFromRequest = function (request) {
   var parsedUrl = require("url").parse(request.url, true);
 
   if (parsedUrl.query.accessToken) {
