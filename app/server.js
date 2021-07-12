@@ -73,7 +73,6 @@ myRouter.post("/api/login", (request, response) => {
           lastUpdated: new Date(),
           token: uid(16),
         };
-
         accessTokens.push(newAccessToken);
         response.writeHead(200, { "Content-Type": "application/json" });
         return response.end(JSON.stringify(newAccessToken.token));
