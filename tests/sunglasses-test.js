@@ -20,21 +20,25 @@ chai.use(chaiHttp);
 // endpoints are:
 
 // GET /api/brands
-// describe("WHAT   GOES   HERE", () => {
-//   describe("/GET brands", () => {
-//     it("it should GET all the brands", (done) => {
-//       chai
-//         .request(server)
-//         .get("/brands")
-//         .end((err, res) => {
-//           res.should.have.status(200);
-//           res.body.should.be.an("array");
-//           res.body.length.should.be.eql(0);
-//           done();
-//         });
-//     });
-//   });
-// });
+describe("Brands", () => {
+  describe("/GET brands", () => {
+    it("it should GET all the brands", (done) => {
+      // arrange, act
+      chai
+        .request(server)
+        .get("/brands")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.be.eql(5);
+          done();
+        });
+    });
+  });      
+});
+
+
 
 // GET /api/brands/:id/products
 // GET /api/products
