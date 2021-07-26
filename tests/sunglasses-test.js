@@ -1,6 +1,7 @@
 let chai = require("chai");
 const { expect } = require("chai");
 let chaiHttp = require("chai-http");
+const { request } = require("http");
 let server = require("../app/server");
 let should = chai.should();
 
@@ -115,20 +116,34 @@ describe("/GET brands/:id/products", () =>
   })
 );
 
-// POST /api/login - use deep here
-describe("/login", () =>
-  it("it should allow user to log in", (done) => {
-    chai.request(server)
-    .get("/login")
-    .end((err, res) => {
-      .send({ username: 'username', password: 'password' })
-      .res.should.have.status(200);
-      done();
-    })
-  })
-)
+// POST /api/login - use deep here -
+// DON'T GET THIS AT ALL
+// describe("/login", () => {
+//   it("it should allow user to log in", (done) => {
+//     chai
+//       .request(server)
+//       .get("/login")
+//       .send({ username: "yellowleopard753", password: "jonjon" })
+//       .end((err, res) => {
+//         console.log(res);
+//         res.should.have.status(200);
+//         done();
+//       });
+//   })
+// })
 
 // GET /api/me/cart
+describe("/me/cart", () => {
+  it("should allow a user to view their cart", (done) => {
+    chai
+      .request(server)
+      .get("/me/cart")
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      })
+  })
+})
 // POST /api/me/cart - use deep here
 // DELETE /api/me/cart/:productId
 // POST /api/me/cart/:productId - change quantity in cart

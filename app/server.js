@@ -7,8 +7,10 @@ var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 const brandsJson = require('./../initial-data/brands.json');
 const productsJson = require('./../initial-data/products.json')
+const usersJson = require('./../initial-data/users.json')
 
 const PORT = 8080;
+let accessToken = {};
 
 let server = http
   .createServer(function (request, response) {
@@ -51,7 +53,15 @@ myRouter.get("/products", (request, response) => {
 
 // POST /login
 myRouter.post("api/login", function(request, response) {
+  console.log(request.params.username, request.params.password);
   
+  // if user exists, create access token
+  accessToken = {
+    username: request.params.username,
+    lastUpdated: new Date(),
+    token: uid(16),
+  };
+
 });
 
 // myRouter.post("/api/login", function (request, response) {
@@ -138,6 +148,23 @@ myRouter.post("api/login", function(request, response) {
 //     return null;
 //   }
 // };
+
+// GET /api/me/cart
+myRouter.get("me/cart", function (request, response) {
+  // get cart for user
+  let cartUser = accessToken.user;
+
+  let cart = usersJson.filter(x => x.username === cartUser);
+
+  //Only if the user has access to that store do we return the issues from the store
+  if (user.storeIds.includes(request.params.storeId)) {
+    response.writeHead(
+      200,
+      Object.assign(CORS_HEADERS, { "Content-Type": "application/json" })
+    );
+    return response.end(JSON.stringify(cart));
+  } else {
+})
 
 // // Only logged in users can access a specific store's issues if they have access
 // myRouter.get("/api/stores/:storeId/issues", function (request, response) {
