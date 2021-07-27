@@ -12,6 +12,12 @@ const usersJson = require('./../initial-data/users.json')
 const PORT = 8080;
 let accessToken = {};
 
+accessToken = {
+  username: "yellowleopard753",
+  lastUpdated: new Date(),
+  token: uid(16),
+};
+
 let server = http
   .createServer(function (request, response) {
     myRouter(request, response, finalHandler(request, response));
@@ -21,14 +27,14 @@ let server = http
 const myRouter = Router();
 
 // GET /brands
-myRouter.get("/brands", (request, response) => {
+myRouter.get("/api/brands", (request, response) => {
   // get brands json file directly  
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brandsJson));
 });
 
 // GET /api/brands/:id/products
-myRouter.get("/brands/:id/products", (request, response) => {
+myRouter.get("/api/brands/:id/products", (request, response) => {
   let catCode = brandsJson[request.params.id].id;
 
   let results = productsJson;
@@ -45,23 +51,39 @@ myRouter.get("/brands/:id/products", (request, response) => {
 })
 
 // GET /products
-myRouter.get("/products", (request, response) => {
+myRouter.get("/api/products", (request, response) => {
   // get products json file directly  
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsJson));
 });
 
+//GET retrieves resources.
+//POST submits new data to the server.
+//PUT updates existing data.
+//DELETE removes data.
+
 // POST /login
-myRouter.post("api/login", function(request, response) {
-  console.log(request.params.username, request.params.password);
-  
+myRouter.post("/api/login", function(request, response) {
+  // See if there is a user that has that username and password
+  let user = users.find((u) => {
+    return (
+      u.tempUsername == request.body.username &&
+      u.tempPassword == request.body.password
+    );
+  });
+
+  // Write the header because we know we will be returning successful at this point and that the response will be json
+  response.writeHead(
+    200,
+    Object.assign(CORS_HEADERS, { "Content-Type": "application/json" })
+  );
+
   // if user exists, create access token
   accessToken = {
     username: request.params.username,
     lastUpdated: new Date(),
     token: uid(16),
   };
-
 });
 
 // myRouter.post("/api/login", function (request, response) {
@@ -149,21 +171,17 @@ myRouter.post("api/login", function(request, response) {
 //   }
 // };
 
+
 // GET /api/me/cart
-myRouter.get("me/cart", function (request, response) {
+myRouter.get("/api/me/cart", function (request, response) {
   // get cart for user
-  let cartUser = accessToken.user;
+  // let cartUser = accessToken.user;
+  // console.log(cartUser);
 
-  let cart = usersJson.filter(x => x.username === cartUser);
+  // let cart = usersJson.filter(x => x.username === cartUser);
 
-  //Only if the user has access to that store do we return the issues from the store
-  if (user.storeIds.includes(request.params.storeId)) {
-    response.writeHead(
-      200,
-      Object.assign(CORS_HEADERS, { "Content-Type": "application/json" })
-    );
-    return response.end(JSON.stringify(cart));
-  } else {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify([]));
 })
 
 // // Only logged in users can access a specific store's issues if they have access

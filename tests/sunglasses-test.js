@@ -25,7 +25,7 @@ describe("Brands", () => {
       // arrange, act
       chai
         .request(server)
-        .get("/brands")
+        .get("/api/brands")
         // assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -44,7 +44,7 @@ describe("Products", () => {
       // arrange, act
       chai
         .request(server)
-        .get("/products")
+        .get("/api/products")
         // assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -104,7 +104,7 @@ describe("/GET brands/:id/products", () =>
     chai
       .request(server)
       // don't like this, should test :id, may need a model to do this properly
-      .get("/brands/" + testBrand + "/products")
+      .get("/api/brands/" + testBrand + "/products")
       // assert
       .end((err, res) => {
         res.should.have.status(200);
@@ -117,33 +117,40 @@ describe("/GET brands/:id/products", () =>
 );
 
 // POST /api/login - use deep here -
-// DON'T GET THIS AT ALL
-// describe("/login", () => {
-//   it("it should allow user to log in", (done) => {
-//     chai
-//       .request(server)
-//       .get("/login")
-//       .send({ username: "yellowleopard753", password: "jonjon" })
-//       .end((err, res) => {
-//         console.log(res);
-//         res.should.have.status(200);
-//         done();
-//       });
-//   })
-// })
-
-// GET /api/me/cart
-describe("/me/cart", () => {
-  it("should allow a user to view their cart", (done) => {
+// DON'T GET THIS AT ALL  login request should incllude username and password
+describe("/login", () => {
+  it("it should allow user to log in", (done) => {
     chai
       .request(server)
-      .get("/me/cart")
+      .post("/api/login")
+      .send({ username: "yellowleopard753", password: "jonjon" })
       .end((err, res) => {
+        //console.log(res);
         res.should.have.status(200);
         done();
-      })
+      });
   })
 })
+
+// GET /api/me/cart
+describe("Cart", () => {
+  describe("/GET me/cart", () => {
+    it("should allow a user to view their cart", (done) => {
+      chai
+        .request(server)
+        .get("/api/me/cart")
+        .end((err, res) => {
+          console.log(res);
+          //res.should.have.status(200);
+          res.body.should.be.an("array");
+          done();
+        });
+    });
+  });
+})
+
+
+
 // POST /api/me/cart - use deep here
 // DELETE /api/me/cart/:productId
 // POST /api/me/cart/:productId - change quantity in cart
