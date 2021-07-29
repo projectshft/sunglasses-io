@@ -65,25 +65,25 @@ myRouter.get("/api/products", (request, response) => {
 // POST /login
 myRouter.post("/api/login", function(request, response) {
   // See if there is a user that has that username and password
-  let user = users.find((u) => {
-    return (
-      u.tempUsername == request.body.username &&
-      u.tempPassword == request.body.password
-    );
-  });
+  // username and password may be in header? doesn't seem to be in request
+  // see https://jasonwatmore.com/post/2018/09/24/nodejs-basic-authentication-tutorial-with-example-api
+
+  
+  let user = {
+    reqTemper: request.body,
+  };
+  // let user = usersJson.find((u) => {
+  //   return (
+  //     u.tempUsername == request.body.username &&
+  //     u.tempPassword == request.body.password
+  //   );
+  // });
 
   // Write the header because we know we will be returning successful at this point and that the response will be json
-  response.writeHead(
-    200,
-    Object.assign(CORS_HEADERS, { "Content-Type": "application/json" })
-  );
 
-  // if user exists, create access token
-  accessToken = {
-    username: request.params.username,
-    lastUpdated: new Date(),
-    token: uid(16),
-  };
+  response.writeHead(200, { "Content-Type": "application/json" });
+
+  return response.end(JSON.stringify(user.reqTemper));
 });
 
 // myRouter.post("/api/login", function (request, response) {
@@ -175,13 +175,21 @@ myRouter.post("/api/login", function(request, response) {
 // GET /api/me/cart
 myRouter.get("/api/me/cart", function (request, response) {
   // get cart for user
-  // let cartUser = accessToken.user;
-  // console.log(cartUser);
+  let cartUser = accessToken.username;
 
-  // let cart = usersJson.filter(x => x.username === cartUser);
+  if (!cartUser) {
+    response.writeHead(
+      401,
+      "You need to login to view cart",
+      CORS_HEADERS
+    );
+    return response.end();
+  } else {
+    let cart = usersJson.filter((x) => x.login.username === cartUser);
 
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify([]));
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(cart));
+  }
 })
 
 // // Only logged in users can access a specific store's issues if they have access
