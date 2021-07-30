@@ -41,7 +41,9 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
 
   if (!catCode) {
     response.writeHead(404);
-    return response.end("Brand Not in Stock");
+    return response.end(
+      "The brand you are searching for is not found or not available at our store"
+    );
   }
 
   response.writeHead(200, {"Content-Type": "application/json" });

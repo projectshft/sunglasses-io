@@ -31,8 +31,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/brands'
-        '404':
-          description: The brand you are searching for is not found or not available at our store
         default:
           description: Unexpected error
           schema:
@@ -57,8 +55,6 @@ paths:
             type: array
             items:
               $ref: '#/definitions/products'
-        '404':
-          description: product not found error
         default:
           description: Unexpected error
           schema:
@@ -83,6 +79,8 @@ paths:
             type: array
             items:
               $ref: '#/definitions/brands'
+        '404':
+          description: The brand you are searching for is not found or not available at our store
         default:
           description: Unexpected error
           schema:
@@ -117,6 +115,8 @@ paths:
       responses:
         '200':
           description: Profile information for a user
+        '401':
+          description: You need to login to view the cart
         default:
           description: Unexpected error
           schema:
@@ -130,6 +130,8 @@ paths:
       responses:
         '200':
           description: Challenge is successful
+        '400':
+          description: Selected sunglasses already in the cart!
         default:
           description: Unexpected error
           schema:
@@ -155,18 +157,41 @@ paths:
     post:
       summary: add to cart
       description: |
-        This post allows you to add sunglasses to cart
+        This post allows you to add quantity to sunglasses in cart
       parameters:
         - name: id
           in: path
-          description: The id of the sunglasses to add to cart
+          description: The id of the sunglasses to add quantity to
           required: true
           type: string
       tags:
         - Cart
       responses:
         '200':
-          description: Challenge is successful
+          description: Request is successful
+        '404':
+          description: Sunglasses Not Found in Cart   
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: delete from cart
+      description: |
+        This post allows you to add sunglasses to cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the sunglasses to delete to cart
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Request is successful
+        '404':
+          description: Sunglasses Not Found In Cart   
         default:
           description: Unexpected error
           schema:
@@ -197,17 +222,8 @@ paths:
           description: "successful operation"
           schema:
             type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-        "400":
-          description: "Invalid username/password supplied"
+        "401":
+          description: "Invalid username or password"
 definitions:
   products:
     type: object
