@@ -11,7 +11,7 @@ const usersJson = require('./../initial-data/users.json')
 
 const PORT = 8080;
 
-let currentUser = '';
+let currentUser = "yellowleopard753";  // should be '' to start but need to test
 
 let server = http
   .createServer(function (request, response) {
@@ -80,8 +80,12 @@ myRouter.post("/api/login", function(request, response) {
   }
   
   return response.end(JSON.stringify(currentUser));
-
 });
+
+const cartHelper = () => {
+  let selectedUser = usersJson.filter((x) => x.login.username === currentUser);
+  return selectedUser[0].cart;
+};
 
 // GET /api/me/cart
 myRouter.get("/api/me/cart", function (request, response) {
@@ -96,9 +100,8 @@ myRouter.get("/api/me/cart", function (request, response) {
     );
     return response.end();
   } else {
-    let selectedUser = usersJson.filter((x) => x.login.username === cartUser);
-    let cart = selectedUser[0].cart;
-    console.log(selectedUser[0].cart);
+
+    let cart = cartHelper();
 
     if (cart = []) {
       // this only happens here temporarilty to get a more descriptive return, the cart in users.json is not impacted
@@ -110,28 +113,43 @@ myRouter.get("/api/me/cart", function (request, response) {
   }
 })
 
-// POST /api/me/cart - use deep here
+// POST /api/me/cart
 myRouter.post("/api/me/cart", function (request, response) {
-  // want to push to users.js cart, need a model to do that
-  // need item selected to go into cart, same hangup as login
+  // get product id number from request
+  let itemId = request.body.productId;
 
-  // get object from products.json, get brand from brands.json, output return
-  // {
-  //   cartId:
-  //   brand:
-  //   color:
-  //   quantity:
-  // }
+  let tempProducts = productsJson;
+  let newCartProductArr = tempProducts.filter(
+    (x) => parseInt(x.id) == parseInt(itemId)
+  );
+  let newCartProduct = newCartProductArr[0];
+  let newCartBrand = brandsJson[newCartProduct.categoryId].name;
 
+  let cart = cartHelper();
+  let newCartObjectNumber = cart.length + 1;
 
-//   const fileData = JSON.parse(fs.readFileSync('sample.json'))
-// fileData.push(newData)
-// Write the new data appended to previous into file
+  // if item not in cart, create object
+  if (!cart.find((item) => item.cartProduct == cartProduct)) {
+    let newCartItem = {
+      cartObjectNumber: newCartObjectNumber,
+      cartBrand: newCartBrand,
+      cartProduct: newCartProduct.name,
+      cartQuantity: 1,
+    };
 
-// fs.writeFileSync('sample.json', JSON.stringify(fileData, null, 2));
+    let userIndex = usersJson.findIndex(
+      (x) => (x.login.username = currentUser)
+    );
+    
+    usersJson[userIndex].cart.push(newCartItem);
 
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(cart));
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(usersJson[userIndex].cart));
+
+  } else {
+    response.writeHead(400, { "Content-Type": "application/json"})
+    return "Selected sunglasses already in the cart!";
+  }
 })
 
 

@@ -138,7 +138,7 @@ describe("/login", () => {
 
 // GET /api/me/cart
 describe("Cart", () => {
-  describe("/GET me/cart", () => {
+  describe("/GET api/me/cart", () => {
     it("should allow a user to view their cart", (done) => {
       chai
         .request(server)
@@ -152,8 +152,34 @@ describe("Cart", () => {
         });
     });
   });
+
+  // POST /api/me/cart - use deep here
+  describe("/POST /api/me/cart", () => {
+    it("should allow a user to add an item to the cart", (done) => {
+      newCart = [
+        {
+          cartObjectNumber: 1,
+          cartBrand: "DKNY",
+          cartProduct: "QDogs Glasses",
+          cartQuantity: 1,
+        },
+      ];
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .set("content-type", "application/json")
+        .send({ productId: '7'})
+        .end((err, res) => {
+          // tests here
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          expect(res.body).to.be.deep.equal(newCart);
+          done();
+        });
+    });
+  });
 })
 
-// POST /api/me/cart - use deep here
+
 // DELETE /api/me/cart/:productId
 // POST /api/me/cart/:productId - change quantity in cart
