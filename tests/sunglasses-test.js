@@ -180,6 +180,25 @@ describe("Cart", () => {
   });
 })
 
-
 // DELETE /api/me/cart/:productId
+describe("/DELETE /api/me/cart/:productId", () =>
+  it("it should delete a product from the cart", (done) => {
+    // arrange
+    testItemToDelete = 1;
+    // act
+    chai
+      .request(server)
+      // don't like this, should test :id, may need a model to do this properly
+      .delete("/api/me/cart/" + testItemToDelete)
+      // assert
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        // when :id is 0, should deep equal testProducts
+        expect(res.body).to.be.deep.equal([]);
+        done();
+      });
+  }));
+
+
 // POST /api/me/cart/:productId - change quantity in cart

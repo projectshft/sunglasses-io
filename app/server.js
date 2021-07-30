@@ -87,6 +87,13 @@ const cartHelper = () => {
   return selectedUser[0].cart;
 };
 
+const updateCartHelper = (newCartItem) => {
+  let userIndex = usersJson.findIndex((x) => (x.login.username = currentUser));
+  usersJson[userIndex].cart.push(newCartItem);
+
+  return usersJson[userIndex].cart;
+}
+
 // GET /api/me/cart
 myRouter.get("/api/me/cart", function (request, response) {
   // get cart for user
@@ -137,14 +144,10 @@ myRouter.post("/api/me/cart", function (request, response) {
       cartQuantity: 1,
     };
 
-    let userIndex = usersJson.findIndex(
-      (x) => (x.login.username = currentUser)
-    );
-    
-    usersJson[userIndex].cart.push(newCartItem);
+    let result = updateCartHelper(newCartItem);   
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(usersJson[userIndex].cart));
+    return response.end(JSON.stringify(result));
 
   } else {
     response.writeHead(400, { "Content-Type": "application/json"})
@@ -152,6 +155,29 @@ myRouter.post("/api/me/cart", function (request, response) {
   }
 })
 
+// DELETE /api/me/cart/:productId
+myRouter.delete("/api/me/cart/:productId", function (request, response) {
+  let itemToRemove = parseInt(request.params.productId);
+  let cart = cartHelper();
+
+  if (cart.find(f => f.cartObjectNumber == itemToRemove)) {
+    // if clicked, filter cart array to not include clicked one
+    let newCart = cart.filter((c) => c.cartObjectNumber != itemToRemove);
+
+    let result = updateCartHelper(newCart);
+
+    // return new userCart
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(newCart));
+  } else {
+    response.writeHead(404);
+    return response.end("Book Not Found");
+  }
+
+  
+
+  
+})
 
 module.exports = server;
 
