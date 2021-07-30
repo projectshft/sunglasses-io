@@ -119,14 +119,18 @@ describe("/GET brands/:id/products", () =>
 // POST /api/login - use deep here -
 // DON'T GET THIS AT ALL  login request should incllude username and password
 describe("/login", () => {
-  it("it should allow user to log in", (done) => {
+  //it("it should allow user to log in", (done) => {
+  it("it should allow user to log in",  (done) => {
+    testUser = "yellowleopard753";
     chai
       .request(server)
       .post("/api/login")
+      .set("content-type", "application/json")
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((err, res) => {
-        //console.log(res);
+        //console.log(res)
         res.should.have.status(200);
+        expect(res.body).to.be.deep.equal(testUser);
         done();
       });
   })
@@ -140,16 +144,15 @@ describe("Cart", () => {
         .request(server)
         .get("/api/me/cart")
         .end((err, res) => {
-          console.log(res);
-          //res.should.have.status(200);
+          res.should.have.status(200);
           res.body.should.be.an("array");
+          // all the carts are empty at the start
+          expect(res.body).to.be.deep.equal(["The cart is empty"]);
           done();
         });
     });
   });
 })
-
-
 
 // POST /api/me/cart - use deep here
 // DELETE /api/me/cart/:productId
