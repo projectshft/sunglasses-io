@@ -128,7 +128,6 @@ describe("/login", () => {
       .set("content-type", "application/json")
       .send({ username: "yellowleopard753", password: "jonjon" })
       .end((err, res) => {
-        //console.log(res)
         res.should.have.status(200);
         expect(res.body).to.be.deep.equal(testUser);
         done();
@@ -156,7 +155,7 @@ describe("Cart", () => {
   // POST /api/me/cart - use deep here
   describe("/POST /api/me/cart", () => {
     it("should allow a user to add an item to the cart", (done) => {
-      newCart = [
+      testCart = [
         {
           cartObjectNumber: 1,
           cartBrand: "DKNY",
@@ -173,12 +172,42 @@ describe("Cart", () => {
           // tests here
           res.should.have.status(200);
           res.body.should.be.an("array");
-          expect(res.body).to.be.deep.equal(newCart);
+          expect(res.body).to.be.deep.equal(testCart);
           done();
         });
     });
   });
 })
+
+
+
+// POST /api/me/cart/:productId - change quantity in cart
+describe("/POST /api/me/cart/:productId", () =>
+  it("it should add quantity to a product from the cart", (done) => {
+    // arrange
+    testItemToAddTo = 1;
+    testCart = [
+      {
+        cartObjectNumber: 1,
+        cartBrand: "DKNY",
+        cartProduct: "QDogs Glasses",
+        cartQuantity: 2,
+      },
+    ];
+    // act
+    chai
+      .request(server)
+      // don't like this, should test :id, may need a model to do this properly
+      .post("/api/me/cart/" + testItemToAddTo)
+      // assert
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        // when :id is 0, should deep equal testProducts
+        expect(res.body).to.be.deep.equal(testCart);
+        done();
+      });
+}));
 
 // DELETE /api/me/cart/:productId
 describe("/DELETE /api/me/cart/:productId", () =>
@@ -198,7 +227,5 @@ describe("/DELETE /api/me/cart/:productId", () =>
         expect(res.body).to.be.deep.equal([]);
         done();
       });
-  }));
-
-
-// POST /api/me/cart/:productId - change quantity in cart
+  })
+);

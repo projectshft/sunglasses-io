@@ -11,7 +11,8 @@ const usersJson = require('./../initial-data/users.json')
 
 const PORT = 8080;
 
-let currentUser = "yellowleopard753";  // should be '' to start but need to test
+// initialize currentUser to be updated by login route
+let currentUser = '';
 
 let server = http
   .createServer(function (request, response) {
@@ -171,13 +172,32 @@ myRouter.delete("/api/me/cart/:productId", function (request, response) {
     return response.end(JSON.stringify(newCart));
   } else {
     response.writeHead(404);
-    return response.end("Book Not Found");
+    return response.end("Sunglasses Not Found in Cart");
   }
-
-  
-
-  
 })
+
+// POST /api/me/cart/:productId - change quantity in cart
+myRouter.post("/api/me/cart/:productId", function (request, response) {
+  let itemToChange = parseInt(request.params.productId);
+  let cart = cartHelper();
+
+  //console.log(cart.find(f => f.cartObjectNumber == itemToChange));
+  if (cart.find((f) => f.cartObjectNumber == itemToChange)) {
+    let tempIndex = cart.findIndex((f) => f.cartObjectNumber == itemToChange);
+
+    // if clicked, filter cart array to not include clicked one
+    cart[tempIndex].cartQuantity = cart[tempIndex].cartQuantity + 1;
+
+    result = cartHelper();
+
+    // return new userCart
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(result));
+  } else {
+    response.writeHead(404);
+    return response.end("Sunglasses Not Found in Cart");
+  }
+});
 
 module.exports = server;
 
