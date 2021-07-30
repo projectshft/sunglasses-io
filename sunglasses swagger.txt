@@ -1,0 +1,290 @@
+swagger: '2.0'
+info:
+  title: Sunglasses
+  description: An API to Sunglasses Eval
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+# paths and HTTP methods
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: >-
+        Brands are the four categories of sunglasses.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Sunglasses
+      description: |
+        The Sunglasses endpoint allows you to search sunglasses
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Sunglasses products in Brand
+      description: >-
+        All the sunglasses in a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for sunglasses in.
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of sunglasses in the brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/brands'
+        '404':
+          description: The brand you are searching for is not found or not available at our store
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: User profile
+      description: 
+        user with username, password, and cart
+      tags:
+        - User
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/Me'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Users cart
+      tags: 
+        - Cart
+      responses:
+        '200':
+          description: Profile information for a user
+        '401':
+          description: You need to login to view the cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: add to cart
+      description: |
+        This post allows you to add sunglasses to cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Challenge is successful
+        '400':
+          description: Selected sunglasses already in the cart!
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/products/{id}:
+    get:
+      summary: Users cart
+      tags: 
+        - Cart
+      parameters:
+        - name: id
+          in: path
+          description: id of sunglasses
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Profile information for a user
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: add to cart
+      description: |
+        This post allows you to add quantity to sunglasses in cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the sunglasses to add quantity to
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Request is successful
+        '404':
+          description: Sunglasses Not Found in Cart   
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: delete from cart
+      description: |
+        This post allows you to add sunglasses to cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the sunglasses to delete to cart
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Request is successful
+        '404':
+          description: Sunglasses Not Found In Cart   
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+      - "User"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - name: "username"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+        "401":
+          description: "Invalid username or password"
+definitions:
+  products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a sunglass item.
+      description:
+        type: string
+        description: Description of product.
+      brand:
+        type: string
+        description: The brand of the sunglasses
+      style:
+        type: string
+        description: The brand of the sunglasses
+      quantity:
+        type: integer
+        format: int32
+        description: The number sunglasses available in the store
+      photo-one:
+        type: string
+        description: The URL for the first image
+      photo-two:
+        type: string
+        description: The URL for the second image
+      photo-three:
+        type: string
+        description: The URL for the third image
+  brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the category
+  Me:
+    type: object
+    properties:
+      username:
+        type: string
+        description: |
+          The unique username for each user
+      passord:
+        type: string
+        description: |
+          The password for the user
+      cart:
+        type: object
+        description: |
+          The cart for the user
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
