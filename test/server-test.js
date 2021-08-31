@@ -145,9 +145,11 @@ describe('Cart', () => {
   describe('/POST to add to cart', () => {
     it('should return a cart with three products including the one just added', (done) => {
       //fill cart with 2 products
+      //product to send
       chai
         .request(server)
         .post('/me/cart')
+        .send(newSunglasses)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -155,11 +157,45 @@ describe('Cart', () => {
           done();
         })
     })
+    it('should not return a cart if the user does not have an access token', (done) => {
+      chai
+        .request(server)
+        .post('/me/cart')
+        .send(newSunglasses)
+        .end((err, res) => {
+          err.should.have.status(401);
+          done();
+        })
+    })
   })
   describe('/DELETE item from cart', () => {
-
+    it('should return a cart with one product without the one deleted', (done) => {
+      //fill cart with 2 products
+      chai
+        .request(server)
+        .delete('/me/cart')
+        .send(oldSunglasses)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.should.be.eql(1);
+          done();
+        })
+    })
   })
   describe('/PUT to change quantity of item in cart', () => {
-
+    it('should return a cart with three products two of which are the same product', (done) => {
+      //fill cart with 2 products
+      chai
+        .request(server)
+        .delete('/me/cart')
+        .send(newQuant)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.should.be.eql(3);
+          done();
+        })
+    })
   })
 })
