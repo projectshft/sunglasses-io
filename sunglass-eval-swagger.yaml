@@ -11,7 +11,7 @@ produces:
 paths:
   /brands:
     get:
-      summary: Get brands of sunglasses by brand
+      summary: Get brands of sunglasses
       description: |
         The brand endpoint returns the brands of sunglasses the store currently has.  Each brand will have a unique id and name in object form. 
       tags:
@@ -83,6 +83,8 @@ paths:
             $ref: '#/definitions/Login'
         401: 
           description: Incorrect username or password
+        400:
+          description: Missing user name or password
         default:
           description: Unexpected error
           schema:
@@ -184,21 +186,15 @@ definitions:
   Login:
     type: object
     properties:
-      first_name:
+      Username:
         type: string
-        description: First name of the Uber user.
-      last_name:
+        description: Username
+      access_token:
         type: string
-        description: Last name of the Uber user.
-      email:
-        type: string
-        description: Email address of the Uber user
-      picture:
-        type: string
-        description: Image URL of the Uber user.
-      promo_code:
-        type: string
-        description: Promo code of the Uber user.
+        description: Access token
+      last_updated:
+        type: integer
+        format: int32
   Cart:
     type: array
     items:

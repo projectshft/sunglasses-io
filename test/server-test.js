@@ -12,11 +12,12 @@ describe('Sunglasses', () => {
     it('it should get all the sunglasses in the store', (done) => {
       chai
         .request(server)
-        .get('/products')
+        .get('/api/products')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(11);
+          done();
         })
     })
   })
@@ -27,11 +28,11 @@ describe('/GET Brands', () => {
   it('it should get all brands', (done) => {
     chai
       .request(server)
-      .get('/brands')
+      .get('/api/brands')
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an('array');
-        res.body.lenght.should.be.eq(5);
+        res.body.length.should.be.eq(5);
         done();
       })
   })
@@ -41,9 +42,13 @@ describe('/GET Brands', () => {
 describe('Get sunglasses by brand', () => {
   describe('/GET sunglasses by brand', () => {
     it('it should get all sunglasses of specific brand', (done) => {
+      let brand =  {
+        "id": "1",
+        "name" : "Oakley"
+    }
       chai
         .request(server)
-        .get('/brands/1/products')
+        .get('/api/brands/' + brand.id + '/products')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -54,9 +59,9 @@ describe('Get sunglasses by brand', () => {
     it('it should return an error if a brand with no sunglasses is entered', (done) => {
       chai
         .request(server)
-        .get('/brands/6/products')
+        .get('/api/brands/6/products')
         .end((err, res) => {
-          err.should.have.status(404);
+          res.should.have.status(404);
           done();
         })
     })
