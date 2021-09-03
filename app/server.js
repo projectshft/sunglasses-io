@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
+var url = require('url');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
@@ -63,6 +64,13 @@ router.get('/api/brands/:id/products', (req, res) => {
 
 router.get('/api/products', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
+  const queryParams = queryString.parse(url.parse(req.url).query);
+
+  if (queryParams.query) {
+    const queryProducts = products.filter(product => product.name.toUpperCase().includes(queryParams.query.toUpperCase()));
+    return res.end(JSON.stringify(queryProducts));
+  }
+  
   return res.end(JSON.stringify(products));
 })
 

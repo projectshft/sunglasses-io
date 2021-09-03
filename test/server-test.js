@@ -81,5 +81,68 @@ describe('Products', () => {
         done();
       })
     })
+
+    // This one need work
+    it ('should GET all products that match a query', (done) => {
+      const glasses = [
+        {
+          id: "1",
+          categoryId: "1",
+          name: "Superglasses",
+          description: "The best glasses in the world",
+          price:150,
+          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      },
+      {
+          id: "2",
+          categoryId: "1",
+          name: "Black Sunglasses",
+          description: "The best glasses in the world",
+          price:100,
+          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      },
+      {
+          id: "3",
+          categoryId: "1",
+          name: "Brown Sunglasses",
+          description: "The best glasses in the world",
+          price:50,
+          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      },
+      {
+          id: "4",
+          categoryId: "2",
+          name: "Better glasses",
+          description: "The best glasses in the world",
+          price:1500,
+          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      },
+      {
+          id: "5",
+          categoryId: "2",
+          name: "Glasses",
+          description: "The most normal glasses in the world",
+          price:150,
+          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      },
+      {
+        id: "7",
+        categoryId: "3",
+        name: "QDogs Glasses",
+        description: "They bark",
+        price:1500,
+        imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    },
+      ]
+
+      chai.request(server)
+      .get('/api/products?query=glasses')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.should.be.eql(glasses);
+        done();
+      })
+    })
   })
 })
