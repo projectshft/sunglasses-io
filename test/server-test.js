@@ -18,10 +18,8 @@ describe('Brands', () => {
         done();
       })
     })
-  })
 
-  describe('/GET, brands, ID', () => {
-    it ("should GET all of a brand's products", (done) => {
+    it ("should GET all of a brand's products by id", (done) => {
 
       const oakley = [
         {
@@ -51,14 +49,22 @@ describe('Brands', () => {
       ]
 
       chai.request(server)
-      .get(`/api/brands/1/products`)
+      .get('/api/brands/1/products')
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an('array');
-        res.body.length.should.be.eql(3);
         res.body.should.be.eql(oakley);
         done();
       })
     })
-  })
+
+    it ("should be 404 if an invalid id is passed", (done) => {
+      chai.request(server)
+      .get('/api/brands/6/products')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      })
+    })
+  })    
 })

@@ -51,6 +51,12 @@ router.get('/api/brands', (req, res) => {
 
 router.get('/api/brands/:id/products', (req, res) => {
   const brandProducts = products.filter(product => product.categoryId === req.params.id);
+
+  if (brandProducts.length === 0) {
+    res.writeHead(404);
+    return res.end("Brand not found.");
+  }
+
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(brandProducts));
 })
