@@ -49,4 +49,10 @@ router.get('/api/brands', (req, res) => {
 	return res.end(JSON.stringify(brands));
 })
 
+router.get('/api/brands/:id/products', (req, res) => {
+  const brandProducts = products.filter(product => product.categoryId === req.params.id);
+  res.writeHead(200, { "Content-Type": "application/json" });
+  return res.end(JSON.stringify(brandProducts));
+})
+
 module.exports = server;
