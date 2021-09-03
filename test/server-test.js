@@ -52,7 +52,6 @@ describe('Brands', () => {
       .get('/api/brands/1/products')
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.be.an('array');
         res.body.should.be.eql(oakley);
         done();
       })
@@ -139,8 +138,17 @@ describe('Products', () => {
       .get('/api/products?query=glasses')
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.be.an('array');
         res.body.should.be.eql(glasses);
+        done();
+      })
+    })
+
+    it ('should not GET any products when there are no query matches', (done) => {
+      chai.request(server)
+      .get('/api/products?query=reallycoolsunglasses')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.eql([]);
         done();
       })
     })
