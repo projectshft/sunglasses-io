@@ -61,4 +61,9 @@ router.get('/api/brands/:id/products', (req, res) => {
   return res.end(JSON.stringify(brandProducts));
 })
 
+router.get('/api/products', (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  return res.end(JSON.stringify(products));
+})
+
 module.exports = server;
