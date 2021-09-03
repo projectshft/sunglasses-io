@@ -15,8 +15,8 @@ let users = [];
 const router = Router();
 router.use(bodyParser.json());
 
-http.createServer(function (request, response) {
-  router(request, response, finalHandler(request, response))
+const server = http.createServer(function (req, res) {
+  router(req, res, finalHandler(req, res))
 }).listen(PORT, (err) => {
 
   if (err) {
@@ -26,20 +26,27 @@ http.createServer(function (request, response) {
   fs.readFile('./initial-data/brands.json', 'utf8', (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded`);
+    // console.log(`Server setup: ${brands.length} brands loaded`);
   });
 
   fs.readFile('./initial-data/products.json', 'utf-8', (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} users loaded`);
+    // console.log(`Server setup: ${products.length} users loaded`);
   })
 
   fs.readFile('./initial-data/users.json', 'utf8', (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
-    console.log(`Server setup: ${users.length} users loaded`);
+    // console.log(`Server setup: ${users.length} users loaded`);
   });
 
-  console.log(`Server is listening on ${PORT}`);
+  // console.log(`Server is listening on ${PORT}`);
 });
+
+router.get('/api/brands', (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" });
+	return res.end(JSON.stringify(brands));
+})
+
+module.exports = server;

@@ -1,0 +1,238 @@
+swagger: '2.0'
+info:
+  title: Sunglasses IO
+  description: An API to support a sunglasses store
+  version: 1.0.0
+host: sunglasses.api
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Brands
+      description: |
+        The brands enpoint returns all brands in the store
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /api/brands/{id}/products:
+    get:
+      summary: Brand Products
+      description: |
+        The brand products endpoint returns all products for a specified brand id
+      tags:
+        - Brands
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /api/products:
+    get:
+      summary: Products
+      description: |
+        The products endpoint returns either all products or the result of a product search query
+      tags:
+        - Products
+      parameters:
+        - name: query
+          in: query
+          description: search query string
+          required: false
+          type: string
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        
+  /api/login:
+    post:
+      summary: User login
+      description: >-
+        The login endpoint sets the current authenticated user
+      tags:
+        - User
+      responses:
+        '200':
+          description: Login successful
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /api/me/cart:
+    get:
+      summary: View cart
+      description: |
+        This endpoint allows the user to view their cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add item to cart
+      description: |
+        This endpoint allows the user to add a product to their cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Product succesfully added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /api/me/cart/{productId}:
+    delete:
+      summary: Deletes a product from the cart
+      description: |
+        This endpoint allows users to remove a product from their cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to remove
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Deletion successful
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Updates a product quantity in the cart
+      description: |
+        This endpoint allows users to update the amount of an item in their cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to remove
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Update successful
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: name of brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the product
+      categoryId:
+        type: string
+        description:
+          The indentifier for the product's brand
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: The description of the product
+      imageURL:
+        type: string
+        description: The URL for the image representing the product
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the store user.
+      last_name:
+        type: string
+        description: Last name of the store user.
+      email:
+        type: string
+        description: Email address of the store user
+      cart:
+        $ref: '#/definitions/Cart'
+  Cart:
+    type: array
+    items:
+      $ref: '#/definitions/CartItem'
+  CartItem:
+    type: object
+    properties:
+      quantity:
+        type: integer
+      product:
+        $ref: '#/definitions/Product'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
