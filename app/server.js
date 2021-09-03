@@ -12,6 +12,7 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -72,6 +73,36 @@ router.get('/api/products', (req, res) => {
   }
   
   return res.end(JSON.stringify(products));
+})
+
+router.post('/api/login', (req, res) => {
+  if (req.body.username && req.body.password) {
+    const user = users.find(u => u.login.username === req.body.username && u.login.password === req.body.password);
+
+    if (user) {
+      res.writeHead(200, { "Content-Type": "application/json" });
+
+      const existingAccessToken = accessTokens.find(accessToken => accessToken.username === user.login.username);
+
+      if (existingAccessToken) {
+        existingAccessToken.lastUpdated = new Date();
+        return res.end(JSON.stringify(existingAccessToken.token));
+      }
+
+      const newAccessToken = {
+        username: user.login.username,
+        lastUpdated: new Date(),
+        token: uid(16)
+      }
+
+      accessTokens.push(newAccessToken);
+      return(res.end(JSON.stringify(newAccessToken.token)));
+    }
+
+    res.writeHead(401, 'Invalid username or password');
+    return res.end();
+  }
+  return res.end();
 })
 
 module.exports = server;

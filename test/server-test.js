@@ -154,3 +154,41 @@ describe('Products', () => {
     })
   })
 })
+
+describe('User', () => {
+  describe('/POST, login', () => {
+    it ('should return an access token for the user logging in', (done) => {
+
+      const user = {
+        username: 'yellowleopard753',
+        password: 'jonjon'
+      }
+
+      chai.request(server)
+      .post('/api/login')
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('string');
+        res.body.length.should.be.eql(16);
+        done();
+      })
+    })
+
+    it ('should return 401 if the user inputs an invalid username or password', (done) => {
+      
+      const user = {
+        username: 'wrongusername',
+        password: 'wrongpassword'
+      }
+
+      chai.request(server)
+      .post('/api/login')
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+    })
+  })
+})
