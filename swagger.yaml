@@ -50,7 +50,7 @@ paths:
             items:
               $ref: "#/definitions/Product"
         "404":
-          description: Response when an invalid id is passed
+          description: Invalid id
           schema:
             $ref: "#/definitions/Error"
         default:
@@ -83,6 +83,29 @@ paths:
           schema:
             $ref: "#/definitions/Error"
 
+  /api/products/{id}:
+    get:
+      summary: Products
+      description: |
+        This endpoint returns the product with the specified id
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          description: The id of the product
+          required: true
+          type: string
+      responses:
+        "200":
+          description: A product
+          schema:
+            $ref: "#/definitions/Product"
+        "404":
+          description: Invalid id
+          schema:
+            $ref: "#/definitions/Error"
+
   /api/login:
     post:
       summary: User login
@@ -95,6 +118,14 @@ paths:
           description: Login successful
           schema:
             $ref: "#/definitions/User"
+        "401":
+          description: Invalid username or password
+          schema:
+            $ref: "#/definitions/Error"
+        "400":
+          description: Username or password is missing
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:

@@ -158,7 +158,6 @@ describe('Products', () => {
 describe('User', () => {
   describe('/POST, login', () => {
     it ('should return an access token for the user logging in', (done) => {
-
       const user = {
         username: 'yellowleopard753',
         password: 'jonjon'
@@ -175,8 +174,7 @@ describe('User', () => {
       })
     })
 
-    it ('should return 401 if the user inputs an invalid username or password', (done) => {
-      
+    it ('should return 401 if the user inputs an invalid username or password', (done) => {     
       const user = {
         username: 'wrongusername',
         password: 'wrongpassword'
@@ -187,6 +185,18 @@ describe('User', () => {
       .send(user)
       .end((err, res) => {
         res.should.have.status(401);
+        done();
+      })
+    })
+
+    it ('should return 400 if the request is missing a username or password', (done) => {
+      const user = {}
+
+      chai.request(server)
+      .post('/api/login')
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(400);
         done();
       })
     })

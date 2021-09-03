@@ -102,6 +102,8 @@ router.post('/api/login', (req, res) => {
     res.writeHead(401, 'Invalid username or password');
     return res.end();
   }
+
+  res.writeHead(400, 'Incorrectly formatted request');
   return res.end();
 })
 
