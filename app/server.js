@@ -55,8 +55,8 @@ router.get('/api/brands/:id/products', (req, res) => {
   const brandProducts = products.filter(product => product.categoryId === req.params.id);
 
   if (brandProducts.length === 0) {
-    res.writeHead(404);
-    return res.end("Brand not found.");
+    res.writeHead(404, 'Brand not found');
+    return res.end();
   }
 
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -73,6 +73,18 @@ router.get('/api/products', (req, res) => {
   }
   
   return res.end(JSON.stringify(products));
+})
+
+router.get('/api/products/:id', (req, res) => {
+  const product = products.find(p => p.id === req.params.id);
+
+  if (!product) {
+    res.writeHead(404, 'Product not found');
+    return res.end();
+  }
+  
+  res.writeHead(200, { "Content-Type": "application/json" });
+  return res.end(JSON.stringify(product));
 })
 
 router.post('/api/login', (req, res) => {

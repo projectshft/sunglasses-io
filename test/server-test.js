@@ -20,7 +20,6 @@ describe('Brands', () => {
     })
 
     it ("should GET all of a brand's products by id", (done) => {
-
       const oakley = [
         {
           id: "1",
@@ -81,7 +80,6 @@ describe('Products', () => {
       })
     })
 
-    // This one need work
     it ('should GET all products that match a query', (done) => {
       const glasses = [
         {
@@ -143,12 +141,40 @@ describe('Products', () => {
       })
     })
 
+    it ('should GET the product with the passed id', (done) => {
+      const product = {
+        id: "3",
+        categoryId: "1",
+        name: "Brown Sunglasses",
+        description: "The best glasses in the world",
+        price:50,
+        imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
+
+      chai.request(server)
+      .get('/api/products/3')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.eql(product);
+        done();
+      })
+    })
+
     it ('should not GET any products when there are no query matches', (done) => {
       chai.request(server)
       .get('/api/products?query=reallycoolsunglasses')
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.eql([]);
+        done();
+      })
+    })
+
+    it ('should return 404 if an invalid id is passed', (done) => {
+      chai.request(server)
+      .get('/api/products/33')
+      .end((err, res) => {
+        res.should.have.status(404);
         done();
       })
     })
