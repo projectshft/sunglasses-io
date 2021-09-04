@@ -147,4 +147,27 @@ router.get('/api/me/cart', (req, res) => {
   return res.end();  
 })
 
+router.post('/api/me/cart', (req, res) => {
+  const accessToken = getValidToken(req);
+
+  if (!accessToken) {
+    res.writeHead(401, 'You need to be logged in to add products to your cart.')
+    return res.end();  
+  }
+
+  if (req.body.id) {
+    const product = products.find(p => p.id === req.body.id);
+    const user = users.find(u => u.login.username === accessToken.username);
+
+    if (product) {
+      user.cart.push(product);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify(user.cart));
+    }
+  }
+
+  res.writeHead(404, "That product doesn't exist");
+  return res.end();
+})
+
 module.exports = server;
