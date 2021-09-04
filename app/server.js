@@ -28,29 +28,26 @@ const server = http.createServer(function (req, res) {
   fs.readFile('./initial-data/brands.json', 'utf8', (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    // console.log(`Server setup: ${brands.length} brands loaded`);
   });
 
   fs.readFile('./initial-data/products.json', 'utf-8', (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
-    // console.log(`Server setup: ${products.length} users loaded`);
   })
 
   fs.readFile('./initial-data/users.json', 'utf8', (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
-    // console.log(`Server setup: ${users.length} users loaded`);
   });
-
-  // console.log(`Server is listening on ${PORT}`);
 });
 
+// GETs all brands
 router.get('/api/brands', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
 	return res.end(JSON.stringify(brands));
 })
 
+// GETs a brand's products
 router.get('/api/brands/:id/products', (req, res) => {
   const brandProducts = products.filter(product => product.categoryId === req.params.id);
 
@@ -63,6 +60,7 @@ router.get('/api/brands/:id/products', (req, res) => {
   return res.end(JSON.stringify(brandProducts));
 })
 
+// GETs all products or products that match an optional query
 router.get('/api/products', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   const queryParams = queryString.parse(url.parse(req.url).query);
@@ -75,6 +73,7 @@ router.get('/api/products', (req, res) => {
   return res.end(JSON.stringify(products));
 })
 
+// GETs the product that matches the id
 router.get('/api/products/:id', (req, res) => {
   const product = products.find(p => p.id === req.params.id);
 
@@ -87,6 +86,7 @@ router.get('/api/products/:id', (req, res) => {
   return res.end(JSON.stringify(product));
 })
 
+// Logs the user in
 router.post('/api/login', (req, res) => {
   if (req.body.username && req.body.password) {
     const user = users.find(u => u.login.username === req.body.username && u.login.password === req.body.password);
@@ -119,6 +119,7 @@ router.post('/api/login', (req, res) => {
   return res.end();
 })
 
+// Gets access tokens from requests
 const getValidToken = (req) => {
   const parsedUrl = url.parse(req.url, true);
 
@@ -133,6 +134,7 @@ const getValidToken = (req) => {
   return null;
 }
 
+// GETs the user's cart
 router.get('/api/me/cart', (req, res) => {
   const accessToken = getValidToken(req);
 
@@ -147,6 +149,7 @@ router.get('/api/me/cart', (req, res) => {
     return res.end(JSON.stringify(user.cart));
 })
 
+// POSTs an item to the user's cart
 router.post('/api/me/cart', (req, res) => {
   const accessToken = getValidToken(req);
 
@@ -161,7 +164,7 @@ router.post('/api/me/cart', (req, res) => {
 
     if (product) {
       const cartItem = {
-        quantity: '1',
+        quantity: 1,
         product: product
       }
 
@@ -175,6 +178,7 @@ router.post('/api/me/cart', (req, res) => {
   return res.end();
 })
 
+// POSTs a quantity to an item in the user's cart
 router.post('/api/me/cart/:id', (req, res) => {
   const accessToken = getValidToken(req);
 
@@ -183,13 +187,8 @@ router.post('/api/me/cart/:id', (req, res) => {
     return res.end();  
   }
 
-  if (!Number.isInteger(req.body.count)) {
-    res.writeHead(400, 'Quantity must be an integer')
-    return res.end();
-  }
-
-  if (req.body.count < 1) {
-    res.writeHead(400, 'Quantity must be larger than 0')
+  if (!Number.isInteger(req.body.count) || req.body.count < 1) {
+    res.writeHead(400, 'Invalid quantity')
     return res.end();
   }
 
@@ -197,7 +196,7 @@ router.post('/api/me/cart/:id', (req, res) => {
   let product = user.cart.find(item => item.product.id === req.params.id);
 
   if (product) {
-    product.quantity = req.body.count.toString();
+    product.quantity = req.body.count;
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(product));
   }
@@ -206,6 +205,7 @@ router.post('/api/me/cart/:id', (req, res) => {
   return res.end();
 })
 
+// DELETEs an item from the user's cart
 router.delete('/api/me/cart/:productId', (req, res) => {
   const accessToken = getValidToken(req);
 

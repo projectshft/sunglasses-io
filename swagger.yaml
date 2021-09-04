@@ -105,6 +105,10 @@ paths:
           description: Invalid id
           schema:
             $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
 
   /api/login:
     post:
@@ -161,7 +165,7 @@ paths:
         "200":
           description: Product succesfully added to cart
         "404":
-          description: Product does not exit
+          description: Product does not exist
           schema:
             $ref: "#/definitions/Error"
         "401":
@@ -191,6 +195,14 @@ paths:
           description: Deletion successful
           schema:
             $ref: "#/definitions/Product"
+        "404":
+        description: Product is not in cart
+        schema:
+          $ref: "#/definitions/Error"
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -212,6 +224,18 @@ paths:
           description: Update successful
           schema:
             $ref: "#/definitions/Product"
+        "404":
+        description: Product is not in cart
+        schema:
+          $ref: "#/definitions/Error"
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: "#/definitions/Error"
+        "400":
+          description: Invalid quantity
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:

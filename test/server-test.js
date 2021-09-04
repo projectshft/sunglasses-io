@@ -265,7 +265,7 @@ describe('Cart', () => {
 
       const responseCart = [
         {
-          quantity: '1',
+          quantity: 1,
           product: {
             id: "7",
             categoryId: "3",
@@ -323,7 +323,7 @@ describe('Cart', () => {
       }
 
       const responseObj = {
-        quantity: '4',
+        quantity: 4,
         product: {
           id: "7",
           categoryId: "3",
