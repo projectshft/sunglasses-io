@@ -1,0 +1,282 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Products in Brand
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Enter login credentials
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: View cart
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add product to cart
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      summary: Remove product from cart
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Change quantity of product in cart
+      description: |
+        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - upVotes
+              - dateCreated
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: An array of goals
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Goal"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
