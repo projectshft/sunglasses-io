@@ -47,6 +47,10 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+        "400":
+          description: ID parameter required
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: A model with the specified ID was not found
           schema:
@@ -57,8 +61,14 @@ paths:
             $ref: "#/definitions/Error"
   /products:
     get:
-      summary: Get all products
-      description: This endpoint returns all products
+      summary: Products
+      description: The products endpoint allows the user to search products.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
       tags:
         - Products
       responses:
@@ -100,9 +110,9 @@ paths:
         - Cart
       responses:
         "200":
-          description: Cart object
+          description: Cart Array
           schema:
-            $ref: "#/definitions/Cart"
+            $ref: "#/definitions/User"
         "401":
           description: User not logged in
           schema:
@@ -118,9 +128,9 @@ paths:
         - Cart
       responses:
         "200":
-          description: Added product
+          description: Cart Array
           schema:
-            $ref: "#/definitions/Product"
+            $ref: "#/definitions/User"
         "401":
           description: User not logged in
           schema:
@@ -144,6 +154,10 @@ paths:
       responses:
         "200":
           description: Success message
+        "400":
+          description: Missing required productId parameter
+          schema:
+            $ref: "#/definitions/Error"
         "401":
           description: User not logged in
           schema:
@@ -169,7 +183,7 @@ paths:
         - Cart
       responses:
         "200":
-          description: Updated Product
+          description: Updated Cart
           schema:
             $ref: "#/definitions/Product"
         "401":
@@ -195,19 +209,6 @@ definitions:
       name:
         type: string
         description: Name of brand
-  Cart:
-    type: object
-    properties:
-      id:
-        type: string
-        description: Unique identifier for cart
-      items:
-        type: array
-        items:
-          $ref: "#/definitions/CartItem"
-        description: Products in cart and quantities of each
-      user:
-        $ref: "#/definitions/User"
   CartItem:
     type: object
     properties:
@@ -254,8 +255,13 @@ definitions:
       email:
         type: string
         description: Email address of the user
+      password:
+        type: string
+        description: User password
       id:
         type: string
         description: Unique identifier of the user
       cart:
-        $ref: "#/definitions/Cart"
+        type: array
+        items:
+          $ref: "#/definitions/CartItem"
