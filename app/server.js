@@ -136,15 +136,15 @@ const getValidToken = (req) => {
 router.get('/api/me/cart', (req, res) => {
   const accessToken = getValidToken(req);
 
-  if (accessToken) {
-    const user = users.find(u => u.login.username === accessToken.username);
+  if (!accessToken) {
+    res.writeHead(401, 'You need to be logged in to view your cart.')
+    return res.end();  
+  } 
+
+  const user = users.find(u => u.login.username === accessToken.username);
 
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(user.cart));
-  }
-
-  res.writeHead(401, 'You need to be logged in to view your cart.')
-  return res.end();  
 })
 
 router.post('/api/me/cart', (req, res) => {
@@ -167,6 +167,28 @@ router.post('/api/me/cart', (req, res) => {
   }
 
   res.writeHead(404, "That product doesn't exist");
+  return res.end();
+})
+
+router.delete('/api/me/cart/:productId', (req, res) => {
+  const accessToken = getValidToken(req);
+
+  if (!accessToken) {
+    res.writeHead(401, 'You need to be logged in to delete items from your cart.')
+    return res.end();  
+  }
+
+  let user = users.find(u => u.login.username === accessToken.username);
+  const updatedCart = user.cart.filter(product => product.id === req.params.id);
+
+  if (updatedCart.length !== user.cart.length) {
+    user.cart = updatedCart;
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(user.cart));
+  }
+
+  res.writeHead(404, "That product isn't in your cart");
   return res.end();
 })
 

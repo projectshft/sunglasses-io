@@ -298,7 +298,7 @@ describe('Cart', () => {
       })
     })
 
-    it ('should return 401 if an invalid access token is passed', (done) => {
+    it ('should return 401 if the access token is invalid', (done) => {
       const product = {
         id: '3'
       }
@@ -306,6 +306,36 @@ describe('Cart', () => {
       chai.request(server)
       .post('/api/me/cart?accessToken=thisisabadtoken')
       .send(product)
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      })
+    })
+  })
+
+  describe('/DELETE cart', () => {
+    it ("should remove the specified product from the user's cart", (done) => {
+      chai.request(server)
+      .delete(`/api/me/cart/7?accessToken=${token}`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.eql([]);
+        done();
+      })
+    })
+
+    it ("should return 404 if the passed product isn't in the cart before deletion", (done) => {
+      chai.request(server)
+      .delete(`/api/me/cart/47?accessToken=${token}`)
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      })
+    })
+
+    it ("should return 401 if the access token is invalid", (done) => {
+      chai.request(server)
+      .delete(`/api/me/cart/7?accessToken=thisisabadtoken`)
       .end((err, res) => {
         res.should.have.status(401);
         done();

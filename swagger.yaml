@@ -143,6 +143,10 @@ paths:
           description: A user's cart
           schema:
             $ref: "#/definitions/Cart"
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -156,6 +160,14 @@ paths:
       responses:
         "200":
           description: Product succesfully added to cart
+        "404":
+          description: Product does not exit
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
