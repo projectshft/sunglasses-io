@@ -6,6 +6,8 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
+let token = '';
+
 describe('Brands', () => {
   describe('/GET, brands', () => {
     it ('should GET all brands', (done) => {
@@ -194,8 +196,12 @@ describe('User', () => {
       .send(user)
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.be.a('string');
-        res.body.length.should.be.eql(16);
+        res.body.should.be.an('object');
+        res.body.should.have.property('username');
+        res.body.should.have.property('lastUpdated');
+        res.body.should.have.property('token');
+
+        token = res.body.token;
         done();
       })
     })
@@ -223,6 +229,29 @@ describe('User', () => {
       .send(user)
       .end((err, res) => {
         res.should.have.status(400);
+        done();
+      })
+    })
+  })
+})
+
+describe('Cart', () => {
+  describe('/GET, cart', () => {
+    it ("should return the currently logged in user's cart", (done) => {
+      chai.request(server)
+      .get(`/api/me/cart?accessToken=${token}`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        done();
+      })
+    })
+
+    it ("should return 401 if the access token is invalid", (done) => {
+      chai.request(server)
+      .get('/api/me/cart?accessToken=thisisabadtoken')
+      .end((err, res) => {
+        res.should.have.status(401);
         done();
       })
     })

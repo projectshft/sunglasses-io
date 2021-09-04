@@ -140,11 +140,9 @@ paths:
         - Cart
       responses:
         "200":
-          description: An array of products
+          description: A user's cart
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Product"
+            $ref: "#/definitions/Cart"
         default:
           description: Unexpected error
           schema:

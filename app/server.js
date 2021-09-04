@@ -98,7 +98,7 @@ router.post('/api/login', (req, res) => {
 
       if (existingAccessToken) {
         existingAccessToken.lastUpdated = new Date();
-        return res.end(JSON.stringify(existingAccessToken.token));
+        return res.end(JSON.stringify(existingAccessToken));
       }
 
       const newAccessToken = {
@@ -108,7 +108,7 @@ router.post('/api/login', (req, res) => {
       }
 
       accessTokens.push(newAccessToken);
-      return(res.end(JSON.stringify(newAccessToken.token)));
+      return res.end(JSON.stringify(newAccessToken));
     }
 
     res.writeHead(401, 'Invalid username or password');
@@ -117,6 +117,34 @@ router.post('/api/login', (req, res) => {
 
   res.writeHead(400, 'Incorrectly formatted request');
   return res.end();
+})
+
+const getValidToken = (req) => {
+  const parsedUrl = url.parse(req.url, true);
+
+  if (parsedUrl.query.accessToken) {
+    const validAccessToken = accessTokens.find(accessToken => accessToken.token === parsedUrl.query.accessToken);
+
+    if (validAccessToken)
+      return validAccessToken;
+    
+    return null;
+  }
+  return null;
+}
+
+router.get('/api/me/cart', (req, res) => {
+  const accessToken = getValidToken(req);
+
+  if (accessToken) {
+    const user = users.find(u => u.login.username === accessToken.username);
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(user.cart));
+  }
+
+  res.writeHead(401, 'You need to be logged in to view your cart.')
+  return res.end();  
 })
 
 module.exports = server;
