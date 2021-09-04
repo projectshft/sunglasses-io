@@ -160,13 +160,49 @@ router.post('/api/me/cart', (req, res) => {
     const user = users.find(u => u.login.username === accessToken.username);
 
     if (product) {
-      user.cart.push(product);
+      const cartItem = {
+        quantity: '1',
+        product: product
+      }
+
+      user.cart.push(cartItem);
       res.writeHead(200, { "Content-Type": "application/json" });
       return res.end(JSON.stringify(user.cart));
     }
   }
 
   res.writeHead(404, "That product doesn't exist");
+  return res.end();
+})
+
+router.post('/api/me/cart/:id', (req, res) => {
+  const accessToken = getValidToken(req);
+
+  if (!accessToken) {
+    res.writeHead(401, 'You need to be logged in to delete items from your cart.')
+    return res.end();  
+  }
+
+  if (!Number.isInteger(req.body.count)) {
+    res.writeHead(400, 'Quantity must be an integer')
+    return res.end();
+  }
+
+  if (req.body.count < 1) {
+    res.writeHead(400, 'Quantity must be larger than 0')
+    return res.end();
+  }
+
+  let user = users.find(u => u.login.username === accessToken.username);
+  let product = user.cart.find(item => item.product.id === req.params.id);
+
+  if (product) {
+    product.quantity = req.body.count.toString();
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(product));
+  }
+
+  res.writeHead(404, "That product isn't in your cart");
   return res.end();
 })
 
@@ -179,7 +215,7 @@ router.delete('/api/me/cart/:productId', (req, res) => {
   }
 
   let user = users.find(u => u.login.username === accessToken.username);
-  const updatedCart = user.cart.filter(product => product.id === req.params.id);
+  const updatedCart = user.cart.filter(item => item.product.id === req.params.id);
 
   if (updatedCart.length !== user.cart.length) {
     user.cart = updatedCart;

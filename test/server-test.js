@@ -265,13 +265,16 @@ describe('Cart', () => {
 
       const responseCart = [
         {
-          id: "7",
-          categoryId: "3",
-          name: "QDogs Glasses",
-          description: "They bark",
-          price:1500,
-          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-        }
+          quantity: '1',
+          product: {
+            id: "7",
+            categoryId: "3",
+            name: "QDogs Glasses",
+            description: "They bark",
+            price:1500,
+            imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }
+        }     
       ]
 
       chai.request(server)
@@ -308,6 +311,77 @@ describe('Cart', () => {
       .send(product)
       .end((err, res) => {
         res.should.have.status(401);
+        done();
+      })
+    })
+  })
+
+  describe('/POST cart item', () => {
+    it ('should update the quantity of an item in the cart', (done) => {
+      const quantity = {
+        count: 4
+      }
+
+      const responseObj = {
+        quantity: '4',
+        product: {
+          id: "7",
+          categoryId: "3",
+          name: "QDogs Glasses",
+          description: "They bark",
+          price:1500,
+          imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+      }     
+
+      chai.request(server)
+      .post(`/api/me/cart/7?accessToken=${token}`)
+      .send(quantity)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.eql(responseObj);
+        done();
+      })
+    })
+
+    it ("should return 404 if the passed product isn't in the cart", (done) => {
+      const quantity = {
+        count: 4
+      }
+
+      chai.request(server)
+      .post(`/api/me/cart/21?accessToken=${token}`)
+      .send(quantity)
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      })
+    })
+
+    it ("should return 400 if the passed quantity isn't an integer", (done) => {
+      const quantity = {
+        count: '4'
+      }
+
+      chai.request(server)
+      .post(`/api/me/cart/7?accessToken=${token}`)
+      .send(quantity)
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      })
+    })
+
+    it ("should return 400 if the passed quantity is less than 1", (done) => {
+      const quantity = {
+        count: -1
+      }
+
+      chai.request(server)
+      .post(`/api/me/cart/7?accessToken=${token}`)
+      .send(quantity)
+      .end((err, res) => {
+        res.should.have.status(400);
         done();
       })
     })
