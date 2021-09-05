@@ -69,6 +69,11 @@ router.get("/api/brands/:id/products", (request, response) => {
   const {id} = request.params;
   const brand = brands.find(brand => brand.id == id);
 
+  if (!brand) {
+    response.writeHead(404, "Brand ID not found");
+    return response.end();
+  }
+
   const relatedProducts = products.filter(product => product.categoryId == brand.id);
 
   response.writeHead(200, {"Content-Type": "application/json"});
