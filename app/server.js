@@ -35,9 +35,26 @@ server.listen(PORT, err => {
   products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
 });
 
-myRouter.get('/brands', function(request,response) {
+myRouter.get('/brands', (request,response) => {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(brands));
+})
+
+myRouter.get('/brands/:id/products', (req, res) => {
+  const { id } = req.params;
+  const productsResult = products.filter(product => product.categoryId == id);
+  const brand = brands.find(brand => brand.id == id);
+  
+  if (!brand) {
+    res.writeHead(404, "That brand does not exist");      
+    return res.end();  
+  } else if (!productsResult) {
+    res.writeHead(404, "No products found");    
+    return res.end();
+  } else {
+  res.writeHead(200, {"Content-Type": "application/json"});    
+  return res.end(JSON.stringify(productsResult));
+  }
 })
 
 module.exports = server;
