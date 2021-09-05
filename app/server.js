@@ -6,12 +6,14 @@ const url = require("url");
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
+const { traceDeprecation } = require('process');
 
 //state holding variables
 let brands = [];
 let users = [];
 let user = {};
 let products = [];
+let accessTokens = ['sqHPTIt4wYP5dhpO'];
 
 const PORT = process.env.PORT || 8080;
 
@@ -59,7 +61,7 @@ myRouter.get('/brands/:id/products', (req, res) => {
 })
 
 myRouter.get('/products', (req, res) => {
-  console.log(req);
+  
   const parsedUrl = url.parse(req.originalUrl);
   const { query } = queryString.parse(parsedUrl.query);
   let productsToReturn = [];
@@ -80,4 +82,62 @@ myRouter.get('/products', (req, res) => {
   return res.end(JSON.stringify(productsToReturn));
 })
 
+myRouter.post("/login", (req, res) => {
+  if (req.body.username && req.body.password) {
+    let user=users.find((user) => {
+      return user.login.username == req.body.username && user.login.password == req.body.password
+    });
+
+    if (user) {
+      res.writeHead(200, { 'Content-Type': 'application/json'});
+
+      let currentAccessToken = accessTokens.find((token) => {
+        token.username == user.login.username
+      });
+
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+
+        return res.end(JSON.stringify(currentAccessToken.token));
+      } else {
+
+        //why is new access token undefined??
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        
+        accessTokens.push(newAccessToken);
+        return res.end(JSON.stringify(newAccessToken.token))
+      }
+    } else {
+      res.writeHead(401, "Invalid username or password");
+      return res.end();
+    }
+  } else {
+    res.writeHead(400, "incorrectly formatted response");
+    return res.end();
+  }
+});
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 module.exports = server;

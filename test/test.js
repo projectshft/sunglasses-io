@@ -96,3 +96,55 @@ describe("/GET products", () => {
       });
   });
 });
+
+describe("/POST login", () => {
+  it.only("should send Access Token if successful", done => {
+    let user = {      
+      username: "yellowleopard753",
+      password: "jonjon"
+    };
+
+    chai
+      .request(server)
+      .post('/login')
+      .send(user)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.a('string');
+        expect(res.body).to.have.lengthOf(16);
+        done();
+      })
+  });
+
+  it.only("should throw an error if username or password are not sent in req", done => {
+    let user = {
+      username: "yellowleopard753"
+    };
+
+    chai
+      .request(server)
+      .post('/login')
+      .send(user)
+      .end((err, res) => {
+        expect(res).to.have.status(400)
+        done();
+
+      })
+  })
+
+  it.only("should throw error if user isn't found", done => {
+    let user = {
+      username: "Phil",
+      password: "McCracken"
+    };
+
+    chai
+      .request(server)
+      .post('/login')
+      .send(user)
+      .end((err, res) => {
+        expect(res).to.have.status(401)
+        done();
+      })
+  })
+})
