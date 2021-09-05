@@ -86,12 +86,12 @@ paths:
       summary: Enter login credentials
       description: The login endpoint allows you to submit your login credentials
       tags:
-        - Login
+        - User
       responses:
         "200":
           description: Login successful
           schema:
-            $ref: "#/definitions/Login"
+            $ref: "#/definitions/User"
         "400":
           description: No credentials entered
           schema:
@@ -225,7 +225,6 @@ definitions:
         type: array
         items:
           type: string
-        description: Product images
   Brand:
     type: object
     properties:
@@ -235,15 +234,42 @@ definitions:
       name:
         type: string
         description: Brand name
-  Login:
+  User:
     type: object
     properties:
-      username:
+      gender:
         type: string
-        description: Username for login
-      password:
+        description: Gender of user
+      cart:
+        type: array
+        items:
+          type: object
+      name:
+        type: object
+      location:
+        type: object
+      email:
         type: string
-        description: Password for login
+        description: Email of user
+      login:
+        type: object
+      dob:
+        type: string
+        description: Date of birth of user
+      registered:
+        type: string
+        description: Date of registration for user
+      phone:
+        type: string
+        description: Home phone number for user
+      cell:
+        type: string
+        description: Cell phone number for user
+      picture:
+        type: object
+      nat:
+        type: string
+        description: Nat of user
   Cart:
     type: array
     items:

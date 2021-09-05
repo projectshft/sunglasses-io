@@ -11,6 +11,7 @@ const url = require("url");
 let products = [];
 let brands = [];
 let users = [];
+let accessTokens = [];
 
 const PORT = 3001;
 
@@ -72,4 +73,55 @@ router.get("/api/brands/:id/products", (request, response) => {
 
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(relatedProducts));
+});
+
+//POST login credentials
+router.post("/api/login", (request, response) => {
+ // Make sure there is a username and password in the request
+ if (request.body.username && request.body.password) {
+   // See if there is a user that has that username and password
+   const user = users.find((user) => {
+     return ((user.login.username == request.body.username) && (user.login.password==request.body.password));
+   });
+
+   if (!user) {
+    // Header for failed login
+    response.writeHead(401, "Invalid credentials");
+    return response.end();
+   }
+
+    // We have a successful login, if we already have an existing access token, use that
+    let currentAccessToken = accessTokens.find((tokenObject) => {
+      return tokenObject.username == user.login.username;
+    });
+
+    // Update the last updated value so we get another time period
+    if (currentAccessToken) {
+      currentAccessToken.lastUpdated = new Date();
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(currentAccessToken.token));
+    } else {
+      // Create a new token with the user value and a "random" token
+      let newAccessToken = {
+        username: user.login.username,
+        lastUpdated: new Date(),
+        token: uid(16)
+      }
+      accessTokens.push(newAccessToken);
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(newAccessToken.token));
+    }
+  }
+
+  else {
+    // Header for missing parameters
+    response.writeHead(400, "Missing credentials");
+    return response.end();
+  }
+});
+
+//GET
+router.get("/api/brands", (request, response) => {
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(brands));
 });
