@@ -1,10 +1,10 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const uid = require('rand-token').uid;
 const url = require("url");
 
 //State holding variables
@@ -125,7 +125,7 @@ const getValidTokenFromRequest = function(request) {
   const parsedUrl = url.parse(request.url, true);
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure it's valid
-    let currentAccessToken = accessTokens.find(accessToken => {
+    const currentAccessToken = accessTokens.find(accessToken => {
       return (accessToken.token == parsedUrl.query.accessToken);
     });
 
@@ -142,8 +142,7 @@ const getValidTokenFromRequest = function(request) {
 //GET cart
 router.get("/api/me/cart", (request, response) => {
   //Login authentication
-  let currentAccessToken = getValidTokenFromRequest(request);
-
+  const currentAccessToken = getValidTokenFromRequest(request);
   if(!currentAccessToken) {
     response.writeHead(401, "Login required");
     return response.end();
@@ -156,3 +155,45 @@ router.get("/api/me/cart", (request, response) => {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(currentUser.cart));
 });
+
+//POST add product to cart
+router.post("/api/me/cart", (request, response) => {
+  //Login authentication
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if(!currentAccessToken) {
+    response.writeHead(401, "Login required");
+    return response.end();
+  }
+
+  if(!request.body.id) {
+    response.writeHead(400, "No product submitted");
+    return response.end();
+  }
+
+  const currentUser = users.find((user) => {
+    return (user.login.username == currentAccessToken.username);
+  });
+
+  const submittedProduct = products.find((product) => {
+    return (product.id == request.body.id);
+  });
+
+  if (!submittedProduct) {
+    response.writeHead(404, "Product ID not found");
+    return response.end();
+  }
+
+  const productToCart = {
+    product: submittedProduct,
+    quantity: 1
+  }
+
+  currentUser.cart.push(productToCart);
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(currentUser.cart));
+});
+
+//DELETE remove product from cart
+router.post("/api/me/cart/:productId", (request, response) => {
+  
+})
