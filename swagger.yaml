@@ -13,33 +13,26 @@ paths:
   /products:
     get:
       summary: Products
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      description: The Products endpoint returns all products and optionally allows you to filter products based on a search query string.
       parameters:
         - name: query
           in: query
           description: Search query string
           required: false
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
       tags:
         - Products
       responses:
         "200":
-          description: An array of goals
+          description: An array of products
           schema:
             type: array
             items:
-              $ref: "#/definitions/Goal"
+              $ref: "#/definitions/Product"
+        "404":
+          description: No products match query
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -47,33 +40,16 @@ paths:
   /brands:
     get:
       summary: Brands
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
-      parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
+      description: The Brands endpoint returns information on all product brands.
       tags:
         - Brands
       responses:
         "200":
-          description: An array of goals
+          description: An array of brands
           schema:
             type: array
             items:
-              $ref: "#/definitions/Goal"
+              $ref: "#/definitions/Brand"
         default:
           description: Unexpected error
           schema:
@@ -81,33 +57,26 @@ paths:
   /brands/{id}/products:
     get:
       summary: Products in Brand
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      description: This endpoint returns information on all products for a specific brand.
       parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
+        - name: id
+          in: path
+          description: The id of the brand to filter products for
+          required: true
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
       tags:
         - Brands
       responses:
         "200":
-          description: An array of goals
+          description: An array of products
           schema:
             type: array
             items:
-              $ref: "#/definitions/Goal"
+              $ref: "#/definitions/Product"
+        "404":
+          description: Brand ID not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -115,33 +84,22 @@ paths:
   /login:
     post:
       summary: Enter login credentials
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
-      parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
+      description: The login endpoint allows you to submit your login credentials
       tags:
-        - Authentication
+        - Login
       responses:
         "200":
-          description: An array of goals
+          description: Login successful
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Goal"
+            $ref: "#/definitions/Login"
+        "400":
+          description: No credentials entered
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -149,66 +107,36 @@ paths:
   /me/cart:
     get:
       summary: View cart
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
-      parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
+      description: This endpoint allows you to view your cart
       tags:
         - Cart
       responses:
         "200":
-          description: An array of goals
+          description: A cart
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Goal"
+            $ref: "#/definitions/Cart"
+        "401":
+          description: Valid credentials required
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
     post:
       summary: Add product to cart
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
-      parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
-          type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
+      description: This endpoint allows you to add a product to your cart
       tags:
         - Cart
       responses:
         "200":
-          description: An array of goals
+          description: Cart updated
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Goal"
+            $ref: "#/definitions/Cart"
+        "401":
+          description: Valid credentials required
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -216,67 +144,118 @@ paths:
   /me/cart/{productId}:
     delete:
       summary: Remove product from cart
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      description: This endpoint allows you to remove a product from your cart
       parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
+        - name: productId
+          in: path
+          description: The id of the product to remove
+          required: true
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
       tags:
         - Cart
       responses:
         "200":
-          description: An array of goals
+          description: Cart updated
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Goal"
+            $ref: "#/definitions/Cart"
+        "401":
+          description: Valid credentials
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product ID not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
     post:
-      summary: Change quantity of product in cart
-      description: |
-        The Goals endpoint allows you to search goals based on different filters such as category and popularity as well as a search string
+      summary: Change the quantity of a product in your cart
+      description: This endpoint allows you to change the quantity of a specific product in your cart
       parameters:
-        - name: query
-          in: query
-          description: Search query string
-          required: false
+        - name: productId
+          in: path
+          description: The id of the product to change the quantity for
+          required: true
           type: string
-        - name: sort
-          in: query
-          description: The sort type on the response.
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - upVotes
-              - dateCreated
       tags:
         - Cart
       responses:
         "200":
-          description: An array of goals
+          description: Cart updated
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Goal"
+            $ref: "#/definitions/Cart"
+        "400":
+          description: Invalid quantity
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Valid credentials required
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product ID not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product identifier
+      categoryId:
+        type: string
+        description: Brand identifier
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: string
+        description: Price of product
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Product images
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier
+      name:
+        type: string
+        description: Brand name
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username for login
+      password:
+        type: string
+        description: Password for login
+  Cart:
+    type: array
+    items:
+      type: object
+      description: Products in the cart
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
