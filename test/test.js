@@ -203,3 +203,36 @@ describe("/POST me/cart", () => {
 
   //probably should test that it added one to the count for the cart object
 })
+
+describe("/DELETE /me/cart", () => {
+  it.only("Should delete the item from the user's cart", done => {
+    chai
+      .request(server)
+      .delete('/me/cart/5')
+      .query({accessToken: token})
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        done();
+      })
+  });
+  it.only("should throw an error if user is not logged in", done => {
+    chai
+      .request(server)
+      .get('/me/cart')
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+  
+  it.only("Should throw an error if the product id isn't in the user's cart", done => {
+    chai
+      .request(server)
+      .delete('/me/cart/47')
+      .query({accessToken: token})
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
+});

@@ -189,4 +189,33 @@ myRouter.post("/me/cart", (req, res) => {
   res.writeHead(200, {'Content-Type': 'application/json'})
   return res.end(JSON.stringify(product));
 })
+
+
+myRouter.delete("/me/cart/:productId", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  
+  if (!currentAccessToken) {
+    res.writeHead(401, "You need to log in to your account.")
+    return res.end();
+  } 
+  const user = users.find(user => {
+    return currentAccessToken.username === user.login.username
+  });
+
+  const itemToDelete = user.cart.find(item => {
+    return item.productId == req.params.productId;
+  })
+
+  if (itemToDelete) {
+    //delete it from file
+    const index = user.cart.indexOf(itemToDelete);
+    user.cart.splice(index, 1);
+   
+    res.writeHead(200);
+    return res.end();
+  } else {
+    res.writeHead(404, "Product not in cart");
+    return res.end(); 
+   }
+})
 module.exports = server;
