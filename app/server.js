@@ -11,7 +11,7 @@ const { traceDeprecation } = require('process');
 //state holding variables
 let brands = [];
 let users = [];
-
+let user = {};
 let products = [];
 let accessTokens = [{
   username: "yellowleopard753",
@@ -41,6 +41,10 @@ server.listen(PORT, err => {
 
   products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
 });
+
+const saveCurrentUser = (user) => {
+  fs.writeFileSync("initial-data/users.json", JSON.stringify(user), "utf-8");
+}
 
 myRouter.get('/brands', (request,response) => {
   response.writeHead(200, {"Content-Type": "application/json"});
@@ -153,7 +157,7 @@ myRouter.get("/me/cart", (req, res) => {
     res.writeHead(401, "You need to log in to your account.")
     return res.end();
   } 
-  const user = users.find(user => {
+  user = users.find(user => {
     return currentAccessToken.username === user.login.username
   })
   
@@ -179,13 +183,16 @@ myRouter.post("/me/cart", (req, res) => {
   })
   //update cart with product count
   if (productInCart) {
-    productInCart.count += 1
+    const index = user.cart.indexOf(productInCart);
+    user.cart[index].count += 1;
   } else {
     user.cart.push({
       "productId": product.id,
-      "count": 1
+      "count": 1,
+      "price": product.price
     })
   }
+  saveCurrentUser(user);
   res.writeHead(200, {'Content-Type': 'application/json'})
   return res.end(JSON.stringify(product));
 })
@@ -198,7 +205,7 @@ myRouter.delete("/me/cart/:productId", (req, res) => {
     res.writeHead(401, "You need to log in to your account.")
     return res.end();
   } 
-  const user = users.find(user => {
+  user = users.find(user => {
     return currentAccessToken.username === user.login.username
   });
 
@@ -207,10 +214,11 @@ myRouter.delete("/me/cart/:productId", (req, res) => {
   })
 
   if (itemToDelete) {
-    //delete it from file
+    
     const index = user.cart.indexOf(itemToDelete);
     user.cart.splice(index, 1);
-   
+
+    saveCurrentUser(user);
     res.writeHead(200);
     return res.end();
   } else {
@@ -226,7 +234,7 @@ myRouter.post("/me/cart/:productId", (req, res) => {
     res.writeHead(401, "You need to log in to your account.")
     return res.end();
   } 
-  const user = users.find(user => {
+  user = users.find(user => {
     return currentAccessToken.username === user.login.username
   });
 
@@ -237,7 +245,8 @@ myRouter.post("/me/cart/:productId", (req, res) => {
   if (itemToIncrement) {
     const index = user.cart.indexOf(itemToIncrement);
     user.cart[index].count += 1;
-    //save to file  
+    
+    saveCurrentUser(user); 
    
     res.writeHead(200, { "Content-Type": "application/json"});
     return res.end(JSON.stringify(itemToIncrement));
