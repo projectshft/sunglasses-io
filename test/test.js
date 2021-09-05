@@ -5,6 +5,8 @@ const { expect, assert } = require("chai");
 let should = chai.should();
 chai.use(chaiHttp);
 
+const token = 'sqHPTIt4wYP5dhpO';
+
 describe("/GET brands", () => {
   it.only("should GET all brands", done => {
     chai
@@ -149,10 +151,9 @@ describe("/POST login", () => {
   })
 })
 
-//I have no idea how to test using the authentication setup we were shown in the lessons
 describe("/GET me/cart", () => {
   it.only("should return contents of users cart or empty array", done => {
-    const token = 'sqHPTIt4wYP5dhpO';
+    
     chai
       .request(server)
       .get('/me/cart')
@@ -172,4 +173,33 @@ describe("/GET me/cart", () => {
         done();
       });
   });
+});
+
+describe("/POST me/cart", () => {
+  it.only("should add one of the selected item to the user's cart", done => {
+    const productId = {productId: '5'};
+
+    chai
+      .request(server)
+      .post('/me/cart')
+      .query({accessToken: token})
+      .send(productId)
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an("object");
+        done();
+      });
+  });
+
+  it.only("should throw an error if user is not logged in", done => {
+    chai
+      .request(server)
+      .get('/me/cart')
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+
+  //probably should test that it added one to the count for the cart object
 })

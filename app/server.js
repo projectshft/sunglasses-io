@@ -159,5 +159,34 @@ myRouter.get("/me/cart", (req, res) => {
   
   res.writeHead(200, {'Content-Type': 'application/json'})
   return res.end(JSON.stringify(user.cart));
+});
+
+myRouter.post("/me/cart", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  
+  if (!currentAccessToken) {
+    res.writeHead(401, "You need to log in to your account.")
+    return res.end();
+  } 
+  const user = users.find(user => {
+    return currentAccessToken.username === user.login.username
+  });
+  const product = products.find(product => {
+    return req.body.productId == product.id;
+  });
+  const productInCart = user.cart.find(item => {
+    return req.body.productId == item.productId;
+  })
+  //update cart with product count
+  if (productInCart) {
+    productInCart.count += 1
+  } else {
+    user.cart.push({
+      "productId": product.id,
+      "count": 1
+    })
+  }
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  return res.end(JSON.stringify(product));
 })
 module.exports = server;
