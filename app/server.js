@@ -203,7 +203,6 @@ router.delete("/api/me/cart/:productId", (request, response) => {
   }
 
   const {productId} = request.params;
-
   const submittedProduct = products.find(product => product.id == productId);
 
   if (!submittedProduct) {
@@ -231,13 +230,30 @@ router.post("/api/me/cart/:productId", (request, response) => {
     return response.end();
   }
 
-  const {quantity} = request.params;
+  const {productId} = request.params;
+  const submittedProduct = products.find(product => product.id == productId);
 
-  if (!productId) {
-    response.writeHead(400, "No product submitted");
+  if (!submittedProduct) {
+    response.writeHead(404, "Product ID not found");
     return response.end();
   }
 
-  
+  const quantity = request.body.quantity;
 
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    response.writeHead(400, "Invalid quantity");
+    return response.end();
+  }
+
+  const currentUser = users.find((user) => {
+    return (user.login.username == currentAccessToken.username);
+  });
+
+  const productToChange = currentUser.cart.find((productInCart) => {
+    return (productInCart.product.id == productId);
+  });
+
+  productToChange.quantity = quantity;
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(currentUser.cart));
 });
