@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Sunglasses API
   description: An API to support the sunglasses store
@@ -23,20 +23,20 @@ paths:
       tags:
         - Products
       responses:
-        '200':
+        "200":
           description: An array of products
           schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
-        '404':
+              $ref: "#/definitions/Product"
+        "404":
           description: No products match query
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /brands:
     get:
       summary: Brands
@@ -44,16 +44,16 @@ paths:
       tags:
         - Brands
       responses:
-        '200':
+        "200":
           description: An array of brands
           schema:
             type: array
             items:
-              $ref: '#/definitions/Brand'
+              $ref: "#/definitions/Brand"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /brands/{id}/products:
     get:
       summary: Products in Brand
@@ -67,43 +67,43 @@ paths:
       tags:
         - Brands
       responses:
-        '200':
+        "200":
           description: An array of products
           schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
-        '404':
+              $ref: "#/definitions/Product"
+        "404":
           description: Brand ID not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /login:
     post:
       summary: Enter login credentials
-      description: The login endpoint allows you to submit your login credentials
+      description: The login endpoint allows you to submit your login credentials and receive an access token
       tags:
         - User
       responses:
-        '200':
-          description: Login successful 
+        "200":
+          description: Login successful
           schema:
-              $ref: '#/definitions/User'
-        '400':
+            $ref: "#/definitions/User"
+        "400":
           description: Missing credentials
           schema:
-            $ref: '#/definitions/Error'
-        '401':
+            $ref: "#/definitions/Error"
+        "401":
           description: Invalid credentials
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /me/cart:
     get:
       summary: View cart
@@ -111,105 +111,105 @@ paths:
       tags:
         - Cart
       responses:
-        '200':
+        "200":
           description: A cart
           schema:
-              $ref: '#/definitions/Cart'
-        '401':
+            $ref: "#/definitions/Cart"
+        "401":
           description: Login required
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
     post:
       summary: Add product to cart
       description: This endpoint allows you to add a product to your cart
       tags:
         - Cart
       responses:
-        '200':
+        "200":
           description: Cart updated
           schema:
-              $ref: '#/definitions/Cart'
-        '400':
+            $ref: "#/definitions/Cart"
+        "400":
           description: No product submitted
           schema:
-            $ref: '#/definitions/Error'
-        '401':
+            $ref: "#/definitions/Error"
+        "401":
           description: Login required
           schema:
-            $ref: '#/definitions/Error'
-        '404':
+            $ref: "#/definitions/Error"
+        "404":
           description: Product ID not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /me/cart/{productId}:
     delete:
       summary: Remove product from cart
       description: This endpoint allows you to remove a product from your cart
       parameters:
-       - name: productId
-         in: path
-         description: The id of the product to remove
-         required: true
-         type: string
+        - name: productId
+          in: path
+          description: The id of the product to remove
+          required: true
+          type: string
       tags:
         - Cart
       responses:
-        '200':
+        "200":
           description: Cart updated
           schema:
-              $ref: '#/definitions/Cart'
-        '401':
+            $ref: "#/definitions/Cart"
+        "401":
           description: Login required
           schema:
-            $ref: '#/definitions/Error'
-        '404':
+            $ref: "#/definitions/Error"
+        "404":
           description: Product ID not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
     post:
       summary: Change the quantity of a product in your cart
       description: This endpoint allows you to change the quantity of a specific product in your cart
       parameters:
-       - name: productId
-         in: path
-         description: The id of the product to change the quantity for
-         required: true
-         type: string
+        - name: productId
+          in: path
+          description: The id of the product to change the quantity for
+          required: true
+          type: string
       tags:
         - Cart
       responses:
-        '200':
+        "200":
           description: Cart updated
           schema:
-              $ref: '#/definitions/Cart'
-        '400':
+            $ref: "#/definitions/Cart"
+        "400":
           description: Invalid quantity
           schema:
-            $ref: '#/definitions/Error'
-        '401':
+            $ref: "#/definitions/Error"
+        "401":
           description: Login required
           schema:
-            $ref: '#/definitions/Error'
-        '404':
+            $ref: "#/definitions/Error"
+        "404":
           description: Product ID not found
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
 definitions:
   Product:
     type: object
@@ -247,42 +247,77 @@ definitions:
     properties:
       gender:
         type: string
-        description: Gender of user
       cart:
         type: array
         items:
-          type: object
+          $ref: "#/definitions/Cart"
       name:
         type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
       location:
         type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
       email:
         type: string
-        description: Email of user
       login:
         type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
       dob:
         type: string
-        description: Date of birth of user
       registered:
         type: string
-        description: Date of registration for user
       phone:
         type: string
-        description: Home phone number for user
       cell:
         type: string
-        description: Cell phone number for user
       picture:
         type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
       nat:
         type: string
-        description: Nat of user
   Cart:
     type: array
     items:
       type: object
-      description: Products in the cart
+      properties:
+        product:
+          type: object
+          $ref: "#/definitions/Product"
+        quantity:
+          type: integer
+
   Error:
     type: object
     properties:
@@ -293,4 +328,3 @@ definitions:
         type: string
       fields:
         type: string
-            
