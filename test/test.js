@@ -148,3 +148,28 @@ describe("/POST login", () => {
       })
   })
 })
+
+//I have no idea how to test using the authentication setup we were shown in the lessons
+describe("/GET me/cart", () => {
+  it.only("should return contents of users cart or empty array", done => {
+    const token = 'sqHPTIt4wYP5dhpO';
+    chai
+      .request(server)
+      .get('/me/cart')
+      .query({accessToken: token})
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an("array");
+        done();
+      });
+    });
+  it.only("should throw an error if user is not logged in", done => {
+    chai
+      .request(server)
+      .get('/me/cart')
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+})

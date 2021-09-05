@@ -11,9 +11,13 @@ const { traceDeprecation } = require('process');
 //state holding variables
 let brands = [];
 let users = [];
-let user = {};
+
 let products = [];
-let accessTokens = ['sqHPTIt4wYP5dhpO'];
+let accessTokens = [{
+  username: "yellowleopard753",
+  lastUpdated: new Date(),
+  token: 'sqHPTIt4wYP5dhpO'
+}];
 
 const PORT = process.env.PORT || 8080;
 
@@ -125,6 +129,7 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 var getValidTokenFromRequest = function(request) {
   var parsedUrl = require('url').parse(request.url, true);
+  
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure it's valid and not expired
     let currentAccessToken = accessTokens.find((accessToken) => {
@@ -140,4 +145,19 @@ var getValidTokenFromRequest = function(request) {
     return null;
   }
 };
+
+myRouter.get("/me/cart", (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  
+  if (!currentAccessToken) {
+    res.writeHead(401, "You need to log in to your account.")
+    return res.end();
+  } 
+  const user = users.find(user => {
+    return currentAccessToken.username === user.login.username
+  })
+  
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  return res.end(JSON.stringify(user.cart));
+})
 module.exports = server;
