@@ -51,13 +51,48 @@ describe("/GET products", () => {
     chai
     .request(server)
     .get("/products")
-    .end((err, res) => {
-      assert.isNotNull(res.body);
-      expect(err).to.be.null;
+    .end((err, res) => {     
       res.should.have.status(200);
       expect("Content-Type", "application/json");
       res.body.should.be.an("array");
       done();
-    })
-  })
+    });
+  });
+  it.only("returns all goals if query is missing", done => {
+    chai
+      .request(server)
+      //property doesn't exist
+      .get("/products?query=")
+      .end((err, res) => {
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        done();
+      });
+  });
+  it.only("should limit results to those with a query string", done => {
+    chai
+      .request(server)
+      .get("/products?query=spiciest")
+      .end((err, res) => {
+        
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(1);
+        done();
+      });
+  });
+  it("fails as expected when unrecognized property", done => {
+    chai
+      .request(server)
+      .get("/products?query=sdfv")
+      .end((err, res) => {
+        expect(err).to.not.be.null;
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
 });

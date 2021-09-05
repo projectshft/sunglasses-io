@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
+const url = require("url");
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
@@ -55,6 +56,28 @@ myRouter.get('/brands/:id/products', (req, res) => {
   res.writeHead(200, {"Content-Type": "application/json"});    
   return res.end(JSON.stringify(productsResult));
   }
+})
+
+myRouter.get('/products', (req, res) => {
+  console.log(req);
+  const parsedUrl = url.parse(req.originalUrl);
+  const { query } = queryString.parse(parsedUrl.query);
+  let productsToReturn = [];
+
+  if (query !== undefined) {
+    productsToReturn = products.filter(product => {
+      return product.description.includes(query) || product.name.includes(query)
+    });
+
+    if (!productsToReturn) {
+      res.writeHead(404, "No products match the search query");
+      return response.end();
+    } 
+  } else {
+    productsToReturn = products;
+  }
+  res.writeHead(200, {"Content-Type": "application/json"});
+  return res.end(JSON.stringify(productsToReturn));
 })
 
 module.exports = server;
