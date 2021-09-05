@@ -37,7 +37,7 @@ http.createServer(function (request, response) {
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
 });
 
-//GET all products or products filtered by a query
+//GET ALL PRODUCTS OR PRODUCTS FILTERED BY A QUERY
 router.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const {query} = queryString.parse(parsedUrl.query);
@@ -58,13 +58,13 @@ router.get("/api/products", (request, response) => {
   return response.end(JSON.stringify(productsToReturn));
 });
 
-//GET all brands
+//GET ALL BRANDS
 router.get("/api/brands", (request, response) => {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(brands));
 });
 
-//GET all products for a specific brand
+//GET ALL PRODUCTS FOR A SPECIFIC BRAND
 router.get("/api/brands/:id/products", (request, response) => {
   const {id} = request.params;
   const brand = brands.find(brand => brand.id == id);
@@ -80,7 +80,7 @@ router.get("/api/brands/:id/products", (request, response) => {
   return response.end(JSON.stringify(relatedProducts));
 });
 
-//POST login credentials
+//POST LOGIN CREDENTIALS
 router.post("/api/login", (request, response) => {
  // Make sure there is a username and password in the request
  if (request.body.username && request.body.password) {
@@ -144,7 +144,7 @@ const getValidTokenFromRequest = function(request) {
   }
 };
 
-//GET cart
+//GET CART
 router.get("/api/me/cart", (request, response) => {
   //Login authentication
   const currentAccessToken = getValidTokenFromRequest(request);
@@ -161,7 +161,7 @@ router.get("/api/me/cart", (request, response) => {
   return response.end(JSON.stringify(currentUser.cart));
 });
 
-//POST add product to cart
+//ADD PRODUCT TO CART
 router.post("/api/me/cart", (request, response) => {
   //Login authentication
   const currentAccessToken = getValidTokenFromRequest(request);
@@ -198,7 +198,7 @@ router.post("/api/me/cart", (request, response) => {
   return response.end(JSON.stringify(currentUser.cart));
 });
 
-//DELETE remove product from cart
+//REMOVE PRODUCT FROM CART
 router.delete("/api/me/cart/:productId", (request, response) => {
   //Login authentication
   const currentAccessToken = getValidTokenFromRequest(request);
@@ -226,7 +226,7 @@ router.delete("/api/me/cart/:productId", (request, response) => {
   return response.end(JSON.stringify(currentUser.cart));
 })
 
-//POST change quantity of product in cart
+//CHANGE QUANTITY OF PRODUCT IN CART
 router.post("/api/me/cart/:productId", (request, response) => {
   //Login authentication
   const currentAccessToken = getValidTokenFromRequest(request);
@@ -262,3 +262,5 @@ router.post("/api/me/cart/:productId", (request, response) => {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(currentUser.cart));
 });
+
+module.exports = server;
