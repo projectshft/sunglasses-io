@@ -93,7 +93,7 @@ paths:
           schema:
             $ref: "#/definitions/User"
         "400":
-          description: No credentials entered
+          description: Missing credentials
           schema:
             $ref: "#/definitions/Error"
         "401":
@@ -116,7 +116,7 @@ paths:
           schema:
             $ref: "#/definitions/Cart"
         "401":
-          description: Valid credentials required
+          description: Login required
           schema:
             $ref: "#/definitions/Error"
         default:
@@ -134,7 +134,7 @@ paths:
           schema:
             $ref: "#/definitions/Cart"
         "401":
-          description: Valid credentials required
+          description: Login required
           schema:
             $ref: "#/definitions/Error"
         default:
@@ -159,7 +159,7 @@ paths:
           schema:
             $ref: "#/definitions/Cart"
         "401":
-          description: Valid credentials
+          description: Login required
           schema:
             $ref: "#/definitions/Error"
         "404":
@@ -191,7 +191,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
         "401":
-          description: Valid credentials required
+          description: Login required
           schema:
             $ref: "#/definitions/Error"
         "404":

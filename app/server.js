@@ -120,8 +120,39 @@ router.post("/api/login", (request, response) => {
   }
 });
 
-//GET
-router.get("/api/brands", (request, response) => {
+// Helper method to process access token
+const getValidTokenFromRequest = function(request) {
+  const parsedUrl = url.parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return (accessToken.token == parsedUrl.query.accessToken);
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+//GET cart
+router.get("/api/me/cart", (request, response) => {
+  //Login authentication
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if(!currentAccessToken) {
+    response.writeHead(401, "Login required");
+    return response.end();
+  }
+  //Find user based on access token
+  const currentUser = users.find((user) => {
+    return (user.login.username == currentAccessToken.username);
+  });
+
   response.writeHead(200, {"Content-Type": "application/json"});
-  return response.end(JSON.stringify(brands));
+  return response.end(JSON.stringify(currentUser.cart));
 });
