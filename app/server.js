@@ -170,10 +170,6 @@ router.post("/api/me/cart", (request, response) => {
     return response.end();
   }
 
-  const currentUser = users.find((user) => {
-    return (user.login.username == currentAccessToken.username);
-  });
-
   const submittedProduct = products.find((product) => {
     return (product.id == request.body.id);
   });
@@ -182,6 +178,10 @@ router.post("/api/me/cart", (request, response) => {
     response.writeHead(404, "Product ID not found");
     return response.end();
   }
+
+  const currentUser = users.find((user) => {
+    return (user.login.username == currentAccessToken.username);
+  });
 
   const productToCart = {
     product: submittedProduct,
@@ -194,6 +194,50 @@ router.post("/api/me/cart", (request, response) => {
 });
 
 //DELETE remove product from cart
-router.post("/api/me/cart/:productId", (request, response) => {
-  
+router.delete("/api/me/cart/:productId", (request, response) => {
+  //Login authentication
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if(!currentAccessToken) {
+    response.writeHead(401, "Login required");
+    return response.end();
+  }
+
+  const {productId} = request.params;
+
+  const submittedProduct = products.find(product => product.id == productId);
+
+  if (!submittedProduct) {
+    response.writeHead(404, "Product ID not found");
+    return response.end();
+  }
+
+  const currentUser = users.find((user) => {
+    return (user.login.username == currentAccessToken.username);
+  });
+
+  currentUser.cart = currentUser.cart.filter((productInCart) => {
+    return (productInCart.product.id !== productId);
+  });
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(currentUser.cart));
 })
+
+//POST change quantity of product in cart
+router.post("/api/me/cart/:productId", (request, response) => {
+  //Login authentication
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if(!currentAccessToken) {
+    response.writeHead(401, "Login required");
+    return response.end();
+  }
+
+  const {quantity} = request.params;
+
+  if (!productId) {
+    response.writeHead(400, "No product submitted");
+    return response.end();
+  }
+
+  
+
+});
