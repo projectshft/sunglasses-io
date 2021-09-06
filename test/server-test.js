@@ -42,17 +42,14 @@ describe('/GET Brands', () => {
 describe('Get sunglasses by brand', () => {
   describe('/GET sunglasses by brand', () => {
     it('it should get all sunglasses of specific brand', (done) => {
-      let brand =  {
-        "id": "1",
-        "name" : "Oakley"
-    }
+    
       chai
         .request(server)
-        .get('/api/brands/' + brand.id + '/products')
+        .get('/api/brands/1/products')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.should.be.eql(3);
+          res.body.length.should.be.eql(3);
           done();
         })
     })
@@ -77,55 +74,53 @@ describe('Login request', () => {
       }
       chai
         .request(server)
-        .post('/login')
+        .post('/api/login')
         .send(user)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an('object');
-          res.body.should.have.property('username');
-          res.body.should.have.property('access_token');
-          res.body.should.have.property('last_updated');
+          res.body.should.be.an('string');
+          res.body.length.should.be.eql(16)
           done();
         })
     })
-    it('it should throw an error if the username is incorrect', (done) => {
+    it('it should throw error 401 if the username is incorrect', (done) => {
       let user = {
         "username": "greenleopard752",
         "password": "jonjon"
       }
       chai
         .request(server)
-        .post('/login')
+        .post('/api/login')
         .send(user)
         .end((err, res) => {
-          err.should.have.status(401);
+          res.should.have.status(401);
           done();
         })
     })
-    it('it should throw an error if the password is incorrect', (done) => {
+    it('it should throw error 401 if the password is incorrect', (done) => {
       let user = {
         "username": "yellowleopard753",
         "password": "jon"
       }
       chai
         .request(server)
-        .post('/login')
+        .post('/api/login')
         .send(user)
         .end((err, res) => {
-          err.should.have.status(401);
+          res.should.have.status(401);
           done();
         })
     })
-    it('it should throw an error if the password is missing', (done) => {
+    it('it should throw error 400 if the password is missing', (done) => {
       let user = {
         "username": "yellowleopard753",
       }
       chai
         .request(server)
-        .post('/login')
+        .post('/api/login')
         .send(user)
         .end((err, res) => {
-          err.should.have.status(400);
+          res.should.have.status(400);
           done();
         })
     })
@@ -133,32 +128,60 @@ describe('Login request', () => {
 });
 
 describe('Cart', () => {
-  describe('/GET cart', () => {
-    it('should return a cart full of two products', (done) => {
-      //fill cart with 2 products
-      chai
-        .request(server)
-        .get('/me/cart')
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.an('array');
-          res.body.should.be.eql(2);
-          done();
-        })
+  let accessToken = ''
+  before('login to get access', () => {
+    let user = {
+      "username": "yellowleopard753",
+      "password": "jonjon"
+    }
+    chai
+    .request(server)
+    .post('/api/login')
+    .send(user)
+    .end((err, res) => {
+      accessToken = res.body;
     })
   })
+  describe('/GET cart', () => {
+    it('should return a cart from the user', (done) => {
+      chai
+      .request(server)
+      .get('/me/cart')
+      .query({accessToken: accessToken})
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.shoudl.be.an("array");
+        done();
+      });
+    });
+  it("should throw an error if user is not logged in", done => {
+    chai
+      .request(server)
+      .get('/me/cart')
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+});
   describe('/POST to add to cart', () => {
-    it('should return a cart with three products including the one just added', (done) => {
-      //fill cart with 2 products
-      //product to send
+    it('should return a cart with products including the one just added', (done) => {
+      const newSunglasses = {
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price":150,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      }
       chai
         .request(server)
         .post('/me/cart')
+        .query({accessToken: accessToken})
         .send(newSunglasses)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.should.be.eql(3);
           done();
         })
     })
@@ -175,30 +198,41 @@ describe('Cart', () => {
   })
   describe('/DELETE item from cart', () => {
     it('should return a cart with one product without the one deleted', (done) => {
-      //fill cart with 2 products
+      const oldSunglasses = {
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price":150,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      } 
       chai
         .request(server)
         .delete('/me/cart')
+        .query({accessToken: accessToken})
         .send(oldSunglasses)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.should.be.eql(1);
+          res.body.length.should.be.eql(0);
           done();
         })
     })
   })
   describe('/PUT to change quantity of item in cart', () => {
-    it('should return a cart with three products two of which are the same product', (done) => {
-      //fill cart with 2 products
+    it('should return a cart with updatd quantity', (done) => {
+      const newQuant = {
+        count: 2
+      }
       chai
         .request(server)
         .delete('/me/cart')
+        .query({accessToken: accessToken})
         .send(newQuant)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.should.be.eql(3);
+          res.body.should.count.should.be.eql(2);
           done();
         })
     })
