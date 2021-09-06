@@ -212,7 +212,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
         "404":
-          description: Product ID not found
+          description: Product not found in cart
           schema:
             $ref: "#/definitions/Error"
         default:
@@ -259,7 +259,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
         "404":
-          description: Product ID not found
+          description: Product not found in cart
           schema:
             $ref: "#/definitions/Error"
         default:
