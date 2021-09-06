@@ -1,0 +1,267 @@
+swagger: "2.0"
+info:
+  title: Sunglasses Eval
+  description: An API to run a sunglass selling business
+  version: "1.0.0"
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Get brands of sunglasses
+      description: |
+        The brand endpoint returns the brands of sunglasses the store currently has.  Each brand will have a unique id and name in object form.
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        404:
+          description: No brands found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/:id/products:
+    get:
+      summary: Get product by brand
+      description: |
+        The product by brands endpoint will return an array of sunglasses objects that match the search parameter of brand. Each sunglass will have a unique id, category id to correspond with brand, name, description, price and an image url.
+      parameters:
+        - name: brand
+          in: query
+          description: the id number corresponding to brand
+          required: true
+          type: number
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of sunglasses by searched brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        404:
+          description: There are not products of this brand.
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: All sunglasses
+      description: |
+        The products endpoint will return an array of all sunglasses current in the database.
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Login to recieve an access token to add items to cart
+      description: |
+        The login endpoint will allow a user to recieve an access token and authorization to add items to the cart.  This will allow secure transactions
+      tags:
+        - Login
+      parameters:
+        - name: "login"
+          in: "body"
+          description: An object with the username and passowrd
+          required: true
+          schema:
+            $ref: "#/definitions/LoginRequest"
+      responses:
+        200:
+          description: User is logged in and has an access token
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        401:
+          description: Incorrect username or password
+          schema:
+            $ref: "#/definitions/Error"
+        400:
+          description: Missing username or password
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: User's cart
+      description: |
+        The user's cart endpoint will return all items the user has added to their cart.  These items will include a unique id, category id to correspond with brand, name, descritpion, price and an image url.
+      tags:
+        - Cart
+      responses:
+        200:
+          description: User's current cart
+          schema:
+            $ref: "#/definitions/Cart"
+        401:
+          description: Please login to access cart
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: User's will add an item to their cart
+      description: |
+        The user's will be able to add a sunglass object to their cart and the array of the users cart will be returned from this endpoint to ensure correct object was added.
+      tags:
+        - Cart
+      responses:
+        200:
+          description: The user's current cart
+          schema:
+            $ref: "#/definitions/Cart"
+        401:
+          description: Please login to add sunglasses to cart
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/:productId:
+    delete:
+      summary: User's will remove an item from their cart
+      description: |
+        The user's will be able to remove a sunglass object from their cart and the array of the users cart will be returned from this endpoint to ensure correct object was removed.
+      tags:
+        - Cart
+      responses:
+        200:
+          description: The user's current cart
+          schema:
+            $ref: "#/definitions/Cart"
+        401:
+          description: Please login to access cart
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    put:
+      summary: User's will edit the quantity of an item in their cart
+      description: |
+        The user's will be able to alter the number of a single item in their car and the array of the users cart will be returned from this endpoint to ensure correct object was added.
+      tags:
+        - Cart
+      responses:
+        200:
+          description: The user's current cart
+          schema:
+            $ref: "#/definitions/Cart"
+        401:
+          description: Please login to access cart
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific brand that will be used to find sunglasses by brand.
+      name:
+        type: string
+        description: Name of the brand.
+  Sunglasses:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific product
+      categoryId:
+        type: string
+        description: The unique identifier of the brand of sunglass
+      name:
+        type: string
+        description: Display name of product.
+      description:
+        type: string
+        description: A description of the sunglasses product
+      price:
+        type: number
+        description: The current price of this specific sunglasses product
+  LoginRequest:
+    type: object
+    properties:
+      Username:
+        type: string
+        description: Username
+      password:
+        type: string
+        description: password
+  LoginResponse:
+    type: object
+    properties:
+      Username:
+        type: string
+        description: Username
+      access_token:
+        type: string
+        description: Access token
+      last_updated:
+        type: integer
+        format: int32
+  Cart:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier representing a specific product
+        categoryId:
+          type: string
+          description: The unique identifier of the brand of sunglass
+        name:
+          type: string
+          description: Display name of product.
+        description:
+          type: string
+          description: A description of the sunglasses product
+        price:
+          type: number
+          description: The current price of this specific sunglasses product
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
