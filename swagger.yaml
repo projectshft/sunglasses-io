@@ -85,6 +85,20 @@ paths:
     post:
       summary: Enter login credentials
       description: The login endpoint allows you to submit your login credentials and receive an access token
+      parameters:
+        - in: body
+          name: login
+          description: Login credentials required to receive access token
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
       tags:
         - User
       responses:
@@ -108,6 +122,12 @@ paths:
     get:
       summary: View cart
       description: This endpoint allows you to view your cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: Unique access token
+          required: true
+          type: string
       tags:
         - Cart
       responses:
@@ -126,6 +146,22 @@ paths:
     post:
       summary: Add product to cart
       description: This endpoint allows you to add a product to your cart
+      parameters:
+        - in: query
+          name: accessToken
+          description: Unique access token
+          required: true
+          type: string
+        - in: body
+          name: id
+          description: The id of the product to add to cart
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
       tags:
         - Cart
       responses:
@@ -154,8 +190,13 @@ paths:
       summary: Remove product from cart
       description: This endpoint allows you to remove a product from your cart
       parameters:
-        - name: productId
-          in: path
+        - in: query
+          name: accessToken
+          description: Unique access token
+          required: true
+          type: string
+        - in: path
+          name: productId
           description: The id of the product to remove
           required: true
           type: string
@@ -182,11 +223,26 @@ paths:
       summary: Change the quantity of a product in your cart
       description: This endpoint allows you to change the quantity of a specific product in your cart
       parameters:
-        - name: productId
-          in: path
+        - in: query
+          name: accessToken
+          description: Unique access token
+          required: true
+          type: string
+        - in: path
+          name: productId
           description: The id of the product to change the quantity for
           required: true
           type: string
+        - in: body
+          name: quantity
+          description: The id of the product to add to cart
+          schema:
+            type: object
+            required:
+              - quantity
+            properties:
+              quantity:
+                type: integer
       tags:
         - Cart
       responses:
