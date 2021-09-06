@@ -218,6 +218,10 @@ definitions:
         type: integer
         format: int32
         description: The number of items added to cart
+      price:
+        type: integer
+        format: int32
+        description: Price of item
   Error:
     type: object
     properties:

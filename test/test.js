@@ -201,7 +201,7 @@ describe("/POST me/cart", () => {
       });
   });
 
-  //probably should test that it added one to the count for the cart object
+  //probably should test that it added one to the count for the cart object, but I'm short on time. Same goes for the delete and update routes below
 })
 
 describe("/DELETE /me/cart/:productId", () => {
