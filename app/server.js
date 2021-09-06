@@ -49,7 +49,7 @@ router.get("/api/products", (request, response) => {
     productsToReturn = products.filter(product => product.name.toLowerCase().includes(query.toLowerCase()));
   }
 
-  if (!productsToReturn) {
+  if (productsToReturn == "") {
     response.writeHead(404, "No products match query");
     return response.end();
   }
@@ -211,7 +211,7 @@ router.delete("/api/me/cart/:productId", (request, response) => {
   const submittedProduct = products.find(product => product.id == productId);
 
   if (!submittedProduct) {
-    response.writeHead(404, "Product ID not found");
+    response.writeHead(404, "Product not found in cart");
     return response.end();
   }
 
@@ -239,7 +239,7 @@ router.post("/api/me/cart/:productId", (request, response) => {
   const submittedProduct = products.find(product => product.id == productId);
 
   if (!submittedProduct) {
-    response.writeHead(404, "Product ID not found");
+    response.writeHead(404, "Product not found in cart");
     return response.end();
   }
 
