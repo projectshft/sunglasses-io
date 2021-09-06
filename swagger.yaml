@@ -1,0 +1,386 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: Products
+      description: The Products endpoint returns all products and optionally allows you to filter products based on a search query string.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: No products match query
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands:
+    get:
+      summary: Brands
+      description: The Brands endpoint returns information on all product brands.
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Products in Brand
+      description: This endpoint returns information on all products for a specific brand.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to filter products for
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Brand ID not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Enter login credentials
+      description: The login endpoint allows you to submit your login credentials and receive an access token
+      parameters:
+        - in: body
+          name: login
+          description: Login credentials required to receive access token
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: "#/definitions/User"
+        "400":
+          description: Missing credentials
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: View cart
+      description: This endpoint allows you to view your cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: Unique access token
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: A cart
+          schema:
+            $ref: "#/definitions/Cart"
+        "401":
+          description: Login required
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add product to cart
+      description: This endpoint allows you to add a product to your cart
+      parameters:
+        - in: query
+          name: accessToken
+          description: Unique access token
+          required: true
+          type: string
+        - in: body
+          name: id
+          description: The id of the product to add to cart
+          schema:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Cart updated
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: No product submitted
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Login required
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product ID not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      summary: Remove product from cart
+      description: This endpoint allows you to remove a product from your cart
+      parameters:
+        - in: query
+          name: accessToken
+          description: Unique access token
+          required: true
+          type: string
+        - in: path
+          name: productId
+          description: The id of the product to remove
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Cart updated
+          schema:
+            $ref: "#/definitions/Cart"
+        "401":
+          description: Login required
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product not found in cart
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Change the quantity of a product in your cart
+      description: This endpoint allows you to change the quantity of a specific product in your cart
+      parameters:
+        - in: query
+          name: accessToken
+          description: Unique access token
+          required: true
+          type: string
+        - in: path
+          name: productId
+          description: The id of the product to change the quantity for
+          required: true
+          type: string
+        - in: body
+          name: quantity
+          description: The id of the product to add to cart
+          schema:
+            type: object
+            required:
+              - quantity
+            properties:
+              quantity:
+                type: integer
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Cart updated
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: Invalid quantity
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Login required
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product not found in cart
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product identifier
+      categoryId:
+        type: string
+        description: Brand identifier
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: string
+        description: Price of product
+      imageUrls:
+        type: array
+        items:
+          type: string
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier
+      name:
+        type: string
+        description: Brand name
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/Cart"
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+      email:
+        type: string
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+      registered:
+        type: string
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+  Cart:
+    type: array
+    items:
+      type: object
+      properties:
+        product:
+          type: object
+          $ref: "#/definitions/Product"
+        quantity:
+          type: integer
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
