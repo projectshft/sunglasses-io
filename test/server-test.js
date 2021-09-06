@@ -146,7 +146,7 @@ describe('Cart', () => {
     it('should return a cart from the user', (done) => {
       chai
       .request(server)
-      .get('/me/cart')
+      .get('/api/me/cart')
       .query({accessToken: accessToken})
       .end((err, res) => {
         res.should.have.status(200);
@@ -157,7 +157,7 @@ describe('Cart', () => {
   it("should throw an error if user is not logged in", done => {
     chai
       .request(server)
-      .get('/me/cart')
+      .get('/api/me/cart')
       .end((err, res) => {
         res.should.have.status(401);
         done();
@@ -176,9 +176,9 @@ describe('Cart', () => {
       }
       chai
         .request(server)
-        .post('/me/cart')
+        .post('/api/me/cart')
         .query({accessToken: accessToken})
-        .send(newSunglasses)
+        .send(newSunglasses.id)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -188,8 +188,8 @@ describe('Cart', () => {
     it('should not return a cart if the user does not have an access token', (done) => {
       chai
         .request(server)
-        .post('/me/cart')
-        .send(newSunglasses)
+        .post('/api/me/cart')
+        .send(newSunglasses.id)
         .end((err, res) => {
           err.should.have.status(401);
           done();
@@ -208,9 +208,9 @@ describe('Cart', () => {
       } 
       chai
         .request(server)
-        .delete('/me/cart')
+        .delete('/api/me/cart/:productid')
         .query({accessToken: accessToken})
-        .send(oldSunglasses)
+        .send(oldSunglasses.id)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -226,7 +226,7 @@ describe('Cart', () => {
       }
       chai
         .request(server)
-        .delete('/me/cart')
+        .delete('/api/me/cart/:productid')
         .query({accessToken: accessToken})
         .send(newQuant)
         .end((err, res) => {
