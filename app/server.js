@@ -20,7 +20,7 @@ const router = Router();
 router.use(bodyParser.json());
 
 //Server
-http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
   response.writeHead(200);
   router(request, response, finalHandler(request, response));
 })
