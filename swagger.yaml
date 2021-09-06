@@ -1,0 +1,271 @@
+swagger: "2.0"
+info:
+  title: Sunglasses
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes: [http]
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands of Sunglasses
+      description: |
+        The Brands endpoint returns all brands that the store sells.
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Get Products by Brand
+      description: This endpoint returns all products availble by a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      tags:
+        - Brands
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "400":
+          description: ID parameter required
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: A model with the specified ID was not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Products
+      description: The products endpoint allows the user to search products.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: User Account Login
+      description: This endpoint allows users to log in to their account
+      tags:
+        - User
+      responses:
+        "200":
+          description: Access token
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: User's Cart Contents
+      description: This endpoint returns the user's shopping cart
+      tags:
+        - User
+        - Cart
+      responses:
+        "200":
+          description: Cart Array
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: User not logged in
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add Item to Cart
+      description: This endpoint adds an item to the user's cart
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Cart Array
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: User not logged in
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      summary: Delete Item from Cart
+      description: This endpoint deletes item from cart by given Product ID
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Success message
+        "400":
+          description: Missing required productId parameter
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: User not logged in
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Update Item Quantity
+      description: This endpoint updates the number of a product in a user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Updated Cart
+          schema:
+            $ref: "#/definitions/Product"
+        "401":
+          description: User not logged in
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Product not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifer for a brand
+      name:
+        type: string
+        description: Name of brand
+  CartItem:
+    type: object
+    properties:
+      item:
+        $ref: "#/definitions/Product"
+      quantity:
+        type: integer
+        format: int32
+        description: The number of items added to cart
+      price:
+        type: integer
+        format: int32
+        description: Price of item
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+  Product:
+    type: object
+    properties:
+      productId:
+        type: string
+        description: Unique identifier for a product
+      name:
+        type: string
+        description: Name of product
+      photo_url:
+        type: string
+        description: URL for product image
+      description:
+        type: string
+        description: Information about the product
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the user.
+      last_name:
+        type: string
+        description: Last name of the user.
+      email:
+        type: string
+        description: Email address of the user
+      password:
+        type: string
+        description: User password
+      id:
+        type: string
+        description: Unique identifier of the user
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/CartItem"
