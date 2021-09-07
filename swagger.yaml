@@ -1,0 +1,244 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses platform
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to search all brands available.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        "404":
+          description: That brand does not exist
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: All products of a brand
+      description: >-
+        This endpoint allows you to see the products of a brand.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      responses:
+        "200":
+          description: An array of products of a brand
+          schema:
+            $ref: "#/definitions/Products"
+        "404":
+          description: Brand not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Products
+      description: |
+        This endpoint gets products based on a query.
+      parameters:
+        - name: query
+          in: query
+          description: Product query string
+          required: false
+          type: string
+      responses:
+        "200":
+          description: An array of products
+        "404":
+          description: Products not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - User
+      summary: Logs user in
+      description: |
+      parameters:
+        - name: Username
+          in: query
+          description: Username for login
+          required: true
+          type: string
+        - name: Password
+          in: query
+          description: Password for login
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful login
+        "400":
+          description: Invalid Username/Password
+        "401":
+          description: Username/Password doesn't match records
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      tags:
+        - User
+      summary: User's Cart
+      description: |
+        This endpoint allows the user to view the items in their cart
+      responses:
+        "200":
+          description: Items in user's cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - User
+      summary: Submit cart for order
+      description: |
+        This endpoint allows the user to order the items in their cart
+      responses:
+        "200":
+          description: Cart items ordered
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - User
+      summary: Remove item
+      description: |
+        This endpoint allows the user to remove an item from their cart.
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Item was removed from cart
+        "404":
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - User
+      summary: Add item
+      description: |
+        This endpoint allows the user to add an item to their cart.
+      parameters:
+        - name: productId
+        in: path
+        description: The id of the product
+        required: true
+        type: string
+      responses:
+        "200":
+          description: New item was added to cart
+        "404":
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      description:
+        type: string
+        description: Description of product.
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+      categoryId:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: integer
+      imageUrls: 
+        type: array
+        items:
+          type: string
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of user.
+      last_name:
+        type: string
+        description: Last name of user.
+      email:
+        type: string
+        description: Email address of user
+      login:
+        type: object
+      cart:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            price:
+              type: integer
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
