@@ -12,12 +12,12 @@ router.use(bodyParser.json());
 
 // Frontend
 // localhost: 3000 -> UI -> get me all the brands from API -> localhost:3001/api/brands -> render
-// fetch("openweathermap.com/....")
+// fetch( like in "openweathermap.com/....")
 // API
 // localhost: 3001 -> API
 
 // localhost:3001/
-// openweathermap.com/api/weather
+
 
 // localhost:3001/api/brands
 router.get('/api/brands', function (req, res) {
@@ -46,6 +46,45 @@ router.get('/api/brands/:id/products', function (req, res) {
 
   res.end(JSON.stringify(brandProducts));
 });
+
+//GET products
+router.get('/api/products', function (req, res) {
+  console.log('get the products');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  //  Read the products file and write the products as a response
+  const data = fs.readFileSync("initial-data/products.json");
+  res.end(data)
+});
+
+//GET cart
+router.get('api/me/cart', function (req, res) {
+  console.log('get the cart items');
+  res.setHeader('Content-Tyype', 'text/plain; charset=utf-8');
+  //  Read the cart file and write the cart as a response
+  const data = fs.readFileSync("initial-data/cart.json");
+  res.end(data)
+});
+
+//POST login
+router.post('/api/login', function (req, res) {
+  console.log('user login');
+  if (request.body.username && request.body.password) {
+    let currentUser = users.find(user) => {
+      return (
+        user.login.username == request.body.username &&
+        user.login.password == request.body.password
+      )
+    }
+  }
+})
+
+// POST api/me/cart
+router.post('/api/me/cart', function (req, res) {
+  console.log('show my cart');
+  
+})
+
+
 
 http.createServer(function (request, response) {
   router(request, response, finalHandler(request, response))
