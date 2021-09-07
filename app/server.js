@@ -78,11 +78,31 @@ router.post('/api/login', function (req, res) {
   }
 })
 
-// POST api/me/cart
+// POST /api/me/cart
 router.post('/api/me/cart', function (req, res) {
   console.log('show my cart');
-  
+
+  let product = req.body;
+
+  user.cart.push(product);
+  response.writeHead(200, { "Content-Type": "application/json"});
+  return response.end(JSON.stringify(user.cart));
+
+});
+
+
+// POST /api/me/cart/:productId
+
+router.post('/api/me/cart/:productId', function (req, res) {
+  console.log('show product id in the cart');
+
+  let productInTheCart = products.find((c) => {
+    return c.id === request.params.productId;
+
+    
+  })
 })
+
 
 
 
