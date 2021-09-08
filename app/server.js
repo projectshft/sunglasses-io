@@ -45,16 +45,39 @@ http.createServer(function (request, response) {
 
 // localhost:3001/
 
-
-
 // localhost:3001/api/brands
 router.get('/api/brands', function (req, res) {
   console.log('hit brand');
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  // Read the brands file and write the brands as a response
-  const data = fs.readFileSync("initial-data/brands.json");
-  res.end(data);
+  res.end(JSON.stringify(brands));
 });
+
+// Get all the products matching the brand id = categoryId
+router.get('/api/brands/:id/products', function (req, res) {
+  const { id } = req.params;
+  
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
+  const brandProducts = [];
+
+  for (let i = 0; i < products.length; i++) {
+    console.log(products[i])
+    if (products[i].categoryId === id) {
+      brandProducts.push(products[i]);
+    }
+  }
+
+  res.end(JSON.stringify(brandProducts));
+});
+
+//GET products
+router.get('/api/products', function (req, res) {
+  console.log('get the products');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.end(JSON.stringify(products))
+});
+
+
 
 // Get all the products matching the brand id = categoryId
 router.get('/api/brands/:id/products', function (req, res) {
