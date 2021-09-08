@@ -37,7 +37,13 @@ http.createServer(function (request, response) {
 
 });
 
+// Frontend
+// localhost: 3000 -> UI -> get me all the brands from API -> localhost:3001/api/brands -> render
+// fetch( like in "openweathermap.com/....")
+// API
+// localhost: 3001 -> API
 
+// localhost:3001/
 
 
 
