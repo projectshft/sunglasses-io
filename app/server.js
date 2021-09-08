@@ -77,7 +77,57 @@ router.get('/api/products', function (req, res) {
   res.end(JSON.stringify(products))
 });
 
+//POST login, still need to mock data.
+router.post('/api/login', function (req, res) {
+  console.log('user login');
+  if (req.body.username && req.body.password) {
+    loggedInUser = users.find(user => {
+      return (
+        user.login.username == req.body.username &&
+        user.login.password == req.body.password
+      )
+    });
+  }
+});
 
+//GET cart
+router.get('/api/me/cart', function (req, res) {
+  console.log('get the cart items');
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.end(JSON.stringify(loggedInUser.cart));
+});
+
+// POST /api/me/cart
+router.post('/api/me/cart', function (req, res) {
+  console.log('adding items to the cart');
+
+  let productId = req.body.productId;
+
+  // TODO: Increment quantity by 1 instead of adding a duplicated product if the same product already exists in the cart.
+  const product = products.find(p => p.id === productId);
+  product.quantity = 1;
+
+  loggedInUser.cart.push(product);
+  res.writeHead(200, { "Content-Type": "application/json"});
+  res.end(JSON.stringify(loggedInUser.cart));
+});
+
+// POST /api/me/cart/:productId
+router.post('/api/me/cart/:productId', function (req, res) {
+  console.log('change quantity of this product');
+
+  // TODO
+  const quantity = req.body.quantity;
+
+  let productInTheCart = loggedInUser.cart.find((c) => {
+    return c.id === req.params.productId;
+  });
+
+  productInTheCart.quantity = quantity;
+
+  res.writeHead(200, { "Content-Type": "application/json"});
+  res.end(JSON.stringify(loggedInUser.cart));
+});
 
 // Get all the products matching the brand id = categoryId
 router.get('/api/brands/:id/products', function (req, res) {
