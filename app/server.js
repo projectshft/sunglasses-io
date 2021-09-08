@@ -9,14 +9,36 @@ var uid = require('rand-token').uid;
 const PORT = 3001;
 var router = Router();
 router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
 
-// Frontend
-// localhost: 3000 -> UI -> get me all the brands from API -> localhost:3001/api/brands -> render
-// fetch( like in "openweathermap.com/....")
-// API
-// localhost: 3001 -> API
+// Array of users, States, e.g, authentication, cart
+// {
+//   cart: [],
+//   login: {
+//     username: 'philip',
+//     password: 'loggedin'
+//   }
+// }
+let users = [];
+let brands = [];
+let products = [];
+let loggedInUser = undefined;
 
-// localhost:3001/
+http.createServer(function (request, response) {
+  router(request, response, finalHandler(request, response));
+}).listen(PORT, () => {
+  users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
+  loggedInUser = users[0];
+
+  // Read the brands file
+  brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
+  //  Read the products file
+  products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
+
+});
+
+
+
 
 
 // localhost:3001/api/brands
