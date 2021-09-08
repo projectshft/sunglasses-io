@@ -129,84 +129,17 @@ router.post('/api/me/cart/:productId', function (req, res) {
   res.end(JSON.stringify(loggedInUser.cart));
 });
 
-// Get all the products matching the brand id = categoryId
-router.get('/api/brands/:id/products', function (req, res) {
-  const { id } = req.params;
-  
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-
-  const products = JSON.parse(fs.readFileSync("initial-data/products.json"));
-
-  const brandProducts = [];
-
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].categoryId === id) {
-      brandProducts.push(products[i]);
-    }
+// DELETE /api/me/cart/:productId
+router.delete('/api/me/cart/:productId', function(req, res) {
+  console.log("delete the product from card");
+  const productIndex = loggedInUser.cart.findIndex((c) => {
+    return c.id === req.params.productId;
+  });
+  // Remove the product from the array
+  if (productIndex >= 0) {
+    loggedInUser.cart.splice(productIndex, 1);
   }
 
-  res.end(JSON.stringify(brandProducts));
+  res.writeHead(200, { "Content-Type": "application/json"});
+  res.end(JSON.stringify(loggedInUser.cart));
 });
-
-//GET products
-router.get('/api/products', function (req, res) {
-  console.log('get the products');
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  //  Read the products file and write the products as a response
-  const data = fs.readFileSync("initial-data/products.json");
-  res.end(data)
-});
-
-//GET cart
-router.get('api/me/cart', function (req, res) {
-  console.log('get the cart items');
-  res.setHeader('Content-Tyype', 'text/plain; charset=utf-8');
-  //  Read the cart file and write the cart as a response
-  const data = fs.readFileSync("initial-data/cart.json");
-  res.end(data)
-});
-
-//POST login
-router.post('/api/login', function (req, res) {
-  console.log('user login');
-  if (request.body.username && request.body.password) {
-    let currentUser = users.find(user) => {
-      return (
-        user.login.username == request.body.username &&
-        user.login.password == request.body.password
-      )
-    }
-  }
-})
-
-// POST /api/me/cart
-router.post('/api/me/cart', function (req, res) {
-  console.log('show my cart');
-
-  let product = req.body;
-
-  user.cart.push(product);
-  response.writeHead(200, { "Content-Type": "application/json"});
-  return response.end(JSON.stringify(user.cart));
-
-});
-
-
-// POST /api/me/cart/:productId
-
-router.post('/api/me/cart/:productId', function (req, res) {
-  console.log('show product id in the cart');
-
-  let productInTheCart = products.find((c) => {
-    return c.id === request.params.productId;
-
-    
-  })
-})
-
-
-
-
-http.createServer(function (request, response) {
-  router(request, response, finalHandler(request, response))
-}).listen(PORT);
