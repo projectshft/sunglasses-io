@@ -101,7 +101,6 @@ router.post('/api/me/cart', function (req, res) {
 
   let productId = req.body.productId;
 
-  // TODO: Increment quantity by 1 instead of adding a duplicated product if the same product already exists in the cart.
   
   //  Check if product already exists in the cart
   //  If so, add one to the quantity
