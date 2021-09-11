@@ -24,7 +24,7 @@ let brands = [];
 let products = [];
 let loggedInUser = undefined;
 
-http.createServer(function (request, response) {
+module.exports=http.createServer(function (request, response) {
   router(request, response, finalHandler(request, response));
 }).listen(PORT, () => {
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
@@ -43,37 +43,35 @@ http.createServer(function (request, response) {
 // API
 // localhost: 3001 -> API
 
-// localhost:3001/
-
 // localhost:3001/api/brands
 router.get('/api/brands', function (req, res) {
-  console.log('hit brand');
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(brands));
 });
 
 // Get all the products matching the brand id = categoryId
 router.get('/api/brands/:id/products', function (req, res) {
   const { id } = req.params;
-  
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
   const brandProducts = [];
 
   for (let i = 0; i < products.length; i++) {
-    console.log(products[i])
     if (products[i].categoryId === id) {
       brandProducts.push(products[i]);
     }
   }
-
+  if (brandProducts.length === 0) {
+  res.writeHead(404, { "Content-Type": "application/json"});
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json"});
+  }
   res.end(JSON.stringify(brandProducts));
 });
 
 //GET products
 router.get('/api/products', function (req, res) {
   console.log('get the products');
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(products))
 });
 
@@ -93,7 +91,7 @@ router.post('/api/login', function (req, res) {
 //GET cart
 router.get('/api/me/cart', function (req, res) {
   console.log('get the cart items');
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(loggedInUser.cart));
 });
 
@@ -104,10 +102,21 @@ router.post('/api/me/cart', function (req, res) {
   let productId = req.body.productId;
 
   // TODO: Increment quantity by 1 instead of adding a duplicated product if the same product already exists in the cart.
-  const product = products.find(p => p.id === productId);
-  product.quantity = 1;
-
-  loggedInUser.cart.push(product);
+  
+  //  Check if product already exists in the cart
+  //  If so, add one to the quantity
+  let match = false;
+  for (let i=0; i < loggedInUser.cart.length; i++) {
+    if(loggedInUser.cart[i].id === productId) {
+      match = true;
+      loggedInUser.cart[i].quantity += 1;
+      } 
+   }
+   if (!match) {
+    const product = products.find(p => p.id === productId);
+    product.quantity = 1;
+    loggedInUser.cart.push(product);
+   }
   res.writeHead(200, { "Content-Type": "application/json"});
   res.end(JSON.stringify(loggedInUser.cart));
 });
@@ -131,7 +140,7 @@ router.post('/api/me/cart/:productId', function (req, res) {
 
 // DELETE /api/me/cart/:productId
 router.delete('/api/me/cart/:productId', function(req, res) {
-  console.log("delete the product from card");
+  console.log("delete the product from cart");
   const productIndex = loggedInUser.cart.findIndex((c) => {
     return c.id === req.params.productId;
   });
