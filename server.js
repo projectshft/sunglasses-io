@@ -11,7 +11,6 @@ const Brand = require('./app/models/brand')
 const User = require('./app/models/user')
 
 
-
 // State holding variables
 let users = [];
 let brands = [];
@@ -23,12 +22,21 @@ let accessTokens = [
   }
 ];
 
+const exampleProduct = {
+  "id": "10",
+  "categoryId": "1",
+  "name": "Test Glasses",
+  "description": "Glasses to help test stuff!",
+  "price": 15,
+  "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}
+
+
 
 
 
 //TODOS
 
-// Include fs to user json data and not have to redefine .json files
 
 
 // Setup router
@@ -71,26 +79,29 @@ let server = http.createServer(function (request, response) {
 
 
 // Returns an array of all the brands we carry
-myRouter.get('/brands', function(request,response) {
+myRouter.get('/api/brands', function(request,response) {
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(Brand.getAll()));
 });
 
 // Returns all the sunglasses for a particular brand
-myRouter.get('/brands/:id/products', function(request, response) {
-  const reqBrandProducts = Brand.getBrandProd(request.params.id)
-  if (reqBrandProducts) {
+myRouter.get('/api/brands/:id/products', function(request, response) {
+ let reqBrandProducts = Brand.getBrandProd(request.params.id);
+
+ console.log(reqBrandProducts);
+  if (reqBrandProducts.length > 0) {
     response.writeHead(200, { "Content-Type": "application/json" });
+    response.statusCode = 200;
     return response.end(JSON.stringify(reqBrandProducts));
   } else {
     response.writeHead(404, { "Content-Type": "application/json" });
     response.statusCode = 404;
-    response.end();
+    return response.end(JSON.stringify('Brand not found.'));
   }
 });
 
 // Returns all sunglasses
-myRouter.get('/products', function(request,response) {
+myRouter.get('/api/products', function(request,response) {
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(Brand.getAllProd()));
 });
@@ -155,7 +166,7 @@ var getValidTokenFromRequest = function(request) {
     console.log(currentAccessToken);
     return currentAccessToken;
   } else {
-    return (`Something is wrong...`);
+    return null;
   }
 };
 
@@ -168,7 +179,37 @@ myRouter.get('/api/me/cart', (request, response) => {
     response.writeHead(404, "You need to be logged in to view this.");
     return response.end();
   } else {
-    // Find the user's username by using the current access token
+  // Find the user's username by using the current access token
+    let foundToken = accessTokens.find((user)=> {
+      return user.username == currentAccessToken.username;
+    })
+  // Use filter method on users array to skip over elements that do not match criteria
+    let foundUser = users.filter(function(user) {
+      if (foundToken.username !== user.login.username) {
+        return false;
+      }
+      return true;
+  //   // Return the element that does match the criteria
+    }).map(user => {
+      if (user.login.username == foundToken.username) {
+        return user;
+      };
+    });
+    console.log(foundUser[0].cart);
+  // Return the user's cart in an stringified object
+    return response.end(JSON.stringify(foundUser[0].cart));
+  }
+});
+
+// Adds a product to the user's cart by using the request.body
+myRouter.post('/api/me/cart', (request, response) => {
+  // Pass request url into helper method
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(404, "You need to be logged in to view this.");
+    return response.end();
+  } else {
+    // Could make helper function for this too idk
     let foundToken = accessTokens.find((user)=> {
       return user.username == currentAccessToken.username;
     })
@@ -178,15 +219,76 @@ myRouter.get('/api/me/cart', (request, response) => {
         return false;
       }
       return true;
-    // Return the element that does match the criteria
     }).map(user => {
       if (user.login.username == foundToken.username) {
         return user;
       };
     });
-    console.log(foundUser[0].cart);
+    // console.log(request.body);
+    // Will send item to be pushed into user's cart in the request body
+    foundUser[0].cart.push(request.body);
     // Return the user's cart in an stringified object
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(foundUser[0].cart));
+  }
+})
+
+// Deletes a product using the product id from the user's cart
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  // Pass request url into helper method
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(404, "You need to be logged in to view this.");
+    return response.end();
+  } else {
+    let foundToken = accessTokens.find((user)=> {
+      return user.username == currentAccessToken.username;
+  })
+   // Use filter method on users array to skip over elements that do not match criteria
+  let foundUser = users.filter(function(user) {
+    if (foundToken.username !== user.login.username) {
+      return false;
+    } return true;
+    }).map(user => {
+      if (user.login.username == foundToken.username) {
+        return user;
+      };
+    });
+
+    // To check user's cart contents BEFORE deleting product
+    console.log(`This is the found user's cart ${JSON.stringify(foundUser[0].cart)}`);
+
+
+    // Get the product from the productId in req parameters
+    // returns the product to be deleted as an object
+    let reqProduct = User.getProdFromId(request.params.productId);
+
+    let matchedProd;
+    
+    // Matches the product to be deleted, makes sure it's actually there
+    foundUser[0].cart.filter(p => {
+      return p.id == reqProduct.id
+    }).map((p) => {
+     // matchedProd will be an obj
+      matchedProd = p;
+      return p;
+    });
+    if (!matchedProd) {
+      response.writeHead(404, "That item is not in your cart.");
+      return response.end();
+    } else {
+      console.log(matchedProd);
+
+      // Creates a new cart...
+      const newCart = foundUser[0].cart.filter(p => {
+        return p.name !== matchedProd.name
+      });
+      
+      foundUser[0].cart = newCart;
+      console.log(foundUser[0].cart);
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end(JSON.stringify(newCart));
+    }
   }
 });
 

@@ -22,7 +22,7 @@ paths:
           required: false
           type: string
       tags:
-        - Sunglasses
+        - Brands
       responses:
         "200":
           description: An array of sunglass brands
@@ -42,7 +42,7 @@ paths:
     get:
       summary: Different brands' collections of sunglasses
       description: |
-        The /brands/{id}/products endpoint allows you to retrieve a sunglasses for a specific brand.
+        The /brands/{id}/products endpoint allows you to retrieve sunglasses from a specific brand.
       parameters:
         - name: id
           in: path
@@ -50,7 +50,7 @@ paths:
           required: true
           type: string
       tags:
-        - Sunglasses
+        - Products
       responses:
         "200":
           description: An array of sunglasses from a specific brand
@@ -70,9 +70,15 @@ paths:
     get:
       summary: Sunglasses
       description: |
-        The /api/products endpoint allows you to retrieve all the sunglasses.
+        The /api/products endpoint allows you to retrieve all the sunglasses, or to filter by different brands.
+      parameters:
+        - name: query
+          in: query
+          description: Brand search query string
+          required: false
+          type: string
       tags:
-        - Sunglasses
+        - Products
       responses:
         "200":
           description: An array of sunglasses
@@ -88,24 +94,17 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /api/login:
+  /login:
     post:
       summary: Login to user account.
       description: |
         The /api/login endpoint allows a user to log in to their account.
-      parameters:
-        - name: id
-          in: query
-          description: The id of the brand
-          required: true
-          type: string
       tags:
         - User
       responses:
         "200":
           description: Log in successful
           schema:
-            type: string
             $ref: "#/definitions/User"
         "401":
           description: User name or password is incorrect
@@ -116,7 +115,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
 
-  /api/me/cart:
+  /me/cart:
     get:
       summary: User's cart
       description: >-
