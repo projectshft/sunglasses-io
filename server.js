@@ -8,7 +8,8 @@ const newAccessToken = uid(16);
 
 
 const Brand = require('./app/models/brand')
-const User = require('./app/models/user')
+const User = require('./app/models/user');
+const { isArray } = require('util');
 
 
 // State holding variables
@@ -292,9 +293,85 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
   }
 });
 
+myRouter.post('/api/me/cart/:productId', (request, response) => {
+  // Pass request url into helper method
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(404, "You need to be logged in to view this.");
+    return response.end();
+  } else {
+    // Could make helper function for this too idk
+    let foundToken = accessTokens.find((user)=> {
+      return user.username == currentAccessToken.username;
+    })
+    // Use filter method on users array to skip over elements that do not match criteria
+    let foundUser = users.filter(function(user) {
+      if (foundToken.username !== user.login.username) {
+        return false;
+      }
+      return true;
+    }).map(user => {
+      if (user.login.username == foundToken.username) {
+        return user;
+      };
+    });
+    const userCart = foundUser[0].cart;
 
+    // Get the product from the productId in req parameters
+    // returns the product to be deleted as an object
+    let reqProduct = User.getProdFromId(request.params.productId);
+    // console.log(reqProduct);
+
+    // Will send quantity in request.body
+    const updateQuant = request.body.quantity;
+
+    // Check the quantity already existing in cart
+    const currentQuant = (arr) => {
+      var count = 0;
+      for (var i = 0; i < arr.length; i++) {
+        if (arr[i].name == reqProduct.name) {
+          count++
+        }
+      };
+      return count;
+    };
+    
+    let currentCount = currentQuant(userCart);
+    if (currentCount < 0) {
+      response.writeHead(403, { "Content-Type": "application/json" });
+      response.statusCode = 403;
+      return response.end(JSON.stringify('You don\'t have that item in your cart.'));
+    }
+
+    
+    console.log(currentCount);
+    console.log(updateQuant);
+
+    // Subtract already exist quantity from desired quantity
+    // use that number in for loop
+    const diff = updateQuant - currentCount;
+   
+    // If diff < 0, remove that product from the array
+    
+    let newUserCart;
+
+    if (diff <= 0) {
+      newUserCart = userCart.filter(p => {
+        return p.name !== reqProduct.name
+      }).map(p => {
+       return p;
+      });
+    } else {
+      newUserCart = userCart.map(p => p)
+      }
+      for (let i = currentCount; i <= diff; i++) {
+        newUserCart.push(reqProduct)
+      };
+      console.log(newUserCart);
+      response.end(JSON.stringify(newUserCart));
+    } 
+  }
+
+);
 
 module.exports = server;
-
-
-// To work with spaces, use %20 in between words.

@@ -24,6 +24,16 @@ const exampleProduct = {
   "description": "Glasses to help test stuff!",
   "price": 15,
   "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+};
+
+const productQuantUpdate = {
+  "id": "1",
+  "quantity": "2"
+}
+
+const invalidProductQuantUpdate = {
+  "id": "3",
+  "quantity": "2"
 }
 
 // TODOS
@@ -153,8 +163,8 @@ describe('User', () => {
     chai
       .request(server)
       .delete('/api/me/cart/1')
-       // Send access token in parameter query
-       .query({accessToken: testToken})
+      // Send access token in parameter query
+      .query({accessToken: testToken})
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an('array');
@@ -164,7 +174,7 @@ describe('User', () => {
 
   });
   describe('/DELETE item not in user cart', () => {
-    // - Test that a user can delete a product from their cart
+    // - Test that a user cannot delete a product from their cart if it is not there
     it('user should not be able to delete a product from their cart that is not already there', (done) => {
       // Test token, hard-coded in for yellowleopard753
       let testToken = '8W0m7DtqNT9WnfAZ';
@@ -182,28 +192,22 @@ describe('User', () => {
 
   describe('/POST change quantity of item', () => {
   // - Test that a user can change the quantity of a product in their cart
-  it('user should be able to update the quantity of a product in their cart')
+  it('user should be able to update the quantity of a product in their cart', (done) => {
+     // Test token, hard-coded in for yellowleopard753
+     let testToken = '8W0m7DtqNT9WnfAZ';
+     chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .query({accessToken: testToken})
+      .send(productQuantUpdate)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('object');
+        done();
+      });
+    })
   });
-
-
 
 
 })
 
-
-
-
-
-// Testing with Chai
-
-// Positive:
-// - Test if a valid query returns the brand and the sunglasses for that brand
-// - Test that passing no query paramter returns back all brands
-
-// Negative:
-// - Test if passing something invalid as the 'q' parameter (like null) returns an error code
-// - Test that if a query has no brands for it returns back an empty 
-
-// Return user.name.first and user.name.last
-          // return string `Hello, ${} ${}'
-          // res.body.should.be.a('string')
