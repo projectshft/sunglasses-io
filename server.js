@@ -16,7 +16,15 @@ const User = require('./app/models/user')
 let users = [];
 let brands = [];
 let products = [];
-let accessTokens = [];
+let accessTokens = [
+  {
+    username: "lazywolf342",
+    token: '8W0m7DtqNT9WnfAZ'
+  }
+];
+
+
+
 
 //TODOS
 
@@ -87,6 +95,8 @@ myRouter.get('/products', function(request,response) {
 	return response.end(JSON.stringify(Brand.getAllProd()));
 });
 
+// Allows user to send log in information to attempt login
+// and creates an access token for them
 // POST /api/login
 myRouter.post('/api/login', (request, response) => {
 	response.writeHead(200, { "Content-Type": "application/json" });
@@ -114,7 +124,7 @@ myRouter.post('/api/login', (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        console.log(accessTokens);
+        // console.log(accessTokens);
 
         return response.end(JSON.stringify(newAccessToken.token));
       }
@@ -130,13 +140,59 @@ myRouter.post('/api/login', (request, response) => {
   }
 });
 
-myRouter.get('/api/me/cart', (request, response) => {
 
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  // Get the access token from the url
+  var parsedUrl = require('url').parse(request.url, true);
+
+  // Verify the access token 
+  let currentAccessToken = accessTokens.find((token) => {
+      return token.token == parsedUrl.query.accessToken;
+  });
+
+  if (currentAccessToken) {
+    console.log(currentAccessToken);
+    return currentAccessToken;
+  } else {
+    return (`Something is wrong...`);
+  }
+};
+
+// Returns the user's cart
+// must log in first to push fresh access token into array
+myRouter.get('/api/me/cart', (request, response) => {
+  // Pass request url into helper method
+  let currentAccessToken = getValidTokenFromRequest(request);
+  if (!currentAccessToken) {
+    response.writeHead(404, "You need to be logged in to view this.");
+    return response.end();
+  } else {
+    // Find the user's username by using the current access token
+    let foundToken = accessTokens.find((user)=> {
+      return user.username == currentAccessToken.username;
+    })
+    // Use filter method on users array to skip over elements that do not match criteria
+    let foundUser = users.filter(function(user) {
+      if (foundToken.username !== user.login.username) {
+        return false;
+      }
+      return true;
+    // Return the element that does match the criteria
+    }).map(user => {
+      if (user.login.username == foundToken.username) {
+        return user;
+      };
+    });
+    console.log(foundUser[0].cart);
+    // Return the user's cart in an stringified object
+    return response.end(JSON.stringify(foundUser[0].cart));
+  }
 });
+
 
 
 module.exports = server;
 
-  // Get our query params from the query string.
-  // Find brand to return
-  // To work with spaces, use %20 in between words.
+
+// To work with spaces, use %20 in between words.

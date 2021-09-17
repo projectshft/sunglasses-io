@@ -76,6 +76,21 @@ describe('User', () => {
           done();
         })
     })
+  });
+  describe('/GET user cart', () => {
+    // - Test that a user can access their cart
+    it('should return items in the user\'s cart', (done) => {
+      let testToken = '8W0m7DtqNT9WnfAZ';
+      chai 
+        .request(server)
+        .get('/api/me/cart')
+        .query({accessToken: testToken})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        })
+    })
   })
 
 })
