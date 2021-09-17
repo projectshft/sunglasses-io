@@ -117,19 +117,51 @@ class Brand {
     Object.assign(this,params);
   }
 
+  // Return all brand names
   static getAll() {
-    return brands
-  }
+    let allBrands = brands.map(b => {
+      return b.name;
+    })
+    return allBrands
+  };
 
-  static getBrand(brandName) {
-    let brand = brands.find(b => b.name == brandName)
-    let brandId = brand.id;
-    // .find only returns the first element that matches
-    let brandProducts = products.find(p => p.categoryId == brandId);
-    // use .map instead?
-    return brandProducts;
+  // Return products for a specific brand
+  static getBrandProd(id) {
+    // check if brand ID matches categoryId for any products
+    // if it does, pass it into next func
+    const checkId = (id => {
+      products.filter(function(p) {
+        if (p.categoryId !== id) {
+          console.log('false');
+          return false; // skip and tell our server the brand does not exist.
+        } return true;
+              }).map((p) => {
+                console.log('true');
+                return p;
+              })   
+    });
+    checkId(id);
+  };
+    // let foundBrands = brands.find(b => b.id == reqBrandId);
+    // const foundProducts = products.filter(function(p) {
+    //   if (p.categoryId !== id) {
+    //     return false; // skip
+    //   } return true;
+    //     }).map((p) => {
+    //       return p;
+    // })
+    // return foundProducts;
+    
+  
+  // Return all products regardless of brand
+  static getAllProd() {
+    return products
   }
-
 }
 
 module.exports = Brand;
+
+ // let brandId = brand.id;
+    // .find only returns the first element that matches
+    // let brandProducts = products.find(p => p.categoryId == brandId);
+    // use .map instead?

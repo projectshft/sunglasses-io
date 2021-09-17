@@ -42,7 +42,7 @@ paths:
     get:
       summary: Different brands' collections of sunglasses
       description: |
-        The /brands/{id}/products endpoint allows you to retrieve sunglasses from a specific brand.
+        The /brands/{id}/products endpoint allows you to retrieve a sunglasses for a specific brand.
       parameters:
         - name: id
           in: path
@@ -70,13 +70,7 @@ paths:
     get:
       summary: Sunglasses
       description: |
-        The /api/products endpoint allows you to retrieve all the sunglasses, or to filter by different brands.
-      parameters:
-        - name: query
-          in: query
-          description: Brand search query string
-          required: false
-          type: string
+        The /api/products endpoint allows you to retrieve all the sunglasses.
       tags:
         - Sunglasses
       responses:
@@ -94,7 +88,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /login:
+  /api/login:
     post:
       summary: Login to user account.
       description: |
@@ -105,6 +99,7 @@ paths:
         "200":
           description: Log in successful
           schema:
+            type: string
             $ref: "#/definitions/User"
         "401":
           description: User name or password is incorrect
@@ -115,7 +110,7 @@ paths:
           schema:
             $ref: "#/definitions/Error"
 
-  /me/cart:
+  /api/me/cart:
     get:
       summary: User's cart
       description: >-
