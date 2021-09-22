@@ -1,0 +1,191 @@
+swagger: "2.0"
+info:
+  description: "This is a sample server for a Sunglasses store.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
+  version: "1.0.0"
+  title: "Sunglasses Store"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "sunglasses.swagger.io"
+schemes:
+  - "https"
+  - "http"
+basePath: /api
+produces:
+  - application/json
+paths:
+  
+  /api/brands:
+    get:
+      tags:
+        - "brand"
+      summary: "Get all brands"
+      description: Brands of sunglasses for browsing
+      operationId: "getBrands"
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+      default:
+        "405":
+          description: "Invalid input"
+  
+  /api/brands/:id/products:
+    get:
+      tags:
+        - "brand"
+      summary: "Get all products under the given brand ID"
+      operationId: "getProductsByBrandId"
+      parameters:
+        - name: id
+          description: id of the brand
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+        "405":
+          description: "Invalid input"
+        default:
+          description: Unexpected error
+  
+  /api/products:
+    get:
+      tags:
+        - "products"
+      summary: "Get all products or results from a product search query"
+      operationId: "getProducts"
+      parameters:
+        - name: query
+          description: search within query string
+          in: query
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Array of products
+          schema:
+            type: array
+        "405":
+          description: "Invalid input"
+        default:
+          description: Unexpected error
+          schema:
+             $ref: "#/definitions/Error"
+  
+  /api/login:
+    post:
+      summary: User login
+      description: Login endpoint for the current authenticated user
+      tags:
+        - "login"
+      summary: "Sends login information"
+      operationId: "login"
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: Invalid username or password
+          schema:
+            $ref: "#/definitions/Error"
+        "405":
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  
+  /api/me/cart:
+    get:
+      tags:
+        - "cart"
+      summary: "View all items that are in the cart"
+      operationId: "getProductsInCart"
+      responses:
+        "200":
+          description: A user's cart
+          schema:
+            $ref: "/definitions/Cart"
+        "405":
+          description: "Invalid input"
+          schema: 
+            $ref: "/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "/definitions/Error"
+    post:
+      tags:
+        - "cart"
+      summary: "Add a product to the cart"
+      operationId: "postItemsInCart"
+      responses:
+        "200":
+          description: Produect successfully added to cart
+        "405":
+          description: "Invalid input"
+          schema:
+            $ref: "/definitions/Error"
+        default:
+          description: Unexpected error
+            schema:
+              $ref: "#/definitions/Error"
+          
+  /api/me/cart/:productId:
+    post:
+      tags:
+        - "cart"
+      summary: "Change the quantity of an item in the cart"
+      description:  Endpoint updates the quantity of an item in the cart
+      operationId: "postProductIdItemsInCart"
+      parameters:
+        - name: productId
+          description: Id of the product to remove
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Update successful
+          schema:
+            $ref: "#/definitions/Product"
+        "401":
+          description: Invalid access token
+          schema:
+            $ref: "#/definitions/Error"
+        "405":
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      tags:
+        - "cart"
+      summary: "Delete a product in the cart"
+      operationId: "deleteProductsInCart"
+      responses:
+        "200":
+          description: Deletion successful
+          schema:
+            $ref: "#/definitions/Product"
+        "405":
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
