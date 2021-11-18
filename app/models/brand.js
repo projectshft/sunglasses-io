@@ -126,24 +126,22 @@ class Brand {
   };
 
   // Return products for a specific brand
-  static getBrandProd(id) {
+  static getBrandProd(brandId) {
     let matched = [];
     // check if brand ID matches categoryId for any products
     // if it does, pass it into next func
-    const checkId = (id => {
+    const checkId = (brandId => {
       products.filter(function(p) {
-        if (p.categoryId !== id) {
+        if (p.categoryId !== brandId) {
           return false; // skip and tell our server the brand does not exist.
         } return true;
       }).map((p) => {
-          // console.log('true');
           matched.push(p);
-          // console.log(matched);
           return p;
         }) 
         return matched;
     });
-    return checkId(id);
+    return checkId(brandId);
   };
     
   

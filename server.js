@@ -9,6 +9,7 @@ const newAccessToken = uid(16);
 
 const Brand = require('./app/models/brand')
 const User = require('./app/models/user');
+const Cart = require('./app/models/cart')
 const { isArray } = require('util');
 
 
@@ -32,14 +33,6 @@ const exampleProduct = {
   "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
 }
 
-
-
-
-
-//TODOS
-
-
-
 // Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.urlencoded({
@@ -48,8 +41,8 @@ myRouter.use(bodyParser.urlencoded({
 myRouter.use(bodyParser.json());
 
 
-let server = http.createServer(function (request, response) {
-  myRouter(request, response, finalHandler(request, response));
+let server = http.createServer(function (req, res) {
+  myRouter(req, res, finalHandler(req, res));
 
 }).listen(8080, err => {
   if (err) {
@@ -74,51 +67,48 @@ let server = http.createServer(function (request, response) {
     console.log(`Server setup: ${products.length} products loaded`);
   });
   console.log(`Server is listening on 8080`);
-
 });
 
-
-
 // Returns an array of all the brands we carry
-myRouter.get('/api/brands', function(request,response) {
-	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(Brand.getAll()));
+myRouter.get('/api/brands', function(req,res) {
+	res.writeHead(200, { "Content-Type": "application/json" });
+	return res.end(JSON.stringify(Brand.getAll()));
 });
 
 // Returns all the sunglasses for a particular brand
-myRouter.get('/api/brands/:id/products', function(request, response) {
- let reqBrandProducts = Brand.getBrandProd(request.params.id);
+myRouter.get('/api/brands/:id/products', function(req, res) {
+ let reqBrandProducts = Brand.getBrandProd(req.params.id);
 
  console.log(reqBrandProducts);
   if (reqBrandProducts.length > 0) {
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.statusCode = 200;
-    return response.end(JSON.stringify(reqBrandProducts));
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.statusCode = 200;
+    return res.end(JSON.stringify(reqBrandProducts));
   } else {
-    response.writeHead(404, { "Content-Type": "application/json" });
-    response.statusCode = 404;
-    return response.end(JSON.stringify('Brand not found.'));
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.statusCode = 404;
+    return res.end(JSON.stringify('Brand not found.'));
   }
 });
 
 // Returns all sunglasses
-myRouter.get('/api/products', function(request,response) {
-	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(Brand.getAllProd()));
+myRouter.get('/api/products', function(req,res) {
+	res.writeHead(200, { "Content-Type": "application/json" });
+	return res.end(JSON.stringify(Brand.getAllProd()));
 });
 
 // Allows user to send log in information to attempt login
 // and creates an access token for them
 // POST /api/login
-myRouter.post('/api/login', (request, response) => {
-	response.writeHead(200, { "Content-Type": "application/json" });
-  // Make sure there is a username and password in the request
-  if (request.body.username && request.body.password) {
+myRouter.post('/api/login', (req, res) => {
+	res.writeHead(200, { "Content-Type": "application/json" });
+  // Make sure there is a username and password in the req
+  if (req.body.username && req.body.password) {
     let user = users.find((user) => {
-      return user.login.username == request.body.username && user.login.password == request.body.password;
+      return user.login.username == req.body.username && user.login.password == req.body.password;
     });
     if (user) {
-      response.writeHead(200, { "Content-Type": "application/json" });
+      res.writeHead(200, { "Content-Type": "application/json" });
       // We have a successful login, if we already have an existing access token, use that.
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
@@ -127,7 +117,7 @@ myRouter.post('/api/login', (request, response) => {
        // Update the last updated value so we get another time period
        if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
+        return res.end(JSON.stringify(currentAccessToken.token));
       } else {
         // Create a new token with the user value and a "random" token
         let newAccessToken = {
@@ -138,25 +128,25 @@ myRouter.post('/api/login', (request, response) => {
         accessTokens.push(newAccessToken);
         // console.log(accessTokens);
 
-        return response.end(JSON.stringify(newAccessToken.token));
+        return res.end(JSON.stringify(newAccessToken.token));
       }
     } else {
       // When a login fails, tell the client in a generic way that either the username or password was wrong
-      response.writeHead(401, "Invalid username or password");
-      return response.end();
+      res.writeHead(401, "Invalid username or password");
+      return res.end();
     }
   } else {
-     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-     response.writeHead(400, "Incorrectly formatted response");
-     return response.end();
+     // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the res
+     res.writeHead(400, "Incorrectly formatted res");
+     return res.end();
   }
 });
 
 
 // Helper method to process access token
-var getValidTokenFromRequest = function(request) {
+var getValidTokenFromRequest = function(req) {
   // Get the access token from the url
-  var parsedUrl = require('url').parse(request.url, true);
+  var parsedUrl = require('url').parse(req.url, true);
 
   // Verify the access token 
   let currentAccessToken = accessTokens.find((token) => {
@@ -164,105 +154,90 @@ var getValidTokenFromRequest = function(request) {
   });
 
   if (currentAccessToken) {
-    console.log(currentAccessToken);
+    // console.log(`This is the current access token: ${currentAccessToken}`);
     return currentAccessToken;
   } else {
     return null;
   }
 };
 
+const getUserFromToken = (token) => {
+  console.log(token);
+//   // Find the user's username by using the current access token
+  let foundToken = accessTokens.find((user)=> {
+    return user.username == token.username;
+  })
+//   // Use filter method on users array to skip over users without the matching access token
+  let foundUser = users.filter(function(user) {
+  if (foundToken.username !== user.login.username) {
+    return false;
+  }
+    return true;
+  // Return the user that has the matching access token
+  }).map(user => {
+    if (user.login.username == foundToken.username) {
+      return user;
+    };
+  });
+  return foundUser;
+};
+
 // Returns the user's cart
 // must log in first to push fresh access token into array
-myRouter.get('/api/me/cart', (request, response) => {
-  // Pass request url into helper method
-  let currentAccessToken = getValidTokenFromRequest(request);
+myRouter.get('/api/me/cart', (req, res) => {
+  // Pass req url into helper method
+  let currentAccessToken = getValidTokenFromRequest(req);
   if (!currentAccessToken) {
-    response.writeHead(404, "You need to be logged in to view this.");
-    return response.end();
+    res.writeHead(404, "You need to be logged in to view this.");
+    return res.end();
   } else {
-  // Find the user's username by using the current access token
-    let foundToken = accessTokens.find((user)=> {
-      return user.username == currentAccessToken.username;
-    })
-  // Use filter method on users array to skip over elements that do not match criteria
-    let foundUser = users.filter(function(user) {
-      if (foundToken.username !== user.login.username) {
-        return false;
-      }
-      return true;
-  //   // Return the element that does match the criteria
-    }).map(user => {
-      if (user.login.username == foundToken.username) {
-        return user;
-      };
-    });
+    let foundUser = getUserFromToken(currentAccessToken);
     console.log(foundUser[0].cart);
   // Return the user's cart in an stringified object
-    return response.end(JSON.stringify(foundUser[0].cart));
+    return res.end(JSON.stringify(foundUser[0].cart));
   }
 });
 
-// Adds a product to the user's cart by using the request.body
-myRouter.post('/api/me/cart', (request, response) => {
-  // Pass request url into helper method
-  let currentAccessToken = getValidTokenFromRequest(request);
+// Add a product to the user's cart by sending the product id in the req.body
+myRouter.post('/api/me/cart', (req, res) => {
+  // Pass req url into helper method to retrieve access token
+  let currentAccessToken = getValidTokenFromRequest(req);
   if (!currentAccessToken) {
-    response.writeHead(404, "You need to be logged in to view this.");
-    return response.end();
+    res.writeHead(404, "You need to be logged in to view this.");
+    return res.end();
   } else {
-    // Could make helper function for this too idk
-    let foundToken = accessTokens.find((user)=> {
-      return user.username == currentAccessToken.username;
-    })
-    // Use filter method on users array to skip over elements that do not match criteria
-    let foundUser = users.filter(function(user) {
-      if (foundToken.username !== user.login.username) {
-        return false;
-      }
-      return true;
-    }).map(user => {
-      if (user.login.username == foundToken.username) {
-        return user;
-      };
-    });
-    // console.log(request.body);
-    // Will send item to be pushed into user's cart in the request body
-    foundUser[0].cart.push(request.body);
-    // Return the user's cart in an stringified object
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(foundUser[0].cart));
+    let foundUser = getUserFromToken(currentAccessToken);
+  
+    if (req.body.id) {
+    const product = products.find(p => p.id == req.body.id)
+
+      if (product) {
+        foundUser[0].cart.push(product);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify(foundUser[0].cart));
+      }    
+    };
   }
-})
+});
 
 // Deletes a product using the product id from the user's cart
-myRouter.delete('/api/me/cart/:productId', (request, response) => {
-  // Pass request url into helper method
-  let currentAccessToken = getValidTokenFromRequest(request);
-  if (!currentAccessToken) {
-    response.writeHead(404, "You need to be logged in to view this.");
-    return response.end();
-  } else {
-    let foundToken = accessTokens.find((user)=> {
-      return user.username == currentAccessToken.username;
-  })
-   // Use filter method on users array to skip over elements that do not match criteria
-  let foundUser = users.filter(function(user) {
-    if (foundToken.username !== user.login.username) {
-      return false;
-    } return true;
-    }).map(user => {
-      if (user.login.username == foundToken.username) {
-        return user;
-      };
-    });
+myRouter.delete('/api/me/cart/:productId', (req, res) => {
 
+  let currentAccessToken = getValidTokenFromRequest(req);
+
+  if (!currentAccessToken) {
+    res.writeHead(404, "You need to be logged in to view this.");
+    return res.end();
+  } else {
+    let foundUser = getUserFromToken(currentAccessToken);
+    
     // To check user's cart contents BEFORE deleting product
     console.log(`This is the found user's cart ${JSON.stringify(foundUser[0].cart)}`);
 
-
     // Get the product from the productId in req parameters
     // returns the product to be deleted as an object
-    let reqProduct = User.getProdFromId(request.params.productId);
+    let reqProduct = Cart.getProdFromId(req.params.productId);
+    console.log(reqProduct);
 
     let matchedProd;
     
@@ -275,8 +250,8 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
       return p;
     });
     if (!matchedProd) {
-      response.writeHead(404, "That item is not in your cart.");
-      return response.end();
+      res.writeHead(404, "That item is not in your cart.");
+      return res.end();
     } else {
       console.log(matchedProd);
 
@@ -287,88 +262,73 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
       
       foundUser[0].cart = newCart;
       console.log(foundUser[0].cart);
-      response.writeHead(200, { "Content-Type": "application/json" });
-      response.end(JSON.stringify(newCart));
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(newCart));
     }
   }
 });
 
-myRouter.post('/api/me/cart/:productId', (request, response) => {
-  // Pass request url into helper method
-  let currentAccessToken = getValidTokenFromRequest(request);
+// Changes the quantity of a product in the user's cart
+myRouter.post('/api/me/cart/:productId', (req, res) => {
+  // Pass req url into helper method
+  let currentAccessToken = getValidTokenFromRequest(req);
   if (!currentAccessToken) {
-    response.writeHead(404, "You need to be logged in to view this.");
-    return response.end();
+    res.writeHead(404, "You need to be logged in to view this.");
+    return res.end();
   } else {
-    // Could make helper function for this too idk
-    let foundToken = accessTokens.find((user)=> {
-      return user.username == currentAccessToken.username;
-    })
-    // Use filter method on users array to skip over elements that do not match criteria
-    let foundUser = users.filter(function(user) {
-      if (foundToken.username !== user.login.username) {
-        return false;
-      }
-      return true;
-    }).map(user => {
-      if (user.login.username == foundToken.username) {
-        return user;
-      };
-    });
-    const userCart = foundUser[0].cart;
+    let user = getUserFromToken(currentAccessToken);
+    const cart = user[0].cart;
 
     // Get the product from the productId in req parameters
     // returns the product to be deleted as an object
-    let reqProduct = User.getProdFromId(request.params.productId);
-    // console.log(reqProduct);
+    let product = Cart.getProdFromId(req.params.productId);
 
-    // Will send quantity in request.body
-    const updateQuant = request.body.quantity;
+    // Will send quantity in req.body
+    const updateQuant = req.body.quantity;
 
     // Check the quantity already existing in cart
     const currentQuant = (arr) => {
       var count = 0;
       for (var i = 0; i < arr.length; i++) {
-        if (arr[i].name == reqProduct.name) {
+        if (arr[i].name == product.name) {
           count++
         }
       };
       return count;
     };
     
-    let currentCount = currentQuant(userCart);
+    let currentCount = currentQuant(cart);
     if (currentCount < 0) {
-      response.writeHead(403, { "Content-Type": "application/json" });
-      response.statusCode = 403;
-      return response.end(JSON.stringify('You don\'t have that item in your cart.'));
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.statusCode = 403;
+      return res.end(JSON.stringify('You don\'t have that item in your cart.'));
     }
 
-    
     console.log(currentCount);
     console.log(updateQuant);
 
-    // Subtract already exist quantity from desired quantity
+    // Subtract already existing quantity from desired quantity
     // use that number in for loop
     const diff = updateQuant - currentCount;
    
     // If diff < 0, remove that product from the array
     
-    let newUserCart;
+    let newCart;
 
     if (diff <= 0) {
-      newUserCart = userCart.filter(p => {
-        return p.name !== reqProduct.name
+      newCart = cart.filter(p => {
+        return p.name !== product.name
       }).map(p => {
        return p;
       });
     } else {
-      newUserCart = userCart.map(p => p)
+      newCart = cart.map(p => p)
       }
       for (let i = currentCount; i <= diff; i++) {
-        newUserCart.push(reqProduct)
+        newCart.push(product)
       };
-      console.log(newUserCart);
-      response.end(JSON.stringify(newUserCart));
+      console.log(newCart);
+      res.end(JSON.stringify(newCart));
     } 
   }
 

@@ -36,8 +36,6 @@ const invalidProductQuantUpdate = {
   "quantity": "2"
 }
 
-// TODOS
-
 describe('Brands', () => {
   describe('/GET brand', () => {
     // - Test that /brands returns all the brands, formatted in an array.

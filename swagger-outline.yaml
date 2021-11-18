@@ -38,13 +38,13 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /brands/{id}/products:
+  /brands/{brandId}/products:
     get:
       summary: Different brands' collections of sunglasses
       description: |
         The /brands/{id}/products endpoint allows you to retrieve sunglasses from a specific brand.
       parameters:
-        - name: id
+        - name: brandId
           in: path
           description: The id of the brand
           required: true

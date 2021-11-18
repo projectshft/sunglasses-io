@@ -1,6 +1,5 @@
 const fs = require('fs')
 
-
 let users = [
   [
     {
@@ -126,44 +125,6 @@ let accessTokens = [
 class User {
   constructor(params) {
     Object.assign(this,params);
-  }
-
-  static getProdFromId(id) {
-    // id is stored in 'id'
-    let matched;;
-    const checkId = (id => {
-      products.filter(function(p) {
-        if (p.id !== id) {
-          return false;
-        } return true;
-      }).map((p) => {
-        matched = p;
-        return p;
-      })
-      return matched;
-    })
-    return checkId(id);
-  };
-
-  static returnCart(currentAccessToken) {
-    // User.returnCart(currentAccessToken)
-    const findTokenUser = accessTokens.find((user) => {
-      return user.username == currentAccessToken.username;
-    });
-    let foundUser = users.filter(function(user) {
-      if (foundToken.username !== user.login.username) {
-        return false;
-      }
-      return true;
-    // Return the element that does match the criteria
-    }).map(user => {
-      if (user.login.username == foundToken.username) {
-        return user;
-      };
-    });
-    console.log(foundUser[0].cart);
-    // Return the user's cart in an stringified object
-    return response.end(JSON.stringify(foundUser[0].cart));
   }
 }
 
