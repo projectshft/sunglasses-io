@@ -1,0 +1,331 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Sunglasses-API
+  description: An API to support the Sunglasses.io site
+schemes:
+ - https
+consumes:
+  - application/json
+produces:
+  - application/json
+  
+paths:
+  /products:
+    get:
+      summary: All products.
+      description: Get all of the products in the store.
+      tags:
+        - Products
+      responses:
+        '200':
+          description: success - returns an array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /brands:
+    get:
+      summary: Brands of sunglasses available
+      description: |
+        The list of brands available
+      tags:
+        - Brands
+      responses:
+          '200':
+            description: success - returns an array of brands
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Brands'
+          default:
+            description: Unexpected error
+            schema:
+              $ref: '#/definitions/Error'
+
+  /brands/{id}/products:
+    get:
+      summary: Products for a given brand.
+      description: Get all of the products for a given brand.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand whose products will be returned.
+          required: true
+          type: number
+          format: int32
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: success - returns an array of products filtered by the given brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        '400':
+          description: "Invalid Brand ID"
+        
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /login:
+    post:
+      summary: User Login
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: The login credentials
+          schema:
+            $ref: '#/definitions/Login'
+      tags:
+        - User
+      responses:
+        '200':
+          description: Login was successful
+          schema:
+            $ref: '#/definitions/Users'
+        '400':
+          description: Invalid username/password supplied
+
+  /me/cart:
+    get:
+      summary: Get User's Cart
+      description: >-
+        The User Profile endpoint returns information about the Uber user that
+        has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: success - returns array of products in user's cart
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        '404':
+          description: "User must be logged in"
+          schema:
+              $ref: "#/definitions/Error"
+            
+    post:
+      summary: Add product to User's cart
+      tags:
+        - User
+      parameters:
+          -   in: "body"
+              name: "product to add"
+              required: true
+              schema:
+                  $ref: "#/definitions/Products"
+      responses:
+          200:
+            description: "Item has been added to the cart"
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Products'
+          400:
+            description: "Invalid input."
+            schema:
+                $ref: "#/definitions/Error"
+          404:
+            description: "User must be logged in"
+            schema:
+                $ref: "#/definitions/Error"
+
+  /me/cart/{productId}:
+    parameters:
+      - name: productId
+        in: path
+        description: Id of specfic item in the cart
+        required: true
+        type: string
+        
+    delete:
+      tags:
+        - User
+      summary: Remove cart item
+      responses:
+        '200':
+          description: "success - Cart item has been removed"
+        '400':
+          description: "Invalid product id."
+          schema:
+              $ref: "#/definitions/Error"
+        '404':
+          description: "User must be logged in"
+          schema:
+              $ref: "#/definitions/Error"
+              
+    post:
+      tags:
+        - User
+      summary: change quantity of product in cart
+      parameters:
+        - in: "body"
+          name: "content"
+          required: true
+          schema:
+            $ref: "#/definitions/ChangeItemQuantityRequest"
+      responses:
+        '200':
+          description: "success - quantity has been changed"
+        '400':
+          description: "Invalid product id."
+          schema:
+              $ref: "#/definitions/Error"
+        '404':
+          description: "User must be logged in"
+          schema:
+              $ref: "#/definitions/Error"
+  
+
+definitions:
+
+  Brands:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier for a brand
+      name:
+        type: string
+        description: The name of the brand
+  
+  Products:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: Unique identifier for the product.
+      categoryId:
+        type: integer
+        description: identifier for the brand of the product
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: number
+        description: Price of product.
+      imageURLs:
+        type: array
+        items: 
+          type: string
+          description: URLs for the images of the product
+
+  Users:
+    type: object
+    properties:
+      gender:
+        type: string
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Products'
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+      email: 
+        type: string
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+            format: password
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        format: date-time
+      registered:
+        type: string
+        format: date-time
+      phone:
+        type: string
+        pattern: '^\d{3}-\d{3}-\d{4}$'
+      cell:
+        type: string
+        pattern: '^\d{3}-\d{3}-\d{4}$'
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string     
+      nat:
+        type: string
+
+  Login:
+    required: [username, password]
+    properties:
+      username:
+        type: string
+        minLength: 1
+      password:
+        type: string
+        minLength: 1
+
+  ChangeItemQuantityRequest:
+      type: object
+      description: Body of request used to change quantity of an item.
+      required:
+          - quantity
+      properties:
+          quantity:
+              type: integer
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+        
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /stevehusmann/Sunglasses-API/1.0.0
