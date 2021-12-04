@@ -6,11 +6,11 @@ var Router = require('router');
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
+
 // State holding variables
 let brands = [];
 let products = [];
 let users = [];
-let currentUser = {};
 let accessTokens = [];
 
 const PORT = 3001;
@@ -132,14 +132,125 @@ router.get('/api/me/cart', (request, response) => {
     response.end();
   } else {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    currentUser = users.find(user => {
+    let currentUser = users.find(user => {
       return user.login.username == tokenVerified.username;
     });
-
     response.end(JSON.stringify(currentUser.cart));
   }
 });
 
+const verifyProduct = (productToVerify) => {
+  if (!productToVerify.hasOwnProperty('id')||
+      !productToVerify.hasOwnProperty('categoryId')||
+      !productToVerify.hasOwnProperty('name')||
+      !productToVerify.hasOwnProperty('description')||
+      !productToVerify.hasOwnProperty('price')||
+      !productToVerify.hasOwnProperty('imageUrls')
+  ) {
+    return 400;
+  } 
 
+  // console.log(products);
+
+  const checkDatabaseForProduct = products.find(product => {
+    return JSON.stringify(product) === JSON.stringify(productToVerify);
+  })
+
+  if (!checkDatabaseForProduct) {
+    return 404;
+  }
+
+  if (checkDatabaseForProduct) {
+    return 200;
+  }
+}
+
+//POST api/me/cart
+router.post('/api/me/cart', (request, response) => {
+  const parsedUrl = require('url').parse(request.url, true);
+  let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
+  if (tokenVerified == 401) {
+    response.writeHead(401, "AccessToken required to access cart");
+    response.end();
+  } else if (tokenVerified == 403) {
+    response.writeHead(403, "AccessToken not valid");
+    response.end();
+  } else {
+    
+    let productToAdd = request.body;
+
+
+    if (JSON.stringify(productToAdd) == '{}') {
+      response.writeHead(415, "Product is missing from the request");
+      response.end();
+    }
+    let productVerified = verifyProduct(productToAdd);
+
+    if (productVerified == 400) {
+      response.writeHead(400, "Product has invalid syntax");
+      response.end();
+    }
+
+    if (productVerified == 404) {
+      response.writeHead(404, "Product cannot be found in database");
+      response.end();
+    }
+
+    if (productVerified == 200) {
+      let currentUser = users.find(user => {
+        return user.login.username == tokenVerified.username;
+      });
+      currentUser.cart.push(productToAdd);
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify(currentUser.cart));
+    }
+  }
+});
+
+// //DELETE cart item
+// router.post('/api/me/cart/:productId', (request, response) => {
+
+//   router.get('/api/brands/:brandId/products', (request, response) => {
+//     const { brandId } = request.params;
+
+//   const parsedUrl = require('url').parse(request.url, true);
+//   let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
+//   if (tokenVerified == 401) {
+//     response.writeHead(401, "AccessToken required to access cart");
+//     response.end();
+//   } else if (tokenVerified == 403) {
+//     response.writeHead(403, "AccessToken not valid");
+//     response.end();
+//   } else {
+    
+//     let productToAdd = request.body;
+
+
+//     if (JSON.stringify(productToAdd) == '{}') {
+//       response.writeHead(415, "Product is missing from the request");
+//       response.end();
+//     }
+//     let productVerified = verifyProduct(productToAdd);
+
+//     if (productVerified == 400) {
+//       response.writeHead(400, "Product has invalid syntax");
+//       response.end();
+//     }
+
+//     if (productVerified == 404) {
+//       response.writeHead(404, "Product cannot be found in database");
+//       response.end();
+//     }
+
+//     if (productVerified == 200) {
+//       let currentUser = users.find(user => {
+//         return user.login.username == tokenVerified.username;
+//       });
+//       currentUser.cart.push(productToAdd);
+//       response.writeHead(200, {'Content-Type': 'application/json'});
+//       response.end(JSON.stringify(currentUser.cart));
+//     }
+//   }
+// });
 
 module.exports = server;
