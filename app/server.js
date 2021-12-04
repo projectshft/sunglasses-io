@@ -207,50 +207,19 @@ router.post('/api/me/cart', (request, response) => {
   }
 });
 
-// //DELETE cart item
-// router.post('/api/me/cart/:productId', (request, response) => {
+//DELETE cart item
+router.delete('/me/cart/:productId', (request, response) => {
+  const { idOfProductToDelete } = request.params;
+  const parsedUrl = require('url').parse(request.url, true);
 
-//   router.get('/api/brands/:brandId/products', (request, response) => {
-//     const { brandId } = request.params;
-
-//   const parsedUrl = require('url').parse(request.url, true);
-//   let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
-//   if (tokenVerified == 401) {
-//     response.writeHead(401, "AccessToken required to access cart");
-//     response.end();
-//   } else if (tokenVerified == 403) {
-//     response.writeHead(403, "AccessToken not valid");
-//     response.end();
-//   } else {
-    
-//     let productToAdd = request.body;
-
-
-//     if (JSON.stringify(productToAdd) == '{}') {
-//       response.writeHead(415, "Product is missing from the request");
-//       response.end();
-//     }
-//     let productVerified = verifyProduct(productToAdd);
-
-//     if (productVerified == 400) {
-//       response.writeHead(400, "Product has invalid syntax");
-//       response.end();
-//     }
-
-//     if (productVerified == 404) {
-//       response.writeHead(404, "Product cannot be found in database");
-//       response.end();
-//     }
-
-//     if (productVerified == 200) {
-//       let currentUser = users.find(user => {
-//         return user.login.username == tokenVerified.username;
-//       });
-//       currentUser.cart.push(productToAdd);
-//       response.writeHead(200, {'Content-Type': 'application/json'});
-//       response.end(JSON.stringify(currentUser.cart));
-//     }
-//   }
-// });
+  let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
+  if (tokenVerified == 401) {
+    response.writeHead(401, "AccessToken required to access cart");
+    response.end();
+  } else if (tokenVerified == 403) {
+    response.writeHead(403, "AccessToken not valid");
+    response.end();
+  } 
+});
 
 module.exports = server;

@@ -293,27 +293,26 @@ describe ('Login', () => {
 
   });
 
-  // describe ('DELETE/ api/me/cart/:productId', () => {
+  describe ('DELETE/ api/me/cart/:productId', () => {
+    it('it should FAIL if there is no Access Token in the URL.', done => {
+      chai
+        .request(server)
+        .delete('/api/me/cart/' + productToSend.id)
+        .end((error, response) => {
+          response.should.have.status(401);
+          done();
+        })
+    });
 
-  //   it('it should FAIL if there is no Access Token in the URL.', done => {
-  //     chai
-  //       .request(server)
-  //       .delete('/api/me/cart')
-  //       .end((error, response) => {
-  //         response.should.have.status(401);
-  //         done();
-  //       })
-  //   });
-
-  //   it('it should FAIL if there is an invalid Access Token Key.', done => {
-  //     chai
-  //       .request(server)
-  //       .delete('/api/me/cart?accessToken=456446541065421354')
-  //       .end((error, response) => {
-  //         response.should.have.status(403);
-  //         done();
-  //       })
-  //   });
-
+    // it('it should FAIL if there is an invalid Access Token Key.', done => {
+    //   chai
+    //     .request(server)
+    //     .delete('/api/me/cart/1?accessToken=456446541065421354')
+    //     .end((error, response) => {
+    //       response.should.have.status(403);
+    //       done();
+    //     })
+    // });
+  });
 
 });
