@@ -10,6 +10,7 @@ var uid = require('rand-token').uid;
 let brands = [];
 let products = [];
 let users = [];
+let currentUser = {};
 let accessTokens = [];
 
 const PORT = 3001;
@@ -76,13 +77,11 @@ router.post('/api/login', (request, response) => {
     });
     if (user) {
       response.writeHead(200, {'Content-Type': 'application/json'});
-      
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
       });
 
       if (currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
         return response.end(JSON.stringify(currentAccessToken.token));
 
       } else {
@@ -104,34 +103,43 @@ router.post('/api/login', (request, response) => {
   }
 });
 
+//Helper function to verify tokens
+const verifyAccessToken = (tokenToVerify) => {
+  if (!tokenToVerify) {
+    return 401;
+  } 
+  let currentAccessToken = accessTokens.find(accessToken => {
+    return accessToken.token == tokenToVerify;
+  });
+  if (!currentAccessToken) {
+    return 403;
+  }
+  if (currentAccessToken) {
+    return currentAccessToken;
+  }
+};
+
 //GET api/me/cart
 router.get('/api/me/cart', (request, response) => {
   const parsedUrl = require('url').parse(request.url, true);
-    
-  if (!parsedUrl.query.accessToken) {
-    response.writeHead(401, "Login required to access cart");
-    return response.end();
-  } 
+  let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
   
-  let currentAccessToken = accessTokens.find(accessToken => {
-    return accessToken.token == parsedUrl.query.accessToken;
-  });
-
-  if (!currentAccessToken) {
+  if (tokenVerified == 401) {
+    response.writeHead(401, "AccessToken required to access cart");
+    response.end();
+  } else if (tokenVerified == 403) {
     response.writeHead(403, "AccessToken not valid");
-    return response.end();
-  }
-
-  if (currentAccessToken) {
+    response.end();
+  } else {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    let username = currentAccessToken.username;
-    let user = users.find(user => {
-      return user.login.username == username;
+    currentUser = users.find(user => {
+      return user.login.username == tokenVerified.username;
     });
-    response.end(JSON.stringify(user.cart));
+
+    response.end(JSON.stringify(currentUser.cart));
   }
-
-
 });
+
+
 
 module.exports = server;
