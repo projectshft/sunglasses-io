@@ -107,9 +107,7 @@ router.post('/api/login', (request, response) => {
 //GET api/me/cart
 router.get('/api/me/cart', (request, response) => {
   const parsedUrl = require('url').parse(request.url, true);
-  
-  console.log(parsedUrl.query.accessToken);
-
+    
   if (!parsedUrl.query.accessToken) {
     response.writeHead(401, "Login required to access cart");
     return response.end();
@@ -126,7 +124,11 @@ router.get('/api/me/cart', (request, response) => {
 
   if (currentAccessToken) {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    response.end();
+    let username = currentAccessToken.username;
+    let user = users.find(user => {
+      return user.login.username == username;
+    });
+    response.end(JSON.stringify(user.cart));
   }
 
 

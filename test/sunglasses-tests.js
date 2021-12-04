@@ -177,12 +177,13 @@ describe ('Login', () => {
         })
     });
 
-    it('it should PASS if there is a valid Access Token Key.', done => {
+    it('it should PASS if there is a valid Access Token Key and it returns the cart successfully.', done => {
       chai
         .request(server)
         .get(`/api/me/cart?accessToken=${currentAccessToken}`)
         .end((error, response) => {
           response.should.have.status(200);
+          response.body.should.be.an('array');
           done();
         })
     });
