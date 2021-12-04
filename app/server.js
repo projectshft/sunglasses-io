@@ -84,11 +84,10 @@ router.post('/api/login', (request, response) => {
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
         return response.end(JSON.stringify(currentAccessToken.token));
-        
+
       } else {
         let newAccessToken = {
           username: user.login.username,
-          lastUpdated: new Date(),
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
@@ -103,6 +102,34 @@ router.post('/api/login', (request, response) => {
     response.writeHead(400, "Incorrectly formatted response");
     return response.end();
   }
+});
+
+//GET api/me/cart
+router.get('/api/me/cart', (request, response) => {
+  const parsedUrl = require('url').parse(request.url, true);
+  
+  console.log(parsedUrl.query.accessToken);
+
+  if (!parsedUrl.query.accessToken) {
+    response.writeHead(401, "Login required to access cart");
+    return response.end();
+  } 
+  
+  let currentAccessToken = accessTokens.find(accessToken => {
+    return accessToken.token == parsedUrl.query.accessToken;
+  });
+
+  if (!currentAccessToken) {
+    response.writeHead(403, "AccessToken not valid");
+    return response.end();
+  }
+
+  if (currentAccessToken) {
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end();
+  }
+
+
 });
 
 module.exports = server;

@@ -1,16 +1,10 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('../app/server');
-var Router = require('router');
-var bodyParser = require('body-parser');
 
 let should = chai.should();
 
 chai.use(chaiHttp);
-
-//setup router
-const router = Router();
-router.use(bodyParser.json());
 
 describe ('Products', () => {
   
@@ -162,6 +156,37 @@ describe ('Login', () => {
 
   });
 
-  
+  describe ('GET/ api/me/cart', () => {
+    it('it should FAIL if there is no Access Token in the URL.', done => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((error, response) => {
+          response.should.have.status(401);
+          done();
+        })
+    });
+
+    it('it should FAIL if there is an invalid Access Token Key.', done => {
+      chai
+        .request(server)
+        .get('/api/me/cart?accessToken=456421354')
+        .end((error, response) => {
+          response.should.have.status(403);
+          done();
+        })
+    });
+
+    it('it should PASS if there is a valid Access Token Key.', done => {
+      chai
+        .request(server)
+        .get(`/api/me/cart?accessToken=${currentAccessToken}`)
+        .end((error, response) => {
+          response.should.have.status(200);
+          done();
+        })
+    });
+
+  });
 
 });
