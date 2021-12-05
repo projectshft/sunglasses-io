@@ -22,6 +22,20 @@ describe("Brands", () => {
   });
 
   describe("/GET brands/:id/products", () => {
+    it("it should return a 404 if no products of the requested brand are found", (done) => {
+      let id = "123456789";
+
+      chai
+        .request(server)
+        .get(`/api/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+      });
+    });
+  })
+
+  describe("/GET brands/:id/products", () => {
     it("it should GET all products of the requested brand", (done) => {
       // brand id 1 is Oakley, which has 3 products in the store, including the Superglasses
       let id = "1";

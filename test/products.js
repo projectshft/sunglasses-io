@@ -8,6 +8,17 @@ chai.use(chaiHttp);
 
 describe("Products", () => {
   describe("/GET products", () => {
+    it("it should return a 404 if no products are found that match the search query", (done) => {
+      chai
+        .request(server)
+        .get("/api/products")
+        .query({query: "hello world"})
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+    
     it("it should GET all the products whose description includes the search query", (done) => {
       // 4 of the products are described as "best glasses in the world, including the Superglasses
       let superglasses = {
@@ -22,7 +33,7 @@ describe("Products", () => {
       chai
         .request(server)
         .get("/api/products")
-        .query( {query: "best"})
+        .query({query: "best"})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");

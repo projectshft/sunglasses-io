@@ -11,6 +11,7 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
+var accessTokens = [];
 
 var router = Router();
 router.use(bodyParser.json());
@@ -62,6 +63,45 @@ router.get('/api/products', (request, response) => {
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsWithQuery));
+});
+
+// POST user login
+router.post('/api/login', (request, response) => {
+  // Confirm request includes a username and password
+  if (!request.body.username || !request.body.password) {
+
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+
+  // Identify user with the given credentials
+  let user = users.find(user => user.login.username === request.body.username && user.login.password === request.body.password);
+
+  // Respond if credentials are invalid
+  if (!user) {
+    response.writeHead(401, "Invalid username and/or password");
+    return response.end();
+  }
+  
+  response.writeHead(200, { "Content-Type": "application/json" });
+
+  // Check if user already has an access token
+  let currentAccessToken = accessTokens.find(tokenInfo => tokenInfo.username === user.login.username);
+  
+  // If user has token already, modify date it was last updated and return it
+  if (currentAccessToken) {
+    currentAccessToken.lastUpdated = new Date();
+    return response.end(JSON.stringify(currentAccessToken.token));
+  } else {
+    // If user doesn't have a token, create a new one and return it
+    let newAccessToken = {
+      username: user.login.username,
+      lastUpdated: new Date(),
+      token: uid(16)
+    }
+    accessTokens.push(newAccessToken);
+    return response.end(JSON.stringify(newAccessToken.token));
+  }
 });
 
 module.exports = server;
