@@ -150,8 +150,6 @@ const verifyProduct = (productToVerify) => {
     return 400;
   } 
 
-  // console.log(products);
-
   const checkDatabaseForProduct = products.find(product => {
     return JSON.stringify(product) === JSON.stringify(productToVerify);
   })
@@ -176,42 +174,46 @@ router.post('/api/me/cart', (request, response) => {
     response.writeHead(403, "AccessToken not valid");
     response.end();
   } else {
-    
-    let productToAdd = request.body;
+      let productToAdd = request.body;
+      if (JSON.stringify(productToAdd) == '{}') {
+        response.writeHead(415, "Product is missing from the request");
+        response.end();
+      }
+      let productVerified = verifyProduct(productToAdd);
 
+      if (productVerified == 400) {
+        response.writeHead(400, "Product has invalid syntax");
+        response.end();
+      }
 
-    if (JSON.stringify(productToAdd) == '{}') {
-      response.writeHead(415, "Product is missing from the request");
-      response.end();
-    }
-    let productVerified = verifyProduct(productToAdd);
+      if (productVerified == 404) {
+        response.writeHead(404, "Product cannot be found in database");
+        response.end();
+      }
 
-    if (productVerified == 400) {
-      response.writeHead(400, "Product has invalid syntax");
-      response.end();
-    }
+      if (productVerified == 200) {
+        let currentUser = users.find(user => {
+          return user.login.username == tokenVerified.username;
+        });
 
-    if (productVerified == 404) {
-      response.writeHead(404, "Product cannot be found in database");
-      response.end();
-    }
+        let indexOfProductInCart = currentUser.cart.findIndex(cartItem => cartItem.product.id == productToAdd.id);
+        if (indexOfProductInCart == -1) {
+          currentUser.cart.push({'product':productToAdd, 'quantity': 1});
+        } else {
+          currentUser.cart[indexOfProductInCart].quantity++;
+        }
 
-    if (productVerified == 200) {
-      let currentUser = users.find(user => {
-        return user.login.username == tokenVerified.username;
-      });
-      currentUser.cart.push(productToAdd);
-      response.writeHead(200, {'Content-Type': 'application/json'});
-      response.end(JSON.stringify(currentUser.cart));
-    }
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.end(JSON.stringify(currentUser.cart));
+      }
   }
 });
 
 //DELETE cart item
-router.delete('/me/cart/:productId', (request, response) => {
-  const { idOfProductToDelete } = request.params;
-  const parsedUrl = require('url').parse(request.url, true);
+router.delete('/api/me/cart/:productId', (request, response) => {
 
+  const idOfProductToDelete = request.params.productId;
+  const parsedUrl = require('url').parse(request.url, true);
   let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
   if (tokenVerified == 401) {
     response.writeHead(401, "AccessToken required to access cart");
@@ -219,7 +221,51 @@ router.delete('/me/cart/:productId', (request, response) => {
   } else if (tokenVerified == 403) {
     response.writeHead(403, "AccessToken not valid");
     response.end();
-  } 
+  } else {
+    let currentUser = users.find(user => {
+      return user.login.username == tokenVerified.username;
+    });
+    let indexOfProductInCart = currentUser.cart.findIndex(cartItem => cartItem.product.id == idOfProductToDelete);
+    if (indexOfProductInCart == -1) {
+      response.writeHead(404);
+      response.end("Product not found in cart");
+    } else {
+      response.writeHead(200);
+      currentUser.cart.splice(indexOfProductInCart, 1);
+      response.end();
+    }
+  }
 });
+
+//POST change quantity of cart item
+router.post('/api/me/cart/:productId', (request, response) => {
+  const newQuantity = request.body.quantity;
+  if (!newQuantity) {
+    response.writeHead(400, "POST request does not include new quantity");
+    response.end();
+  } else {
+    const idOfProductToUpdate = request.params.productId;
+    const parsedUrl = require('url').parse(request.url, true);
+    let tokenVerified = verifyAccessToken(parsedUrl.query.accessToken);
+    if (tokenVerified == 401) {
+      response.writeHead(401, "AccessToken required to access cart");
+      response.end();
+    } else if (tokenVerified == 403) {
+      response.writeHead(403, "AccessToken not valid");
+      response.end();
+    } else {
+      let currentUser = users.find(user => user.login.username == tokenVerified.username);
+      let indexOfProductInCart = currentUser.cart.findIndex(cartItem => cartItem.product.id == idOfProductToUpdate);
+      if (indexOfProductInCart == -1) {
+        response.writeHead(404, "This ID doesn't match any items in the users cart");
+        response.end();
+      } 
+      currentUser.cart[indexOfProductInCart].quantity = newQuantity;
+      response.writeHead(200, {'Content-Type': 'application/json'});
+      response.end(JSON.stringify(currentUser.cart));
+    }
+  }
+});
+
 
 module.exports = server;

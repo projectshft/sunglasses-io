@@ -70,7 +70,7 @@ describe ('Brands', () => {
     })
 
     it('it should FAIL if the brand id is not legitimate.', done => {
-      const allLegitBrandIds = [];
+      let allLegitBrandIds = [];
       brands.forEach(brand => allLegitBrandIds.push(parseInt(brand.id)));
       let illegitBrandId = Math.floor(Math.random() * 50);
       while (allLegitBrandIds.includes(illegitBrandId)) {
@@ -92,8 +92,7 @@ describe ('Brands', () => {
 describe ('Login', () => {
   //dummy data to use for Login/cart tests
   let currentAccessToken = '';
-  let userCart = {};
-  const productToSend = {
+  const productToKeep = {
     id: '1',
     categoryId: '1',
     name: 'Superglasses',
@@ -106,8 +105,21 @@ describe ('Login', () => {
     ]
   }
 
+  const productToDelete = {
+    id: '11',
+    categoryId: '5',
+    name: 'Habanero',
+    description: 'The spiciest glasses in the world',
+    price: 153,
+    imageUrls: [
+      'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+      'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+      'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg'
+    ]
+  }
+
   //missing price key
-  const badlyFormattedProductToSend = {
+  const badlyFormattedProduct = {
     id: 1,
     categoryId: 1,
     name: 'Superglasses',
@@ -119,7 +131,7 @@ describe ('Login', () => {
     ]
   }
 
-  const missingProductToSend = {
+  const missingProduct = {
     id: 6,
     categoryId: 6,
     name: 'doggie glasses',
@@ -135,7 +147,7 @@ describe ('Login', () => {
   describe ('/POST /api/login', () => {
     it('it should LOGIN a user with a valid login', done => {
       
-      let goodLoginAttempt = {
+      const goodLoginAttempt = {
         username: 'yellowleopard753',
         password: "jonjon"
       }
@@ -153,7 +165,7 @@ describe ('Login', () => {
     });
 
     it('it should REJECT a user with an poorly formatted login', done => {
-      let poorlyFormattedLoginAttempt = {
+      const poorlyFormattedLoginAttempt = {
         username: 'redelephant864'
       }
       
@@ -161,6 +173,16 @@ describe ('Login', () => {
         .request(server)
         .post('/api/login')
         .send(poorlyFormattedLoginAttempt)
+        .end((error, response) => {
+          response.should.have.status(400)
+          done();
+        })
+    });
+
+    it('it should REJECT a user who does not send login info', done => {      
+      chai
+        .request(server)
+        .post('/api/login')
         .end((error, response) => {
           response.should.have.status(400)
           done();
@@ -214,7 +236,6 @@ describe ('Login', () => {
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an('array');
-          userCart = response.body;
           done();
         })
     });
@@ -227,7 +248,7 @@ describe ('Login', () => {
       chai
         .request(server)
         .post('/api/me/cart')
-        .send(productToSend)
+        .send(productToKeep)
         .end((error, response) => {
           response.should.have.status(401);
           done();
@@ -238,7 +259,7 @@ describe ('Login', () => {
       chai
         .request(server)
         .post('/api/me/cart?accessToken=456446541065421354')
-        .send(productToSend)
+        .send(productToKeep)
         .end((error, response) => {
           response.should.have.status(403);
           done();
@@ -259,7 +280,7 @@ describe ('Login', () => {
       chai
         .request(server)
         .post(`/api/me/cart?accessToken=${currentAccessToken}`)
-        .send(badlyFormattedProductToSend)
+        .send(badlyFormattedProduct)
         .end((error, response) => {
           response.should.have.status(400);
           done();
@@ -270,23 +291,35 @@ describe ('Login', () => {
       chai
         .request(server)
         .post(`/api/me/cart?accessToken=${currentAccessToken}`)
-        .send(missingProductToSend)
+        .send(missingProduct)
         .end((error, response) => {
           response.should.have.status(404);
           done();
         })
     });
 
-    it('it should POST the product to the cart if the product sent is in the database.', done => {
+    it('it should POST the product to the cart if the product sent is in the database (but not in the cart).', done => {
       chai
         .request(server)
         .post(`/api/me/cart?accessToken=${currentAccessToken}`)
-        .send(productToSend)
+        .send(productToKeep)
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an('array');
-          response.body.should.deep.include(productToSend);
-          userCart = response.body;
+          response.body.should.deep.include({'product':productToKeep, 'quantity':1});
+          done();
+        })
+    });
+
+    it('if the product is in the database AND is already in the cart, it should INCREASE the quantity by 1.', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart?accessToken=${currentAccessToken}`)
+        .send(productToKeep)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an('array');
+          response.body.should.deep.include({product:productToKeep, quantity:2});
           done();
         })
     });
@@ -294,25 +327,120 @@ describe ('Login', () => {
   });
 
   describe ('DELETE/ api/me/cart/:productId', () => {
+
+    it('it should POST a product for us to delete', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart?accessToken=${currentAccessToken}`)
+        .send(productToDelete)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.be.an('array');
+          response.body.should.deep.include({'product':productToDelete, 'quantity':1});
+          done();
+        })
+    });
+
     it('it should FAIL if there is no Access Token in the URL.', done => {
       chai
         .request(server)
-        .delete('/api/me/cart/' + productToSend.id)
+        .delete(`/api/me/cart/${productToKeep.id}`)
         .end((error, response) => {
           response.should.have.status(401);
           done();
         })
     });
 
-    // it('it should FAIL if there is an invalid Access Token Key.', done => {
-    //   chai
-    //     .request(server)
-    //     .delete('/api/me/cart/1?accessToken=456446541065421354')
-    //     .end((error, response) => {
-    //       response.should.have.status(403);
-    //       done();
-    //     })
-    // });
+    it('it should FAIL if there is an invalid Access Token Key.', done => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productToKeep.id}?accessToken=456446541065421354`)
+        .end((error, response) => {
+          response.should.have.status(403);
+          done();
+        })
+    });
+
+    it('it should FAIL if the productId does not match any product in the users cart.', done => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/4567?accessToken=${currentAccessToken}`)
+        .end((error, response) => {
+          response.should.have.status(404);
+          done();
+        })
+    });
+
+    it('it should DELETE the product if it is found in the users cart.', done => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productToDelete.id}?accessToken=${currentAccessToken}`)
+        .end((error, response) => {
+          response.should.have.status(200);
+          done();
+        })
+    });
+  });
+
+  //POST
+  describe ('POST/ api/me/cart/:productId', () => {
+    const  newQuantity = {quantity: 35};
+
+    it('it should FAIL if there is no Access Token in the URL.', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productToKeep.id}`)
+        .send(newQuantity)
+        .end((error, response) => {
+          response.should.have.status(401);
+          done();
+        })
+    });
+
+    it('it should FAIL if there is an invalid Access Token Key.', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productToKeep.id}?accessToken=456446adfas541065421354`)
+        .send(newQuantity)
+        .end((error, response) => {
+          response.should.have.status(403);
+          done();
+        })
+    });
+
+    it('it should FAIL if the productId does not match any product in the users cart.', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart/4568567?accessToken=${currentAccessToken}`)
+        .send(newQuantity)
+        .end((error, response) => {
+          response.should.have.status(404);
+          done();
+        })
+    });
+
+    it('it should FAIL if a new quantity is not sent.', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productToKeep.id}?accessToken=${currentAccessToken}`)
+        .end((error, response) => {
+          response.should.have.status(400);
+          done();
+        })
+    });
+
+    it('it should UPDATE the product in the cart to a new quantity', done => {
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productToKeep.id}?accessToken=${currentAccessToken}`)
+        .send(newQuantity)
+        .end((error, response) => {
+          response.should.have.status(200);
+          response.body.should.deep.include({product:productToKeep, quantity:newQuantity.quantity});
+          done();
+        })
+    });
+
   });
 
 });
