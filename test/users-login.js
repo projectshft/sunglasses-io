@@ -3,7 +3,6 @@ let chaiHttp = require("chai-http");
 let server = require("../app/server");
 
 let should = chai.should();
-
 chai.use(chaiHttp);
 
 describe("Users", () => {
@@ -20,7 +19,6 @@ describe("Users", () => {
     });
 
     it("it should return a 401 status if the given username and/or password are incorrect", (done) => {
-      // test with incorrect login credentials
       let userCredentials = {
         "username": "hello",
         "password": "world",
@@ -37,7 +35,7 @@ describe("Users", () => {
     });
 
     it("it should POST the username and password and return an access token", (done) => {
-      // test with login credentials for user natalia ramos
+      // test with login credentials for user greenlion235
       let userCredentials = {
         "username": "greenlion235",
         "password": "waters",
@@ -52,7 +50,7 @@ describe("Users", () => {
           res.body.should.be.a("string");
           res.body.length.should.be.eql(16);
           done();
-        });
+      });
     });
   });
 });

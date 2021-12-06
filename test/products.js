@@ -3,7 +3,6 @@ let chaiHttp = require("chai-http");
 let server = require("../app/server");
 
 let should = chai.should();
-
 chai.use(chaiHttp);
 
 describe("Products", () => {
@@ -20,7 +19,7 @@ describe("Products", () => {
     });
     
     it("it should GET all the products whose description includes the search query", (done) => {
-      // 4 of the products are described as "best glasses in the world, including the Superglasses
+      // 4 of the products are described as "best glasses in the world", including the Superglasses
       let superglasses = {
         "id": "1",
         "categoryId": "1",

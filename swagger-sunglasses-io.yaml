@@ -110,9 +110,17 @@ paths:
         Display products in the user's shopping cart
       tags:
         - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: Access token for the user
+          required: true
+          type: string
       responses:
         "200":
           description: Acceptance is successful
+        "401":
+          description: You do not have access to continue
         default:
           description: Unexpected error
     post:
@@ -131,6 +139,10 @@ paths:
       responses:
         "200":
           description: Acceptance is successful
+        "400":
+          description: Incorrectly formatted response
+        "401":
+          description: You do not have access to continue
         "404":
           description: That product was not found
         default:
@@ -151,12 +163,14 @@ paths:
       responses:
         "200":
           description: Acceptance is successful
+        "401":
+          description: You do not have access to continue
         "404":
           description: That product was not found
         default:
           description: Unexpected error
     post:
-      summary: Update product quantity
+      summary: Update product quantity in shopping cart
       description: |
         Udpate quatity of the product in the user's shopping cart
       parameters:
@@ -176,6 +190,10 @@ paths:
       responses:
         "200":
           description: Acceptance is successful
+        "400":
+          description: Incorrectly formatted request
+        "401":
+          description: You do not have access to continue
         "404":
           description: That product was not found
         default:

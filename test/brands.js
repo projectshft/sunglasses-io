@@ -3,7 +3,6 @@ let chaiHttp = require("chai-http");
 let server = require("../app/server");
 
 let should = chai.should();
-
 chai.use(chaiHttp);
 
 describe("Brands", () => {
@@ -23,7 +22,7 @@ describe("Brands", () => {
 
   describe("/GET brands/:id/products", () => {
     it("it should return a 404 if no products of the requested brand are found", (done) => {
-      let id = "123456789";
+      let id = "100";
 
       chai
         .request(server)
@@ -33,9 +32,7 @@ describe("Brands", () => {
           done();
       });
     });
-  })
 
-  describe("/GET brands/:id/products", () => {
     it("it should GET all products of the requested brand", (done) => {
       // brand id 1 is Oakley, which has 3 products in the store, including the Superglasses
       let id = "1";
