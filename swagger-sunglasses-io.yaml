@@ -1,0 +1,314 @@
+swagger: "2.0"
+info:
+  title: Sunglasses IO API
+  description: An API to support the best sunglasses store in the world
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        All brands of sunglasses that the store sells
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+  /brands/{id}/products:
+    get:
+      summary: Products of that Brand
+      description: >
+        All products from a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for products in
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of products of the brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: That brand was not found
+        default:
+          description: Unexpected error
+  /products:
+    get:
+      summary: Products
+      description: |
+        Find relevant products using a search query
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: There are no products matching that query
+        default:
+          description: Unexpected error
+  /login:
+    post:
+      tags:
+        - User
+      summary: User login
+      description: Logs user into the system
+      parameters:
+        - name: username
+          in: query
+          description: The username for the user to log in
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for the user to log in
+          required: true
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: string
+            description: Access token
+        "400":
+          description: Incorrectly formatted request
+        "401":
+          description: Invalid username and/or password
+        default:
+          description: Unexpected error
+  /me/cart:
+    get:
+      summary: Shopping cart
+      description: |
+        Display products in the user's shopping cart
+      tags:
+        - User
+      parameters:
+        - name: accessToken
+          in: query
+          description: Access token for the user
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Acceptance is successful
+        "401":
+          description: You do not have access to continue
+        default:
+          description: Unexpected error
+    post:
+      summary: Add to shopping cart
+      description: |
+        Add product to the user's shopping cart
+      parameters:
+        - name: product
+          in: body
+          description: Product to add to be added
+          required: true
+          schema:
+            $ref: "#/definitions/Product"
+      tags:
+        - User
+      responses:
+        "200":
+          description: Acceptance is successful
+        "400":
+          description: Incorrectly formatted response
+        "401":
+          description: You do not have access to continue
+        "404":
+          description: That product was not found
+        default:
+          description: Unexpected error
+  /me/cart/{productId}:
+    delete:
+      summary: Delete from shopping cart
+      description: |
+        Delete product from the user's shopping cart
+      parameters:
+        - name: productId
+          in: path
+          description: Id of the product to be removed
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: Acceptance is successful
+        "401":
+          description: You do not have access to continue
+        "404":
+          description: That product was not found
+        default:
+          description: Unexpected error
+    post:
+      summary: Update product quantity in shopping cart
+      description: |
+        Udpate quatity of the product in the user's shopping cart
+      parameters:
+        - name: productId
+          in: path
+          description: Id of the product to be removed
+          required: true
+          type: string
+        - name: newQuantity
+          in: query
+          description: The updated quantity of the product
+          required: true
+          type: integer
+          format: int32
+      tags:
+        - User
+      responses:
+        "200":
+          description: Acceptance is successful
+        "400":
+          description: Incorrectly formatted request
+        "401":
+          description: You do not have access to continue
+        "404":
+          description: That product was not found
+        default:
+          description: Unexpected error
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand
+      name:
+        type: string
+        description: Name of the brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: ID of the brand
+      name:
+        type: string
+        description: Name of the product
+      description:
+        type: string
+        description: Eye-catching description of product
+      price:
+        type: integer
+        format: int32
+        description: Price of the product in USD
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: Array of URLs linking to images of the product
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Preferred gender of the user
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/Product"
+        description: Products in the user's shopping cart
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: Preferred title of the user
+          first:
+            type: string
+            description: First name of the user
+          last:
+            type: string
+            description: Last name of the user
+      location:
+        type: object
+        description: Address of the user
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
+      email:
+        type: string
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        format: date
+        description: Date of birth of the user
+      registered:
+        type: string
+        format: date
+        description: Date of registration of the user
+      phone:
+        type: string
+        description: Home phone number of the user
+      cell:
+        type: string
+        description: Cell phone number of the user
+      picture:
+        type: object
+        description: URLs linking to different-sized images of the user
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+        description: Nationality of the user
