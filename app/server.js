@@ -56,19 +56,21 @@ myRouter.get('/brands/:id/products', function(request,response) {
 
 myRouter.post('/login', (request,response) => {
     // See if there is a user that has that name and password
-    if (request.body.username && request.body.password) {
+    if (request.body.username && request.body.password) {        
         let user = users.find((user) => {
             return user.login.username == request.body.username && user.login.password == request.body.password;
         });
+        
         if (user) {
             response.writeHead(200, { "Content-Type": "application/json" });
             let currentAccessToken = accessTokens.find((tokenObject) => {
-                return tokenObject.username == user.login.username;
+                 tokenObject.username == user.login.username;
             });
 
             if (currentAccessToken) {
                 currentAccessToken.lasUpdated = new Date();
-                return response.end(JSON.stringify(currentAccessToken.token));
+                //return response.end(JSON.stringify(currentAccessToken.token));
+                return response.end(JSON.stringify(user));
             } else {
                 let newAccessToken = {
                     username: user.login.username,
@@ -76,7 +78,8 @@ myRouter.post('/login', (request,response) => {
                     token: uid(32)                 
                 }
                 accessTokens.push(newAccessToken);
-                return response.end(JSON.stringify(newAccesstoken.token));
+                //return response.end(JSON.stringify(newAccesstoken.token));
+                return response.end(JSON.stringify(user));
             }
         } else {
             response.writeHead(401, "Invalid username or password");
