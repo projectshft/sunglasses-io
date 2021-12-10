@@ -6,22 +6,7 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-/*
-describe('/GET me/cart', () => {
-    it('it should return the users cart', done => {
-        chai    
-            .request(server)
-            .post('/login')
-            .send({ username: '', password: ''})
-            .get('/me/cart')
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.an('array');
-                done();
-            });
-    });
-});
- */
+// Successful test to obtain all products
 describe('/GET products', () => {
     it('it should GET all products', done => {
         chai    
@@ -36,6 +21,7 @@ describe('/GET products', () => {
     });
 });
 
+// Successful test to obtain all brands
 describe('/GET brands', () => {
     it('it should GET all of the brands', done => {
         chai
@@ -50,6 +36,7 @@ describe('/GET brands', () => {
     });
 });
 
+// Successful test to obtain a single product
 describe('/GET brands/:id/products', () => {
     it('it should GET a single product', done => {        
         chai
@@ -70,7 +57,7 @@ describe('/GET brands/:id/products', () => {
 });
 
 
-
+// Tests for a known successfuly login
 describe('/POST login', () => {
     it('it should POST a login', done => {        
         chai
@@ -79,26 +66,53 @@ describe('/POST login', () => {
             .send({ username: 'yellowleopard753', password: 'jonjon' })
             .end((err, res) => {                
                 res.should.have.status(200);
-                res.body.should.be.a('object');
-                res.body.should.have.property('gender');
-                res.body.should.have.property('cart');  
-                res.body.should.have.property('name');
-                res.body.should.have.property('location');
-                res.body.should.have.property('email');
-                res.body.should.have.property('login');
-                res.body.should.have.property('dob'); 
-                res.body.should.have.property('registered'); 
-                res.body.should.have.property('phone'); 
-                res.body.should.have.property('cell'); 
-                res.body.should.have.property('picture');   
-                res.body.should.have.property('nat');            
+                res.body.should.be.a('string');                                             
                 done();
             });
+            
     });
 });
 
+// Tests for successful login and GETs the users cart
+describe('/GET me/cart', () => {   
+    it('it should return the users cart', done => {
+            chai         
+                .request(server)       
+                .get('/me/cart')
+                .send({ username: 'yellowleopard753' })
+                .end((err, res) => {                    
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    done();
+                });
+        });
+});
+
+describe('/POST me/cart', () => {
+    it('it add an item to the users cart', done => {
+        chai
+            .request(server)
+            .post('/me/cart')
+            .send({ username: 'yellowleopard753', id: '7' })
+            .end((err, res) => {
+                console.log(res.body)
+                console.log(res.status)
+                res.should.have.status(200);
+                res.body.should.be.an('array');                
+                done();
+            });            
+    });
+});
+ 
 
 
 
 
-        
+/*
+"id": "7",
+        "categoryId": "3",
+        "name": "QDogs Glasses",
+        "description": "They bark",
+        "price":1500,
+        "imageUrls":
+*/
