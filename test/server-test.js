@@ -56,8 +56,48 @@ describe('/GET brands/:id/products', () => {
     });
 });
 
+//Test for a product that does NOT exist (Edge Case High)
+describe('/GET brands/:id/products', () => {
+    it('it should display an ERROR code edge case high', done => {        
+        chai
+            .request(server)            
+            .get('/brands/' + 12 + '/products')            
+            .end((err, res) => {                            
+                res.should.have.status(404);                
+                done();
+            });
+    });
+});
 
-// Tests for a known successfuly login
+//Test for a product that does NOT exist (Edge Case Low)
+describe('/GET brands/:id/products', () => {
+    it('it should display an ERROR code edge case low', done => {        
+        chai
+            .request(server)            
+            .get('/brands/' + 0 + '/products')            
+            .end((err, res) => {                            
+                res.should.have.status(404);                
+                done();
+            });
+    });
+});
+
+// Test for a known unsuccessful login
+describe('/POST login', () => {
+    it('it should display a login ERROR code', done => {        
+        chai
+            .request(server)            
+            .post('/login')
+            .send({ username: 'bluebird489', password: 'WinG$' })
+            .end((err, res) => {                
+                res.should.have.status(401);                                                           
+                done();
+            });
+            
+    });
+});
+
+// Tests for a known successfull login
 describe('/POST login', () => {
     it('it should POST a login', done => {        
         chai
@@ -88,6 +128,7 @@ describe('/GET me/cart', () => {
         });
 });
 
+// Adds an item to the users cart
 describe('/POST me/cart', () => {
     it('it add an item to the users cart', done => {
         chai
@@ -95,18 +136,25 @@ describe('/POST me/cart', () => {
             .post('/me/cart')
             .send({ username: 'yellowleopard753', id: '7' })
             .end((err, res) => {
-                console.log(res.body)
+                console.log(res)
                 console.log(res.status)
                 res.should.have.status(200);
-                res.body.should.be.an('array');                
+                res.body.should.be.a('array');                
                 done();
             });            
     });
 });
- 
 
-
-
+/*
+// Deletes an item from the users cart
+describe('/DELETE me/cart/:productId', () => {
+    it('it deletes an item from the users cart', done => {
+        chai
+            .request(server)
+            .delete('/me/cart/:productId')
+            .send('')
+    })
+}) */
 
 /*
 "id": "7",

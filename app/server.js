@@ -103,15 +103,10 @@ myRouter.get('/me/cart', (request, response) => {
         response.writeHead(200, { "Content-Type": "application/json" }); 
         return response.end(JSON.stringify(user.cart));
     }
-});
+}); 
 
-    
-    
- 
-
-
-////////////////////////////////////////////////
-myRouter.post('/me/cart', (request, resonse) => {
+// POST method to add to the users cart
+myRouter.post('/me/cart', (request, response) => {
     let productToBeAdded = {};
     let selectedUserIndex = null;
     
@@ -135,21 +130,34 @@ myRouter.post('/me/cart', (request, resonse) => {
     if (!productToBeAdded) {
         response.writehead(400, "That product doesn't exist");
         return response.end();
-    } else {        
-        
-        console.log("Just before the loop")
+    } else {               
         for (let i = 0; i < users.length; i++) {            
             if (user.login.username == users[i].login.username) {
                 users[i].cart.push(productToBeAdded);
                 selectedUserIndex = i;                
             }
         }
-        response.writeHead(200, { "Content-Type": "application/json" }); 
-        return response.end(JSON.stringify(users[selectedUserIndex].cart));            
+        console.log(users[selectedUserIndex].cart) 
+        response.writeHead(200, { "Content-Type": "application/json" });         
+        return response.end(JSON.stringify(users[selectedUserIndex].cart));         
         }               
 }); 
 
 //////////////////////////////////////////////////
+/*
+myRouter.delete('/me/cart/:productId', (request, resonse) => {
+    const { id } = request.params;  
+    const product = products.find(product => product.id == id);
+
+    if (!product) {
+        response.writeHead(404, "That product does not exist");
+        return response.end();
+    }
+    response.writeHead(200, { "Content-Type": "application/json" });  
+    return response.end(JSON.stringify(product));
+
+
+}); */
 
 module.exports = server;
 
