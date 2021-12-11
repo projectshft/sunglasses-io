@@ -135,9 +135,7 @@ describe('/POST me/cart', () => {
             .request(server)
             .post('/me/cart')
             .send({ username: 'yellowleopard753', id: '7' })
-            .end((err, res) => {
-                console.log(res)
-                console.log(res.status)
+            .end((err, res) => {                
                 res.should.have.status(200);
                 res.body.should.be.a('array');                
                 done();
@@ -145,22 +143,52 @@ describe('/POST me/cart', () => {
     });
 });
 
-/*
+/////////////////////////////////////////////////////
+
+// Updates an item that is in the users cart
+describe('/PUT me/cart/:productId', () => {
+    it('its should update an item in the users cart', done => {
+        chai
+            .request(server)
+            .put('/me/cart/' + 7)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
+                done();
+            });
+    });
+});
+
+///////////////////////////////////////////////
+
+
 // Deletes an item from the users cart
 describe('/DELETE me/cart/:productId', () => {
     it('it deletes an item from the users cart', done => {
         chai
             .request(server)
-            .delete('/me/cart/:productId')
-            .send('')
-    })
-}) */
+            .delete('/me/cart/' + 7)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
+                done();
+            });            
+    });
+}); 
+
+// Attempts to delete an item that is NOT in the cart
+describe('/DELETE me/cart/:productId', () => {
+    it('it attempts to delete an item that is not in the cart', done => {
+        chai
+            .request(server)
+            .delete('/me/cart/' + 12)
+            .end((err, res) => {
+                res.should.have.status(404);               
+                done();
+            });            
+    });
+}); 
 
 /*
-"id": "7",
-        "categoryId": "3",
-        "name": "QDogs Glasses",
-        "description": "They bark",
-        "price":1500,
-        "imageUrls":
+
 */

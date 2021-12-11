@@ -15,6 +15,8 @@ let users = [];
 let accessTokens = [];
 let user = {};
 let cart = [];
+let productToBeAdded = {};
+let selectedUserIndex = null;
 
 // setup router
 var myRouter = Router();
@@ -106,9 +108,7 @@ myRouter.get('/me/cart', (request, response) => {
 }); 
 
 // POST method to add to the users cart
-myRouter.post('/me/cart', (request, response) => {
-    let productToBeAdded = {};
-    let selectedUserIndex = null;
+myRouter.post('/me/cart', (request, response) => {    
     
     // Check for valid login
     tokenToBeTested = accessTokens.find((tokenObject) => {
@@ -136,39 +136,37 @@ myRouter.post('/me/cart', (request, response) => {
                 users[i].cart.push(productToBeAdded);
                 selectedUserIndex = i;                
             }
-        }
-        console.log(users[selectedUserIndex].cart) 
+        }        
         response.writeHead(200, { "Content-Type": "application/json" });         
         return response.end(JSON.stringify(users[selectedUserIndex].cart));         
         }               
 }); 
 
-//////////////////////////////////////////////////
-/*
-myRouter.delete('/me/cart/:productId', (request, resonse) => {
-    const { id } = request.params;  
-    const product = products.find(product => product.id == id);
+myRouter.put('/me/cart/:productId', (request, response) => {
+    const productToBeEdited = users[selectedUserIndex].cart.find(product => product.id == request.params.productId);
+    
 
-    if (!product) {
-        response.writeHead(404, "That product does not exist");
+
+});
+
+
+// Deletes a specified item from the users cart
+myRouter.delete('/me/cart/:productId', (request, response) => {
+    const productToBeRemoved = users[selectedUserIndex].cart.find(product => product.id == request.params.productId);
+
+    if (!productToBeRemoved) {
+        response.writeHead(404, "That product is not in the cart");
         return response.end();
+    } else {
+        response.writeHead(200, { "Content-Type": "application/json" }); // not filtering out by id.  Why?
+        const updatedCart = users[selectedUserIndex].cart.filter(items => items.id != productToBeRemoved.id); 
+        users[selectedUserIndex].cart = updatedCart;        
+        return response.end(JSON.stringify(users[selectedUserIndex].cart));
     }
-    response.writeHead(200, { "Content-Type": "application/json" });  
-    return response.end(JSON.stringify(product));
-
-
-}); */
+}); 
 
 module.exports = server;
 
-/*
-validTestToken = {
-        username: 'yellowleopard753',
-        lastUpdated: 'testDate',
-        token: 12345678
-    }*/
 
 
 
-// Multiple params destructured in order based on URL
-// const {ID1, ID2} = request.params  with a URL of brands/:ID1/products/:ID2
