@@ -14,7 +14,6 @@ let products = [];
 let users = [];
 let accessTokens = [];
 let user = {};
-let cart = [];
 let productToBeAdded = {};
 let selectedUserIndex = null;
 
@@ -44,17 +43,17 @@ myRouter.get('/products', function(request,response) {
     return response.end(JSON.stringify(products));
 });
 
-// GET method to retrieve a single product by ID
+// GET method to retrieves all products belonging to the given brand id
 myRouter.get('/brands/:id/products', function(request,response) {    
     const { id } = request.params;  
-    const product = products.find(product => product.id == id);
+    const matchingProducts = products.find(product => product.categoryId == id);
 
-    if (!product) {
+    if (!matchingProducts) {
         response.writeHead(404, "That product does not exist");
         return response.end();
     }
     response.writeHead(200, { "Content-Type": "application/json" });  
-    return response.end(JSON.stringify(product));
+    return response.end(JSON.stringify(matchingProducts));
 });
 
 // POST method for the user to log in
@@ -108,8 +107,7 @@ myRouter.get('/me/cart', (request, response) => {
 }); 
 
 // POST method to add to the users cart
-myRouter.post('/me/cart', (request, response) => {    
-    
+myRouter.post('/me/cart', (request, response) => {     
     // Check for valid login
     tokenToBeTested = accessTokens.find((tokenObject) => {
         return tokenObject.username == request.body.username; 
@@ -144,11 +142,21 @@ myRouter.post('/me/cart', (request, response) => {
 
 myRouter.put('/me/cart/:productId', (request, response) => {
     const productToBeEdited = users[selectedUserIndex].cart.find(product => product.id == request.params.productId);
-    
 
-
+    if (!productToBeEdited) {
+        response.writeHead(404, "That product is not in the cart");
+        return response.end();
+    } else {
+        // productToBeEdited modified on front end
+        response.writeHead(200, { "Content-Type": "application/json" }); 
+        // original version is removed from cart
+        const updatedCart = users[selectedUserIndex].cart.filter(items => items.id != productToBeEdited.id); 
+        users[selectedUserIndex].cart = updatedCart;
+        // modifed version of productToBeEdited added to cart
+        users[selectedUserIndex].cart.push(productToBeEdited);         
+        return response.end(JSON.stringify(users[selectedUserIndex].cart));
+    }
 });
-
 
 // Deletes a specified item from the users cart
 myRouter.delete('/me/cart/:productId', (request, response) => {
@@ -158,7 +166,7 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
         response.writeHead(404, "That product is not in the cart");
         return response.end();
     } else {
-        response.writeHead(200, { "Content-Type": "application/json" }); // not filtering out by id.  Why?
+        response.writeHead(200, { "Content-Type": "application/json" }); 
         const updatedCart = users[selectedUserIndex].cart.filter(items => items.id != productToBeRemoved.id); 
         users[selectedUserIndex].cart = updatedCart;        
         return response.end(JSON.stringify(users[selectedUserIndex].cart));

@@ -1,0 +1,304 @@
+swagger: '2.0'
+info:
+  title: Sunglasses Store
+  description: An API to support the Sunglasses Store Project
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /me/cart:
+    get:
+      summary: Returns the users cart
+      description: get method used to retrieve the users cart
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        403:
+          description: User not logged in
+    post:
+      summary: Adds products to the users cart
+      description: post method used to add products to the users cart
+      parameters:
+        - name: username
+          in: query
+          description: user's unique username (for verification)
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+  /me/cart/{id}:
+    delete:
+      summary: Deletes product from cart matching the given id
+      description: Searches users cart for the given id and deletes the matching product
+      parameters:
+        - name: id
+          in: path
+          description: The unique id of a pair of frames (product)
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+    put:
+      summary: Updates a product in the user's cart
+      description: Searches user's cart for product with the matching id and updates the product
+      parameters:
+        - name: id
+          in: path
+          description: The unique id of a pair of frames (product)
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+  /products:
+    get:
+      summary: Categories
+      description: Array of all available products
+      tags:
+        - Categories
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      summary: Frames by brand
+      description: Frames listed by brand
+      tags:
+        - Categories
+      responses:
+        200:
+          description: An array of frames of the same brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Frames by id
+      description: 
+        Frames matched to a unique ID
+      parameters:
+        - name: id
+          in: path
+          description: The unique id of a pair of frames
+          required: true
+          type: string
+      tags:
+        - Categories
+      responses:
+        200:
+          description: An array of frames in the category
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    post:
+      summary: User Profile
+      description: 
+        The User Profile endpoint returns information about the user that
+        has been authorized with the application.
+      parameters:
+        - name: username
+          in: query
+          description: user's unique username
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: user's unique password
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        200:
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  
+  
+      
+definitions:
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a pair of frames.
+      categoryId:
+        type: string
+        description: The id of the category this pair of frames belongs to.
+      name:
+        type: string
+        description: The name of this individual pair of frames
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        description: The price of this individual product
+      imageURL:
+        type: string
+        description: The URL for the image representing the goal
+      color:
+        type: string
+        description: The color of the pair of frames
+  Brand:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the user.
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Products'
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: User's title
+          first:
+            type: string
+            description: User's first name
+          last: 
+            type: string
+            description: User's last name
+      location:
+        type: object
+        properties:
+          street: 
+            type: string
+            description: User's street name
+          city:
+            type: string
+            description: User's city name
+          state:
+            type: string
+            description: User's state name
+          postcode:
+            type: string
+            description: User's postal code
+      email:
+        type: string
+        description: Email address of the Uber user
+      login:
+        type: object
+        properties:
+          username: 
+            type: string
+            description: Unique username for user
+          password:
+            type: string
+            description: Unique password for user login
+          salt:
+            type: string
+            description: Salt value for user
+          md5:
+            type: string
+            description: md5 value for user
+          sha1:
+            type: string
+            description: Sha1 value for user
+          sha256:
+            type: string
+            description: Sha256 value for user
+      dob:
+        type: string
+        description: User's date of birth
+      registered:
+        type: string
+        description: Date the user registered
+      phone:
+        type: string
+        description: User's phone number
+      cell:
+        type: string
+        description: User's cell phone number
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: URL for large photo
+          medium:
+            type: string
+            description: URL for medium photo
+          thumbnail:
+            type: string
+            description: URL for thumbnail photo
+      nat:
+        type: string
+        description: User's NAT value
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

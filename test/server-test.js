@@ -36,12 +36,12 @@ describe('/GET brands', () => {
     });
 });
 
-// Successful test to obtain a single product
+// Successful test to obtain a all products belonging to the same brand
 describe('/GET brands/:id/products', () => {
-    it('it should GET a single product', done => {        
+    it('it should GET all products for one brand', done => {        
         chai
             .request(server)            
-            .get('/brands/' + 5 + '/products')            
+            .get('/brands/' + 2 + '/products')            
             .end((err, res) => {                            
                 res.should.have.status(200);
                 res.body.should.be.an('object');
@@ -82,7 +82,7 @@ describe('/GET brands/:id/products', () => {
     });
 });
 
-// Test for a known unsuccessful login
+// Test for a known UNsuccessful login
 describe('/POST login', () => {
     it('it should display a login ERROR code', done => {        
         chai
@@ -92,8 +92,7 @@ describe('/POST login', () => {
             .end((err, res) => {                
                 res.should.have.status(401);                                                           
                 done();
-            });
-            
+            });            
     });
 });
 
@@ -108,8 +107,7 @@ describe('/POST login', () => {
                 res.should.have.status(200);
                 res.body.should.be.a('string');                                             
                 done();
-            });
-            
+            });            
     });
 });
 
@@ -143,9 +141,7 @@ describe('/POST me/cart', () => {
     });
 });
 
-/////////////////////////////////////////////////////
-
-// Updates an item that is in the users cart
+// Successfully updates an item that is in the users cart
 describe('/PUT me/cart/:productId', () => {
     it('its should update an item in the users cart', done => {
         chai
@@ -159,8 +155,18 @@ describe('/PUT me/cart/:productId', () => {
     });
 });
 
-///////////////////////////////////////////////
-
+// Attempts to update an item that is NOT in the cart
+describe('/PUT me/cart/:productId', () => {
+    it('it should fail to update a non-existent item in the cart', done => {
+        chai
+            .request(server)
+            .put('/me/cart/' + 12)
+            .end((err, res) => {
+                res.should.have.status(404);
+                done();
+            });
+    });
+});
 
 // Deletes an item from the users cart
 describe('/DELETE me/cart/:productId', () => {
@@ -189,6 +195,3 @@ describe('/DELETE me/cart/:productId', () => {
     });
 }); 
 
-/*
-
-*/
