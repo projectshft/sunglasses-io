@@ -306,7 +306,6 @@ components:
     #   type: object
 
     Brand:
-      # x-swagger-router-model: io.swagger.petstore.model.Brand
       properties:
         id:
           type: integer
