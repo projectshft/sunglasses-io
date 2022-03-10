@@ -121,17 +121,10 @@ paths:
         "400":
           description: Invalid username/password supplied
 
-  /api/{userId}/cart:
+  /api/me/cart:
     get:
       summary: Gets the cart of a logged in user.
-      parameters:
-        - in: path
-          name: userId
-          required: true
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
+
       responses:
         "200":
           description: OK
@@ -150,14 +143,6 @@ paths:
           description: Unexpected error
 
     post:
-      parameters:
-        - in: path
-          name: userId
-          required: true
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
       tags:
         - product
       summary: Add product
@@ -190,7 +175,7 @@ paths:
             schema:
               $ref: "#/components/schemas/CartItem"
 
-  /api/{userId}/cart/{productId}:
+  /api/me/cart/{productId}:
     delete:
       tags:
         - product
@@ -200,13 +185,6 @@ paths:
         1000 or nonintegers will generate API errors
       operationId: deleteProduct
       parameters:
-        - name: userId
-          in: path
-          description: userId
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: productId
           in: path
           description: ID of the order that needs to be deleted
@@ -227,13 +205,6 @@ paths:
       description: "Updates product"
       operationId: updateProduct
       parameters:
-        - name: userId
-          in: path
-          description: userId
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: productId
           in: path
           description: ID of the order that needs to be updated
@@ -269,70 +240,70 @@ paths:
             schema:
               $ref: "#/components/schemas/CartItem"
 
-  /api/user:
-    post:
-      tags:
-        - user
-      summary: Create user
-      description: This can only be done by the logged in user.
-      operationId: createUser
-      responses:
-        default:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-            application/xml:
-              schema:
-                $ref: "#/components/schemas/User"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
-          application/xml:
-            schema:
-              $ref: "#/components/schemas/User"
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: "#/components/schemas/User"
-        description: Created user object
+  # /api/user:
+  #   post:
+  #     tags:
+  #       - user
+  #     summary: Create user
+  #     description: User profile for repeat customers
+  #     operationId: createUser
+  #     responses:
+  #       default:
+  #         description: successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/User'
+  #           application/xml:
+  #             schema:
+  #               $ref: '#/components/schemas/User'
+  #     requestBody:
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/User'
+  #         application/xml:
+  #           schema:
+  #             $ref: '#/components/schemas/User'
+  #         application/x-www-form-urlencoded:
+  #           schema:
+  #             $ref: '#/components/schemas/User'
+  #       description: Created user object
 
 components:
   schemas:
-    User:
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
-        username:
-          type: string
-          example: theUser
-        firstName:
-          type: string
-          example: John
-        lastName:
-          type: string
-          example: James
-        email:
-          type: string
-          example: john@email.com
-        password:
-          type: string
-          example: 12345
-        phone:
-          type: string
-          example: 12345
-        userStatus:
-          type: integer
-          format: int32
-          example: 1
-          description: User Status
-      xml:
-        name: customer
-      type: object
+    # User:
+    #   properties:
+    #     id:
+    #       type: integer
+    #       format: int64
+    #       example: 10
+    #     username:
+    #       type: string
+    #       example: theUser
+    #     firstName:
+    #       type: string
+    #       example: John
+    #     lastName:
+    #       type: string
+    #       example: James
+    #     email:
+    #       type: string
+    #       example: john@email.com
+    #     password:
+    #       type: string
+    #       example: 12345
+    #     phone:
+    #       type: string
+    #       example: 12345
+    #     userStatus:
+    #       type: integer
+    #       format: int32
+    #       example: 1
+    #       description: User Status
+    #   xml:
+    #     name: customer
+    #   type: object
 
     Brand:
       # x-swagger-router-model: io.swagger.petstore.model.Brand
@@ -360,13 +331,13 @@ components:
         description:
           type: string
           example: Impress your friends with the latest cool glasses by Oakley.
-        cost:
+        price:
           type: integer
           example: 85
-        brandId:
+        categoryId:
           type: integer
           example: 5
-        imageURL:
+        imageUrls:
           type: string
           example: http://myimage.com
       xml:
