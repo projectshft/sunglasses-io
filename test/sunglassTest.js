@@ -95,13 +95,13 @@ describe("Products by brand", () => {
         .get('/api/brands/42/products')
         .end((err, res) => {
           res.should.have.status(404);
-          done(err);
+          done();
         });
     });
   });
 
 
-//   //  # POST /api/login
+//  POST /api/login
 describe("Login", () => {
   describe("/POST login", () => {
     it('it should give an error if the username or password is missing', (done) => {
@@ -114,7 +114,6 @@ describe("Login", () => {
         });
     });
     it('it should give an error if the username or password is incorrect', (done) => {
-
       chai
         .request(server)
         .post('/api/login/')
@@ -135,13 +134,56 @@ describe("Login", () => {
           res.should.have.status(200);
           res.body.should.be.a("string")
           res.body.length.should.be.eql(16);
+          should.not.exist(res.body.password);
           done();
         });
     });
   });
 });
 
-// // # GET /api/me/cart
+// // // # GET /api/me/cart
+describe("Consumer cart", () => {
+  //Need to set the access token so that we can get into a cart - so first need to login using one of the user profiles
+  let accessToken = '';
+    before('login so we have a token', () => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send({username: "greenlion235", password: "waters" })
+        .end((err, res) => {
+         accessToken=res.body;
+         
+        })
+    }) 
+
+    //note cart of user is empty - thus the 0 length;
+  describe('/GET products in the cart', () => {
+    it('it should GET products in the cart', (done) => {
+        chai
+          .request(server)
+          .get("/api/me/cart/")
+          .query({'accessToken': accessToken})
+          .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an("array");
+                res.body.length.should.eql(0);
+                done();
+          })
+        });
+
+    it('it should give an error if there is a missing or bad token (e.g. expired)', (done) => {
+        chai
+        .request(server)
+        .get("/api/me/cart/")
+        .end((err, res) => {
+            res.should.have.status(401, "bad token");
+            done();
+      })
+    });
+    })
+  });
+
+
 // // # POST /api/me/cart
 
 // // # DELETE /api/me/cart/:productId

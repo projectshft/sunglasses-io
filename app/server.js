@@ -13,7 +13,7 @@ let brands = [];
 let products = [];
 let users = [];
 let accessTokens = [];
-const newAccessToken = uid(16);
+
 
 // Setup router
 const router = Router();
@@ -52,7 +52,6 @@ router.get('/api/brands', (req,res) => {
 
 //Route for all products
 router.get('/api/products', (req,res) => {
-
   const parsedUrl = url.parse(req.url,true);
   const query = parsedUrl.query;
   let {q} = query
@@ -65,7 +64,7 @@ router.get('/api/products', (req,res) => {
   }
 
   else if (q.length>0) {
-    queriedProducts = products.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
+    queriedProducts = products.filter(p => p.name.trim().toLowerCase().includes(q.trim().toLowerCase()));
       if(queriedProducts.length > 0 ) {
         res.writeHead(200, { "Content-Type": "application/json" });
         return res.end(JSON.stringify(queriedProducts));
@@ -148,9 +147,27 @@ router.post('/api/login', (req, res) => {
   }
 });
 
+
+//Route for cart
+router.get('/api/me/cart', (req,res) => {
+let currentAccessToken = getValidTokenFromRequest(req);
+
+if (!currentAccessToken) {
+  res.writeHead(401, "You need to be logged in to see your cart");
+  return res.end();
+} else {
+
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  let user = users.find((user) => (user.login.username == currentAccessToken.username) )
+
+  return res.end(JSON.stringify(user.cart));
+  }
+})
+   
+
 // Helper method to process access token
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url, true);
+const getValidTokenFromRequest = (req) => {
+  const parsedUrl = require('url').parse(req.url, true);
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure it's valid and not expired
     let currentAccessToken = accessTokens.find((accessToken) => {
@@ -169,9 +186,7 @@ var getValidTokenFromRequest = function(request) {
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-let currentAccessToken = accessTokens.find((accessToken) => {
-  return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-});
+
 
 
 module.exports = server;
