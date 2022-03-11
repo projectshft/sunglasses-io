@@ -39,7 +39,7 @@ describe("Store products", () => {
     it("it should GET all the products", (done) => {
       chai
         .request(server)
-        .get("/api/products")
+        .get("/api/products?q=")
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -48,15 +48,16 @@ describe("Store products", () => {
           done();
         });
     });
-  });
-  it('If there is no search term entered, all products are returned', (done) => {
+  
+
+  it('If there is a valid search term entered, the relevant products should be returned', (done) => {
     chai
       .request(server)
-      .get('/api/products?query=')
+      .get('/api/products?q=superglasses')
       .end((err, res) => {
         res.should.have.status(200);
+        res.body.length.should.be.eql(1);
         res.body.should.be.an('array');
-        res.body.length.should.be.eql(11);
         res.body[0].should.have.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls')
         done();
       });
@@ -65,13 +66,16 @@ describe("Store products", () => {
   it('If the query search is unrelated to the store products, an error should be returned', (done) => {
     chai
       .request(server)
-      .get('/api/products?query=handbag')
+      .get('/api/products?q=handbag')
       .end((err, res) => {
         res.should.have.status(404);
         done();
       });
   });
 });
+});
+
+
 
 
 

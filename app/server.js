@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
+const url = require("url");
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
@@ -40,28 +41,39 @@ server.listen(PORT, err => {
 
 //Route for brands
 router.get('/api/brands', (req,res) => {
+  
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(brands));
 });
 
+
+
 //Route for all products
 router.get('/api/products', (req,res) => {
-  const queryParams = queryString.parse(url.parse(req.url).query);
-//FIGURE OUT THIS HOW TO ISOLATE QUERY PARAMATERS - need to look this up. Qyert string deprecated!
-  if (queryParams) {
-    const queryProds = products.filter(p => p.name.toLowerCase().includes(queryParams.toLowerCase()));
-     if(queryProds.length === 0 ) {
+
+  const parsedUrl = url.parse(req.url,true);
+  const query = parsedUrl.query;
+  let {q} = query
+
+  let queriedProducts = [];
+
+  if(q.length === 0 ) {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify(products));
+  }
+
+  else if (q.length>0) {
+    queriedProducts = products.filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
+      if(queriedProducts.length > 0 ) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify(queriedProducts));
+      }
+      else {
       res.writeHead(404, 'No products were found related to your search term');
       return res.end();
      }
-     else {
-    return res.end(JSON.stringify(queryProds));
   }
-}
-  else {
-  res.writeHead(200, { "Content-Type": "application/json" });
-  return res.end(JSON.stringify(products));
-  }
+ 
 });
 
 
