@@ -8,11 +8,6 @@ should = chai.should();
 chai.use(chaiHttp);
 
 
-// beforeEach(() => {
-//   Book.removeAll();
-// });
-
-
 //For route /api/brands
 describe("Store brands", () => {
   describe("/GET brands", () => {
@@ -76,9 +71,6 @@ describe("Store products", () => {
 });
 
 
-
-
-
 // // For route /api/brands/:id/products
 describe("Products by brand", () => {
   describe('/GET products by brand', () => {
@@ -110,33 +102,44 @@ describe("Products by brand", () => {
 
 
 //   //  # POST /api/login
-// describe("Login", () => {
-//   describe("/POST login", () => {
-//     // it('it should give an error if the username or password is missing', (done) => {
-//     //   chai
-//     //     .request(server)
-//     //     .post('/api/login/')
-//     //     .end((err, res) => {
-//     //       res.should.have.status(404);
-//     //       res.body.should.have.property('message').eql('Missing information');
-//     //       done(err);
-//     //     });
-//     // });
-//     it("it should POST login information to the server", (done) => {
-//       chai
-//         .request(server)
-//         .post("/api/login")
-//         .end((err, res) => {
-//           if(err) done(err);
-//           res.should.have.status(200);
-//           res.body.should.be.an("object");
-//           res.body.should.have.property('username')
-//           res.body.should.have.property('password')
-//           done();
-//         });
-//     });
-//   });
-// });
+describe("Login", () => {
+  describe("/POST login", () => {
+    it('it should give an error if the username or password is missing', (done) => {
+      chai
+        .request(server)
+        .post('/api/login/')
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+    it('it should give an error if the username or password is incorrect', (done) => {
+
+      chai
+        .request(server)
+        .post('/api/login/')
+        .send({username: 'billybobbo', password: 'ismokecigars'})
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+
+    it("it should POST login information to the server", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send({username: 'greenlion235', password: "waters"})
+        .end((err, res) => {
+          if(err) done(err);
+          res.should.have.status(200);
+          res.body.should.be.a("string")
+          res.body.length.should.be.eql(16);
+          done();
+        });
+    });
+  });
+});
 
 // // # GET /api/me/cart
 // // # POST /api/me/cart

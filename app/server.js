@@ -7,11 +7,13 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
-const PORT = 8000;
+const PORT = 5050;
 
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
+const newAccessToken = uid(16);
 
 // Setup router
 const router = Router();
@@ -95,6 +97,81 @@ router.get('/api/brands/:id/products', (req, res) => {
 });
 
 
+//Route for login information
+router.post('/api/login', (req, res) => {
+    // Make sure there is a username and password in the request
+    if (req.body.username && req.body.password) {
+      // See if there is a user that has that username and password
+      let user = users.find((user) => {
+        return user.login.username === req.body.username && user.login.password === req.body.password;
+      });
+
+      //If user, success and then retrieve an existing or create an access token
+      if (user) {
+        res.writeHead(200, {'Content-Type': 'application/json'});
+  
+      //Checking for already existing token
+        let currentAccessToken = accessTokens.find((tokenObject) => {
+          return tokenObject.username == user.login.username;
+        });
+  
+        // // Update the last updated value so we get another time period
+        if (currentAccessToken) {
+          currentAccessToken.lastUpdated = new Date();
+          return res.end(JSON.stringify(currentAccessToken.token));
+        } 
+        
+        else {
+        //   // Create a new token with the user value and a "random" token
+          let newAccessToken = {
+            username: user.login.username,
+            lastUpdated: new Date(),
+            token: uid(16)
+          }
+
+          //Returning a token ONLY so account for this in testing
+          accessTokens.push(newAccessToken);
+          return res.end(JSON.stringify(newAccessToken.token));
+        }
+      } 
+      
+      else {
+        //Failed login
+        res.writeHead(401, "Invalid username or password");
+        return res.end();
+      }
+  }   
+  //Missing parameters in login
+  else {
+    res.writeHead(400, "Please enter both a valid username and passport");
+    return res.end();
+  }
+});
+
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+let currentAccessToken = accessTokens.find((accessToken) => {
+  return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+});
 
 
 module.exports = server;
