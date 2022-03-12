@@ -112,6 +112,7 @@ describe('User', () => {
         });
     });
   });
+  // having trouble with token and response body throughout
   describe('/GET me/cart', () => {
     it('it returns the users cart', (done) => {
       const userLogin = {
@@ -152,6 +153,96 @@ describe('User', () => {
         .send(cart)
         .end((err, res) => {
           res.should.have.status(401);
+          done();
+        });
+    });
+  });
+  describe('/POST /me/cart', () => {
+    it('it should add an item to the cart', (done) => {
+      const product = {
+        productId: 1,
+        quantity: 2,
+      };
+      // let token = '';
+      chai
+        .request(server)
+        .post('/me/cart')
+        .set('currentAccessToken', 'WRzWOxryNawJCZwH')
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          done();
+        });
+    });
+    it('it should not let you add to cart if not logged in', (done) => {
+      const currentAccessToken = '';
+      if (currentAccessToken == '' || currentAccessToken == undefined) {
+        const err = new TypeError(
+          'You must be logged in to add an item to your cart'
+        );
+      }
+      const tokenErr = function () {
+        throw err;
+      };
+      chai
+        .request(server)
+        .post('/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401);
+          expect(tokenErr).to.throw(err);
+          done();
+        });
+    });
+  });
+  describe('/DELETE /me/cart/:productId', () => {
+    it('it should delete specific item from cart', (done) => {
+      const product = {
+        id: 2,
+      };
+      chai
+        .request(server)
+        .delete(`/me/cart?productId=${product.id}`)
+        .set('currentAccessToken', 'WRzWOxryNawJCZwH')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+  });
+  describe('/PUT /me/cart/:productId', () => {
+    it('it should update item quantity in cart cart', (done) => {
+      const product = {
+        id: 2,
+        quantity: 2,
+      };
+      chai
+        .request(server)
+        .delete(`/me/cart?productId=${product.id}`)
+        .set('currentAccessToken', 'WRzWOxryNawJCZwH')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        });
+    });
+    it('it should not let you edit items in cart if not logged in', (done) => {
+      const currentAccessToken = '';
+      if (currentAccessToken == '' || currentAccessToken == undefined) {
+        const err = new TypeError(
+          'You must be logged in to add an item to your cart'
+        );
+      }
+      const tokenErr = function () {
+        throw err;
+      };
+      chai
+        .request(server)
+        .post('/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401);
+          expect(tokenErr).to.throw(err);
           done();
         });
     });

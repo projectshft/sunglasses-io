@@ -167,7 +167,7 @@ paths:
       responses:
         "404":
           description: product not found
-    post:
+    put:
       summary: change quantity of product in cart
       description: allows user to update quantity of an item in the cart
       tags:

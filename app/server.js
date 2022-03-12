@@ -1,6 +1,9 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-sequences */
 const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
+const url = require('url');
 const queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
@@ -30,8 +33,22 @@ const server = http
   });
 
 myRouter.get('/brands', (request, response) => {
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query } = queryString.parse(parsedUrl.query);
+  let brandsToReturn = [];
+  if (query !== undefined) {
+    brandsToReturn = brands.filter((brand) => brand.name.includes(query));
+
+    if (!brandsToReturn) {
+      response.writeHead(404, 'Brand not found');
+      return response.end();
+    }
+  } else {
+    brandsToReturn = brands;
+  }
+
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  return response.end(JSON.stringify(brands));
+  return response.end(JSON.stringify(brandsToReturn));
 });
 
 myRouter.get('/brands/:brandId/products', (request, response) => {
@@ -50,8 +67,24 @@ myRouter.get('/brands/:brandId/products', (request, response) => {
 });
 
 myRouter.get('/products', (request, response) => {
+  const parsedUrl = url.parse(request.originalUrl);
+  const { query } = queryString.parse(parsedUrl.query);
+  let productsToReturn = [];
+  if (query !== undefined) {
+    productsToReturn = products.filter((product) =>
+      product.description.includes(query)
+    );
+
+    if (!productsToReturn) {
+      response.writeHead(404, 'Product not found');
+      return response.end();
+    }
+  } else {
+    productsToReturn = products;
+  }
+
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  return response.end(JSON.stringify(products));
+  return response.end(JSON.stringify(productsToReturn));
 });
 
 myRouter.post('/login', (request, response) => {
@@ -115,6 +148,69 @@ myRouter.get('/me/cart', (request, response) => {
   );
 
   response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(user.cart));
+});
+
+myRouter.post('/me/cart/', (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, 'You must be logged in to access your cart');
+    return response.end();
+  }
+  const productId = request.params.id;
+  const product = products.find((product) => product.id == productId);
+
+  const user = users.find(
+    (user) => user.login.username === currentAccessToken.username
+  );
+  user.cart.push(product);
+
+  response.writeHead(200), { 'Content-Type': 'application/json' };
+  return response.end(JSON.stringify(product));
+});
+
+myRouter.delete('/me/cart/:productId', (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, 'You must be logged in to access your cart');
+    return response.end();
+  }
+  const user = users.find(
+    (user) => user.login.username === currentAccessToken.username
+  );
+  const productId = request.params.id;
+  const productToDelete = user.cart.find((product) => product.id == productId);
+  if (!productToDelete) {
+    response.writeHead(404, 'Product not found');
+    return response.end();
+  }
+
+  user.cart.splice(productToDelete, 1);
+  response.writeHead(200), { 'Content-Type': 'application/json' };
+  return response.end(JSON.stringify(user.cart));
+});
+
+myRouter.put('/me/cart/:productId', (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, 'You must be logged in to access your cart');
+    return response.end();
+  }
+  const user = users.find(
+    (user) => user.login.username === currentAccessToken.username
+  );
+  const productId = request.params.id;
+  const productToUpdate = user.cart.find((product) => product.id == productId);
+  if (!productToUpdate) {
+    response.writeHead(404, 'Product not found');
+    return response.end();
+  }
+
+  // user.cart.splice(productToDelete, 1);
+  response.writeHead(200), { 'Content-Type': 'application/json' };
   return response.end(JSON.stringify(user.cart));
 });
 
