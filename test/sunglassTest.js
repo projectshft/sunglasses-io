@@ -157,6 +157,16 @@ describe("Consumer cart", () => {
         })
     }) 
 
+    let product =    {
+      "id": "1",
+      "categoryId": "1",
+      "name": "Superglasses",
+      "description": "The best glasses in the world",
+      "price":150,
+      "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+  }
+
+
   describe('/GET products in the cart', () => {
     it('it should GET products in the cart', (done) => {
         chai
@@ -194,27 +204,6 @@ describe("Consumer cart", () => {
    
   //  POST /api/me/cart
     describe("/POST to the cart", () => {
-      let product =    {
-        "id": "1",
-        "categoryId": "1",
-        "name": "Superglasses",
-        "description": "The best glasses in the world",
-        "price":150,
-        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-    }
-     
-      it('an item should post to the cart', (done) => {
-        chai
-          .request(server)
-          .post('/api/me/cart')
-          .query({'accessToken': accessToken})
-          .send(product)
-          .end((err, res) => {
-            res.should.have.status(200);
-            done();
-          });
-      });
-
       it('an empty post to the cart should come back with an error', (done) => {
         chai
           .request(server)
@@ -226,18 +215,23 @@ describe("Consumer cart", () => {
             done();
           });
       });
+
+      it('an item should post to the cart', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart')
+          .query({'accessToken': accessToken})
+          .send(product)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.should.be.an('object');
+            done();
+          });
+      });
   });
 
   // DELETE /api/me/cart/:productId
 describe('/DELETE items from cart' , () => {
-  let cart = [{
-    "id": "1",
-    "categoryId": "1",
-    "name": "Superglasses",
-    "description": "The best glasses in the world",
-    "price":150,
-    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-}]
   it('it should DELETE a product given the user cart', (done) => {
             chai
             .request(server)
@@ -245,11 +239,12 @@ describe('/DELETE items from cart' , () => {
             .query({'accessToken': accessToken})
             .end((err, res) => {
                   res.should.have.status(200);
-                  res.body.should.be.a('array');
+                  res.body.should.be.an('array');
               done();
             });
-      });
-    });
+      })
+  
+  
 
     it('it should give an error if no product is found', (done) => {
 
@@ -273,36 +268,40 @@ describe('/DELETE items from cart' , () => {
                     done();
                   });
             });
+          });
+    
+// # POST /api/me/cart/:productId
+
+describe('/POST update to a product id ', () => {
+  let cart = [{
+    "quantity": "1",
+    "id": "1",
+    "categoryId": "1",
+    "name": "Superglasses",
+    "description": "The best glasses in the world",
+    "price":150,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}]
+
+
+  it('it should POST an update to a product', (done) => {
+   
+    chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .send(book)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        res.body.should.have.property('title');
+        res.body.should.have.property('author');
+        res.body.should.have.property('pages');
+        res.body.should.have.property('year');
+        done();
       });
-
-
-// // # POST /api/me/cart/:productId
-
-// describe('/POST update to a product id ', () => {
-//   it('it should POST an update to a product', done => {
-//     // arrange
-//     let product = {
-//       title: 'The Hunger Games',
-//       author: 'Suzanne Collins',
-//       year: 2008,
-//       pages: 301
-//     };
-//     //act
-//     chai
-//       .request(server)
-//       .post('/book')
-//       .send(book)
-//       .end((err, res) => {
-//         res.should.have.status(200);
-//         res.body.should.be.a('object');
-//         res.body.should.have.property('title');
-//         res.body.should.have.property('author');
-//         res.body.should.have.property('pages');
-//         res.body.should.have.property('year');
-//         done();
-//       });
-//   });
-// });
+  });
+});
+});
 
 
 

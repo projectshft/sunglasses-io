@@ -181,7 +181,7 @@ router.post('/api/me/cart', (req,res) => {
   }
 
   let item = {
-   product,
+   product: product,
    quantity: 1
   }
   
@@ -193,12 +193,11 @@ router.post('/api/me/cart', (req,res) => {
    
 })
 
-// # //below means to change the quantity of a product#
-// # POST /api/me/cart/:productId
-
+// DELETE a product
 router.delete('/api/me/cart/:productId', (req,res) => {
   let currentAccessToken = getValidTokenFromRequest(req);
   
+  //Invalid or lack of access token
   if (!currentAccessToken) {
     res.writeHead(401, "You need to be logged in to delete from your cart");
     return res.end();
@@ -207,24 +206,28 @@ router.delete('/api/me/cart/:productId', (req,res) => {
   //First find user
  let user = users.find((user) => (user.login.username === currentAccessToken.username) )
 
- // Then product
- const foundProduct = user.cart.find(p => p.id === req.params.id)
+ // Then product - which was pushed as an item so the ID is nested
+ const foundProduct = user.cart.find(item => item.product.id === req.params.productId)
     
    
   if (!foundProduct) {
       res.writeHead(404, "Product was not found");	
       return res.end();
     }
+    
+  // Remove product from cart list and have that reflected in user.cart
+  //This is to delete the ENTIRE product - not just one (that is below)
+  const updatedCart = user.cart.filter(item => item.product.id !== foundProduct.product.id)
+
+  user.cart = updatedCart;
+
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  return res.end(JSON.stringify(user.cart));
   
-    // Remove product from cart list and have that reflected in user.cart
-   user.cart = user.cart.filter(p => p.id !== foundProduct.id)
-   
-  
-    res.writeHead(200, {'Content-Type': 'application/json'})
-    return res.end(JSON.stringify(user.cart));
   });
 
-
+  // # //below means to change the quantity of a product#
+// # POST /api/me/cart/:productId
 router.post('api/me/cart/', (req, res) => {
 })
 
