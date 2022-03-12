@@ -10,8 +10,7 @@ const PORT = 3001;
 let products = [];
 let brands = [];
 let users = [];
-let cart = [];
-let accessToken = 'adi49f20fj20v2ft';
+let accessTokens = [];
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -69,8 +68,22 @@ myRouter.get('/api/brands/:brandId/products', function(request,response) {
 });
 
 myRouter.post('/api/login', function(request,response) {
-	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(accessToken));
+  if (request.body.username && request.body.password) {
+    let user = users.find((user) => {
+    return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+
+    if (user){
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify());
+    } else {
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  } else {
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
 });
 
 myRouter.get('/api/me/cart', function(request,response) {

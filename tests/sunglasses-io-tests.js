@@ -60,23 +60,61 @@ describe("Sunglasses-io", () => {
   });
 
   describe("/POST login", () => {
-    it("it should log a user in", (done) => {
-      let loginData = {
-        username : "john",
-        password : "smith"
+    it("it should log a valid user in", (done) => {
+      let loginAttempt = {
+        username : "yellowleopard753",
+        password : "jonjon"
       };
 
       chai
         .request(server)
         .post("/api/login")
-        .send(loginData)
+        .send(loginAttempt)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an("string");
-          res.body.length.should.be.eql(16);
+          // res.body.should.be.an("string");
+          // res.body.length.should.be.eql(16);
           done();
         });
     });
+
+    it("it should NOT log a user in if missing username or password", (done) => {
+      let loginAttempt = {
+        username: 'yellowleopard753'
+      }
+
+      let loginAttempt2 = {
+        password: 'jonjon'
+      }
+
+      let loginAttempt3 = {}
+
+      chai
+        .request(server)
+        .post("/api/login")
+        .send(loginAttempt3)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+
+    })
+
+    it("it should NOT login if no user exists", (done) => {
+      let loginAttempt = {
+        username: 'stephie',
+        password: 'b'
+      }
+
+      chai
+        .request(server)
+        .post("/api/login")
+        .send(loginAttempt)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    })
   });
 
   describe("/GET/me/cart", () => {
