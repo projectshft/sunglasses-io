@@ -52,9 +52,20 @@ myRouter.get('/api/brands', function(request,response) {
 	return response.end(JSON.stringify(brands));
 });
 
-myRouter.get('/api/brands/:id/products', function(request,response) {
+myRouter.get('/api/brands/:brandId/products', function(request,response) {
+  
+  // check if valid brand id
+  const { brandId } = request.params;
+  const brand = brands.find(brand => brand.id === brandId);
+  if (!brand) {
+    response.writeHead(404);
+    return response.end("Brand not found");
+  }
+
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify([]));
+  // get product list
+  const productsToReturn = products.filter(product => product.categoryId === brandId);
+	return response.end(JSON.stringify(productsToReturn));
 });
 
 myRouter.post('/api/login', function(request,response) {

@@ -8,7 +8,7 @@ chai.use(chaiHttp);
 
 describe("Sunglasses-io", () => {
 
-  describe("/GET products", () => {
+  describe("/GET/products", () => {
     it("it should GET all the products", (done) => {
       chai
         .request(server)
@@ -21,7 +21,7 @@ describe("Sunglasses-io", () => {
     });
   });
 
-  describe("/GET brands", () => {
+  describe("/GET/brands", () => {
     it("it should GET all the brands sold", (done) => {
       chai
         .request(server)
@@ -34,17 +34,29 @@ describe("Sunglasses-io", () => {
     });
   });
 
-  describe("/GET/brands/:id products", () => {
-    it("it should GET all the brands sold", (done) => {
+  describe("/GET/brands/:id/products", () => {
+    it("it should GET all products from specified brand", (done) => {
+      let brandId = '1';
       chai
         .request(server)
-        .get("/api/brands/1/products")
+        .get(`/api/brands/${brandId}/products`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
           done();
         });
     });
+
+    it("it should NOT GET products with invalid brand id", (done) => {
+      let brandId = '6';
+      chai
+        .request(server)
+        .get(`/api/brands/${brandId}/products`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    })
   });
 
   describe("/POST login", () => {
