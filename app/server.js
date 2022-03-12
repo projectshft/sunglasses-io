@@ -15,6 +15,25 @@ let accessTokens = [];
 var myRouter = Router();
 myRouter.use(bodyParser.json());
 
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, error => {
@@ -67,15 +86,35 @@ myRouter.get('/api/brands/:brandId/products', function(request,response) {
 	return response.end(JSON.stringify(productsToReturn));
 });
 
+// LOGIN ENDPOINT
 myRouter.post('/api/login', function(request,response) {
   if (request.body.username && request.body.password) {
+    // get valid user
     let user = users.find((user) => {
-    return user.login.username == request.body.username && user.login.password == request.body.password;
+      return user.login.username == request.body.username && user.login.password == request.body.password;
     });
 
-    if (user){
+    if (user) {
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(JSON.stringify());
+
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Update the last updated value so we get another time period
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Create a new token with the user value and a "random" token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
     } else {
       response.writeHead(401, "Invalid username or password");
       return response.end();

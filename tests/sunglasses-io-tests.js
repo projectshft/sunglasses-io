@@ -60,7 +60,7 @@ describe("Sunglasses-io", () => {
   });
 
   describe("/POST login", () => {
-    it("it should log a valid user in", (done) => {
+    it("it should return an access token on valid logins", (done) => {
       let loginAttempt = {
         username : "yellowleopard753",
         password : "jonjon"
@@ -72,8 +72,8 @@ describe("Sunglasses-io", () => {
         .send(loginAttempt)
         .end((err, res) => {
           res.should.have.status(200);
-          // res.body.should.be.an("string");
-          // res.body.length.should.be.eql(16);
+          res.body.should.be.an("string");
+          res.body.length.should.be.eql(16);
           done();
         });
     });
