@@ -164,6 +164,34 @@ if (!currentAccessToken) {
   }
 })
    
+router.post('/api/me/cart', (req,res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  
+  if (!currentAccessToken) {
+    res.writeHead(401, "You need to be logged in to add to your cart");
+    return res.end();
+  } 
+  
+  let product = products.find(p => p.id === req.body.id);
+  
+  if (!product) {
+    res.writeHead(400, "There is no product to add to cart");
+        return res.end();
+      }
+
+
+let item = {
+   product,
+   quantity: 1
+  }
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  let user = users.find((user) => (user.login.username === currentAccessToken.username) )
+ 
+  user.cart.push(item);
+
+ return res.end(JSON.stringify(user.cart));  
+   
+})
 
 // Helper method to process access token
 const getValidTokenFromRequest = (req) => {

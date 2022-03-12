@@ -1,3 +1,4 @@
+const { expect } = require("chai");
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const server = require('../app/server.js');
@@ -145,18 +146,17 @@ describe("Login", () => {
 describe("Consumer cart", () => {
   //Need to set the access token so that we can get into a cart - so first need to login using one of the user profiles
   let accessToken = '';
-    before('login so we have a token', () => {
+    before('login so we have a token', (done) => {
       chai
         .request(server)
         .post("/api/login")
         .send({username: "greenlion235", password: "waters" })
         .end((err, res) => {
          accessToken=res.body;
-         
+         done();
         })
     }) 
 
-    //note cart of user is empty - thus the 0 length;
   describe('/GET products in the cart', () => {
     it('it should GET products in the cart', (done) => {
         chai
@@ -166,25 +166,66 @@ describe("Consumer cart", () => {
           .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.an("array");
-                res.body.length.should.eql(0);
                 done();
           })
         });
 
-    it('it should give an error if there is a missing or bad token (e.g. expired)', (done) => {
+    it('it should give an error if there is a missing token', (done) => {
         chai
         .request(server)
         .get("/api/me/cart/")
         .end((err, res) => {
-            res.should.have.status(401, "bad token");
+            res.should.have.status(401);
+            done();
+      })
+
+      it('it should give an error if there is a bad token (e.g. expired)', (done) => {
+        chai
+        .request(server)
+        .get("/api/me/cart/")
+        .query({'accessToken': 'balloon'})
+        .end((err, res) => {
+            res.should.have.status(401);
             done();
       })
     });
-    })
   });
+});
+   
+  //  POST /api/me/cart
+    describe("/POST to the cart", () => {
+      let product = {
+        id: "1"
+      }
+     
+      it('an item should post to the cart', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart')
+          .query({'accessToken': accessToken})
+          .send(product)
+          .end((err, res) => {
+            res.should.have.status(200);
+            done();
+          });
+      });
+
+      it('an empty post to the cart should come back with an error', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart')
+          .query({'accessToken': accessToken})
+          .send("")
+          .end((err, res) => {
+            res.should.have.status(400);
+            done();
+          });
+      });
+  });
+});
 
 
-// // # POST /api/me/cart
+
 
 // // # DELETE /api/me/cart/:productId
 
