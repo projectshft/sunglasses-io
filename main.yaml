@@ -1,9 +1,0 @@
-swagger: "2.0"
-info:
-  title: Sunglasses API
-  description: an API for a sunglasses web page
-  version: 1.0.0
-servers:
-  – url: http://localhost:3000
-paths:
-  /glasses:

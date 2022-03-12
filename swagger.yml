@@ -1,0 +1,73 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: an API for a sunglasses web page
+  version: 1.0.0
+tags:
+  - name: "Sunglasses"
+    description: "Get information about sunglasses available"
+  - name: "user"
+    description: "Information about the current user"
+  - name: "store"
+    description: "Access to sunglass orders"
+schemes:
+  - "https"
+  - "http"
+paths: 
+  /sunglasses/sunglasses-search:
+    get:
+      summary: "Generates sunglasses according to search query"
+      responses:
+        '200':
+          description: "A list of sunglasses"
+        '400':
+          description: "Search parameter must be a string"
+      parameters:
+        - in: query
+          name: search-query
+          type: string
+      tags:
+        - "Sunglasses"
+  /user/login:
+    get:
+      summary: "Logs the user in"
+      responses:
+        '200':
+          description: "successful operation"
+        '400':
+          description: "Invalid username/password supplied"
+      parameters:
+        - in: query
+          name: "username"
+          type: "string"
+          required: true
+          description: "The user name for login"
+        - in: query
+          name: "password"
+          type: "string"
+          required: true
+          description: "The password for login"
+      tags:
+        - "user"
+  /store/add-to-cart{cart}:
+    post:
+      summary: "Add sunglasses to cart"
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Invalid Order"
+      parameters:
+        - in: path
+          required: true
+          name: "cart"
+          type: "array"
+          items: 
+            type: "string"
+      tags:
+        - "store"
+      
+ 
+   
+      
+        
