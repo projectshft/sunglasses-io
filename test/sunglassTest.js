@@ -28,11 +28,24 @@ describe("Store brands", () => {
 });
 
 
-
 // For route  /api/products
 describe("Store products", () => {
   describe("/GET products", () => {
-    it("it should GET all the products", (done) => {
+    it("it should GET all the products with just regular entry", (done) => {
+      chai
+        .request(server)
+        .get("/api/products/")
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.be.eql(11);
+          res.body[0].should.have.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls')
+          done();
+        });
+    });
+  
+
+    it("it should GET all the products when the query is blank", (done) => {
       chai
         .request(server)
         .get("/api/products?q=")
@@ -44,7 +57,7 @@ describe("Store products", () => {
           done();
         });
     });
-  
+
 
   it('If there is a valid search term entered, the relevant products should be returned', (done) => {
     chai
@@ -90,7 +103,7 @@ describe("Products by brand", () => {
     });
 
 
-    it('it should give 404 error if the id is invalid', (done) => {
+    it('it should give 404 error if the id is invalid (e.g. wrong number)', (done) => {
       chai
         .request(server)
         .get('/api/brands/42/products')
@@ -99,6 +112,17 @@ describe("Products by brand", () => {
           done();
         });
     });
+
+    it('it should give 404 error if the id is invalid (e.g. word)', (done) => {
+      chai
+        .request(server)
+        .get('/api/brands/coffee/products')
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+
   });
 
 
@@ -114,17 +138,28 @@ describe("Login", () => {
           done();
         });
     });
-    it('it should give an error if the username or password is incorrect', (done) => {
+    it('it should give an error if the username is incorrect', (done) => {
       chai
         .request(server)
         .post('/api/login/')
-        .send({username: 'billybobbo', password: 'ismokecigars'})
+        .send({username: 'billybobbo', password: 'waters'})
         .end((err, res) => {
           res.should.have.status(401);
           done();
         });
     });
 
+    it('it should give an error if the password is incorrect', (done) => {
+      chai
+        .request(server)
+        .post('/api/login/')
+        .send({username: 'greenlion235', password: 'ismokecigars'})
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    
     it("it should POST login information to the server", (done) => {
       chai
         .request(server)
@@ -166,7 +201,7 @@ describe("Consumer cart", () => {
       "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
   }
 
-
+ 
   describe('/GET products in the cart', () => {
     it('it should GET products in the cart', (done) => {
         chai
@@ -216,7 +251,19 @@ describe("Consumer cart", () => {
           });
       });
 
-      it('an item should post to the cart', (done) => {
+      it('an invalid access token should prevent posting to cart', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart')
+          .query({'accessToken': ""})
+          .send("")
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      it('a valid item by a logged in user should post to the cart', (done) => {
         chai
           .request(server)
           .post('/api/me/cart')
@@ -229,6 +276,111 @@ describe("Consumer cart", () => {
           });
       });
   });
+
+
+  // # POST /api/me/cart/:productId
+describe('/POST update to a product quantity in cart ', () => {
+  let updatedQuantity = {
+    quantity: 4
+  }
+
+  let negativeQuantity = {
+    quantity: -1
+  }
+
+  let stringQuantity = {
+    quantity: "balloon"
+  }
+
+  let equalQuantity = {
+    quantity: 1
+  }
+
+  describe('/api/me/cart/:productId', () => {
+    it('it should give an error if access token is missing', (done) => {
+      chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .send(updatedQuantity)
+      .query({'accessToken': ''})
+      .end((err, res) => {
+            res.should.have.status(401);
+        done();
+      });
+});
+
+  it('it should give an error if access token is wrong', (done) => {
+    chai
+    .request(server)
+    .post('/api/me/cart/1')
+    .send(updatedQuantity)
+    .query({'accessToken': 'marbles'})
+    .end((err, res) => {
+          res.should.have.status(401);
+      done();
+    });
+});
+
+ 
+it('it should give an error if no product is found', (done) => {
+  chai
+  .request(server)
+  .post('/api/me/cart/7')
+  .query({'accessToken': accessToken})
+  .send(updatedQuantity)
+  .end((err, res) => {
+        res.should.have.status(404);
+    done();
+  });
+});
+
+  it('it return an error if an invalid quantity is entered (e.g negative number) ', (done) => {
+    chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .query({'accessToken': accessToken})
+      .send(negativeQuantity)
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
+  it('it return an error if an invalid quantity is entered (e.g. string)', (done) => {
+    chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .query({'accessToken': accessToken})
+      .send(stringQuantity)
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
+
+  it('it return an error if the quantity entered as an update is the same as that which already exists', (done) => {
+    chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .query({'accessToken': accessToken})
+      .send(equalQuantity)
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
+
+  it('it should update quantity if logged in and product exists in cart', (done) => {
+    chai
+      .request(server)
+      .post('/api/me/cart/1')
+      .query({'accessToken': accessToken})
+      .send(updatedQuantity)
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+  });
+});
 
   // DELETE /api/me/cart/:productId
 describe('/DELETE items from cart' , () => {
@@ -244,8 +396,6 @@ describe('/DELETE items from cart' , () => {
             });
       })
   
-  
-
     it('it should give an error if no product is found', (done) => {
 
               chai
@@ -258,7 +408,7 @@ describe('/DELETE items from cart' , () => {
               });
         });
 
-        it('it should give an error if acess token is invalid', (done) => {
+        it('it should give an error if access token is invalid', (done) => {
                   chai
                   .request(server)
                   .delete('/api/me/cart/7')
@@ -268,38 +418,19 @@ describe('/DELETE items from cart' , () => {
                     done();
                   });
             });
-          });
-    
-// # POST /api/me/cart/:productId
 
-describe('/POST update to a product id ', () => {
-  let cart = [{
-    "quantity": "1",
-    "id": "1",
-    "categoryId": "1",
-    "name": "Superglasses",
-    "description": "The best glasses in the world",
-    "price":150,
-    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-}]
-
-
-  it('it should POST an update to a product', (done) => {
-   
-    chai
-      .request(server)
-      .post('/api/me/cart/1')
-      .send(book)
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('title');
-        res.body.should.have.property('author');
-        res.body.should.have.property('pages');
-        res.body.should.have.property('year');
-        done();
+        it('it should give an error if access token is missing', (done) => {
+              chai
+              .request(server)
+              .delete('/api/me/cart/7')
+              .query({'accessToken': ''})
+              .end((err, res) => {
+                    res.should.have.status(401);
+                done();
+              });
+        });
       });
-  });
+
 });
 });
 

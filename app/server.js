@@ -38,12 +38,10 @@ server.listen(PORT, err => {
   //populate users
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
 
-  
 });
 
 //Route for brands
 router.get('/api/brands', (req,res) => {
-  
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(brands));
 });
@@ -52,13 +50,14 @@ router.get('/api/brands', (req,res) => {
 
 //Route for all products
 router.get('/api/products', (req,res) => {
+
   const parsedUrl = url.parse(req.url,true);
   const query = parsedUrl.query;
   let {q} = query
 
   let queriedProducts = [];
 
-  if(q.length === 0 ) {
+  if(q === undefined || q.length === 0) {
     res.writeHead(200, { "Content-Type": "application/json" });
     return res.end(JSON.stringify(products));
   }
@@ -74,7 +73,6 @@ router.get('/api/products', (req,res) => {
       return res.end();
      }
   }
- 
 });
 
 
@@ -180,6 +178,12 @@ router.post('/api/me/cart', (req,res) => {
         return res.end();
   }
 
+  //Only throwing an error here is the name or price is missing. The rest of the info seems optional
+//   if( product.name === undefined || product.price === undefined ) {
+//     res.writeHead(400, "This product is missing vital information");
+//     return res.end();
+// }
+
   let item = {
    product: product,
    quantity: 1
@@ -226,10 +230,53 @@ router.delete('/api/me/cart/:productId', (req,res) => {
   
   });
 
-  // # //below means to change the quantity of a product#
+  // below means to change the quantity of a product#
 // # POST /api/me/cart/:productId
-router.post('api/me/cart/', (req, res) => {
-})
+router.post('/api/me/cart/:productId', (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  
+  if (!currentAccessToken) {
+    res.writeHead(401, "You need to be logged in to make changes to your cart");
+    return res.end();
+  } 
+  
+  //Product from route and then the quantity that is requested
+  let product = products.find(p => p.id === req.params.productId);
+
+  if (!product) {
+    res.writeHead(400, "There is no such product to update");
+      return res.end();
+  }
+
+  let {quantity} = req.body
+
+  if (!quantity || quantity < 1 || isNaN(quantity)) {
+    res.writeHead(400, "Enter a sufficient quantity to update");
+    return res.end();
+}
+
+//If all of that passes, then find user, the product to update 
+const user = users.find((user) => (user.login.username === currentAccessToken.username) )
+const foundProduct = user.cart.find(item => item.product.id === req.params.productId)
+
+
+if (!foundProduct) {
+  res.writeHead(404, "Product was not found in your cart");	
+  return res.end();
+}
+
+if (quantity === Number(foundProduct.quantity)) {
+  res.writeHead(400, "The stated quantity is already in the cart");
+  return res.end();
+}
+
+//Find id of product whose quantity needs to be updated and update
+let id = user.cart.indexOf(foundProduct);
+
+  user.cart[id].quantity = quantity
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  return res.end(JSON.stringify(user.cart));
+});
 
 
 
