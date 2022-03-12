@@ -72,7 +72,7 @@ describe("Store products", () => {
 });
 
 
-// // For route /api/brands/:id/products
+//  For route /api/brands/:id/products
 describe("Products by brand", () => {
   describe('/GET products by brand', () => {
     it('it should GET products by the given brand id', (done) => {
@@ -142,7 +142,7 @@ describe("Login", () => {
   });
 });
 
-// // // # GET /api/me/cart
+// # GET /api/me/cart
 describe("Consumer cart", () => {
   //Need to set the access token so that we can get into a cart - so first need to login using one of the user profiles
   let accessToken = '';
@@ -194,9 +194,14 @@ describe("Consumer cart", () => {
    
   //  POST /api/me/cart
     describe("/POST to the cart", () => {
-      let product = {
-        id: "1"
-      }
+      let product =    {
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price":150,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
      
       it('an item should post to the cart', (done) => {
         chai
@@ -222,31 +227,53 @@ describe("Consumer cart", () => {
           });
       });
   });
-});
 
+  // DELETE /api/me/cart/:productId
+describe('/DELETE items from cart' , () => {
+  let cart = [{
+    "id": "1",
+    "categoryId": "1",
+    "name": "Superglasses",
+    "description": "The best glasses in the world",
+    "price":150,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}]
+  it('it should DELETE a product given the user cart', (done) => {
+            chai
+            .request(server)
+            .delete('/api/me/cart/1')
+            .query({'accessToken': accessToken})
+            .end((err, res) => {
+                  res.should.have.status(200);
+                  res.body.should.be.a('array');
+              done();
+            });
+      });
+    });
 
+    it('it should give an error if no product is found', (done) => {
 
+              chai
+              .request(server)
+              .delete('/api/me/cart/7')
+              .query({'accessToken': accessToken})
+              .end((err, res) => {
+                    res.should.have.status(404);
+                done();
+              });
+        });
 
-// // # DELETE /api/me/cart/:productId
-
-// describe('/DELETE items from cart' , () => {
-//   it('it should DELETE a product given the user cart', (done) => {
-//       let product = {title: "The Chronicles of Narnia", author: "C.S. Lewis", year: 1948, pages: 778}
-
-//       product.save((err, book) => {
-//             chai.request(server)
-//             .delete('/book/' + book.id)
-//             .end((err, res) => {
-//                   res.should.have.status(200);
-//                   res.body.should.be.a('object');
-//                   res.body.should.have.property('message').eql('Product successfully deleted!');
-//                   res.body.result.should.have.property('ok').eql(1);
-//                   res.body.result.should.have.property('n').eql(1);
-//               done();
-//             });
-//       });
-//     }
-// )});
+        it('it should give an error if acess token is invalid', (done) => {
+                  chai
+                  .request(server)
+                  .delete('/api/me/cart/7')
+                  .query({'accessToken': 'bumblebee'})
+                  .end((err, res) => {
+                        res.should.have.status(401);
+                    done();
+                  });
+            });
+      });
 
 
 // // # POST /api/me/cart/:productId

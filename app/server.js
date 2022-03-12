@@ -155,15 +155,16 @@ let currentAccessToken = getValidTokenFromRequest(req);
 if (!currentAccessToken) {
   res.writeHead(401, "You need to be logged in to see your cart");
   return res.end();
-} else {
+} 
 
+else {
   res.writeHead(200, {'Content-Type': 'application/json'})
   let user = users.find((user) => (user.login.username == currentAccessToken.username) )
-
   return res.end(JSON.stringify(user.cart));
   }
 })
-   
+
+
 router.post('/api/me/cart', (req,res) => {
   let currentAccessToken = getValidTokenFromRequest(req);
   
@@ -177,21 +178,58 @@ router.post('/api/me/cart', (req,res) => {
   if (!product) {
     res.writeHead(400, "There is no product to add to cart");
         return res.end();
-      }
+  }
 
-
-let item = {
+  let item = {
    product,
    quantity: 1
   }
+  
   res.writeHead(200, {'Content-Type': 'application/json'})
   let user = users.find((user) => (user.login.username === currentAccessToken.username) )
  
   user.cart.push(item);
-
  return res.end(JSON.stringify(user.cart));  
    
 })
+
+// # //below means to change the quantity of a product#
+// # POST /api/me/cart/:productId
+
+router.delete('/api/me/cart/:productId', (req,res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  
+  if (!currentAccessToken) {
+    res.writeHead(401, "You need to be logged in to delete from your cart");
+    return res.end();
+  } 
+  
+  //First find user
+ let user = users.find((user) => (user.login.username === currentAccessToken.username) )
+
+ // Then product
+ const foundProduct = user.cart.find(p => p.id === req.params.id)
+    
+   
+  if (!foundProduct) {
+      res.writeHead(404, "Product was not found");	
+      return res.end();
+    }
+  
+    // Remove product from cart list and have that reflected in user.cart
+   user.cart = user.cart.filter(p => p.id !== foundProduct.id)
+   
+  
+    res.writeHead(200, {'Content-Type': 'application/json'})
+    return res.end(JSON.stringify(user.cart));
+  });
+
+
+router.post('api/me/cart/', (req, res) => {
+})
+
+
+
 
 // Helper method to process access token
 const getValidTokenFromRequest = (req) => {
