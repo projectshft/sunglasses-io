@@ -52,8 +52,8 @@ router.get('/api/brands', (req,res) => {
 router.get('/api/products', (req,res) => {
 
   const parsedUrl = url.parse(req.url,true);
-  const query = parsedUrl.query;
-  let {q} = query
+  const q = parsedUrl.query.q;
+
 
   let queriedProducts = [];
 
@@ -140,7 +140,7 @@ router.post('/api/login', (req, res) => {
   }   
   //Missing parameters in login
   else {
-    res.writeHead(400, "Please enter both a valid username and passport");
+    res.writeHead(400, "Please enter both a valid username and password");
     return res.end();
   }
 });
@@ -178,11 +178,11 @@ router.post('/api/me/cart', (req,res) => {
         return res.end();
   }
 
-  //Only throwing an error here is the name or price is missing. The rest of the info seems optional
-//   if( product.name === undefined || product.price === undefined ) {
-//     res.writeHead(400, "This product is missing vital information");
-//     return res.end();
-// }
+  // Only calling this out as an error (and not the other keys) because this seems like the only two necessary pieces of information;
+  if( product.name === undefined || product.price === undefined ) {
+    res.writeHead(400, "This product is missing vital information");
+    return res.end();
+}
 
   let item = {
    product: product,

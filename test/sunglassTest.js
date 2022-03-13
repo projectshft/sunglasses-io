@@ -219,12 +219,13 @@ describe("Consumer cart", () => {
         chai
         .request(server)
         .get("/api/me/cart/")
+        .query({'accessToken': ""})
         .end((err, res) => {
             res.should.have.status(401);
             done();
       })
 
-      it('it should give an error if there is a bad token (e.g. expired)', (done) => {
+      it('it should give an error if there is a bad token (e.g. expired/not valid)', (done) => {
         chai
         .request(server)
         .get("/api/me/cart/")
@@ -255,8 +256,20 @@ describe("Consumer cart", () => {
         chai
           .request(server)
           .post('/api/me/cart')
+          .query({'accessToken': "chopsticks"})
+          .send(product)
+          .end((err, res) => {
+            res.should.have.status(401);
+            done();
+          });
+      });
+
+      it('a missing access token should prevent posting to cart', (done) => {
+        chai
+          .request(server)
+          .post('/api/me/cart')
           .query({'accessToken': ""})
-          .send("")
+          .send(product)
           .end((err, res) => {
             res.should.have.status(401);
             done();
@@ -345,6 +358,7 @@ it('it should give an error if no product is found', (done) => {
         done();
       });
   });
+
   it('it return an error if an invalid quantity is entered (e.g. string)', (done) => {
     chai
       .request(server)
@@ -377,6 +391,7 @@ it('it should give an error if no product is found', (done) => {
       .send(updatedQuantity)
       .end((err, res) => {
         res.should.have.status(200);
+        res.body.should.be.an("array")
         done();
       });
   });
