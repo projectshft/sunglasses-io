@@ -12,17 +12,6 @@ const User = require('../app/models/user')
 const AccessToken = require('../app/models/accessToken')
 
 const PORT = 3001;
-// let products = [];
-// let brands = [];
-// let users = [];
-
-// for testing
-// let accessTokens = [{
-//   username: 'yellowleopard753',
-//   lastUpdated: new Date(),
-//   token: '1111111111111111'
-// }];
-
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 var myRouter = Router();
@@ -53,24 +42,6 @@ let server = http.createServer(function (request, response) {
   if (error) {
     return console.log("Error on Server Startup: ", error);
   }
-
-  // fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/products.json", "utf8", (error, data) => {
-  //   if (error) throw error;
-  //   products = JSON.parse(data);
-  //   console.log(`Server setup: ${products.length} stores loaded`);
-  // });
-
-  // fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/users.json", "utf8", (error, data) => {
-  //   if (error) throw error;
-  //   users = JSON.parse(data);
-  //   console.log(`Server setup: ${users.length} users loaded`);
-  // });
-
-  // fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/brands.json", "utf8", (error, data) => {
-  //   if (error) throw error;
-  //   brands = JSON.parse(data);
-  //   console.log(`Server setup: ${brands.length} users loaded`);
-  // });
 });
 
 myRouter.get('/api/products', function(request,response) {

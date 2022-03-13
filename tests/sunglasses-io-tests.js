@@ -8,8 +8,7 @@ let chaiHttp = require("chai-http");
 let server = require("../app/server");
 
 let should = chai.should();
-let TEST_TOKEN = '1111111111111111';
-let testAccessToken = '2222222222222222'
+let TEST_TOKEN = '2222222222222222'
 
 chai.use(chaiHttp);
 
@@ -29,7 +28,7 @@ describe("Sunglasses-io", () => {
     let newToken = {
       username: 'lazywolf342',
       lastUpdated: new Date(),
-      token: testAccessToken
+      token: TEST_TOKEN
     }
     AccessToken.addToken(newToken);
   });
@@ -164,7 +163,7 @@ describe("Sunglasses-io", () => {
       chai
         .request(server)
         .get("/api/me/cart")
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -195,7 +194,7 @@ describe("Sunglasses-io", () => {
       chai
         .request(server)
         .post("/api/me/cart")
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .send(item)
         .end((err, res) => {
           res.should.have.status(200);
@@ -230,7 +229,7 @@ describe("Sunglasses-io", () => {
       chai
         .request(server)
         .post("/api/me/cart")
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .send(item)
         .end((err, res) => {
           res.should.have.status(400);
@@ -255,11 +254,31 @@ describe("Sunglasses-io", () => {
       chai
         .request(server)
         .delete("/api/me/cart/1")
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(200);
           //res.body.should.be.an("object");
           // must be logged in
+          done();
+        });
+    });
+
+    it("it should not DELETE add an item in the cart if user not logged in", (done) => {
+      
+      let user = User.getUser('lazywolf342');
+      let updatedUser = {
+        "cart" : [{
+          "id": 1,
+          "name": 'fancy sunglasses',
+          "quantity": 2
+        }]
+      }
+      User.updateUser(user, updatedUser);
+      chai
+        .request(server)
+        .delete("/api/me/cart/1")
+        .end((err, res) => {
+          res.should.have.status(401);
           done();
         });
     });
@@ -269,7 +288,7 @@ describe("Sunglasses-io", () => {
       chai
         .request(server)
         .delete("/api/me/cart/3")
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(404);
           done();
@@ -299,7 +318,7 @@ describe("Sunglasses-io", () => {
         .request(server)
         .put("/api/me/cart/2")
         .send(updatedItem)
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
@@ -331,7 +350,7 @@ describe("Sunglasses-io", () => {
         .request(server)
         .put("/api/me/cart/2")
         .send(updatedItem)
-        .query({accessToken: testAccessToken})
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(404);
           done();
