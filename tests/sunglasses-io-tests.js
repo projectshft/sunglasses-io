@@ -3,6 +3,7 @@ let chaiHttp = require("chai-http");
 let server = require("../app/server");
 
 let should = chai.should();
+let TEST_TOKEN = '1111111111111111';
 
 chai.use(chaiHttp);
 
@@ -119,20 +120,51 @@ describe("Sunglasses-io", () => {
 
   describe("/GET/me/cart", () => {
     it("it should GET all products in current user's cart", (done) => {
+      // is there a way to set up a user's accessToken?
       chai
         .request(server)
         .get("/api/me/cart")
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
-          // must be logged in
           done();
         });
+    });
+
+    it("it should NOT GET products if user is not logged in", (done) => {
+      chai
+      .request(server)
+      .get("/api/me/cart")
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
     });
   });
 
   describe("/POST/me/cart", () => {
-    it("it should add an item to the user's cart", (done) => {
+    it("it should POST an item to a logged in user's cart", (done) => {
+      let item = {
+        id: 1,
+        quantity: 5
+      }
+
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({accessToken: TEST_TOKEN})
+        .send(item)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('quantity');
+          done();
+        });
+    });
+    
+    it("it should not POST add an item to cart if user not logged in", (done) => {
       let item = {
         id: 1,
         quantity: 5
@@ -143,22 +175,51 @@ describe("Sunglasses-io", () => {
         .post("/api/me/cart")
         .send(item)
         .end((err, res) => {
-          res.should.have.status(200);
-          //res.body.should.be.an("object");
-          // must be logged in
+          res.should.have.status(401);
+          done();
+        });
+    });
+    
+    it("it should not POST add an item to cart if missing quantity", (done) => {
+      let item = {
+        id: 1,
+      }
+
+      chai
+        .request(server)
+        .post("/api/me/cart")
+        .query({accessToken: TEST_TOKEN})
+        .send(item)
+        .end((err, res) => {
+          res.should.have.status(400);
           done();
         });
     });
   });
 
   describe("/DELETE/me/cart/:productId", () => {
-    it("it should add an item to the user's cart", (done) => {
-
+    it("it should DELETE an item from the user's cart", (done) => {
+      // how do i set up this test?
       chai
         .request(server)
         .delete("/api/me/cart/1")
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
           res.should.have.status(200);
+          //res.body.should.be.an("object");
+          // must be logged in
+          done();
+        });
+    });
+
+    it("it should not DELETE an item if invalid id", (done) => {
+
+      chai
+        .request(server)
+        .delete("/api/me/cart/3")
+        .query({accessToken: TEST_TOKEN})
+        .end((err, res) => {
+          res.should.have.status(404);
           //res.body.should.be.an("object");
           // must be logged in
           done();
@@ -167,17 +228,43 @@ describe("Sunglasses-io", () => {
   });
 
   describe("/PUT/me/cart/:productId", () => {
-    it("it should update an item to the user's cart", (done) => {
+    it("it should UPDATE an item to the user's cart", (done) => {
+
+      let updatedItem = {
+        id: '2',
+        quantity: 100
+      }
+
+      chai
+        .request(server)
+        .put("/api/me/cart/2")
+        .send(updatedItem)
+        .query({accessToken: TEST_TOKEN})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('quantity');
+          done();
+        });
+    });
+
+    it("it should not UPDATE an item with an invalid id", (done) => {
+
+      let updatedItem = {
+        id: '1',
+        quantity: 100
+      }
 
       chai
         .request(server)
         .put("/api/me/cart/1")
+        .send(updatedItem)
+        .query({accessToken: TEST_TOKEN})
         .end((err, res) => {
-          res.should.have.status(200);
-          //res.body.should.be.an("object");
-          // must be logged in
+          res.should.have.status(404);
           done();
         });
-    });
+    })
   });
 });

@@ -10,7 +10,14 @@ const PORT = 3001;
 let products = [];
 let brands = [];
 let users = [];
-let accessTokens = [];
+// for testing
+let accessTokens = [{
+  username: 'yellowleopard753',
+  lastUpdated: new Date(),
+  token: '1111111111111111'
+}];
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -126,23 +133,83 @@ myRouter.post('/api/login', function(request,response) {
 });
 
 myRouter.get('/api/me/cart', function(request,response) {
+  const accessToken = getValidTokenFromRequest(request);
+  if (!accessToken) {
+    response.writeHead(401, "Unauthorized");
+    return response.end();
+  } 
+
+  const user = users.find(user => accessToken.username === user.login.username);
+  const userCart = user.cart;
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify([]));
+	return response.end(JSON.stringify(userCart));
 });
 
 myRouter.post('/api/me/cart', function(request,response) {
+  const accessToken = getValidTokenFromRequest(request);
+  if (!accessToken) {
+    response.writeHead(401, "Unauthorized");
+    return response.end();
+  } 
+
+  // error if any missing fields 
+  if (!request.body.quantity || !request.body.id){
+		response.writeHead(400);
+		return response.end();
+	}
+
+  const user = users.find(user => accessToken.username === user.login.username);
+  const userCart = user.cart;
+  const addedItem = (request.body)
+  userCart.push(addedItem);
+
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify([]));
+	return response.end(JSON.stringify(addedItem));
 });
 
 myRouter.delete('/api/me/cart/:id', function(request,response) {
+  const accessToken = getValidTokenFromRequest(request);
+  if (!accessToken) {
+    response.writeHead(401, "Unauthorized");
+    return response.end();
+  } 
+
+  const user = users.find(user => accessToken.username === user.login.username);
+  const usersCart = user.cart
+
+  
+  // can we move this data manipulation to a model?
+  const foundItem = usersCart.find((item=>item.id == request.params.id))
+  if (!foundItem) {
+    response.writeHead(404);	
+		return response.end("Item Not Found");
+  }
+
+  user.cart = usersCart.filter((item=>item.id != foundItem.id))
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify([]));
+	return response.end();
 });
 
 myRouter.put('/api/me/cart/:id', function(request,response) {
+  const accessToken = getValidTokenFromRequest(request);
+  if (!accessToken) {
+    response.writeHead(401, "Unauthorized");
+    return response.end();
+  } 
+
+  const user = users.find(user => accessToken.username === user.login.username);
+  const usersCart = user.cart
+  
+  // can we move this data manipulation to a model?
+  const foundItem = usersCart.find((item=>item.id == request.params.id))
+  if (!foundItem) {
+    response.writeHead(404);	
+		return response.end("Item Not Found");
+  }
+
+  Object.assign(foundItem, request.body);
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify([]));
+	return response.end(JSON.stringify(foundItem));
 });
 
 module.exports = server;
