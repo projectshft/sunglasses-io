@@ -1,13 +1,7 @@
 [
   {
     "gender": "female",
-    "cart": [
-      {
-        "id": 2,
-        "name": "cool sunglasses",
-        "quantity": 3
-      }
-    ],
+    "cart": [],
     "name": {
       "title": "mrs",
       "first": "susanna",

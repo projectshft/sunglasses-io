@@ -6,16 +6,22 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+const Product = require('./models/product')
+const Brand = require('./models/brand')
+const User = require('../app/models/user')
+const AccessToken = require('../app/models/accessToken')
+
 const PORT = 3001;
-let products = [];
-let brands = [];
-let users = [];
+// let products = [];
+// let brands = [];
+// let users = [];
+
 // for testing
-let accessTokens = [{
-  username: 'yellowleopard753',
-  lastUpdated: new Date(),
-  token: '1111111111111111'
-}];
+// let accessTokens = [{
+//   username: 'yellowleopard753',
+//   lastUpdated: new Date(),
+//   token: '1111111111111111'
+// }];
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
@@ -27,7 +33,7 @@ var getValidTokenFromRequest = function(request) {
   var parsedUrl = require('url').parse(request.url, true);
   if (parsedUrl.query.accessToken) {
     // Verify the access token to make sure it's valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
+    let currentAccessToken = AccessToken.getAll().find((accessToken) => {
       return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
 
@@ -48,40 +54,40 @@ let server = http.createServer(function (request, response) {
     return console.log("Error on Server Startup: ", error);
   }
 
-  fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/products.json", "utf8", (error, data) => {
-    if (error) throw error;
-    products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} stores loaded`);
-  });
+  // fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/products.json", "utf8", (error, data) => {
+  //   if (error) throw error;
+  //   products = JSON.parse(data);
+  //   console.log(`Server setup: ${products.length} stores loaded`);
+  // });
 
-  fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/users.json", "utf8", (error, data) => {
-    if (error) throw error;
-    users = JSON.parse(data);
-    console.log(`Server setup: ${users.length} users loaded`);
-  });
+  // fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/users.json", "utf8", (error, data) => {
+  //   if (error) throw error;
+  //   users = JSON.parse(data);
+  //   console.log(`Server setup: ${users.length} users loaded`);
+  // });
 
-  fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/brands.json", "utf8", (error, data) => {
-    if (error) throw error;
-    brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} users loaded`);
-  });
+  // fs.readFile("/Users/StephB/code/node-js/sunglasses-io/initial-data/brands.json", "utf8", (error, data) => {
+  //   if (error) throw error;
+  //   brands = JSON.parse(data);
+  //   console.log(`Server setup: ${brands.length} users loaded`);
+  // });
 });
 
 myRouter.get('/api/products', function(request,response) {
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(products));
+	return response.end(JSON.stringify(Product.getAll()));
 });
 
 myRouter.get('/api/brands', function(request,response) {
 	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(brands));
+	return response.end(JSON.stringify(Brand.getAll()));
 });
 
 myRouter.get('/api/brands/:brandId/products', function(request,response) {
   
   // check if valid brand id
   const { brandId } = request.params;
-  const brand = brands.find(brand => brand.id === brandId);
+  const brand = Brand.getAll().find(brand => brand.id === brandId);
   if (!brand) {
     response.writeHead(404);
     return response.end("Brand not found");
@@ -89,7 +95,7 @@ myRouter.get('/api/brands/:brandId/products', function(request,response) {
 
 	response.writeHead(200, { "Content-Type": "application/json" });
   // get product list
-  const productsToReturn = products.filter(product => product.categoryId === brandId);
+  const productsToReturn = Product.getAll().filter(product => product.categoryId === brandId);
 	return response.end(JSON.stringify(productsToReturn));
 });
 
@@ -97,14 +103,14 @@ myRouter.get('/api/brands/:brandId/products', function(request,response) {
 myRouter.post('/api/login', function(request,response) {
   if (request.body.username && request.body.password) {
     // get valid user
-    let user = users.find((user) => {
+    let user = User.getAll().find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
     });
 
     if (user) {
       response.writeHead(200, { "Content-Type": "application/json" });
 
-      let currentAccessToken = accessTokens.find((tokenObject) => {
+      let currentAccessToken = AccessToken.getAll().find((tokenObject) => {
         return tokenObject.username == user.login.username;
       });
 
@@ -119,7 +125,7 @@ myRouter.post('/api/login', function(request,response) {
           lastUpdated: new Date(),
           token: uid(16)
         }
-        accessTokens.push(newAccessToken);
+        AccessToken.addToken(newAccessToken);
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
@@ -139,7 +145,7 @@ myRouter.get('/api/me/cart', function(request,response) {
     return response.end();
   } 
 
-  const user = users.find(user => accessToken.username === user.login.username);
+  const user = User.getAll().find(user => accessToken.username === user.login.username);
   const userCart = user.cart;
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(userCart));
@@ -158,7 +164,7 @@ myRouter.post('/api/me/cart', function(request,response) {
 		return response.end();
 	}
 
-  const user = users.find(user => accessToken.username === user.login.username);
+  const user = User.getAll().find(user => accessToken.username === user.login.username);
   const userCart = user.cart;
   const addedItem = (request.body)
   userCart.push(addedItem);
@@ -174,7 +180,7 @@ myRouter.delete('/api/me/cart/:id', function(request,response) {
     return response.end();
   } 
 
-  const user = users.find(user => accessToken.username === user.login.username);
+  const user = User.getAll().find(user => accessToken.username === user.login.username);
   const usersCart = user.cart
 
   
@@ -197,7 +203,7 @@ myRouter.put('/api/me/cart/:id', function(request,response) {
     return response.end();
   } 
 
-  const user = users.find(user => accessToken.username === user.login.username);
+  const user = User.getAll().find(user => accessToken.username === user.login.username);
   const usersCart = user.cart
   
   // can we move this data manipulation to a model?
