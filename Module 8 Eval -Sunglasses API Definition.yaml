@@ -3,7 +3,7 @@ info:
   title: Sunglasses API
   description: An API to support the Sunglasses Shopping App, built by a Parsity student.
   version: 1.0.0
-host: api.sunglassesproject.com
+host: api
 schemes:
   - https
 basePath: /api
