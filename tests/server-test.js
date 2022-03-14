@@ -1,7 +1,12 @@
 const server = require('../app/server.js');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+
 const uids = require('../data/uids');
+const User = require('../models/users.js');
+const Product = require('../models/products.js');
+const Brand = require('../models/brands.js');
+
 
 chai.should();
 chai.use(chaiHttp);
@@ -202,6 +207,9 @@ describe('Login', () => {
 });
 
 describe('Cart', () => {
+  beforeEach(() => {
+    User.emptyCart();
+  });
   describe('GET all cart items', () => {
     it('should return a cart object', (done) => {
       const query = {
@@ -449,9 +457,11 @@ describe('Cart', () => {
         })
     })
     it('should remove all items if the quantity is more than the cart has', (done) => {
+      User.addCartItem('1', '4', 3);
+      
       const query = {
         accessToken: uids[0],
-        quantity: '4'
+        quantity: '5'
       }
 
       chai.request(server)
@@ -507,6 +517,75 @@ describe('Cart', () => {
           res.body.should.not.be.an('array');
           res.body.should.not.have.property('id');
           res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+  })
+  describe('Update number of cart items', () => {
+    it('should change the number of cart items', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: '4'
+      }
+
+      chai.request(server)
+        .get('/me/cart/1/update')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.all.keys('quantities', 'items');
+          res.body.items.length.should.equal(4);
+          res.body.items[0].id.should.equal(1);
+          res.body.quantities[1].should.equal(4);
+          done();
+        })
+    })
+    it('should not update the cart if there is an invalid access token', (done) => {
+      const query = {
+        accessToken: 'yuwi743874',
+        quantity: '4'
+      }
+
+      chai.request(server)
+        .get('/me/cart/1/update')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.not.be.an('object');
+          res.body.should.not.be.an('array');
+          done();
+        })
+    })
+    it('should not update the cart if the quantity is invalid ', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: 'five'
+      }
+
+      chai.request(server)
+        .get('/me/cart/1/update')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.not.be.an('object');
+          res.body.should.not.be.an('array');
+          done();
+        })
+    })
+    it('should not update the cart if the sunglasses ID does not exist', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: '5'
+      }
+
+      chai.request(server)
+        .get('/me/cart/78263fds/update')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.not.be.an('array');
+          res.body.should.not.be.an('object');
           done();
         })
     })
