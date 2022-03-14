@@ -15,7 +15,6 @@ let users = [];
 const accessTokens = [];
 
 const PORT = 3001;
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -192,7 +191,7 @@ myRouter.delete('/me/cart/:productId', (request, response) => {
   return response.end(JSON.stringify(user.cart));
 });
 
-myRouter.put('/me/cart/:productId', (request, response) => {
+myRouter.post('/me/cart/:productId', (request, response) => {
   const currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -208,8 +207,10 @@ myRouter.put('/me/cart/:productId', (request, response) => {
     response.writeHead(404, 'Product not found');
     return response.end();
   }
+  if (productToUpdate.quantity > 0) {
+    user.cart.push(productToUpdate);
+  }
 
-  // user.cart.splice(productToDelete, 1);
   response.writeHead(200), { 'Content-Type': 'application/json' };
   return response.end(JSON.stringify(user.cart));
 });
