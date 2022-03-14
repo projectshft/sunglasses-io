@@ -1,6 +1,7 @@
 const server = require('../app/server.js');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const uids = require('../revised-data/uids');
 
 chai.should();
 chai.use(chaiHttp);
@@ -75,7 +76,7 @@ describe('Sunglasses', () => {
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.be.empty;
+          res.body.should.not.be.an('array');
           done();
         })
     })
@@ -200,4 +201,103 @@ describe('Login', () => {
   })
 });
 
-describe('Cart', () => {});
+describe('Cart', () => {
+  describe('GET all cart items', () => {
+    it('should return a cart object', (done) => {
+      const query = {
+        accessToken: uid[0]
+      }
+
+      chai.request(server)
+        .get('/me/cart')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.all.keys('items', 'quantities');
+          done();
+        })
+    })
+    it('should return an error if the token is invalid', (done) => {
+      const query = {
+        accessToken: '738463674hjdjdjfsjkhgfh'
+      }
+
+      chai.request(server)
+        .get('/me/cart')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.not.have.all.keys('items', 'quantities');
+          done();
+        })
+    })
+  })
+  describe('Add items to the cart', () => {
+    it('should add a single itme if none are specified', (done) => {
+      const query = {
+        accessToken: uid[0],
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body[0].id.should.equal(4);
+          done();
+        })
+    })
+    it('should add the specified number of items to the cart', (done) => {
+      const query = {
+        accessToken: uid[0],
+        quantity: '6'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(6);
+          res.body[0].id.should.equal(4);
+          done();
+        })
+    })
+    it('should not add items if the access token is invalid', (done) => {
+      const query = {
+        accessToken: '6789678967jhkdqg',
+        quantity: '6'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.not.be.an('array');
+          res.body[0].should.not.have.property('id');
+          done();
+        })
+    })
+    it('should not add items if the quantity is invalid', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: 'null'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.not.be.an('array');
+          res.body[0].should.not.have.property('id');
+          res.body[0].should.not.have.property('inStock');
+          done();
+        })
+    })
+  })
+});

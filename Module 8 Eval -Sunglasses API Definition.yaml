@@ -152,9 +152,8 @@ paths:
         - Cart Actions
       summary: All Cart items.
       description: |
-        Returns all the items in an authenticated user's cart. Uses the valid token 
-        in the body of the request to identify the user. 
-        Multiple items will appear multiple times in the cart.
+        Returns an authenticated user's cart. Uses the valid token 
+        in the body of the request to identify the user.
       parameters:
         - name: accessToken
           in: query
@@ -163,7 +162,7 @@ paths:
           type: string
       responses:
         "200":
-          description: A Cart array.
+          description: A Cart object.
           schema:
             $ref: "#/definitions/Cart"
         "401":

@@ -5,6 +5,7 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
+const uids = require('../revised-data/uids');
 
 const myRouter = Router();
 myRouter.use(bodyParser.json());
