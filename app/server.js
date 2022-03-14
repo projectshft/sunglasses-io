@@ -1,13 +1,46 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+// imports
+var http = require("http");
+var fs = require("fs");
+const finalHandler = require("finalhandler");
+const Router = require("router");
+const bodyParser = require("body-parser");
+const { request } = require("https");
 
+// declare port variable
 const PORT = 3001;
 
-http.createServer(function (request, response) {
+// State holding variables // will be populated below // in place of database
+let brands = [];
+let products = [];
+let users = [];
 
-}).listen(PORT);
+// Setup router
+var myRouter = Router();
+myRouter.use(bodyParser.json());
+
+http.createServer((request, response) => {
+  myRouter(request, response, finalHandler(request, response));
+}).listen(PORT, error => {
+  if (error) {
+    return console.log("Error on Sever Startup: ", error);
+  }
+
+  // load products
+  fs.readFile("products.json", "utf-8", (error, data) => {
+    if (error) throw error;
+    products = JSON.parse(data);
+    console.log(`Server setup: ${products.length} products loaded`);
+  });
+  // confirm server is listening on port
+  console.log(`Server is listening on ${PORT}`);
+});
+
+// route to API "home page"
+myRouter.get("/", (request, response) => {
+  response.end("There's nothing here, please visit /api/products");
+});
+
+// route to products
+myRouter.get("/api/products", (request, response) => {
+  response.end(JSON.stringify(products));
+});
