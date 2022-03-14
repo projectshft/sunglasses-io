@@ -1,0 +1,145 @@
+[
+  {
+    "id": "1",
+    "brandId": "1",
+    "name": "Superglasses",
+    "description": "The best glasses in the world",
+    "price": 150,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "2",
+    "brandId": "1",
+    "name": "Black Sunglasses",
+    "description": "The best glasses in the world",
+    "price": 100,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "3",
+    "brandId": "1",
+    "name": "Brown Sunglasses",
+    "description": "The best glasses in the world",
+    "price": 50,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "4",
+    "brandId": "2",
+    "name": "Better glasses",
+    "description": "The best glasses in the world",
+    "price": 1500,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "5",
+    "brandId": "2",
+    "name": "Glasses",
+    "description": "The most normal glasses in the world",
+    "price": 150,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "6",
+    "brandId": "3",
+    "name": "glas",
+    "description": "Pretty awful glasses",
+    "price": 10,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "7",
+    "brandId": "3",
+    "name": "QDogs Glasses",
+    "description": "They bark",
+    "price": 1500,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "8",
+    "brandId": "4",
+    "name": "Coke cans",
+    "description": "The thickest glasses in the world",
+    "price": 110,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": false
+  },
+  {
+    "id": "9",
+    "brandId": "4",
+    "name": "Sugar",
+    "description": "The sweetest glasses in the world",
+    "price": 125,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  },
+  {
+    "id": "10",
+    "brandId": "5",
+    "name": "Peanut Butter",
+    "description": "The stickiest glasses in the world",
+    "price": 103,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": false
+  },
+  {
+    "id": "11",
+    "brandId": "5",
+    "name": "Habanero",
+    "description": "The spiciest glasses in the world",
+    "price": 153,
+    "imageUrls": {
+      "image_1": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_2": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+      "image_3": "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+    },
+    "inStock": true
+  }
+]

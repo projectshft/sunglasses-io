@@ -1,0 +1,53 @@
+[
+  {
+    "gender": "female",
+    "cart": {
+      "items": [],
+      "quantities": {}
+    },
+    "name": {
+      "title": "mrs",
+      "first": "susanna",
+      "last": "richards"
+    },
+    "login": {
+      "username": "yellowleopard753",
+      "password": "jonjon",
+      "email": "susanna.richards@example.com"
+    }
+  },
+  {
+    "gender": "male",
+    "cart": {
+      "items": [],
+      "quantities": {}
+    },
+    "name": {
+      "title": "mr",
+      "first": "salvador",
+      "last": "jordan"
+    },
+    "login": {
+      "username": "lazywolf342",
+      "password": "tucker",
+      "email": "salvador.jordan@example.com"
+    }
+  },
+  {
+    "gender": "female",
+    "cart": {
+      "items": [],
+      "quantities": {}
+    },
+    "name": {
+      "title": "mrs",
+      "first": "natalia",
+      "last": "ramos"
+    },
+    "login": {
+      "username": "greenlion235",
+      "password": "waters",
+      "email": "natalia.ramos@example.com"
+    }
+  }
+]
