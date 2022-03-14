@@ -26,7 +26,7 @@ http.createServer((request, response) => {
   }
 
   // load products
-  fs.readFile("products.json", "utf-8", (error, data) => {
+  fs.readFile("./initial-data/products.json", "utf-8", (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
     console.log(`Server setup: ${products.length} products loaded`);
