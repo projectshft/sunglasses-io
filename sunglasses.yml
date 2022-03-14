@@ -132,23 +132,21 @@ paths:
           schema:
             $ref: "#/definitions/Error"
     post:
-      summary: Replace shopping cart.
+      summary: Add an item to shopping cart.
       description: |
-        This endpoint allows you to replace a user's shopping cart with a new array.
+        This endpoint allows you to add an item to a user's shopping cart.
       tags:
-        - Shopping Cart
+        - Cart
       responses:
         "200":
-          description: Array of products currently in user's shopping cart.
-          schema:
-            $ref: "#/definitions/Cart"
+          description: Successfully added to cart
         default:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
   /me/cart/{productId}:
     post:
-      summary: Add an item to shopping cart.
+      summary: Edit quantity of an item to shopping cart.
       description: |
         This endpoint allows you to add an item to a user's shopping cart.
       parameters:

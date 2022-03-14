@@ -22,38 +22,21 @@ describe('Cart', () => {
   });
 
   describe('/POST cart', () => {
-    it('should replace the current cart with the new cart', (done) => {
-      const testCart = [1, 2, 3];
+    it('should send an id of a product and add it to the shopping cart', (done) => {
+      const productId = '3';
 
       chai
         .request(server)
         .post('/me/cart')
-        .send(testCart)
+        .send({ productId })
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an('array');
-          response.body.should.be.eql(testCart);
+          response.body.should.include.one.satisfy(
+            (product) => product.id === productId
+          );
           done();
         });
     });
   });
-
-  // describe('/POST cart/{productId}', () => {
-  //   it('should get an item by id and add it to the shopping cart', (done) => {
-  //     const productIdToCheck = '3';
-
-  //     chai
-  //       .request(server)
-  //       .post(`me/cart/${productIdToCheck}`)
-  //       .send()
-  //       .end((error, response) => {
-  //         response.should.have.status(200);
-  //         response.body.should.be.an('array');
-  //         response.body.should.include.one.satisfy(
-  //           (product) => product.id === productIdToCheck
-  //         );
-  //         done();
-  //       });
-  //   });
-  // });
 });
