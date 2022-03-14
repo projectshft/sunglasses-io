@@ -35,8 +35,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Sunglasses"
-        "404":
-          description: Sunglasses not found in the server.
+        "400":
+          description: Invalid query.
           schema:
             $ref: "#/definitions/Error"
         "500":
@@ -122,6 +122,17 @@ paths:
         Use this endpoint to authenticate a username and password, or email and password. 
         It will return a valid token that must be used in all other /user endpoints. 
         Expects the username and password to be in the request body as an object.
+      parameters:
+        - name: username
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
       responses:
         "200":
           description: An authentication token.
