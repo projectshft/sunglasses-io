@@ -1,4 +1,4 @@
-let products = require("../initial-data/products.json");
+let products = require("/initial-data/products.json");
 
 let chai = require("chai");
 let chaiHttp = require("chai-http");

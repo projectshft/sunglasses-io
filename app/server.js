@@ -31,6 +31,20 @@ http.createServer((request, response) => {
     products = JSON.parse(data);
     console.log(`Server setup: ${products.length} products loaded`);
   });
+
+  // load brands
+  fs.readFile("./initial-data/brands.json", "utf-8", (error, data) => {
+    if (error) throw error;
+    brands = JSON.parse(data);
+    console.log(`Server setup: ${brands.length} brands loaded`);
+  });
+ 
+  // load users
+  fs.readFile("./initial-data/users.json", "utf-8", (error, data) => {
+    if (error) throw error;
+    users = JSON.parse(data);
+    console.log(`Server setup: ${users.length} users loaded`);
+  });
   // confirm server is listening on port
   console.log(`Server is listening on ${PORT}`);
 });
@@ -40,7 +54,18 @@ myRouter.get("/", (request, response) => {
   response.end("There's nothing here, please visit /api/products");
 });
 
-// route to products
+// Public route to products
 myRouter.get("/api/products", (request, response) => {
+  response.end(JSON.stringify(products));
+});
+
+// Public route to specific product
+myRouter.get("/api/products/:productId", (request, response) => {
+  const { productId } = request.params;
+  response.end(JSON.stringify(products[productId]));
+});
+
+// Public route to brands
+myRouter.get("/api/brands", (request, response) => {
   response.end(JSON.stringify(products));
 });
