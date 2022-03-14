@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Sunglasses.io",
+      "name": "Mocha Tests",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
       "args": [
         "-u",
