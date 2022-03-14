@@ -21,11 +21,11 @@ const server = http.createServer(function (request, response) {
 })
 
 server.listen(PORT, () => {
-  users = JSON.parse(fs.readFileSync('../revised-data/users.json', 'utf-8'));
+  // users = JSON.parse(fs.readFileSync('../data/users.json', 'utf-8'));
 
-  brands = JSON.parse(fs.readFileSync('../revised-data/brands.json', 'utf-8'));
+  // brands = JSON.parse(fs.readFileSync('../data/brands.json', 'utf-8'));
 
-  products = JSON.parse(fs.readFileSync('../revised-data/products.json', 'utf-8'));
+  // products = JSON.parse(fs.readFileSync('../data/products.json', 'utf-8'));
 });
 
 myRouter.get('/api/sunglasses', (request, response) => {

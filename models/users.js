@@ -1,5 +1,5 @@
 const fs = require('fs');
-const Product = require('products.js');
+const Product = require('./products.js');
 let users = [];
 
 class User {

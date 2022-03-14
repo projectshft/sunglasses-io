@@ -208,7 +208,8 @@ describe('Login', () => {
 
 describe('Cart', () => {
   beforeEach(() => {
-    User.emptyCart();
+    User.load();
+    User.emptyCart('1');
   });
   describe('GET all cart items', () => {
     it('should return a cart object', (done) => {
@@ -373,6 +374,7 @@ describe('Cart', () => {
   })
   describe('DELETE items from the cart', () => {
     it('should remove a single item if quantity is not specified', (done) => {
+      User.addCartItem('1', '4', 3);
       const query = {
         accessToken: uid[0],
       }
@@ -389,6 +391,8 @@ describe('Cart', () => {
         })
     })
     it('should remove a single item if quantity is empty', (done) => {
+      User.addCartItem('1', '4', 3);
+
       const query = {
         accessToken: uid[0],
         quantity: ''
@@ -406,6 +410,8 @@ describe('Cart', () => {
         })
     })
     it('should remove the specified number of items from the cart', (done) => {
+      User.addCartItem('1', '4', 3);
+
       const query = {
         accessToken: uid[0],
         quantity: '2'
@@ -423,6 +429,8 @@ describe('Cart', () => {
         })
     })
     it('should not delete items if the access token is invalid', (done) => {
+      User.addCartItem('1', '4', 3);
+
       const query = {
         accessToken: '6789678967jhkdqg',
         quantity: '2'
@@ -440,6 +448,7 @@ describe('Cart', () => {
         })
     })
     it('should not remove items if the quantity is invalid', (done) => {
+      User.addCartItem('1', '4', 3);
       const query = {
         accessToken: uids[0],
         quantity: 'null'
@@ -477,6 +486,7 @@ describe('Cart', () => {
         })
     })
     it('should not remove items if there is no access token', (done) => {
+      User.addCartItem('1', '4', 3);
 
       chai.request(server)
         .get('/me/cart/4/remove')
@@ -489,6 +499,8 @@ describe('Cart', () => {
         })
     })
     it('should not remove items if the sunglasses ID is invalid', (done) => {
+      User.addCartItem('1', '4', 3);
+
       const query = {
         accessToken: uids[0],
       }
@@ -505,12 +517,13 @@ describe('Cart', () => {
         })
     })
     it('should not remove items if the sunglasses ID is not in the cart', (done) => {
+      User.addCartItem('1', '4', 3);
       const query = {
         accessToken: uids[0],
       }
 
       chai.request(server)
-        .get('/me/cart/1/remove')
+        .get('/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);
