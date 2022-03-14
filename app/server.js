@@ -5,12 +5,13 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-const uids = require('../data/uids');
 
-const users = [];
-const brands = [];
-const products = [];
-const accessTokenList = [];
+const Product = require('../models/products.js');
+const Brand = require('../models/brands.js');
+const User = require('../models/users.js');
+
+const sampleToken = require('../data/uids');
+let accessTokenList = [sampleToken];
 
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -21,11 +22,9 @@ const server = http.createServer(function (request, response) {
 })
 
 server.listen(PORT, () => {
-  // users = JSON.parse(fs.readFileSync('../data/users.json', 'utf-8'));
-
-  // brands = JSON.parse(fs.readFileSync('../data/brands.json', 'utf-8'));
-
-  // products = JSON.parse(fs.readFileSync('../data/products.json', 'utf-8'));
+  User.load();
+  Product.load();
+  Brand.load();
 });
 
 myRouter.get('/api/sunglasses', (request, response) => {

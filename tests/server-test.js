@@ -2,7 +2,7 @@ const server = require('../app/server.js');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 
-const uids = require('../data/uids');
+const uid = require('../data/uids');
 const User = require('../models/users.js');
 const Product = require('../models/products.js');
 const Brand = require('../models/brands.js');
@@ -311,7 +311,7 @@ describe('Cart', () => {
     })
     it('should not add items if the quantity is invalid', (done) => {
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: 'null'
       }
 
@@ -328,7 +328,7 @@ describe('Cart', () => {
     })
     it('should not add items if the quantity is too large', (done) => {
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: '300'
       }
 
@@ -357,7 +357,7 @@ describe('Cart', () => {
     })
     it('should not add items if the sunglasses ID is invalid', (done) => {
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
       }
 
       chai.request(server)
@@ -450,7 +450,7 @@ describe('Cart', () => {
     it('should not remove items if the quantity is invalid', (done) => {
       User.addCartItem('1', '4', 3);
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: 'null'
       }
 
@@ -469,7 +469,7 @@ describe('Cart', () => {
       User.addCartItem('1', '4', 3);
       
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: '5'
       }
 
@@ -502,7 +502,7 @@ describe('Cart', () => {
       User.addCartItem('1', '4', 3);
 
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
       }
 
       chai.request(server)
@@ -519,7 +519,7 @@ describe('Cart', () => {
     it('should not remove items if the sunglasses ID is not in the cart', (done) => {
       User.addCartItem('1', '4', 3);
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
       }
 
       chai.request(server)
@@ -537,7 +537,7 @@ describe('Cart', () => {
   describe('Update number of cart items', () => {
     it('should change the number of cart items', (done) => {
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: '4'
       }
 
@@ -572,7 +572,7 @@ describe('Cart', () => {
     })
     it('should not update the cart if the quantity is invalid ', (done) => {
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: 'five'
       }
 
@@ -588,7 +588,7 @@ describe('Cart', () => {
     })
     it('should not update the cart if the sunglasses ID does not exist', (done) => {
       const query = {
-        accessToken: uids[0],
+        accessToken: uid.hash,
         quantity: '5'
       }
 

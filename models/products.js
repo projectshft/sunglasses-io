@@ -7,7 +7,7 @@ class Product {
   }
 
   static load() {
-    products = JSON.parse(fs.readFileSync('../data/products.json', 'utf-8'));
+    products = JSON.parse(fs.readFileSync('data/products.json', 'utf-8'));
   }
 
   static get(sunglassesId) {

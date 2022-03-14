@@ -1,11 +1,12 @@
-const uid = require('rand-token').uid;
+const uidCreator = require('rand-token').uid;
 
 
 // first token should be attached to user with id of 1
-const uids = [
-  uid(16),
-  uid(16),
-  uid(16)
-]
+const uid = 
+  {
+    username: "yellowleopard753",
+    hash: uidCreator(16),
+    lastUpdated: new Date()
+  }
 
-module.exports = uids;
+module.exports = uid;

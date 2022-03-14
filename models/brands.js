@@ -7,7 +7,7 @@ class Brand {
   }
 
   static load() {
-    brands = JSON.parse(fs.readFileSync('../data/brands.json', 'utf-8'));
+    brands = JSON.parse(fs.readFileSync('data/brands.json', 'utf-8'));
   }
 
   static get(brandId) {

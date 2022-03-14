@@ -8,7 +8,7 @@ class User {
   }
 
   static load() {
-    users = JSON.parse(fs.readFileSync('../data/users.json', 'utf-8'));
+    users = JSON.parse(fs.readFileSync('data/users.json', 'utf-8'));
   }
 
   static get(userId) {
