@@ -5,7 +5,12 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-const uids = require('../revised-data/uids');
+const uids = require('../data/uids');
+
+const users = [];
+const brands = [];
+const products = [];
+const accessTokenList = [];
 
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -13,7 +18,15 @@ const PORT = 3001;
 
 const server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response));
-}).listen(PORT);
+})
+
+server.listen(PORT, () => {
+  users = JSON.parse(fs.readFileSync('../revised-data/users.json', 'utf-8'));
+
+  brands = JSON.parse(fs.readFileSync('../revised-data/brands.json', 'utf-8'));
+
+  products = JSON.parse(fs.readFileSync('../revised-data/products.json', 'utf-8'));
+});
 
 myRouter.get('/api/sunglasses', (request, response) => {
 

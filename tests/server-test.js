@@ -1,7 +1,7 @@
 const server = require('../app/server.js');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const uids = require('../revised-data/uids');
+const uids = require('../data/uids');
 
 chai.should();
 chai.use(chaiHttp);
@@ -234,7 +234,7 @@ describe('Cart', () => {
     })
   })
   describe('Add items to the cart', () => {
-    it('should add a single itme if none are specified', (done) => {
+    it('should add a single item if quantity is not specified', (done) => {
       const query = {
         accessToken: uid[0],
       }
@@ -244,7 +244,25 @@ describe('Cart', () => {
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an('object');
+          res.body.should.be.an('array');
+          res.body.length.should.equal(1);
+          res.body[0].id.should.equal(4);
+          done();
+        })
+    })
+    it('should add a single item if quantity is empty', (done) => {
+      const query = {
+        accessToken: uid[0],
+        quantity: ''
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(1);
           res.body[0].id.should.equal(4);
           done();
         })
@@ -296,6 +314,199 @@ describe('Cart', () => {
           res.body.should.not.be.an('array');
           res.body[0].should.not.have.property('id');
           res.body[0].should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should not add items if the quantity is too large', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: '300'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should not add items if there is no access token', (done) => {
+
+      chai.request(server)
+        .get('/me/cart/4/add')
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should not add items if the sunglasses ID is invalid', (done) => {
+      const query = {
+        accessToken: uids[0],
+      }
+
+      chai.request(server)
+        .get('/me/cart/hufih7876/add')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+  })
+  describe('DELETE items from the cart', () => {
+    it('should remove a single item if quantity is not specified', (done) => {
+      const query = {
+        accessToken: uid[0],
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(1);
+          res.body[0].id.should.equal(4);
+          done();
+        })
+    })
+    it('should remove a single item if quantity is empty', (done) => {
+      const query = {
+        accessToken: uid[0],
+        quantity: ''
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(1);
+          res.body[0].id.should.equal(4);
+          done();
+        })
+    })
+    it('should remove the specified number of items from the cart', (done) => {
+      const query = {
+        accessToken: uid[0],
+        quantity: '2'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(2);
+          res.body[0].id.should.equal(4);
+          done();
+        })
+    })
+    it('should not delete items if the access token is invalid', (done) => {
+      const query = {
+        accessToken: '6789678967jhkdqg',
+        quantity: '2'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should not remove items if the quantity is invalid', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: 'null'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(400);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should remove all items if the quantity is more than the cart has', (done) => {
+      const query = {
+        accessToken: uids[0],
+        quantity: '4'
+      }
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(3);
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('inStock');
+          done();
+        })
+    })
+    it('should not remove items if there is no access token', (done) => {
+
+      chai.request(server)
+        .get('/me/cart/4/remove')
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should not remove items if the sunglasses ID is invalid', (done) => {
+      const query = {
+        accessToken: uids[0],
+      }
+
+      chai.request(server)
+        .get('/me/cart/hufih7876/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
+          done();
+        })
+    })
+    it('should not remove items if the sunglasses ID is not in the cart', (done) => {
+      const query = {
+        accessToken: uids[0],
+      }
+
+      chai.request(server)
+        .get('/me/cart/1/remove')
+        .query(query)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.not.be.an('array');
+          res.body.should.not.have.property('id');
+          res.body.should.not.have.property('inStock');
           done();
         })
     })
