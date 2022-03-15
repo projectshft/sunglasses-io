@@ -1,0 +1,414 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses Shopping App, built by a Parsity student.
+  version: 1.0.0
+host: api
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /sunglasses:
+    get:
+      tags:
+        - Sunglasses
+      summary: All Sunglasses
+      description: |
+        A route to retrieve all sunglasses that are in the store.
+      parameters:
+        - name: search
+          in: query
+          description: Query string. Searches the name, description, and brand name properties of the sunglasses objects.
+          required: false
+          type: string
+        - name: inStock
+          in: query
+          description: If set to 'true', only return items in stock. If 'false', only return items out of stock.
+          required: false
+          type: string
+      responses:
+        "200":
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "400":
+          description: Invalid query.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unexpected server error occurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /sunglasses/{id}:
+    get:
+      tags:
+        - Sunglasses
+      summary: An individual pair of glasses.
+      description: |
+        Retrieves a pair of sunglasses based on its id.
+      parameters:
+        - name: id
+          in: path
+          description: id of those sunglasses.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: A single sunglasses object
+          schema:
+            $ref: "#/definitions/Sunglasses"
+        "404":
+          description: The server could not find a pair of sunglasses that matched the given id.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unexpected server error occurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: All brands in the store.
+      description: Retrieves all the brands that are in the store.
+      responses:
+        "200":
+          description: An array of brands.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        "500":
+          description: An unexpected server error occurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/sunglasses:
+    get:
+      tags:
+        - Brands
+      summary: All sunglasses under a brand.
+      description: Returns all sunglasses in a brand.
+      parameters:
+        - name: id
+          in: path
+          description: id of the brand.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "404":
+          description: The server could not find a brand that matched the given id.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unexpected server error occurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: An endpoint to authenticate a user.
+      description: |
+        Use this endpoint to authenticate a username and password, or email and password. 
+        It will return a valid token that must be used in all other /user endpoints. 
+        Expects the username and password to be in the request body as an object.
+      parameters:
+        - name: username
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: An authentication token.
+          schema:
+            $ref: "#/definitions/Token"
+        "401":
+          description: The username or password was incorrect.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unknown server error ocurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      tags:
+        - Cart Actions
+      summary: All Cart items.
+      description: |
+        Returns an authenticated user's cart. Uses the valid token 
+        in the body of the request to identify the user.
+      parameters:
+        - name: accessToken
+          in: query
+          required: true
+          description: Valid access token.
+          type: string
+      responses:
+        "200":
+          description: A Cart object.
+          schema:
+            $ref: "#/definitions/Cart"
+        "401":
+          description: The access token was invalid.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unknown server error ocurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{id}/add:
+    post:
+      tags:
+        - Cart Actions
+      summary: Add sunglasses to the cart.
+      description: |
+        Add a pair of sunglasses by id to the cart.
+        Specify quantity to add in the query string.
+        Returns the added sunglasses.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the sunglasses to add.
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          required: false
+          description: An integer value as a string that specifies how many pairs of the given sunglasses to add.
+          type: string
+        - name: accessToken
+          in: query
+          required: true
+          description: Valid access token.
+          type: string
+      responses:
+        "200":
+          description: An array containing the added sunglasses.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "400":
+          description: The quantity param was not a valid integer, or the quantity was too large.
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: The access token was invalid.
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Could not find the sunglasses with the requested id.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unknown server error ocurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{id}/remove:
+    delete:
+      tags:
+        - Cart Actions
+      summary: Remove sunglasses from the cart.
+      description: |
+        Removes a pair of sunglasses from the cart by id. 
+        Specify quantity to remove in the query string.
+        Returns the deleted sunglasses.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the sunglasses to add.
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          required: false
+          description: An integer value as a string that specifies how many pairs of the given sunglasses to remove.
+          type: string
+        - name: accessToken
+          in: query
+          required: true
+          description: Valid access token.
+          type: string
+      responses:
+        "200":
+          description: An array containing the deleted sunglasses.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "400":
+          description: The quantity param was not a valid integer, or the quantity was too large.
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: The access token was invalid.
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Could not find the sunglasses with the requested id.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unknown server error ocurred.
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{id}/update:
+    post:
+      tags:
+        - Cart Actions
+      summary: Sets the quantity of an item in the cart.
+      description: |
+        Takes a number and changes the number of that item in the cart.
+      parameters:
+        - name: id
+          in: path
+          description: Id of the sunglasses to update.
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          required: true
+          description: An integer value as a string that specifies how many pairs of those sunglasses should be in the cart.
+          type: string
+        - name: accessToken
+          in: query
+          required: true
+          description: Valid access token.
+          type: string
+      responses:
+        "200":
+          description: The updated cart.
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: The quantity param was not a valid integer, or the quantity was too large.
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: The access token was invalid.
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Could not find the sunglasses with the requested id.
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: An unknown server error ocurred.
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Sunglasses:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id assigned by the server upon saving the sunglasses object to the database.
+      name:
+        type: string
+      description:
+        type: string
+      brandId:
+        type: string
+        description: Brand ID.
+      imageUrls:
+        type: object
+        properties:
+          image_1:
+            type: string
+          image_2:
+            type: string
+          image_3:
+            type: string
+        description: shots of the pair at different angles.
+      price:
+        type: integer
+        description: unit price in dollars.
+      inStock:
+        type: boolean
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id assigned by the server upon saving the brand to the database.
+      name:
+        type: string
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id assigned by the server upon saving the user to the database.
+      gender:
+        type: string
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          email:
+            type: string
+      cart:
+        $ref: "#/definitions/Cart"
+  Cart:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/Sunglasses"
+      quantities:
+        type: object
+        properties:
+          product_id_1:
+            type: integer
+          product_id_2:
+            type: integer
+        description: an object containing the quantity of each pair of sunglasses keyed with its id.
+    description: cart containing all of the user's selected sunglasses.
+  Error:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+  Token:
+    type: object
+    properties:
+      username:
+        type: string
+      hash:
+        type: string
+        description: The actual token.
+      lastUpdated:
+        type: object
+        description: a JS date object.
