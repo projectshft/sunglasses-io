@@ -1,0 +1,234 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint allows you to search products based on different filters such as brand and price as well as a search string.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - brand
+              - price
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        Returns a list of all brands in the store.
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: All products from a specified brand
+      description: |
+        Return a list of products from a specified brand by brand ID.
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to return products for.
+          required: true
+          type: integer
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of products from the brand.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      description: Login to shopping cart
+      parameters:
+        - name: username
+          in: query
+          description: Username of user.
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: Password of user.
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: User Shopping Cart
+      description: |
+        Returns user's current shopping cart.
+      tags:
+        - Shopping Cart
+      responses:
+        "200":
+          description: Array of products currently in user's shopping cart.
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add an item to shopping cart.
+      description: |
+        This endpoint allows you to add an item to a user's shopping cart.
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Successfully added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    post:
+      summary: Edit quantity of an item to shopping cart.
+      description: |
+        This endpoint allows you to add an item to a user's shopping cart.
+      parameters:
+        - name: productId
+          in: path
+          description: The product to add to the cart
+          required: true
+          type: integer
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Successfully added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      summary: Delete an item from shopping cart.
+      description: |
+        This endpoint allows you to delete an item from a user's shopping cart.
+      parameters:
+        - name: productId
+          in: path
+          description: The product to delete from the cart
+          required: true
+          type: integer
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Successfully deleted from cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Unique identifier for a product.
+      brandId:
+        type: integer
+        format: int32
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the product
+      imageURL:
+        type: string
+        description: The URL for the image representing the product
+  Brand:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Unique identifier for a brand
+      name:
+        type: string
+        description: Name of the brand
+  Cart:
+    type: array
+    items:
+      type: object
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
