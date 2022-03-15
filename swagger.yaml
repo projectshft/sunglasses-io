@@ -1,0 +1,334 @@
+swagger: "2.0"
+info:
+  description: "This is a sample server for the sunglasses-io site."
+  version: "1.0.0"
+  title: "Sunglasses-io"
+host: "localhost:3001"
+basePath: "/api"
+tags:
+  - name: "brands"
+    description: "Information about sunglasses brands offered at the store"
+  - name: "products"
+    description: "Information about sunglasses on sale at the store"
+  - name: "me"
+    description: "Operations about the current user"
+  - name: "login"
+    description: "Operations about logging in"
+
+schemes:
+  - "https"
+  - "http"
+paths:
+  /brands:
+    get:
+      tags:
+        - "brands"
+      summary: "Find the sunglasses brands offered in the store"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        "400":
+          description: "Invalid status value"
+  /brands/{brandId}/products:
+    get:
+      tags:
+        - "brands"
+      summary: "Find a list of a brand's sunglasses by brand ID"
+      description: "Returns an array of sunglasses"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "brandId"
+          in: "path"
+          description: "ID of brand's products to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Brand not found"
+  /products:
+    get:
+      tags:
+        - products
+      summary: "Find the sunglasses offered in the store"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        "400":
+          description: "Invalid status value"
+  /me/cart:
+    get:
+      tags:
+        - "me"
+      summary: "Finds the items in the current user's cart"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        "400":
+          description: "Invalid status value"
+    post:
+      tags:
+        - "me"
+      summary: "Adds a given product to the current user's cart"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Product object that needs to be added to the cart"
+          required: true
+          schema:
+            $ref: "#/definitions/Product"
+      responses:
+        "200":
+          description: "successful operation"
+        "405":
+          description: "Invalid input"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - "me"
+      summary: "Removes a given item from the current user's cart"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - name: "api_key"
+          in: "header"
+          required: false
+          type: "string"
+        - name: "productId"
+          in: "path"
+          description: "Product id to delete"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "Product not found"
+    post:
+      tags:
+        - "me"
+      summary: "Updates the quantity of a given product in the current user's cart"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "productId"
+          in: "path"
+          description: "Product id whose quantity needs to be adjusted in the cart"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+        "405":
+          description: "Invalid input"
+  /login:
+    get:
+      tags:
+        - "login"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "username"
+          in: "query"
+          description: "The user name for login"
+          required: true
+          type: "string"
+        - name: "password"
+          in: "query"
+          description: "The password for login in clear text"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        "400":
+          description: "Invalid username/password supplied"
+
+definitions:
+  User:
+    type: "object"
+    properties:
+      gender:
+        type: "string"
+      cart:
+        type: "array"
+        items:
+          type: "object"
+      name:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+          first:
+            type: "string"
+          last:
+            type: "string"
+      location:
+        type: "object"
+        properties:
+          street:
+            type: "string"
+          city:
+            type: "string"
+          state:
+            type: "string"
+          postcode:
+            type: "integer"
+      email:
+        type: "string"
+      login:
+        type: "object"
+        properties:
+          username:
+            type: "string"
+          password:
+            type: "string"
+          salt:
+            type: "string"
+          md5:
+            type: "string"
+          sha1:
+            type: "string"
+          sha256:
+            type: "string"
+      dob:
+        type: "string"
+      registered:
+        type: "string"
+      phone:
+        type: "string"
+      cell:
+        type: "string"
+      picture:
+        type: "object"
+        properties:
+          large:
+            type: "string"
+          medium:
+            type: "string"
+          thumbnail:
+            type: "string"
+      nat:
+        type: "string"
+    xml:
+      name: "User"
+
+  Brand:
+    type: "object"
+    required:
+      - "name"
+      - "products"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+        example: "Ray-Ban"
+      ApiResponse:
+        type: "object"
+        properties:
+          code:
+            type: "integer"
+            format: "int32"
+          type:
+            type: "string"
+          message:
+            type: "string"
+
+  Product:
+    type: "object"
+    required:
+      - "name"
+      - "categoryId"
+      - "description"
+      - "price"
+      - "imageUrls"
+    properties:
+      id:
+        type: "string"
+      categoryId:
+        type: "string"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      price:
+        type: "integer"
+        format: "int32"
+      imageUrls:
+        type: "array"
+        items:
+          type: "string"
+      ApiResponse:
+        type: "object"
+        properties:
+          code:
+            type: "integer"
+            format: "int32"
+          type:
+            type: "string"
+          message:
+            type: "string"
+
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
