@@ -13,14 +13,29 @@ tags:
 schemes:
   - "https"
   - "http"
-paths: 
+paths:
+  /sunglasses{brands}:
+    get:
+      summary: "Populates the brands part of the home page"
+      responses:
+        "200":
+          description: "A list of brand links"
+      parameters:
+        - in: path
+          name: "brands"
+          required: true
+          type: "array"
+          items:
+            type: "string"
+      tags:
+        - "Sunglasses"
   /sunglasses/sunglasses-search:
     get:
       summary: "Generates sunglasses according to search query"
       responses:
-        '200':
+        "200":
           description: "A list of sunglasses"
-        '400':
+        "400":
           description: "Search parameter must be a string"
       parameters:
         - in: query
@@ -32,9 +47,9 @@ paths:
     get:
       summary: "Logs the user in"
       responses:
-        '200':
+        "200":
           description: "successful operation"
-        '400':
+        "400":
           description: "Invalid username/password supplied"
       parameters:
         - in: query
@@ -62,12 +77,7 @@ paths:
           required: true
           name: "cart"
           type: "array"
-          items: 
+          items:
             type: "string"
       tags:
         - "store"
-      
- 
-   
-      
-        
