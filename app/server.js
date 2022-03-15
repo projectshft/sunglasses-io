@@ -11,8 +11,28 @@ const Product = require('../models/products.js');
 const Brand = require('../models/brands.js');
 const User = require('../models/users.js');
 
+const getValidTokenFromRequest = function(request) {
+  const parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+
+    // Verify the access token to make sure it's valid and not expired
+    const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token == parsedUrl.query.accessToken && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 const sampleToken = require('../data/uids');
-let accessTokenList = [sampleToken];
+let accessTokens = [];
 
 const contentHeader = { "Content-Type": "application/json" }
 const myRouter = Router();
@@ -92,7 +112,44 @@ myRouter.get('/api/brands/:brandId/sunglasses', (request, response) => {
 });
 
 myRouter.post('/api/login', (request, response) => {
-  
+  const { username, password } = request.body;
+  const TOKEN_EXPIRATION = 30 * 60 * 1000;
+
+  const users = User.getAll();
+  const loginAttempt = users.find((user) => username === user.login.username && password === user.login.password);
+
+  // if the username/password are correct
+  if (loginAttempt) {
+
+    const token = accessTokens.find((token) => username === token.username)
+    if (token) {
+
+      if (new Date() - token.lastUpdated > TOKEN_EXPIRATION) {
+        // update the token
+        token.hash = uid(16);
+        token.lastUpdated = new Date();
+      }
+      response.writeHead(200, contentHeader);
+      response.write(JSON.stringify(token.hash));
+
+    } else {
+
+      // if there is not a token, create a new one.
+      const newToken = {
+        username: username,
+        hash: uid(16),
+        lastUpdated: new Date()
+      };
+      accessTokens.push(newToken);
+      response.writeHead(200, contentHeader);
+      response.write(JSON.stringify(newToken.hash));
+
+    }
+    
+  } else {
+    response.writeHead(401, 'Username and/or password are incorrect.');
+  }
+
   return response.end();
 });
 

@@ -172,7 +172,7 @@ describe('Login', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a('string');
-          res.body.length.should.be(16);
+          res.body.length.should.equal(16);
           done();
         })
     })
@@ -188,7 +188,6 @@ describe('Login', () => {
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.not.be.a('string');
-          res.body.length.should.not.be(16);
           done();
         })
     })
@@ -199,7 +198,6 @@ describe('Login', () => {
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.not.be.a('string');
-          res.body.length.should.not.be(16);
           done();
         })
     })
