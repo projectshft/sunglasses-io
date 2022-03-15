@@ -14,7 +14,11 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
-let cart = [];
+let cart = [
+  {
+    productId
+  }
+];
 
 // Setup router
 var myRouter = Router();
@@ -83,13 +87,13 @@ myRouter.get("/api/products/:brandId", (request, response) => {
   return response.end(JSON.stringify(productsByBrand));
   });    
 
-// Password Protected route to a user's shopping cart
+// Route to a user's shopping cart
 myRouter.get("/api/me/cart", (request, response) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(cart));
 });
 
-// Password Protected route to add items to a user's shopping cart
+// Route to add items to a user's shopping cart
 myRouter.post("/api/me/cart", (request, response) => {
   const { productId } = request.body;
 
@@ -98,6 +102,21 @@ myRouter.post("/api/me/cart", (request, response) => {
   
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(cart));
+});
+
+// Route to delete an item from a user's shopping cart
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+  const { productId } = request.params;
+
+  const productToDelete = products.find((product) => product.id === productId);
+  const indexToDelete = cart.indexOf(productToDelete);
+  
+  if(indexToDelete) {
+    cart.splice(indexToDelete, 1);
+  
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(cart));
+  }
 });
 
 const uid = require('rand-token').uid;

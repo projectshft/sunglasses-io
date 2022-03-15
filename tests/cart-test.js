@@ -43,4 +43,23 @@ describe('/POST cart', () => {
   });
 });
 
+describe('/POST cart', () => {
+  it('should add a product to the cart by id', (done) => {
+    const productId = '5';
+
+    chai
+      .request(server)
+      .delete('/api/me/cart')
+      .send({ productId })
+      .end((error, response) => {
+        response.should.have.status(200);
+        response.body.should.be.an('array');
+        response.body.should.include.one.satisfy(
+          (product) => product.id === productId
+        );
+        done();
+      });
+  });
+});
+
 
