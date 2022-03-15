@@ -38,5 +38,17 @@ describe('Brands', () => {
           done();
         });
     });
+
+    it('should return a 404 if id invalid', (done) => {
+      const brandIdToCheck = '337';
+
+      chai
+        .request(server)
+        .get(`/brands/${brandIdToCheck}/products`)
+        .end((error, response) => {
+          response.should.have.status(404);
+          done();
+        });
+    });
   });
 });
