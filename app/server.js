@@ -10,15 +10,16 @@ var uid = require('rand-token').uid;
 const Product = require('../models/products.js');
 const Brand = require('../models/brands.js');
 const User = require('../models/users.js');
+const TOKEN_EXPIRATION = 30 * 60 * 1000; // 30 minutes
 
 const getValidTokenFromRequest = function(request) {
   const parsedUrl = require('url').parse(request.url, true);
   if (parsedUrl.query.accessToken) {
 
     // Verify the access token to make sure it's valid and not expired
-    const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+    
     let currentAccessToken = accessTokens.find(accessToken => {
-      return accessToken.token == parsedUrl.query.accessToken && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
+      return accessToken.hash == parsedUrl.query.accessToken && new Date() - accessToken.lastUpdated < TOKEN_EXPIRATION;
     });
 
     if (currentAccessToken) {
@@ -47,6 +48,8 @@ server.listen(PORT, () => {
   User.load();
   Product.load();
   Brand.load();
+  sampleToken.lastUpdated = new Date();
+  accessTokens.push(sampleToken);
 });
 
 myRouter.get('/api/sunglasses', (request, response) => {
@@ -113,7 +116,6 @@ myRouter.get('/api/brands/:brandId/sunglasses', (request, response) => {
 
 myRouter.post('/api/login', (request, response) => {
   const { username, password } = request.body;
-  const TOKEN_EXPIRATION = 30 * 60 * 1000;
 
   const users = User.getAll();
   const loginAttempt = users.find((user) => username === user.login.username && password === user.login.password);
@@ -154,10 +156,49 @@ myRouter.post('/api/login', (request, response) => {
 });
 
 myRouter.get('/api/me/cart', (request, response) => {
+  const validatedToken = getValidTokenFromRequest(request);
+
+  if (validatedToken) {
+    const user = User.getAll().find((user) => validatedToken.username === user.login.username)
+    response.writeHead(200, contentHeader);
+    response.write(JSON.stringify(User.getCart(user.id)));
+  } else {
+    response.writeHead(401, 'A valid access token is required for that request.');
+  }
+
   return response.end();
 });
 
 myRouter.post('/api/me/cart/:glassId/add', (request, response) => {
+  const validatedToken = getValidTokenFromRequest(request);
+  const productId = request.params.glassId;
+  const quantity = queryString.parse(url.parse(request.url).query).quantity;
+
+  if (validatedToken) {
+    const user = User.getAll().find((user) => validatedToken.username === user.login.username);
+    if (Product.get(productId)) {
+      if (quantity && isNaN(quantity)) {
+        response.writeHead(400, 'Quantity must be an integer')
+      } else if (quantity && parseInt(quantity) <= 50) {
+        const addedItems = User.addCartItem(user.id, productId, parseInt(quantity));
+        response.writeHead(200, contentHeader);
+        response.write(JSON.stringify(addedItems));
+      } else if (quantity && parseInt(quantity) > 50) {
+        response.writeHead(400, 'Too many items.');
+      } else {
+        const addedItems = User.addCartItem(user.id, productId);
+        response.writeHead(200, contentHeader);
+        response.write(JSON.stringify(addedItems));
+      }
+
+    } else {
+      response.writeHead(404, 'Invalid product id, or no product with that id found.')
+    }
+
+  } else {
+    response.writeHead(401, 'A valid token is required to perform that action.')
+  }
+  
   return response.end();
 });
 
