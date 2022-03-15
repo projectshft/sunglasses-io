@@ -3,6 +3,7 @@ const chaiHttp = require('chai-http');
 const chaiThings = require('chai-things');
 const server = require('../app/server');
 
+const { getTokenFromUsername } = require('../app/loginHelper');
 const Cart = require('../app/models/cartModel');
 
 chai.should();
@@ -13,12 +14,20 @@ beforeEach(() => {
   Cart.clearCart();
 });
 
+const testUserNames = {
+  validUserName: 'greenlion235',
+  invalidUserName: 'yellowleopard753',
+};
+
 describe('Cart', () => {
   describe('/GET cart', () => {
     it('should get an array of all the products in the user cart', (done) => {
+      // getTokenFromUsername(testUserNames.validUserName);
+
       chai
         .request(server)
         .get('/me/cart')
+        .send(testUserNames.validUserName)
         .end((error, response) => {
           response.should.have.status(200);
           response.body.should.be.an('array');

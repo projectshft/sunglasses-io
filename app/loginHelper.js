@@ -1,8 +1,10 @@
 const Url = require('url');
+const fs = require('fs');
 const { uid } = require('rand-token');
 
-const accessTokens = [];
-const users = [];
+const users = JSON.parse(fs.readFileSync('./data/users.json', 'utf-8'));
+
+const accessTokens = [{ username: 'greenlion235', token: '2NtI54rzGs6KEaSL' }];
 
 const getValidTokenFromRequest = (request) => {
   const parsedUrl = Url.parse(request.url, true);
@@ -18,6 +20,13 @@ const getValidTokenFromRequest = (request) => {
   return null;
 };
 
+const getTokenFromUsername = (username) => {
+  const token = accessTokens.find(
+    (accessToken) => accessToken.username === username
+  );
+  if (token) return token;
+};
+
 const loginHelper = (request, response) => {
   if (request.body.username && request.body.password) {
     const user = users.find(
@@ -29,23 +38,13 @@ const loginHelper = (request, response) => {
     if (user) {
       response.writeHead(200, { 'Content-Type': 'application/json' });
 
-      const currentAccessToken = accessTokens.find(
-        (tokenObject) => tokenObject.username === user.login.username
-      );
-
-      // Update the last updated value so we get another time period
-      if (currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
-      }
-      // Create a new token with the user value and a "random" token
       const newAccessToken = {
         username: user.login.username,
-        lastUpdated: new Date(),
         token: uid(16),
       };
+      console.log(newAccessToken);
       accessTokens.push(newAccessToken);
-      return response.end(JSON.stringify(newAccessToken.token));
+      return response.end(JSON.stringify(newAccessToken));
     }
 
     response.writeHead(401, 'Invalid username or password');
@@ -55,4 +54,9 @@ const loginHelper = (request, response) => {
   return response.end();
 };
 
-module.exports = { getValidTokenFromRequest, loginHelper };
+module.exports = {
+  loginHelper,
+  getValidTokenFromRequest,
+  getTokenFromUsername,
+  accessTokens,
+};

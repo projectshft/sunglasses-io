@@ -7,8 +7,12 @@ const finalHandler = require('finalhandler');
 const fs = require('fs');
 
 const Cart = require('./models/cartModel');
-const { loginHelper } = require('./login');
 const { successHandler } = require('./helperFuncs');
+const {
+  loginHelper,
+  getValidTokenFromRequest,
+  getTokenFromUsername,
+} = require('./loginHelper');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -58,10 +62,18 @@ myRouter.get('/brands/:brandId/products', (request, response) => {
   );
 });
 
-myRouter.post('/api/login', loginHelper);
+// login handler
+myRouter.post('/login', loginHelper);
 
-// get currect shopping cart
+// get current shopping cart
 myRouter.get('/me/cart', (request, response) => {
+  const currentAccessToken = getTokenFromUsername(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, 'You need to have access to this call to continue');
+    return response.end();
+  }
+
   successHandler(response);
   return response.end(JSON.stringify(Cart.getCart()));
 });
