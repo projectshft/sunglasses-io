@@ -373,7 +373,7 @@ describe('Cart', () => {
     it('should remove a single item if quantity is not specified', (done) => {
       User.addCartItem('1', '4', 3);
       const query = {
-        accessToken: uid,
+        accessToken: uid.hash,
       }
 
       chai.request(server)
@@ -383,7 +383,7 @@ describe('Cart', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.equal(1);
-          res.body[0].id.should.equal(4);
+          res.body[0].id.should.equal('4');
           done();
         })
     })
@@ -391,7 +391,7 @@ describe('Cart', () => {
       User.addCartItem('1', '4', 3);
 
       const query = {
-        accessToken: uid[0],
+        accessToken: uid.hash,
         quantity: ''
       }
 
@@ -402,7 +402,7 @@ describe('Cart', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.equal(1);
-          res.body[0].id.should.equal(4);
+          res.body[0].id.should.equal('4');
           done();
         })
     })
@@ -410,7 +410,7 @@ describe('Cart', () => {
       User.addCartItem('1', '4', 3);
 
       const query = {
-        accessToken: uid[0],
+        accessToken: uid.hash,
         quantity: '2'
       }
 
@@ -421,7 +421,7 @@ describe('Cart', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.equal(2);
-          res.body[0].id.should.equal(4);
+          res.body[0].id.should.equal('4');
           done();
         })
     })
@@ -520,7 +520,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .delete('/api/me/cart/4/remove')
+        .delete('/api/me/cart/uewi7868/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);

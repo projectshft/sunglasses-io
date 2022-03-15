@@ -44,7 +44,7 @@ class User {
     const cart = this.getCart(userId);
     const removedItems = [];
 
-    if (quantity > cart.quantities[productId] || cart.quantities[productId] === undefined) {
+    if (cart.quantities[productId] === undefined) {
       cart.quantities[productId] = 0;
     } else {
       const newCart = cart.items.filter((item) => {
@@ -55,7 +55,7 @@ class User {
         return true;
       })
       cart.items = newCart;
-      cart.quantities[productId] = cart.quantities[productId] - quantity;
+      cart.quantities[productId] = quantity < cart.quantities[productId] ? cart.quantities[productId] - quantity : 0;
     }
 
     return removedItems;

@@ -203,6 +203,33 @@ myRouter.post('/api/me/cart/:glassId/add', (request, response) => {
 });
 
 myRouter.delete('/api/me/cart/:glassId/remove', (request, response) => {
+  const validatedToken = getValidTokenFromRequest(request);
+  const productId = request.params.glassId;
+  const quantity = queryString.parse(url.parse(request.url).query).quantity;
+
+  if (validatedToken) {
+    const user = User.getAll().find((user) => validatedToken.username === user.login.username);
+    if (Product.get(productId)) {
+      if (quantity && isNaN(quantity)) {
+        response.writeHead(400, 'Quantity must be an integer')
+      } else if (quantity) {
+        const removedItems = User.removeCartItem(user.id, productId, parseInt(quantity));
+        response.writeHead(200, contentHeader);
+        response.write(JSON.stringify(removedItems));
+      } else {
+        const removedItems = User.removeCartItem(user.id, productId);
+        response.writeHead(200, contentHeader);
+        response.write(JSON.stringify(removedItems));
+      }
+
+    } else {
+      response.writeHead(404, 'Invalid product id, or no product with that id found.')
+    }
+
+  } else {
+    response.writeHead(401, 'A valid token is required to perform that action.')
+  }
+  
   return response.end();
 });
 
