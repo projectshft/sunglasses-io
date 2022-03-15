@@ -59,10 +59,21 @@ myRouter.get('/api/sunglasses', (request, response) => {
 });
 
 myRouter.get('/api/sunglasses/:glassId', (request, response) => {
-  return response.end();
+  const productId = request.params.glassId;
+
+  const pair = Product.get(productId);
+
+  if (!pair) {
+    response.writeHead(404, 'No product was found with that id, or the id was invalid.');
+    response.end();
+  }
+
+  response.writeHead(200, contentHeader);
+  return response.end(JSON.stringify(pair));
 });
 
 myRouter.get('/api/brands', (request, response) => {
+
   return response.end();
 });
 

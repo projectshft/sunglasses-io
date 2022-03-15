@@ -104,7 +104,7 @@ describe('Sunglasses', () => {
         .get('/api/sunglasses/fhdjskfh')
         .end((err, res) => {
           res.should.have.status(404);
-          res.body.should.not.be.an('object');
+          res.body.should.not.have.property('inStock');
           done();
         })
     })
