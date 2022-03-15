@@ -42,7 +42,7 @@ const loginHelper = (request, response) => {
         username: user.login.username,
         token: uid(16),
       };
-      console.log(newAccessToken);
+
       accessTokens.push(newAccessToken);
       return response.end(JSON.stringify(newAccessToken));
     }
@@ -58,5 +58,4 @@ module.exports = {
   loginHelper,
   getValidTokenFromRequest,
   getTokenFromUsername,
-  accessTokens,
 };
