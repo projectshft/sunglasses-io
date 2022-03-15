@@ -73,15 +73,26 @@ myRouter.get('/api/sunglasses/:glassId', (request, response) => {
 });
 
 myRouter.get('/api/brands', (request, response) => {
-
-  return response.end();
+  response.writeHead(200, contentHeader);
+  return response.end(JSON.stringify(Brand.getAll()));
 });
 
 myRouter.get('/api/brands/:brandId/sunglasses', (request, response) => {
-  return response.end();
+  const brandId = request.params.brandId;
+
+  const result = Product.getAll().filter((product) => product.brandId === brandId);
+
+  if (result.length === 0) {
+    response.writeHead(404, 'No brand was found matching the given id.');
+    return response.end();
+  }
+
+  response.writeHead(200, contentHeader);
+  return response.end(JSON.stringify(result));
 });
 
 myRouter.post('/api/login', (request, response) => {
+  
   return response.end();
 });
 
