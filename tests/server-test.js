@@ -14,7 +14,7 @@ chai.use(chaiHttp);
 describe('Sunglasses', () => {
   describe('GET all Sunglasses', () => {
     it('should return an array of sunglasses', (done) => {
-      chai.request(server).get("/sunglasses").end((err, res) => {
+      chai.request(server).get("/api/sunglasses").end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an('array');
         res.body[0].should.have.property('id');
@@ -33,7 +33,7 @@ describe('Sunglasses', () => {
       };
 
       chai.request(server)
-        .get('/sunglasses')
+        .get('/api/sunglasses')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -48,7 +48,7 @@ describe('Sunglasses', () => {
       };
 
       chai.request(server)
-        .get('/sunglasses')
+        .get('/api/sunglasses')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -63,11 +63,11 @@ describe('Sunglasses', () => {
       };
 
       chai.request(server)
-        .get('/sunglasses')
+        .get('/api/sunglasses')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.not.be.an('object')
+          res.body.should.not.be.an('array');
           done();
         })
     })
@@ -77,7 +77,7 @@ describe('Sunglasses', () => {
       };
 
       chai.request(server)
-        .get('/sunglasses')
+        .get('/api/sunglasses')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
@@ -90,7 +90,7 @@ describe('Sunglasses', () => {
     it('should return a sunglasses object', (done) => {
 
       chai.request(server)
-        .get('/sunglasses/2')
+        .get('/api/sunglasses/2')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
@@ -101,7 +101,7 @@ describe('Sunglasses', () => {
     it('should return an error if the id is invalid', (done) => {
 
       chai.request(server)
-        .get('/sunglasses/fhdjskfh')
+        .get('/api/sunglasses/fhdjskfh')
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.not.be.an('object');
@@ -116,7 +116,7 @@ describe('Brands', () => {
     it('should return an array of brands', (done) => {
 
       chai.request(server)
-        .get('/brands')
+        .get('/api/brands')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -130,7 +130,7 @@ describe('Brands', () => {
     it('should return an array of sunglasses', (done) => {
 
       chai.request(server)
-        .get('/brands/1/sunglasses')
+        .get('/api/brands/1/sunglasses')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -142,7 +142,7 @@ describe('Brands', () => {
     it('should not return sunglasses if the brand id does not exist/is invalid', (done) => {
 
       chai.request(server)
-        .get('/brands/450000/sunglasses')
+        .get('/api/brands/450000/sunglasses')
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.not.be.an('array');
@@ -167,7 +167,7 @@ describe('Login', () => {
       }
 
       chai.request(server)
-        .post('/login')
+        .post('/api/login')
         .send(login)
         .end((err, res) => {
           res.should.have.status(200);
@@ -183,7 +183,7 @@ describe('Login', () => {
       }
 
       chai.request(server)
-        .post('/login')
+        .post('/api/login')
         .send(fakeLogin)
         .end((err, res) => {
           res.should.have.status(401);
@@ -195,7 +195,7 @@ describe('Login', () => {
     it('should return an error if no username or password is given', (done) => {
       
       chai.request(server)
-        .post('/login')
+        .post('/api/login')
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.not.be.a('string');
@@ -218,7 +218,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart')
+        .get('/api/me/cart')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -233,7 +233,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart')
+        .get('/api/me/cart')
         .query(query)
         .end((err, res) => {
           res.should.have.status(401);
@@ -249,7 +249,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -266,7 +266,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -283,7 +283,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -300,7 +300,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(401);
@@ -316,7 +316,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
@@ -333,7 +333,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
@@ -346,7 +346,7 @@ describe('Cart', () => {
     it('should not add items if there is no access token', (done) => {
 
       chai.request(server)
-        .get('/me/cart/4/add')
+        .get('/api/me/cart/4/add')
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.not.be.an('array');
@@ -361,7 +361,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/hufih7876/add')
+        .get('/api/me/cart/hufih7876/add')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);
@@ -380,7 +380,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -399,7 +399,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -418,7 +418,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -437,7 +437,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(401);
@@ -455,7 +455,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
@@ -474,7 +474,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -489,7 +489,7 @@ describe('Cart', () => {
       User.addCartItem('1', '4', 3);
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.not.be.an('array');
@@ -506,7 +506,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/hufih7876/remove')
+        .get('/api/me/cart/hufih7876/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);
@@ -523,7 +523,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/4/remove')
+        .get('/api/me/cart/4/remove')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);
@@ -542,7 +542,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/1/update')
+        .get('/api/me/cart/1/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(200);
@@ -561,7 +561,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/1/update')
+        .get('/api/me/cart/1/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(401);
@@ -577,7 +577,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/1/update')
+        .get('/api/me/cart/1/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
@@ -593,7 +593,7 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/me/cart/78263fds/update')
+        .get('/api/me/cart/78263fds/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);
