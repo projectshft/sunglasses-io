@@ -546,7 +546,7 @@ describe('Cart', () => {
           res.body.should.be.an('object');
           res.body.should.have.all.keys('quantities', 'items');
           res.body.items.length.should.equal(4);
-          res.body.items[0].id.should.equal(1);
+          res.body.items[0].id.should.equal('1');
           res.body.quantities[1].should.equal(4);
           done();
         })
@@ -558,11 +558,11 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/api/me/cart/1/update')
+        .post('/api/me/cart/1/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(401);
-          res.body.should.not.be.an('object');
+          res.body.should.not.have.property('items');
           res.body.should.not.be.an('array');
           done();
         })
@@ -574,11 +574,11 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/api/me/cart/1/update')
+        .post('/api/me/cart/1/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(400);
-          res.body.should.not.be.an('object');
+          res.body.should.not.have.property('items');
           res.body.should.not.be.an('array');
           done();
         })
@@ -590,12 +590,12 @@ describe('Cart', () => {
       }
 
       chai.request(server)
-        .get('/api/me/cart/78263fds/update')
+        .post('/api/me/cart/78263fds/update')
         .query(query)
         .end((err, res) => {
           res.should.have.status(404);
           res.body.should.not.be.an('array');
-          res.body.should.not.be.an('object');
+          res.body.should.not.have.property('items');
           done();
         })
     })

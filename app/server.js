@@ -234,6 +234,31 @@ myRouter.delete('/api/me/cart/:glassId/remove', (request, response) => {
 });
 
 myRouter.post('/api/me/cart/:glassId/update', (request, response) => {
+  const validatedToken = getValidTokenFromRequest(request);
+  const productId = request.params.glassId;
+  const quantity = queryString.parse(url.parse(request.url).query).quantity;
+
+  if (validatedToken) {
+    const user = User.getAll().find((user) => validatedToken.username === user.login.username);
+    if (Product.get(productId)) {
+      if (quantity && isNaN(quantity)) {
+        response.writeHead(400, 'Quantity must be a number.')
+      } else if (quantity) {
+        const updatedCart = User.updateItemQuantity(user.id, productId, parseInt(quantity));
+        response.writeHead(200, contentHeader);
+        response.write(JSON.stringify(updatedCart));
+      } else {
+        response.writeHead(400, 'You must specify a quantity to set the items to.');
+      }
+
+    } else {
+      response.writeHead(404, 'Invalid product id, or no product with that id found.')
+    }
+
+  } else {
+    response.writeHead(401, 'A valid token is required to perform that action.')
+  }
+
   return response.end();
 });
 
