@@ -1,0 +1,383 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses App
+  version: 1.0.0
+host: api
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /sunglasses:
+    get:
+      tags:
+        - Sunglasses
+      summary: All Sunglasses
+      description: |
+        Allows searching for all sunglasses in API
+      parameters:
+        - name: search
+          in: query
+          description: Searches for sunglasses
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "400":
+          description: Invalid search
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /sunglasses/{id}:
+    get:
+      tags:
+        - Sunglasses
+      summary: Specific pair of sunglasses
+      description: |
+        Returns sunglasses based on id
+      parameters:
+        - name: id
+          in: path
+          description: id of sunglasses
+          required: true
+          type: string
+      responses:
+        "200":
+          description: A single pair of sunglasses
+          schema:
+            $ref: "#/definitions/Sunglasses"
+        "404":
+          description: Could not find sunglasses given the id. 
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    post:
+      tags:
+        - User
+      summary: User profile
+      description: |
+        Used to login user so they can add and remove things from cart.
+      parameters:
+        - name: username
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Login token
+          schema:
+            $ref: "#/definitions/Token"
+        "401":
+          description: Login was incorrect. 
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      tags:
+        - Cart
+      summary: Sunglasses in cart
+      description: |
+        Gives the sunglasses in the users cart.
+      parameters:
+        - name: Token
+          in: query
+          required: true
+          description: Valid token
+          type: string
+      responses:
+        "200":
+          description: Cart Object
+          schema:
+            $ref: "#/definitions/Cart"
+        "401":
+          description: Invalid token
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{id}/remove:
+    delete:
+      tags:
+        - Cart
+      summary: Remove sunglasses from cart
+      description: |
+        Removes a pair of sunglasses based off of given id. 
+      parameters:
+        - name: id
+          in: path
+          description: Id of removed sunglasses
+          required: true
+          type: string
+        - name: quantity
+          in: query
+          required: false
+          description: Quantity of sunglasses to remove
+          type: string
+        - name: Token
+          in: query
+          required: true
+          description: Valid token
+          type: string
+      responses:
+        "200":
+          description: Array with removed sunglasses.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "400":
+          description: Quantity not a valid number, or too large. 
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Invalid token 
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Could not find the sunglasses with given id. 
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{id}/add:
+    post:
+      tags:
+        - Cart
+      summary: Add sunglasses to cart.
+      description: |
+        Adds sunglasses based off of given id. 
+      parameters:
+        - name: id
+          in: path
+          description: Id of the sunglasses to add.
+          required: true
+          type: string
+        - name: Token
+          in: query
+          required: true
+          description: Valid token
+          type: string
+        - name: quantity
+          in: query
+          required: false
+          description: Quantity of sunglasses to add
+          type: string
+      responses:
+        "200":
+          description: An array containing the added sunglasses.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "400":
+          description: Quantity not a valid number, or too large.
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Invalid token 
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Could not find the sunglasses with given id. 
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{id}/quantity:
+    post:
+      tags:
+        - Cart
+      summary: Sets the quantity of an item in the cart.
+      description: |
+        Changes quantity of items in cart
+      parameters:
+        - name: quantity
+          in: query
+          required: true
+          description: Quantity of sunglasses to add
+          type: string
+        - name: id
+          in: path
+          description: Id of sunglasses
+          required: true
+          type: string
+        - name: Token
+          in: query
+          required: true
+          description: Valid token
+          type: string
+      responses:
+        "200":
+          description: The updated cart.
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: Quantity not a valid number, or too large.
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Invalid token 
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Could not find the sunglasses with given id. 
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: All Brands
+      description: Returns a list of brands
+      responses:
+        "200":
+          description: Array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/sunglasses:
+    get:
+      tags:
+        - Brands
+      summary: Brands sunglasses
+      description: All sunglasses of a brand. 
+      parameters:
+        - name: id
+          in: path
+          description: id of the brand.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        "404":
+          description: Unable to find brand given the id. 
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Sunglasses:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id saved to the sunglasses object.
+      name:
+        type: string
+      description:
+        type: string
+      brandId:
+        type: string
+        description: Brand ID.
+      imageUrl:
+        type: object
+        properties:
+          image:
+            type: string
+        description: Picture of sunglasses
+      price:
+        type: integer
+        description: Price of sunglasses. 
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Token given to users in database
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+      cart:
+        $ref: "#/definitions/Cart"
+  Token:
+    type: object
+    properties:
+      username:
+        type: string
+      hash:
+        type: string
+        description: The actual token.
+      lastUpdated:
+        type: object
+        description: Date token was last updated
+  Cart:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/Sunglasses"
+      quantities:
+        type: object
+        properties:
+          product_id_1:
+            type: integer
+          product_id_2:
+            type: integer
+        description: Quantity of sunglasses in object
+    description: Cart of the users selected sunglasses.
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Id of brand in database
+      name:
+        type: string
+  Error:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
