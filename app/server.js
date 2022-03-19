@@ -19,7 +19,8 @@ let server = http.createServer(function (request, response) {
 
 router.get("/sunglasses{brands}", (req, res) => {
   res.writehead(200);
-  return res.end(JSON.stringify(Brands.getAll()))
+  return res.end(JSON.stringify(Brands))
 })
+
 
 module.exports = server;
