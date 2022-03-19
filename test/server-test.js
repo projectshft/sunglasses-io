@@ -1,4 +1,5 @@
 let chai = require("chai");
+const should = chai.should();
 let chaiHttp = require("chai-http");
 const server = require('../app/server');
 
@@ -9,7 +10,7 @@ describe("Brands", () => {
     it("it should GET all the brands", (done) => {
       chai
         .request(server)
-        .get("/sunglasses{brands}")
+        .get("/brands")
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.a("string");

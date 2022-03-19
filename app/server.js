@@ -17,8 +17,8 @@ let server = http.createServer(function (request, response) {
   router(request, response, finalHandler(request, response))
 }).listen(PORT);
 
-router.get("/sunglasses{brands}", (req, res) => {
-  res.writehead(200);
+router.get("/brands", (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
   return res.end(JSON.stringify(Brands))
 })
 
