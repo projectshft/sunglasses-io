@@ -14,7 +14,7 @@ schemes:
   - "https"
   - "http"
 paths:
-  /sunglasses{brands}:
+  /brands:
     get:
       summary: "Populates the brands part of the home page"
       responses:
@@ -34,7 +34,7 @@ paths:
       summary: "Generates sunglasses according to search query"
       responses:
         "200":
-          description: "A list of sunglasses"
+          description: "A list of sunglasses that match the search parameter"
         "400":
           description: "Search parameter must be a string"
       parameters:
