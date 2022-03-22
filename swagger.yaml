@@ -1,0 +1,223 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses platform
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /sunglasses:
+    get:
+      summary: Sunglasses
+      description: |
+        The Sunglasses endpoint allows you to search sunglasses based on brand
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Sunglasses
+      responses:
+        '200':
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sunglasses'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands:
+    get:
+      summary: Brands
+      description: >
+        Brands defines a group of sunglasses for browsing.
+      tags:
+        - Brand
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{brandId}/sunglasses:
+    get:
+      summary: Sunglasses in Brand
+      description: >
+        All the sunglasses in a given brand
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the category to search for sunglasses in.
+          required: true
+          type: string
+      tags:
+        - Brand
+      responses:
+        '200':
+          description: An array of sunglasses in the brand
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Sunglasses'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Login for User
+      description: >-
+        The Login endpoint authorizes a User to shop for sunglassses
+      tags:
+        - User
+      responses:
+        '200':
+          description: Login information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Render a User's Cart
+      description: |
+        This endpoint allows you get what is in the current user's cart
+      tags:
+        - User
+      responses:
+        '200':
+          description: Contents of Shopping Cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add to Cart
+      description: |
+        This endpoint allows you to add an item to your shopping cart
+      tags:
+        - User
+      responses:
+        '200':
+          description: Add to cart was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/sunglasses/{sunglassesId}:
+    put:
+      summary: Add to Cart
+      description: |
+        This endpoint allows you to update an item's quantity in your shopping cart
+      parameters:
+        - name: sunglassesId
+          in: path
+          description: The id of the pair of sunglasses to add
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Add to cart was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Remove Sunglasses from Cart
+      description: |
+        This endpoint allows you to remove an item to your shopping cart
+      parameters:
+        - name: sunglassesId
+          in: path
+          description: The id of the pair of sunglasses to add
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Remove from cart was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Sunglasses:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a goal.
+      categoryId:
+        type: string
+        description: The id of the category this goal belongs to.
+      description:
+        type: string
+        description: Description of product.
+      upVotes:
+        type: integer
+        format: int32
+        description: The number of up votes given to a goal
+      downVotes:
+        type: integer
+        format: int32
+        description: The number of down votes given to a goal
+      imageURL:
+        type: string
+        description: The URL for the image representing the goal
+      dateCreated:
+        type: string
+        format: date-time
+        description: The date the goal was created
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the category
+      name:
+        type: string
+        description: The name of the category
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the Uber user.
+      last_name:
+        type: string
+        description: Last name of the Uber user.
+      email:
+        type: string
+        description: Email address of the Uber user
+      cart:
+        items:
+          $ref: '#/definitions/Sunglasses'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
