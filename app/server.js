@@ -20,12 +20,12 @@ let server = http.createServer(function (request, response) {
 
 router.get("/brands", (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  return res.end(JSON.stringify(Brands))
+  res.end(JSON.stringify(Brands))
 });
 
 router.get("/sunglasses/search", (req, res) => {
   res.writeHead(200, {'Content-Type': 'application/json'});
-  return res.end(JSON.stringify(Products))
+  res.end(JSON.stringify(Products))
 })
 
 

@@ -22,7 +22,7 @@ describe("brands", function(){
 });
 
 describe("sunglasses-search", function(){
-  describe("/Get sunglasses/search", function(){
+  describe("/GET sunglasses/search", function(){
     it("should Get all of the sunglasses that match the search query", function(done){
       chai
         .request(server)
@@ -34,3 +34,7 @@ describe("sunglasses-search", function(){
     })
   })
 })
+
+// describe("user/login", function(){
+//   describe("/GET user/login")
+// })
