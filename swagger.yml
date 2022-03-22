@@ -29,7 +29,7 @@ paths:
             type: "string"
       tags:
         - "Sunglasses"
-  /sunglasses/sunglasses-search:
+  /sunglasses/search:
     get:
       summary: "Generates sunglasses according to search query"
       responses:
@@ -39,7 +39,7 @@ paths:
           description: "Search parameter must be a string"
       parameters:
         - in: query
-          name: search-query
+          name: name
           type: string
       tags:
         - "Sunglasses"

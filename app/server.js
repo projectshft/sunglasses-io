@@ -7,6 +7,7 @@ var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
 const Brands = require('../initial-data/brands.json')
+const Products = require('../initial-data/products.json');
 
 const PORT = 3001;
 
@@ -20,8 +21,12 @@ let server = http.createServer(function (request, response) {
 router.get("/brands", (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   return res.end(JSON.stringify(Brands))
-})
+});
 
+router.get("/sunglasses/search", (req, res) => {
+  res.writeHead(200, {'Content-Type': 'application/json'});
+  return res.end(JSON.stringify(Products))
+})
 
 
 module.exports = server;
