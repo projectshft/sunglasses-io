@@ -11,6 +11,7 @@ const Brands = require('../initial-data/brands.json')
 const Products = require('../initial-data/products.json');
 
 const PORT = 3001;
+const accessTokens = [];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -39,7 +40,7 @@ myRouter.post('/user/login', (req, res) => {
       
       response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
 
-      
+      // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
       });
