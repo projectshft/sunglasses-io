@@ -3,6 +3,7 @@ const should = chai.should();
 const expect = chai.expect;
 let chaiHttp = require("chai-http");
 const server = require('../app/server');
+const users = require('../initial-data/users.json');
 
 chai.use(chaiHttp);
 
@@ -38,3 +39,4 @@ describe("sunglasses-search", function(){
 // describe("user/login", function(){
 //   describe("/GET user/login")
 // })
+
