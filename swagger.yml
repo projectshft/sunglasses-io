@@ -64,7 +64,7 @@ paths:
           description: "The password for login"
       tags:
         - "user"
-  /store/add-to-cart{cart}:
+  /store/add-to-cart:
     post:
       summary: "Add sunglasses to cart"
       responses:

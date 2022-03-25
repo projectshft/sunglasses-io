@@ -36,9 +36,33 @@ describe("sunglasses-search", function(){
   })
 })
 
-// describe("/user/login", function(){
-//   describe("/GET /user/login") {
-//     it("should ")
-//   }
-// })
+describe("add-to-cart", function(){
+  describe("GET /store/add-to-cart", function(){
+    if("should add selected products to the shopping cart", function(done){
+      let items = {
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price":150,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+      chai 
+        .request(server)
+        .post('/store/add-to-cart')
+        .send(items)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('id');
+          res.body.should.have.property('categoryId');
+          res.body.should.have.property('name');
+          res.body.should.have.property('description');
+          res.body.should.have.property('price');
+          res.body.should.have.property('imageUrls');
+          done();
+        })
+    })
+  })
+})
 
