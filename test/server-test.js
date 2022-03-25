@@ -36,7 +36,9 @@ describe("sunglasses-search", function(){
   })
 })
 
-// describe("user/login", function(){
-//   describe("/GET user/login")
+// describe("/user/login", function(){
+//   describe("/GET /user/login") {
+//     it("should ")
+//   }
 // })
 

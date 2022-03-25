@@ -40,17 +40,14 @@ myRouter.post('/user/login', (req, res) => {
       
       response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
 
-      // We have a successful login, if we already have an existing access token, use that
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
       });
 
-      // Update the last updated value so we get another time period
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // Create a new token with the user value and a "random" token
         let newAccessToken = {
           username: user.login.username,
           lastUpdated: new Date(),
@@ -60,13 +57,11 @@ myRouter.post('/user/login', (req, res) => {
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
-      // When a login fails, tell the client in a generic way that either the username or password was wrong
       response.writeHead(401, "Invalid username or password");
       return response.end();
     }
 
   } else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
     response.writeHead(400, "Incorrectly formatted response");
     return response.end();
   }
