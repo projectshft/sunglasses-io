@@ -30,7 +30,7 @@ router.get("/sunglasses/search", (req, res) => {
   res.end(JSON.stringify(Products))
 })
 
-myRouter.post('/user/login', (req, res) => {
+router.post('/user/login', (req, res) => {
   if (req.body.username && req.body.password) {
 
     let user = users.find((user) => {
@@ -38,7 +38,7 @@ myRouter.post('/user/login', (req, res) => {
     });
     if (user) {
       
-      response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+      res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
 
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
@@ -46,7 +46,7 @@ myRouter.post('/user/login', (req, res) => {
 
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
+        return res.end(JSON.stringify(currentAccessToken.token));
       } else {
         let newAccessToken = {
           username: user.login.username,
@@ -54,17 +54,21 @@ myRouter.post('/user/login', (req, res) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
+        return res.end(JSON.stringify(newAccessToken.token));
       }
     } else {
-      response.writeHead(401, "Invalid username or password");
-      return response.end();
+      res.writeHead(401, "Invalid username or password");
+      return res.end();
     }
 
   } else {
-    response.writeHead(400, "Incorrectly formatted response");
-    return response.end();
+    res.writeHead(400, "Incorrectly formatted response");
+    return res.end();
   }
 });
+
+router.post('/store/add-to-cart', (req, res) => {
+  
+})
 
 module.exports = server;

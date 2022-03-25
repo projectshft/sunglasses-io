@@ -36,9 +36,9 @@ describe("sunglasses-search", function(){
   })
 })
 
-describe("add-to-cart", function(){
-  describe("GET /store/add-to-cart", function(){
-    if("should add selected products to the shopping cart", function(done){
+describe("add-to-cart", function(done){
+  describe("POST /store/add-to-cart", function(){
+    it("should add selected products to the shopping cart", function(done){
       let items = {
         "id": "1",
         "categoryId": "1",
@@ -61,8 +61,8 @@ describe("add-to-cart", function(){
           res.body.should.have.property('price');
           res.body.should.have.property('imageUrls');
           done();
-        })
-    })
-  })
-})
+        }).catch(done);
+    });
+  });
+});
 
