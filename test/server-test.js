@@ -50,8 +50,9 @@ describe("add-to-cart", function(done){
       chai 
         .request(server)
         .post('/store/add-to-cart')
+        .set('content-type', 'application/json')
         .send(items)
-        .end((err, res) => {
+        .end(function(res){
           res.should.have.status(200);
           res.body.should.be.an('object');
           res.body.should.have.property('id');
@@ -61,7 +62,7 @@ describe("add-to-cart", function(done){
           res.body.should.have.property('price');
           res.body.should.have.property('imageUrls');
           done();
-        }).catch(done);
+        });
     });
   });
 });

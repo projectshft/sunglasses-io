@@ -12,6 +12,7 @@ const Products = require('../initial-data/products.json');
 
 const PORT = 3001;
 const accessTokens = [];
+const cart = [];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -22,12 +23,12 @@ let server = http.createServer(function (request, response) {
 
 router.get("/brands", (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(Brands))
+  return res.end(JSON.stringify(Brands))
 });
 
 router.get("/sunglasses/search", (req, res) => {
   res.writeHead(200, {'Content-Type': 'application/json'});
-  res.end(JSON.stringify(Products))
+  return res.end(JSON.stringify(Products))
 })
 
 router.post('/user/login', (req, res) => {
@@ -68,7 +69,10 @@ router.post('/user/login', (req, res) => {
 });
 
 router.post('/store/add-to-cart', (req, res) => {
-  
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  console.log(res)
+  cart.push(req.body);
+  return res.end(req.body);
 })
 
 module.exports = server;
