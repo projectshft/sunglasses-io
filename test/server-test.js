@@ -44,7 +44,7 @@ describe("add-to-cart", function(done){
         "categoryId": "1",
         "name": "Superglasses",
         "description": "The best glasses in the world",
-        "price":150,
+        "price":"150",
         "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
       };
       chai 
@@ -52,15 +52,15 @@ describe("add-to-cart", function(done){
         .post('/store/add-to-cart')
         .set('content-type', 'application/json')
         .send(items)
-        .end(function(res){
+        .end(function(err, res){
           res.should.have.status(200);
-          res.body.should.be.an('object');
-          res.body.should.have.property('id');
-          res.body.should.have.property('categoryId');
-          res.body.should.have.property('name');
-          res.body.should.have.property('description');
-          res.body.should.have.property('price');
-          res.body.should.have.property('imageUrls');
+          res.body.should.be.an('array');
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('categoryId');
+          res.body[0].should.have.property('name');
+          res.body[0].should.have.property('description');
+          res.body[0].should.have.property('price');
+          res.body[0].should.have.property('imageUrls');
           done();
         });
     });

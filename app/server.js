@@ -9,6 +9,7 @@ var users = require('../initial-data/users.json');
 
 const Brands = require('../initial-data/brands.json')
 const Products = require('../initial-data/products.json');
+const { response } = require('express');
 
 const PORT = 3001;
 const accessTokens = [];
@@ -69,10 +70,15 @@ router.post('/user/login', (req, res) => {
 });
 
 router.post('/store/add-to-cart', (req, res) => {
+  if(!req.body) {
+    res.writeHead(400);
+    return res.end();
+  }
+
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  console.log(res)
   cart.push(req.body);
-  return res.end(req.body);
+  console.log(JSON.stringify(cart))
+  res.end(JSON.stringify(cart));
 })
 
 module.exports = server;
