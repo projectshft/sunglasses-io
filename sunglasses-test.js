@@ -8,7 +8,7 @@ let should = chai.should();
 
 describe('Products', () => {
   describe('/GET products', () => {
-    it('should GET all the products', (done) => {
+    it('should get all the products', (done) => {
       chai
         .request(server)
         .get('/api/products')
@@ -24,7 +24,7 @@ describe('Products', () => {
 
 describe('Brands', () => {
   describe('/GET brands', () => {
-    it('should GET all the brands', (done) => {
+    it('should get all the brands', (done) => {
       chai
         .request(server)
         .get('/api/brands')
@@ -35,7 +35,7 @@ describe('Brands', () => {
           done();
         })
     });
-    it('should GET all the products of a brand', (done) => {
+    it('should get all the products of a brand', (done) => {
       let id = '1';
       chai
         .request(server)
@@ -153,7 +153,7 @@ describe('Me', () => {
             "description": "The best glasses in the world",
             "price":50,
             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-          },
+          }
         ]
       }
       chai
@@ -162,6 +162,55 @@ describe('Me', () => {
         .end((err, res) => {
           res.should.have.status(200);
           expect(res.body).to.have.lengthOf(1);
+          expect(res.body).to.deep.equal(currentCart.cart);
+          done();
+        })
+    })
+  })
+  describe('POST product quantity', () => {
+    it('should edit the quantity of a product in cart', (done) => {
+      currentCart = {
+        "cart": [
+          {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          },
+          {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          },
+          {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          },
+          {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          },
+        ]
+      }
+      chai
+        .request(server)
+        .post('/api/me/cart/3?quantity=4')
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.have.lengthOf(4);
           expect(res.body).to.deep.equal(currentCart.cart);
           done();
         })
