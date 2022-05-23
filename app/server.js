@@ -99,7 +99,6 @@ myRouter.post("/api/login", (request, response) => {
 // GET current user's cart
 myRouter.get('/api/me/cart', (request, response) => {
   const currentUser = users.find(user => user.currentUser == true)
-  console.log(currentUser)
   if(!currentUser){
     response.writeHead(401, 'Please Login')
     response.end();
