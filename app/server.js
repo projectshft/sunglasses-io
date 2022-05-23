@@ -56,5 +56,18 @@ myRouter.get('/api/brands', (request, response) => {
   return response.end(JSON.stringify(brands));
 })
 
+// GET products by brand id 
+myRouter.get('/api/brands/:id/products', (request, response) => {
+  const { id } = request.params
+  if(!id) {
+    response.writeHead(404, 'Brand not found');
+    response.end()
+  }
+  let productsToReturn = products.filter(product => product.categoryId == id)
+  console.log(productsToReturn)
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  response.end(JSON.stringify(productsToReturn))
+})
+
 
 module.exports = server;

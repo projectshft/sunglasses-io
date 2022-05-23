@@ -36,14 +36,17 @@ describe('Brands', () => {
         })
     });
     it('should GET all the products of a brand', (done) => {
+      let id = '1';
       chai
         .request(server)
-        .get('/api/brands/:id/products')
+        .get('/api/brands/1/products')
         .end((err, res) => {
+          console.log(res.body[0].categoryId)
           res.should.have.status(200);
           res.body.should.be.an('array');
           expect(res.body).to.have.lengthOf.above(0);
-          res.body[0].should.have.property('categoryId')
+          expect(res.body[0].categoryId).to.equal(id);
+          done();
         })
     })
   })
