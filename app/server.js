@@ -44,14 +44,17 @@ const server = http.createServer(function (request, response) {
   console.log(`Server is listening on ${PORT}`);
 });;
 
+// GET all products
 myRouter.get('/api/products', (request, response) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(products));
 });
 
+// GET all brands
 myRouter.get('/api/brands', (request, response) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brands));
 })
+
 
 module.exports = server;

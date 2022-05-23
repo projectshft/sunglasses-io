@@ -1,3 +1,4 @@
+const { expect } = require('chai');
 let chai = require('chai');
 let chaiHttp = require('chai-http');
 let server = require('./app/server');
@@ -14,7 +15,7 @@ describe('Products', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.length.should.be.eql(11);
+          expect(res.body).to.have.lengthOf.above(0);
           done();
         })
     })
@@ -30,8 +31,19 @@ describe('Brands', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.length.should.be.eql(5);
+          expect(res.body).to.have.lengthOf.above(0);
           done();
+        })
+    });
+    it('should GET all the products of a brand', (done) => {
+      chai
+        .request(server)
+        .get('/api/brands/:id/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          expect(res.body).to.have.lengthOf.above(0);
+          res.body[0].should.have.property('categoryId')
         })
     })
   })
