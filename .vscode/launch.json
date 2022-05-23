@@ -24,9 +24,8 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/yourNodeIndex.js"
+      "name": "Sunglasses.io",
+      "program": "${workspaceRoot}/app/server.js"
     }
   ]
 }

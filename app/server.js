@@ -149,6 +149,35 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
   }
 });
 
+// POST quantity in cart
+myRouter.post('/api/me/cart/:productId', (request, response) => {
+  const currentUser = users.find(user => user.currentUser == true);
+  const { productId } = request.params;
+  const quantity = queryString.parse(request._parsedUrl.query).quantity - 1;
+
+  if(currentUser){
+    const product = currentUser.cart.find(product => product.id == productId);
+    if(product){
+      if(quantity){
+        for (let i = 0; i < quantity; i++) {
+          currentUser.cart.push(Object.assign(product))
+        }
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        return response.end(JSON.stringify(currentUser.cart));
+      } else {
+        response.writeHead(400, 'Invalid quantity');
+        return response.end();
+      }
+    } else {
+      response.writeHead(404, 'Product not in cart');
+      return response.end();
+    }
+  } else {
+    response.writeHead(401, 'Please Login');
+    return response.end();
+  }
+})
+
 
 
 module.exports = server;
