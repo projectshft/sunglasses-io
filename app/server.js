@@ -129,4 +129,26 @@ myRouter.post('/api/me/cart', (request, response) => {
   }
 });
 
+// DELETE from cart
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  const currentUser = users.find(user => user.currentUser == true);
+  const { productId } = request.params;
+  if(currentUser){
+    const product = currentUser.cart.find(product => product.id == productId);
+    if(product){
+      currentUser.cart.filter(value => value.id !== product.id);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(currentUser.cart));
+    } else {
+      response.writeHead(404, 'Product not in cart');
+      return response.end();
+    }
+  } else {
+    response.writeHead(401, 'Please Login');
+    return response.end();
+  }
+});
+
+
+
 module.exports = server;
