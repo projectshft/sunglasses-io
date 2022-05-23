@@ -10,8 +10,6 @@ let brands = [];
 let products = [];
 let users = [];
 
-let currentUser = null;
-
 var myRouter = Router();
 
 myRouter.use(bodyParser.json())
@@ -21,7 +19,6 @@ const PORT = 3001;
 const server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response));
 }).listen(PORT, error => {
-  
   if (error) {
     return console.log("Error on Server Startup: ", error);
   }
@@ -81,6 +78,12 @@ myRouter.post("/api/login", (request, response) => {
     })
 
     if(user) {
+      if(users.find(user => user.currentUser === true)){
+        const otherUser = users.find(user => user.currentUser === true);
+        otherUser.currentUser = false;
+        user.currentUser = true;
+      }
+      user.currentUser = true;
       response.writeHead(200, { 'Content-Type': 'text/plain' })
       return response.end(`successfully logged in ${user.login.username}`)
     } else {
@@ -92,5 +95,17 @@ myRouter.post("/api/login", (request, response) => {
     return response.end();
   }
 });
+
+// GET current user's cart
+myRouter.get('/api/me/cart', (request, response) => {
+  const currentUser = users.find(user => user.currentUser == true)
+  console.log(currentUser)
+  if(!currentUser){
+    response.writeHead(401, 'Please Login')
+    response.end();
+  }
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(currentUser.cart))
+})
 
 module.exports = server;
