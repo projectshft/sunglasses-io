@@ -101,10 +101,32 @@ myRouter.get('/api/me/cart', (request, response) => {
   const currentUser = users.find(user => user.currentUser == true)
   if(!currentUser){
     response.writeHead(401, 'Please Login')
-    response.end();
+    return response.end();
   }
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(currentUser.cart))
-})
+});
+
+// POST to cart
+myRouter.post('/api/me/cart', (request, response) => {
+  const currentUser = users.find(user => user.currentUser == true)
+  const id = queryString.parse(request._parsedUrl.query);
+  const product = products.find(product => product.id == id.productId);
+
+  if(currentUser){
+    if(product){
+      currentUser.cart.push(product);
+
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(currentUser.cart));
+    } else {
+      response.writeHead(404, 'Product not found');
+      return response.end();
+    }
+  } else {
+    response.writeHead(401, 'Please Login');
+    return response.end();
+  }
+});
 
 module.exports = server;
