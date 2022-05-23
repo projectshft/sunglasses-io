@@ -2,7 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
-var Router = require('router');
+const Router = require('router')
 var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
@@ -10,7 +10,10 @@ let brands = [];
 let products = [];
 let users = [];
 
+let currentUser = null;
+
 var myRouter = Router();
+
 myRouter.use(bodyParser.json())
 
 const PORT = 3001;
@@ -64,10 +67,30 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
     response.end()
   }
   let productsToReturn = products.filter(product => product.categoryId == id)
-  console.log(productsToReturn)
   response.writeHead(200, { 'Content-Type': 'application/json' });
   response.end(JSON.stringify(productsToReturn))
 })
 
+// POST login
+myRouter.post("/api/login", (request, response) => {
+	const userLogin = queryString.parse(request._parsedUrl.query)
+
+  if(userLogin.username && userLogin.password) {
+    let user = users.find((user) => {
+      return user.login.username === userLogin.username && user.login.password === userLogin.password;
+    })
+
+    if(user) {
+      response.writeHead(200, { 'Content-Type': 'text/plain' })
+      return response.end(`successfully logged in ${user.login.username}`)
+    } else {
+      response.writeHead(401, 'Invalid username or password')
+      return response.end();
+    }
+  } else {
+    response.writeHead(400, 'Incorrectly formatted response')
+    return response.end();
+  }
+});
 
 module.exports = server;

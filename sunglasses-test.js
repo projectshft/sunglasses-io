@@ -41,11 +41,25 @@ describe('Brands', () => {
         .request(server)
         .get('/api/brands/1/products')
         .end((err, res) => {
-          console.log(res.body[0].categoryId)
           res.should.have.status(200);
           res.body.should.be.an('array');
           expect(res.body).to.have.lengthOf.above(0);
           expect(res.body[0].categoryId).to.equal(id);
+          done();
+        })
+    })
+  })
+});
+
+describe('Login', () => {
+  describe('/POST login', () => {
+    it('should login user successfully', (done) => {
+      chai
+        .request(server)
+        .post(`/api/login?username=yellowleopard753&password=jonjon`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.text).to.equal('successfully logged in yellowleopard753');
           done();
         })
     })
