@@ -56,10 +56,10 @@ describe('Login', () => {
     it('should login user successfully', (done) => {
       chai
         .request(server)
-        .post(`/api/login?username=yellowleopard753&password=jonjon`)
+        .post(`/api/login?username=greenlion235&password=waters`)
         .end((err, res) => {
           res.should.have.status(200);
-          expect(res.text).to.equal('successfully logged in yellowleopard753');
+          expect(res.text).to.equal('successfully logged in greenlion235');
           done();
         })
     })
@@ -138,6 +138,31 @@ describe('Me', () => {
           res.should.have.status(200);
           expect(res.body).to.have.lengthOf.above(0)
           expect(currentCart.cart).to.deep.equal(res.body)
+          done();
+        })
+    })
+  })
+  describe('DELETE product', () => {
+    it('should remove a product from the cart', (done) => {
+      currentCart = {
+        "cart": [
+          {
+            "id": "3",
+            "categoryId": "1",
+            "name": "Brown Sunglasses",
+            "description": "The best glasses in the world",
+            "price":50,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          },
+        ]
+      }
+      chai
+        .request(server)
+        .delete('/api/me/cart/3')
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.have.lengthOf(1);
+          expect(res.body).to.deep.equal(currentCart.cart);
           done();
         })
     })
