@@ -8,6 +8,23 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
-http.createServer(function (request, response) {
+const router = Router();
+router.use(bodyParser.json());
 
-}).listen(PORT);
+let brands = [];
+let products = [];
+let users = [];
+
+http.createServer(function (request, response) {
+  response.writeHead(200);
+  router(request, response, finalHandler(request, response));
+}).listen(PORT, err => {
+  if (err) throw err;
+  console.log(`server running on port ${PORT}`);
+
+  brands = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
+  products = JSON.parse(fs.readFileSync('initial-data/products.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
+});
+
+
