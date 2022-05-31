@@ -4,8 +4,6 @@ const server = require("../app/server");
 const expect = chai.expect;
 const assert = chai.assert;
 
-let should = chai.should();
-
 chai.use(chaiHTTP);
 
 describe('/GET brands', () => {
@@ -202,6 +200,7 @@ describe("/POST items to cart", () => {
     chai
       .request(server)
       .post("/api/me/cart?accessToken=1234")
+      .send({product: "test"})
       .end((err, res) => {
         assert.isNotNull(res.body);
         expect(err).to.be.null;
@@ -258,5 +257,22 @@ describe("/DELETE items from cart", () => {
   });
 });
 
+describe("/POST quantity to cart", () => {
+  it("should change quantity of item in cart if user is logged in", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/47?accessToken=1234")
+      .send({amount: "4"})
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(2);
+        done();
+      })
+  })
+})
 
 

@@ -157,8 +157,7 @@ router.post("/api/me/cart", (request, response) => {
     return response.end()
   }
   else {
-    //hardcoded because I don't see how to add items when there is no front-end that knows what the user clicked
-    let item = products[0];
+    let item = request.body.product;
     let user = users.find(user => user.login.username === currentAccessToken.username);
     let cart = user.cart;
     cart.push(item);
@@ -190,6 +189,34 @@ router.delete("/api/me/cart/:productId", (request, response) => {
       let updatedCart = cart.filter((item => item.id !== productId));
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(updatedCart));
+    }
+  }
+});
+
+router.post("/api/me/cart/:productId", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  
+  if (!currentAccessToken) {
+    response.writeHead(401, "User is not logged in");
+    return response.end()
+  }
+  else {
+    let { productId } = request.params;
+
+    let user = users.find(user => user.login.username === currentAccessToken.username);
+    let cart = user.cart;
+    let makeSureIdExists = cart.find(item => item.id === productId);
+    
+    if (!makeSureIdExists) {
+      response.writeHead(404, "Not found");
+      return response.end();
+    }
+    else {
+      let amount = request.body.amount;
+      let itemToChange = cart.find(item => item.id === productId);
+      itemToChange.quantity = amount;
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(cart));
     }
   }
 })
