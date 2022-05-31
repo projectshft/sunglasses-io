@@ -49,15 +49,6 @@ describe('/GET brands', () => {
         done();
       });
   });
-  // it("should return error if query does not match data", done => {
-  //   chai
-  //     .request(server)
-  //     .get("/api/brands?query=sfdksl")
-  //     .end((err, res) => {
-  //       expect(res).to.have.status(404);;
-  //       done();
-  //     })
-  // })
 });
 
 describe("/GET products of a brand", () => {
@@ -271,8 +262,26 @@ describe("/POST quantity to cart", () => {
         expect(res.body).to.be.an("array");
         expect(res.body).to.have.lengthOf(2);
         done();
-      })
-  })
+      });
+  });
+  it("should return error if user is not logged in", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/4?accessToken=")
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+    });
+  });
+  it("should return error if productId is not in cart", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart/98?accessToken=1234")
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+    });
+  });
 })
 
 
