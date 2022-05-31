@@ -197,7 +197,7 @@ describe("/GET items in cart", () => {
   });
 });
 
-describe("/POST add items to cart", () => {
+describe("/POST items to cart", () => {
   it("should add items to the cart if user is logged in", done => {
     chai
       .request(server)
@@ -207,7 +207,7 @@ describe("/POST add items to cart", () => {
         expect(err).to.be.null;
         expect(res).to.have.status(200);
         expect("Content-Type", "application/json");
-        expect(res.body).to.be.a("array");
+        expect(res.body).to.be.an("array");
         expect(res.body).to.have.lengthOf(2);
         done();
       });
@@ -215,11 +215,48 @@ describe("/POST add items to cart", () => {
   it("should return error if user is not logged in", done => {
     chai
       .request(server)
-      .get("/api/me/cart?accessToken=")
+      .post("/api/me/cart?accessToken=")
       .end((err, res) => {
         expect(res).to.have.status(401);
         done();
       });
-  })
-})
+  });
+});
+
+describe("/DELETE items from cart", () => {
+  it("should delete an item from cart if user is logged in", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/47?accessToken=1234")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.an("array");
+        expect(res.body).to.have.lengthOf(1);
+        done();
+      });
+  });
+  it("should return error if user is not logged in", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/4?accessToken=")
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+    });
+  });
+  it("should return error if productId is not in cart", done => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/98?accessToken=1234")
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        done();
+    });
+  });
+});
+
+
 

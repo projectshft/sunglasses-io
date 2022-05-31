@@ -194,4 +194,4 @@ router.delete("/api/me/cart/:productId", (request, response) => {
   }
 })
 
-// module.exports = server;
+module.exports = server;

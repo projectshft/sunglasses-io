@@ -102,7 +102,12 @@
     "nat": "ES"
   },
   {
-    "cart": ["test"],
+    "cart": [
+      {
+        "id": "47",
+        "name": "test"
+      }
+    ],
     "login": {
       "username": "emily",
       "password": "testtest"
