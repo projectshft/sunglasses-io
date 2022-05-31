@@ -133,7 +133,93 @@ describe("/GET products", () => {
   });
 });
 
-// describe("/POST login", () => {
-//   it("")
-// })
+describe("/POST login", () => {
+  it("should be successful if the credentials are valid", done => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .set({username: "yellowleopard753", password: "jonjon"})
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.a("string");
+        expect(res.body).to.have.lengthOf(11);
+        done();
+      });
+  });
+  it("should fail if username/password does not exist in data", done => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .set({username: "emilyfreeman", password: "fake"})
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+  it("should fail if username/password is empty", done => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .set({username: "emilyfreeman", password: ""})
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+});
+
+describe("/GET items in cart", () => {
+  it("should return all items in cart if a user is logged in", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart?accessToken=1234")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.a("array");
+        expect(res.body).to.have.lengthOf(1);
+        done();
+      });
+  });
+  it("should return error if user is not logged in", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart?accessToken=")
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+});
+
+describe("/POST add items to cart", () => {
+  it("should add items to the cart if user is logged in", done => {
+    chai
+      .request(server)
+      .post("/api/me/cart?accessToken=1234")
+      .end((err, res) => {
+        assert.isNotNull(res.body);
+        expect(err).to.be.null;
+        expect(res).to.have.status(200);
+        expect("Content-Type", "application/json");
+        expect(res.body).to.be.a("array");
+        expect(res.body).to.have.lengthOf(2);
+        done();
+      });
+  });
+  it("should return error if user is not logged in", done => {
+    chai
+      .request(server)
+      .get("/api/me/cart?accessToken=")
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  })
+})
 

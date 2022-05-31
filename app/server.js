@@ -15,7 +15,10 @@ router.use(bodyParser.json());
 let brands = [];
 let products = [];
 let users = [];
-
+let accessTokens = [{
+  username: 'emily',
+  token: '1234'
+}];
 
 let server = http.createServer(function (request, response) {
   response.writeHead(200);
@@ -25,7 +28,7 @@ let server = http.createServer(function (request, response) {
 
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
   products = JSON.parse(fs.readFileSync('initial-data/products.json', 'utf-8'));
-  users = JSON.parse(fs.readFileSync('initial-data/brands.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
 
   console.log(`server running on port ${PORT}`);
 });
@@ -37,10 +40,6 @@ router.get("/api/brands", (request, response) => {
   let brandToReturn = [];
   if (query !== undefined) {
     brandToReturn = brands.filter(brand => brand.name.includes(query))
-    // if (!brandToReturn) {
-    //   response.writeHead(404, "No brand with that name found");
-    //   return response.end();
-    // }
   }
   else {
     brandToReturn = brands;
@@ -81,6 +80,118 @@ router.get("/api/products", (request, response) => {
 })
 
 router.post("/api/login", (request, response) => {
+  if(request.headers.username && request.headers.password) {
+    let user = users.find((user) => {
+      return user.login.username == request.headers.username && user.login.password == request.headers.password;
+    });
+
+    if (user) {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      if(currentAccessToken) {
+        return response.end(JSON.stringify(currentAccessToken.token));
+      }
+      else {
+        let newAccessToken = {
+          username: user.login.username,
+          token: uid(11)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    }
+    else {
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  }
+  else {
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+});
+
+const getValidTokenFromRequest = function(request) {
+  const parsedUrl = url.parse(request.url, true)
+
+  if (parsedUrl.query.accessToken) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+router.get("/api/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
   
+  if (!currentAccessToken) {
+    response.writeHead(401, "User is not logged in");
+    return response.end()
+  }
+  else {
+    let user = users.find(user => user.login.username === currentAccessToken.username);
+    let cart = user.cart
+    
+    response.writeHead(200, { "Content-Type": "application/json" })
+    return response.end(JSON.stringify(cart))
+  }
+});
+
+router.post("/api/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  
+  if (!currentAccessToken) {
+    response.writeHead(401, "User is not logged in");
+    return response.end()
+  }
+  else {
+    //hardcoded because I don't see how to add items when there is no front-end that knows what the user clicked
+    let item = products[0];
+    let user = users.find(user => user.login.username === currentAccessToken.username);
+    let cart = user.cart;
+    cart.push(item);
+
+    response.writeHead(200, { "Content-Type": "application/json" })
+    return response.end(JSON.stringify(cart));
+  }
 })
+
+router.delete("/api/me/cart/:productId", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  
+  if (!currentAccessToken) {
+    response.writeHead(401, "User is not logged in");
+    return response.end()
+  }
+  else {
+    let { productId } = request.params;
+
+    let user = users.find(user => user.login.username === currentAccessToken.username);
+    let cart = user.cart;
+    let makeSureIdExists = cart.find(item => item.id === productId);
+    
+    if (!makeSureIdExists) {
+      response.writeHead(404, "Not found");
+      return response.end();
+    }
+    else {
+      let updatedCart = cart.filter((item => item.id !== productId));
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(updatedCart));
+    }
+  }
+})
+
 // module.exports = server;
