@@ -15,6 +15,7 @@ router.use(bodyParser.json());
 let brands = [];
 let products = [];
 let users = [];
+//one hard coded value for testing purposes
 let accessTokens = [{
   username: 'emily',
   token: '1234'
@@ -67,7 +68,8 @@ router.get("/api/products", (request, response) => {
   const parsedUrl = url.parse(request.originalUrl);
   const { query } = queryString.parse(parsedUrl.query);
 
-  let productsToReturn = []
+  let productsToReturn = [];
+
   if (query !== undefined) {
     productsToReturn = products.filter(product => product.name.includes(query) || product.description.includes(query))
   }
@@ -133,6 +135,13 @@ const getValidTokenFromRequest = function(request) {
   }
 };
 
+
+const getCart = function (currentAccessToken) {
+  let user = users.find(user => user.login.username === currentAccessToken.username);
+  let cart = user.cart;
+  return cart;
+}
+
 router.get("/api/me/cart", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
   
@@ -141,8 +150,7 @@ router.get("/api/me/cart", (request, response) => {
     return response.end()
   }
   else {
-    let user = users.find(user => user.login.username === currentAccessToken.username);
-    let cart = user.cart
+    let cart = getCart(currentAccessToken);
     
     response.writeHead(200, { "Content-Type": "application/json" })
     return response.end(JSON.stringify(cart))
@@ -158,8 +166,7 @@ router.post("/api/me/cart", (request, response) => {
   }
   else {
     let item = request.body.product;
-    let user = users.find(user => user.login.username === currentAccessToken.username);
-    let cart = user.cart;
+    let cart = getCart(currentAccessToken);
     cart.push(item);
 
     response.writeHead(200, { "Content-Type": "application/json" })
@@ -177,8 +184,7 @@ router.delete("/api/me/cart/:productId", (request, response) => {
   else {
     let { productId } = request.params;
 
-    let user = users.find(user => user.login.username === currentAccessToken.username);
-    let cart = user.cart;
+    let cart = getCart(currentAccessToken);
     let makeSureIdExists = cart.find(item => item.id === productId);
     
     if (!makeSureIdExists) {
@@ -203,8 +209,7 @@ router.post("/api/me/cart/:productId", (request, response) => {
   else {
     let { productId } = request.params;
 
-    let user = users.find(user => user.login.username === currentAccessToken.username);
-    let cart = user.cart;
+    let cart = getCart(currentAccessToken);
     let makeSureIdExists = cart.find(item => item.id === productId);
     
     if (!makeSureIdExists) {
