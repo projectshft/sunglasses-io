@@ -1,0 +1,252 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: API to support the sunglasses.io platform
+  version: 1.0.0
+host: sunglasses.io
+schemes:
+  - http
+basepath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: The brands endpoint returns all the brands of sunglasses and allows you to search for a specific brand.
+      parameters:
+        - name: query
+          in: query
+          description: Search string query
+          required: false
+          type: string
+      tags:
+        - Brands
+      responses: 
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '/components/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/Error'
+  /brands/{id}/products:
+    get:
+      summary: Brands Products
+      description: This endpoint retrieves the products available from a particular brand
+      parameters:
+        - name: id
+          in: path
+          description: id of the brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '/components/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/Error'
+  /products:
+    get:
+      summary: Products
+      description: This endpoint provides the products and allows you to search for a particular product
+      parameters:
+        - name: query
+          in: query
+          description: Search string query
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '/components/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/Error'
+  /login:
+    post:
+      summary: Login to account
+      description: This endpoint allows a user to login to their account so that they can add items to their cart
+      tags:
+        - Login
+      responses:
+        '200':
+          description: Login information for a user
+          schema: 
+            $ref: '/components/Login'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/Error'
+  /me/cart:
+    get:
+      summary: Items in the user's cart
+      description: This endpoint allows a user to see the items that are in their cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: user access token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '/components/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/Error'
+    post:
+      summary: Add items to user's cart
+      description: This endpoint allows a user to add items to their cart
+      parameters:
+        - name: accessToken
+          in: query
+          description: user access token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '/components/Products'
+  /me/cart/{productId}:
+    delete:
+      summary: Delete items in user's cart
+      description: This endpoint allows a user to delete items in their cart
+      parameters:
+        - name: productId
+          in: path
+          description: product id
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: user access token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '/components/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/Error'
+    post:
+      summary: Change the quantity of a product in user's cart
+      description: This endpoint allows a user to change the quantity of items in their cart
+      parameters:
+        - name: productId
+          in: path
+          description: product id
+          required: true
+          type: string
+        - name: accessToken
+          in: query
+          description: user access token
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '/components/User'
+components:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand
+      name:
+        type: string
+        description: Name of brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: Brand of product
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: string
+        description: Price of product
+      imageUrls:
+        type: array
+        items: 
+          type: string
+        description: Pictures of product
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: username
+      password:
+        type: string
+        description: password
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+      
+
+      
+        
+      
+      
+              
+              
+      
+        
+    
+  
