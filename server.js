@@ -6,6 +6,7 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 let Products = require('./app/models/products');
+let Brands = require('./app/models/brands');
 
 const PORT = 3001;
 
@@ -32,6 +33,12 @@ let server = http.createServer(function (request, response) {
         if(error) throw error;
         products = JSON.parse(data);
         console.log(`Server setup: ${products.length} products loaded`);
+    });
+
+    fs.readFile("initial-data/brands.json", (error, data) => {
+        if(error) throw error;
+        brands = JSON.parse(data);
+        console.log(`Server set up: ${brands.length} brands loaded`);
     });
 });
 
