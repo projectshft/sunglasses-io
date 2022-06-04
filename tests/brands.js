@@ -29,11 +29,11 @@ describe("Brands", () => {
         it("it should GET all products of a particular brand by brand id", (done) => {
             chai
                 .request(server)
-                .get("/brands/:id/products")
+                .get("/brands/3/products")
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an("array");
-                    res.body.should.have.length.to.be.at.least(1);
+                    res.body.should.have.lengthOf(2);
                     res.body[0].should.be.an("object");
                     res.body[0].should.have.property("id");
                     res.body[0].should.have.property("categoryId");
@@ -41,6 +41,14 @@ describe("Brands", () => {
                     res.body[0].should.have.property("description");
                     res.body[0].should.have.property("price");
                     res.body[0].should.have.property("imageUrls");
+                    // done();
+                });
+            chai
+                .request(server)
+                .get("/brands/6/products")
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    done();
                 });
         });
     });
