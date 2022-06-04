@@ -24,4 +24,24 @@ describe("Brands", () => {
                 });
         });
     });
+
+    describe("/GET products by brand id", () => {
+        it("it should GET all products of a particular brand by brand id", (done) => {
+            chai
+                .request(server)
+                .get("/brands/:id/products")
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an("array");
+                    res.body.should.have.length.to.be.at.least(1);
+                    res.body[0].should.be.an("object");
+                    res.body[0].should.have.property("id");
+                    res.body[0].should.have.property("categoryId");
+                    res.body[0].should.have.property("name");
+                    res.body[0].should.have.property("description");
+                    res.body[0].should.have.property("price");
+                    res.body[0].should.have.property("imageUrls");
+                });
+        });
+    });
 });
