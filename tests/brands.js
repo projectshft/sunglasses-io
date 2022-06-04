@@ -11,7 +11,7 @@ describe("Brands", () => {
         it("it should GET all of the brands", (done) => {
             chai
                 .request(server)
-                .get("brands")
+                .get("/brands")
                 .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.an("array");
@@ -19,7 +19,8 @@ describe("Brands", () => {
                     res.body[0].should.be.an("object");
                     res.body[0].should.have.property("id");
                     res.body[0].should.have.property("name");
-                    res.body[0].name.should.be("Oakley");
+                    res.body[0].name.should.equal("Oakley");
+                    done();
                 });
         });
     });
