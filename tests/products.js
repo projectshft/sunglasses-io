@@ -16,6 +16,8 @@ describe("Products", () => {
                     res.should.have.status(200);
                     res.body.should.be.an("array");
                     res.body.should.have.lengthOf(11);
+                    res.body[0].should.be.an("object");
+                    res.body[0].should.have.property('imageUrls');
                     done();
                 });
         });
