@@ -43,8 +43,13 @@ let server = http.createServer(function (request, response) {
 });
 
 router.get('/products', function(request, response) {
-    response.writeHead(200, {"Content-Type": "application/json"});
+    response.writeHead(200, {"Content-Type": "application/json"}, CORS_HEADERS);
     return response.end(JSON.stringify(Products.getAll(products)));
+});
+
+router.get('/brands', function(request, response) {
+    response.writeHead(200, {"Content-Type": "application/json"},  CORS_HEADERS);
+    return response.end(JSON.stringify(Brands.getAll(brands)));
 });
 
 module.exports = server;
