@@ -37,7 +37,7 @@ let server = http.createServer(function (request, response) {
 
 router.get('/products', function(request, response) {
     response.writeHead(200, {"Content-Type": "application/json"});
-    return response.end(JSON.stringify(Products.getAll()));
+    return response.end(JSON.stringify(Products.getAll(products)));
 });
 
 module.exports = server;
