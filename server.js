@@ -52,4 +52,14 @@ router.get('/brands', function(request, response) {
     return response.end(JSON.stringify(Brands.getAll(brands)));
 });
 
+router.get('/brands/:id/products', function(request, response) {
+    if(request.params.id < brands.length) {
+        response.writeHead(200, {"Content-Type": "application/json"}, CORS_HEADERS);
+        return response.end(JSON.stringify(Brands.getProductsByBrandID(request.params.id, products)));
+    } else {
+        response.writeHead(404);
+        return response.end('Brand not found');
+    }
+});
+
 module.exports = server;
