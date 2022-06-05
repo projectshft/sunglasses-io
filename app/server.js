@@ -98,6 +98,9 @@ router.post('/login', function(request, response) {
             response.writeHead(401, "Invalid username or password");
             return response.end();
         }
+    } else {
+        response.writeHead(400, "Username and password are required");
+        return response.end();
     }
 });
 
