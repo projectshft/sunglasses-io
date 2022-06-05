@@ -46,7 +46,7 @@ let server = http.createServer(function (request, response) {
 
     fs.readFile("initial-data/users.json", (error, data) => {
         if(error) throw error;
-        brands = JSON.parse(data);
+        users = JSON.parse(data);
         console.log(`Server set up: ${users.length} users loaded`);
     });
 });
@@ -94,6 +94,9 @@ router.post('/login', function(request, response) {
                 accessTokens.push(newAccessToken);
                 return response.end(JSON.stringify(newAccessToken.token));
             }
+        } else {
+            response.writeHead(401, "Invalid username or password");
+            return response.end();
         }
     }
 });
