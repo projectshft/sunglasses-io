@@ -23,7 +23,7 @@ chai.use(chaiHttp);
 
 describe("Cart", () => {
     describe("/Get cart", () => {
-        it("it should get the item in a validated user's cart", (done) => {
+        it("it should get the items in a validated user's cart", (done) => {
             // let user = {
             //     username: "yellowleopard753",
             //     password: "jonjon"
