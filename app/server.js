@@ -8,13 +8,14 @@ var uid = require('rand-token').uid;
 let Products = require('./models/products');
 let Brands = require('./models/brands');
 let url = require('url');
+const { Console } = require('console');
 
 const PORT = 3001;
 
 let products = [];
 let brands = [];
 let users = [];
-let accessTokens = [];
+let accessTokens = [{username: 'lazywolf342', lastUpdated: Infinity, token: '4923292892791171'}];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -25,10 +26,10 @@ const TOKEN_VALIDITY_TIMEOUT = 30 * 60 * 1000;
 
 const getValidTokenFromRequest = function(request) {
     const parsedUrl = require('url').parse(request.url, true);
-    if (parsedUrl.query.accessToken) {
+    if (parsedUrl.query.token) {
       // Verify the access token to make sure it's valid and not expired
       let currentAccessToken = accessTokens.find((accessToken) => {
-        let tokenExists = accessToken.token == parsedUrl.query.accessToken;
+        let tokenExists = accessToken.token == parsedUrl.query.token;
         let tokenHasntExpired = ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         return tokenExists && tokenHasntExpired;
         // return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
@@ -139,6 +140,16 @@ router.post('/login', function(request, response) {
     }
 });
 
-
+router.get('/me/cart', function(request, response) {
+    let foundToken = getValidTokenFromRequest(request);
+    if(!foundToken) {
+        response.writeHead(401, 'You have to be logged in to continue');
+        return response.end();
+    }
+    let username = foundToken.username;
+    let loggedInUser = users.find(user => user.login.username === username);
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(loggedInUser.cart));
+});
 
 module.exports = server;
