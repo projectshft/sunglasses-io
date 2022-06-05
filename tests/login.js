@@ -47,7 +47,7 @@ describe("Login", () => {
                 .post("/login")
                 .send(user)
                 .end((err, res) => {
-                    res.should.have.status(401);
+                    res.should.have.status(400);
                     done();
                 });
         });
@@ -60,7 +60,7 @@ describe("Login", () => {
                 .post("/login")
                 .send(user)
                 .end((err, res) => {
-                    res.should.have.status(401);
+                    res.should.have.status(400);
                     done();
                 });
         });
