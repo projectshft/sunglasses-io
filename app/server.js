@@ -5,12 +5,15 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
-let Products = require('./app/models/products');
-let Brands = require('./app/models/brands');
+let Products = require('./models/products');
+let Brands = require('./models/brands');
 
 const PORT = 3001;
 
 let products = [];
+let brands = [];
+let users = [];
+let accessTokens = [];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -40,6 +43,12 @@ let server = http.createServer(function (request, response) {
         brands = JSON.parse(data);
         console.log(`Server set up: ${brands.length} brands loaded`);
     });
+
+    fs.readFile("initial-data/users.json", (error, data) => {
+        if(error) throw error;
+        brands = JSON.parse(data);
+        console.log(`Server set up: ${users.length} users loaded`);
+    });
 });
 
 router.get('/products', function(request, response) {
@@ -59,6 +68,33 @@ router.get('/brands/:id/products', function(request, response) {
     } else {
         response.writeHead(404);
         return response.end('Brand not found');
+    }
+});
+
+router.post('/login', function(request, response) {
+    let username = request.body.username;
+    let password = request.body.password;
+    if(request.body.username && request.body.password) {
+        let user = users.find(user => user.login.password === password && user.login.username === username);
+        if(user) {
+            response.writeHead(200, {'Content-Type': 'application/json'});
+            let currentAccessToken = accessTokens.find((tokenObject) => {
+                return tokenObject.username === username;
+            });
+
+            if(currentAccessToken) {
+                currentAccessToken.lastUpdated = new Date();
+                return response.end(JSON.stringify(currentAccessToken.token));
+            } else {
+                let newAccessToken = {
+                    username: username,
+                    lastUpdated: new Date(),
+                    token: uid(16)
+                }
+                accessTokens.push(newAccessToken);
+                return response.end(JSON.stringify(newAccessToken.token));
+            }
+        }
     }
 });
 
