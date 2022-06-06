@@ -83,26 +83,29 @@ describe("Cart", () => {
                 .request(server)
                 .post('/me/cart/?token=4923292892791171')
                 .send(item)
-                .end((err, res) => {
+                .then(res => {
                     res.should.have.status(200);
+                    chai
+                        .request(server)
+                        .get('/me/cart?token=4923292892791171')
+                        .end((err, res) => {
+                            res.should.have.status(200);
+                            res.body.should.be.an("array");
+                            res.body.should.have.lengthOf(1);
+                            res.body[0].should.be.an("object");
+                            res.body[0].should.have.property("id");
+                            res.body[0].should.have.property("categoryId");
+                            res.body[0].should.have.property("name");
+                            res.body[0].should.have.property("description");
+                            res.body[0].should.have.property("price");
+                            res.body[0].should.have.property("imageUrls");
+                            res.body[0].should.have.property("count");
+                            done();
+                        });
                 });
-            chai
-                .request(server)
-                .get('/me/cart?token=4923292892791171')
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.an("array");
-                    res.body.should.have.lengthOf(1);
-                    res.body[0].should.be.an("object");
-                    res.body[0].should.have.property("id");
-                    res.body[0].should.have.property("categoryId");
-                    res.body[0].should.have.property("name");
-                    res.body[0].should.have.property("description");
-                    res.body[0].should.have.property("price");
-                    res.body[0].should.have.property("imageUrls");
-                    res.body[0].should.have.property("count");
-                    done();
-                });
+                // .end((err, res) => {
+                    
+                // });
         });
     });
 });
