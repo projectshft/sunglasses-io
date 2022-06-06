@@ -100,6 +100,7 @@ describe("Cart", () => {
                     res.body[0].should.have.property("description");
                     res.body[0].should.have.property("price");
                     res.body[0].should.have.property("imageUrls");
+                    res.body[0].should.have.property("count");
                     done();
                 });
         });
