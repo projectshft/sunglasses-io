@@ -1,0 +1,164 @@
+swagger: "2.0"
+info:
+  title: Sunglasses
+  description: An API to support the Sunglasses site
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        Brands allows you to find all brands of sunglasses
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: Sort type
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - quantity
+              - price
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: array of brands
+
+  /brands/{id}/products:
+    get:
+      summary: Get a brand's products
+      description: |
+        Get products by Brand Id
+      parameters:
+        - name: id
+          in: path
+          description: id of brand to get products
+          required: true
+          type: array
+      responses:
+        "200":
+          description: successful
+        default:
+          description: Unexpected error
+
+  /products:
+    get:
+      summary: Get all products
+      description: |
+        Get all products
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: Sort type
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - quantity
+              - price
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: array of products
+
+  /login:
+    post:
+      summary: User login
+      description: |
+        Allows a user to log into the site
+      parameters:
+        - name: user
+          in: body
+          description: user login
+          schema:
+            type: object
+            required:
+              - userName
+              - password
+            properties:
+              userName:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: successful login
+        "400":
+          description: Bad request. User ID must be an integer and larger than 0.
+        "401":
+          description: Authorization information is missing or invalid.
+        "404":
+          description: A user with the specified ID was not found.
+
+  /me/cart:
+    get:
+      summary: Show shopping cart
+      description: |
+        Allows a user to see their shopping cart
+      parameters:
+        - name: query
+          in: query
+          description: user cart
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - productId
+              - quantity
+              - price
+      responses:
+        "200":
+          description: successful
+
+    post:
+      summary:
+      description: |
+      parameters:
+
+  /me/cart/{productId}:
+    delete:
+      summary: Delete product
+      description: |
+        Remove a product from Cart
+      parameters:
+        - name: deleteProduct
+          in: path
+          description: remove product from cart
+          required: true
+          schema:
+            type: object
+            enum:
+              - productId
+
+    post:
+      summary: Add product
+      description: |
+        Add a product to Cart
+      parameters:
+        - name: addProduct
+          in: path
+          description: add product to cart
+          required: true
+          schema:
+            type: object
