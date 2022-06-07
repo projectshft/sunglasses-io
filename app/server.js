@@ -153,31 +153,27 @@ router.get('/me/cart', function(request, response) {
 });
 
 router.post('/me/cart', function(request, response) {
-    console.dir(request.body);
-    console.log('in cart post route');
     let foundToken = getValidTokenFromRequest(request);
     if(!foundToken) {
         response.writeHead(401, 'You have to be logged in to continue');
         return response.end();
     }
     let username = foundToken.username;
-    console.log(username);
     let loggedInUser = users.find(user => user.login.username === username);
-    // console.dir(loggedInUser);
     let addedItemIndex = loggedInUser.cart.findIndex(item => item.id === request.body.id);
-    console.log(addedItemIndex);
     let newCart = loggedInUser.cart.slice();
     if(addedItemIndex > -1) {
-        console.log('found')
         newCart[addedItemIndex].count++
     } else {
-        console.log('not found')
         newCart.push({...request.body, count: 1});
-        // console.dir(newCart);
         addedItemIndex = newCart.length - 1;
-        console.log(addedItemIndex);
     }
-    console.dir(newCart[addedItemIndex]);
+    let users = user.map(user => {
+        if(user.login.username === loggedInUser.username) {
+            user.cart = newCart;
+        } 
+        return user;
+    });
     response.writeHead(200, {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(newCart[addedItemIndex]));
 });
