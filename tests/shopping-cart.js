@@ -31,7 +31,7 @@ describe("Cart", () => {
         });
     });
     describe("/POST cart", () => {
-        it("should add an item to a validated user's cart", (done) => {
+        it("should add a new item to a validated user's cart", (done) => {
             let item = {
                 id: "5",
                 categoryId: "2",
@@ -61,6 +61,32 @@ describe("Cart", () => {
                             res.body[0].should.have.property("price");
                             res.body[0].should.have.property("imageUrls");
                             res.body[0].should.have.property("count");
+                            done();
+                        });
+                })
+                .end(done());
+        });
+        it("should not add an item to an unvalidated user's cart", (done) => {
+            let item = {
+                id: "5",
+                categoryId: "2",
+                name: "Glasses",
+                description: "The most normal glasses in the world",
+                price:150,
+                imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+            };
+            chai
+                .request(server)
+                .post('/me/cart/?token=badtokennumber')
+                .send(item)
+                .then(res => {
+                    res.should.have.status(401);
+                    chai
+                        .request(server)
+                        .get('/me/cart?token=4923292892791171')
+                        .end((err, res) => {
+                            res.body.should.be.an("array");
+                            res.body.should.have.lengthOf(0);
                             done();
                         });
                 })
