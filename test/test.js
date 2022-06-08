@@ -1,6 +1,6 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let server = require('../app/server');
+let server = require('../app/server.js');
 
 let should = chai.should();
 
@@ -13,7 +13,17 @@ describe('/GET brands', () => {
       .get('/brands')
       .end((err,res) => {
         res.should.have.status(200);
-        res.should.be.an('array');
+        // res.should.be.an('array');
+        // res.deepEqual(
+        //   { id: '1', name: 'Oakley' },
+        //   { id: '2', name: 'Ray Ban' },
+        //   { id: '3', name: "Levi's" },
+        //   { id: '4', name: 'DKNY' },
+        //   { id: '5', name: 'Burberry' }
+        // );
+        // res.body.should.be.a('object');
+        res.body.should.have.property('id');
+        res.body.should.have.property('name');
         done();
       });
   });
@@ -35,7 +45,7 @@ describe('/GET products', () => {
   it('it should GET all products', done => {
     chai
       .request(server)
-      .get('/prducts')
+      .get('/products')
       .end((err,res) => {
         res.should.have.status(200);
         res.should.be.an('array');

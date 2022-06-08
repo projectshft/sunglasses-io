@@ -13,15 +13,34 @@ let user = {};
 let users = [];
 let cart = [];
 
+var myRouter = Router();
+myRouter.use(bodyParser.json());
+
 const PORT = 3001;
 
-http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request,response)) 
 
-}).listen(PORT);
+});
+
+//Listen on port
+server.listen(PORT, err => {
+  if (err) throw err;
+  console.log(`server running on port ${PORT}`);
+  //populate brands  
+  brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
+
+  //populate products
+  products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"));
+
+  //populate users
+  users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
+
+});
 
 // Get Brands
 myRouter.get('/brands', function(request,response) {
+  console.log(brands);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
@@ -49,7 +68,7 @@ myRouter.get('/me/cart', function(request,response) {
 });
 
 // Post Cart
-myRouter.post('/me/cart', function(requets, response) {
+myRouter.post('/me/cart', function(request, response) {
 
 });
 
@@ -62,3 +81,5 @@ myRouter.delete('/me/cart/:productId', function(request,response) {
 myRouter.post('me/cart/:productId', function(request, response) {
 
 });
+
+module.exports = server;
