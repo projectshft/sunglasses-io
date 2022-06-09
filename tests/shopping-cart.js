@@ -104,7 +104,7 @@ describe("Cart", () => {
                     done();
                 });
         });
-        it("should decrease the count of an item there are more than one of in a validated user's cart by one", (done) => {
+        it("should decrease the count of an item in a validated user's cart by one", (done) => {
             chai
                 .request(server)
                 .put('/me/cart/1?token=9720471039174304')
@@ -117,6 +117,26 @@ describe("Cart", () => {
                     done();
                 });
         }); 
+        it("should not change the count of an item that isn't in a validated user's cart", (done) => {
+            chai
+                .request(server)
+                .put('/me/cart/2?token=9720471039174304')
+                .send({action: 'increment'})
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    done();
+                });
+        });
+        it("should not change the count of an item in an unvalidated user's cart", (done) => {
+            chai   
+                .request(server)
+                .put('/me/cart/2?token=badtokennumber')
+                .send({action: 'increment'})
+                .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                });
+        });
         
     });
 });
