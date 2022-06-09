@@ -100,7 +100,7 @@ describe("Cart", () => {
                     res.should.have.status(200);
                     res.body.should.be.an("array");
                     res.body.should.have.lengthOf(1);
-                    res.body[0].count.should.be(2);
+                    res.body[0].count.should.equal(3);
                     done();
                 });
         });
