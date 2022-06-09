@@ -83,7 +83,7 @@ let server = http.createServer(function (request, response) {
     fs.readFile("initial-data/users.json", (error, data) => {
         if(error) throw error;
         users = JSON.parse(data);
-        users[0].cart = {...products[0], count: 2}
+        users[0].cart = [{...products[0], count: 2}]
         console.log(`Server set up: ${users.length} users loaded`);
     });
 });
@@ -177,6 +177,32 @@ router.post('/me/cart', function(request, response) {
     });
     response.writeHead(200, {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(newCart[addedItemIndex]));
+});
+
+router.delete('/me/cart/:productId', function(request, response) {
+    let foundToken = getValidTokenFromRequest(request);
+    if(!foundToken) {
+        response.writeHead(401, 'You have to be logged in to continue');
+        return response.end();
+    }
+    let username = foundToken.username;
+    let loggedInUser = users.find(user => user.login.username === username);
+    let addedItemIndex = loggedInUser.cart.findIndex(item => item.id === request.params.productId);
+    let newCart = loggedInUser.cart.slice();
+    if(addedItemIndex > -1) {
+        newCart.splice(addedItemIndex, 0);
+        users = users.map(user => {
+            if(user.login.username === loggedInUser.username) {
+                user.cart = newCart;
+            } 
+            return user;
+        });
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        return response.end(JSON.stringify(newCart));
+    } else {
+        response.writeHead(404, 'The item to be deleted is not in the cart');
+        return response.end();
+    }
 });
 
 
