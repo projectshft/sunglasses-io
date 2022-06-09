@@ -80,5 +80,14 @@ describe("Cart", () => {
                     done();
                 });
         });
+        it("should not remove an item that exists in an unvalidated user's cart", (done) => {
+            chai
+                .request(server)
+                .delete('/me/cart/1?token=badtoken')
+                .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                });
+        });
     });
 });
