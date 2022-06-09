@@ -40,7 +40,6 @@ server.listen(PORT, err => {
 
 // Get Brands
 myRouter.get('/brands', function(request,response) {
-  console.log(brands);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
@@ -58,6 +57,25 @@ myRouter.get('/products', function(request,response) {
 
 // Post Login
 myRouter.post('/login', function(request, response) {
+  console.log(request.body.username);
+  if (!user){
+    response.writeHead(400);
+    return response.end();
+  }
+  const userLogin = request.body;
+
+  const findUser = (userLogin) => {
+    return users.find((users=>users.login.username == userLogin.username))
+  }
+
+  console.log(findUser);
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(userLogin));
+
+  // getBook(bookId) {
+  //   return books.find((book=>book.id == bookId))
+  // }
 
 });
 

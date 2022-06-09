@@ -6,6 +6,10 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
+// beforeEach(() => {
+//   server.removeAll();
+// });
+
 describe('/GET brands', () => {
   it('it should GET all brands', done => {
     chai
@@ -13,7 +17,9 @@ describe('/GET brands', () => {
       .get('/brands')
       .end((err,res) => {
         res.should.have.status(200);
-        // res.should.be.an('array');
+        res.body.should.be.an('array');
+        // res.body.length.should.be.eql(0);
+
         // res.deepEqual(
         //   { id: '1', name: 'Oakley' },
         //   { id: '2', name: 'Ray Ban' },
@@ -22,8 +28,8 @@ describe('/GET brands', () => {
         //   { id: '5', name: 'Burberry' }
         // );
         // res.body.should.be.a('object');
-        res.body.should.have.property('id');
-        res.body.should.have.property('name');
+        // res.body.should.have.property('id');
+        // res.body.should.have.property('name');
         done();
       });
   });
@@ -37,6 +43,7 @@ describe('/GET products by brand', () => {
       .end((err,res) => {
         res.should.have.status(200);
         res.should.be.an('array');
+        done();
       });
   });
 });
@@ -48,7 +55,7 @@ describe('/GET products', () => {
       .get('/products')
       .end((err,res) => {
         res.should.have.status(200);
-        res.should.be.an('array');
+        res.body.should.be.an('array');
         done();
       });
   });
@@ -56,9 +63,14 @@ describe('/GET products', () => {
 
 describe('/POST login', () => {
   it('it should POST user login', done => {
+    let user = {
+      username: 'yellowleopard753',
+      password: 'jonjon'
+    }
     chai
       .request(server)
       .post('/login')
+      .send(user)
       .end((err,res) => {
         res.body.should.be.a('object');
         res.body.should.have.property('username');
@@ -76,8 +88,9 @@ describe('The Cart', () => {
         .get('/me/cart')
         .end((err, res) => {
           res.should.have.status(200);
-          res.should.be.an('array');
-
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(0);
+          done();
         });
     });
   });
@@ -89,7 +102,7 @@ describe('The Cart', () => {
         .post('/me/cart')
         .end((err, res) => {
           res.should.have.status(200);
-
+        done();
       });
     })
   })
@@ -104,6 +117,7 @@ describe('The Products in the Cart', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.should.be.an('object');
+        done();
         });
     });
   });
@@ -116,6 +130,7 @@ describe('The Products in the Cart', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.should.be.an('object');
+        done();
         });
     });
   });
