@@ -44,69 +44,10 @@ describe("Cart", () => {
                 .request(server)
                 .post('/me/cart/?token=4923292892791171')
                 .send(item)
-                .then(res => {
+                .end((err, res) => {
                     res.should.have.status(200);
-                    chai
-                        .request(server)
-                        .get('/me/cart?token=4923292892791171')
-                        .end((err, res) => {
-                            res.should.have.status(200);
-                            res.body.should.be.an("array");
-                            res.body.should.have.lengthOf(1);
-                            res.body[0].should.be.an("object");
-                            res.body[0].should.have.property("id");
-                            res.body[0].should.have.property("categoryId");
-                            res.body[0].should.have.property("name");
-                            res.body[0].should.have.property("description");
-                            res.body[0].should.have.property("price");
-                            res.body[0].should.have.property("imageUrls");
-                            res.body[0].should.have.property("count");
-                            done();
-                        });
-                })
-                .end(done());
-        });
-        it("should increase the count of an item that had already been added to a validated user's cart", (done) => {
-            let item = {
-                id: "2",
-                categoryId: "1",
-                name: "Black Sunglasses",
-                description: "The best glasses in the world",
-                price:100,
-                imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-            };
-            chai
-                .request(server)
-                .post('/me/cart/?token=4923292892791171')
-                .send(item)
-                .then(res => {
-                    chai
-                        .request(server)
-                        .post('/me/cart/?token=4923292892791171')
-                        .send(item)
-                        .then(res => {
-                            res.should.have.status(200);
-                            chai
-                                .request(server)
-                                .get('/me/cart?token=4923292892791171')
-                                .end((err, res) => {
-                                    res.should.have.status(200);
-                                    res.body.should.be.an("array");
-                                    res.body.should.have.lengthOf(1);
-                                    res.body[0].should.be.an("object");
-                                    res.body[0].should.have.property("id");
-                                    res.body[0].should.have.property("categoryId");
-                                    res.body[0].should.have.property("name");
-                                    res.body[0].should.have.property("description");
-                                    res.body[0].should.have.property("price");
-                                    res.body[0].should.have.property("imageUrls");
-                                    res.body[0].should.have.property("count");
-                                    res.body[0].count.should.equal(2);
-                                    done();
-                                });
-                        });
-                })
-                .end(done());
+                    done();
+                });
         });
         it("should not add an item to an unvalidated user's cart", (done) => {
             let item = {
@@ -121,18 +62,10 @@ describe("Cart", () => {
                 .request(server)
                 .post('/me/cart/?token=badtokennumber')
                 .send(item)
-                .then(res => {
+                .end((err, res) => {
                     res.should.have.status(401);
-                    chai
-                        .request(server)
-                        .get('/me/cart?token=4923292892791171')
-                        .end((err, res) => {
-                            res.body.should.be.an("array");
-                            res.body.should.have.lengthOf(0);
-                            done();
-                        });
-                })
-                .end(done());
+                    done();
+                });
         });
     });
 });
