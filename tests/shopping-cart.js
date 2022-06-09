@@ -75,6 +75,8 @@ describe("Cart", () => {
                 .delete('/me/cart/1?token=9720471039174304')
                 .end((err, res) => {
                     res.should.have.status(200);
+                    res.body.should.be.an("array");
+                    res.body.should.have.lengthOf(0);   
                     done();
                 });
         });
