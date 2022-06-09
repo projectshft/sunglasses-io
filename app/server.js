@@ -205,6 +205,32 @@ router.delete('/me/cart/:productId', function(request, response) {
     }
 });
 
+router.put('/me/cart/:productId', function(request, response) {
+    let foundToken = getValidTokenFromRequest(request);
+    if(!foundToken) {
+        response.writeHead(401, 'You have to be logged in to continue');
+        return response.end();
+    }
+    let username = foundToken.username;
+    let loggedInUser = users.find(user => user.login.username === username);
+    let updatedItemIndex = loggedInUser.cart.findIndex(item => item.id === request.params.productId);
+    let newCart = loggedInUser.cart.slice();
+    if(updatedItemIndex > -1) {
+        let countChange = request.body.action === 'increment' ? 1 : -1;
+        newCart[updatedItemIndex].count += countChange;
+        users = users.map(user => {
+            if(user.login.username === loggedInUser.username) {
+                user.cart = newCart;
+            }
+            return user;
+        });
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        return response.end(JSON.stringify(newCart));
+    } else {
+        response.writeHead(404, 'Item not found');
+        return response.end();
+    }
+});
 
 
 module.exports = server;
