@@ -15,7 +15,7 @@ const PORT = 3001;
 let products = [];
 let brands = [];
 let users = [];
-let accessTokens = [{username: 'lazywolf342', lastUpdated: Infinity, token: '4923292892791171'}];
+let accessTokens = [{username: 'lazywolf342', lastUpdated: Infinity, token: '4923292892791171'}, {username: 'yellowleopard753', lastUpdated: Infinity, token: '9720471039174304'}];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -83,6 +83,7 @@ let server = http.createServer(function (request, response) {
     fs.readFile("initial-data/users.json", (error, data) => {
         if(error) throw error;
         users = JSON.parse(data);
+        users[0].cart = {...products[0], count: 2}
         console.log(`Server set up: ${users.length} users loaded`);
     });
 });
@@ -177,5 +178,7 @@ router.post('/me/cart', function(request, response) {
     response.writeHead(200, {'Content-Type': 'application/json'});
     return response.end(JSON.stringify(newCart[addedItemIndex]));
 });
+
+
 
 module.exports = server;
