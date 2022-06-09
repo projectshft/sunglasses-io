@@ -168,7 +168,7 @@ router.post('/me/cart', function(request, response) {
         newCart.push({...request.body, count: 1});
         addedItemIndex = newCart.length - 1;
     }
-    let users = user.map(user => {
+    users = users.map(user => {
         if(user.login.username === loggedInUser.username) {
             user.cart = newCart;
         } 
