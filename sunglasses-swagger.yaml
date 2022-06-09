@@ -1,0 +1,254 @@
+swagger: "2.0"
+info:
+  title: Sunglasses IO API
+  description: API for Sunglasses IO Website
+  version: "1.0.0"
+host: api.sunglassesio.com
+schemes:
+  - http
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        This endpoint returns an array of Brand objects that contain each brand's name and ID
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of all available brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Products of a particular brand
+      description: |
+        This endpoint returns information for all brands of glasses sold in the store. The response is an object that contains the name of the brand and an array of all pairs of glasses of a selected brand.
+      parameters:
+        - name: id
+          in: path
+          description: Unique ID of selected brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of products of a specific brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint returns information for all the products sold in the store. The response is an array of products objects and each product object contains the product's brand, description, image URL, and price.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        # Should there be an ID query?
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Log in to account
+      description: |
+        This endpoint allows you to log into a user's account
+      tags:
+        - User
+      responses:
+        "200":
+          description: An object representing the newly signed in user
+          schema:
+            $ref: "#/definitions/AccessToken"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: Retrieve Products in the Cart
+      description: |
+        This endpoint allows you to retrieve information for all pairs of glasses in the cart
+      # Do I need a token here as a query?
+      tags:
+        - User
+      responses:
+        "200":
+          description: An array of products in the user's cart
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add a product to the Cart
+      description: |
+        This endpoint allows you to add a product to the cart
+      # Do I need a token here as a query?
+      tags:
+        - User
+      responses:
+        "200":
+          description: An object representing the product that was added to the cart
+          schema:
+            $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    post:
+      summary: Change the quantity of a certain product in a user's cart
+      description: |
+        This endpoint allows you to update the quantity of a product that is already in a user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to update the quantity of
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        "200":
+          # Should I do the cart as the return object insteadd?
+          description: An object representing the product in the cart that was updated
+          schema:
+            $ref: "#/definitions/CartItem"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      summary: Remove a product from a user's cart
+      description: |
+        This endpoint allows you to remove a product from a cart (including duplicates if the count of the product in the cart is more than 1)
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to update the quantity of
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: An object representing the product that was removed from the cart
+          schema:
+            $ref: "#/definitions/CartItem"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: Unique identifier for the brand this product belongs to
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: Description of this product
+      price:
+        type: string
+        description: Price for this product
+      imageURL:
+        type: string
+        description: URL where image for this product is located
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand
+      name:
+        type: string
+        description: Name of the brand
+  Cart:
+    type: array
+    description: Array of products user has selected to buy
+    items:
+      $ref: "#/definitions/CartItem"
+  CartItem:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: Unique identifier for the brand this product belongs to
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: Description of this product
+      price:
+        type: string
+        description: Price for this product
+      imageURL:
+        type: string
+        description: URL where image for this product is located
+      count:
+        type: integer
+        description: How many of an item are in a cart
+  AccessToken:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username the token belongs to
+      lastUpdated:
+        type: string
+        description: The date the user's token was last updated
+      token:
+        type: string
+        description: Sixteen digit integer string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
