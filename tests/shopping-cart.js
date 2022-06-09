@@ -91,7 +91,7 @@ describe("Cart", () => {
         });
     });
     describe("/UPDATE cart", () => {
-        it("should should increase the count of an item in a user's cart by one", (done) => {
+        it("should increase the count of an item in a validated user's cart by one", (done) => {
             chai
                 .request(server)
                 .put('/me/cart/1?token=9720471039174304')
@@ -104,5 +104,19 @@ describe("Cart", () => {
                     done();
                 });
         });
+        it("should decrease the count of an item there are more than one of in a validated user's cart by one", (done) => {
+            chai
+                .request(server)
+                .put('/me/cart/1?token=9720471039174304')
+                .send({action: 'decrement'})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an("array");
+                    res.body.should.have.lengthOf(1);
+                    res.body[0].count.should.equal(2);
+                    done();
+                });
+        }); 
+        
     });
 });
