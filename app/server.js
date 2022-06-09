@@ -1,14 +1,12 @@
 var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
-var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 let Products = require('./models/products');
 let Brands = require('./models/brands');
-let url = require('url');
-const { Console } = require('console');
+
 
 const PORT = 3001;
 
@@ -27,12 +25,10 @@ const TOKEN_VALIDITY_TIMEOUT = 30 * 60 * 1000;
 const getValidTokenFromRequest = function(request) {
     const parsedUrl = require('url').parse(request.url, true);
     if (parsedUrl.query.token) {
-      // Verify the access token to make sure it's valid and not expired
       let currentAccessToken = accessTokens.find((accessToken) => {
         let tokenExists = accessToken.token == parsedUrl.query.token;
         let tokenHasntExpired = ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
         return tokenExists && tokenHasntExpired;
-        // return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
       });
   
     if (currentAccessToken) {
@@ -44,17 +40,6 @@ const getValidTokenFromRequest = function(request) {
         return null;
     }
 };
-
-const checkUserAccess = (token, id) => {
-    let username = accessTokens.find(accessToken => accessToken.token = token).username;
-    let user = users.find(user => user.login.username === username);
-    if(user && user.storeIds.includes(id)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-  
 
 
 let server = http.createServer(function (request, response) {
