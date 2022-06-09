@@ -190,7 +190,7 @@ router.delete('/me/cart/:productId', function(request, response) {
     let addedItemIndex = loggedInUser.cart.findIndex(item => item.id === request.params.productId);
     let newCart = loggedInUser.cart.slice();
     if(addedItemIndex > -1) {
-        newCart.splice(addedItemIndex, 0);
+        newCart.splice(addedItemIndex, 1);
         users = users.map(user => {
             if(user.login.username === loggedInUser.username) {
                 user.cart = newCart;
