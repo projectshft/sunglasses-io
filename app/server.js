@@ -73,11 +73,6 @@ let server = http.createServer(function (request, response) {
     });
 });
 
-router.get('/products', function(request, response) {
-    response.writeHead(200, {"Content-Type": "application/json"}, CORS_HEADERS);
-    return response.end(JSON.stringify(Products.getAll(products)));
-});
-
 router.get('/brands', function(request, response) {
     response.writeHead(200, {"Content-Type": "application/json"},  CORS_HEADERS);
     return response.end(JSON.stringify(Brands.getAll(brands)));
@@ -91,6 +86,11 @@ router.get('/brands/:id/products', function(request, response) {
         response.writeHead(404);
         return response.end('Brand not found');
     }
+});
+
+router.get('/products', function(request, response) {
+    response.writeHead(200, {"Content-Type": "application/json"}, CORS_HEADERS);
+    return response.end(JSON.stringify(Products.getAll(products)));
 });
 
 router.post('/login', function(request, response) {
@@ -190,7 +190,7 @@ router.delete('/me/cart/:productId', function(request, response) {
     }
 });
 
-router.put('/me/cart/:productId', function(request, response) {
+router.post('/me/cart/:productId', function(request, response) {
     let foundToken = getValidTokenFromRequest(request);
     if(!foundToken) {
         response.writeHead(401, 'You have to be logged in to continue');

@@ -67,6 +67,52 @@ describe("Cart", () => {
                     done();
                 });
         });
+        it("should increase the count of an item in a validated user's cart by one", (done) => {
+            chai
+                .request(server)
+                .post('/me/cart/1?token=9720471039174304')
+                .send({action: 'increment'})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an("array");
+                    res.body.should.have.lengthOf(1);
+                    res.body[0].count.should.equal(3);
+                    done();
+                });
+        });
+        it("should decrease the count of an item in a validated user's cart by one", (done) => {
+            chai
+                .request(server)
+                .post('/me/cart/1?token=9720471039174304')
+                .send({action: 'decrement'})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an("array");
+                    res.body.should.have.lengthOf(1);
+                    res.body[0].count.should.equal(2);
+                    done();
+                });
+        }); 
+        it("should not change the count of an item that isn't in a validated user's cart", (done) => {
+            chai
+                .request(server)
+                .post('/me/cart/2?token=9720471039174304')
+                .send({action: 'increment'})
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    done();
+                });
+        });
+        it("should not change the count of an item in an unvalidated user's cart", (done) => {
+            chai   
+                .request(server)
+                .post('/me/cart/2?token=badtokennumber')
+                .send({action: 'increment'})
+                .end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                });
+        });
     });
     describe("/DELETE cart", () => {
         it("should remove an item (all counts of the item) that exists in a validated user's cart", (done) => {
@@ -98,54 +144,5 @@ describe("Cart", () => {
                     done();
                 });
         });
-    });
-    describe("/UPDATE cart", () => {
-        it("should increase the count of an item in a validated user's cart by one", (done) => {
-            chai
-                .request(server)
-                .put('/me/cart/1?token=9720471039174304')
-                .send({action: 'increment'})
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.an("array");
-                    res.body.should.have.lengthOf(1);
-                    res.body[0].count.should.equal(3);
-                    done();
-                });
-        });
-        it("should decrease the count of an item in a validated user's cart by one", (done) => {
-            chai
-                .request(server)
-                .put('/me/cart/1?token=9720471039174304')
-                .send({action: 'decrement'})
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.an("array");
-                    res.body.should.have.lengthOf(1);
-                    res.body[0].count.should.equal(2);
-                    done();
-                });
-        }); 
-        it("should not change the count of an item that isn't in a validated user's cart", (done) => {
-            chai
-                .request(server)
-                .put('/me/cart/2?token=9720471039174304')
-                .send({action: 'increment'})
-                .end((err, res) => {
-                    res.should.have.status(404);
-                    done();
-                });
-        });
-        it("should not change the count of an item in an unvalidated user's cart", (done) => {
-            chai   
-                .request(server)
-                .put('/me/cart/2?token=badtokennumber')
-                .send({action: 'increment'})
-                .end((err, res) => {
-                    res.should.have.status(401);
-                    done();
-                });
-        });
-        
     });
 });
