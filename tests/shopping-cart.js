@@ -68,4 +68,15 @@ describe("Cart", () => {
                 });
         });
     });
+    describe("/DELETE cart", () => {
+        it("should remove an item (all counts of the item) that exists in a validated user's cart", (done) => {
+            chai
+                .request(server)
+                .delete('/me/cart/1?token=9720471039174304')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    done();
+                });
+        });
+    });
 });
