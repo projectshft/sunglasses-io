@@ -90,4 +90,19 @@ describe("Cart", () => {
                 });
         });
     });
+    describe("/UPDATE cart", () => {
+        it("should should increase the count of an item in a user's cart by one", (done) => {
+            chai
+                .request(server)
+                .put('/me/cart/1?token=9720471039174304')
+                .send({action: 'increment'})
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an("array");
+                    res.body.should.have.lengthOf(1);
+                    res.body[0].count.should.be(2);
+                    done();
+                });
+        });
+    });
 });
