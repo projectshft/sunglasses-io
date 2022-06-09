@@ -80,6 +80,15 @@ describe("Cart", () => {
                     done();
                 });
         });
+        it("should not remove an item that doesn't exist in a validated user's cart", (done) => {
+            chai
+                .request(server)
+                .delete('/me/cart/2?token=9720471039174304')
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    done();
+                });
+        });
         it("should not remove an item that exists in an unvalidated user's cart", (done) => {
             chai
                 .request(server)
