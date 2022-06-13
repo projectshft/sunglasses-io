@@ -20,11 +20,6 @@ paths:
           in: query
           description: Search query string
           required: false
-          type: string
-        - name: sort
-          in: query
-          description: Sort type
-          required: false
           type: array
           items:
             type: string
@@ -48,6 +43,11 @@ paths:
           description: id of brand to get products
           required: true
           type: array
+          items:
+            type: string
+            enum:
+              - quantity
+              - price
       responses:
         "200":
           description: successful
@@ -132,9 +132,19 @@ paths:
           description: successful
 
     post:
-      summary:
+      summary: Add product
       description: |
+        Add a product to Cart
       parameters:
+        - name: addProuct
+          in: body
+          description: add product to cart
+          required: true
+          schema:
+            type: object
+      responses:
+        "200":
+          description: successful
 
   /me/cart/{productId}:
     delete:
@@ -142,23 +152,27 @@ paths:
       description: |
         Remove a product from Cart
       parameters:
-        - name: deleteProduct
+        - name: productId
           in: path
-          description: remove product from cart
+          description: product id
           required: true
-          schema:
-            type: object
-            enum:
-              - productId
+          type: integer
+          minimum: 1
+      responses:
+        "200":
+          description: successful
 
     post:
-      summary: Add product
+      summary: Add quanity to product
       description: |
-        Add a product to Cart
+        Add quanity product in Cart
       parameters:
-        - name: addProduct
+        - name: productId
           in: path
           description: add product to cart
           required: true
-          schema:
-            type: object
+          type: integer
+          minimum: 1
+      responses:
+        "200":
+          description: successful

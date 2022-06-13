@@ -6,10 +6,6 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-// beforeEach(() => {
-//   server.removeAll();
-// });
-
 describe('/GET brands', () => {
   it('it should GET all brands', done => {
     chai
@@ -170,7 +166,7 @@ describe('The Products in the Cart', () => {
           res.body.should.have.property('description');
           res.body.should.have.property('price');
           res.body.should.have.property('imageUrls');
-          res.body.should.have.property('quantity');
+          res.body.should.have.property('quantity').eql(2);
         done();
         });
     });

@@ -9,7 +9,6 @@ var uid = require('rand-token').uid;
 //State holding variables
 let brands = [];
 let products = [];
-let user = {};
 let users = [];
 let cart = [];
 
@@ -95,7 +94,6 @@ myRouter.post('/login', function(request, response) {
     response.writeHead(400, 'No login information');
     return response.end();
   }
-
 });
 
 // Get Cart
