@@ -58,7 +58,6 @@ myRouter.get('/brands/:id/products', function(request, response) {
   });
 
   if (findProducts) {
-    console.log(findProducts);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(findProducts));
 
@@ -105,29 +104,10 @@ myRouter.get('/me/cart', function(request,response) {
   return response.end(JSON.stringify(cart));
 });
 
-// Post Cart
+// Post to Cart
 myRouter.post('/me/cart', function(request, response) {
-
-});
-
-// Delete Product in Cart
-myRouter.delete('/me/cart/:productId', function(request,response) {
-  const currentCart = request.body;
-
-  if(!currentCart){
-    response.writeHead(400);
-    return response.end();
-  }
-  if(currentCart.id) {
-    const findProduct = currentCart.find((product) => {
-      return cart.id == currentCart.id
-    });
-  }
-});
-
-// Post Product to Cart
-myRouter.post('/me/cart/:productId', function(request, response) {
   const addedProduct = request.body;
+  const includeQty = {"quantity": 1};
 
   if(!addedProduct.id){
     response.writeHead(400);
@@ -139,14 +119,64 @@ myRouter.post('/me/cart/:productId', function(request, response) {
       return products.id == addedProduct.id
     });
     if(findProduct) {
-      cart.push(addedProduct);
+      productInCart = Object.assign(addedProduct, includeQty);
+      cart.push(productInCart);
     
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(addedProduct));
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(productInCart));
     }
   } else {
-    response.writeHead(400, 'No product information');
+      response.writeHead(400, 'No product information');
+      return response.end();
+  }
+});
+
+// Delete Product in Cart
+myRouter.delete('/me/cart/:productId', function(request, response) {
+  const deleteProduct = request.body;
+
+  if(!deleteProduct){
+    response.writeHead(400);
     return response.end();
+  }
+  if(deleteProduct.id) {
+    const findProduct = products.find((products) => {
+      return products.id == deleteProduct.id
+    });
+    if(findProduct) {
+      delete cart.deleteProduct;
+    
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(deleteProduct));
+    }
+  } else {
+      response.writeHead(400, 'No product information');
+      return response.end();
+  }
+});
+
+// Add Quantity Product to Cart
+myRouter.post('/me/cart/:productId', function(request, response) {
+  const updateProduct = request.body;
+
+  if(!updateProduct.id){
+    response.writeHead(400);
+    return response.end();
+  }
+
+  if(updateProduct.id && updateProduct.quantity) {
+    const findProduct = products.find((products) => {
+      return products.id == updateProduct.id
+    });
+    if(findProduct) {
+      updateProduct.quantity++;
+    
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(updateProduct));
+    }
+  } else {
+      response.writeHead(400, 'No product information');
+      return response.end();
   }
 });
 
