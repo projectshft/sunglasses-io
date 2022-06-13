@@ -46,7 +46,26 @@ myRouter.get('/brands', function(request,response) {
 
 // Get Products by Brand Id
 myRouter.get('/brands/:id/products', function(request, response) {
+  const brandRequested = request.body;
 
+  if(!brandRequested.id){
+    response.writeHead(400);
+    return response.end();
+  }
+
+  const findProducts = products.filter((products) => {
+    return products.categoryId == brandRequested.id;
+  });
+
+  if (findProducts) {
+    console.log(findProducts);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(findProducts));
+
+  } else {
+    response.writeHead(400, 'Could not find any products');
+    return response.end();
+  }
 });
 
 // Get Products
@@ -57,25 +76,26 @@ myRouter.get('/products', function(request,response) {
 
 // Post Login
 myRouter.post('/login', function(request, response) {
-  console.log(request.body.username);
-  if (!user){
-    response.writeHead(400);
-    return response.end();
-  }
   const userLogin = request.body;
 
-  const findUser = (userLogin) => {
-    return users.find((users=>users.login.username == userLogin.username))
+  if (userLogin.username && userLogin.password) {
+    
+    const findUser = users.find((users) => {
+      return users.login.username == userLogin.username && users.login.password == userLogin.password;
+    });
+
+    if(findUser) {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(userLogin));
+    } else {
+      response.writeHead(400, 'Invalid username or password');
+      return response.end();
+    }
+
+  } else {
+    response.writeHead(400, 'No login information');
+    return response.end();
   }
-
-  console.log(findUser);
-
-  response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(userLogin));
-
-  // getBook(bookId) {
-  //   return books.find((book=>book.id == bookId))
-  // }
 
 });
 
@@ -92,12 +112,42 @@ myRouter.post('/me/cart', function(request, response) {
 
 // Delete Product in Cart
 myRouter.delete('/me/cart/:productId', function(request,response) {
+  const currentCart = request.body;
 
+  if(!currentCart){
+    response.writeHead(400);
+    return response.end();
+  }
+  if(currentCart.id) {
+    const findProduct = currentCart.find((product) => {
+      return cart.id == currentCart.id
+    });
+  }
 });
 
 // Post Product to Cart
-myRouter.post('me/cart/:productId', function(request, response) {
+myRouter.post('/me/cart/:productId', function(request, response) {
+  const addedProduct = request.body;
 
+  if(!addedProduct.id){
+    response.writeHead(400);
+    return response.end();
+  }
+
+  if(addedProduct.id) {
+    const findProduct = products.find((products) => {
+      return products.id == addedProduct.id
+    });
+    if(findProduct) {
+      cart.push(addedProduct);
+    
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(addedProduct));
+    }
+  } else {
+    response.writeHead(400, 'No product information');
+    return response.end();
+  }
 });
 
 module.exports = server;
