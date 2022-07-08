@@ -10,6 +10,8 @@ const PORT = 3001;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer( (request, response) => {
+let server = http.createServer( (request, response) => {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT);
+
+module.exports = server;
