@@ -1,0 +1,403 @@
+openapi: 3.0.0
+info:
+  title: Sunglasses.io
+  version: 1.0.0
+  description: The backend to a sunglasses website
+paths:
+  /login:
+    summary: user login
+    description: user login
+    post:
+      summary: user login
+      description: user login via username and password
+      operationId: user_login
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: '{"username": "Jim", "password": "hunter2"} '
+        '401':
+          content:
+            application/json:
+              examples:
+                Invalid username or password:
+                  value: '{"username": "Jim", "password": "hunter2"} '
+        default:
+          description: Default error sample response
+  /sunglasses:
+    summary: search all sunglasses
+    description: >-
+      search all sunglasses with the brands and products specified in the query
+      params
+    get:
+      parameters:
+        - in: query
+          name: brand
+          schema:
+            type: string
+        - in: query
+          name: product
+          schema:
+            type: string
+      summary: search all sunglasses
+      description: >-
+        search all sunglasses with brand and/or product specified in the query
+        params
+      operationId: get_all
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                OK:
+                  type: null
+                sunglass with query:
+                  value: |2-
+                     {"id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses"}
+          description: get sunglasses back
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |2-
+                     {"id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses"}
+        '404':
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  value: |-
+                    { "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses"}
+        default:
+          description: Default error sample response
+    delete:
+      summary: request to delete denied
+      description: request to delete denied
+      operationId: no_delete_sunglasses
+      responses:
+        '405':
+          content:
+            application/json:
+              examples:
+                Method not allowed:
+                  value: |-
+                    { "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses"}
+        default:
+          description: Default error sample response
+  /sunglasses/:brands:
+    summary: get sunglasses by brand
+    description: get sunglasses by brand
+    get:
+      summary: get sunglasses by brand
+      description: get sunglasses by brand
+      operationId: get_by_brand
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |2-
+                     {
+                        "id": "1",
+                        "name": "Oakley"
+                      }
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |2-
+                     {
+                        "id": "1",
+                        "name": "Oakley"
+                      }
+        '404':
+          content:
+            application/json:
+              examples:
+                Particular brand not found:
+                  value: |2-
+                     {
+                        "id": "1",
+                        "name": "Oakley"
+                      }
+        default:
+          description: Default error sample response
+      tags:
+        - Brand
+    delete:
+      summary: Delete not allowed
+      description: Delete not allowed
+      operationId: no_deleting_brands
+      responses:
+        '405':
+          content:
+            application/json:
+              examples:
+                Delete Method Not Permitted for Brands:
+                  value: |2-
+                     {
+                        "id": "1",
+                        "name": "Oakley"
+                      }
+        default:
+          description: Default error sample response
+      tags:
+        - Brand
+  /sunglasses/:brands/:products:
+    summary: get sunglasses by product
+    description: get sunglasses by product
+    get:
+      summary: get sunglasses by product
+      description: get sunglasses by product
+      operationId: get_by_product
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |-
+                    {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '404':
+          content:
+            application/json:
+              examples:
+                Product not found:
+                  value: |-
+                    {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+    delete:
+      summary: No deletes allowed
+      description: No deletes allowed
+      operationId: no_deleting_brands
+      responses:
+        '405':
+          content:
+            application/json:
+              examples:
+                Deleting products is not permitted:
+                  value: |-
+                    {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        default:
+          description: Default error sample response
+      tags:
+        - Product
+  /cart:
+    summary: items to purchase
+    description: items to purchase
+    get:
+      summary: view the whole cart
+      description: view the whole cart after things are posted to it
+      operationId: get_cart
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '401':
+          content:
+            application/json:
+              examples:
+                You must be logged in to view a cart:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+    post:
+      summary: Add items to the cart
+      description: Add items to the cart
+      operationId: post_cart
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                Item successfully posted to the cart:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '401':
+          content:
+            application/json:
+              examples:
+                You must be logged in to post something to the cart:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '404':
+          content:
+            application/json:
+              examples:
+                The item that you tried to post is not recognized:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+    delete:
+      summary: cannot delete cart
+      description: cannot delete cart
+      operationId: no_deleting_cart
+      responses:
+        '405':
+          content:
+            application/json:
+              examples:
+                Cannot delete an entire cart. Can only delete individual items.:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
+  /cart/:id:
+    summary: a particular item in the cart
+    description: a particular item in the cart
+    delete:
+      summary: remove an item from your cart
+      description: remove an item from your cart
+      operationId: delete_cart_item
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                Item successfully deleted from the cart:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '401':
+          content:
+            application/json:
+              examples:
+                You must be logged in to delete items from the cart:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        '404':
+          content:
+            application/json:
+              examples:
+                The item that you are trying to delete from the cart is not recognized:
+                  value: |2-
+                     {
+                            "id": "1",
+                            "categoryId": "1",
+                            "name": "Superglasses",
+                            "description": "The best glasses in the world",
+                            "price":150,
+                            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+                        }
+        default:
+          description: Default error sample response
+      tags:
+        - Cart
