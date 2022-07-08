@@ -12,6 +12,7 @@ describe('Sunglasses', () => {
       .get('/sunglasses')
       .end((err, res) => {
         res.should.have.status(200)
+        res.body.should.be.an('array')
         done()
       })
     })
