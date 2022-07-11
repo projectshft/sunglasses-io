@@ -31,7 +31,7 @@ let server = http.createServer( (req, res) => {
 
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
-  res.send(JSON.stringify(products))
+  res.end(JSON.stringify(products))
 })
 
 module.exports = server;

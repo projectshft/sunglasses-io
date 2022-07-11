@@ -11,7 +11,7 @@ describe('Sunglasses', function() {
       chai.request(server)
       .get('/sunglasses')
       .end(function(err, res) {
-        should.exist(err, res)
+        should.exist(res)
         res.should.have.status(200)       
         res.body.should.be.an('array')
         done()
