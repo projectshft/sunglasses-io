@@ -12,8 +12,8 @@ myRouter.use(bodyParser.json());
 
 let products = [];
 
-let server = http.createServer( (request, response) => {
-  myRouter(request, response, finalHandler(request, response))
+let server = http.createServer( (req, res) => {
+  myRouter(req, res, finalHandler(req, res))
 }).listen(PORT, error => {
   if (error) {
     return console.log("Error on Server Startup: ", error);
@@ -31,7 +31,7 @@ let server = http.createServer( (request, response) => {
 
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
-  res.end(products)
+  res.send(JSON.stringify(products))
 })
 
 module.exports = server;
