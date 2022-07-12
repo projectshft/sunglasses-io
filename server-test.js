@@ -23,6 +23,18 @@ describe('Sunglasses', function() {
     })
   })
 
+  //cannot delete sunglasses
+  describe('/DELETE for sunglasses', function() {
+    it('should return a 405 error if someone tries it', function(done) {
+      chai.request(server)
+      .delete('/sunglasses')
+      .end(function(err, res) {
+        res.should.have.status(405)
+        done()
+      })
+    })
+  })
+
   //all brands
 
   describe('/GET search with a path for brands', function() {
@@ -36,6 +48,8 @@ describe('Sunglasses', function() {
       })
     })
   })
+
+  //cannot delete brands
 
   //specific product
 

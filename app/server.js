@@ -46,4 +46,9 @@ myRouter.get('/sunglasses/brands', (req, res) => {
   res.end(JSON.stringify(brands))
 })
 
+myRouter.delete('/sunglasses', (req, res) => {
+  res.writeHead(405)
+  res.end('Cannot delete this resource')
+})
+
 module.exports = server;
