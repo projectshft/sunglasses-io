@@ -12,6 +12,7 @@ myRouter.use(bodyParser.json());
 
 let products = [];
 let brands = [];
+let cart = [];
 
 let server = http.createServer( (req, res) => {
   myRouter(req, res, finalHandler(req, res))
@@ -111,5 +112,19 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
     res.end('searched brand not found')
   }
 })
+
+//CART
+//POST /cart
+myRouter.post('/cart', (req, res) => {
+  //check for proper keys and values
+  const toPost = req.body
+  cart.push(toPost)
+  res.writeHead(201)
+  res.end('item posted to cart')
+  //if so, push to cart
+})
+//GET /cart
+//DELETE /cart (not permitted)
+//DELETE /cart/:id 
 
 module.exports = server;
