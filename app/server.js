@@ -84,4 +84,32 @@ myRouter.get('/sunglasses/:product', (req, res) => {
   }
 })
 
+myRouter.get('/sunglasses/brands/:brand', (req, res) => {
+  const reqBrandName = req.params.brand;
+  
+  let matchingBrands = [];
+  let matchedBrandList = [];
+
+  brands.map(brand => {
+    if (brand.name == reqBrandName) {
+      matchingBrands.push(reqBrandName);
+    }
+  })
+
+  if (matchingBrands.length > 0) {
+    brands.map(brand => {
+      matchingBrands.map(bran => {
+        if (bran == brand.name) {
+          matchedBrandList.push(brand)
+        }
+      })
+    })
+    res.writeHead(200)
+    res.end(JSON.stringify(matchedBrandList))
+  } else {
+    res.writeHead(404)
+    res.end('searched brand not found')
+  }
+})
+
 module.exports = server;
