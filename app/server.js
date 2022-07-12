@@ -11,6 +11,7 @@ const myRouter = Router();
 myRouter.use(bodyParser.json());
 
 let products = [];
+let brands = [];
 
 let server = http.createServer( (req, res) => {
   myRouter(req, res, finalHandler(req, res))
@@ -22,7 +23,13 @@ let server = http.createServer( (req, res) => {
   fs.readFile('/Users/joshuacushing/code/Parsity/evals/sunglasses-io/initial-data/products.json', "utf8", (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} products loaded
+    console.log(`Server setup: ${products.length} products loaded`);
+  });
+
+  fs.readFile('/Users/joshuacushing/code/Parsity/evals/sunglasses-io/initial-data/brands.json', "utf8", (error, data) => {
+    if (error) throw error;
+    brands = JSON.parse(data);
+    console.log(`Server setup: ${brands.length} brands loaded
     Listening on PORT ${PORT}`);
   });
 });
@@ -32,6 +39,11 @@ let server = http.createServer( (req, res) => {
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
+})
+
+myRouter.get('/sunglasses/brands', (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" })
+  res.end(JSON.stringify(brands))
 })
 
 module.exports = server;
