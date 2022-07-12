@@ -60,7 +60,8 @@ myRouter.get('/sunglasses/:product', (req, res) => {
   const reqProductName = req.params.product;
   
   //if productName name in here ? 404
-  let matchingProducts = []
+  let matchingProducts = [];
+  let matchedProductList = [];
 
   products.map(product => {
     if (product.name == reqProductName) {
@@ -69,14 +70,19 @@ myRouter.get('/sunglasses/:product', (req, res) => {
   })
 
   if (matchingProducts.length > 0) {
+    products.map(product => {
+      matchingProducts.map(prod => {
+        if (prod == product.name) {
+          matchedProductList.push(product)
+        }
+      })
+    })
     res.writeHead(200)
-    res.end('the item you were looking for')
+    res.end(JSON.stringify(matchedProductList))
   } else {
     res.writeHead(404)
     res.end('searched product not found')
   }
-
-  res.end()
 })
 
 module.exports = server;
