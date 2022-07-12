@@ -87,5 +87,25 @@ describe('Sunglasses', function() {
   })
 
   //specific brand
+  describe('/GET request with a query for a specific brand', function() {
+    it('should return all of the brands whose name match the description', function(done) {
+      chai.request(server)
+      .get('/sunglasses/brands/Oakley')
+      .end(function(err, res) {
+        res.should.have.status(200)
+        done()
+      })
+    })
+
+    it('should return a 404 status is the name in the query is not found in the database', function(done) {
+      chai.request(server)
+      .get('/sunglasses/brands/LlaamaShades')
+      .end(function(err, res) {
+        res.should.have.status(404)
+        done()
+      })
+    })
+
+  })
 })
 
