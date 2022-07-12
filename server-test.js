@@ -61,7 +61,26 @@ describe('Sunglasses', function() {
     })
   })
 
-  //specific product
+  // specific product
+  
+  describe('/GET request with a query for a specific product', function() {
+    it('should return all of the products whose name match the description', function(done) {
+      const sugar = {
+        "id": "9",
+        "categoryId": "4",
+        "name": "Sugar",
+        "description": "The sweetest glasses in the world",
+        "price":125,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+    }
+      chai.request(server)
+      .get('sunglasses?product=sugar')
+      .end(function(err, res) {
+        res.should.have.status(200)
+        res.should.equal(sugar)
+      })
+    })
+  })
 
   //specific brand
 })

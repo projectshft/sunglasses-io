@@ -56,4 +56,27 @@ myRouter.delete('/sunglasses/brands', (req, res) => {
   res.end('Cannot delete this resource')
 })
 
+myRouter.get('/sunglasses/:product', (req, res) => {
+  const reqProductName = req.params.product;
+  
+  //if productName name in here ? 404
+  let matchingProducts = []
+
+  products.map(product => {
+    if (product.name == reqProductName) {
+      matchingProducts.push(reqProductName);
+    }
+  })
+
+  if (matchingProducts.length > 0) {
+    res.writeHead(200)
+    res.end('the item you were looking for')
+  } else {
+    res.writeHead(404)
+    res.end('searched product not found')
+  }
+
+  res.end()
+})
+
 module.exports = server;
