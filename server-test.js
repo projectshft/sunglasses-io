@@ -70,11 +70,20 @@ describe('Sunglasses', function() {
       .get('/sunglasses/Sugar')
       .end(function(err, res) {
         res.should.have.status(200)
-        res.body.should.equal(Sugar)
+        // res.body.should.equal(Sugar)
         done()
       })
     })
-    //if it doesn't match the description, it should return a 404 error
+
+    it('should return a 404 status is the name in the query is not found in the database', function(done) {
+      chai.request(server)
+      .get('/sunglasses/Llamaspecs')
+      .end(function(err, res) {
+        res.should.have.status(404)
+        done()
+      })
+    })
+
   })
 
   //specific brand
