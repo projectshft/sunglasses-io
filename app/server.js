@@ -59,7 +59,6 @@ myRouter.delete('/sunglasses/brands', (req, res) => {
 myRouter.get('/sunglasses/:product', (req, res) => {
   const reqProductName = req.params.product;
   
-  //if productName name in here ? 404
   let matchingProducts = [];
   let matchedProductList = [];
 
