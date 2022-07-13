@@ -82,10 +82,17 @@ myRouter.post('/cart', (req, res) => {
   //make sure it has all the necessary keys
   //make sure it doesn't have any extra keys
   const toPost = req.body
-  console.log(toPost);
-  cart.push(toPost)
-  res.writeHead(201)
-  res.end(`${toPost.name} posted to cart.`);
+
+  if (!toPost.hasOwnProperty('id')) {
+    res.writeHead(404)
+    res.end('posted item must have an id category')
+  } else {
+    cart.push(toPost)
+    res.writeHead(201)
+    res.end(`${toPost.name} posted to cart.`);
+  }
+
+  
 })
 
 
