@@ -121,7 +121,6 @@ myRouter.post('/cart', (req, res) => {
   cart.push(toPost)
   res.writeHead(201)
   res.end('item posted to cart')
-  //if so, push to cart
 })
 //GET /cart
 //DELETE /cart (not permitted)
