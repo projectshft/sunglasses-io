@@ -57,33 +57,71 @@ myRouter.delete('/sunglasses/brands', (req, res) => {
   res.end('Cannot delete this resource')
 })
 
-myRouter.get('/sunglasses/:product', (req, res) => {
-  const reqProductName = req.params.product;
-  
-  let matchingProducts = [];
-  let matchedProductList = [];
+const queryHandler = (database, req) => {
+  //database should be the exact name of the database, currently set to be an array
 
-  products.map(product => {
-    if (product.name == reqProductName) {
-      matchingProducts.push(reqProductName);
+  const reqName = req.params.product
+
+  let matching = [];
+  let matchedList = [];
+
+  database.map(item => {
+    if (item.name == reqName) {
+      matchedList.push(reqName)
     }
   })
 
-  if (matchingProducts.length > 0) {
-    products.map(product => {
-      matchingProducts.map(prod => {
-        if (prod == product.name) {
-          matchedProductList.push(product)
-        }
-      })
-    })
+  database.map(item => {
+    if (item.name == reqName) {
+      matching.push(item)
+    }
+  })
+
+  if (matchedList.length > 0) {
+    return matching;
+  } else {
+    return false;
+  }
+}
+
+myRouter.get('/sunglasses/:product', (req, res) => {
+  // const reqProductName = req.params.product;
+  
+  // let matchingProducts = [];
+  // let matchedProductList = [];
+
+  // products.map(product => {
+  //   if (product.name == reqProductName) {
+  //     matchingProducts.push(reqProductName);
+  //   }
+  // })
+
+  // if (matchingProducts.length > 0) {
+  //   products.map(product => {
+  //     matchingProducts.map(prod => {
+  //       if (prod == product.name) {
+  //         matchedProductList.push(product)
+  //       }
+  //     })
+  //   })
+  //   res.writeHead(200)
+  //   res.end(JSON.stringify(matchedProductList))
+  // } else {
+  //   res.writeHead(404)
+  //   res.end('searched product not found')
+  // }
+
+  if (queryHandler(products, req)) {
     res.writeHead(200)
-    res.end(JSON.stringify(matchedProductList))
+    res.end(JSON.stringify(queryHandler(products, req)))
   } else {
     res.writeHead(404)
     res.end('searched product not found')
   }
+
 })
+
+//This needs to be under one method. Too much duplicat poceedures
 
 myRouter.get('/sunglasses/brands/:brand', (req, res) => {
   const reqBrandName = req.params.brand;
@@ -117,6 +155,7 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
 //POST /cart
 myRouter.post('/cart', (req, res) => {
   //check for proper keys and values
+  //i.e. – check to make sure that an object has the proper values
   const toPost = req.body
   cart.push(toPost)
   res.writeHead(201)
