@@ -86,7 +86,7 @@ myRouter.post('/cart', (req, res) => {
   const toPost = req.body
   cart.push(toPost)
   res.writeHead(201)
-  res.end('item posted to cart')
+  res.end(`${toPost.name} posted to cart.`);
 })
 //GET /cart
 //DELETE /cart (not permitted)

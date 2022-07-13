@@ -1,5 +1,5 @@
 const queryHandler = (database, req) => {
-  //database should be the exact name of the database, currently set to be an array
+  //'database' should be the exact name of the database.
 
   const paramNameArray = Object.keys(req.params)
   const paramName = paramNameArray[0];
