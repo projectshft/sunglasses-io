@@ -162,9 +162,6 @@ myRouter.delete('/cart/:id', (req, res) => {
     res.writeHead(200)
     res.end(`Item successfully removed from the cart`)
   }
-
-  //if is an item in cart, remove from cart
-  res.end();
 })
 
 //LOGIN – up top
