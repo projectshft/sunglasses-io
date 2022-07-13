@@ -62,22 +62,13 @@ $$$ 2) Inside the server, check that the header of the request contained the API
 
 myRouter.post('/login', (req, res) => {
   // Make sure there is a username and password in the request
-  console.log(req.body.password)
-  if (!req.body.password) {
+  if (!req.body.username || !req.body.password) {
     res.writeHead(401)
-    res.end('no password')
+    res.end('Must enter a username and password')
   } else {
     res.writeHead(201)
     res.end('good so far')
   }
-
-  // if (!req.body.username) {
-  //   res.writeHead(401)
-  //   res.end('no username')
-  // } else {
-  //   res.writeHead(201)
-  //   res.end('good so far')
-  // }
 
   // See if there is a user that has that username and password
 
