@@ -72,8 +72,9 @@ myRouter.post('/login', (req, res) => {
   const reqPassword = req.body.password
   // Make sure there is a username and password in the request
 
-  const existingUsername = users.find(user => user.login.username === reqUsername)
-  const existingPassword = users.find(user => user.login.password === reqPassword)
+  const usernameAndPassword = users.find(user => user.login.username === reqUsername && user.login.password === reqPassword)
+
+  console.log(usernameAndPassword);
   
 
   if (!reqUsername || !reqPassword) {
