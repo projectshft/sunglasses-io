@@ -103,7 +103,6 @@ Array.prototype.equals = function (array) {
 //CART
 //POST /cart
 myRouter.post('/cart', (req, res) => {
-  //make sure it has all the necessary keys
   //make sure it doesn't have any extra keys
   const toPost = req.body
 
@@ -116,7 +115,11 @@ myRouter.post('/cart', (req, res) => {
   }
 
   if (!canonList.equals(listToCheck)) {
-    const message = "In order to post, product must include the properties 'id', 'categoryId', 'name', 'description', 'price', and 'imageUrls'. Make sure that you posted item contains each of these categories."
+    const message = `In order to post, product must include the properties 'id', 'categoryId', 'name', 'description', 'price', and 'imageUrls'. 
+    1) Make sure that the posted item contains each of these properties. 
+    2) Make sure that the spelling is accurate for each property.
+    3) Make sure that capitalization is accurate for each property.
+    4) Make sure that there are no additional properties.`
     res.writeHead(404)
     res.end(message)
   } else {
