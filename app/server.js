@@ -134,7 +134,7 @@ myRouter.delete('/cart/:id', (req, res) => {
         cart.splice(indexForObjectToDelete, 1)
       }
     })
-    res.writeHead(200)
+    res.writeHead(201)
     res.end(`Item successfully removed from the cart`)
   }
 })
