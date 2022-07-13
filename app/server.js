@@ -79,7 +79,6 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
 })
 
 //CART
-//POST /cart
 myRouter.post('/cart', (req, res) => {
   const toPost = req.body
 
