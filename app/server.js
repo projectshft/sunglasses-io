@@ -15,32 +15,7 @@ myRouter.use(bodyParser.json());
 
 let products = [];
 let brands = [];
-let cart = [
-  {
-    "id": "1",
-    "categoryId": "1",
-    "name": "Superglasses",
-    "description": "The best glasses in the world",
-    "price":150,
-    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-},
-{
-    "id": "2",
-    "categoryId": "1",
-    "name": "Black Sunglasses",
-    "description": "The best glasses in the world",
-    "price":100,
-    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-},
-{
-    "id": "3",
-    "categoryId": "1",
-    "name": "Brown Sunglasses",
-    "description": "The best glasses in the world",
-    "price":50,
-    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-}
-];
+let cart = [];
 
 let server = http.createServer( (req, res) => {
   myRouter(req, res, finalHandler(req, res))
