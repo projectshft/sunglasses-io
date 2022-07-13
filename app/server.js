@@ -17,6 +17,7 @@ myRouter.use(bodyParser.json());
 let products = [];
 let brands = [];
 let cart = [];
+let users = [];
 
 let server = http.createServer( (req, res) => {
   if (!validApiKeys.includes(req.headers["x-authentication"])) {
@@ -39,7 +40,13 @@ let server = http.createServer( (req, res) => {
   fs.readFile('/Users/joshuacushing/code/Parsity/evals/sunglasses-io/initial-data/brands.json', "utf8", (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded
+    console.log(`Server setup: ${brands.length} brands loaded`);
+  });
+
+  fs.readFile('/Users/joshuacushing/code/Parsity/evals/sunglasses-io/initial-data/users.json', "utf8", (error, data) => {
+    if (error) throw error;
+    users = JSON.parse(data)
+    console.log(`Server setup: ${users.length} users loaded
     Listening on PORT ${PORT}`);
   });
 });
@@ -64,6 +71,11 @@ myRouter.post('/login', (req, res) => {
   const reqUsername = req.body.username;
   const reqPassword = req.body.password
   // Make sure there is a username and password in the request
+
+    //test to make sure users are imported
+    console.log(users)
+    // const existingUsername = 
+
   if (!reqUsername || !reqPassword) {
     res.writeHead(401)
     res.end('Must enter a username and password')
