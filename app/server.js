@@ -60,7 +60,7 @@ myRouter.delete('/sunglasses/brands', (req, res) => {
 
 myRouter.get('/sunglasses/:product', (req, res) => {
   if (queryHandler(products, req)) {
-    res.writeHead(200)
+    res.writeHead(200, { "Content-Type": "application/json" })
     res.end(JSON.stringify(queryHandler(products, req)))
   } else {
     res.writeHead(404)
@@ -70,7 +70,7 @@ myRouter.get('/sunglasses/:product', (req, res) => {
 
 myRouter.get('/sunglasses/brands/:brand', (req, res) => {
   if (queryHandler(brands, req)) {
-    res.writeHead(200)
+    res.writeHead(200, { "Content-Type": "application/json" })
     res.end(JSON.stringify(queryHandler(brands, req)))
   } else {
     res.writeHead(404)
@@ -102,6 +102,9 @@ myRouter.post('/cart', (req, res) => {
 
 
 //GET /cart
+// myRouter.get('/cart', (req, res) => {
+
+// })
 //DELETE /cart (not permitted)
 //DELETE /cart/:id 
 //LOGIN – up top
