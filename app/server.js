@@ -6,6 +6,7 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const queryHandler = require('../utils/queryHandler');
+const equals = require('../utils/arrayEquals');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -76,6 +77,30 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
   }
 })
 
+Array.prototype.equals = function (array) {
+  // if the other array is a falsy value, return
+  if (!array)
+      return false;
+
+  // compare lengths - can save a lot of time 
+  if (this.length != array.length)
+      return false;
+
+  for (var i = 0, l=this.length; i < l; i++) {
+      // Check if we have nested arrays
+      if (this[i] instanceof Array && array[i] instanceof Array) {
+          // recurse into the nested arrays
+          if (!this[i].equals(array[i]))
+              return false;       
+      }           
+      else if (this[i] != array[i]) { 
+          // Warning - two different object instances will never be equal: {x:20} != {x:20}
+          return false;   
+      }           
+  }       
+  return true;
+}
+
 //CART
 //POST /cart
 myRouter.post('/cart', (req, res) => {
@@ -83,14 +108,34 @@ myRouter.post('/cart', (req, res) => {
   //make sure it doesn't have any extra keys
   const toPost = req.body
 
-  if (!toPost.hasOwnProperty('id')) {
-    res.writeHead(404)
-    res.end('posted item must have an id category')
-  } else {
-    cart.push(toPost)
-    res.writeHead(201)
-    res.end(`${toPost.name} posted to cart.`);
+  const canonList = [ 'id', 'categoryId', 'name', 'description', 'price', 'imageUrls' ]
+  let listToCheck = []
+
+  
+  for (let prop in toPost) {
+    listToCheck.push(prop)
   }
+
+  if (canonList.equals(listToCheck)) {
+    console.log('same')
+  } else {
+    console.log('not the same')
+  }
+  
+
+  res.end()
+
+  // if (!toPost.hasOwnProperty('id')) {
+  //   res.writeHead(404)
+  //   res.end('posted item must have an id category')
+  // } else if (!toPost.hasOwnProperty('categoryId')) {
+  //   res.writeHead(404)
+  //   res.end('posted item must have an categoryId category')
+  // } else {
+  //   cart.push(toPost)
+  //   res.writeHead(201)
+  //   res.end(`${toPost.name} posted to cart.`);
+  // }
 
   
 })
