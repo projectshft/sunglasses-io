@@ -102,9 +102,10 @@ myRouter.post('/cart', (req, res) => {
 
 
 //GET /cart
-// myRouter.get('/cart', (req, res) => {
-
-// })
+myRouter.get('/cart', (req, res) => {
+  res.writeHead(200, { "Content-Type": "application/json" })
+  res.end(JSON.stringify(cart))
+})
 //DELETE /cart (not permitted)
 //DELETE /cart/:id 
 //LOGIN – up top
