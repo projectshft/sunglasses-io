@@ -5,7 +5,7 @@ const queryString = require('querystring');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
-const { URL } = require('url');
+const queryHandler = require('../utils/queryHandler');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -57,37 +57,6 @@ myRouter.delete('/sunglasses/brands', (req, res) => {
   res.writeHead(405)
   res.end('Cannot delete this resource')
 })
-
-const queryHandler = (database, req) => {
-  //database should be the exact name of the database, currently set to be an array
-
-  const paramNameArray = Object.keys(req.params)
-  const paramName = paramNameArray[0];
-
-
-  const reqName = req.params[paramName];
-
-  let matching = [];
-  let matchedList = [];
-
-  database.map(item => {
-    if (item.name == reqName) {
-      matchedList.push(reqName)
-    }
-  })
-
-  database.map(item => {
-    if (item.name == reqName) {
-      matching.push(item)
-    }
-  })
-
-  if (matchedList.length > 0) {
-    return matching;
-  } else {
-    return false;
-  }
-}
 
 myRouter.get('/sunglasses/:product', (req, res) => {
   if (queryHandler(products, req)) {
