@@ -36,8 +36,6 @@ let server = http.createServer( (req, res) => {
   });
 });
 
-//LOGIN
-
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
@@ -74,7 +72,7 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
     res.end(JSON.stringify(queryHandler(brands, req)))
   } else {
     res.writeHead(404)
-    res.end('searched product not found')
+    res.end('searched brand not found')
   }
 })
 
@@ -88,8 +86,11 @@ myRouter.post('/cart', (req, res) => {
   res.writeHead(201)
   res.end(`${toPost.name} posted to cart.`);
 })
+
+
 //GET /cart
 //DELETE /cart (not permitted)
 //DELETE /cart/:id 
+//LOGIN – up top
 
 module.exports = server;
