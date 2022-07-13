@@ -19,6 +19,11 @@ let brands = [];
 let cart = [];
 
 let server = http.createServer( (req, res) => {
+  if (!validApiKeys.includes(req.headers["x-authentication"])) {
+    res.writeHead(401)
+    res.end('Must enter a valid API key')
+  }
+  //if API Key list does not include the one listed in the x-authentication of the header, send a 401 status
   myRouter(req, res, finalHandler(req, res))
 }).listen(PORT, error => {
   if (error) {
@@ -52,6 +57,8 @@ $$$ 1) create a valid API Key database (https://parsity.teachable.com/courses/13
   DELETE /cart
   DELETE /cart/:id
 */
+
+//match tests to work
 
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
