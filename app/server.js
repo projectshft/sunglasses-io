@@ -23,7 +23,7 @@ let server = http.createServer( (req, res) => {
     res.writeHead(401)
     res.end('Must enter a valid API key')
   }
-  //if API Key list does not include the one listed in the x-authentication of the header, send a 401 status
+  
   myRouter(req, res, finalHandler(req, res))
 }).listen(PORT, error => {
   if (error) {
