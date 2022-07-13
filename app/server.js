@@ -8,6 +8,7 @@ const uid = require('rand-token').uid;
 const queryHandler = require('../utils/queryHandler');
 const arrayEquals = require('../utils/arrayEquals');
 const postErrorMessage = require('../utils/postErrorMessage');
+const validApiKeys = require('../initial-data/validApiKeys');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -40,7 +41,7 @@ let server = http.createServer( (req, res) => {
 
 //LOGIN STEPS
 /* 
-1) create a valid API Key database (https://parsity.teachable.com/courses/1377241/lectures/31787299)
+$$$ 1) create a valid API Key database (https://parsity.teachable.com/courses/1377241/lectures/31787299)
 2) Inside the server, check that the header of the request contained the API Key in the x-authentication (https://parsity.teachable.com/courses/1377241/lectures/31787299)
 3) Build login POST method (https://parsity.teachable.com/courses/1377241/lectures/31790907)
 4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
