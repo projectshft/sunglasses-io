@@ -6,7 +6,6 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const queryHandler = require('../utils/queryHandler');
-const equals = require('../utils/arrayEquals');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -116,28 +115,15 @@ myRouter.post('/cart', (req, res) => {
     listToCheck.push(prop)
   }
 
-  if (canonList.equals(listToCheck)) {
-    console.log('same')
+  if (!canonList.equals(listToCheck)) {
+    const message = "In order to post, product must include the properties 'id', 'categoryId', 'name', 'description', 'price', and 'imageUrls'. Make sure that you posted item contains each of these categories."
+    res.writeHead(404)
+    res.end(message)
   } else {
-    console.log('not the same')
+    cart.push(toPost)
+    res.writeHead(201)
+    res.end(`${toPost.name} posted to cart.`);
   }
-  
-
-  res.end()
-
-  // if (!toPost.hasOwnProperty('id')) {
-  //   res.writeHead(404)
-  //   res.end('posted item must have an id category')
-  // } else if (!toPost.hasOwnProperty('categoryId')) {
-  //   res.writeHead(404)
-  //   res.end('posted item must have an categoryId category')
-  // } else {
-  //   cart.push(toPost)
-  //   res.writeHead(201)
-  //   res.end(`${toPost.name} posted to cart.`);
-  // }
-
-  
 })
 
 
