@@ -6,6 +6,7 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const queryHandler = require('../utils/queryHandler');
+const arrayEquals = require('../utils/arrayEquals');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -113,6 +114,8 @@ myRouter.post('/cart', (req, res) => {
   for (let prop in toPost) {
     listToCheck.push(prop)
   }
+
+  console.log(arrayEquals(canonList, listToCheck))
 
   if (!canonList.equals(listToCheck)) {
     const message = `In order to post, product must include the properties 'id', 'categoryId', 'name', 'description', 'price', and 'imageUrls'. 
