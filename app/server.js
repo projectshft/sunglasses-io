@@ -38,6 +38,20 @@ let server = http.createServer( (req, res) => {
   });
 });
 
+//LOGIN STEPS
+/* 
+1) create a valid API Key database (https://parsity.teachable.com/courses/1377241/lectures/31787299)
+2) Inside the server, check that the header of the request contained the API Key in the x-authentication (https://parsity.teachable.com/courses/1377241/lectures/31787299)
+3) Build login POST method (https://parsity.teachable.com/courses/1377241/lectures/31790907)
+4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
+5) Make the tokens expire (https://parsity.teachable.com/courses/1377241/lectures/31806852)
+6) Check for access token in each of the /cart methods
+  GET /cart
+  POST /cart
+  DELETE /cart
+  DELETE /cart/:id
+*/
+
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
@@ -78,7 +92,6 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
   }
 })
 
-//CART
 myRouter.post('/cart', (req, res) => {
   const toPost = req.body
 
@@ -110,7 +123,6 @@ myRouter.delete('/cart', (req, res) => {
   res.end('Cannot delete entire cart. Can only delete individual items')
 })
 
-//DELETE /cart/:id 
 myRouter.delete('/cart/:id', (req, res) => {
   const reqID = req.params.id
 
@@ -138,7 +150,5 @@ myRouter.delete('/cart/:id', (req, res) => {
     res.end(`Item successfully removed from the cart`)
   }
 })
-
-//LOGIN – up top
 
 module.exports = server;
