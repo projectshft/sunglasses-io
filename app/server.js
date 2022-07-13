@@ -100,11 +100,14 @@ myRouter.post('/cart', (req, res) => {
   }
 })
 
-
-//GET /cart
 myRouter.get('/cart', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(cart))
+})
+
+myRouter.delete('/cart', (req, res) => {
+  res.writeHead(405)
+  res.end('Cannot delete entire cart. Can only delete individual items')
 })
 //DELETE /cart (not permitted)
 //DELETE /cart/:id 
