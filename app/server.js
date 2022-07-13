@@ -81,7 +81,6 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
 //CART
 //POST /cart
 myRouter.post('/cart', (req, res) => {
-  //make sure it doesn't have any extra keys
   const toPost = req.body
 
   const canonList = [ 'id', 'categoryId', 'name', 'description', 'price', 'imageUrls' ]
