@@ -15,7 +15,32 @@ myRouter.use(bodyParser.json());
 
 let products = [];
 let brands = [];
-let cart = [];
+let cart = [
+  {
+    "id": "1",
+    "categoryId": "1",
+    "name": "Superglasses",
+    "description": "The best glasses in the world",
+    "price":150,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+},
+{
+    "id": "2",
+    "categoryId": "1",
+    "name": "Black Sunglasses",
+    "description": "The best glasses in the world",
+    "price":100,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+},
+{
+    "id": "3",
+    "categoryId": "1",
+    "name": "Brown Sunglasses",
+    "description": "The best glasses in the world",
+    "price":50,
+    "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}
+];
 
 let server = http.createServer( (req, res) => {
   myRouter(req, res, finalHandler(req, res))
@@ -109,8 +134,30 @@ myRouter.delete('/cart', (req, res) => {
   res.writeHead(405)
   res.end('Cannot delete entire cart. Can only delete individual items')
 })
-//DELETE /cart (not permitted)
+
 //DELETE /cart/:id 
+myRouter.delete('/cart/:id', (req, res) => {
+  const reqID = req.params.id
+  //if not an item in your cart 404 "The item ID does not match any items in your cart"
+  
+  let indexForObjectToDelete;
+
+  cart.map((obj, i) => {
+    if (obj.id === reqID) {
+      indexForObjectToDelete = i;
+      cart.splice(indexForObjectToDelete, 1)
+    }
+  })
+ 
+  if (!indexForObjectToDelete) {
+    res.writeHead(404)
+    res.end('The item ID does not match any items in your cart');
+  } 
+
+  //if is an item in cart, remove from cart
+  res.end();
+})
+
 //LOGIN – up top
 
 module.exports = server;
