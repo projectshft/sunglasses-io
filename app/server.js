@@ -138,21 +138,30 @@ myRouter.delete('/cart', (req, res) => {
 //DELETE /cart/:id 
 myRouter.delete('/cart/:id', (req, res) => {
   const reqID = req.params.id
-  //if not an item in your cart 404 "The item ID does not match any items in your cart"
-  
-  let indexForObjectToDelete;
 
-  cart.map((obj, i) => {
+  let isMatched = false;
+
+  cart.map(obj => {
     if (obj.id === reqID) {
-      indexForObjectToDelete = i;
-      cart.splice(indexForObjectToDelete, 1)
+      isMatched = true;
     }
   })
- 
-  if (!indexForObjectToDelete) {
+  
+  if (!isMatched) {
     res.writeHead(404)
-    res.end('The item ID does not match any items in your cart');
-  } 
+    res.end('The item ID does not match any items in your cart.');
+  } else {
+    let indexForObjectToDelete;
+
+    cart.map((obj, i) => {
+      if (obj.id === reqID) {
+        indexForObjectToDelete = i;
+        cart.splice(indexForObjectToDelete, 1)
+      }
+    })
+    res.writeHead(200)
+    res.end(`Item successfully removed from the cart`)
+  }
 
   //if is an item in cart, remove from cart
   res.end();
