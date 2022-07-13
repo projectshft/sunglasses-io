@@ -23,7 +23,7 @@ let server = http.createServer( (req, res) => {
     res.writeHead(401)
     res.end('Must enter a valid API key')
   }
-  
+
   myRouter(req, res, finalHandler(req, res))
 }).listen(PORT, error => {
   if (error) {
@@ -47,7 +47,7 @@ let server = http.createServer( (req, res) => {
 //LOGIN STEPS
 /* 
 $$$ 1) create a valid API Key database (https://parsity.teachable.com/courses/1377241/lectures/31787299)
-2) Inside the server, check that the header of the request contained the API Key in the x-authentication (https://parsity.teachable.com/courses/1377241/lectures/31787299)
+$$$ 2) Inside the server, check that the header of the request contained the API Key in the x-authentication (https://parsity.teachable.com/courses/1377241/lectures/31787299)
 3) Build login POST method (https://parsity.teachable.com/courses/1377241/lectures/31790907)
 4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 5) Make the tokens expire (https://parsity.teachable.com/courses/1377241/lectures/31806852)
@@ -59,6 +59,34 @@ $$$ 1) create a valid API Key database (https://parsity.teachable.com/courses/13
 */
 
 //match tests to work
+
+myRouter.post('/login', (req, res) => {
+  // Make sure there is a username and password in the request
+  console.log(req.body.username)
+  if (!req.body.username) {
+    res.writeHead(401)
+    res.end('no username')
+  } else {
+    res.writeHead(201)
+    res.end('good so far')
+  }
+
+  // See if there is a user that has that username and password
+
+  // Write the header because we know we will be returning successful at this point and that the response will be json
+
+  // If we already have an existing access token, use that
+
+  // Update the last updated value of the existing token so we get another time period before expiration
+
+  // Create a new token with the user value and a "random" token
+
+  // When a login fails, tell the client in a generic way that either the username or password was wrong
+
+  // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+
+  
+})
 
 myRouter.get('/sunglasses', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" })
