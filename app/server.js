@@ -79,9 +79,10 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
 //CART
 //POST /cart
 myRouter.post('/cart', (req, res) => {
-  //check for proper keys and values
-  //i.e. – check to make sure that an object has the proper values
+  //make sure it has all the necessary keys
+  //make sure it doesn't have any extra keys
   const toPost = req.body
+  console.log(toPost);
   cart.push(toPost)
   res.writeHead(201)
   res.end(`${toPost.name} posted to cart.`);
