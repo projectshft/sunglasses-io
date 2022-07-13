@@ -7,6 +7,7 @@ const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const queryHandler = require('../utils/queryHandler');
 const arrayEquals = require('../utils/arrayEquals');
+const postErrorMessage = require('../utils/postErrorMessage');
 
 const PORT = 3001;
 const myRouter = Router();
@@ -92,13 +93,8 @@ myRouter.post('/cart', (req, res) => {
   }
 
   if (!arrayEquals(canonList, listToCheck)) {
-    const message = `In order to post, product must include the properties 'id', 'categoryId', 'name', 'description', 'price', and 'imageUrls'. 
-    1) Make sure that the posted item contains each of these properties. 
-    2) Make sure that the spelling is accurate for each property.
-    3) Make sure that capitalization is accurate for each property.
-    4) Make sure that there are no additional properties.`
     res.writeHead(404)
-    res.end(message)
+    res.end(postErrorMessage)
   } else {
     cart.push(toPost)
     res.writeHead(201)
