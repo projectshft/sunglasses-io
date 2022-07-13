@@ -90,32 +90,6 @@ const queryHandler = (database, req) => {
 }
 
 myRouter.get('/sunglasses/:product', (req, res) => {
-  // const reqProductName = req.params.product;
-  
-  // let matchingProducts = [];
-  // let matchedProductList = [];
-
-  // products.map(product => {
-  //   if (product.name == reqProductName) {
-  //     matchingProducts.push(reqProductName);
-  //   }
-  // })
-
-  // if (matchingProducts.length > 0) {
-  //   products.map(product => {
-  //     matchingProducts.map(prod => {
-  //       if (prod == product.name) {
-  //         matchedProductList.push(product)
-  //       }
-  //     })
-  //   })
-  //   res.writeHead(200)
-  //   res.end(JSON.stringify(matchedProductList))
-  // } else {
-  //   res.writeHead(404)
-  //   res.end('searched product not found')
-  // }
-
   if (queryHandler(products, req)) {
     res.writeHead(200)
     res.end(JSON.stringify(queryHandler(products, req)))
@@ -123,37 +97,9 @@ myRouter.get('/sunglasses/:product', (req, res) => {
     res.writeHead(404)
     res.end('searched product not found')
   }
-
 })
 
-//This needs to be under one method. Too much duplicat poceedures
-
 myRouter.get('/sunglasses/brands/:brand', (req, res) => {
-  // const reqBrandName = req.params.brand;
-  
-  // let matchingBrands = [];
-  // let matchedBrandList = [];
-
-  // brands.map(brand => {
-  //   if (brand.name == reqBrandName) {
-  //     matchingBrands.push(reqBrandName);
-  //   }
-  // })
-
-  // if (matchingBrands.length > 0) {
-  //   brands.map(brand => {
-  //     matchingBrands.map(bran => {
-  //       if (bran == brand.name) {
-  //         matchedBrandList.push(brand)
-  //       }
-  //     })
-  //   })
-  //   res.writeHead(200)
-  //   res.end(JSON.stringify(matchedBrandList))
-  // } else {
-  //   res.writeHead(404)
-  //   res.end('searched brand not found')
-  // }
   if (queryHandler(brands, req)) {
     res.writeHead(200)
     res.end(JSON.stringify(queryHandler(brands, req)))
@@ -161,7 +107,6 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
     res.writeHead(404)
     res.end('searched product not found')
   }
-
 })
 
 //CART
