@@ -6,7 +6,7 @@ let accessTokens = [
   },
   {
     username: 'Ellieboo',
-    lastUpdated: 'this date',
+    lastUpdated: 1657816612689,
     accessToken: '234234234234'
   }
 ];

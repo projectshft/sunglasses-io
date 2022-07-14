@@ -25,16 +25,24 @@ const getValidTokenFromRequest = (req) => {
       return false;
     }
   }
-  
-  console.log(accessTokenStillValid(TOKEN_VALIDITY_TIMEOUT, timeSinceLastUpdated))
-  
 
-  
-  if (currentAccessToken) {
-    return true;
-  } else {
-    return false;
-  }
+  if (!currentAccessToken) {
+    return 'no currenct access token';
+  } else if (!accessTokenStillValid(TOKEN_VALIDITY_TIMEOUT, timeSinceLastUpdated)) {
+      return 'access token has expired'
+    } else {
+      return "You're in!"
+    }
 }
 
+
 module.exports = getValidTokenFromRequest;
+
+/*
+mesh true false statements together with tests
+  no current access token – 'no currenct access token'
+  correct current access token, but not valid – 'access token has expired'
+  correct access token, and up to date – "You're in!"
+  
+add return methods
+*/
