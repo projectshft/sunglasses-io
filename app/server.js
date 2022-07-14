@@ -181,8 +181,13 @@ myRouter.get('/cart', (req, res) => {
 })
 
 myRouter.delete('/cart', (req, res) => {
-  res.writeHead(405)
-  res.end('Cannot delete entire cart. Can only delete individual items')
+  if (!getValidTokenFromRequest(req)) {
+    res.writeHead(401)
+    res.end('Must be logged in to perform this action')
+  } else {
+    res.writeHead(405)
+    res.end('Cannot delete entire cart. Can only delete individual items.')
+  }
 })
 
 myRouter.delete('/cart/:id', (req, res) => {
