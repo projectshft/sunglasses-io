@@ -19,7 +19,11 @@ let brands = [];
 let cart = [];
 let users = [];
 let accessTokens = [
-
+  {
+    username: 'yellowleopard753',
+    lastUpdated: '2022-07-14T13:35:04.635Z',
+    accessToken: 'sm86hrZAAtUJI2qk'
+  }
 ];
 
 let server = http.createServer( (req, res) => {
@@ -99,12 +103,17 @@ myRouter.post('/login', (req, res) => {
 */
 
   //create a new accessToken
+  //create a way to update update token
+  //mesh them together with the proper conditions
+
+
+  
     let newAccessToken = {
       username: reqUsername,
       lastUpdated: new Date(),
       accessToken: uid(16)
     }
-    accessTokens.push(newAccessToken)
+    accessTokens.push(JSON.stringify(newAccessToken))
     console.log(accessTokens)
     res.end()
 
