@@ -106,8 +106,8 @@ myRouter.post('/login', (req, res) => {
 
 myRouter.get('/sunglasses', (req, res) => {
 
-  const TOKEN_VALIDITY_TIMEOUT = 900000;
-  console.log(TOKEN_VALIDITY_TIMEOUT);
+  
+  console.log(getValidTokenFromRequest(req));
 
   //TEST CODE ABOVE
 
