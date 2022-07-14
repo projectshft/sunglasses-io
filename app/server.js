@@ -18,7 +18,9 @@ let products = [];
 let brands = [];
 let cart = [];
 let users = [];
-let accessTokens = [];
+let accessTokens = [
+
+];
 
 let server = http.createServer( (req, res) => {
   if (!validApiKeys.includes(req.headers["x-authentication"])) {
@@ -74,16 +76,16 @@ myRouter.post('/login', (req, res) => {
 
   const usernameAndPassword = users.find(user => user.login.username === reqUsername && user.login.password === reqPassword)
   
-  if (!reqUsername || !reqPassword) {
-    res.writeHead(401)
-    res.end('Must enter a username and password')
-  } else if (!usernameAndPassword) {
-    res.writeHead(401)
-    res.end('Invalid username or password')
-  } else {
-    res.writeHead(201)
-    res.end('good so far')
-  }
+  // if (!reqUsername || !reqPassword) {
+  //   res.writeHead(401)
+  //   res.end('Must enter a username and password')
+  // } else if (!usernameAndPassword) {
+  //   res.writeHead(401)
+  //   res.end('Invalid username or password')
+  // } else {
+  //   res.writeHead(201)
+  //   res.end('good so far')
+  // }
 /*
   If we already have an existing access token, use that
 
@@ -95,6 +97,15 @@ myRouter.post('/login', (req, res) => {
 
   If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
 */
+
+  //create a new accessToken
+    let newAccessToken = {
+      username: reqUsername,
+    }
+    accessTokens.push(newAccessToken)
+    console.log(accessTokens)
+    res.end()
+
   
 })
 
