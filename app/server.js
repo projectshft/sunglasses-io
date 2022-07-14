@@ -132,7 +132,8 @@ myRouter.post('/login', (req, res) => {
 })
 
 myRouter.get('/sunglasses', (req, res) => {
-  console.log(req.url)
+  const currentUrl = urlBase + req.url;
+  console.log(currentUrl);
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
 })
