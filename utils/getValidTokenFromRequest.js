@@ -14,7 +14,9 @@ const getValidTokenFromRequest = (req) => {
     return reqAccessToken == tokenObject.accessToken;
   }) 
 
-  console.log(TOKEN_VALIDITY_TIMEOUT);
+  const newDate = Math.abs(new Date())
+  
+
   
   if (currentAccessToken) {
     return true;
