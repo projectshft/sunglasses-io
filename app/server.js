@@ -83,14 +83,13 @@ $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/le
 
 /*
   create function here
-    if statement determining whether access token matches based on the truthiness of currentAccessToken
+    
     return true or false depending on whether it is there
 
   make function modular
 */
 
 const getValidTokenFromRequest = (req) => {
-  
 
   const currentUrl = urlBase + req.url;
   const myURL = new URL(currentUrl);
@@ -102,12 +101,10 @@ const getValidTokenFromRequest = (req) => {
   }) 
   
   if (currentAccessToken) {
-    console.log(true)
+    return true;
   } else {
-    console.log(false)
+    return false;
   }
-
-
 }
 
 myRouter.post('/login', (req, res) => {
@@ -147,7 +144,7 @@ myRouter.post('/login', (req, res) => {
 
 myRouter.get('/sunglasses', (req, res) => {
   
-  getValidTokenFromRequest(req)
+  console.log(getValidTokenFromRequest(req))
 
   //TEST CODE ABOVE
 
