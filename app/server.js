@@ -107,18 +107,26 @@ myRouter.post('/login', (req, res) => {
   If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
 */
 
-  //create a way to update update token
-  //mesh them together with the proper conditions
+  
+  //create a way to tell if current access token exists
 
   
-  /*
+  
     let currentAccessToken = accessTokens.find(tokenObject => {
       return tokenObject.username == reqUsername;
     }) 
 
+    if (currentAccessToken) {
+      console.log(true)
+    } else {
+      console.log(false)
+    }
+
+    res.end()
+
+  /*  
     currentAccessToken.lastUpdated = new Date();
   */
-  
   
 
   /*
