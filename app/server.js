@@ -101,9 +101,8 @@ myRouter.post('/login', (req, res) => {
   //create a new accessToken
     let newAccessToken = {
       username: reqUsername,
-      lastUpdated: new Date()
-      //last updated
-      //token
+      lastUpdated: new Date(),
+      accessToken: uid(16)
     }
     accessTokens.push(newAccessToken)
     console.log(accessTokens)
