@@ -63,8 +63,8 @@ $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/le
 $$$ 4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 $$$ 5) Make the tokens expire (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 6) Check for access token in each of the /cart methods
-  GET /cart
-  POST /cart
+  $$$ GET /cart
+  $$$ POST /cart
   DELETE /cart
   DELETE /cart/:id
 */
@@ -160,6 +160,9 @@ myRouter.post('/cart', (req, res) => {
   if (!arrayEquals(canonList, listToCheck)) {
     res.writeHead(404)
     res.end(postErrorMessage)
+  } else if (!getValidTokenFromRequest(req)) {
+    res.writeHead(401)
+    res.end('Must be logged in to perform this action')
   } else {
     cart.push(toPost)
     res.writeHead(201)
