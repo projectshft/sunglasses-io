@@ -18,6 +18,7 @@ let products = [];
 let brands = [];
 let cart = [];
 let users = [];
+let accessTokens = [];
 
 let server = http.createServer( (req, res) => {
   if (!validApiKeys.includes(req.headers["x-authentication"])) {
@@ -83,21 +84,17 @@ myRouter.post('/login', (req, res) => {
     res.writeHead(201)
     res.end('good so far')
   }
+/*
+  If we already have an existing access token, use that
 
-  // See if there is a user that has that username and password
+  Update the last updated value of the existing token so we get another time period before expiration
 
-  // Write the header because we know we will be returning successful at this point and that the response will be json
+  Create a new token with the user value and a "random" token
 
-  // If we already have an existing access token, use that
+  When a login fails, tell the client in a generic way that either the username or password was wrong
 
-  // Update the last updated value of the existing token so we get another time period before expiration
-
-  // Create a new token with the user value and a "random" token
-
-  // When a login fails, tell the client in a generic way that either the username or password was wrong
-
-  // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-
+  If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
+*/
   
 })
 
