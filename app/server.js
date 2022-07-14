@@ -69,11 +69,6 @@ $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/le
   DELETE /cart/:id
 */
 
-/*
-
-  make function modular
-*/
-
 myRouter.post('/login', (req, res) => {
   const reqUsername = req.body.username;
   const reqPassword = req.body.password
@@ -110,10 +105,6 @@ myRouter.post('/login', (req, res) => {
 })
 
 myRouter.get('/sunglasses', (req, res) => {
-  
-  console.log(getValidTokenFromRequest(req))
-
-  //TEST CODE ABOVE
 
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
