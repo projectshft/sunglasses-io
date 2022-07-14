@@ -83,9 +83,6 @@ $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/le
 
 /*
   create function here
-    parse the url
-    single out the query
-    place in existing currentAccessToken finder variable from /login
     if statement determining whether access token matches based on the truthiness of currentAccessToken
     return true or false depending on whether it is there
 
@@ -93,6 +90,24 @@ $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/le
 */
 
 const getValidTokenFromRequest = (req) => {
+  
+
+  const currentUrl = urlBase + req.url;
+  const myURL = new URL(currentUrl);
+  const reqAccessToken = myURL.searchParams.get('accessToken')
+
+  console.log(reqAccessToken)
+  
+
+  /*
+  IDENTIFY WHETHER CURRENT ACCESS TOKEN MATCHES
+
+  let currentAccessToken = accessTokens.find(tokenObject => {
+    return tokenObject.username == reqUsername;
+  }) 
+  */
+
+
 
 }
 
@@ -132,10 +147,8 @@ myRouter.post('/login', (req, res) => {
 })
 
 myRouter.get('/sunglasses', (req, res) => {
-  const currentUrl = urlBase + req.url;
-  const myURL = new URL(currentUrl);
-  const reqAccessToken = myURL.searchParams.get('accessToken')
-  console.log(reqAccessToken);
+  
+  getValidTokenFromRequest(req)
 
   //TEST CODE ABOVE
 
