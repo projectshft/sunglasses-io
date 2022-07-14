@@ -23,6 +23,11 @@ let accessTokens = [
     username: 'yellowleopard753',
     lastUpdated: '2022-07-14T13:35:04.635Z',
     accessToken: 'sm86hrZAAtUJI2qk'
+  },
+  {
+    username: 'Ellieboo',
+    lastUpdated: 'this date',
+    accessToken: '234234234234'
   }
 ];
 
@@ -102,21 +107,24 @@ myRouter.post('/login', (req, res) => {
   If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
 */
 
-  //create a new accessToken
+  //create a way to find the current access token
   //create a way to update update token
   //mesh them together with the proper conditions
 
+  let currentAccessToken = accessTokens.find(tokenObject => {
+    return tokenObject.username == reqUsername;
+  }) 
+  console.log(currentAccessToken)
+  res.end()
 
-  
+  /*
     let newAccessToken = {
       username: reqUsername,
       lastUpdated: new Date(),
       accessToken: uid(16)
     }
     accessTokens.push(JSON.stringify(newAccessToken))
-    console.log(accessTokens)
-    res.end()
-
+  */  
   
 })
 
