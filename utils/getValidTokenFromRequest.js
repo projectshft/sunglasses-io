@@ -18,8 +18,12 @@ const getValidTokenFromRequest = (req) => {
   const currentAccessTokenLastUpdated = currentAccessToken.lastUpdated;
   const timeSinceLastUpdated = newDate - currentAccessTokenLastUpdated;
 
-
+  const accessTokenStillValid = (limit, span) => {
+    console.log(`limit: ${limit}`)
+    console.log(`span: ${span}`)
+  }
   
+  accessTokenStillValid(TOKEN_VALIDITY_TIMEOUT, timeSinceLastUpdated)
   
 
   
