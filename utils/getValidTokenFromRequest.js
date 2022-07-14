@@ -2,7 +2,7 @@ const { urlBase } = require('../utils/url');
 const accessTokens = require('../utils/accessTokens');
 
 const getValidTokenFromRequest = (req) => {
-
+  
   const TOKEN_VALIDITY_TIMEOUT = 900000;
   
   const currentUrl = urlBase + req.url;
@@ -15,7 +15,7 @@ const getValidTokenFromRequest = (req) => {
   }) 
 
   if (!currentAccessToken) {
-    return 'no currenct access token';
+    return false;
   }
 
   const newDate = Math.abs(new Date())
@@ -31,9 +31,9 @@ const getValidTokenFromRequest = (req) => {
   }
 
   if (!accessTokenStillValid(TOKEN_VALIDITY_TIMEOUT, timeSinceLastUpdated)) {
-      return 'access token has expired'
+      return false;
     } else {
-      return "You're in!"
+      return true;
     }
 }
 
@@ -41,10 +41,10 @@ const getValidTokenFromRequest = (req) => {
 module.exports = getValidTokenFromRequest;
 
 /*
-mesh true false statements together with tests
-  $$$ no current access token – 'no currenct access token'
-  $$$ correct current access token, but not valid – 'access token has expired'
-  correct access token, and up to date – "You're in!"
+$$$ mesh true false statements together with tests
+  $$$ $$$ no current access token – 'no currenct access token' – false
+  $$$ $$$ correct current access token, but not valid – 'access token has expired' - false
+  $$$ $$$ correct access token, and up to date – "You're in!" - true
   
-add return methods
+add return true/false statements
 */
