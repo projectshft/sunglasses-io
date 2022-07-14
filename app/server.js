@@ -122,24 +122,28 @@ myRouter.post('/login', (req, res) => {
       res.writeHead(200)
       res.end('Login Successful')
     } else {
-      console.log(false)
+      console.log(accessTokens)
+      const newDate = new Date()
+      let newAccessToken = {
+        username: reqUsername,
+        lastUpdated: JSON.stringify(newDate),
+        accessToken: uid(16)
+      }
+      accessTokens.push(newAccessToken)
+      console.log(accessTokens)
+      res.end('new access token')
     }
 
-    res.end()
+
 
   
     
   
   
 
-  /*
-    let newAccessToken = {
-      username: reqUsername,
-      lastUpdated: new Date(),
-      accessToken: uid(16)
-    }
-    accessTokens.push(JSON.stringify(newAccessToken))
-  */  
+  
+    
+  
   
 })
 
