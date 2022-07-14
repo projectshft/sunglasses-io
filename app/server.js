@@ -101,7 +101,11 @@ const getValidTokenFromRequest = (req) => {
     return reqAccessToken == tokenObject.accessToken;
   }) 
   
-  console.log(currentAccessToken)
+  if (currentAccessToken) {
+    console.log(true)
+  } else {
+    console.log(false)
+  }
 
 
 }
