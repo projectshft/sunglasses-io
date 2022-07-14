@@ -108,25 +108,28 @@ myRouter.post('/login', (req, res) => {
 */
 
   
-  //create a way to tell if current access token exists
 
-  
-  
+
     let currentAccessToken = accessTokens.find(tokenObject => {
       return tokenObject.username == reqUsername;
     }) 
+  
+
 
     if (currentAccessToken) {
-      console.log(true)
+      console.log(currentAccessToken)
+      currentAccessToken.lastUpdated = new Date();
+      console.log(currentAccessToken)
+      res.end()
     } else {
       console.log(false)
     }
 
     res.end()
 
-  /*  
-    currentAccessToken.lastUpdated = new Date();
-  */
+  
+    
+  
   
 
   /*
