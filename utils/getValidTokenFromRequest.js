@@ -1,3 +1,5 @@
+const { urlBase } = require('../utils/url');
+
 const getValidTokenFromRequest = (req) => {
 
   const currentUrl = urlBase + req.url;

@@ -10,11 +10,9 @@ const arrayEquals = require('../utils/arrayEquals');
 const postErrorMessage = require('../utils/postErrorMessage');
 const validApiKeys = require('../initial-data/validApiKeys');
 const getValidTokenFromRequest = require('../utils/getValidTokenFromRequest');
-const { domain, PORT, urlBase} = require('../utils/url');
+const { PORT } = require('../utils/url');
+const accessTokens = require('../utils/accessTokens');
 
-console.log(domain)
-console.log(PORT)
-console.log(urlBase)
 
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -23,18 +21,7 @@ let products = [];
 let brands = [];
 let cart = [];
 let users = [];
-let accessTokens = [
-  {
-    username: 'yellowleopard753',
-    lastUpdated: '2022-07-14T13:35:04.635Z',
-    accessToken: 'sm86hrZAAtUJI2qk'
-  },
-  {
-    username: 'Ellieboo',
-    lastUpdated: 'this date',
-    accessToken: '234234234234'
-  }
-];
+
 
 let server = http.createServer( (req, res) => {
   if (!validApiKeys.includes(req.headers["x-authentication"])) {
