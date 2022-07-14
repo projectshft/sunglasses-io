@@ -14,7 +14,13 @@ const getValidTokenFromRequest = (req) => {
     return reqAccessToken == tokenObject.accessToken;
   }) 
 
-  const newDate = Math.abs(new Date())
+  const newDate = new Date();
+  const newDateAbsolute = Math.abs(new Date())
+
+  console.log(`newDate raw: ${newDate}`)
+  console.log(`newDateAbsolute: ${newDateAbsolute}`)
+  console.log(`currentAccessToken.lastUpated as is: ${currentAccessToken.lastUpdated}`)
+  console.log(`currentAccessToken.lastUpdate absolutized: ${Math.abs(currentAccessToken.lastUpdated)}`)
   
 
   

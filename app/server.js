@@ -94,10 +94,11 @@ myRouter.post('/login', (req, res) => {
         const newDate = new Date()
         let newAccessToken = {
           username: reqUsername,
-          lastUpdated: JSON.stringify(newDate),
+          lastUpdated: Math.abs(newDate),
           accessToken: uid(16)
         }
         accessTokens.push(newAccessToken)
+        console.log(accessTokens)
         res.writeHead(200)
         res.end('Login Successful')
       }
