@@ -134,7 +134,8 @@ myRouter.post('/login', (req, res) => {
 myRouter.get('/sunglasses', (req, res) => {
   const currentUrl = urlBase + req.url;
   const myURL = new URL(currentUrl);
-  console.log(myURL);
+  const reqAccessToken = myURL.searchParams.get('accessToken')
+  console.log(reqAccessToken);
 
   //TEST CODE ABOVE
 
