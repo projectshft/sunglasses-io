@@ -39,12 +39,3 @@ const getValidTokenFromRequest = (req) => {
 
 
 module.exports = getValidTokenFromRequest;
-
-/*
-$$$ mesh true false statements together with tests
-  $$$ $$$ no current access token – 'no currenct access token' – false
-  $$$ $$$ correct current access token, but not valid – 'access token has expired' - false
-  $$$ $$$ correct access token, and up to date – "You're in!" - true
-  
-add return true/false statements
-*/
