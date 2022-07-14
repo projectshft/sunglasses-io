@@ -146,6 +146,7 @@ myRouter.get('/sunglasses/brands/:brand', (req, res) => {
 })
 
 myRouter.post('/cart', (req, res) => {
+  
   const toPost = req.body
 
   const canonList = [ 'id', 'categoryId', 'name', 'description', 'price', 'imageUrls' ]
@@ -167,8 +168,13 @@ myRouter.post('/cart', (req, res) => {
 })
 
 myRouter.get('/cart', (req, res) => {
-  res.writeHead(200, { "Content-Type": "application/json" })
-  res.end(JSON.stringify(cart))
+  if (!getValidTokenFromRequest(req)) {
+    res.writeHead(401)
+    res.end('Must be logged in to perform this action')
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" })
+    res.end(JSON.stringify(cart))
+  }
 })
 
 myRouter.delete('/cart', (req, res) => {
