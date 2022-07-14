@@ -96,17 +96,12 @@ const getValidTokenFromRequest = (req) => {
   const myURL = new URL(currentUrl);
   const reqAccessToken = myURL.searchParams.get('accessToken')
 
-  console.log(reqAccessToken)
-  
-
-  /*
-  IDENTIFY WHETHER CURRENT ACCESS TOKEN MATCHES
 
   let currentAccessToken = accessTokens.find(tokenObject => {
-    return tokenObject.username == reqUsername;
+    return reqAccessToken == tokenObject.accessToken;
   }) 
-  */
-
+  
+  console.log(currentAccessToken)
 
 
 }
