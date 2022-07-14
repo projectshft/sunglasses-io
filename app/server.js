@@ -118,7 +118,8 @@ myRouter.post('/login', (req, res) => {
 
     if (currentAccessToken) {
       console.log(currentAccessToken)
-      currentAccessToken.lastUpdated = new Date();
+      const newDate = new Date()
+      currentAccessToken.lastUpdated = JSON.stringify(newDate)
       console.log(currentAccessToken)
       res.end()
     } else {
