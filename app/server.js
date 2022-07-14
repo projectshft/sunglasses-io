@@ -10,7 +10,11 @@ const arrayEquals = require('../utils/arrayEquals');
 const postErrorMessage = require('../utils/postErrorMessage');
 const validApiKeys = require('../initial-data/validApiKeys');
 
+const domain = 'http://localhost:'
 const PORT = 3001;
+const urlBase = domain + PORT;
+
+
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
@@ -67,7 +71,7 @@ let server = http.createServer( (req, res) => {
 /* 
 $$$ 1) create a valid API Key database (https://parsity.teachable.com/courses/1377241/lectures/31787299)
 $$$ 2) Inside the server, check that the header of the request contained the API Key in the x-authentication (https://parsity.teachable.com/courses/1377241/lectures/31787299)
-3) Build login POST method (https://parsity.teachable.com/courses/1377241/lectures/31790907)
+$$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/lectures/31790907)
 4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 5) Make the tokens expire (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 6) Check for access token in each of the /cart methods
@@ -77,7 +81,20 @@ $$$ 2) Inside the server, check that the header of the request contained the API
   DELETE /cart/:id
 */
 
-//match tests to work
+/*
+  create function here
+    parse the url
+    single out the query
+    place in existing currentAccessToken finder variable from /login
+    if statement determining whether access token matches based on the truthiness of currentAccessToken
+    return true or false depending on whether it is there
+
+  make function modular
+*/
+
+const getValidTokenFromRequest = (req) => {
+
+}
 
 myRouter.post('/login', (req, res) => {
   const reqUsername = req.body.username;
@@ -112,12 +129,10 @@ myRouter.post('/login', (req, res) => {
         res.end('Login Successful')
       }
     }
-
-   
-  
 })
 
 myRouter.get('/sunglasses', (req, res) => {
+  
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
 })
