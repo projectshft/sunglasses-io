@@ -106,12 +106,6 @@ myRouter.post('/login', (req, res) => {
 })
 
 myRouter.get('/sunglasses', (req, res) => {
-
-  
-  console.log(getValidTokenFromRequest(req));
-
-  //TEST CODE ABOVE
-
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
 })
