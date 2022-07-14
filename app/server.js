@@ -84,9 +84,6 @@ myRouter.post('/login', (req, res) => {
   const reqPassword = req.body.password
 
   const usernameAndPassword = users.find(user => user.login.username === reqUsername && user.login.password === reqPassword)
-
-    
-    //remove all 4 console logs
   
     if (!reqUsername || !reqPassword) {
       res.writeHead(401)
@@ -99,14 +96,11 @@ myRouter.post('/login', (req, res) => {
         return tokenObject.username == reqUsername;
       }) 
       if (currentAccessToken) {
-        console.log(accessTokens)
         const newDate = new Date()
         currentAccessToken.lastUpdated = JSON.stringify(newDate)
-        console.log(accessTokens)
         res.writeHead(200)
         res.end('Login Successful')
       } else {
-        console.log(accessTokens)
         const newDate = new Date()
         let newAccessToken = {
           username: reqUsername,
@@ -114,7 +108,6 @@ myRouter.post('/login', (req, res) => {
           accessToken: uid(16)
         }
         accessTokens.push(newAccessToken)
-        console.log(accessTokens)
         res.writeHead(200)
         res.end('Login Successful')
       }
