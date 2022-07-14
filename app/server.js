@@ -84,66 +84,43 @@ myRouter.post('/login', (req, res) => {
   const reqPassword = req.body.password
 
   const usernameAndPassword = users.find(user => user.login.username === reqUsername && user.login.password === reqPassword)
+
+    
+    //remove all 4 console logs
   
-  // if (!reqUsername || !reqPassword) {
-  //   res.writeHead(401)
-  //   res.end('Must enter a username and password')
-  // } else if (!usernameAndPassword) {
-  //   res.writeHead(401)
-  //   res.end('Invalid username or password')
-  // } else {
-  //   res.writeHead(201)
-  //   res.end('good so far')
-  // }
-/*
-  If we already have an existing access token, use that
-
-  Update the last updated value of the existing token so we get another time period before expiration
-
-  Create a new token with the user value and a "random" token
-
-  When a login fails, tell the client in a generic way that either the username or password was wrong
-
-  If they are missing one of the parameters, tell the client that something was wrong in the formatting of the response
-*/
-
-  
-
-
-    let currentAccessToken = accessTokens.find(tokenObject => {
-      return tokenObject.username == reqUsername;
-    }) 
-  
-
-
-    if (currentAccessToken) {
-      const newDate = new Date()
-      currentAccessToken.lastUpdated = JSON.stringify(newDate)
-      res.writeHead(200)
-      res.end('Login Successful')
+    if (!reqUsername || !reqPassword) {
+      res.writeHead(401)
+      res.end('Must enter a username and password')
+    } else if (!usernameAndPassword) {
+      res.writeHead(401)
+      res.end('Invalid username or password')
     } else {
-      console.log(accessTokens)
-      const newDate = new Date()
-      let newAccessToken = {
-        username: reqUsername,
-        lastUpdated: JSON.stringify(newDate),
-        accessToken: uid(16)
+      let currentAccessToken = accessTokens.find(tokenObject => {
+        return tokenObject.username == reqUsername;
+      }) 
+      if (currentAccessToken) {
+        console.log(accessTokens)
+        const newDate = new Date()
+        currentAccessToken.lastUpdated = JSON.stringify(newDate)
+        console.log(accessTokens)
+        res.writeHead(200)
+        res.end('Login Successful')
+      } else {
+        console.log(accessTokens)
+        const newDate = new Date()
+        let newAccessToken = {
+          username: reqUsername,
+          lastUpdated: JSON.stringify(newDate),
+          accessToken: uid(16)
+        }
+        accessTokens.push(newAccessToken)
+        console.log(accessTokens)
+        res.writeHead(200)
+        res.end('Login Successful')
       }
-      accessTokens.push(newAccessToken)
-      console.log(accessTokens)
-      res.end('new access token')
     }
 
-
-
-  
-    
-  
-  
-
-  
-    
-  
+   
   
 })
 
