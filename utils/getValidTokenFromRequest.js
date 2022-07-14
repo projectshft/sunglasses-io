@@ -16,9 +16,9 @@ const getValidTokenFromRequest = (req) => {
 
   const newDate = Math.abs(new Date())
   const currentAccessTokenLastUpdated = currentAccessToken.lastUpdated;
+  const timeSinceLastUpdated = newDate - currentAccessTokenLastUpdated;
 
-  console.log(`newDateAbsolute: ${newDate}`)
-  console.log(`currentAccessTokenLastUpdated: ${currentAccessTokenLastUpdated}`);
+
   
   
 
