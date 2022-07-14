@@ -9,11 +9,12 @@ const queryHandler = require('../utils/queryHandler');
 const arrayEquals = require('../utils/arrayEquals');
 const postErrorMessage = require('../utils/postErrorMessage');
 const validApiKeys = require('../initial-data/validApiKeys');
+const getValidTokenFromRequest = require('../utils/getValidTokenFromRequest');
+const { domain, PORT, urlBase} = require('../utils/url');
 
-const domain = 'http://localhost:'
-const PORT = 3001;
-const urlBase = domain + PORT;
-
+console.log(domain)
+console.log(PORT)
+console.log(urlBase)
 
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -82,30 +83,9 @@ $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/le
 */
 
 /*
-  create function here
-    
-    return true or false depending on whether it is there
 
   make function modular
 */
-
-const getValidTokenFromRequest = (req) => {
-
-  const currentUrl = urlBase + req.url;
-  const myURL = new URL(currentUrl);
-  const reqAccessToken = myURL.searchParams.get('accessToken')
-
-
-  let currentAccessToken = accessTokens.find(tokenObject => {
-    return reqAccessToken == tokenObject.accessToken;
-  }) 
-  
-  if (currentAccessToken) {
-    return true;
-  } else {
-    return false;
-  }
-}
 
 myRouter.post('/login', (req, res) => {
   const reqUsername = req.body.username;
