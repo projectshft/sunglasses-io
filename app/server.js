@@ -65,7 +65,7 @@ $$$ 5) Make the tokens expire (https://parsity.teachable.com/courses/1377241/lec
 6) Check for access token in each of the /cart methods
   $$$ GET /cart
   $$$ POST /cart
-  DELETE /cart
+  $$$ DELETE /cart
   DELETE /cart/:id
 */
 
@@ -201,7 +201,10 @@ myRouter.delete('/cart/:id', (req, res) => {
     }
   })
   
-  if (!isMatched) {
+  if (!getValidTokenFromRequest(req)) {
+    res.writeHead(401)
+    res.end('Must be logged in to perform this action')
+  } else if (!isMatched) {
     res.writeHead(404)
     res.end('The item ID does not match any items in your cart.');
   } else {
