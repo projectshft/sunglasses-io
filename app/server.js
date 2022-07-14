@@ -60,7 +60,7 @@ let server = http.createServer( (req, res) => {
 $$$ 1) create a valid API Key database (https://parsity.teachable.com/courses/1377241/lectures/31787299)
 $$$ 2) Inside the server, check that the header of the request contained the API Key in the x-authentication (https://parsity.teachable.com/courses/1377241/lectures/31787299)
 $$$ 3) Build login POST method (https://parsity.teachable.com/courses/1377241/lectures/31790907)
-4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
+$$$ 4) Build a getValidTokenFromRequest function (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 5) Make the tokens expire (https://parsity.teachable.com/courses/1377241/lectures/31806852)
 6) Check for access token in each of the /cart methods
   GET /cart
@@ -105,6 +105,11 @@ myRouter.post('/login', (req, res) => {
 })
 
 myRouter.get('/sunglasses', (req, res) => {
+
+  const TOKEN_VALIDITY_TIMEOUT = 900000;
+  console.log(TOKEN_VALIDITY_TIMEOUT);
+
+  //TEST CODE ABOVE
 
   res.writeHead(200, { "Content-Type": "application/json" })
   res.end(JSON.stringify(products))
