@@ -5,7 +5,7 @@ let accessTokens = [
     accessToken: 'sm86hrZAAtUJI2qk'
   },
   {
-    username: 'Ellieboo',
+    username: 'thor_god_of_love_and_thunder',
     lastUpdated: 1657816612689,
     accessToken: '234234234234'
   }
