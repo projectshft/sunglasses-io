@@ -26,7 +26,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, err => {
   if (err) throw err;
   console.log(`Server running on port ${PORT}`);
-  
+
   // Populate brands  
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
   console.log(`Brands: ${brands.length} loaded`)
@@ -39,3 +39,16 @@ server.listen(PORT, err => {
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
   console.log(`Users: ${users.length} loaded`)
 });
+
+// GET all products
+myRouter.get("/api/products", (request, response) => {
+  if (products.length === 0) {
+    response.writeHead(404, "No products exist");
+    return response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(products));
+});
+
+module.exports = server;

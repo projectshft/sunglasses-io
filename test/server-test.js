@@ -7,7 +7,7 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('GET /api/products', () => {
-  it('should GET all products', (done) => {
+  it('should GET all products', done => {
     chai
       .request(server)
       .get('/api/products')
