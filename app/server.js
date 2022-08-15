@@ -26,6 +26,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, err => {
   if (err) throw err;
   console.log(`Server running on port ${PORT}`);
+  
   // Populate brands  
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
   console.log(`Brands: ${brands.length} loaded`)
@@ -37,7 +38,4 @@ server.listen(PORT, err => {
   // Populate users
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
   console.log(`Users: ${users.length} loaded`)
-
-  // Hardcode "logged in" user
-  user = users[0];
 });
