@@ -19,3 +19,17 @@ describe('GET /api/products', () => {
       });
   });
 });
+
+describe('GET /api/brands', () => {
+  it('should GET all brands', done => {
+    chai
+      .request(server)
+      .get('/api/brands')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an('array');
+        res.body.length.should.eql(5);
+        done();
+      });
+  });
+});
