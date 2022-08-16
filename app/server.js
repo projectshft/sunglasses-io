@@ -120,7 +120,6 @@ myRouter.post("/api/login", (request, response) => {
   
   // Access token does not exist, use new token and return
   accessTokens.push(newAccessToken);
-  console.log(accessTokens);
   return response.end(JSON.stringify(newAccessToken.token))
 });
 
