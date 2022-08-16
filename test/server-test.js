@@ -60,10 +60,8 @@ describe("POST /api/login", () => {
       .send(userCredentials)
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('username');
-        res.body.should.have.property('lastUpdated');
-        res.body.should.have.property('token');
+        res.body.should.be.a('string');
+        res.body.should.have.lengthOf(16);
         done();
       });
   });

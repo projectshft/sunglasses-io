@@ -10,6 +10,7 @@ var uid = require('rand-token').uid;
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
 
 const PORT = 3111;
 
@@ -74,6 +75,54 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsOfBrand));
+});
+
+// // POST user credentials
+myRouter.post("/api/login", (request, response) => {
+  // Find valid user/password
+  const user = users.find((user) => (
+    user.login.username === request.body.username &&
+    user.login.password === request.body.password
+  ));
+
+  // Check if user already has access token
+  const currentAccessToken = accessTokens.find((tokenObject) => (
+    tokenObject.username === user.login.username
+  ));
+
+  // Create new access token
+  const newAccessToken = {
+    username: user.login.username,
+    lastUpdated: new Date(),
+    token: uid(16),
+  };
+  
+  // Missing parameters, return early
+  if (!request.body.username || !request.body.password) {
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+
+  // No matching user/password found, return early
+  if (!user) {
+    response.writeHead(401, "Invalid username or password");
+    return response.end();
+  }
+
+  // Success
+  response.writeHead(200, { "Content-Type": "application/json" });
+
+  // End response
+  if (currentAccessToken) {
+    // Access token exists already, update and return early
+    currentAccessToken.lastUpdated = new Date();
+    return response.end(JSON.stringify(currentAccessToken.token));
+  } else {
+    // Access token does not exist, use new token and return
+    accessTokens.push(newAccessToken);
+    console.log(accessTokens);
+    return response.end(JSON.stringify(newAccessToken.token));
+  }
 });
 
 module.exports = server;
