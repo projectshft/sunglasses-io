@@ -1,0 +1,309 @@
+swagger: "2.0"
+info:
+  title: sunglasses.io API
+  description: An API to support the sunglasses.io store
+  version: 1.0.0
+host: sunglasses.io
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: The Brands endpoint returns information on all current brands in store
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Products of Brand
+      description: All the products of a given brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to search for products in.
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of products in the brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint returns information on all current products in store
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: User Login
+      description: The User Login endpoint allows user to login and begin using the cart
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: credentials
+          description: Login credentials to use.
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      tags:
+        - Login
+      responses:
+        "200":
+          description: Login is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: User Cart
+      description: The User Cart endpoint returns all items currently in the user cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: An array of products and quantities currently in the user cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add Product
+      description: The Add Product endpoint adds a product to the user cart
+      parameters:
+        - name: productId
+          in: query
+          type: integer
+          format: int32
+          description: The id of product to be added to user's cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: Add was successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      summary: Remove Product
+      description: The Remove Product endpoint removes a product from the user cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to remove from user's cart
+          required: true
+          type: string
+        - name: remove
+          in: query
+          type: boolean
+          description: Confirm product is to be removed with true
+      tags:
+        - User
+      responses:
+        "200":
+          description: Removal is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Product Quantity
+      description: The Product Quantity endpoint changes the quantity of a product in the user cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to change the quantity of in the user's cart
+          required: true
+          type: string
+        - name: qty
+          in: query
+          type: integer
+          format: int32
+          description: Desired product quantity
+      tags:
+        - User
+      responses:
+        "200":
+          description: Product quantity update is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of product is US dollars.
+      imageURLs:
+        type: array
+        items:
+          type: string
+        description: The URLs for product images
+  CartItem:
+    type: object
+    description: A product and quantity
+    properties:
+      product:
+        $ref: "#/definitions/Product"
+      quantity:
+        type: integer
+        format: int32
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of user.
+      cart:
+        type: array
+        description: An array of products added by user.
+        items:
+          $ref: "#/definitions/Product"
+      name:
+        type: object
+        description: Full name and title of user.
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        description: Location of user.
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
+      email:
+        type: string
+        description: Email of user.
+      login:
+        type: object
+        description: Username, password, and credentials of user.
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        description: Date of birth of user.
+      registered:
+        type: string
+        description: Date user registered account.
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+        description: URLs of user profile picture.
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+        description: Nationality of user.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
