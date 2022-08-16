@@ -35,10 +35,10 @@ describe('GET /api/brands', () => {
 });
 
 describe('GET /api/brands/:id/products', () => {
-  it('should GET all products for specified brand', done => {        
+  it('should GET all products of given brand', done => {        
       chai
           .request(server)            
-          .get('/brands/1/products')            
+          .get('/api/brands/1/products')            
           .end((err, res) => {                            
               res.should.have.status(200);
               res.body.should.be.an('array');
