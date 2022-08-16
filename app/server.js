@@ -43,12 +43,23 @@ server.listen(PORT, err => {
 // GET all products
 myRouter.get("/api/products", (request, response) => {
   if (products.length === 0) {
-    response.writeHead(404, "No products exist");
+    response.writeHead(404, "No products were found");
     return response.end();
   }
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(products));
+});
+
+// GET all brands
+myRouter.get("/api/brands", (request, response) => {
+  if (brands.length === 0) {
+    response.writeHead(404, "No brands were found");
+    return response.end();
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(brands));
 });
 
 module.exports = server;
