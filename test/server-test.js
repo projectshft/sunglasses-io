@@ -33,3 +33,17 @@ describe('GET /api/brands', () => {
       });
   });
 });
+
+describe('GET /api/brands/:id/products', () => {
+  it('should GET all products for specified brand', done => {        
+      chai
+          .request(server)            
+          .get('/brands/1/products')            
+          .end((err, res) => {                            
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.length.should.eql(3);
+              done();
+          });
+  });
+});
