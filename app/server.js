@@ -172,10 +172,10 @@ myRouter.post("/api/me/cart", (request, response) => {
     return response.end();
   }
 
-  const parsedUrl = require('url').parse(request.url,true)
+  const { productId } = require('url').parse(request.url,true).query;
 
   const foundProduct = products.find((product) => {
-    return product.id === parsedUrl.query.productId
+    return product.id === productId
   })
 
   if (!foundProduct) {
@@ -183,18 +183,18 @@ myRouter.post("/api/me/cart", (request, response) => {
     return response.end();
   }
   
-  const productInCart = user.cart.find((cartObject) => {
+  const foundProductInCart = user.cart.find((cartObject) => {
     return cartObject.id === foundProduct.id;
   })
   
-  if (productInCart) {
+  if (foundProductInCart) {
     user.cart = user.cart.filter((cartObject) => {
-      return cartObject.id !== productInCart.id;
+      return cartObject.id !== foundProductInCart.id;
     })
 
     const updatedProduct = {
-      ...productInCart, 
-      quantity: productInCart.quantity + 1
+      ...foundProductInCart, 
+      quantity: foundProductInCart.quantity + 1
     }
 
     user.cart.push(updatedProduct)
@@ -202,6 +202,45 @@ myRouter.post("/api/me/cart", (request, response) => {
     const newUserCart = [...user.cart, {...foundProduct, quantity: 1}]
 
     user.cart = newUserCart;
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user.cart));
+});
+
+myRouter.put("/api/me/cart/:productId", (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request)
+
+  const user = users.find((user) => {
+    return user.login.username === currentAccessToken?.username
+  })
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "Must be logged in to add to cart");
+    return response.end();
+  }
+
+  const { productId } = request.params;
+  const { qty } = require('url').parse(request.url,true).query;
+
+  const foundProductInCart = user.cart.find((cartObject) => {
+    return cartObject.id === productId;
+  })
+
+  if (!foundProductInCart) {
+    response.writeHead(404, "Product not found");
+    return response.end();
+  } else {
+    user.cart = user.cart.filter((cartObject) => {
+      return cartObject.id !== foundProductInCart.id;
+    })
+
+    const updatedProduct = {
+      ...foundProductInCart, 
+      quantity: +qty
+    }
+
+    user.cart.push(updatedProduct)
   }
 
   response.writeHead(200, { "Content-Type": "application/json" });
