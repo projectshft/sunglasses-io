@@ -247,4 +247,35 @@ myRouter.put("/api/me/cart/:productId", (request, response) => {
   return response.end(JSON.stringify(user.cart));
 });
 
+myRouter.delete("/api/me/cart/:productId", (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request)
+
+  const user = users.find((user) => {
+    return user.login.username === currentAccessToken?.username
+  })
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "Must be logged in to add to cart");
+    return response.end();
+  }
+
+  const { productId } = request.params;
+
+  const foundProductInCart = user.cart.find((cartObject) => {
+    return cartObject.id === productId;
+  })
+
+  if (!foundProductInCart) {
+    response.writeHead(404, "Product not found");
+    return response.end();
+  } else {
+    user.cart = user.cart.filter((cartObject) => {
+      return cartObject.id !== foundProductInCart.id;
+    })
+  }
+  
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user.cart));
+});
+
 module.exports = server;

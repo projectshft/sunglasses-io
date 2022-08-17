@@ -150,7 +150,7 @@ describe("DELETE /api/me/cart/:productId", () => {
   it("should REMOVE product from user's cart", (done) => {
     chai
       .request(server)
-      .put("/api/me/cart/1")
+      .delete("/api/me/cart/1")
       .set("username", "greenlion235")
       .end((err, res) => {
         res.should.have.status(200);
