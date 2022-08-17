@@ -78,15 +78,42 @@ describe("GET /api/me/cart", () => {
 });
 
 describe("POST /api/me/cart", () => {
-  it("should POST a product to the user's cart", (done) => {
+  it("should POST a product to the user's empty cart", (done) => {
     chai
       .request(server)
       .post("/api/me/cart")
       .set("username", "greenlion235")
-      .query({ "productId": "1" })
+      .query({ "productId": 1 })
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array");
+        res.body.should.have.lengthOf(1)
+        done();
+      });
+  });
+  it("should POST an additional product to the user's cart", (done) => {
+    chai
+      .request(server)
+      .post("/api/me/cart")
+      .set("username", "greenlion235")
+      .query({ "productId": 8 })
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        res.body.should.have.lengthOf(2)
+        done();
+      });
+  });
+  it("should POST a product that already exists in the user's cart by increasing its quantity", (done) => {
+    chai
+      .request(server)
+      .post("/api/me/cart")
+      .set("username", "greenlion235")
+      .query({ "productId": 1 })
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        res.body.should.have.lengthOf(2)
         done();
       });
   });

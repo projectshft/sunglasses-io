@@ -160,8 +160,47 @@ myRouter.get("/api/me/cart", (request, response) => {
 });
 
 // POST product to user cart
-myRouter.get("/api/me/cart", (request, response) => {
+myRouter.post("/api/me/cart", (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request)
 
+  const user = users.find((user) => {
+    return user.login.username === currentAccessToken?.username
+  })
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "Must be logged in to add to cart");
+    return response.end();
+  }
+
+  const parsedUrl = require('url').parse(request.url,true)
+
+  const product = products.find((product) => {
+    return product.id === parsedUrl.query.productId
+  })
+  
+  const productInCart = user.cart.find((cartObject) => {
+    return cartObject.id === product.id;
+  })
+  
+  if (productInCart) {
+    user.cart = user.cart.filter((cartObject) => {
+      return cartObject.id !== productInCart.id;
+    })
+
+    const updatedProduct = {
+      ...productInCart, 
+      quantity: productInCart.quantity + 1
+    }
+
+    user.cart.push(updatedProduct)
+  } else {
+    const newUserCart = [...user.cart, {...product, quantity: 1}]
+
+    user.cart = newUserCart;
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(user.cart));
 });
 
 module.exports = server;

@@ -207,8 +207,27 @@ definitions:
     type: object
     description: A product and quantity
     properties:
-      product:
-        $ref: "#/definitions/Product"
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+        description: The price of product is US dollars.
+      imageURLs:
+        type: array
+        items:
+          type: string
+        description: The URLs for product images
       quantity:
         type: integer
         format: int32
