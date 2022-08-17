@@ -145,3 +145,18 @@ describe("PUT /api/me/cart/:productId", () => {
       });
   });
 });
+
+describe("DELETE /api/me/cart/:productId", () => {
+  it("should REMOVE product from user's cart", (done) => {
+    chai
+      .request(server)
+      .put("/api/me/cart/1")
+      .set("username", "greenlion235")
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        res.body.should.have.lengthOf(1)
+        done();
+      });
+  });
+});
