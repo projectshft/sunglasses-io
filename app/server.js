@@ -78,50 +78,51 @@ myRouter.get("/api/brands/:id/products", (request, response) => {
   return response.end(JSON.stringify(productsOfBrand));
 });
 
-// // POST user credentials
+// POST user credentials
 myRouter.post("/api/login", (request, response) => {
-  // Missing parameters, return early
-  if (!request.body.username || !request.body.password) {
-    response.writeHead(400, "Incorrectly formatted response");
-    return response.end();
-  }
-  
   // Find valid user/password
   const user = users.find((user) => (
     user.login.username === request.body.username &&
     user.login.password === request.body.password
   ));
 
-  // No matching user/password found, return early
+  // Find access token if it already exists for user
+  const currentAccessToken = accessTokens.find((tokenObject) => (
+    tokenObject.username === user?.login.username
+  ));
+
+  // Create new access token
+  const newAccessToken = {
+    username: user?.login.username,
+    lastUpdated: new Date(),
+    token: uid(16),
+  };
+
+  // Missing parameters, return 400
+  if (!request.body.username || !request.body.password) {
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
+  }
+
+  // No matching user/password found, return 401
   if (!user) {
     response.writeHead(401, "Invalid username or password");
     return response.end();
   }
-  
-  // Success
-  response.writeHead(200, { "Content-Type": "application/json" });
-
-  // Check if user already has access token
-  const currentAccessToken = accessTokens.find((tokenObject) => (
-    tokenObject.username === user.login.username
-  ));
-
-  // Access token exists already, update and return early
+    
+  // Access token exists already, update and return
   if (currentAccessToken) {
     currentAccessToken.lastUpdated = new Date();
+    response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(currentAccessToken.token));
   }
-
-  // Create new access token
-  const newAccessToken = {
-    username: user.login.username,
-    lastUpdated: new Date(),
-    token: uid(16),
-  };
   
-  // Access token does not exist, use new token and return
-  accessTokens.push(newAccessToken);
-  return response.end(JSON.stringify(newAccessToken.token))
+  // Criteria met, access token does not already exist, use new token and return
+  if (newAccessToken) {
+    accessTokens.push(newAccessToken);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(newAccessToken.token))
+  }
 });
 
 // Helper function to check for valid access token
