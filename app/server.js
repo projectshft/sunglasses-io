@@ -159,4 +159,9 @@ myRouter.get("/api/me/cart", (request, response) => {
   return response.end(JSON.stringify(user.cart));
 });
 
+// POST product to user cart
+myRouter.get("/api/me/cart", (request, response) => {
+
+});
+
 module.exports = server;

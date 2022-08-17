@@ -76,3 +76,18 @@ describe("GET /api/me/cart", () => {
       });
   });
 });
+
+describe("POST /api/me/cart", () => {
+  it("should POST a product to the user's cart", (done) => {
+    chai
+      .request(server)
+      .post("/api/me/cart")
+      .set("username", "greenlion235")
+      .query({ "productId": "1" })
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        done();
+      });
+  });
+});
