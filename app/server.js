@@ -123,4 +123,9 @@ myRouter.post("/api/login", (request, response) => {
   return response.end(JSON.stringify(newAccessToken.token))
 });
 
+// GET user cart
+myRouter.post("/api/me/cart", (request, response) => {
+
+});
+
 module.exports = server;

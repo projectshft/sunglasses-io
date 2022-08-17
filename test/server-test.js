@@ -66,3 +66,16 @@ describe("POST /api/login", () => {
       });
   });
 });
+
+describe("GET /api/me/cart", () => {
+  it("should GET all products in user cart", (done) => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        done();
+      });
+  });
+});
