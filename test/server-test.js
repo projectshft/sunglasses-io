@@ -129,3 +129,19 @@ describe("POST /api/me/cart", () => {
       });
   });
 });
+
+describe("PUT /api/me/cart/:productId", () => {
+  it("should UPDATE product in user's cart with given quantity", (done) => {
+    chai
+      .request(server)
+      .put("/api/me/cart/8")
+      .set("username", "greenlion235")
+      .query({ "qty": 99 })
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        res.body.should.have.lengthOf(2)
+        done();
+      });
+  });
+});
