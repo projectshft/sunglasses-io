@@ -174,12 +174,17 @@ myRouter.post("/api/me/cart", (request, response) => {
 
   const parsedUrl = require('url').parse(request.url,true)
 
-  const product = products.find((product) => {
+  const foundProduct = products.find((product) => {
     return product.id === parsedUrl.query.productId
   })
+
+  if (!foundProduct) {
+    response.writeHead(404, "Product not found");
+    return response.end();
+  }
   
   const productInCart = user.cart.find((cartObject) => {
-    return cartObject.id === product.id;
+    return cartObject.id === foundProduct.id;
   })
   
   if (productInCart) {
@@ -194,7 +199,7 @@ myRouter.post("/api/me/cart", (request, response) => {
 
     user.cart.push(updatedProduct)
   } else {
-    const newUserCart = [...user.cart, {...product, quantity: 1}]
+    const newUserCart = [...user.cart, {...foundProduct, quantity: 1}]
 
     user.cart = newUserCart;
   }

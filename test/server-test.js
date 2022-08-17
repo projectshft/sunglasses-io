@@ -117,4 +117,15 @@ describe("POST /api/me/cart", () => {
         done();
       });
   });
+  it("should not POST a product if not found in data", (done) => {
+    chai
+      .request(server)
+      .post("/api/me/cart")
+      .set("username", "greenlion235")
+      .query({ "productId": 24 })
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
 });
