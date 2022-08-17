@@ -50,14 +50,10 @@ describe("GET /api/brands/:id/products", () => {
 
 describe("POST /api/login", () => {
   it("should POST user credentials", (done) => {
-    const userCredentials = {
-      "username": "greenlion235",
-      "password": "waters"
-    }
     chai
       .request(server)
       .post("/api/login")
-      .send(userCredentials)
+      .send({ "username": "greenlion235", "password": "waters" })
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a('string');
@@ -72,6 +68,7 @@ describe("GET /api/me/cart", () => {
     chai
       .request(server)
       .get("/api/me/cart")
+      .set("username", "greenlion235")
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array");
