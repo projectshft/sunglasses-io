@@ -126,33 +126,33 @@ myRouter.post("/api/login", (request, response) => {
 
 // Helper function to check for valid access token
 const getValidTokenFromRequest = (request) => {
-  const currentAccessToken = accessTokens.find((tokenObject) => (
-    tokenObject.username === request.headers.username
-  ));
+  const currentAccessToken = accessTokens.find((tokenObject) => {
+    return tokenObject.username === request.headers.username  
+  });
 
-  if (!currentAccessToken) {
-    return null
-  }
+  const currentAccessTokenLastUpdated = ((new Date) - currentAccessToken?.lastUpdated) 
 
-  if (((new Date) - currentAccessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT) {
-    return currentAccessToken
-  } else {
-    return null
-  }
+  const currentAccessTokenIsValid = {
+    [!currentAccessTokenLastUpdated]: null,
+    [currentAccessTokenLastUpdated >= TOKEN_VALIDITY_TIMEOUT]: null,
+    [currentAccessTokenLastUpdated < TOKEN_VALIDITY_TIMEOUT]: currentAccessToken
+  };
+
+  return currentAccessTokenIsValid[true] ?? null
 }
 
 // GET user cart
 myRouter.get("/api/me/cart", (request, response) => {
   const currentAccessToken = getValidTokenFromRequest(request)
 
+  const user = users.find((user) => {
+    return user.login.username === currentAccessToken?.username
+  })
+
   if (!currentAccessToken) {
     response.writeHead(401, "Must be logged in to view cart");
     return response.end();
   }
-
-  const user = users.find((user) => {
-    return user.login.username === currentAccessToken.username
-  })
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
