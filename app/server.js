@@ -13,7 +13,7 @@ let users = [];
 let accessTokens = [];
 
 const PORT = 3111;
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const TOKEN_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 // Router setup
 const myRouter = Router();
@@ -125,33 +125,31 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
-// Helper function to check for valid access token
-const getValidTokenFromRequest = (request) => {
-  const currentAccessToken = accessTokens.find((tokenObject) => {
+// Helper function to return authenticated user
+const authenticate = (request) => {
+  const userToken = accessTokens.find((tokenObject) => {
     return tokenObject.username === request.headers.username  
   });
 
-  const currentAccessTokenLastUpdated = ((new Date) - currentAccessToken?.lastUpdated) 
+  const userTokenAge = ((new Date) - userToken?.lastUpdated) 
 
-  const currentAccessTokenIsValid = {
-    [!currentAccessTokenLastUpdated]: null,
-    [currentAccessTokenLastUpdated >= TOKEN_VALIDITY_TIMEOUT]: null,
-    [currentAccessTokenLastUpdated < TOKEN_VALIDITY_TIMEOUT]: currentAccessToken
+  const tokenIsValid = {
+    [!userTokenAge]: null,
+    [userTokenAge >= TOKEN_TIMEOUT]: null,
+    [userTokenAge < TOKEN_TIMEOUT]: users.find((user) => {
+      return user.login.username === userToken?.username
+    })
   };
 
-  return currentAccessTokenIsValid[true] ?? null
+  return tokenIsValid[true] ?? null
 }
 
 // GET user cart
 myRouter.get("/api/me/cart", (request, response) => {
-  const currentAccessToken = getValidTokenFromRequest(request)
+  const user = authenticate(request);
 
-  const user = users.find((user) => {
-    return user.login.username === currentAccessToken?.username
-  })
-
-  if (!currentAccessToken) {
-    response.writeHead(401, "Must be logged in to view cart");
+  if (!user) {
+    response.writeHead(401, "Must be logged in to add to cart");
     return response.end();
   }
 
@@ -161,13 +159,9 @@ myRouter.get("/api/me/cart", (request, response) => {
 
 // POST product to user cart
 myRouter.post("/api/me/cart", (request, response) => {
-  const currentAccessToken = getValidTokenFromRequest(request)
+  const user = authenticate(request);
 
-  const user = users.find((user) => {
-    return user.login.username === currentAccessToken?.username
-  })
-
-  if (!currentAccessToken) {
+  if (!user) {
     response.writeHead(401, "Must be logged in to add to cart");
     return response.end();
   }
@@ -208,14 +202,11 @@ myRouter.post("/api/me/cart", (request, response) => {
   return response.end(JSON.stringify(user.cart));
 });
 
+// UPDATE product quantity in user cart
 myRouter.put("/api/me/cart/:productId", (request, response) => {
-  const currentAccessToken = getValidTokenFromRequest(request)
+  const user = authenticate(request);
 
-  const user = users.find((user) => {
-    return user.login.username === currentAccessToken?.username
-  })
-
-  if (!currentAccessToken) {
+  if (!user) {
     response.writeHead(401, "Must be logged in to add to cart");
     return response.end();
   }
@@ -247,14 +238,11 @@ myRouter.put("/api/me/cart/:productId", (request, response) => {
   return response.end(JSON.stringify(user.cart));
 });
 
+// DELETE product from user cart
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
-  const currentAccessToken = getValidTokenFromRequest(request)
+  const user = authenticate(request);
 
-  const user = users.find((user) => {
-    return user.login.username === currentAccessToken?.username
-  })
-
-  if (!currentAccessToken) {
+  if (!user) {
     response.writeHead(401, "Must be logged in to add to cart");
     return response.end();
   }
