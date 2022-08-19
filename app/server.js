@@ -113,15 +113,15 @@ myRouter.post("/api/login", (request, response) => {
   // Access token exists already, update and return
   if (currentAccessToken) {
     currentAccessToken.lastUpdated = new Date();
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(currentAccessToken.token));
+    response.writeHead(200, "Login successful");
+    return response.end();
   }
   
   // Criteria met, access token does not already exist, use new token and return
   if (newAccessToken) {
     accessTokens.push(newAccessToken);
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(newAccessToken.token))
+    response.writeHead(200, "Login successful");
+    return response.end()
   }
 });
 
@@ -149,7 +149,7 @@ myRouter.get("/api/me/cart", (request, response) => {
   const user = authenticate(request);
 
   if (!user) {
-    response.writeHead(401, "Must be logged in to add to cart");
+    response.writeHead(401, "Must be logged in to view to cart");
     return response.end();
   }
 

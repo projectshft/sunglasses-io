@@ -23,6 +23,10 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Brand"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -46,6 +50,10 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -64,6 +72,10 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -92,7 +104,15 @@ paths:
         - Login
       responses:
         "200":
-          description: Login is successful
+          description: Login successful
+        "400":
+          description: Bad request
+          schema:
+            $ref: "#/definitions/Error"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -110,6 +130,10 @@ paths:
             type: array
             items:
               $ref: "#/definitions/CartItem"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -127,7 +151,19 @@ paths:
         - User
       responses:
         "200":
-          description: Add was successful
+          description: An updated array of products and quantities currently in the user cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
@@ -142,20 +178,28 @@ paths:
           description: The id of the product to remove from user's cart
           required: true
           type: string
-        - name: remove
-          in: query
-          type: boolean
-          description: Confirm product is to be removed with true
       tags:
         - User
       responses:
         "200":
-          description: Removal is successful
+          description: An updated array of products and quantities currently in the user cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-    post:
+    put:
       summary: Product Quantity
       description: The Product Quantity endpoint changes the quantity of a product in the user cart
       parameters:
@@ -173,7 +217,19 @@ paths:
         - User
       responses:
         "200":
-          description: Product quantity update is successful
+          description: An updated array of products and quantities currently in the user cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
         default:
           description: Unexpected error
           schema:

@@ -76,8 +76,6 @@ describe("POST /api/login", () => {
       .send({ "username": "greenlion235", "password": "waters" })
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should.be.a('string');
-        res.body.should.have.lengthOf(16);
         done();
       });
   });
