@@ -49,6 +49,26 @@ describe("GET /api/brands/:id/products", () => {
 });
 
 describe("POST /api/login", () => {
+  it("should not POST user credentials if username/password combo incorrect", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({ "username": "greenlion235", "password": "waters123" })
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+  it("should not POST user credentials if either username or password is missing", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({ "username": "greenlion235" })
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
   it("should POST user credentials", (done) => {
     chai
       .request(server)
@@ -64,6 +84,16 @@ describe("POST /api/login", () => {
 });
 
 describe("GET /api/me/cart", () => {
+  it("should not GET user cart if user not logged in", (done) => {
+    chai
+      .request(server)
+      .get("/api/me/cart")
+      .set("username", "lazywolf342")
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
   it("should GET all products in user cart", (done) => {
     chai
       .request(server)
@@ -78,7 +108,18 @@ describe("GET /api/me/cart", () => {
 });
 
 describe("POST /api/me/cart", () => {
-  it("should POST a product to the user's empty cart", (done) => {
+  it("should not POST a product if user not logged in", (done) => {
+    chai
+      .request(server)
+      .post("/api/me/cart")
+      .set("username", "lazywolf342")
+      .query({ "productId": 24 })
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+  it("should POST a new product to user's empty cart", (done) => {
     chai
       .request(server)
       .post("/api/me/cart")
@@ -131,6 +172,17 @@ describe("POST /api/me/cart", () => {
 });
 
 describe("PUT /api/me/cart/:productId", () => {
+  it("should not UPDATE a product if user not logged in", (done) => {
+    chai
+      .request(server)
+      .put("/api/me/cart/11")
+      .set("username", "lazywolf342")
+      .query({ "qty": 7 })
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
   it("should UPDATE product in user's cart with given quantity", (done) => {
     chai
       .request(server)
@@ -144,9 +196,30 @@ describe("PUT /api/me/cart/:productId", () => {
         done();
       });
   });
+  it("should not UPDATE a product not found in user's cart", (done) => {
+    chai
+      .request(server)
+      .put("/api/me/cart/11")
+      .set("username", "greenlion235")
+      .query({ "qty": 7 })
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
 });
 
 describe("DELETE /api/me/cart/:productId", () => {
+  it("should not REMOVE a product if user not logged in", (done) => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/5")
+      .set("username", "lazywolf342")
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
   it("should REMOVE product from user's cart", (done) => {
     chai
       .request(server)
@@ -156,6 +229,16 @@ describe("DELETE /api/me/cart/:productId", () => {
         res.should.have.status(200);
         res.body.should.be.an("array");
         res.body.should.have.lengthOf(1)
+        done();
+      });
+  });
+  it("should not REMOVE a product not found in user's cart", (done) => {
+    chai
+      .request(server)
+      .delete("/api/me/cart/5")
+      .set("username", "greenlion235")
+      .end((err, res) => {
+        res.should.have.status(404);
         done();
       });
   });
