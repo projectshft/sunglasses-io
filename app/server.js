@@ -144,14 +144,22 @@ const authenticate = (request) => {
   return tokenIsValid[true] ?? null
 }
 
-// GET user cart
-myRouter.get("/api/me/cart", (request, response) => {
+// Authentication middleware
+myRouter.use((request,response,next)=>{
   const user = authenticate(request);
 
   if (!user) {
-    response.writeHead(401, "Must be logged in to view to cart");
+    response.writeHead(401, "Must be logged in to add to cart");
     return response.end();
   }
+
+  response.user = user;
+  next()
+})
+
+// GET user cart
+myRouter.get("/api/me/cart", (request, response) => {
+  const { user } = response;
 
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(user.cart));
@@ -159,12 +167,7 @@ myRouter.get("/api/me/cart", (request, response) => {
 
 // POST product to user cart
 myRouter.post("/api/me/cart", (request, response) => {
-  const user = authenticate(request);
-
-  if (!user) {
-    response.writeHead(401, "Must be logged in to add to cart");
-    return response.end();
-  }
+  const { user } = response;
 
   const { productId } = require('url').parse(request.url,true).query;
 
@@ -204,12 +207,7 @@ myRouter.post("/api/me/cart", (request, response) => {
 
 // UPDATE product quantity in user cart
 myRouter.put("/api/me/cart/:productId", (request, response) => {
-  const user = authenticate(request);
-
-  if (!user) {
-    response.writeHead(401, "Must be logged in to add to cart");
-    return response.end();
-  }
+  const { user } = response;
 
   const { productId } = request.params;
   const { qty } = require('url').parse(request.url,true).query;
@@ -240,13 +238,7 @@ myRouter.put("/api/me/cart/:productId", (request, response) => {
 
 // DELETE product from user cart
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
-  const user = authenticate(request);
-
-  if (!user) {
-    response.writeHead(401, "Must be logged in to add to cart");
-    return response.end();
-  }
-
+  const { user } = response;
   const { productId } = request.params;
 
   const foundProductInCart = user.cart.find((cartObject) => {
