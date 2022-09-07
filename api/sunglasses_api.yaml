@@ -1,4 +1,4 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   title: SunGlasses API
   description: An API to support the sunglasses platform
@@ -14,9 +14,9 @@ paths:
     get:
       tags:
         - Brands
-      summary: Brands
+      summary: Show Brands
       description: |
-        The Brands endpoint allows you to search sunglasses brands based on different filters such as a search string
+        The Brands endpoint allows you to get all available sunglasses brands
       parameters:
         - name: query
           in: query
@@ -24,36 +24,40 @@ paths:
           required: false
           type: string
       responses:
-        "200":
+        '200':
           description: An array of brands
           schema:
             type: array
             items:
-              $ref: "#/definitions/Brand"
+              $ref: '#/definitions/Brand'
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /brands/{id}/products:
     get:
       tags:
         - Brands
-      summary: Show a product
+      summary: Show product(s) with the given brand ID
       description: |
         This endpoint allows you to get a sunglasses product with the given id
       parameters:
         - name: id
           in: path
-          description: The id of the seached sunglasses
+          description: The brand id of the seached sunglasses
           required: true
           type: string
       responses:
-        "200":
-          description: Successful
+        '200':
+          description: An array of product(s) with given brand ID
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /products:
     get:
       tags:
@@ -68,25 +72,25 @@ paths:
           required: false
           type: string
       responses:
-        "200":
+        '200':
           description: An array of products
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: '#/definitions/Product'
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /login:
-    get:
+    post:
       tags:
         - Login
       summary: User login
       description: |
-        This endpoint allows users to login their own accounts
+        This endpoint allows users to login
       parameters:
-        - name: email
+        - name: username
           in: path
           description: The username of the account
           required: true
@@ -98,51 +102,47 @@ paths:
           type: number
           format: int32
       responses:
-        "200":
+        '200':
           description: Login Success
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/Login"
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /me/cart:
     get:
       tags:
         - User
       summary: Get user cart
       description: |
-        This User cart endpoint returns information about the user cart collections
+        This User cart endpoint returns information about the users cart
       responses:
-        "200":
+        '200':
           description: Profile information for a user
           schema:
-            $ref: "#/definitions/User"
+            $ref: '#/definitions/Cart'
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
 
     post:
       tags:
         - User
       summary: Post user cart
       description: |
-        This User cart endpoint allows user to submit orders
+        This User cart endpoint allows user to add items in the cart
       responses:
-        "200":
-          description: Acceptance is successful
+        '200':
+          description: Successful
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /me/cart/{productId}:
     delete:
       tags:
         - User
-      summary: Delete a product
+      summary: Delete a product from the users cart
       description: |
         This endpoint allows you to delete a product with the given productId
       parameters:
@@ -152,19 +152,19 @@ paths:
           required: true
           type: string
       responses:
-        "200":
+        '200':
           description: Successful
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
 
     post:
       tags:
         - User
       summary: Post a product
       description: |
-        This endpoint allows you to post a product with the given productId
+        This endpoint allows you to add a product with the given productId
       parameters:
         - name: productId
           in: path
@@ -172,12 +172,12 @@ paths:
           required: true
           type: string
       responses:
-        "200":
+        '200':
           description: Successful
         default:
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
 
 definitions:
   Brand:
@@ -189,17 +189,18 @@ definitions:
       name:
         type: string
         description: The name of the brand.
+  Cart:
+    type: array,
+    example: []
   Product:
     type: object
     properties:
       id:
         type: string
-        description: >-
-          Unique identifier for a product.
+        description: Unique identifier for a product.
       categoryId:
         type: string
-        description: >-
-          The id of the category this product belongs to.
+        description: The id of the category this product belongs to.
       name:
         type: string
         description: The name of the product.
@@ -212,7 +213,8 @@ definitions:
         description: The price of the product.
       imageUrls:
         type: array
-        description: The urls for the images
+        description: The urls for the images.
+
   Name:
     type: object
     properties:
@@ -282,19 +284,19 @@ definitions:
         description: Gender of the user.
       cart:
         items:
-          $ref: "#/definitions/Product"
+          $ref: '#/definitions/Product'
       name:
         items:
-          $ref: "#/definitions/Name"
+          $ref: '#/definitions/Name'
       location:
         items:
-          $ref: "#/definitions/Location"
+          $ref: '#/definitions/Location'
       email:
         type: string
         description: Email of the user.
       login:
         items:
-          $ref: "#/definitions/Login"
+          $ref: '#/definitions/Login'
       dob:
         type: string
         description: Date of birth of the user.
@@ -309,7 +311,7 @@ definitions:
         description: Users cellphone number.
       picture:
         items:
-          $ref: "#/definitions/Picture"
+          $ref: '#/definitions/Picture'
       nat:
         type: string
         description: Users nationality.

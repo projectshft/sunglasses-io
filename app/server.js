@@ -17,7 +17,7 @@ let accessTokens = [
     token: 'mVQGrtceicJGzjmg',
   },
 ];
-// $ mocha sunglasses_test.js --watch
+
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 let myRouter = Router();
@@ -72,6 +72,11 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
       (product) => product.categoryId == request.params.id
     );
 
+    if (!productsAPI) {
+      response.writeHead(404, "That product can't be found");
+      return response.end();
+    }
+
     response.writeHead(200, { 'Content-Type': 'application/json' });
     return response.end(JSON.stringify(productsAPI));
   }
@@ -85,7 +90,7 @@ myRouter.get('/api/products', (request, response) => {
 
 // POST /api/login
 myRouter.post('/api/login', (request, response) => {
-  // console.log('request body: ', request.body);
+  // console.log('request Body: ', request.body);
   if (request.body.username && request.body.password) {
     let user = users.find((user) => {
       return (
@@ -118,30 +123,13 @@ myRouter.post('/api/login', (request, response) => {
     response.writeHead(400, 'Incorrectly formatted response');
     return response.end();
   }
-  // ++++++++++++
-  // let currentAccessToken = {
-  //   username: 'yellowleopard753',
-  //   token: 'mVQGrtceicJGzjmg',
-  // };
-  // let user = users.find((user) => {
-  //   return (
-  //     (user.login.username == 'yellowleopard753') &
-  //     (user.login.password == 'jonjon')
-  //   );
-  // });
-  // if (!user) {
-  //   response.writeHead(404, 'No such user');
-  //   return response.end();
-  // } else {
-  //   response.writeHead(200, { 'Content-Type': 'application/json' });
-  //   return response.end(JSON.stringify(currentAccessToken.token));
-  // }
 });
 
 // Helper method to process access token
 const getValidTokenFromRequest = function (request) {
   const parsedUrl = require('url').parse(request.url, true);
   // console.log('parseUrl: ', parsedUrl.query.accessToken);
+  // console.log(accessTokens);
   if (parsedUrl.query.accessToken) {
     let currentAccessToken = accessTokens.find((accessToken) => {
       return (
@@ -184,6 +172,7 @@ myRouter.get('/api/me/cart', (request, response) => {
 // POST /api/me/cart
 myRouter.post('/api/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
+  // console.log('curAccToken: ', currentAccessToken);
   // console.log('request body:: ', request.body);
   if (!currentAccessToken) {
     response.writeHead(401, 'You need to have access to this call to continue');
@@ -196,10 +185,10 @@ myRouter.post('/api/me/cart', (request, response) => {
       response.writeHead(403, "You don't have access to the cart");
       return response.end();
     } else {
-      user.cart = request.body;
+      const newCart = [...user.cart, request.body];
       response.writeHead(200, { 'Content-Type': 'application/json' });
-      // console.log('users cart:: ',user.cart);
-      return response.end(JSON.stringify(user.cart));
+      // console.log('users cart:: ', user.cart);
+      return response.end(JSON.stringify(newCart));
     }
   }
 });

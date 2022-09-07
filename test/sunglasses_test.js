@@ -5,10 +5,10 @@ let { server } = require('../app/server');
 let should = chai.should();
 chai.use(chaiHttp);
 
+// mocha sunglasses_test.js --watch
 // "arrange", "act" and "assert".
 // beforeEach(() => {
 //   // log user in
-//   users[0].cart = [];
 // });
 
 // afterEach(() => {
@@ -83,6 +83,7 @@ describe('login', () => {
   });
 });
 
+
 describe('cart', () => {
   describe('/GET api/me/cart', () => {
     it('it should get users cart', (done) => {
@@ -92,7 +93,7 @@ describe('cart', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          // res.body.length.should.be.eql(0);
+          res.body.length.should.be.eql(0);
           done();
         });
     });
@@ -141,7 +142,7 @@ describe('cart', () => {
           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
         ],
       };
-      
+
       chai
         .request(server)
         .delete(`/api/me/cart/${productID}?accessToken=mVQGrtceicJGzjmg`);
