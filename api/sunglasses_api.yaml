@@ -119,7 +119,18 @@ paths:
         '200':
           description: Profile information for a user
           schema:
-            $ref: '#/definitions/Cart'
+            type: array,
+            example:
+              [
+                {
+                  'id': 1,
+                  'categoryId': '1',
+                  'name': 'Superglasses',
+                  'description': 'The best glasses in the world',
+                  'price': 150,
+                  'imageUrls': [],
+                },
+              ]
         default:
           description: Unexpected error
           schema:
