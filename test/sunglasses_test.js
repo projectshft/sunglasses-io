@@ -1,12 +1,11 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-let { server } = require('../app/server');
+let { server, users } = require('../app/server');
 
 let should = chai.should();
 chai.use(chaiHttp);
 
 // mocha sunglasses_test.js --watch
-// "arrange", "act" and "assert".
 // beforeEach(() => {
 //   // log user in
 // });
@@ -83,7 +82,6 @@ describe('login', () => {
   });
 });
 
-
 describe('cart', () => {
   describe('/GET api/me/cart', () => {
     it('it should get users cart', (done) => {
@@ -130,18 +128,6 @@ describe('cart', () => {
   describe('/DELETE api/me/cart/productId', () => {
     it('it should delete a product with the given id from the cart', (done) => {
       let productID = 2;
-      let product = {
-        id: productID,
-        categoryId: '1',
-        name: 'Superglasses',
-        description: 'The best glasses in the world',
-        price: 150,
-        imageUrls: [
-          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-        ],
-      };
 
       chai
         .request(server)
@@ -158,18 +144,6 @@ describe('cart', () => {
 
     it('it should return 404 if the product does not exist', (done) => {
       let productID = 20;
-      let product = {
-        id: productID,
-        categoryId: '1',
-        name: 'Superglasses',
-        description: 'The best glasses in the world',
-        price: 150,
-        imageUrls: [
-          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-          'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
-        ],
-      };
       chai
         .request(server)
         .delete(`/api/me/cart/${productID}?accessToken=mVQGrtceicJGzjmg`)
@@ -185,7 +159,6 @@ describe('cart', () => {
       chai
         .request(server)
         .post(`/api/me/cart/${productID}?accessToken=mVQGrtceicJGzjmg`)
-        // .send(productID)
         .end((err, res) => {
           res.should.have.status(200);
           done();
@@ -195,13 +168,12 @@ describe('cart', () => {
     it('it should return 404 if the product does not exist', (done) => {
       let productID = 20;
       chai
-      .request(server)
-      .post(`/api/me/cart/${productID}?accessToken=mVQGrtceicJGzjmg`)
-      // .send(productID)
-      .end((err, res) => {
-        res.should.have.status(404);
-        done();
-      });
-    })
+        .request(server)
+        .post(`/api/me/cart/${productID}?accessToken=mVQGrtceicJGzjmg`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
   });
 });
