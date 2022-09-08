@@ -1,0 +1,219 @@
+swagger: '2.0'
+info:
+  title: Sunglasses io
+  description: An API to provide sunglasses inventory to Sunglasses.io
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Access brands
+      description: The brands endpoint allows you to search brands offered by the store
+      parameters:
+        - name: query
+          in: query
+          description: search query string
+          required: false
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: an array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Access products in a queried brand
+      description: This enpdoint allows you to search products in a specifed brand
+      parameters:
+        - name: query
+          in: query
+      tags:
+        - Brands
+  /products:
+    get:
+      summary: Access products inventory
+      description: The Products endpoint allows you to search products offered by the store
+      parameters:
+        - name: query
+          in: query
+          description: search query string
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: an array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Login to user account
+      description: this endpoint allows a user to log in to their account
+      tags:
+        - User
+    parameters:
+      - name: username
+        in: query
+        description: the user name for login
+        required: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: the password for login
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Successful login
+        headers:
+          X-Expires-After:
+            description: date in UTC when token expires
+            schema:
+              type: string
+              format: date-time
+      '400':
+        description: Invalid username or password provided
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the user that
+        has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/logout:
+    post:
+      summary: User logout
+      description: Logs the user out of the session and resets for a new user to log in
+      tags:
+        - User
+      responses:
+        '200':
+          description: User successfully logged out
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: User's cart
+      description: returns cart with user's products
+      tags:
+        - User
+      responses:
+        '200':
+          description: successfully returns items in user cart
+        schema:
+          $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      brandId:
+        type: string
+        description: the id of the brand of this product
+      description:
+        type: string
+        description: Description of product
+      imageURL:
+        type: string
+        description: the url for the image representing the product
+      price:
+        type: number
+        description: the price of the product
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: the id of this brand
+      description:
+        type: string
+        description: Description of this brand
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: first name of user
+      last_name:
+        type: string
+        description: last name of user
+      email:
+        type: string
+        description: email address of user
+      phoneNumber:
+        type: string
+        description: phone number of user
+      homeAddress:
+        type: string
+        description: home address of user
+      billingAddress:
+        type: string
+        description: billing address of user
+      history:
+        type: object
+        description: history of purchases that the user has made
+      cart:
+        type: array
+        description: products in cart
+  Cart:
+    type: object
+    properties:
+      id:
+        type: string
+      product:
+        properties:
+          id:
+            type: string
+            quantity: integer
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

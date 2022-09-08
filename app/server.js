@@ -6,8 +6,12 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+let myRouter = Router()
+myRouter.use(bodyParser.json())
 const PORT = 3001;
 
-http.createServer(function (request, response) {
+let server = http.createServer(function (request, response){
+  myRouter(request, response, finalHandler(request, response))
+}).listen(PORT)
 
-}).listen(PORT);
+myRouter.get('')
