@@ -6,13 +6,6 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 // mocha sunglasses_test.js --watch
-// beforeEach(() => {
-//   // log user in
-// });
-
-// afterEach(() => {
-//   // logout user
-// });
 
 describe('brands', () => {
   describe('/GET api/brands', () => {
@@ -76,6 +69,7 @@ describe('login', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('string');
+          res.body.length.should.be.eql(16);
           done();
         });
     });
@@ -111,11 +105,11 @@ describe('cart', () => {
           'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
         ],
       };
-      let req = [product]; // == request.body
+      // let req = [product]; // == request.body
       chai
         .request(server)
         .post('/api/me/cart?accessToken=mVQGrtceicJGzjmg')
-        .send(req)
+        .send(product)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -161,6 +155,7 @@ describe('cart', () => {
         .post(`/api/me/cart/${productID}?accessToken=mVQGrtceicJGzjmg`)
         .end((err, res) => {
           res.should.have.status(200);
+          res.body.should.be.an('object');
           done();
         });
     });
