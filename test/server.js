@@ -1,10 +1,33 @@
 let chai = require("chai");
 let chaiHttp = require("chai-http");
-let server = require("../app/server");
+let {server, updateCart, updateAccessTokens, clearState } = require("../app/server");
 
 let should = chai.should();
 
 chai.use(chaiHttp);
+
+beforeEach(() => {
+  clearState();
+});
+
+// "product" constants to help with arranging
+const superglasses = {
+  "id": "1",
+  "categoryId": "1",
+  "name": "Superglasses",
+  "description": "The best glasses in the world",
+  "price":150,
+  "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+};
+
+const blackSunglasses = {
+  "id": "2",
+  "categoryId": "1",
+  "name": "Black Sunglasses",
+  "description": "The best glasses in the world",
+  "price":100,
+  "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+};
 
 describe("Brands", () => {
   describe("/GET brands", () => {
@@ -29,7 +52,6 @@ describe("Brands", () => {
       chai
         .request(server)
         .get("/brands/1/products")
-        .query({id: 1})
         // assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -45,7 +67,6 @@ describe("Brands", () => {
       chai
         .request(server)
         .get("/brands/6/products")
-        .query({id: 6})
         // assert
         .end((err, res) => {
           res.should.have.status(404);
@@ -81,7 +102,6 @@ describe("Products", () => {
       chai
         .request(server)
         .get(`/products?query=${search}`)
-        .query(search)
         // assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -98,7 +118,6 @@ describe("Products", () => {
       chai
         .request(server)
         .get(`/products?query=${search}`)
-        .query(search)
         // assert
         .end((err, res) => {
           res.should.have.status(400);
@@ -113,7 +132,6 @@ describe("Products", () => {
       chai
         .request(server)
         .get(`/products?query=${search}`)
-        .query(search)
         // assert
         .end((err, res) => {
           res.should.have.status(404);
@@ -196,6 +214,78 @@ describe("Log In", () => {
         .request(server)
         .post("/login")
         .send(credentials)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+  });
+});
+
+describe("Cart", () => {
+  describe("/GET cart", () => {
+    it("it should GET cart products when logged in", (done) => {
+      // arrange
+      updateAccessTokens("testToken");
+      updateCart(superglasses, blackSunglasses);
+      // act
+      chai
+        .request(server)
+        .get("/me/cart?token=testToken")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.be.eql(2);
+          done();
+        });
+    });
+
+    it("it should GET an empty array when logged in and cart is empty", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      // act
+      chai
+        .request(server)
+        .get("me/cart?token=testToken")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.be.eql(0);
+          done();
+        });
+    });
+
+    it("it should return a 401 if no token is present", (done) => {
+      // nothing to arrange
+      chai
+        .request(server)
+        .get("me/cart?token=testToken")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+
+    it("it should return a 401 if token is present but expired", (done) => {
+      // arrange expired token
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date('December 17, 1995 03:24:00'),
+        token: "testToken",
+      }
+      // act
+      chai
+        .request(server)
+        .get("me/cart?token=testToken")
         // assert
         .end((err, res) => {
           res.should.have.status(401);
