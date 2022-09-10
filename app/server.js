@@ -18,8 +18,6 @@ let accessTokens = [];
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-
-
 const server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, error => {
@@ -46,6 +44,12 @@ const server = http.createServer(function (request, response) {
   });
 
   console.log(`Server is listening on ${PORT}`);
+});
+
+myRouter.get("/brands", (request, response) => {
+  // Return all the brands in the database
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(brands));
 });
 
 
