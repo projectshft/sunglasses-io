@@ -122,3 +122,85 @@ describe("Products", () => {
     });
   });
 });
+
+describe("Log In", () => {
+  describe("/POST log in", () => {
+    it("it should return a token object upon successful login", (done) => {
+      // arrange
+      let credentials = {
+        username: "yellowleopard753",
+        password: "jonjon",
+      }
+      // act
+      chai
+        .request(server)
+        .get("/login")
+        .send(credentials)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("object");
+          res.body.should.have.property("username");
+          res.body.username.should.be.eql("yellowleopard753")
+          res.body.should.have.property("lastUpdated");
+          res.body.lastUpdated.should.be.a("string");
+          res.body.should.have.property("token");
+          res.body.token.should.be.a("string");
+          done();
+        });
+    });
+
+    it("it should throw a 400 with a missing parameter", (done) => {
+      // arrange
+      let credentials = {
+        username: "yellowleopard753",
+      };
+      // act
+      chai
+        .request(server)
+        .get("/login")
+        .send(credentials)
+        // assert
+        .end((err, res) => {
+          res.body.should.have.status(400);
+          done();
+        });
+    });
+
+    it("it should throw a 401 with an invalid username", (done) => {
+      // arrange
+      let credentials = {
+        username: "yellowleopard752",
+        password: "jonjon"
+      };
+      // act
+      chai  
+        .request(server)
+        .get("/login")
+        .send(credentials)
+        // assert
+        .end((err, res) => {
+          res.body.should.have.status(401);
+          done();
+        });
+    });
+
+    it("it should throw a 401 with an invalid password", (done) => {
+      // arrange
+      let credentials = {
+        username: "yellowleopard753",
+        password: "jonjoon"
+      };
+      // act
+      chai  
+        .request(server)
+        .get("/login")
+        .send(credentials)
+        // assert
+        .end((err, res) => {
+          res.body.should.have.status(401);
+          done();
+        });
+    });
+  });
+});
