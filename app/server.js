@@ -77,7 +77,7 @@ myRouter.get("/products", (request, response) => {
   // return a 400 if query is too short
   if (query.length < 3) {
     response.writeHead(400, "Invalid search query. Query must contain more than 3 characters");
-    response.end();
+    return response.end();
   } else {
     // otherwise return the relevant products
     let productsToReturn = products.filter((product) => {
@@ -89,11 +89,53 @@ myRouter.get("/products", (request, response) => {
     // return a 404 if no search results are found
     if (!productsToReturn.length) {
       response.writeHead(404, "No products were found.");
-      response.end();
+      return response.end();
     } else {
       response.writeHead(200, {"Content-Type": "application/json" });
-      response.end(JSON.stringify(productsToReturn));
+      return response.end(JSON.stringify(productsToReturn));
     }
+  }
+});
+
+myRouter.post("/login", (request, response) => {
+  // Make sure there is a username and password in request
+  if (request.body.username && request.body.password) {
+    // Check if the credentials are valid
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.body.password
+    });
+    if (user) {
+      response.writeHead(200, {"Content-Type": "application/json"});
+
+      // If we have an existing access token, use that
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username
+      });
+
+      // If there is one, update its last updated value
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token))
+      } else {
+        // Otherwise create a new token
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16),
+        };
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken));
+      }
+      // return response.end(JSON.stringify({username: "Yo"}));
+    } else {
+      // If credentials are invalid
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  } else {
+    // If username or password is absent in request
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
   }
 });
 

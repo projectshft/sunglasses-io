@@ -130,11 +130,11 @@ describe("Log In", () => {
       let credentials = {
         username: "yellowleopard753",
         password: "jonjon",
-      }
+      };
       // act
       chai
         .request(server)
-        .get("/login")
+        .post("/login")
         .send(credentials)
         // assert
         .end((err, res) => {
@@ -158,11 +158,11 @@ describe("Log In", () => {
       // act
       chai
         .request(server)
-        .get("/login")
+        .post("/login")
         .send(credentials)
         // assert
         .end((err, res) => {
-          res.body.should.have.status(400);
+          res.should.have.status(400);
           done();
         });
     });
@@ -176,11 +176,11 @@ describe("Log In", () => {
       // act
       chai  
         .request(server)
-        .get("/login")
+        .post("/login")
         .send(credentials)
         // assert
         .end((err, res) => {
-          res.body.should.have.status(401);
+          res.should.have.status(401);
           done();
         });
     });
@@ -194,11 +194,11 @@ describe("Log In", () => {
       // act
       chai  
         .request(server)
-        .get("/login")
+        .post("/login")
         .send(credentials)
         // assert
         .end((err, res) => {
-          res.body.should.have.status(401);
+          res.should.have.status(401);
           done();
         });
     });
