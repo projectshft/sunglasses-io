@@ -28,7 +28,7 @@ describe("Brands", () => {
       // nothing to arrange
       chai
         .request(server)
-        .get("/brands/1")
+        .get("/brands/1/products")
         .query({id: 1})
         // assert
         .end((err, res) => {
@@ -44,7 +44,7 @@ describe("Brands", () => {
       // nothing to arrange
       chai
         .request(server)
-        .get("/brands/6")
+        .get("/brands/6/products")
         .query({id: 6})
         // assert
         .end((err, res) => {

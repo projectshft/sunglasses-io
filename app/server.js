@@ -52,6 +52,20 @@ myRouter.get("/brands", (request, response) => {
   return response.end(JSON.stringify(brands));
 });
 
+myRouter.get("/brands/:id/products", (request, response) => {
+  const id = request.params.id;
+  let brand = brands.find((brand => brand.id == id));
 
+  // Return 404 if not found
+  if (!brand) {
+    response.writeHead(404);
+    return response.end("Brand not found");
+  }
+
+  // Otherwise return array of products with brand
+  let productsWithBrand = products.filter(product => product.categoryId == id);
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(productsWithBrand));
+});
 
 module.exports = server;
