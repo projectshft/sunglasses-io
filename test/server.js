@@ -63,7 +63,7 @@ describe("Products", () => {
       // act
       chai
         .request(server)
-        .get("/products")
+        .get(`/products?query=${search}`)
         .query(search)
         // assert
         .end((err, res) => {
@@ -80,7 +80,7 @@ describe("Products", () => {
       // act
       chai
         .request(server)
-        .get("/products")
+        .get(`/products?query=${search}`)
         .query(search)
         // assert
         .end((err, res) => {
@@ -97,7 +97,7 @@ describe("Products", () => {
       // act
       chai
         .request(server)
-        .get("/products")
+        .get(`/products?query=${search}`)
         .query(search)
         // assert
         .end((err, res) => {
@@ -112,7 +112,7 @@ describe("Products", () => {
       // act
       chai
         .request(server)
-        .get("/products")
+        .get(`/products?query=${search}`)
         .query(search)
         // assert
         .end((err, res) => {

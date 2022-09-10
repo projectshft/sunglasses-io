@@ -4,6 +4,7 @@ var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
+var url = require("url");
 var uid = require('rand-token').uid;
 
 const PORT = 3001;
@@ -66,6 +67,34 @@ myRouter.get("/brands/:id/products", (request, response) => {
   let productsWithBrand = products.filter(product => product.categoryId == id);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsWithBrand));
+});
+
+myRouter.get("/products", (request, response) => {
+  // Return all the products relevant to a search query
+  const parsedUrl = url.parse(request.originalUrl);
+  let { query } = queryString.parse(parsedUrl.query);
+  query = query.toLowerCase();
+  // return a 400 if query is too short
+  if (query.length < 3) {
+    response.writeHead(400, "Invalid search query. Query must contain more than 3 characters");
+    response.end();
+  } else {
+    // otherwise return the relevant products
+    let productsToReturn = products.filter((product) => {
+      if (product.name.toLowerCase().includes(query) || product.description.toLowerCase().includes(query)) {
+        return true;
+      }
+      return false;
+    });
+    // return a 404 if no search results are found
+    if (!productsToReturn.length) {
+      response.writeHead(404, "No products were found.");
+      response.end();
+    } else {
+      response.writeHead(200, {"Content-Type": "application/json" });
+      response.end(JSON.stringify(productsToReturn));
+    }
+  }
 });
 
 module.exports = server;
