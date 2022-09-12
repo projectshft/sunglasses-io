@@ -499,11 +499,12 @@ describe("Cart", () => {
       chai
         .request(server)
         .post("/me/cart/1?token=testToken")
-        .send("5")
+        .send({newCount: 5})
         // assert
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
+          res.body.length.should.eql(1);
           res.body[0].should.be.an("object");
           res.body[0].should.have.property("count");
           res.body[0].count.should.eql(5);
@@ -524,7 +525,7 @@ describe("Cart", () => {
       chai
         .request(server)
         .post("/me/cart/1?token=testToken")
-        .send("0")
+        .send({newCount: 0})
         // assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -546,7 +547,7 @@ describe("Cart", () => {
       chai
         .request(server)
         .post("/me/cart/1?token=testToken")
-        .send("5")
+        .send({newCount: 5})
         // assert
         .end((err, res) => {
           res.should.have.status(401);
@@ -566,7 +567,7 @@ describe("Cart", () => {
       chai
         .request(server)
         .post("/me/cart/2?token=testToken")
-        .send("5")
+        .send({newCount: 5})
         // assert
         .end((err, res) => {
           res.should.have.status(404);

@@ -204,6 +204,35 @@ myRouter.delete("/me/cart/:productId", (request, response) => {
   }
 });
 
+myRouter.post("/me/cart/:productId", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there is no valid access token, then return a 401
+    response.writeHead(401, "You must be logged in to view cart.");
+    return response.end();
+  }
+  let productId = request.params.productId;
+  let productToChange = cart.find(product => product.id == productId);
+  if (!productToChange) {
+    // If the product does not exist in cart
+    response.writeHead(404, "That product could not be found.");
+    return response.end();
+  }
+  let newCount = parseInt(request.body.newCount);
+  let productIndex = cart.indexOf(productToChange);
+  // If the newCount is 0, remove the product from cart
+  if (!newCount) {
+    cart.splice(productIndex, 1);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(cart));
+  } else {
+    cart[productIndex] = {...productToChange, count: newCount};
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(cart));
+  }
+});
+
 // Helper method to process access token
 const getValidTokenFromRequest = (request) => {
   let parsedUrl = url.parse(request.originalUrl);
