@@ -483,4 +483,95 @@ describe("Cart", () => {
         });
     });
   });
+
+  describe("/POST cart new product count", () => {
+    it("it should change the product count of an existing item in cart", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      addToCart(superglasses);
+      addToCart(superglasses);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart/1?token=testToken")
+        .send("5")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body[0].should.be.an("object");
+          res.body[0].should.have.property("count");
+          res.body[0].count.should.eql(5);
+          done();
+        });
+    });
+    it("it should remove an product from cart when count is changed to zero", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      addToCart(superglasses);
+      addToCart(blackSunglasses);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart/1?token=testToken")
+        .send("0")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.eql(1);
+          done();
+        });
+    });
+    it("it should return a 401 if token is invalid", (done) => {
+      // arrange expired token
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date('December 17, 1995 03:24:00'),
+        token: "testToken",
+      }
+      updateAccessTokens(testToken);
+      addToCart(superglasses);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart/1?token=testToken")
+        .send("5")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it("it should return a 404 if the product is not found in cart", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      addToCart(superglasses);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart/2?token=testToken")
+        .send("5")
+        // assert
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+  });
 });
