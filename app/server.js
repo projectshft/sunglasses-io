@@ -176,16 +176,42 @@ myRouter.post("/me/cart", (request, response) => {
   return response.end(JSON.stringify(cart));
 });
 
+myRouter.delete("/me/cart/:productId", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there is no valid access token, then return a 401
+    response.writeHead(401, "You must be logged in to view cart.");
+    return response.end();
+  }
+  let productId = request.params.productId;
+  let productToRemove = cart.find(product => product.id == productId);
+  if (!productToRemove) {
+    // If the product does not exist in cart
+    response.writeHead(404, "That product could not be found.");
+    return response.end();
+  }
+  // If there is 1 of this product in cart, remove product from cart
+  let productIndex = cart.indexOf(productToRemove);
+  if (productToRemove.count === 1) {
+    cart.splice(productIndex, 1);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(cart));
+  } else {
+    cart[productIndex] = {...productToRemove, count: productToRemove.count-1};
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(cart));
+  }
+});
+
 // Helper method to process access token
 const getValidTokenFromRequest = (request) => {
   let parsedUrl = url.parse(request.originalUrl);
   let queryToken = queryString.parse(parsedUrl.query).token;
-  console.log(`queryToken: ${queryToken}`);
   if (queryToken) {
     let currentAccessToken = accessTokens.find(accessToken => {
       return accessToken.token = queryToken && ((new Date()) - accessToken.lastUpdated) < tokenTimeout;
     });
-    console.log(`currentAccessToken: ${currentAccessToken}`)
     if (currentAccessToken) {
       return currentAccessToken;
     } else {
@@ -209,7 +235,6 @@ const addToCart = (product) => {
   } else {
     cart.push(newProduct);
   }
-  console.log(cart);
 };
 
 exports.updateAccessTokens = (newToken) => {
