@@ -1,6 +1,6 @@
 let chai = require("chai");
 let chaiHttp = require("chai-http");
-let {server, updateCart, updateAccessTokens, clearState } = require("../app/server");
+let {server, addToCart, updateAccessTokens, clearState } = require("../app/server");
 
 let should = chai.should();
 
@@ -233,8 +233,8 @@ describe("Cart", () => {
         token: "testToken",
       };
       updateAccessTokens(testToken);
-      updateCart(superglasses);
-      updateCart(blackSunglasses);
+      addToCart(superglasses);
+      addToCart(blackSunglasses);
       // act
       chai
         .request(server)
@@ -300,4 +300,100 @@ describe("Cart", () => {
         });
     });
   });
+
+  describe("/POST cart", () => {
+    it("it should add an item to the cart and return the updated cart", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      addToCart(superglasses);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart?token=testToken")
+        .send(blackSunglasses)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.eq(2);
+          done();
+        });
+    });
+    it("it should increment the count of an existing item in the cart and return the updated cart", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      addToCart(superglasses);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart?token=testToken")
+        .send(superglasses)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.eq(1);
+          res.body[0].should.be.an("object");
+          res.body[0].should.have.property("count");
+          res.body[0].count.should.eq(2);
+          done();
+        });
+    });
+    it("it should return a 401 with an invalid token", (done) => {
+      // arrange expired token
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date('December 17, 1995 03:24:00'),
+        token: "testToken",
+      }
+      updateAccessTokens(testToken);
+      // act
+      chai
+        .request(server)
+        .post("/me/cart?token=testToken")
+        .send(superglasses)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it("it should return a 404 if trying add a product that does not exist", (done) => {
+      // arrange
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      const testProduct = {
+        "id": "10",
+        "categoryId": "8",
+        "name": "Black Aviators",
+        "description": "The best aviators in the world",
+        "price":101,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+      // act
+      chai
+        .request(server)
+        .post("/me/cart?token=testToken")
+        .send(testProduct)
+        // assert
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+  })
 });

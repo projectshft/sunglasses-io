@@ -176,30 +176,20 @@ const getValidTokenFromRequest = (request) => {
   }
 };
 
-// function to update state for the sake of testing
-exports.updateCart = (product) => {
+// functions to update state for the sake of testing
+const addToCart = (product) => {
   let newProduct = {
     count: 0,
     ...product
   };
-  cart.push(newProduct)
-  // for (let i=0; i < arguments.length; i++) {
-  //   let newProduct = {
-  //     count: 0,
-  //     ...arguments[i]
-  //   }
-  //   // If the product already exists in the cart, increment the count
-  //   // if (cart.find(product => product.id == newProduct.id)) {
-  //   //   cart = [...cart, {...newProduct, count: cart.product.count + 1}];
-  //   // } else {
-  //     // Otherwise just add the product to the cart
-  //     cart.push(newProduct);
-  //   // }
-  // }
-  console.log(`cart: ${cart}`);
+  let productInCart = cart.find(product => product.id == newProduct.id);
+  if (productInCart) {
+    let productInCartIndex = cart.indexOf(productInCart);
+    cart[productInCartIndex] = {...productInCart, count: productInCart.count+1};
+  } else {
+    cart.push(newProduct);
+  }
 };
-
-// TODO something is up with tokens
 
 exports.updateAccessTokens = (newToken) => {
   accessTokens.push(newToken);
@@ -210,4 +200,5 @@ exports.clearState = () => {
   accessTokens = [];
 };
 
+exports.addToCart = addToCart;
 exports.server = server;
