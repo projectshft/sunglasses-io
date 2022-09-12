@@ -156,6 +156,26 @@ myRouter.get("/me/cart", (request, response) => {
   }
 });
 
+myRouter.post("/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+  // if no valid access token, return 401
+  if (!currentAccessToken) {
+    response.writeHead(401, "You must be logged in to access cart.");
+    return response.end();
+  }
+  let productToAdd = request.body;
+  const productExists = products.find(product => JSON.stringify(product) == JSON.stringify(productToAdd));
+  // if product does not exist, return 404
+  if (!productExists) {
+    response.writeHead(404, "That product could not be found.");
+    return response.end();
+  }
+  // otherwise add the product to the cart
+  addToCart(productToAdd);
+  response.writeHead(200, { "Content-Type": "application/json"});
+  return response.end(JSON.stringify(cart));
+});
+
 // Helper method to process access token
 const getValidTokenFromRequest = (request) => {
   let parsedUrl = url.parse(request.originalUrl);
@@ -179,7 +199,7 @@ const getValidTokenFromRequest = (request) => {
 // functions to update state for the sake of testing
 const addToCart = (product) => {
   let newProduct = {
-    count: 0,
+    count: 1,
     ...product
   };
   let productInCart = cart.find(product => product.id == newProduct.id);
@@ -189,6 +209,7 @@ const addToCart = (product) => {
   } else {
     cart.push(newProduct);
   }
+  console.log(cart);
 };
 
 exports.updateAccessTokens = (newToken) => {
