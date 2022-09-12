@@ -111,6 +111,16 @@ describe("User", () => {
           done();
         });
     });
+    it("it should not delete items if the user isn't verified", (done) => {
+      let id = "4";
+      chai
+        .request(server)
+        .delete(`/v1/me/cart/${id}?accessToken=12345678`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
   });
 
   describe("/POST specified item to user cart", () => {
@@ -126,17 +136,26 @@ describe("User", () => {
           done();
         });
     });
+    it("it should not change the cart if user isn't verified", (done) => {
+      chai
+        .request(server)
+        .post(`/v1/me/cart?accessToken=123456789`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
   });
-});
 
-describe("/GET teapot error", () => {
-  it("it should return the teapot error, just for fun.", (done) => {
-    chai
-      .request(server)
-      .get("/v1/teapot")
-      .end((err, res) => {
-        res.should.have.status(418);
-        done();
-      });
+  describe("/GET teapot error", () => {
+    it("it should return the teapot error, just for fun.", (done) => {
+      chai
+        .request(server)
+        .get("/v1/teapot")
+        .end((err, res) => {
+          res.should.have.status(418);
+          done();
+        });
+    });
   });
 });
