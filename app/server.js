@@ -27,11 +27,17 @@ let server = http
     myRouter(request, response, finalHandler(request, response));
   })
   .listen(PORT, (error) => {
-    brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
-    products = JSON.parse(
-      fs.readFileSync("initial-data/products.json", "utf-8")
-    );
-    users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
+    fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
+      if (error) throw error;
+      brands = JSON.parse(data);
+    });
+    fs.readFile("initial-data/users.json", "utf8", (error, data) => {
+      if (error) throw error;
+      users = JSON.parse(data);
+    });
+    fs.readFile("initial-data/products.json", "utf-8", (error, data) => {
+      products = JSON.parse(data);
+    });
   });
 
 myRouter.get("/v1/brands", (request, response) => {
@@ -43,7 +49,7 @@ myRouter.get("/v1/brands/:brandId/products", (request, response) => {
   const { brandId } = request.params;
   let brand = brands.find((brand) => brand.id == brandId);
   if (!brand) {
-    response.writeHead(404, "There aren't any goals to return");
+    response.writeHead(404, "That brand is not currently in the store");
     return response.end();
   } else {
     let productList = products.filter(
@@ -113,7 +119,9 @@ var getValidTokenFromRequest = function (request) {
     return null;
   }
 };
-const verifyUser = (currentAccessToken) => {
+
+myRouter.get("/v1/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
   if (!currentAccessToken) {
     response.writeHead(401, "You need to have access to this call to continue");
     return response.end();
@@ -125,24 +133,21 @@ const verifyUser = (currentAccessToken) => {
       response.writeHead(403, "You don't have access to the cart");
       return response.end();
     } else {
-      return user;
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify(user.cart));
     }
-  }
-};
-
-myRouter.get("/v1/me/cart", (request, response) => {
-  let currentAccessToken = getValidTokenFromRequest(request);
-  let user = verifyUser(currentAccessToken);
-  if (user) {
-    response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(user.cart));
   }
 });
 
 myRouter.post("/v1/me/cart", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-  let user = verifyUser(currentAccessToken);
-  if (user) {
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
     user.cart.push(request.body);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
@@ -151,8 +156,13 @@ myRouter.post("/v1/me/cart", (request, response) => {
 
 myRouter.delete("/v1/me/cart/:productId", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-  let user = verifyUser(currentAccessToken);
-  if (user) {
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
     const { productId } = request.params;
     user.cart.filter((c) => c.id != productId);
     response.writeHead(200, { "Content-Type": "application/json" });
@@ -162,8 +172,13 @@ myRouter.delete("/v1/me/cart/:productId", (request, response) => {
 
 myRouter.post("/v1/me/cart/:productId", (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-  let user = verifyUser(currentAccessToken);
-  if (user) {
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to this call to continue");
+    return response.end();
+  } else {
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
     let product = products.find((product) => {
       const { productId } = request.params;
       return product.id == productId;
@@ -177,6 +192,11 @@ myRouter.post("/v1/me/cart/:productId", (request, response) => {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(user.cart));
   }
+});
+
+myRouter.get("/v1/teapot", (request, response) => {
+  response.writeHead(418, "I'm a teapot");
+  return response.end();
 });
 
 module.exports = server;

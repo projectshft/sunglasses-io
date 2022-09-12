@@ -20,6 +20,16 @@ describe("Brands", () => {
           done();
         });
     });
+    it("it should return and error if brand is used instead of brands", (done) => {
+      chai
+        .request(server)
+        .get("/v1/brand")
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.an("object");
+          done();
+        });
+    });
   });
   describe("/GET brand by id", () => {
     it("it should GET specified brand of products", (done) => {
@@ -36,6 +46,17 @@ describe("Brands", () => {
           res.body[0].should.have.property("description");
           res.body[0].should.have.property("price");
           res.body[0].should.have.property("imageUrls");
+          done();
+        });
+    });
+    it("it should return error if brand doesn't exist", (done) => {
+      let id = "25";
+      chai
+        .request(server)
+        .get(`/v1/brands/${id}/products`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.be.an("object");
           done();
         });
     });

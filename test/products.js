@@ -24,5 +24,14 @@ describe("Products", () => {
           done();
         });
     });
+    it("it should return an error if product name is used instead of products", (done) => {
+      chai
+        .request(server)
+        .get("/v1/:productName")
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
   });
 });

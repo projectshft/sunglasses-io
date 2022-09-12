@@ -25,6 +25,33 @@ describe("User", () => {
           done();
         });
     });
+    it("it should not return access token if credentials don't match exiting user", (done) => {
+      let user = {
+        username: "yellowleepard753",
+        password: "jonjin",
+      };
+      chai
+        .request(server)
+        .post("/v1/login")
+        .send(user)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it("it should not return access token if credentials are missing", (done) => {
+      let user = {
+        username: "yellowleopard753",
+      };
+      chai
+        .request(server)
+        .post("/v1/login")
+        .send(user)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
   });
   describe("/GET user cart", () => {
     it("it should show the current user cart", (done) => {
@@ -34,6 +61,15 @@ describe("User", () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
+          done();
+        });
+    });
+    it("it should not show the current user cart if user isn't verified", (done) => {
+      chai
+        .request(server)
+        .get(`/v1/me/cart?`)
+        .end((err, res) => {
+          res.should.have.status(401);
           done();
         });
     });
@@ -49,6 +85,15 @@ describe("User", () => {
           res.should.have.status(200);
           res.body.should.be.an("array");
           res.body[0].should.be.an("object");
+          done();
+        });
+    });
+    it("it should not show the current user cart if user isn't verified", (done) => {
+      chai
+        .request(server)
+        .post(`/v1/me/cart?accessToken=123456789`)
+        .end((err, res) => {
+          res.should.have.status(401);
           done();
         });
     });
@@ -81,5 +126,17 @@ describe("User", () => {
           done();
         });
     });
+  });
+});
+
+describe("/GET teapot error", () => {
+  it("it should return the teapot error, just for fun.", (done) => {
+    chai
+      .request(server)
+      .get("/v1/teapot")
+      .end((err, res) => {
+        res.should.have.status(418);
+        done();
+      });
   });
 });

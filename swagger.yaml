@@ -56,15 +56,9 @@ paths:
 
   /products:
     get:
-      summary: get all products as specified
+      summary: get all products in the store
       description: |
         Returns the currently available products from the store.
-      parameters:
-        - name: query
-          in: query
-          description: search query string
-          required: false
-          type: string
       tags:
         - Products
       responses:
