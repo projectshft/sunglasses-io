@@ -198,4 +198,143 @@ describe('User cart', () => {
         });
     });
   });
+  describe('/POST user cart', () => {
+    afterEach(async () => {
+      await chai
+        .request(server)
+        .delete(`/api/me/cart/1?accessToken=${accessToken}`);
+    });
+    it('it should update the user cart with the product sent', (done) => {
+      chai
+        .request(server)
+        .post(`/api/me/cart?accessToken=${accessToken}`)
+        .send({ id: '1' })
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+  });
+  it('it should return an error when no product id is sent', (done) => {
+    chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
+  it('it should return an error when the id of the product is not found', (done) => {
+    chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
+      .send({ id: 'notARealId' })
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
+  });
+  it('it should return an error if the user is not authenticated', (done) => {
+    chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=notARealToken`)
+      .send({ id: '1' })
+      .end((err, res) => {
+        res.should.have.status(401);
+        done();
+      });
+  });
+});
+
+describe('User cart by product id', () => {
+  let accessToken = '';
+  beforeEach(async () => {
+    const credentials = {
+      username: 'yellowleopard753',
+      password: 'jonjon',
+    };
+    await chai
+      .request(server)
+      .post('/api/login')
+      .send(credentials)
+      .then((res) => {
+        accessToken = res.body;
+      });
+    await chai
+      .request(server)
+      .post(`/api/me/cart?accessToken=${accessToken}`)
+      .send({ id: '1' });
+  });
+
+  afterEach(async () => {
+    await chai
+      .request(server)
+      .delete(`/api/me/cart/1?accessToken=${accessToken}`);
+  });
+
+  describe('/DELETE cart by product id', () => {
+    it('it should remove an item from logged in user cart', (done) => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/1?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+    it('it should return an error if the user is not logged in', (done) => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/1?accessToken=notAValidToken`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it('it should return an error if there if no item in the cart with that id', (done) => {
+      chai
+        .request(server)
+        .delete(`/api/me/cart/5?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+  });
+  describe('/POST cart by product id', () => {
+    it('it should update the quantity of the item in the cart of a logged in user', (done) => {
+      const amountToUpdate = 5;
+      chai
+        .request(server)
+        .post(`/api/me/cart/1?accessToken=${accessToken}`)
+        .send({ quantity: amountToUpdate })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.equal(amountToUpdate);
+          done();
+        });
+    });
+    it('it should return an error if the user is not logged in', (done) => {
+      const amountToUpdate = 5;
+      chai
+        .request(server)
+        .post(`/api/me/cart/1?accessToken=notARealToken`)
+        .send({ quantity: amountToUpdate })
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+    it('it should return an error if the product id is not found in the user cart', (done) => {
+      const amountToUpdate = 5;
+      chai
+        .request(server)
+        .post(`/api/me/cart/4123125?accessToken=${accessToken}`)
+        .send({ quantity: amountToUpdate })
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
+  });
 });

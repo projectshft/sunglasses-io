@@ -135,20 +135,6 @@ myRouter.post('/api/login', (request, response) => {
   return response.end();
 });
 
-myRouter.get('/api/me/cart', (request, response) => {
-  const currentAccessToken = getValidTokenFromRequest(request);
-  if (currentAccessToken) {
-    const currentUser = users.find(
-      (user) => user.login.username === currentAccessToken.username
-    );
-
-    response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify(currentUser.cart));
-  }
-  response.writeHead(401, { 'Content-Type': 'application/json' });
-  response.end();
-});
-
 // Helper method to process access token
 const getValidTokenFromRequest = function (request) {
   const parsedUrl = urlParser.parse(request.url, true);
@@ -168,4 +154,95 @@ const getValidTokenFromRequest = function (request) {
   return null;
 };
 
+myRouter.get('/api/me/cart', (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (currentAccessToken) {
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify(currentUser.cart));
+  }
+  response.writeHead(401, 'Client must be logged in to perform this action');
+  response.end();
+});
+
+myRouter.post('/api/me/cart', (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (currentAccessToken) {
+    if (typeof request.body.id !== 'string' || !request.body.id) {
+      response.writeHead(400, 'No product id sent by client');
+      return response.end();
+    }
+    const productToAdd = products.find(
+      (product) => product.id === request.body.id
+    );
+    if (!productToAdd) {
+      response.writeHead(404, 'Product with id not found');
+      return response.end();
+    }
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+
+    currentUser.cart.push({
+      product: productToAdd,
+      quantity: 1,
+      id: productToAdd.id,
+    });
+    response.writeHead(200);
+    response.end();
+  }
+  response.writeHead(401, 'Client must be logged in to perform this action');
+  response.end();
+});
+
+myRouter.delete('/api/me/cart/:id', (request, response) => {
+  const { id } = request.params;
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (currentAccessToken) {
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+    const productToDelete = currentUser.cart.find(
+      (product) => product.id === id
+    );
+    if (!productToDelete) {
+      response.writeHead(404, 'Product with id not found');
+      return response.end();
+    }
+
+    currentUser.cart = currentUser.cart.filter(
+      (product) => product.id !== productToDelete.id
+    );
+    response.writeHead(200);
+    response.end();
+  }
+  response.writeHead(401, 'Client must be logged in to perform this action');
+  response.end();
+});
+
+myRouter.post('/api/me/cart/:id', (request, response) => {
+  const { id } = request.params;
+  const currentAccessToken = getValidTokenFromRequest(request);
+  if (currentAccessToken) {
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+    const productToUpdate = currentUser.cart.find(
+      (product) => product.id === id
+    );
+    if (!productToUpdate) {
+      response.writeHead(404, 'Product with id not found');
+      return response.end();
+    }
+    productToUpdate.quantity = request.body.quantity;
+
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify(productToUpdate.quantity));
+  }
+  response.writeHead(401, 'Client must be logged in to perform this action');
+  response.end();
+});
 module.exports = server;

@@ -6,31 +6,31 @@ info:
 host: localhost:3001
 basePath: "/api"
 tags:
-- name: "brands"
-  description: "Access brand names and products by brand"
-- name: "products"
-  description: "Access to all products in the store"
-- name: "login"
-  description: "Authenticate the user"
-- name: "user"
-  description: "Everything about the user"
+  - name: "brands"
+    description: "Access brand names and products by brand"
+  - name: "products"
+    description: "Access to all products in the store"
+  - name: "login"
+    description: "Authenticate the user"
+  - name: "user"
+    description: "Everything about the user"
 schemes:
-- "https"
-- "http"
+  - "https"
+  - "http"
 paths:
   /brands:
     get:
       tags:
-      - "brands"
+        - "brands"
       summary: Brands list
       description: |
         The brands endpoint returns the brands in the sunglasses store
       operationId: "getBrands"
       produces:
-      - "application/json"
+        - "application/json"
       responses:
         "200":
-          description: 	An array of brands
+          description: An array of brands
           schema:
             type: array
             items:
@@ -57,11 +57,13 @@ paths:
           type: string
       responses:
         "200":
-          description: 	An array of products
+          description: An array of products
           schema:
             type: array
             items:
               $ref: "#/definitions/Product"
+        "404":
+          description: Brand of id not found or products of the brand not found
         default:
           description: Unexpected error
           schema:
@@ -109,7 +111,7 @@ paths:
           description: Password of user to authenticate
           required: true
       responses:
-        "200": 
+        "200":
           description: Successful login
         "400":
           description: Missing username or password query
@@ -164,7 +166,7 @@ paths:
             $ref: "#/definitions/Error"
   /me/cart/{productId}:
     delete:
-      tags: 
+      tags:
         - user
       summary: Remove product from user's cart
       description: Removes the product with the id specified in the path from the user's cart
@@ -177,8 +179,6 @@ paths:
       responses:
         "200":
           description: Product successfully removed from the cart
-        "400":
-          description: Missing query
         "401":
           description: User is not authenticated
         "404":
@@ -201,8 +201,6 @@ paths:
       responses:
         "200":
           description: Product quantity successfully updated in the cart
-        "400":
-          description: Missing query
         "401":
           description: User is not authenticated
         "404":
@@ -224,66 +222,44 @@ securityDefinitions:
     name: "api_key"
     in: "header"
 definitions:
-    Brand:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identifier for a brand.
-        name:
-          type: string
-          description: The name of the brand.
-    Product:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique identifier for a product
-        categoryId: 
-          type: string
-          description: Product brand's id
-        name:
-          type: string
-          description: Name of product
-        description:
-          type: string
-          description: Description of product
-        price:
-          type: integer
-          format: int32
-          description: Price of the product
-        imageUrls:
-          type: string
-          description: URL of a picture of the product
-    # User:
-    #   type: object
-    #   properties:
-    #     gender:
-    #       type: string
-    #       description: gender of the user
-    #     cart:
-    #       type: array
-    #       description: an array of the user's products in the cart
-    #       items:
-    #         $ref: "#/definitions/Product"
-    #     name:
-    #       type: object
-    #       items:
-    #         first
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
-        fields:
-          type: string
-  
-        # "id": "1",
-        # "categoryId": "1",
-        # "name": "Superglasses",
-        # "description": "The best glasses in the world",
-        # "price":150,
-        # "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: Product brand's id
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: integer
+        format: int32
+        description: Price of the product
+      imageUrls:
+        type: string
+        description: URL of a picture of the product
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
