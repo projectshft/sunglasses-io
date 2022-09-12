@@ -227,8 +227,14 @@ describe("Cart", () => {
   describe("/GET cart", () => {
     it("it should GET cart products when logged in", (done) => {
       // arrange
-      updateAccessTokens("testToken");
-      updateCart(superglasses, blackSunglasses);
+      const testToken = {
+        username: "username",
+        lastUpdated: new Date(),
+        token: "testToken",
+      };
+      updateAccessTokens(testToken);
+      updateCart(superglasses);
+      updateCart(blackSunglasses);
       // act
       chai
         .request(server)
@@ -253,7 +259,7 @@ describe("Cart", () => {
       // act
       chai
         .request(server)
-        .get("me/cart?token=testToken")
+        .get("/me/cart?token=testToken")
         // assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -267,7 +273,7 @@ describe("Cart", () => {
       // nothing to arrange
       chai
         .request(server)
-        .get("me/cart?token=testToken")
+        .get("/me/cart?token=testToken")
         // assert
         .end((err, res) => {
           res.should.have.status(401);
@@ -282,10 +288,11 @@ describe("Cart", () => {
         lastUpdated: new Date('December 17, 1995 03:24:00'),
         token: "testToken",
       }
+      updateAccessTokens(testToken);
       // act
       chai
         .request(server)
-        .get("me/cart?token=testToken")
+        .get("/me/cart?token=testToken")
         // assert
         .end((err, res) => {
           res.should.have.status(401);

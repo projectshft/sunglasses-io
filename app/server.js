@@ -5,6 +5,7 @@ var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
 var url = require("url");
+const { isArgumentsObject } = require('util/types');
 var uid = require('rand-token').uid;
 
 const PORT = 3001;
@@ -14,6 +15,9 @@ let brands = [];
 let products = [];
 let users = [];
 let accessTokens = [];
+
+// Access tokens should expire after 15 mins
+const tokenTimeout = 15 * 60 * 1000;
 
 // Set up router
 const myRouter = Router();
@@ -126,7 +130,6 @@ myRouter.post("/login", (request, response) => {
         accessTokens.push(newAccessToken);
         return response.end(JSON.stringify(newAccessToken));
       }
-      // return response.end(JSON.stringify({username: "Yo"}));
     } else {
       // If credentials are invalid
       response.writeHead(401, "Invalid username or password");
@@ -139,4 +142,72 @@ myRouter.post("/login", (request, response) => {
   }
 });
 
-module.exports = server;
+myRouter.get("/me/cart", (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    // If there is no valid access token, then return a 401
+    response.writeHead(401, "You must be logged in to view cart.");
+    return response.end();
+  } else {
+    // Otherwise, return cart
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(cart));
+  }
+});
+
+// Helper method to process access token
+const getValidTokenFromRequest = (request) => {
+  let parsedUrl = url.parse(request.originalUrl);
+  let queryToken = queryString.parse(parsedUrl.query).token;
+  console.log(`queryToken: ${queryToken}`);
+  if (queryToken) {
+    let currentAccessToken = accessTokens.find(accessToken => {
+      return accessToken.token = queryToken && ((new Date()) - accessToken.lastUpdated) < tokenTimeout;
+    });
+    console.log(`currentAccessToken: ${currentAccessToken}`)
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+// function to update state for the sake of testing
+exports.updateCart = (product) => {
+  let newProduct = {
+    count: 0,
+    ...product
+  };
+  cart.push(newProduct)
+  // for (let i=0; i < arguments.length; i++) {
+  //   let newProduct = {
+  //     count: 0,
+  //     ...arguments[i]
+  //   }
+  //   // If the product already exists in the cart, increment the count
+  //   // if (cart.find(product => product.id == newProduct.id)) {
+  //   //   cart = [...cart, {...newProduct, count: cart.product.count + 1}];
+  //   // } else {
+  //     // Otherwise just add the product to the cart
+  //     cart.push(newProduct);
+  //   // }
+  // }
+  console.log(`cart: ${cart}`);
+};
+
+// TODO something is up with tokens
+
+exports.updateAccessTokens = (newToken) => {
+  accessTokens.push(newToken);
+};
+
+exports.clearState = () => {
+  cart = [];
+  accessTokens = [];
+};
+
+exports.server = server;
