@@ -37,7 +37,7 @@ paths:
   /api/brands/{id}/products:
     get:
       summary: chosen brand products
-      description: returns products associated with id that was entered
+      description: returns products associated with brand id that was entered
       tags:
         - brand specific products
       parameters:
@@ -75,6 +75,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+        404:
+          description: inventory not found
         default:
           description: unexpected error
           schema:

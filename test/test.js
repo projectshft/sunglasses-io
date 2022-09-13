@@ -13,14 +13,58 @@ chai.use(chaiHttp);
 
 
   describe('/api/brands', () => {
-    it('should return an array', (done) => {
+    it('should return an array', () => {
       chai 
         .request(server)
         .get('/api/brands')
         .end((err, res) => {
+          if(err) throw err;
           res.should.have.status(200);
-          res.body.should.be.an('application/json');
-          done();
+          res.body.should.be.an('array');
         })
     });
   });
+
+  describe('/api/brands/:id/products', () => {
+    it('should return an array of products chosen by brand', () => {
+      let id = 'gucci';
+      chai
+        .request(server)
+        .get(`/api/brands/${id}/products`)
+        .end((err, res) => {
+          if(err) throw err;
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+        })
+    });
+  })
+
+  describe('/api/products', () => {
+    it('should return an array', () => {
+      chai 
+        .request(server)
+        .get('/api/products')
+        .end((err, res) => {
+          if(err) throw err;
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          
+        })
+    });
+  });
+
+  describe('/api/login', () => {
+    it('should return an access token string', (done) => {
+      chai
+      .request(server)
+      .post('/api/login')
+      .send(username = 'BorisJ')
+      .send(password = 'userPass123')
+      .end((err, res) => {
+        if (err) throw err;
+        res.should.have.status(200);
+        res.body.should.be.a('string');
+        done();
+      })
+    })
+  })

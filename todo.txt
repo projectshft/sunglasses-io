@@ -1,0 +1,13 @@
+in server.js: 
+
+- define 'users' array that consists of
+
+  user = {
+    login:
+      username: '',
+      password: ''
+  }
+
+in test.js:
+
+- 'api/login' test endpoint to make sure it returns an access token. 
