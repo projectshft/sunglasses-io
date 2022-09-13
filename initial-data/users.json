@@ -3,7 +3,7 @@
     "gender": "female",
     "cart": [
       {
-        "id": "1",
+        "id": "kuZfUv9kRUMOoESv",
         "product": {
           "id": "1",
           "categoryId": "1",
@@ -15,7 +15,24 @@
             "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
             "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
           ]
-        }
+        },
+        "quantity": 1
+      },
+      {
+        "id": "kuZfUv9kRUMOoESV",
+        "product": {
+          "id": "3",
+          "categoryId": "1",
+          "name": "Brown Sunglasses",
+          "description": "The best glasses in the world",
+          "price": 50,
+          "imageUrls": [
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+          ]
+        },
+        "quantity": 1
       }
     ],
     "name": {
