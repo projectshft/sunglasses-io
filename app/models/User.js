@@ -5,9 +5,13 @@ class User {
     Object.assign(this, params)
   }
 
-  static getUser(userId) {
-    return users.find((user=> user.name.first == userId))
-  }
+  static getUserInfo(username) {
+    let user = users.find((user=> {
+      user.login.username == username }))
+    return user
+    }
+  
+
 
 
 }
