@@ -37,7 +37,7 @@ chai.use(chaiHttp);
           res.body.should.be.an('array');
         })
     });
-  })
+  });
 
   describe('/api/products', () => {
     it('should return an array', () => {

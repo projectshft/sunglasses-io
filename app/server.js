@@ -32,7 +32,7 @@ router.get('/api/brands/:id/products', (req, res) => {
   if(id === 'gucci')
     {
       let dummyProducts = ["gucciSwg1", "gucciSwg2", "gucciSwg3"];
-      return res.end(dummyProducts);
+      return res.end(JSON.stringify(dummyProducts));
     }
     else 
       {
