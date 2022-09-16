@@ -1,8 +1,5 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const { uid } = require('rand-token');
-const { access } = require('fs');
-const Store = require('../app/store');
 const server = require('../app/server');
 
 const should = chai.should();
