@@ -7,6 +7,8 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const hostname ='localhost';
 const port = 8080;
+const users = [{username: 'BorisJ', password: 'userPass123'}];
+const accessTokens = [{username: 'BorisJ', lastUpdated: '2022-08-29', token: "1234567890"}];
 
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 let router = Router();
@@ -16,7 +18,10 @@ let server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS'){
     res.writeHead(200, CORS_HEADERS);
     return res.end();}
-  router(req, res, finalHandler(req, res));}).listen(port);
+  router(req, res, finalHandler(req, res));
+  console.log(`server is running at port ${port}`);
+}
+  ).listen(port);
 
 
 router.get('/api/brands', (req, res) => {
@@ -29,9 +34,10 @@ router.get('/api/brands', (req, res) => {
 
 router.get('/api/brands/:id/products', (req, res) => {
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-  if(id === 'gucci')
+  if(req.params.id === 'gucci')
     {
       let dummyProducts = ["gucciSwg1", "gucciSwg2", "gucciSwg3"];
+      res.writeHead(200, {'Content-Type': 'application/json'});
       return res.end(JSON.stringify(dummyProducts));
     }
     else 
@@ -43,34 +49,35 @@ router.get('/api/brands/:id/products', (req, res) => {
 
 router.get('/api/products', (req, res) => {
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+  let dummyProducts = ["gucciSwg1", "gucciSwg2", "gucciSwg3"];
+  return res.end(JSON.stringify(dummyProducts));
 })
     
 router.post('/api/login', (req, res) => {
-  res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-  const users = [{username: 'BorisJ', password: 'userPass123'}];
-      const accessTokens = [{username: 'BorisJ', lastUpdated: '2022-08-29', token: "1234567890"}];
-        if(req.method === "POST" && req.body.username && req.body.password) {
+  // res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+ 
+  if(req.method === "POST" && req.body.username && req.body.password) {
           // See if there is a user that has that username and password
     let user = users.find((user) => {
-      return user.login.username == req.body.username && user.login.password == req.body.password;
-    });
-    if (user) {
+    return user.username === req.body.username && user.password === req.body.password;
+        });
+  if (user) {
       // Write the header because we know we will be returning successful at this point and that the res will be json
-      res.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+    res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
 
       // We have a successful login, if we already have an existing access token, use that
-      let currentAccessToken = accessTokens.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
+    let currentAccessToken = accessTokens.find((tokenObject) => {
+    return tokenObject.username == user.username;
       });
 
       // Update the last updated value so we get another time period
-      if (currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
-        return res.end(JSON.stringify(currentAccessToken.token));
+    if (currentAccessToken) {
+      currentAccessToken.lastUpdated = new Date();
+      return res.end(JSON.stringify(currentAccessToken.token));
       } else {
         // Create a new token with the user value and a "random" token
         let newAccessToken = {
-          username: user.login.username,
+          username: user.username,
           lastUpdated: new Date(),
           token: uid(16)
         }
@@ -88,6 +95,12 @@ router.post('/api/login', (req, res) => {
     res.writeHead(400, "Incorrectly formatted res");
     return res.end('Hakuna Matata! err #400, Incorrectly formatted response');
   }
+})
+
+router.get('/api/me/cart', (req, res) => {
+  res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+  // access request header with the token and check if it matches token on file, then return cart data related to that token obj
+  
 })
 
 module.exports = server;

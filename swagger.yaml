@@ -90,16 +90,18 @@ paths:
       tags:
         - customer login
       parameters:
-        - in: header
+        - in: body
+          required: true
           name: email
+          description: user email
+          schema:
+            type: string
+        - in: body
           required: true
-          type: string
-          description: the user email
-        - in: header
           name: password
-          required: true
-          type: string
           description: user password
+          schema:
+            type: string
       produces:
         - application/json
       responses:
