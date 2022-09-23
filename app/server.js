@@ -110,9 +110,8 @@ const userCart = (req) => {
   }
 
 router.get('/api/me/cart', (req, res) => {
+  console.log('/api/me/cart is requested');
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-  // access request header with the token (?) and check if it matches token on file, then return cart data related to that token obj
-  //req.body.token, refer to curr-m, create a f() to handle token. In real life this would be handled in req.body
   let cart = userCart(req);
   console.log(cart);
   return res.end(JSON.stringify(cart));

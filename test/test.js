@@ -59,7 +59,6 @@ const token = 1234567890123456;
 
   describe('/api/login', () => {
     it('should return an access token string', (done) => {
-
       chai
       .request(server)
       .post('/api/login')
@@ -69,9 +68,9 @@ const token = 1234567890123456;
         if (err) throw err;
         res.should.have.status(200);
         res.body.should.be.a('string');
-        done();
+        
       })
-      
+      done();
     })
   })
 
@@ -79,16 +78,13 @@ const token = 1234567890123456;
     it('should return an array of products in the cart', (done) => {
       chai
       .request(server)
-      .get('api/me/cart')
+      .get('/api/me/cart')
       .send({ accessToken : token })
       .end((err, res) => {
         if(err) throw err;
         res.should.have.status(200);
         res.body.should.be.an('array');
-        // const isObj = res.body.every(value => typeof value === 'object');
-        // expect(isObj).to.be.true;
-        done();
-      })
-
+        done();  
+      }) 
     })
   })
