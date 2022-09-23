@@ -7,12 +7,18 @@ var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 const hostname ='localhost';
 const port = 8080;
-const users = [{username: 'BorisJ', password: 'userPass123'}];
-const accessTokens = [{username: 'BorisJ', lastUpdated: '2022-08-29', token: "1234567890"}];
-
+const users = JSON.parse(fs.readFileSync('./initial-data/users.json'));
+const brands = JSON.parse(fs.readFileSync('./initial-data/brands.json'));
+const products = JSON.parse(fs.readFileSync('./initial-data/products.json'));
+const accessTokens = [{username: 'yellowleopard753', lastUpdated: '2022-08-29', token: "1234567890123456"}];
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 let router = Router();
 router.use(bodyParser.json());
+
+// create function that grabs req.body access token, checks if token is present in the list of tokens, and returns the cart that belongs to the owner of the token
+
+
+
 
 let server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS'){
@@ -26,7 +32,7 @@ let server = http.createServer((req, res) => {
 
 router.get('/api/brands', (req, res) => {
    res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-    let brandArry = JSON.stringify(['gucci', 'oakley', 'mk']);
+    let brandArry = JSON.stringify(brands);
     return res.end(brandArry);
   
 });
@@ -49,8 +55,7 @@ router.get('/api/brands/:id/products', (req, res) => {
 
 router.get('/api/products', (req, res) => {
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-  let dummyProducts = ["gucciSwg1", "gucciSwg2", "gucciSwg3"];
-  return res.end(JSON.stringify(dummyProducts));
+  return res.end(JSON.stringify(products));
 })
     
 router.post('/api/login', (req, res) => {
@@ -59,7 +64,7 @@ router.post('/api/login', (req, res) => {
   if(req.method === "POST" && req.body.username && req.body.password) {
           // See if there is a user that has that username and password
     let user = users.find((user) => {
-    return user.username === req.body.username && user.password === req.body.password;
+    return user.login.username === req.body.username && user.login.password === req.body.password;
         });
   if (user) {
       // Write the header because we know we will be returning successful at this point and that the res will be json
@@ -97,10 +102,20 @@ router.post('/api/login', (req, res) => {
   }
 })
 
+const userCart = (req) => {
+  let targetPerson = accessTokens.find((user) => user.token === req.body.accessToken); // return username from accessTokens that has same token as requested token (from cliend req)
+  if(!targetPerson.username) { console.log('Error, invalid token')}
+  let user = users.find(user =>  user.login.username === targetPerson.username); // find user by name and return from users db file
+  return user.cart;
+  }
+
 router.get('/api/me/cart', (req, res) => {
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-  // access request header with the token and check if it matches token on file, then return cart data related to that token obj
-  
+  // access request header with the token (?) and check if it matches token on file, then return cart data related to that token obj
+  //req.body.token, refer to curr-m, create a f() to handle token. In real life this would be handled in req.body
+  let cart = userCart(req);
+  console.log(cart);
+  return res.end(JSON.stringify(cart));
 })
 
 module.exports = server;
