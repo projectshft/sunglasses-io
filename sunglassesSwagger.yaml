@@ -1,0 +1,265 @@
+swagger: "2.0"
+info:
+  description: An API to support the sunglasses-io platform
+  version: "1.0.0"
+  title: Sunglasses API
+host: localhost:3001
+basePath: "/api"
+tags:
+  - name: "brands"
+    description: "Access brand names and products by brand"
+  - name: "products"
+    description: "Access to all products in the store"
+  - name: "login"
+    description: "Authenticate the user"
+  - name: "user"
+    description: "Everything about the user"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /brands:
+    get:
+      tags:
+        - "brands"
+      summary: Brands list
+      description: |
+        The brands endpoint returns the brands in the sunglasses store
+      operationId: "getBrands"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - brands
+      summary: Products under brand name
+      description: |
+        All products of a given brand
+      operationId: getProductsByBrandId
+      produces:
+        - "application/json"
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Brand of id not found or products of the brand not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - products
+      summary: Get products
+      description: Get all products or select products based on name query
+      parameters:
+        - name: query
+          in: query
+          type: string
+          description: Search via the name of the product
+          required: false
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Product with query not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - login
+      summary: Authenticate user
+      description: Authenticates the user by passing a username and password. Returns authentication key to the client upon success.
+      parameters:
+        - name: username
+          in: query
+          type: string
+          description: Username of user to authenticate
+          required: true
+        - name: password
+          in: query
+          type: string
+          description: Password of user to authenticate
+          required: true
+      responses:
+        "200":
+          description: Successful login
+        "400":
+          description: Missing username or password query
+        "401":
+          description: Username or password incorrect
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      tags:
+        - user
+      summary: Returns products in the user's cart
+      description: Gets a list of products that are in the currently logged in user's cart
+      responses:
+        "200":
+          description: an array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "401":
+          description: The user is not logged in
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - user
+      summary: Adds item to cart
+      description: Adds an item to the cart based on the product Id passed into the query.
+      parameters:
+        - name: productId
+          type: string
+          required: true
+          in: query
+          description: Id of the product to add to user's cart
+      responses:
+        "200":
+          description: Product successfully added to cart
+        "400":
+          description: Missing query
+        "401":
+          description: User is not authenticated
+        "404":
+          description: Product with the specified id was not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - user
+      summary: Remove product from user's cart
+      description: Removes the product with the id specified in the path from the user's cart
+      parameters:
+        - name: productId
+          type: string
+          required: true
+          in: path
+          description: id of the product to be removed from cart
+      responses:
+        "200":
+          description: Product successfully removed from the cart
+        "401":
+          description: User is not authenticated
+        "404":
+          description: Product with specified id was not found in the user's cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - user
+      summary: Change product quantity in user's cart
+      description: Changes the quantity of the product with the id specified in the path in the user's cart
+      parameters:
+        - name: productId
+          type: string
+          required: true
+          in: path
+          description: id of the product to be removed from cart
+      responses:
+        "200":
+          description: Product quantity successfully updated in the cart
+        "401":
+          description: User is not authenticated
+        "404":
+          description: Product with specified id was not found in the user's cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+securityDefinitions:
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:pets: "modify pets in your account"
+      read:pets: "read your pets"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: Product brand's id
+      name:
+        type: string
+        description: Name of product
+      description:
+        type: string
+        description: Description of product
+      price:
+        type: integer
+        format: int32
+        description: Price of the product
+      imageUrls:
+        type: string
+        description: URL of a picture of the product
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
