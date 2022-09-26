@@ -1,0 +1,226 @@
+swagger: '2.0'
+info:
+  title: 'Sunglasses API'
+  description: 'An API to support the sunglasses platform'
+  version: 1.0.0
+host: 'api.sunglasses.io'
+basePath: '/v1'
+schemes:
+  - 'https'
+produces:
+  - 'application/json'
+tags:
+  - name: 'brands'
+    description: 'Brands of Sunglasses'
+  - name: 'products'
+    description: 'Sunglasses Products'
+  - name: 'users'
+    description: 'User information'
+components:
+  securitySchemes:
+    basicAuth: x-auth-token
+      type: http
+      scheme: basic
+security:
+  - basicAuth: [x-auth-token] 
+paths:
+  /api/brands:
+    get:
+      tags:
+      - 'brands'
+      summary: 'Brands'
+      description: 
+        'The Brands endpoint allows you to view all brands.'
+      responses:
+        '200':
+          description: 'An array of brands' 
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: 'Unexpected error'
+          schema:
+            $ref: '#/definitions/Error'
+  /api/products:
+    get:
+      summary: 'Products'
+      description:
+        'The Products endpoint allows you to view all products'
+      responses:
+        '200':
+          description: 'An array of all products'
+          schema: 
+            type: 'array'
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: 'Unexpected error'
+          schema:
+            $ref: '#/definitions/Error'
+        
+  /api/brands/{id}/products:
+    get:
+      summary: 'Products by Brand'
+      description: 
+        'This endpoint allows you to view all the products for a particular brand'
+      parameters:
+        - name: 'id'
+          in: 'path'
+          description: 'The id of the brand'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'Products by brand successful'
+          schema: 
+            type: 'array'
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: 'Unexpected error'
+          schema:
+            $ref: '#/definitions/Error'      
+  /api/login:
+    post:
+      summary: 'User Login'
+      description: 
+        'This endpoint allows a user to log into their account'
+      operationId: userLogin
+      parameters: 
+        - name: 'username'
+          in: body
+          description: 'The user name for login'
+          required: true
+          type: string
+        - name: password
+          in: body
+          description: 'The password for login in clear text'
+          required: true
+          type: 'string'
+      responses:
+        '200':
+          description: 'successful operation'
+          headers: 
+            x-auth-token: COME BACK TO THIS
+        '400': COME BACK TO THIS
+          description: 'Invalid username/password supplied'
+  /api/me/cart:
+    get:
+      summary: User Cart
+      description: 
+        This endpoint allows a user to view the items in their cart
+    post:
+      summary: Add to Cart
+      description: 
+        This endpoint allows a user to add a product to their cart
+  /api/me/cart/{productId}:
+    delete:
+      summary: Delete from Cart
+      description:
+        This endpoint allows a user to remove a product from their cart
+    post:
+      summary: Change Quantity
+      description:
+        This endpoint allows a user to change the quantity of a product in their cart
+        
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand.
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: Identifier for the brand of the product
+      name: 
+        type: string
+        description: The name of the product 
+      description:
+        type: string
+        description: A description of the product. More than one product can have the same description
+      price:
+        type: integer
+        description: The price of the product
+      imageUrls:
+        type: array 
+        items:
+          $ref: '#/definitions/Products'
+        description: Three image Urls for the product
+  Users:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: The user's gender
+      cart: 
+        type: array
+        items: items in cart
+      name:
+        type: object
+        items: 
+          properties: 
+            title: 
+              type: string
+            first: 
+              type: string
+            last:
+              type: string
+      location:
+        type: object
+        items:
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            postcode: integer
+      email:
+        type: string
+      login:
+        type: object
+          properties:
+            username:
+              type: string
+      dob:
+        type: string
+      registered:
+        type: string
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+          properties:
+            large:
+              type: string
+            medium:
+              type: string
+            thumbnail:
+              type: string
+      nat:
+        type: string
+    description: The user's personal information
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
