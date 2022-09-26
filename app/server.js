@@ -1,13 +1,38 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+/* eslint-disable indent */
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const uid = require('rand-token').uid;
+
+
+let brands = [];
+let products = [];
+let users = [];
+let user = {};
+let cart = [];
 
 const PORT = 3001;
 
-http.createServer(function (request, response) {
+let router = Router();
+router.use(bodyParser.json());
 
-}).listen(PORT);
+const server = http.createServer((req, res) => {
+	res.writeHead(200);
+	router(req, res, finalHandler(req, res));
+});
+
+server.listen(PORT, (err) => {
+  if (err) throw err;
+  console.log(`Server running on port ${PORT}`);
+  brands = JSON.parse(fs.readFileSync('./data/brands.json', 'utf-8'));
+  products = JSON.parse(fs.readFileSync('./data/products.json', 'utf-8'));
+  users = JSON.parse(fs.readFileSync('./data/users.json', 'utf-8'));
+  user = users [0];
+});
+
+
+
+
