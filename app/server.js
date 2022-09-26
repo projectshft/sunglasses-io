@@ -15,9 +15,6 @@ const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-He
 let router = Router();
 router.use(bodyParser.json());
 
-// create function that grabs req.body access token, checks if token is present in the list of tokens, and returns the cart that belongs to the owner of the token
-
-
 
 
 let server = http.createServer((req, res) => {
@@ -25,7 +22,6 @@ let server = http.createServer((req, res) => {
     res.writeHead(200, CORS_HEADERS);
     return res.end();}
   router(req, res, finalHandler(req, res));
-  console.log(`server is running at port ${port}`);
 }
   ).listen(port);
 
@@ -40,17 +36,13 @@ router.get('/api/brands', (req, res) => {
 
 router.get('/api/brands/:id/products', (req, res) => {
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
-  if(req.params.id === 'gucci')
-    {
-      let dummyProducts = ["gucciSwg1", "gucciSwg2", "gucciSwg3"];
-      res.writeHead(200, {'Content-Type': 'application/json'});
-      return res.end(JSON.stringify(dummyProducts));
-    }
-    else 
-      {
-        return res.end(JSON.stringify({ message: "specified brand id was not found"}))
-      }
-  
+  let targetProduct = products.find(product => product.id === req.params.id);
+  if(!targetProduct) {
+    res.writeHead(404, 'Requested Product Can Not Be Found');
+    res.end();
+  }
+  res.writeHead(200, 'Successfull Request!');
+  res.end(JSON.stringify(targetProduct));
 });
 
 router.get('/api/products', (req, res) => {
@@ -59,28 +51,21 @@ router.get('/api/products', (req, res) => {
 })
     
 router.post('/api/login', (req, res) => {
-  // res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
  
   if(req.method === "POST" && req.body.username && req.body.password) {
-          // See if there is a user that has that username and password
     let user = users.find((user) => {
     return user.login.username === req.body.username && user.login.password === req.body.password;
         });
   if (user) {
-      // Write the header because we know we will be returning successful at this point and that the res will be json
     res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}));
-
-      // We have a successful login, if we already have an existing access token, use that
     let currentAccessToken = accessTokens.find((tokenObject) => {
     return tokenObject.username == user.username;
       });
-
-      // Update the last updated value so we get another time period
     if (currentAccessToken) {
       currentAccessToken.lastUpdated = new Date();
       return res.end(JSON.stringify(currentAccessToken.token));
       } else {
-        // Create a new token with the user value and a "random" token
+        
         let newAccessToken = {
           username: user.username,
           lastUpdated: new Date(),
@@ -90,31 +75,89 @@ router.post('/api/login', (req, res) => {
         return res.end(JSON.stringify(newAccessToken.token));
       }
     } else {
-      // When a login fails, tell the client in a generic way that either the username or password was wrong
       res.writeHead(401, "Invalid username or password");
       return res.end();
     }
 
   } else {
-    // If they are missing one of the parameters, tell the client that something was wrong in the formatting of the res
     res.writeHead(400, "Incorrectly formatted res");
-    return res.end('Hakuna Matata! err #400, Incorrectly formatted response');
+    return res.end();
   }
 })
 
-const userCart = (req) => {
-  let targetPerson = accessTokens.find((user) => user.token === req.body.accessToken); // return username from accessTokens that has same token as requested token (from cliend req)
-  if(!targetPerson.username) { console.log('Error, invalid token')}
-  let user = users.find(user =>  user.login.username === targetPerson.username); // find user by name and return from users db file
+const userCart = (req, res) => {
+  let targetPerson = accessTokens.find((user) => user.token === req.body.accessToken); 
+  if(!targetPerson.username) {
+    console.log('Error, invalid token');
+    res.writeHead(404, 'User Not Found!');
+    return res.end();
+  }
+  let user = users.find(user =>  user.login.username === targetPerson.username); 
   return user.cart;
   }
 
-router.get('/api/me/cart', (req, res) => {
-  console.log('/api/me/cart is requested');
+router.get('/api/me/getcart', (req, res) => {
   res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+  if(!req.body.accessToken) {
+    res.writeHead(401, 'Unauthorized user!');
+    return res.end();
+  }
   let cart = userCart(req);
-  console.log(cart);
-  return res.end(JSON.stringify(cart));
+  res.writeHead(200, 'Success!')
+  res.end(JSON.stringify(cart));
 })
 
+router.post('/api/me/cart', (req, res) => {
+  res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+  let tokenIsPresent = accessTokens.find(token => token.token === req.body.accessToken)
+  if(!tokenIsPresent) {
+    res.writeHead(401, "Invalid/missing access token");
+    return res.end();
+  }
+  let cart = userCart(req);
+  let productToAdd = products.find(product => product.id === req.body.productId);
+  cart.push(productToAdd);
+  fs.writeFileSync('./initial-data/users.json', JSON.stringify(users, null, 2));
+  res.writeHead(201, 'Product Successfully Added to Cart');
+  res.end(JSON.stringify(cart));
+})
+
+router.delete('/api/me/cart/:productId/delete', (req, res) => {
+  res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+  if(!req.body.accessToken) { 
+    res.writeHead(401, 'Unauthorized user!');
+    return res.end();
+  } else { 
+      let cart = userCart(req);
+      let indexOfProductToDelete = cart.findIndex(product => product.id === req.params.productId);
+      if( indexOfProductToDelete === -1 ) {
+        res.writeHead(404, 'Product not Found');
+        return res.end();
+      } 
+      cart.splice(indexOfProductToDelete, 1); 
+      fs.writeFileSync('./initial-data/users.json', JSON.stringify(users, null, 2));
+      res.writeHead(200, 'Product Has Been Deleted');
+      return res.end(JSON.stringify(cart));
+    
+  }
+})
+
+router.post('/api/me/cart/:productId', (req, res) => {
+  res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type' : 'application/json'}));
+  if(!req.body.accessToken) {
+    res.writeHead(401, 'Unauthorized user!');
+    return res.end();
+  } else {
+    let cart = userCart(req);
+    let targetProduct = cart.find( product => product.id === req.params.productId);
+    if(!targetProduct) {
+      res.writeHead(404, 'Incorrect Product Id');
+      return res.end();
+    }
+    targetProduct.quantity = req.body.newCount;
+    fs.writeFileSync('./initial-data/users.json', JSON.stringify(users, null, 2));
+    res.writeHead(200, 'Cart Has Been Updated!');
+    res.end(JSON.stringify(cart));
+  }
+})
 module.exports = server;

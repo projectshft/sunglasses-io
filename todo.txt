@@ -1,13 +1,5 @@
-in server.js: 
-
-- define 'users' array that consists of
-
-  user = {
-    login:
-      username: '',
-      password: ''
-  }
-
-in test.js:
-
-- 'api/login' test endpoint to make sure it returns an access token. 
+- complete test cases for get requests in accordance with api documentation
+- include if block to test if req methods are correct (use api/login as example)
+- clean up indentation, and clean up code
+- correct error in swagger.editor
+- pull request!
