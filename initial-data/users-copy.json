@@ -3,7 +3,20 @@
     "gender": "female",
     "cart": [
       {
-        "quantity": "10",
+        "quantity": "1",
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price": 150,
+        "imageUrls": [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+        ]
+      },
+      {
+        "quantity": "1",
         "id": "2",
         "categoryId": "1",
         "name": "Black Sunglasses",
