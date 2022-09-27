@@ -36,17 +36,15 @@ server.listen(PORT, (err) => {
 });
 
 router.get('/api/brands', (req, res) => {
-  const parsedUrl = url.parse (req.originalUrl);
-  const parsedQuery = queryString.parse (parsedUrl.query);
-  let brandsToReturn = [];
-  if (parsedQuery.name !== undefined) {
-    brandsToReturn = brands.filter(brand => brand.name === parsedQuery.name);
-  } else {
-    brandsToReturn = brands;
-  }
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  return res.end(JSON.stringify(brandsToReturn));
+  return res.end(JSON.stringify(brands));
 });
+
+router.get('/api/products', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify(products));
+});
+
 
 
 
