@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable indent */
-const http = require('http');
-const fs = require('fs');
-const finalHandler = require('finalhandler');
-const queryString = require('querystring');
-const Router = require('router');
-const bodyParser = require('body-parser');
-const url = require('url');
-const uid = require('rand-token').uid;
+var http = require('http');
+var fs = require('fs');
+var finalHandler = require('finalhandler');
+var queryString = require('querystring');
+var Router = require('router');
+var bodyParser = require('body-parser');
+var url = require('url');
+var uid = require('rand-token').uid;
 
 
 let brands = [];
@@ -44,6 +44,12 @@ router.get('/api/products', (req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   return res.end(JSON.stringify(products));
 });
+
+router.get('/api/users', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify(users));
+});
+
 
 
 
