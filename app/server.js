@@ -9,7 +9,6 @@ var bodyParser = require('body-parser');
 var url = require('url');
 var uid = require('rand-token').uid;
 
-
 let brands = [];
 let products = [];
 let users = [];
@@ -50,11 +49,7 @@ router.get('/api/users', (req, res) => {
   return res.end(JSON.stringify(users));
 });
 
-
-
-
-
-module.export = server;
+module.exports = server;
 
 
 

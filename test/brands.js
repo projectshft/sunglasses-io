@@ -12,13 +12,9 @@ describe('The data for brands', () => {
 		let brands = require('../initial-data/brands.json');
 		expect(brands).to.be.an('array');
 	});
-	it('should contain at least 1 brand', () => {
-		let brands = require('../initial-data/brands.json');
-		expect(brands.length).to.be.at.least(1);
-	});
 	it('should have a length of 5', () => {
 		let brands = require('../initial-data/brands.json');
-		expect(brands.length).to.be.equal(5);
+		expect(brands.length).to.eql(5);
 	});
 	it('should contain objects with all the appropriate properties', () => {
 		let brands = require('../initial-data/brands.json');
