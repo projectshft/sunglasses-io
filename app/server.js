@@ -11,9 +11,11 @@ var uid = require('rand-token').uid;
 
 let brands = [];
 let products = [];
+let productsByCategoryId = [];
 let users = [];
 let user = {};
 let cart = [];
+
 
 const PORT = 3001;
 
@@ -49,7 +51,20 @@ router.get('/api/users', (req, res) => {
   return res.end(JSON.stringify(users));
 });
 
+router.get('/api/brands/{id}/products', (req, res) => {
 
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify(products));
+});
+
+router.get('/api/brands/{id}/products' , (req, res) => {
+  let categoryId = req.params.id;
+  let filteredProducts = products.filter((product) => {
+    return product.categoryId === categoryId;
+  });
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify(filteredProducts));
+});
 
 module.exports = server;
 
