@@ -51,17 +51,12 @@ router.get('/api/users', (req, res) => {
   return res.end(JSON.stringify(users));
 });
 
-router.get('/api/brands/{id}/products', (req, res) => {
-
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  return res.end(JSON.stringify(products));
-});
-
-router.get('/api/brands/{id}/products' , (req, res) => {
-  let categoryId = req.params.id;
-  let filteredProducts = products.filter((product) => {
-    return product.categoryId === categoryId;
-  });
+router.get('/api/brands/:categoryId/products' , (req, res) => {
+  let categoryId = req.params.categoryId;
+  let filteredProducts = [];
+  filteredProducts.push(products.filter((product) => {
+  return product.categoryId == categoryId;
+  }));
   res.writeHead(200, { 'Content-Type': 'application/json' });
   return res.end(JSON.stringify(filteredProducts));
 });
