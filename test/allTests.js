@@ -9,7 +9,7 @@ chai.use(chaiHttp);
 
 describe('/GET products by brand', () => {
 	it('should return all products for a specific brand', done => {
-		let categoryId = '1';
+		let categoryId = '2';
 		
 		chai
 			.request(server)
@@ -18,18 +18,18 @@ describe('/GET products by brand', () => {
 				console.log(res.body);
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				// res.body[0].should.have.property('id');
-				// res.body[0].should.have.property('categoryId');
-				// res.body[0].should.have.property('name');
-				// res.body[0].should.have.property('description');
-				// res.body[0].should.have.property('price');
-				// res.body[0].should.have.property('imageUrls');
-				// res.body[0].id.should.be.a('string');
-				// res.body[0].categoryId.should.be.a('string');
-				// res.body[0].name.should.be.a('string');
-				// res.body[0].description.should.be.a('string');
-				// res.body[0].price.should.be.a('number');
-				// res.body[0].imageUrls.should.be.an('array');
+				res.body[0][0].should.have.property('id');
+				res.body[0][0].should.have.property('categoryId');
+				res.body[0][0].should.have.property('name');
+				res.body[0][0].should.have.property('description');
+				res.body[0][0].should.have.property('price');
+				res.body[0][0].should.have.property('imageUrls');
+				res.body[0][0].id.should.be.a('string');
+				res.body[0][0].categoryId.should.be.a('string');
+				res.body[0][0].name.should.be.a('string');
+				res.body[0][0].description.should.be.a('string');
+				res.body[0][0].price.should.be.a('number');
+				res.body[0][0].imageUrls.should.be.an('array');
 				done();
 			});
 	});
