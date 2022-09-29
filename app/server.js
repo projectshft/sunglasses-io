@@ -83,23 +83,9 @@ router.post('/api/login', (req, res) => {
     };
     accessTokens.push(newAccessToken);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(newAccessToken.token));
+    return res.end(JSON.stringify(newAccessToken));
   }
 });
-
-  // router.get('/api/me/cart', (req, res) => {
-  //   let token = req.headers.authorization;
-  //   let user = users.find((user) => {
-  //     return user.token == token;
-  //   });
-  //   if (user) {
-  //     res.writeHead(200, { 'Content-Type': 'application/json' });
-  //     return res.end(JSON.stringify(cart));
-  //   } else {
-  //     res.writeHead(401, { 'Content-Type': 'application/json' });
-  //     return res.end(JSON.stringify({ message: 'You are not authorized' }));
-  //   }
-  // });
 
 
 module.exports = server;
