@@ -17,6 +17,8 @@ var cart = [];
 
 const PORT = 3001;
 
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
+
 let router = Router();
 router.use(bodyParser.json());
 
@@ -76,16 +78,54 @@ router.post('/api/login', (req, res) => {
     return user.login.username == username && user.login.password == password;
   });
   if (user) {
-    let newAccessToken = {
-      username: user.login.username,
-      lastUpdated: new Date(),
-      token: uid(16),
-    };
-    accessTokens.push(newAccessToken);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(newAccessToken));
+    let currentAccessToken = accessTokens.find((tokenObject) => {
+      return tokenObject.username == username.login.username;
+    });
+    if (currentAccessToken) {
+      currentAccessToken.lastUpdated = new Date();
+      return res.end(JSON.stringify(currentAccessToken.token));
+    } else {
+      let newAccessToken = {
+        username: user.login.username,
+        lastUpdated: new Date(),
+        token: uid(16),
+      };
+      accessTokens.push(newAccessToken);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(newAccessToken.token));
+    }
   }
 });
 
+var getValidTokenFromRequest = function (req) {
+  var parsedUrl = require('url').parse(req.url, true);
+  if (parsedUrl.query.accessToken) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+
+router.get(`/api/me/cart/q=${accessTokens.token}`, (req, res) => {
+  let currentAccessToken = getValidTokenFromRequest(req);
+  if (!currentAccessToken) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'You do not have access to this call to continue'}));
+  } else {
+    let userCart = cart.filter((cartItem) => {
+      return cartItem.username == currentAccessToken.username;
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(userCart));
+  }
+});
 
 module.exports = server;

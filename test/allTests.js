@@ -6,6 +6,8 @@ let chaiHttp = require('chai-http');
 let server = require('../app/server');
 let should = chai.should();
 chai.use(chaiHttp);
+let accessToken = require('../app/server');
+
 
 
 
@@ -277,5 +279,35 @@ describe('/POST user login', () => {
 	});
 });
 
+describe('/GET the current users cart', () => {
+	it('should return the items in the current users cart', done => {
+		let cartItem = {
+			username: 'yellowleopard753',
+			item: {
+				id: '1',
+				name: 'test',
+				price: 1,
+				imageUrls: ['test'],
+			}
+		};
+		chai
+			.request(server)
+			.get(`/api/me/cart/q=${accessToken.token}`)
+			.send(cartItem)
+			.end((err, res) => {
+				res.should.have.status(200);
+				// res.body.should.be.an('array');
+				// res.body[0].should.have.property('id');
+				// res.body[0].should.have.property('name');
+				// res.body[0].should.have.property('price');
+				// res.body[0].should.have.property('imageUrls');
+				// res.body[0].id.should.be.a('string');
+				// res.body[0].name.should.be.a('string');
+				// res.body[0].price.should.be.a('number');
+				// res.body[0].imageUrls.should.be.an('array');
+				done();
+			});
+	});
+});
 
-	
+
