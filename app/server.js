@@ -94,33 +94,39 @@ router.post('/api/login', (req, res) => {
       console.log(accessTokens);
       console.log(accessTokens[0].token);
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify(newAccessToken.token));
+      return res.end(JSON.stringify(newAccessToken));
     }
   }
 });
 
-const isTokenValid = (token) => {
+var isTokenValid = (token) => {
   let currentAccessToken = accessTokens.find((tokenObject) => {
     return tokenObject.token == token;
   });
-  //condition to check if token exists
   if (currentAccessToken) {
     let lastUpdated = new Date(currentAccessToken.lastUpdated);
     let currentTime = new Date();
-    //condition to check if token is expired
+    let diff = currentTime - lastUpdated;
+    console.log(diff);
     if (currentTime - lastUpdated < TOKEN_VALIDITY_TIMEOUT) {
-      currentAccessToken.lastUpdated = new Date();
       return true;
-    } else {
-      return false;
     }
-  } else {
-    return false;
   }
+  return false;
 };
 
-isTokenValid('0dVcJZsPKukIVFCy');
-console.log(isTokenValid('0dVcJZsPKukIVFCy'));
+router.get('/api/me/cart', (req, res) => {
+  let token = url.parse(req.url,true).query.token;
+  if (isTokenValid(token) == false) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Token is invalid' }));
+  } else {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(cart));
+  }
+});
+
+
 
 
 

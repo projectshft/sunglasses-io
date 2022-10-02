@@ -276,6 +276,30 @@ describe('/POST user login', () => {
 	});
 });
 
+describe('/GET the users cart', () => {
+	it('should return the users cart', done => {
+		let cart = {
+			'id': '1',
+			'categoryId': '1',
+			'name': 'Superglasses',
+			'description': 'The best glasses in the world',
+			'price':150,
+			'imageUrls':['https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg','https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg','https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg']
+		};
+		chai
+			.request(server)
+			.post('/api/me/cart')
+			.send(cart)
+			.end((err, res) => {
+				res.should.have.status(200);
+				done();
+			});
+	});
+});
+
+
+
+
 
 
 
