@@ -91,8 +91,6 @@ router.post('/api/login', (req, res) => {
         token: uid(16),
       };
       accessTokens.push(newAccessToken);
-      console.log(accessTokens);
-      console.log(accessTokens[0].token);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(newAccessToken));
     }
@@ -106,14 +104,26 @@ var isTokenValid = (token) => {
   if (currentAccessToken) {
     let lastUpdated = new Date(currentAccessToken.lastUpdated);
     let currentTime = new Date();
-    let diff = currentTime - lastUpdated;
-    console.log(diff);
     if (currentTime - lastUpdated < TOKEN_VALIDITY_TIMEOUT) {
       return true;
     }
   }
   return false;
 };
+
+router.post('/api/me/cart', (req, res) => {
+  let token = url.parse(req.url,true).query.token;
+  let cartItem = req.body.cartItem;
+  if (isTokenValid(token) == false) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Token is invalid' }));
+  } else {
+    cart.push(cartItem);
+    console.log(cartItem);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(cartItem));
+  }
+});
 
 router.get('/api/me/cart', (req, res) => {
   let token = url.parse(req.url,true).query.token;
@@ -122,13 +132,31 @@ router.get('/api/me/cart', (req, res) => {
     return res.end(JSON.stringify({ message: 'Token is invalid' }));
   } else {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(cart));
+    return res.end(JSON.stringify([cart]));
   }
 });
 
-
-
-
+router.delete('/api/me/cart/:id', (req, res) => {
+  let token = url.parse(req.url,true).query.token;
+  let id = req.params.id;
+  if (isTokenValid(token) == false) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Token is invalid' }));
+  } else {
+    let item = cart.find((item) => {
+      return item.id == id;
+    });
+    if (item) {
+      cart.splice(cart.indexOf(item), 1);
+      console.log(item);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Item deleted' }));
+  } else {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Item not found' }));
+    }
+  }
+});
 
 
 

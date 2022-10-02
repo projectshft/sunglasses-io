@@ -6,7 +6,30 @@ let chaiHttp = require('chai-http');
 let server = require('../app/server');
 let should = chai.should();
 chai.use(chaiHttp);
-let accessToken = require('../app/server');
+
+let token = '';
+
+describe('/POST user login', () => {
+	it('should return a token', done => {
+		let user = {
+			username: 'yellowleopard753',
+			password: 'jonjon'
+		};
+		chai
+			.request(server)
+			.post('/api/login')
+			.send(user)
+			.end((err, res) => {
+				res.should.have.status(200);
+				res.body.should.be.an('object');
+				res.body.should.have.property('token');
+				res.body.token.should.be.a('string');
+				res.body.token.should.have.lengthOf(16);
+				token = res.body.token;
+				done();
+			});
+	});
+});
 
 describe('The data for brands', () => {
 	it('should be an array', () => {
@@ -254,48 +277,56 @@ describe('/GET products by brand', () => {
 	});
 });
 
-describe('/POST user login', () => {
-	it('should return a token', done => {
-		let user = {
-			username: 'yellowleopard753',
-			password: 'jonjon'
+describe('/Post cart item', () => {
+	it('should ADD a new item to the cart', done => {
+		let cartItem = {
+			id: '1',
+			name: 'test',
+			price: 17,
+			quantity: 1
 		};
 		chai
 			.request(server)
-			.post('/api/login')
-			.send(user)
+			.post('/api/me/cart')
+			.query({ token: token })
+			.send(cartItem)
 			.end((err, res) => {
-				// console.log(res.body);
 				res.should.have.status(200);
-				// res.body.should.be.an('object');
-				// res.body.should.have.property('token');
-				// res.body.token.should.be.a('string');
-				// res.body.token.should.have.lengthOf(16);
+				done();
+			});
+	});
+});
+				
+describe('/GET the users cart', () => {
+	it('should return the users cart items', done => {
+		chai
+			.request(server)
+			.get('/api/me/cart')
+			.query({ 'token': token })
+			.end((err, res) => {
+				res.should.have.status(200);
 				done();
 			});
 	});
 });
 
-describe('/GET the users cart', () => {
-	it('should return the users cart', done => {
-		let cart = {
-			'id': '1',
-			'categoryId': '1',
-			'name': 'Superglasses',
-			'description': 'The best glasses in the world',
-			'price':150,
-			'imageUrls':['https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg','https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg','https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg']
-		};
+describe('/DELETE cart item', () => {
+	let id = '1';
+	it('should delete a cart item', done => {
 		chai
 			.request(server)
-			.post('/api/me/cart')
-			.send(cart)
+			.delete(`/api/me/cart/${id}`)
+			.query({ 'token': token })
+			.send({ id: '1' })
 			.end((err, res) => {
 				res.should.have.status(200);
 				done();
 			});
 	});
 });
+
+
+
 
 
 
