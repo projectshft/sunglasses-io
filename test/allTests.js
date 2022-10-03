@@ -292,6 +292,8 @@ describe('/Post cart item', () => {
 			.send(cartItem)
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
+				// res.body[0].should.have.property('id');
 				done();
 			});
 	});
@@ -305,25 +307,26 @@ describe('/GET the users cart', () => {
 			.query({ 'token': token })
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
 				done();
 			});
 	});
 });
 
-describe('/DELETE cart item', () => {
-	let id = '1';
-	it('should delete a cart item', done => {
-		chai
-			.request(server)
-			.delete(`/api/me/cart/${id}`)
-			.query({ 'token': token })
-			.send({ id: '1' })
-			.end((err, res) => {
-				res.should.have.status(200);
-				done();
-			});
-	});
-});
+// describe('/DELETE cart item', () => {
+// 	let id = '1';
+// 	it('should remove a cart item by id', done => {
+// 		chai
+// 			.request(server)
+// 			.delete(`/api/me/cart/${id}`)
+// 			.query({ 'token': token })
+// 			.send(id)
+// 			.end((err, res) => {
+// 				res.should.have.status(200);
+// 				done();
+// 			});
+// 	});
+// });
 
 
 
