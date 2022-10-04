@@ -154,13 +154,25 @@ router.delete('/api/me/cart/:id', (req, res) => {
   }
 });
 
-
-    
-
-   
-
-
-
+//UPDATE item in cart
+router.put('/api/me/cart/:id', (req, res) => {
+  let token = url.parse(req.url,true).query.token;
+  let id = req.params.id;
+  let quantity = req.body.quantity;
+  if (isTokenValid(token) == false) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Token is invalid' }));
+  } else {
+    users[0].cart = users[0].cart.map((item) => {
+      if (item.id == id) {
+        item.quantity = quantity;
+      }
+      return item;
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(users[0].cart));
+  }
+});
 
 //change QUANTITY of item in cart
 // router.put('/api/me/cart/:id', (req, res) => {

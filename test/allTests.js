@@ -277,7 +277,7 @@ describe('/GET products by brand', () => {
 	});
 });
 
-describe('/Post cart item', () => {
+describe('/POST cart item', () => {
 	it('should ADD a new item to the cart', (done) => {
 		let users = require('../initial-data/users.json');
 		let user = users[0];
@@ -327,6 +327,28 @@ describe('/DELETE cart item', () => {
 		chai
 			.request(server)
 			.delete(`/api/me/cart/${id}`)
+			.query({ token: token })
+			.send(user.cart)
+			.end((err, res) => {
+				res.should.have.status(200);
+				done();
+			});
+	});
+});
+
+describe('/UPDATE quantity of a product in cart', () => {
+	it('should update the quantity of a product in the cart', (done) => {
+		let users = require('../initial-data/users.json');
+		let user = users[0];
+		user.cart = {
+			id: '2',
+			quantity: 3,
+		};
+		let id = user.cart.id;
+		console.log(user.cart);
+		chai
+			.request(server)
+			.put(`/api/me/cart/${id}`)
 			.query({ token: token })
 			.send(user.cart)
 			.end((err, res) => {
