@@ -133,51 +133,70 @@ describe('The data for users', () => {
 		users.forEach((user) => {
 			expect(user).to.be.an('object');
 			expect(user).to.have.property('gender');
-			expect(user).to.have.property('cart');
-			expect(user).to.have.property('name');
-			expect(user).to.have.property('location');
-			expect(user).to.have.property('email');
-			expect(user).to.have.property('login');
-			expect(user).to.have.property('dob');
-			expect(user).to.have.property('registered');
-			expect(user).to.have.property('phone');
-			expect(user).to.have.property('cell');
-			expect(user).to.have.property('picture');
-			expect(user).to.have.property('nat');
-		});
-	});
-	it('should have properties with the appropriate data-types', () => {
-		let users = require('../initial-data/users.json');
-		users.forEach((user) => {
 			expect(user.gender).to.be.a('string');
+			expect(user).to.have.property('cart');
 			expect(user.cart).to.be.an('array');
+			expect(user).to.have.property('name');
 			expect(user.name).to.be.an('object');
+			expect(user.name).to.have.property('title');
 			expect(user.name.title).to.be.a('string');
+			expect(user.name).to.have.property('first');
 			expect(user.name.first).to.be.a('string');
+			expect(user.name).to.have.property('last');
 			expect(user.name.last).to.be.a('string');
+			expect(user).to.have.property('location');
 			expect(user.location).to.be.an('object');
 			expect(user.location.street).to.be.a('string');
 			expect(user.location.city).to.be.a('string');
 			expect(user.location.state).to.be.a('string');
 			expect(user.location.postcode).to.be.a('number');
+			expect(user).to.have.property('email');
 			expect(user.email).to.be.a('string');
+			expect(user.email).to.include('@');
+			expect(user).to.have.property('login');
 			expect(user.login).to.be.an('object');
+			expect(user.login).to.have.property('username');
 			expect(user.login.username).to.be.a('string');
-			expect(user.dob).to.be.an('string');
-			expect(user.registered).to.be.an('string');
+			expect(user.login).to.have.property('password');
+			expect(user.login.password).to.be.a('string');
+			expect(user).to.have.property('dob');
+			expect(user.dob).to.be.a('string');
+			expect(user.dob).to.include('-');
+			expect(user.dob).to.have.length.above(9);
+			expect(user).to.have.property('registered');
+			expect(user.registered).to.be.a('string');
+			expect(user.registered).to.include('-');
+			expect(user.registered).to.have.length.above(9);
+			expect(user).to.have.property('phone');
 			expect(user.phone).to.be.a('string');
+			expect(user.phone).to.include('-');
+			expect(user.phone).to.have.length.above(10);
+			expect(user).to.have.property('cell');
 			expect(user.cell).to.be.a('string');
+			expect(user.cell).to.include('-');
+			expect(user.cell).to.have.length.above(10);
+			expect(user).to.have.property('picture');
 			expect(user.picture).to.be.an('object');
+			expect(user.picture).to.have.property('large');
 			expect(user.picture.large).to.be.a('string');
+			expect(user.picture).to.have.property('medium');
 			expect(user.picture.medium).to.be.a('string');
+			expect(user.picture).to.have.property('thumbnail');
 			expect(user.picture.thumbnail).to.be.a('string');
+			expect(user).to.have.property('nat');
 			expect(user.nat).to.be.a('string');
+			expect(user.nat).to.have.lengthOf(2);
 		});
 	});
 	it('should contain objects with unique emails', () => {
 		let users = require('../initial-data/users.json');
 		let emails = users.map((user) => user.email);
 		expect(emails).to.have.lengthOf(new Set(emails).size);
+	});
+	it('should contain objects with unique usernames', () => {
+		let users = require('../initial-data/users.json');
+		let usernames = users.map((user) => user.login.username);
+		expect(usernames).to.have.lengthOf(new Set(usernames).size);
 	});
 });
 
@@ -200,7 +219,7 @@ describe('/GET brands', () => {
 });
 
 describe('/GET products', () => {
-	it('should return all products', (done) => {
+	it('should GET all products', (done) => {
 		chai
 			.request(server)
 			.get('/api/products')
@@ -208,17 +227,18 @@ describe('/GET products', () => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
 				res.body[0].should.have.property('id');
-				res.body[0].should.have.property('categoryId');
-				res.body[0].should.have.property('name');
-				res.body[0].should.have.property('description');
-				res.body[0].should.have.property('price');
-				res.body[0].should.have.property('imageUrls');
 				res.body[0].id.should.be.a('string');
+				res.body[0].should.have.property('categoryId');
 				res.body[0].categoryId.should.be.a('string');
+				res.body[0].should.have.property('name');
 				res.body[0].name.should.be.a('string');
+				res.body[0].should.have.property('description');
 				res.body[0].description.should.be.a('string');
+				res.body[0].should.have.property('price');
 				res.body[0].price.should.be.a('number');
+				res.body[0].should.have.property('imageUrls');
 				res.body[0].imageUrls.should.be.an('array');
+				res.body[0].imageUrls.should.have.lengthOf(3);
 				done();
 			});
 	});
@@ -253,7 +273,6 @@ describe('/GET users', () => {
 describe('/GET products by brand', () => {
 	it('should return all products for a specific brand', (done) => {
 		let categoryId = '2';
-
 		chai
 			.request(server)
 			.get(`/api/brands/${categoryId}/products`)
@@ -293,6 +312,12 @@ describe('/POST cart item', () => {
 			.send(user.cart)
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
+				res.body.length.should.be.eql(1);
+				res.body[0].should.have.property('id');
+				res.body[0].id.should.be.a('string');
+				res.body[0].should.have.property('quantity');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
@@ -306,6 +331,8 @@ describe('/GET the users cart', () => {
 			.query({ token: token })
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
+				res.body.length.should.be.eql(0);
 				done();
 			});
 	});
@@ -314,7 +341,6 @@ describe('/GET the users cart', () => {
 describe('/DELETE cart item', () => {
 	it('should remove a cart item by id', (done) => {
 		let users = require('../initial-data/users.json');
-		let products = require('../initial-data/products.json');
 		let user = users[0];
 		user.cart = {
 			id: '2',
@@ -329,6 +355,8 @@ describe('/DELETE cart item', () => {
 			.send(user.cart)
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
+				res.body.length.should.be.eql(0);
 				done();
 			});
 	});
@@ -340,7 +368,7 @@ describe('/UPDATE quantity of a product in cart', () => {
 		let user = users[0];
 		user.cart = {
 			id: '2',
-			quantity: 3,
+			quantity: 4,
 		};
 		let id = user.cart.id;
 		console.log(user.cart);
@@ -351,6 +379,11 @@ describe('/UPDATE quantity of a product in cart', () => {
 			.send(user.cart)
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
+				res.body[0].should.have.property('id');
+				res.body[0].id.should.be.a('string');
+				res.body[0].should.have.property('quantity');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
