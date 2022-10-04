@@ -13,7 +13,6 @@ var brands = [];
 var products = [];
 var users = [];
 var accessTokens = [];
-var cart = [];
 
 const PORT = 3001;
 
@@ -115,26 +114,25 @@ var isTokenValid = (token) => {
 //ADD item to cart
 router.post('/api/me/cart', (req, res) => {
   let token = url.parse(req.url,true).query.token;
-  let cartItem = req.body.cartItem;
+  let cart = req.body;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ message: 'Token is invalid' }));
   } else {
-    cart.push(cartItem);
     console.log(cart);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(cartItem));
+    return res.end(JSON.stringify(cart));
   }
 });
 
 // VIEW items in cart
 router.get('/api/me/cart', (req, res) => {
   let token = url.parse(req.url,true).query.token;
+  let cart = [];
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ message: 'Token is invalid' }));
   } else {
-    console.log(cart);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(cart));
   }

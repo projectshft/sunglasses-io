@@ -10,10 +10,10 @@ chai.use(chaiHttp);
 let token = '';
 
 describe('/POST user login', () => {
-	it('should return a token', done => {
+	it('should return a token', (done) => {
 		let user = {
 			username: 'yellowleopard753',
-			password: 'jonjon'
+			password: 'jonjon',
 		};
 		chai
 			.request(server)
@@ -251,9 +251,9 @@ describe('/GET users', () => {
 });
 
 describe('/GET products by brand', () => {
-	it('should return all products for a specific brand', done => {
+	it('should return all products for a specific brand', (done) => {
 		let categoryId = '2';
-		
+
 		chai
 			.request(server)
 			.get(`/api/brands/${categoryId}/products`)
@@ -278,48 +278,50 @@ describe('/GET products by brand', () => {
 });
 
 describe('/Post cart item', () => {
-	it('should ADD a new item to the cart', done => {
+	it('should ADD a new item to the cart', (done) => {
+		let users = require('../initial-data/users.json');
+		let products = require('../initial-data/products.json');
+		let user = users[0];
 		let cartItem = {
 			id: '1',
-			name: 'test',
-			price: 17,
-			quantity: 1
+			quantity: 1,
 		};
+		user.cart.push(cartItem);
+
 		chai
 			.request(server)
 			.post('/api/me/cart')
 			.query({ token: token })
-			.send(cartItem)
+			.send(user.cart)
 			.end((err, res) => {
 				res.should.have.status(200);
-				res.body.should.be.an('array');
+				res.body.should.be.a('array');
 				// res.body[0].should.have.property('id');
 				done();
 			});
 	});
 });
-				
+
 describe('/GET the users cart', () => {
-	it('should return the users cart items', done => {
+	it('should return the users cart items', (done) => {
 		chai
 			.request(server)
 			.get('/api/me/cart')
-			.query({ 'token': token })
+			.query({ token: token })
 			.end((err, res) => {
 				res.should.have.status(200);
-				res.body.should.be.an('array');
 				done();
 			});
 	});
 });
 
 // describe('/DELETE cart item', () => {
-// 	let id = '1';
-// 	it('should remove a cart item by id', done => {
+// 	it('should remove a cart item by id', (done) => {
+// 		let id = '1';
 // 		chai
 // 			.request(server)
 // 			.delete(`/api/me/cart/${id}`)
-// 			.query({ 'token': token })
+// 			.query({ token: token })
 // 			.send(id)
 // 			.end((err, res) => {
 // 				res.should.have.status(200);
@@ -327,13 +329,3 @@ describe('/GET the users cart', () => {
 // 			});
 // 	});
 // });
-
-
-
-
-
-
-
-
-
-
