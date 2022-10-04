@@ -293,15 +293,13 @@ describe('/POST cart item', () => {
 			.send(user.cart)
 			.end((err, res) => {
 				res.should.have.status(200);
-				res.body.should.be.a('array');
-				// res.body[0].should.have.property('id');
 				done();
 			});
 	});
 });
 
 describe('/GET the users cart', () => {
-	it('should return the users cart items', (done) => {
+	it('should return an empty cart', (done) => {
 		chai
 			.request(server)
 			.get('/api/me/cart')

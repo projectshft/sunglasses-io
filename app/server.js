@@ -114,27 +114,28 @@ var isTokenValid = (token) => {
 //ADD item to cart
 router.post('/api/me/cart', (req, res) => {
   let token = url.parse(req.url,true).query.token;
-  let cart = req.body;
+  let addItemToCart = req.body;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ message: 'Token is invalid' }));
   } else {
-    console.log(cart);
+    console.log(addItemToCart);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(cart));
+    return res.end(JSON.stringify(addItemToCart));
   }
 });
 
 // VIEW items in cart
 router.get('/api/me/cart', (req, res) => {
   let token = url.parse(req.url,true).query.token;
-  let cart = [];
+  let cartItems = users[0].cart;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ message: 'Token is invalid' }));
   } else {
+    console.log(cartItems);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(cart));
+    return res.end(JSON.stringify(cartItems));
   }
 });
 
@@ -173,51 +174,5 @@ router.put('/api/me/cart/:id', (req, res) => {
     return res.end(JSON.stringify(users[0].cart));
   }
 });
-
-//change QUANTITY of item in cart
-// router.put('/api/me/cart/:id', (req, res) => {
-//   let token = url.parse(req.url,true).query.token;
-//   let id = req.params.id;
-//   let quantity = req.body.quantity;
-//   if (isTokenValid(token) == false) {
-//     res.writeHead(401, { 'Content-Type': 'application/json' });
-//     return res.end(JSON.stringify({ message: 'Token is invalid' }));
-//   } else {
-//     let item = cart.find((item) => {
-//       return item.id == id;
-//     });
-//     if (item) {
-//       item.quantity = quantity;
-//       res.writeHead(200, { 'Content-Type': 'application/json' });
-//       return res.end(JSON.stringify(`Quantity of item ${id} changed to ${quantity}`));
-//     } else {
-//       res.writeHead(404, { 'Content-Type': 'application/json' });
-//       return res.end(JSON.stringify({ message: 'Item not found' }));
-//     }
-//   }
-// });
-
-// router.post('/api/me/cart/:id', (req, res) => {
-//   let token = url.parse(req.url,true).query.token;
-//   let id = req.params.id;
-//   let quantity = req.body.quantity;
-//   if (isTokenValid(token) == false) {
-//     res.writeHead(401, { 'Content-Type': 'application/json' });
-//     return res.end(JSON.stringify({ message: 'Token is invalid' }));
-//   } else {
-//     let item = cart.find((item) => {
-//       return item.id == id;
-//     });
-//     if (item) {
-//       item.quantity = quantity;
-//       res.writeHead(200, { 'Content-Type': 'application/json' });
-//       return res.end(JSON.stringify(item));
-//     } else {
-//       res.writeHead(404, { 'Content-Type': 'application/json' });
-//       return res.end(JSON.stringify({ message: 'Item not found' }));
-//     }
-//   }
-// });
-
 
 module.exports = server;
