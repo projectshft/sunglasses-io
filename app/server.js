@@ -139,27 +139,25 @@ router.get('/api/me/cart', (req, res) => {
 });
 
 //REMOVE item from cart
-// router.delete('/api/me/cart/:id', (req, res) => {
-//   let token = url.parse(req.url,true).query.token;
-//   let id = req.params.id;
-//   if (isTokenValid(token) == false) {
-//     res.writeHead(401, { 'Content-Type': 'application/json' });
-//     return res.end(JSON.stringify({ message: 'Token is invalid' }));
-//   } else {
-//     let item = cart.find((item) => {
-//       return item.id == id;
-//     });
-//     if (item) {
-//       cart.remove({id : req.params.id}, (err, res) => {
-//     res.writeHead(200, { 'Content-Type': 'application/json' });
-//     return res.end(JSON.stringify({ message: item + 'Item deleted' }));
-//   });
-//   } else {
-//     res.writeHead(404, { 'Content-Type': 'application/json' });
-//     return res.end(JSON.stringify({ message: 'Item not found' }));
-//     }
-//   }
-// });
+router.delete('/api/me/cart/:id', (req, res) => {
+  let token = url.parse(req.url,true).query.token;
+  let id = req.params.id;
+  if (isTokenValid(token) == false) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ message: 'Token is invalid' }));
+  } else {
+    users[0].cart = users[0].cart.filter((item) => {
+      return item.id != id;
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify(users[0].cart));
+  }
+});
+
+
+    
+
+   
 
 
 

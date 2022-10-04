@@ -280,14 +280,12 @@ describe('/GET products by brand', () => {
 describe('/Post cart item', () => {
 	it('should ADD a new item to the cart', (done) => {
 		let users = require('../initial-data/users.json');
-		let products = require('../initial-data/products.json');
 		let user = users[0];
 		let cartItem = {
 			id: '1',
 			quantity: 1,
 		};
 		user.cart.push(cartItem);
-
 		chai
 			.request(server)
 			.post('/api/me/cart')
@@ -315,17 +313,25 @@ describe('/GET the users cart', () => {
 	});
 });
 
-// describe('/DELETE cart item', () => {
-// 	it('should remove a cart item by id', (done) => {
-// 		let id = '1';
-// 		chai
-// 			.request(server)
-// 			.delete(`/api/me/cart/${id}`)
-// 			.query({ token: token })
-// 			.send(id)
-// 			.end((err, res) => {
-// 				res.should.have.status(200);
-// 				done();
-// 			});
-// 	});
-// });
+describe('/DELETE cart item', () => {
+	it('should remove a cart item by id', (done) => {
+		let users = require('../initial-data/users.json');
+		let products = require('../initial-data/products.json');
+		let user = users[0];
+		user.cart = {
+			id: '2',
+			quantity: 1,
+		};
+		let id = user.cart.id;
+		console.log(user.cart);
+		chai
+			.request(server)
+			.delete(`/api/me/cart/${id}`)
+			.query({ token: token })
+			.send(user.cart)
+			.end((err, res) => {
+				res.should.have.status(200);
+				done();
+			});
+	});
+});
