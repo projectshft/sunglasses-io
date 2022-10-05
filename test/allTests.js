@@ -306,8 +306,7 @@ describe('/POST cart items', () => {
 			{
 				id: '2',
 				quantity: 1,
-			},
-		];
+			}];
 		chai
 			.request(server)
 			.post('/api/me/cart')
@@ -316,11 +315,11 @@ describe('/POST cart items', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				// res.body.length.should.be.eql(1);
-				// res.body[0].should.have.property('id');
-				// res.body[0].id.should.be.a('string');
-				// res.body[0].should.have.property('quantity');
-				// res.body[0].quantity.should.be.a('number');
+				res.body.length.should.be.eql(1);
+				res.body[0][0].should.have.property('id');
+				res.body[0][0].should.have.property('quantity');
+				res.body[0][0].id.should.be.a('string');
+				res.body[0][0].quantity.should.be.a('number');
 				done();
 			});
 	});
@@ -335,14 +334,18 @@ describe('/GET the users cart', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				// res.body.length.should.be.eql(0);
+				res.body.length.should.be.eql(1);
+				res.body[0][0].should.have.property('id');
+				res.body[0][0].should.have.property('quantity');
+				res.body[0][0].id.should.be.a('string');
+				res.body[0][0].quantity.should.be.a('number');
 				done();
 			});
 	});
 });
 
 describe('/DELETE cart item', () => {
-	it('should remove a cart item by id', (done) => {
+	it('should remove a cart item by id and return the updated cart', (done) => {
 		let id = '2';
 		chai
 			.request(server)
@@ -352,14 +355,18 @@ describe('/DELETE cart item', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				// res.body.length.should.be.eql(0);
+				res.body.length.should.be.eql(1);
+				res.body[0].should.have.property('id');
+				res.body[0].should.have.property('quantity');
+				res.body[0].id.should.be.a('string');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
 });
 
 describe('/UPDATE quantity by id', () => {
-	it('should update the quantity of a product in the cart', (done) => {
+	it('should update the quantity of a product in the cart and return the updated cart', (done) => {
 		let updatedQuantity = {
 			quantity: 5,
 		};
@@ -371,6 +378,12 @@ describe('/UPDATE quantity by id', () => {
 			.send(updatedQuantity)
 			.end((err, res) => {
 				res.should.have.status(200);
+				res.body.should.be.an('array');
+				res.body.length.should.be.eql(1);
+				res.body[0].should.have.property('id');
+				res.body[0].should.have.property('quantity');
+				res.body[0].id.should.be.a('string');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});

@@ -53,7 +53,7 @@ router.get('/api/users', (req, res) => {
 
 router.get('/api/brands/:categoryId/products', (req, res) => {
   let categoryId = req.params.categoryId;
-  if (categoryId > 0 && categoryId < 6) {
+  if (categoryId > 0 && categoryId < 6 && isNaN(categoryId) == false) {
     let filteredProducts = [];
     filteredProducts.push(
       products.filter((product) => {
@@ -190,17 +190,26 @@ router.post('/api/me/cart/:id', (req, res) => {
     );
   } else {
     let id = req.params.id;
-    let user = users[0];
-    let cartItems = user.cart;
-    let cartAfterUpdate = cartItems.map((item) => {
-      if (item.id == id) {
-        item.quantity = req.body.quantity;
-      }
-      return item;
-    });
-    user.cart = cartAfterUpdate;
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(user.cart));
+    if (id < 1 || id > 11 || isNaN(id)) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          message: 'There are not any products for this request',
+        })
+      );
+    } else {
+      let user = users[0];
+      let cartItems = user.cart;
+      let cartAfterUpdate = cartItems.map((item) => {
+        if (item.id == id) {
+          item.quantity = req.body.quantity;
+        }
+        return item;
+      });
+      user.cart = cartAfterUpdate;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(user.cart));
+    }
   }
 });
 
