@@ -364,26 +364,25 @@ describe('/DELETE cart item', () => {
 
 describe('/UPDATE quantity by id', () => {
 	it('should update the quantity of a product in the cart', (done) => {
-		let users = require('../initial-data/users.json');
-		let user = users[0];
-		user.cart = [
-			{
-				'id': '2',
-				'categoryId': '1',
-				'name': 'Black Sunglasses',
-				'description': 'The best glasses in the world',
-			}
-		];
+		// let users = require('../initial-data/users.json');
+		// let user = users[0];
+		// user.cart = [
+		// 	{
+		// 		'id': '3',
+		// 		'categoryId': '1',
+		// 		'name': 'Black Sunglasses',
+		// 		'description': 'The best glasses in the world',
+		// 	}
+		// ];
 		let quantity = {
-			quantity: '4'
+			quantity: 5
 		};
-		let id = user.cart[0].id;
+		let id = '1';
 		chai
 			.request(server)
 			.post(`/api/me/cart/${id}`)
 			.query({ token: token })
 			.send(quantity)
-			.send(user.cart)
 			.end((err, res) => {
 				res.should.have.status(200);
 				done();
