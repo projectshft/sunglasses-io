@@ -385,7 +385,6 @@ describe('/UPDATE quantity by id', () => {
 			.send(quantity)
 			.send(user.cart)
 			.end((err, res) => {
-				console.log(res);
 				res.should.have.status(200);
 				done();
 			});
