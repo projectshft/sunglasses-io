@@ -117,14 +117,21 @@ var isTokenValid = (token) => {
 //ADD item to cart
 router.post('/api/me/cart', (req, res) => {
   let token = url.parse(req.url, true).query.token;
-  let addItemToCart = req.body;
+  let addItemsToCart = req.body;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ message: 'Invalid token: You need to have access to this call to continue' }));
+    return res.end(
+      JSON.stringify({
+        message:
+          'Invalid token: You need to have access to this call to continue',
+      })
+    );
   } else {
-    console.log(addItemToCart);
+    let user = users[0];
+    user.cart.push(addItemsToCart);
+    console.log(user.cart);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(addItemToCart));
+    return res.end(JSON.stringify(user.cart));
   }
 });
 
@@ -134,7 +141,12 @@ router.get('/api/me/cart', (req, res) => {
   let cartItems = users[0].cart;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ message: 'Invalid token: You need to have access to this call to continue' }));
+    return res.end(
+      JSON.stringify({
+        message:
+          'Invalid token: You need to have access to this call to continue',
+      })
+    );
   } else {
     console.log(cartItems);
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -148,13 +160,20 @@ router.delete('/api/me/cart/:id', (req, res) => {
   let id = req.params.id;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ message: 'Invalid token: You need to have access to this call to continue' }));
+    return res.end(
+      JSON.stringify({
+        message:
+          'Invalid token: You need to have access to this call to continue',
+      })
+    );
   } else {
-    users[0].cart = users[0].cart.filter((item) => {
-      return item.id != id;
-    });
+    let user = users[0];
+    let cartItems = user.cart;
+    let cartAfterRemove = cartItems[0].filter((item) => item.id !== id);
+    user.cart = cartAfterRemove;
+    console.log(user.cart);
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(users[0].cart));
+    return res.end(JSON.stringify(user.cart));
   }
 });
 
@@ -163,20 +182,25 @@ router.post('/api/me/cart/:id', (req, res) => {
   let token = url.parse(req.url, true).query.token;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ message: 'Invalid token: You need to have access to this call to continue' }));
+    return res.end(
+      JSON.stringify({
+        message:
+          'Invalid token: You need to have access to this call to continue',
+      })
+    );
   } else {
-    users[0].cart = req.body[0];
-    let cartWithQuantity = users[0].cart;
-    cartWithQuantity.quantity = req.body.quantity;
-    let updatedCart = users[0].cart;
-    for (let i = 0; i < updatedCart.length; i++) {
-      if (updatedCart[i].id == req.params.id) {
-        updatedCart[i].quantity = req.body[1].quantity;
+    let id = req.params.id;
+    let user = users[0];
+    let cartItems = user.cart;
+    let cartAfterUpdate = cartItems.map((item) => {
+      if (item.id == id) {
+        item.quantity = req.body.quantity;
       }
-    }
-    console.log(updatedCart);
+      return item;
+    });
+    user.cart = cartAfterUpdate;
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(updatedCart));
+    return res.end(JSON.stringify(user.cart));
   }
 });
 
