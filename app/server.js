@@ -113,7 +113,7 @@ var isTokenValid = (token) => {
 
 //ADD item to cart
 router.post('/api/me/cart', (req, res) => {
-  let token = url.parse(req.url,true).query.token;
+  let token = url.parse(req.url, true).query.token;
   let addItemToCart = req.body;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -127,7 +127,7 @@ router.post('/api/me/cart', (req, res) => {
 
 // VIEW items in cart
 router.get('/api/me/cart', (req, res) => {
-  let token = url.parse(req.url,true).query.token;
+  let token = url.parse(req.url, true).query.token;
   let cartItems = users[0].cart;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -141,7 +141,7 @@ router.get('/api/me/cart', (req, res) => {
 
 //REMOVE item from cart
 router.delete('/api/me/cart/:id', (req, res) => {
-  let token = url.parse(req.url,true).query.token;
+  let token = url.parse(req.url, true).query.token;
   let id = req.params.id;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
@@ -155,23 +155,24 @@ router.delete('/api/me/cart/:id', (req, res) => {
   }
 });
 
-//UPDATE item in cart
-router.put('/api/me/cart/:id', (req, res) => {
-  let token = url.parse(req.url,true).query.token;
-  let id = req.params.id;
-  let quantity = req.body.quantity;
+//UPDATE item in cart by product id
+router.post('/api/me/cart/:id', (req, res) => {
+  let token = url.parse(req.url, true).query.token;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ message: 'Token is invalid' }));
   } else {
-    users[0].cart = users[0].cart.map((item) => {
-      if (item.id == id) {
-        item.quantity = quantity;
-      }
-      return item;
-    });
+  users[0].cart = req.body[0];
+  let cartWithQuantity = users[0].cart;
+  cartWithQuantity.quantity = req.body.quantity;
+  let updatedCart = users[0].cart;
+  for (let i = 0; i < updatedCart.length; i++) {
+    if (updatedCart[i].id == req.params.id) {
+      updatedCart[i].quantity = req.body[1].quantity;
+    }
+  }
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(users[0].cart));
+    return res.end(JSON.stringify(updatedCart));
   }
 });
 

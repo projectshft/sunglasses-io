@@ -362,28 +362,31 @@ describe('/DELETE cart item', () => {
 	});
 });
 
-describe('/UPDATE quantity of a product in cart', () => {
+describe('/UPDATE quantity by id', () => {
 	it('should update the quantity of a product in the cart', (done) => {
 		let users = require('../initial-data/users.json');
 		let user = users[0];
-		user.cart = {
-			id: '2',
-			quantity: 4,
+		user.cart = [
+			{
+				'id': '2',
+				'categoryId': '1',
+				'name': 'Black Sunglasses',
+				'description': 'The best glasses in the world',
+			}
+		];
+		let quantity = {
+			quantity: '4'
 		};
-		let id = user.cart.id;
-		console.log(user.cart);
+		let id = user.cart[0].id;
 		chai
 			.request(server)
-			.put(`/api/me/cart/${id}`)
+			.post(`/api/me/cart/${id}`)
 			.query({ token: token })
+			.send(quantity)
 			.send(user.cart)
 			.end((err, res) => {
+				console.log(res);
 				res.should.have.status(200);
-				res.body.should.be.an('array');
-				res.body[0].should.have.property('id');
-				res.body[0].id.should.be.a('string');
-				res.body[0].should.have.property('quantity');
-				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
