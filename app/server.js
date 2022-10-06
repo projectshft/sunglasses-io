@@ -196,8 +196,6 @@ router.post('/api/me/cart', (req, res) => {
   }
 });
 
-
-
 // VIEW items in cart
 router.get('/api/me/cart', (req, res) => {
   let token = url.parse(req.url, true).query.token;
@@ -211,13 +209,22 @@ router.get('/api/me/cart', (req, res) => {
       })
     );
   } else {
-    console.log(cartItems);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(cartItems));
+    if (cartItems.length == 0) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          message: 'Your cart is empty',
+        })
+      );
+    } else {
+      console.log(cartItems);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(cartItems));
+    }
   }
 });
 
-//REMOVE item from cart
+// //REMOVE item from cart
 router.delete('/api/me/cart/:id', (req, res) => {
   let token = url.parse(req.url, true).query.token;
   let id = req.params.id;
@@ -232,7 +239,7 @@ router.delete('/api/me/cart/:id', (req, res) => {
   } else {
     let user = users[0];
     let cartItems = user.cart;
-    let cartAfterRemove = cartItems[0].filter((item) => item.id !== id);
+    let cartAfterRemove = cartItems.filter((item) => item.id !== id);
     user.cart = cartAfterRemove;
     console.log(user.cart);
     res.writeHead(200, { 'Content-Type': 'application/json' });

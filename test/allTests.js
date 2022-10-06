@@ -310,11 +310,34 @@ describe('/POST cart item', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				res.body.length.should.be.eql(1);
-				// res.body[0][0].should.have.property('id');
-				// res.body[0][0].should.have.property('quantity');
-				// res.body[0][0].id.should.be.a('string');
-				// res.body[0][0].quantity.should.be.a('number');
+				res.body[0].should.have.property('id');
+				res.body[0].should.have.property('quantity');
+				res.body[0].id.should.be.a('string');
+				res.body[0].quantity.should.be.a('number');
+				done();
+			});
+	});
+});
+
+//executing a second test in order to test the functionality of deleting an item and updating an item's quantity
+describe('/POST cart item', () => {
+	it('should ADD new item to the cart', (done) => {
+		let cartItem = {
+			id: '11',
+			quantity: 1,
+		};
+		chai
+			.request(server)
+			.post('/api/me/cart')
+			.query({ token: token })
+			.send(cartItem)
+			.end((err, res) => {
+				res.should.have.status(200);
+				res.body.should.be.an('array');
+				res.body[0].should.have.property('id');
+				res.body[0].should.have.property('quantity');
+				res.body[0].id.should.be.a('string');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
@@ -329,36 +352,10 @@ describe('/GET the users cart', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				res.body.length.should.be.eql(1);
-				// res.body[0][0].should.have.property('id');
-				// res.body[0][0].should.have.property('quantity');
-				// res.body[0][0].id.should.be.a('string');
-				// res.body[0][0].quantity.should.be.a('number');
-				done();
-			});
-	});
-});
-
-
-describe('/UPDATE quantity by id', () => {
-	it('should update the quantity of a product in the cart and return the updated cart', (done) => {
-		let updatedQuantity = {
-			quantity: 5,
-		};
-		let id = '2';
-		chai
-			.request(server)
-			.post(`/api/me/cart/${id}`)
-			.query({ token: token })
-			.send(updatedQuantity)
-			.end((err, res) => {
-				res.should.have.status(200);
-				res.body.should.be.an('array');
-				// res.body.length.should.be.eql(1);
-				// res.body[0].should.have.property('id');
-				// res.body[0].should.have.property('quantity');
-				// res.body[0].id.should.be.a('string');
-				// res.body[0].quantity.should.be.a('number');
+				res.body[0].should.have.property('id');
+				res.body[0].should.have.property('quantity');
+				res.body[0].id.should.be.a('string');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
@@ -375,7 +372,26 @@ describe('/DELETE cart item', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				res.body.length.should.be.eql(1);
+				done();
+			});
+	});
+});
+
+describe('/UPDATE quantity by id', () => {
+	it('should update the quantity of a product in the cart and return the updated cart', (done) => {
+		let updatedQuantity = {
+			quantity: 5,
+		};
+		let id = '11';
+		chai
+			.request(server)
+			.post(`/api/me/cart/${id}`)
+			.query({ token: token })
+			.send(updatedQuantity)
+			.end((err, res) => {
+				res.should.have.status(200);
+				res.body.should.be.an('array');
+				// res.body.length.should.be.eql(1);
 				// res.body[0].should.have.property('id');
 				// res.body[0].should.have.property('quantity');
 				// res.body[0].id.should.be.a('string');
