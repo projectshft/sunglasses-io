@@ -126,12 +126,68 @@ router.post('/api/me/cart', (req, res) => {
           'Invalid token: You need to have access to this call to continue',
       })
     );
-  } else {
+  } else if (
+    req.body.id != null &&
+    req.body.quantity != null &&
+    req.body.id &&
+    req.body.quantity &&
+    isNaN(req.body.id) == false &&
+    isNaN(req.body.quantity) == false &&
+    req.body.id > 0 &&
+    req.body.id < 13 &&
+    req.body.quantity > 0 &&
+    //limiting the purchase quantity of any single product to 5
+    req.body.quantity < 6 &&
+    req.body.id % 1 == 0 &&
+    req.body.quantity % 1 == 0
+  ) {
     let user = users[0];
     user.cart.push(addItemsToCart);
     console.log(user.cart);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify(user.cart));
+  } else if (req.body.id == null || req.body.id == undefined) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        message: 'Please provide a valid product id',
+      })
+    );
+  } else if (req.body.quantity == null || req.body.quantity == undefined) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        message: 'Please provide a valid product quantity',
+      })
+    );
+  } else if (isNaN(parseInt(req.body.id)) == true || isNaN((parseInt(req.body.quantity)) == true)) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        message: 'Please provide a valid product id and quantity',
+      })
+    );
+  } else if (req.body.id < 1 || req.body.id > 12) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        message: 'Please provide a valid product id between 1 and 12',
+      })
+    );
+  } else if (req.body.quantity < 1 || req.body.quantity > 5) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        message: 'Please provide a valid product quantity between 1 and 5',
+      })
+    );
+  } else if (req.body.id % 1 != 0 || req.body.quantity % 1 != 0) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        message: 'Please provide a whole number for product id and for quantity ',
+      })
+    );
   }
 });
 
@@ -153,6 +209,7 @@ router.get('/api/me/cart', (req, res) => {
     return res.end(JSON.stringify(cartItems));
   }
 });
+
 
 //REMOVE item from cart
 router.delete('/api/me/cart/:id', (req, res) => {
