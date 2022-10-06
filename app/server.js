@@ -53,20 +53,50 @@ router.get('/api/users', (req, res) => {
 
 router.get('/api/brands/:categoryId/products', (req, res) => {
   let categoryId = req.params.categoryId;
-  if (categoryId > 0 && categoryId < 6 && isNaN(categoryId) == false) {
-    let filteredProducts = [];
-    filteredProducts.push(
-      products.filter((product) => {
-        return product.categoryId == categoryId;
+  let brandId = parseInt(categoryId);
+  if (categoryId == 'undefined' || categoryId == null) {
+    res.writeHead(400, { 'Content-Type': 'application/json' });
+    return res.end(
+      JSON.stringify({
+        error: 'Category Id is required',
       })
     );
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(filteredProducts));
   } else {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({ message: 'There are not any products for this request' })
-    );
+    if (isNaN(brandId) == true) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          error: 'Category Id should be a number',
+        })
+      );
+    } else {
+      if (brandId < 1 || brandId > 5) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            error: 'Invalid Request: Category Id should be between 1 and 5',
+          })
+        );
+      } else {
+        if (brandId % 1 != 0) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(
+            JSON.stringify({
+              error: 'Invalid Request: Category Id should be an integer',
+            })
+          );
+        } else {
+            let filteredProducts = [];
+            filteredProducts.push(
+              products.filter((product) => {
+                return product.categoryId == categoryId;
+              })
+            );
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify(filteredProducts));
+        }
+      }
+    }
   }
 });
 
