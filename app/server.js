@@ -127,62 +127,74 @@ router.post('/api/me/cart', (req, res) => {
     );
   } else {
     if (isTokenValid(token) == true) {
-      let addItemsToCart = req.body;
-      //currently a mess but previously was working with...
-      //let id = parseInt(addItemsToCart[0].id);
-      //let quantity = addItemsToCart[0].quantity;
-      //then I was testing each conditional using id. and quantity. 
-      let id = addItemsToCart.id;
-      let quantity = addItemsToCart.quantity;
-      const enumeratedItems = () => {
-        addItemsToCart.map((item, string) => {
-        return { ...item, id: parseInt(string) };
-      });
-    
-        if (obj.id < 1 || obj.id > 12) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          return res.end(
-          JSON.stringify({
-            message: 'Please provide a valid product id between 1 and 12',
-          })
-        );
-      } else if (obj.quantity < 1 || obj.quantity > 5) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        return res.end(
-          JSON.stringify({
-            message: 'Please provide a valid product quantity between 1 and 5',
-          })
-        );
-      } else if (obj.id % 1 != 0 || obj.quantity % 1 != 0) {
+      var addItemToCart = req.body;
+      var idString = req.body.id;
+      var quantity = req.body.quantity;
+
+      if (
+        idString == undefined ||
+        quantity == undefined ||
+        idString == '' ||
+        quantity == ''
+      ) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         return res.end(
           JSON.stringify({
             message:
-              'Please provide a whole number for product id and for quantity ',
+              'Invalid request: product id and product quantity required',
           })
         );
-      } else if (
-        obj.id != null &&
-        obj.quantity != null &&
-        isNaN(obj.id) == false &&
-        isNaN(obj.quantity) == false &&
-        obj.id > 0 &&
-        obj.id < 13 &&
-        obj.quantity > 0 &&
-        //limiting the purchase quantity of any single product to 5
-        obj.quantity < 6
-      ) {
-        let user = users[0];
-        user.cart.push(addItemsToCart);
-        console.log(user.cart);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify(user.cart));
+      } else {
+        var id = parseInt(idString);
+        if (isNaN(id) == true || isNaN(quantity) == true) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(
+            JSON.stringify({
+              message:
+                'Invalid request: product id and product quantity must be numbers',
+            })
+          );
+        } else {
+          if (id < 1 || id > 12) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(
+              JSON.stringify({
+                message: 'Invalid request: product id does not exist',
+              })
+            );
+          } else {
+            // limit quantity to 5
+            if (quantity < 1 || quantity > 5) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              return res.end(
+                JSON.stringify({
+                  message:
+                    'Invalid request: product quantity must be between 1 and 5',
+                })
+              );
+            } else {
+              if (id % 1 != 0 || quantity % 1 != 0) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(
+                  JSON.stringify({
+                    message:
+                      'Invalid request: product id and product quantity must be integers',
+                  })
+                );
+              } else {
+                let user = users[0];
+                user.cart.push(addItemToCart);
+                console.log(user.cart);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify(user.cart));
+              }
+            }
+          }
+        }
       }
-    };
     }
   }
 });
-
 
 
 
