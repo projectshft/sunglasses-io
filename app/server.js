@@ -155,7 +155,7 @@ router.post('/api/me/cart', (req, res) => {
             })
           );
         } else {
-          if (id < 1 || id > 12) {
+          if (id < 1 || id > 11) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             return res.end(
               JSON.stringify({
@@ -227,7 +227,8 @@ router.get('/api/me/cart', (req, res) => {
 // //REMOVE item from cart
 router.delete('/api/me/cart/:id', (req, res) => {
   let token = url.parse(req.url, true).query.token;
-  let id = req.params.id;
+  let idString = req.params.id;
+  let id = parseInt(idString);
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(
@@ -237,13 +238,60 @@ router.delete('/api/me/cart/:id', (req, res) => {
       })
     );
   } else {
-    let user = users[0];
-    let cartItems = user.cart;
-    let cartAfterRemove = cartItems.filter((item) => item.id !== id);
-    user.cart = cartAfterRemove;
-    console.log(user.cart);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(user.cart));
+    if (id == undefined || id == '') {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      return res.end(
+        JSON.stringify({
+          message: 'Invalid request: product id required',
+        })
+      );
+    } else {
+      if (isNaN(id) == true) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            message: 'Invalid request: product id must be a number',
+          })
+        );
+      } else {
+        if (id < 1 || id > 11) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(
+            JSON.stringify({
+              message: 'Invalid request: product id must be between 1 and 11',
+            })
+          );
+        } else {
+          if (id % 1 != 0) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(
+              JSON.stringify({
+                message: 'Invalid request: product id must be an integer',
+              })
+            );
+          } else {
+            let user = users[0];
+            let cartItems = user.cart;
+            if (cartItems.length == 0) {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              return res.end(
+                JSON.stringify({
+                  message: 'Cannot delete item because your cart is empty',
+                })
+              );
+            } else {
+              let cartAfterRemove = cartItems.filter(
+                (item) => item.id !== idString
+              );
+              user.cart = cartAfterRemove;
+              console.log(user.cart);
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              return res.end(JSON.stringify(user.cart));
+            }
+          }
+        }
+      }
+    }
   }
 });
 
@@ -259,26 +307,121 @@ router.post('/api/me/cart/:id', (req, res) => {
       })
     );
   } else {
-    let id = req.params.id;
-    if (id < 1 || id > 11 || isNaN(id)) {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
+    let idString = req.params.id;
+    let id = parseInt(idString);
+    if (id == undefined || id == '') {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
       return res.end(
         JSON.stringify({
-          message: 'There are not any products for this request',
+          message: 'Invalid request: product id required',
         })
       );
     } else {
-      let user = users[0];
-      let cartItems = user.cart;
-      let cartAfterUpdate = cartItems.map((item) => {
-        if (item.id == id) {
-          item.quantity = req.body.quantity;
+      if (isNaN(id) == true) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            message: 'Invalid request: product id must be a number',
+          })
+        );
+      } else {
+        if (id < 1 || id > 11) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(
+            JSON.stringify({
+              message: 'Invalid request: product id must be between 1 and 11',
+            })
+          );
+        } else {
+          if (id % 1 != 0) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(
+              JSON.stringify({
+                message: 'Invalid request: product id must be an integer',
+              })
+            );
+          } else {
+            let user = users[0];
+            if (req.body.quantity == undefined || req.body.quantity == '') {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              return res.end(
+                JSON.stringify({
+                  message: 'Invalid request: product quantity required',
+                })
+              );
+            } else {
+              let quantity = req.body.quantity;
+              if (isNaN(quantity) == true) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(
+                  JSON.stringify({
+                    message:
+                      'Invalid request: product quantity must be a number',
+                  })
+                );
+              } else {
+                if (quantity < 1 || quantity > 5) {
+                  res.writeHead(400, { 'Content-Type': 'application/json' });
+                  return res.end(
+                    JSON.stringify({
+                      message:
+                        'Invalid request: product quantity must be between 1 and 5',
+                    })
+                  );
+                } else {
+                  if (quantity % 1 != 0) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(
+                      JSON.stringify({
+                        message:
+                          'Invalid request: product quantity must be an integer',
+                      })
+                    );
+                  } else {
+                    let cartItems = user.cart;
+                    let cartAfterUpdate = cartItems.map((item) => {
+                      if (item.id == id) {
+                        item.quantity = req.body.quantity;
+                      }
+                      return item;
+                    });
+                    if (cartItems == cartAfterUpdate) {
+                      res.writeHead(404, {
+                        'Content-Type': 'application/json',
+                      });
+                      return res.end(
+                        JSON.stringify({
+                          message:
+                            'The item with the specified id does not exist in your cart',
+                        })
+                      );
+                    } else {
+                      user.cart = cartAfterUpdate;
+                      if (user.cart.length == 0) {
+                        res.writeHead(404, {
+                          'Content-Type': 'application/json',
+                        });
+                        return res.end(
+                          JSON.stringify({
+                            message:
+                              'Cannot update item because your cart is empty',
+                          })
+                        );
+                      } else {
+                        console.log(user.cart);
+                        res.writeHead(200, {
+                          'Content-Type': 'application/json',
+                        });
+                        return res.end(JSON.stringify(user.cart));
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-        return item;
-      });
-      user.cart = cartAfterUpdate;
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify(user.cart));
+      }
     }
   }
 });
