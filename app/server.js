@@ -117,7 +117,6 @@ var isTokenValid = (token) => {
 //ADD item to cart
 router.post('/api/me/cart', (req, res) => {
   let token = url.parse(req.url, true).query.token;
-  let addItemsToCart = req.body;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(
@@ -126,70 +125,66 @@ router.post('/api/me/cart', (req, res) => {
           'Invalid token: You need to have access to this call to continue',
       })
     );
-  } else if (
-    req.body.id != null &&
-    req.body.quantity != null &&
-    req.body.id &&
-    req.body.quantity &&
-    isNaN(req.body.id) == false &&
-    isNaN(req.body.quantity) == false &&
-    req.body.id > 0 &&
-    req.body.id < 13 &&
-    req.body.quantity > 0 &&
-    //limiting the purchase quantity of any single product to 5
-    req.body.quantity < 6 &&
-    req.body.id % 1 == 0 &&
-    req.body.quantity % 1 == 0
-  ) {
-    let user = users[0];
-    user.cart.push(addItemsToCart);
-    console.log(user.cart);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify(user.cart));
-  } else if (req.body.id == null || req.body.id == undefined) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({
-        message: 'Please provide a valid product id',
-      })
-    );
-  } else if (req.body.quantity == null || req.body.quantity == undefined) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({
-        message: 'Please provide a valid product quantity',
-      })
-    );
-  } else if (isNaN(parseInt(req.body.id)) == true || isNaN((parseInt(req.body.quantity)) == true)) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({
-        message: 'Please provide a valid product id and quantity',
-      })
-    );
-  } else if (req.body.id < 1 || req.body.id > 12) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({
-        message: 'Please provide a valid product id between 1 and 12',
-      })
-    );
-  } else if (req.body.quantity < 1 || req.body.quantity > 5) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({
-        message: 'Please provide a valid product quantity between 1 and 5',
-      })
-    );
-  } else if (req.body.id % 1 != 0 || req.body.quantity % 1 != 0) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    return res.end(
-      JSON.stringify({
-        message: 'Please provide a whole number for product id and for quantity ',
-      })
-    );
+  } else {
+    if (isTokenValid(token) == true) {
+      let addItemsToCart = req.body;
+      //currently a mess but previously was working with...
+      //let id = parseInt(addItemsToCart[0].id);
+      //let quantity = addItemsToCart[0].quantity;
+      //then I was testing each conditional using id. and quantity. 
+      let id = addItemsToCart.id;
+      let quantity = addItemsToCart.quantity;
+      const enumeratedItems = () => {
+        addItemsToCart.map((item, string) => {
+        return { ...item, id: parseInt(string) };
+      });
+    
+        if (obj.id < 1 || obj.id > 12) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(
+          JSON.stringify({
+            message: 'Please provide a valid product id between 1 and 12',
+          })
+        );
+      } else if (obj.quantity < 1 || obj.quantity > 5) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            message: 'Please provide a valid product quantity between 1 and 5',
+          })
+        );
+      } else if (obj.id % 1 != 0 || obj.quantity % 1 != 0) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(
+          JSON.stringify({
+            message:
+              'Please provide a whole number for product id and for quantity ',
+          })
+        );
+      } else if (
+        obj.id != null &&
+        obj.quantity != null &&
+        isNaN(obj.id) == false &&
+        isNaN(obj.quantity) == false &&
+        obj.id > 0 &&
+        obj.id < 13 &&
+        obj.quantity > 0 &&
+        //limiting the purchase quantity of any single product to 5
+        obj.quantity < 6
+      ) {
+        let user = users[0];
+        user.cart.push(addItemsToCart);
+        console.log(user.cart);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify(user.cart));
+      }
+    };
+    }
   }
 });
+
+
+
 
 // VIEW items in cart
 router.get('/api/me/cart', (req, res) => {
@@ -209,7 +204,6 @@ router.get('/api/me/cart', (req, res) => {
     return res.end(JSON.stringify(cartItems));
   }
 });
-
 
 //REMOVE item from cart
 router.delete('/api/me/cart/:id', (req, res) => {
