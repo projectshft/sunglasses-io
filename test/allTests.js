@@ -6,12 +6,11 @@ let chaiHttp = require('chai-http');
 let server = require('../app/server');
 let should = chai.should();
 chai.use(chaiHttp);
-
 let token = '';
 
 describe('/POST user login', () => {
 	it('should return a token', (done) => {
-		let user = {
+		var user = {
 			username: 'yellowleopard753',
 			password: 'jonjon',
 		};
