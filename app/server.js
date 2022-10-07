@@ -58,7 +58,7 @@ router.get('/api/brands/:categoryId/products', (req, res) => {
     res.writeHead(400, { 'Content-Type': 'application/json' });
     return res.end(
       JSON.stringify({
-        error: 'Category Id is required',
+        error: 'Invalid Request: Category Id is required',
       })
     );
   } else {
@@ -66,7 +66,7 @@ router.get('/api/brands/:categoryId/products', (req, res) => {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       return res.end(
         JSON.stringify({
-          error: 'Category Id should be a number',
+          error: 'Invalid Request: Category Id should be a number',
         })
       );
     } else {
@@ -388,77 +388,88 @@ router.post('/api/me/cart/:id', (req, res) => {
                 return user;
               }
             });
-            if (req.body.quantity == undefined || req.body.quantity == '') {
-              res.writeHead(400, { 'Content-Type': 'application/json' });
+            if (user.cart[0].id !== idString) {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
               return res.end(
                 JSON.stringify({
-                  message: 'Invalid request: product quantity required',
+                  message: 'Cannot update item because it is not in your cart',
                 })
               );
             } else {
-              let quantity = req.body.quantity;
-              if (isNaN(quantity) == true) {
+              if (req.body.quantity == undefined || req.body.quantity == '') {
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 return res.end(
                   JSON.stringify({
-                    message:
-                      'Invalid request: product quantity must be a number',
+                    message: 'Invalid request: product quantity required',
                   })
                 );
               } else {
-                if (quantity < 1 || quantity > 5) {
+                let quantity = req.body.quantity;
+                if (isNaN(quantity) == true) {
                   res.writeHead(400, { 'Content-Type': 'application/json' });
                   return res.end(
                     JSON.stringify({
                       message:
-                        'Invalid request: product quantity must be between 1 and 5',
+                        'Invalid request: product quantity must be a number',
                     })
                   );
                 } else {
-                  if (quantity % 1 != 0) {
+                  if (quantity < 1 || quantity > 5) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     return res.end(
                       JSON.stringify({
                         message:
-                          'Invalid request: product quantity must be an integer',
+                          'Invalid request: product quantity must be between 1 and 5',
                       })
                     );
                   } else {
-                    let cartItems = user.cart;
-                    let cartAfterUpdate = cartItems.map((item) => {
-                      if (item.id == id) {
-                        item.quantity = req.body.quantity;
-                      }
-                      return item;
-                    });
-                    if (cartItems == cartAfterUpdate) {
-                      res.writeHead(404, {
+                    if (quantity % 1 != 0) {
+                      res.writeHead(400, {
                         'Content-Type': 'application/json',
                       });
                       return res.end(
                         JSON.stringify({
                           message:
-                            'The item with the specified id does not exist in your cart',
+                            'Invalid request: product quantity must be an integer',
                         })
                       );
                     } else {
-                      user.cart = cartAfterUpdate;
-                      if (user.cart.length == 0) {
+                      let cartItems = user.cart;
+                      let cartAfterUpdate = cartItems.map((item) => {
+                        if (item.id == id) {
+                          item.quantity = req.body.quantity;
+                        }
+                        return item;
+                      });
+                      if (user.cart == cartAfterUpdate) {
                         res.writeHead(404, {
                           'Content-Type': 'application/json',
                         });
                         return res.end(
                           JSON.stringify({
                             message:
-                              'Cannot update item because your cart is empty',
+                              'The item with the specified id does not exist in your cart',
                           })
                         );
                       } else {
-                        console.log(user.cart);
-                        res.writeHead(200, {
-                          'Content-Type': 'application/json',
-                        });
-                        return res.end(JSON.stringify(user.cart));
+                        user.cart = cartAfterUpdate;
+                        if (user.cart.length == 0) {
+                          res.writeHead(404, {
+                            'Content-Type': 'application/json',
+                          });
+                          return res.end(
+                            JSON.stringify({
+                              message:
+                                'Cannot update item because your cart is empty',
+                            })
+                          );
+                        } else {
+                          console.log(user.cart);
+                          res.writeHead(200, {
+                            'Content-Type': 'application/json',
+                          });
+                          return res.end(JSON.stringify(user.cart));
+                        }
                       }
                     }
                   }
