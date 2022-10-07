@@ -86,14 +86,14 @@ router.get('/api/brands/:categoryId/products', (req, res) => {
             })
           );
         } else {
-            let filteredProducts = [];
-            filteredProducts.push(
-              products.filter((product) => {
-                return product.categoryId == categoryId;
-              })
-            );
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify(filteredProducts));
+          let filteredProducts = [];
+          filteredProducts.push(
+            products.filter((product) => {
+              return product.categoryId == categoryId;
+            })
+          );
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify(filteredProducts));
         }
       }
     }
@@ -212,9 +212,12 @@ router.post('/api/me/cart', (req, res) => {
                   })
                 );
               } else {
-                let user = users[0];
+                let user = users.find((user) => {
+                  if (user.login.username == accessTokens[0].username) {
+                    return user;
+                  }
+                });
                 user.cart.push(addItemToCart);
-                console.log(user.cart);
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify(user.cart));
               }
@@ -229,7 +232,12 @@ router.post('/api/me/cart', (req, res) => {
 // VIEW items in cart
 router.get('/api/me/cart', (req, res) => {
   let token = url.parse(req.url, true).query.token;
-  let cartItems = users[0].cart;
+  let user = users.find((user) => {
+    if (user.login.username == accessTokens[0].username) {
+      return user;
+    }
+  });
+  let cartItems = user.cart;
   if (isTokenValid(token) == false) {
     res.writeHead(401, { 'Content-Type': 'application/json' });
     return res.end(
@@ -300,7 +308,11 @@ router.delete('/api/me/cart/:id', (req, res) => {
               })
             );
           } else {
-            let user = users[0];
+            let user = users.find((user) => {
+              if (user.login.username == accessTokens[0].username) {
+                return user;
+              }
+            });
             let cartItems = user.cart;
             if (cartItems.length == 0) {
               res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -371,7 +383,11 @@ router.post('/api/me/cart/:id', (req, res) => {
               })
             );
           } else {
-            let user = users[0];
+            let user = users.find((user) => {
+              if (user.login.username == accessTokens[0].username) {
+                return user;
+              }
+            });
             if (req.body.quantity == undefined || req.body.quantity == '') {
               res.writeHead(400, { 'Content-Type': 'application/json' });
               return res.end(

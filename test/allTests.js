@@ -319,7 +319,7 @@ describe('/POST cart item', () => {
 	});
 });
 
-//executing a second test in order to test the functionality of deleting an item and updating an item's quantity
+//executing a second test for the purpose of testing the functionality of deleting an item and updating an item's quantity
 describe('/POST cart item', () => {
 	it('should ADD new item to the cart', (done) => {
 		let cartItem = {
@@ -391,11 +391,10 @@ describe('/UPDATE quantity by id', () => {
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.an('array');
-				// res.body.length.should.be.eql(1);
-				// res.body[0].should.have.property('id');
-				// res.body[0].should.have.property('quantity');
-				// res.body[0].id.should.be.a('string');
-				// res.body[0].quantity.should.be.a('number');
+				res.body[0].should.have.property('id');
+				res.body[0].should.have.property('quantity');
+				res.body[0].id.should.be.a('string');
+				res.body[0].quantity.should.be.a('number');
 				done();
 			});
 	});
