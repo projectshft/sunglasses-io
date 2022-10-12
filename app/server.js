@@ -20,7 +20,7 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000
 const router = Router();
 router.use(bodyParser.json());
 
-const server = http.createServer(function (request, response) {
+const server = http.createServer(function (req, res) {
   res.writeHead(200);
   router(req, res, finalHandler(req, res));
 })
@@ -32,8 +32,7 @@ server.listen(PORT, err => {
   products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"))
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
-  });
-
+})
 
 router.get("/app/brands", (request, response) => {
   if (!brands) {
@@ -91,7 +90,7 @@ router.get("/app/cart", (request, response) => {
 router.post("/app/cart", (request, response) => {
 // is this correct ? 
 	const updatedCart = Cart.addCart(request.body)
-  
+
 	response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(updatedCart));
 });
@@ -155,7 +154,6 @@ if (request.body.username && request.body.password) {
 }
 });
 
-// Helper method to process access token
 var getValidTokenFromRequest = function(request) {
   var parsedUrl = require('url').parse(request.url, true);
   if (parsedUrl.query.accessToken) {

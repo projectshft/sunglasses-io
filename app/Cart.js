@@ -1,5 +1,5 @@
 let cart = [];
-let currentId = 1;
+let currentQuantity = 1;
 
 class Cart {
   constructor(params) {
@@ -7,10 +7,10 @@ class Cart {
   }
 
   static addCart(newProduct) {
-    newCart.id = currentId;
-    currentId++;
-    cart.push(newCart)
-    return newCart;
+    newProduct.quantity = currentQuantity;
+    currentQuantity++;
+    cart.push(newProduct)
+    return newProduct;
   }
 
   static removeAll() {
