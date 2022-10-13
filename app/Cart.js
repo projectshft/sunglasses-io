@@ -37,6 +37,6 @@ class Cart {
   }
 } 
 
-//Exports the Cart for use elsewhere.
+
 module.exports = Cart;
   

@@ -5,6 +5,7 @@ const queryString = require('querystring');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
+// const urlParser = require('url');
 
 const Cart = require('./Cart')
 
@@ -12,7 +13,6 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
-const newAccessToken = uid(16);
 let accessTokens = [];
 
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000
@@ -20,19 +20,27 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000
 const router = Router();
 router.use(bodyParser.json());
 
+const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
+
 const server = http.createServer(function (req, res) {
-  res.writeHead(200);
-  router(req, res, finalHandler(req, res));
+  if (req.method === 'OPTIONS'){
+    res.writeHead(200, CORS_HEADERS);
+    return res.end();
+  }
+  else {
+    res.writeHead(200);
+  };
+  router(req, res, finalHandler(req, res))
 })
 
 server.listen(PORT, err => {
   if (err) throw err;
   console.log(`server running on port ${PORT}`);
-
   products = JSON.parse(fs.readFileSync("initial-data/products.json","utf-8"))
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json","utf-8"));
   users = JSON.parse(fs.readFileSync("initial-data/users.json","utf-8"));
 })
+
 
 router.get("/app/brands", (request, response) => {
   if (!brands) {
@@ -44,26 +52,29 @@ router.get("/app/brands", (request, response) => {
 });
 
 router.get("/app/products", (request, response) => {
-  const parsedUrl = url.parse(request.originalUrl);
-  const { query, sort } = querystring.parse(parsedUrl.query);
-  let productsToReturn = [];
-  if (query !== undefined) {
-    productsToReturn = products.filter(product =>
-      product.name.includes(query)
-    );
+  // const parsedUrl = url.parse(request.originalUrl);
+  // const { query } = querystring.parse(parsedUrl.query);
+  // let productsToReturn = [];
+  // if (query !== undefined) {
+  //   productsToReturn = products.filter(product =>
+  //     product.name.toLowerCase().includes(query)
+  //   );
 
-    if (!productsToReturn) {
-      response.writeHead(404, "There aren't any products to return");
-      return response.end();
-    }
-  } else {
-    productsToReturn = products;
-  }
-  if (sort !== undefined) {
-    productsToReturn.sort((a, b) => a[sort] - b[sort]);
+  //   if (!productsToReturn) {
+  //     response.writeHead(404, "There aren't any products to return");
+  //     return response.end();
+  //   }
+  // } else {
+  //   productsToReturn = products;
+  // }
+  // response.writeHead(200, { "Content-Type": "application/json" });
+  // return response.end(JSON.stringify(productsToReturn));
+  if (!products) {
+    response.writeHead(404, "No products found");
+    return response.end();
   }
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(productsToReturn));
+  return response.end(JSON.stringify(products));
 });
 
 router.get('/app/brands/:id/products', (request, response) => {
@@ -75,50 +86,11 @@ router.get('/app/brands/:id/products', (request, response) => {
   }
   response.writeHead(200, { "Content-Type": "application/json" });
   const relatedProducts = products.filter(
-    product => product.categoryId === id
+    product => product.categoryId == id
   );
   return response.end(JSON.stringify(relatedProducts));
 
 })
-
-router.get("/app/cart", (request, response) => {
-// is this correct ? 
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(Cart.getAll()));
-});
-
-router.post("/app/cart", (request, response) => {
-// is this correct ? 
-	const updatedCart = Cart.addCart(request.body)
-
-	response.writeHead(200, { "Content-Type": "application/json" });
-	return response.end(JSON.stringify(updatedCart));
-});
-
-router.delete("/app/cart/:productId", (request, response) => {
-  const { productId } = request.params;
-  const product = cart.find(product => product.id == productId)
-  if (!product) {
-    response.writeHead(404, "That product doesn't exist");
-    return response.end();
-  }
-  const cartToReturn=Cart.remove(product.id)
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(cartToReturn));
-});
-
-router.put("/app/cart/:productId", (request, response) => {
-  const foundProduct = Cart.getProduct(request.params.productId)
-// how could I get access to a new quantity that user is supposed to input? is it in request.body ? 
-  const quantityToChange= request.body
-  if (!foundProduct) {
-    response.writeHead(404, "That product doesn't exist");
-    return response.end();
-  }
-  const updatedCart=Cart.updateCart(foundProduct,quantityToChange)
-  response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(updatedCart));
-});
 
 router.post('/api/login', (request,response)=>{
 if (request.body.username && request.body.password) {
@@ -147,7 +119,6 @@ if (request.body.username && request.body.password) {
     response.writeHead(401, "Invalid username or password");
     return response.end();
   }
-
 } else {
   response.writeHead(400, "Incorrectly formatted response");
   return response.end();
@@ -160,6 +131,7 @@ var getValidTokenFromRequest = function(request) {
     let currentAccessToken = accessTokens.find((accessToken) => {
       return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
     });
+
     if (currentAccessToken) {
       return currentAccessToken;
     } else {
@@ -170,5 +142,93 @@ var getValidTokenFromRequest = function(request) {
   }
 };
 
+router.get('/app/me/cart', function(request, response){
+  const currentAccessToken = getValidTokenFromRequest(request)
+  if(currentAccessToken){
+      const currentUser = users.find(
+        (user) => user.login.username === currentAccessToken.username
+      );
+    response.writeHead(200, {'Content-Type':'application/json'})
+    return response.end(JSON.stringify(currentUser.cart))
+  } else {
+    response.writeHead(401, "You need to log in to see this page")
+    return response.end()
+  }
+})
 
-module.exports = server;
+router.post("/app/me/cart", (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request)
+  if(currentAccessToken){
+    const { productId } = request.body
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+    const productToAdd = products.find(
+      (product) => product.id === productId
+    );
+    const checkIfProductIsInCart=currentUser.cart.find(product=>product.id===productId)
+    if(!checkIfProductIsInCart){
+        currentUser.cart.push({
+        product: productToAdd,
+        quantity: 1,
+        id: productToAdd.id
+      })}
+    else {
+      currentUser.cart.checkIfProductIsInCart.quantity++
+    }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(currentUser.cart));
+  }
+  else {
+    response.writeHead(401, "You need to log in to see this page")
+    return response.end()
+  }
+});
+
+router.delete("/app/me/cart/:productId", (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request)
+  if(currentAccessToken){
+    const { productId } = request.params;
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+    const productToDelete = currentUser.cart.find(product => product.id === productId)
+    if (!productToDelete) {
+      response.writeHead(404, "That product doesn't exist");
+      return response.end();
+    }
+    const cartToReturn=currentUser.cart.filter(product=>product.id !== productToDelete.id)
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(cartToReturn));
+  }
+  else {
+    response.writeHead(401, "You need to log in to see this page")
+    return response.end()
+  }
+});
+
+router.post("/app/me/cart/:productId", (request, response) => {
+  const currentAccessToken = getValidTokenFromRequest(request)
+  if(currentAccessToken){
+    const { productId } = request.params;
+    const currentUser = users.find(
+      (user) => user.login.username === currentAccessToken.username
+    );
+    const productToUpdate = currentUser.cart.find(product => product.id === productId)
+    if (!productToUpdate) {
+      response.writeHead(404, "That product doesn't exist for being updated");
+      return response.end();
+    }
+    productToUpdate.quantity = request.body.quantity;
+    const cartToReturn=currentUser.cart
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(cartToReturn));
+  }
+  else {
+    response.writeHead(401, "You need to log in to see this page")
+    return response.end()
+  }
+});
+
+module.exports = server
