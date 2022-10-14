@@ -90,12 +90,12 @@ paths:
       operationId: loginUser
       parameters:
         - name: username
-          in: query
+          in: body
           description: The user name for login
           required: true
           type: string
         - name: password
-          in: query
+          in: body
           description: The password for login in clear text
           required: true
           type: string
@@ -140,6 +140,10 @@ paths:
       responses:
         "200":
           description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
         "400":
           description: Invalid input
         "401":
@@ -183,8 +187,8 @@ paths:
           required: true
           type: string
         - name: quantity
-          in: query
-          description: Updated quantity
+          in: body
+          description: New quantity to update
           required: true
           type: string
       responses:
@@ -198,6 +202,7 @@ paths:
           description: That product doesn't exist for being updated
         "401":
           description: You need to log in to see this page
+
 definitions:
   Brands:
     type: object
