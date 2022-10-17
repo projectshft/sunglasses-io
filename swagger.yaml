@@ -1,0 +1,306 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API for sunglasses app
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - http
+basePath: /app
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Available brands for sunglasses
+      description: |
+        The Brands endpoint allows you to get all the brands of sunglasses
+      operationId: getBrands
+      responses:
+        "200":
+          description: An array of appropriate brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: That brands do not exist
+
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      operationId: getBrandProduct
+      description: |
+        This endpoint allows you to get all sunglasess of the brand based on its id
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      responses:
+        "200":
+          description: An array of approp branded sunglasses
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: No products of this brand found
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Sunglasses
+      operationId: getProducts
+      description: |
+        This endpoint allows you to get all products available for sale
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: No products found
+
+  /login:
+    post:
+      tags:
+        - User
+      summary: Logs user into the system
+      description: This endpoint logs the user in
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: body
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: body
+          description: The password for login in clear text
+          required: true
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          headers:
+            X-Expires-After:
+              description: date in UTC when token expires
+              type: string
+              format: date-time
+        "401":
+          description: Invalid username/password supplied
+
+  /me/cart:
+    get:
+      tags:
+        - Cart
+      summary: Cart of user
+      operationId: getCart
+      description: Cart of an authorised user
+      responses:
+        "200":
+          description: Acceptance is successful
+        "401":
+          description: You need to log in to see this page
+
+    post:
+      tags:
+        - Cart
+      operationId: addToCart
+      summary: Add to cart
+      description: |
+        Add sunglasses to a cart
+      parameters:
+        - name: productId
+          in: body
+          description: The cart of products of a user
+          required: true
+          schema:
+            $ref: "#/definitions/Product"
+      responses:
+        "200":
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+        "400":
+          description: Invalid input
+        "401":
+          description: You need to log in to see this page
+
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - Cart
+      summary: Delete an item from cart
+      operationId: deleteProductId
+      description: This endpoint is for deleting a product based on its id
+      parameters:
+        - name: productId
+          in: path
+          description: The product for being delete
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: That product doesn't exist
+        "401":
+          description: You need to log in to see this page
+    post:
+      tags:
+        - Cart
+      summary: Change the quantity of products in a cart
+      operationId: changeQuantity
+      description: |
+        Change the quantity of product
+      parameters:
+        - name: productId
+          in: path
+          description: The product for being update quantity
+          required: true
+          type: string
+        - name: quantity
+          in: body
+          description: New quantity to update
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Acceptance is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: That product doesn't exist for being updated
+        "401":
+          description: You need to log in to see this page
+
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand
+      name:
+        type: string
+        description: Name of the brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier given to the product
+      categoryId:
+        type: integer
+        description: Identifier for the brand of the product
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: Description of glasses
+      price:
+        type: number
+        description: The price of the sunglasses
+      imageURLs:
+        type: string
+        description: The URLs for the images representing the product
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: gender of the user
+      cart:
+        type: array
+        description: cart of the user
+        items:
+          $ref: "#/definitions/Cart"
+      name-title:
+        type: string
+        description: title for user.
+      first_name:
+        type: string
+        description: First name of the user.
+      last_name:
+        type: string
+        description: Last name of the user.
+      location:
+        type: object
+        description: Location of the user.
+      email:
+        type: string
+        description: Email address of the user
+      login:
+        type: object
+        description: login info of the user
+      dob:
+        type: string
+        description: date of birth of the user
+      registered:
+        type: string
+        description: date of registartion of the user
+      phone:
+        type: string
+        description: phone number of the user
+      cell:
+        type: string
+        description: phone number of the user
+      picture:
+        type: string
+        description: URL of pics of the user
+      nat:
+        type: string
+        description: nationality of the user
+  Cart:
+    type: array
+    properties:
+      product:
+        type: object
+        description: The product in the cart
+      quantity:
+        type: integer
+        format: int32
+        description: Number of the product.
+    items:
+      $ref: "#/definitions/Product"
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
