@@ -126,6 +126,7 @@ router.get('/app/me/cart', (request, response) => {
   return response.end();
 });
 
+// POST a product to cart of logged in user
 router.post('/app/me/cart', (request, response) => {
   const currentToken = getToken(request);
   if (currentToken) {
@@ -214,7 +215,7 @@ const getToken = function (request) {
 };
 
 const getProductFromStorage=(productId) =>
-products.find((product) => product.id == productId)
+  products.find((product) => product.id == productId)
 
 const getProductFromCart = (productId) =>
   currentUser.cart.find((product) => product.id == productId);
@@ -223,5 +224,10 @@ const getUser = (currentToken) =>
   (currentUser = users.find(
     (user) => user.login.username == currentToken.username
   ));
+
+const resetUsers = () => {
+  users = JSON.parse(fs.readFileSync('initial-data/users.json', 'utf-8'));
+}
+server.resetUsers = resetUsers
 
 module.exports = server;
