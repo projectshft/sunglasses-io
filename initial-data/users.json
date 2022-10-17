@@ -1,12 +1,7 @@
 [
   {
     "gender": "female",
-    "cart": [
-      {
-        "product": {},
-        "quantity": 0
-      }
-    ],
+    "cart": [],
     "name": {
       "title": "mrs",
       "first": "susanna",
@@ -42,8 +37,30 @@
     "gender": "male",
     "cart": [
       {
-        "product": {},
-        "quantity": 0
+        "quantity": 1,
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price": 150,
+        "imageUrls": [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+        ]
+      },
+      {
+        "quantity": 1,
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price": 100,
+        "imageUrls": [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+        ]
       }
     ],
     "name": {
@@ -81,8 +98,16 @@
     "gender": "female",
     "cart": [
       {
-        "product": {},
-        "quantity": 0
+        "id": "11",
+        "categoryId": "5",
+        "name": "Habanero",
+        "description": "The spiciest glasses in the world",
+        "price": 153,
+        "imageUrls": [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+        ]
       }
     ],
     "name": {
