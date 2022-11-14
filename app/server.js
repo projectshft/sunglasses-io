@@ -1,34 +1,36 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalHandler');
-var queryString = require('queryString');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
-var { expect } = require('chai');
+// Import all built-in node modules and methods, as well as installed modules 
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalHandler');
+const queryString = require('queryString');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const uid = require('rand-token').uid;
+const { expect } = require('chai');
 
-// // var myRouter = Router()
-// // myRouter.use(bodyParser.json())
-
+// Establish port 
+// const PORT = process.env.PORT || 3001; ????
  const hostname = 'localhost';
- const port = 3001;
+ const PORT = 3001;
 
- let person = JSON.stringify({
-  name: 'Jill',
-  title: 'Software Engineer',
-  graduated: false,
-});
+ // Establish state-holding variables
 
-http.createServer(function(req,res) {
-  res.setHeader('Content-type', 'application/json')
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.writeHead(200)
-  res.end(person);
-  })
-  .listen(port, hostname, function() {
-    console.log('Server running at http://' + hostname + ':' + port + '/');
+
+ // Set up router 
+ const myRouter = Router()
+ myRouter.use(bodyParser.json())
+
+ // Establish server with finalHandler (***replaces res.end?) ???
+  const server = http.createServer(function(req,res) {
+    res.setHeader('Content-type', 'application/json')
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.writeHead(200)
+    myRouter(req, res, finalHandler(req, res));
   });
 
+server.listen(PORT, hostname, err => {
+    if (err) throw err;
+    console.log(`'Server running at http://${hostname}:${PORT}/'`);
+  });
 
-
-
+  
