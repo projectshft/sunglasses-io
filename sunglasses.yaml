@@ -4,10 +4,9 @@ info:
   description: "API for Sunglasses store platforms"
   version: "1.0.0"
   
-host: "sunglasses.swagger.io"
+host: "sunglasses.swagger-io"
 basePath: "/v1"
 schemes:
-- "https"
 - "http"
 
 paths:

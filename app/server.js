@@ -6,7 +6,6 @@ const queryString = require('queryString');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
-const { expect } = require('chai');
 
 // Establish port 
 // const PORT = process.env.PORT || 3001; ????
