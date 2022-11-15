@@ -32,4 +32,4 @@ server.listen(PORT, hostname, err => {
     console.log(`'Server running at http://${hostname}:${PORT}/'`);
   });
 
-  
+module.exports = server;
