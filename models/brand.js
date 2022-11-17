@@ -1,6 +1,6 @@
 let brands = [];
 let productByBrand = [];
-let currentBrandId = 1;
+let brandId = 1;
 let categoryId = 1;
 
 
