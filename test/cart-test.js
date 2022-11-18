@@ -9,8 +9,8 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe('/POST cart', () => {
-  it('should POST an item to cart', done => {
-    let item = {
+  it('should POST an item to cart', async function () {
+    let cart = {
       itemId: 1,
       name: 'QDogs Glasses',
       quantity: 1,
@@ -32,5 +32,57 @@ describe('/POST cart', () => {
     });
   });
 
+  describe('/DELETE/:itemId cart', () => {
+    it('should DELETE a SINGLE item from the cart', async function () {
+      chai
+        .request(server)
+        .get('/cart')
+        .end((err, res) => {
+          chai.request(server)
+            .delete('/item/'+res.body[0].itemId)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.should.be.json;
+              res.body.should.be.a('object');
+              res.body.should.have.property('REMOVED');
+              res.body.REMOVED.should.be.a('object');
+              res.body.REMOVED.should.have.property('productName');
+              res.body.REMOVED.should.have.property('itemId');
+              res.body.REMOVED.shouldhave.property('itemQuantity');
+              done();
+            })
+
+        })
+        
+         
+          });
+      });
+
+      describe('/PUT/:itemId cart', () => {
+      it('should update a SINGLE item in the cart', async function () {
+        chai.request(server)
+          .get('/cart')
+          .end(function(err, res){
+            chai.request(server)
+              .put('/cart/'+res.body[0].itemId)
+              .send({'itemQuantity': 1})
+              .end(function(err, res){
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.be.a('object');
+                res.body.should.have.property('UPDATED');
+                res.body.UPDATED.should.be.a('object');
+                res.body.UPDATED.should.have.property('productName');
+                res.body.UPDATED.should.have.property('itemId');
+                res.body.UPDATED.itemQuantity.should.equal('1');
+                done();
+            });
+          });
+      });
+    });
   
- 
+
+
+
+
+   
