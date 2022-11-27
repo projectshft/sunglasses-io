@@ -9,22 +9,22 @@ var uid = require('rand-token').uid;
 let brands = []
 let products = []
 let users = []
-let user = {}
+
 
 const router = Router();
 router.use(bodyParser.json());
 
-const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication", "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE"};
+// const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication", "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE"};
 
 const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449","1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
 
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer((req, res) =>  {
-  if(req.method === 'OPTIONS') {
-    res.writeHead(200, CORS_HEADERS)
-    return res.end()
-  }
+  // if(req.method === 'OPTIONS') {
+  //   res.writeHead(200, CORS_HEADERS)
+  //   return res.end()
+  // }
 
   // if(!VALID_API_KEYS.includes(req.headers['x-authentication'])) {
   //   res.writeHead(401, "You need a valid API key", CORS_HEADERS)
@@ -39,11 +39,11 @@ server.listen(PORT, (err) => {
   if (err) throw err;
   console.log(`server running on port: ${PORT}`)
 
-  brands = JSON.parse(fs.readFileSync('../initial-data/brands.json'))
+  brands = JSON.parse(fs.readFileSync('./initial-data/brands.json'))
 
-  products = JSON.parse(fs.readFileSync('../initial-data/products.json'))
+  products = JSON.parse(fs.readFileSync('./initial-data/products.json'))
 
-  users = JSON.parse(fs.readFileSync('../initial-data/users.json'))
+  users = JSON.parse(fs.readFileSync('./initial-data/users.json'))
 
   user = users[0];
 });
@@ -54,7 +54,7 @@ router.get('/v1/brands', (req, res) => {
     res.writeHead(404, "No Brands Found")
     return res.end();
   }
-  res.writeHead(200, Object.assign(CORS_HEADERS, {"Content-Type": "application/json"}))
+  res.writeHead(200, {"Content-Type": "application/json"})
   return res.end(JSON.stringify(brands))
 })
 
@@ -76,7 +76,7 @@ router.get('/v1/brands/:brandId/products', (req, res) => {
     res.writeHead(404, "Brand does not exist")
     return res.end();
   }
-  res.writeHead(200, Object.assign(CORS_HEADERS, {"Content-Type": "application/json"}))
+  res.writeHead(200, {"Content-Type": "application/json"})
   const relatedProducts = products.filter(product => product.brandId === brandId)
   console.log(brandId)
   return res.end(JSON.stringify(relatedProducts))
@@ -86,21 +86,40 @@ router.get('/v1/brands/:brandId/products', (req, res) => {
 router.post('/v1/cart/:productId', (req, res) => {
   const { productId } = req.params;
   const product = products.find(product => product.id === productId)
-  res.writeHead(200, Object.assign(CORS_HEADERS, {"Content-Type": "application/json"}))
+  res.writeHead(200, {"Content-Type": "application/json"})
   user.cart.push(product);
   return res.end()
 })
 
 //Get All Products in Cart
 router.get('/v1/cart', (req, res) => {
-  res.writeHead(200, Object.assign(CORS_HEADERS, {"Content-Type": "application/json"}))
+  res.writeHead(200,  {"Content-Type": "application/json"})
   return res.end(JSON.stringify(user.cart))
 })
 
-router.delete('v1/cart/clear', (req, res) => {
-  res.writeHead(200, Object.assign(CORS_HEADERS, {"Content-Type": "application/json"}))
+router.delete('/v1/cart/clear', (req, res) => {
+  res.writeHead(200,  {"Content-Type": "application/json"}  )
   user.cart.length(0)
   return res.end();
+})
+
+router.post('/v1/login', (req, res) => {
+  // res.writeHead(200, Object.assign(CORS_HEADERS, {'Content-Type': 'application/json'}))
+  console.log(req.body.username)
+  if(!req.body.username || !req.body.password) {
+    res.writeHead(400, "Incorrectly formatted response")
+    return res.end()
+  }
+  let user = users.find((user) => {
+    return user.login.username === req.body.username && user.login.password === req.body.password
+  })
+  if(!user) {
+    res.writeHead(400, 'Username of Password incorrect or not found');
+    return res.end()
+  }
+  res.writeHead(200)
+  return res.end();
+
 })
 
 module.exports = server;
