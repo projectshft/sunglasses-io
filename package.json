@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
     "cors": "^2.8.5",
     "finalhandler": "^1.2.0",
     "http": "latest",
