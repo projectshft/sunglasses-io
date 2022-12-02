@@ -50,46 +50,41 @@ console.log(`Server is listening on ${PORT}`);
 
 myRouter.get('/v1/brands', (request, response) => {
   const query = url.parse(request.url, true).query;
-    
-  if(!query.dname) {
-   const brandsToReturn = Brand.getBrands();
-   response.writeHead(200, { 'Content-Type': 'application/json'});
-   return response.end(JSON.stringify(brandsToReturn));
-  }
+     
+  // instead of an error code and message, all brands
+  // are returned to show the user what the sunglass shop carries 
+  // instead of telling them there is no such brand.  
+  if(!query.nameOfBrand) {
+    const brandsToReturn = Brand.getBrands();
+    response.writeHead(200, { 'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(brandsToReturn));
+  } 
+});
 
 // Public route - all users of the API can access products by brand name 
-// myRouter.get("brands/:id/products", (request, response) => {
-//   let productsByBrand = [
-//     {
-//       id: "2",
-//       brand: "Ray Ban",
-//       name: "Wayfarers",
-//       description: "The best glasses in the world",
-//       price: 100,
-//       "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-//     },
-//   ]
-//   let brands  = brands.name
-
-//   const parsedUrl = url.parse(request.originalUrl);
-//   const { query } = queryString.parse(parsedUrl.query);
- 
-//   const brandId = brands.id;
-//   const productId = products.categoryId
+// myRouter.get("v1/brands/:id/products", (request, response) => {
+//   const query = url.parse(request.url, true).query;
   
-//   // start with error if (!productsByBrand) { 404, 'There are no products with that brand name}
-//   if (brandId === productId) {
-//     productsByBrand = products.filter(product => product.id && product.categoryId(brand));
-//     productsByBrand.push(Product.getProductsByBrand(brand));
+//   if (!query.brand) {
+//     response.writeHead
+//     const productsOfBrand = Brand.getProductsByBrand();
+//     console.log(productsOfBrand);
+//     const getProductsByBrand
+//     response.writeHead(200, { 'Content-Type': 'application/json' });
+//     return response.end(JSON.stringify(productsOfBrand));
+// //   }
+// })
+
+//   if(!query.productBrand) {
+//     const productsToReturn = Brand.getProductsByBrand()
 //   }
-//   if (query !== undefined) {
-    
 //   // }
 // }; 
  
 // // Public route - all users of the API can access products 
 // myRouter.get('/products', function (request, response) {
-//   products.categoryId = brands.name
+//   const query = url.parse(request.url, true).query;
+
 //   const parsedUrl = url.parse(request.originalUrl);
 //   const { query, sort } = queryString.parse(parsedUrl.query);
 //   let productsToReturn = [];
@@ -267,5 +262,3 @@ myRouter.get('/v1/brands', (request, response) => {
 //   }
 //   })
 // })
-
-

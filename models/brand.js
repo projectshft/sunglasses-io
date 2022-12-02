@@ -1,51 +1,30 @@
-const brands = [
-  
-    {
-    "id": "1",
-    "name" : "Oakley"
-},
-{
-    "id": "2",
-    "name" : "Ray Ban"
-},
-{
-    "id": "3",
-    "name" : "Levi's"
-},
-{
-    "id": "4",
-    "name" : "DKNY"
-},
-{
-    "id": "5",
-    "name" : "Burberry"
-}
+let fs = require('fs');
 
+fs.readFile('app/brands.json', 'utf8', function (error, data) {
+  if (error) throw error;
+  brands = JSON.parse(data);
+});
 
-];
-let productByBrand = [];
-let brandId = 1;
-let brandName = 'Oakley';
-let categoryId = 1;
+fs.readFile('app/products.json', 'utf8', function (error, data) {
+  if (error) throw error;
+  products = JSON.parse(data);
+});
 
+let brands = null;
 
 class Brand {
-  constructor(params) {
-    Object.assign(this, params);
-  }
+constructor(params) {
+  Object.assign(this, params);
+}
 
-  static getBrands() {
-    return brands.map((brand=>brand.name))
-  }
+static getBrands() {
+  return brands.map((brand=>brand.name))
+}
 
-  // static getAll() {
-  //   return brands
-  // }
-
-  static getProductsByBrand(categoryId) {
-    return brands.find((brand=>brand.id === categoryId))
-  }
+static getProductsByBrand(categoryId) {
+  return brands.find((brand=>brand.id=== categoryId))
+  
+}
 };
 
 module.exports = Brand;
-  
