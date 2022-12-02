@@ -32,6 +32,6 @@ class Cart {
     Object.assign(item, updatedQuantity);
     return item;
   } 
-}
+};
 
 module.exports = Cart;

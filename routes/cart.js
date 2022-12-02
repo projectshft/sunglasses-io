@@ -11,11 +11,11 @@ function addToCart(req, res) {
   res.send(newItem)
 }
 
-// function getCart (req, res) {
-//   res.send(Cart.getCart(req.params.id));
-// };
+function getCart (req, res) {
+  res.send(Cart.getCart(req.params.id));
+};
 
-function removeFromCart(req, res) {
+function deleteFromCart(req, res) {
   Cart.removeFromCart(req.params.id)
   res.send(true);
 };
@@ -24,4 +24,4 @@ function updateCart(req, res) {
   res.send(Cart.updateCart(req.body));
 };
 
-module.exports = { getCart, addToCart, deleteFromCart, updateCart };
+module.exports = Cart;
