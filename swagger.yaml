@@ -1,0 +1,235 @@
+swagger: "2.0"
+info:
+  title: Sunglasses Store API
+  description: Sunglasses Store Server Side Logic and Data
+  version: 1.0.0
+host: localhost:8080
+basePath: /v2
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  basicAuth:
+    type: basic
+
+paths:
+  /api/brands:
+    get:
+      summary: brands
+      tags:
+        - brands
+      description: returns a list of brands available for sale
+      produces:
+        - application/json
+      responses:
+        200:
+          description: brands available for sale
+          schema:
+            type: array
+            items:
+              type: object
+        404:
+          description: page is not found
+
+  /api/brands/{id}/products:
+    get:
+      summary: chosen brand products
+      description: returns products associated with brand id that was entered
+      tags:
+        - brand specific products
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: brand id
+      produces:
+        - application/json
+      responses:
+        200:
+          description: brand specific products
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                schema:
+                  $ref: "#/definitions/Product"
+        404:
+          description: brand with specified id was not found
+  /api/products:
+    get:
+      summary: products
+      tags:
+        - products
+      description: returns a list of products available for sale
+      produces:
+        - application/json
+      responses:
+        200:
+          description: entire store inventory
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: inventory not found
+        default:
+          description: unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /api/login:
+    post:
+      security:
+        - basicAuth: []
+      summary: customer login
+      tags:
+        - customer login
+      parameters:
+        - in: body
+          required: true
+          name: username
+          description: user name
+          schema:
+            type: string
+        - in: body
+          required: true
+          name: password
+          description: user password
+          schema:
+            type: string
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+        401:
+          description: incorrect username or password
+
+  /api/me/cart:
+    post:
+      tags:
+        - cart
+      summary: add items to cart
+      security:
+        - basicAuth: []
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          required: true
+          name: product
+          description: product added to cart
+          schema:
+            $ref: "#/definitions/Product"
+      responses:
+        201:
+          description: item added to cart
+        401:
+          description: user is unauthorized
+  /api/me/getcart:
+    get:
+      tags:
+        - cart
+      summary: return contents of the cart
+      security:
+        - basicAuth: []
+      produces:
+        - application/json
+      responses:
+        200:
+          description: list of items in the cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        401:
+          description: user is unauthorized
+
+  /api/me/cart/:productId/delete:
+    delete:
+      tags:
+        - cart
+      summary: delete selected item from the cart
+      security:
+        - basicAuth: []
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          required: true
+          name: product
+          description: product that must be deleted
+          schema:
+            $ref: "#/definitions/Product"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: item has been deleted
+        401:
+          description: user is unauthorized
+        404:
+          description: item is not found
+  /api/me/cart/:productId:
+    post:
+      tags:
+        - cart
+      summary: change quantity of product in cart
+      security:
+        - basicAuth: []
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          required: true
+          name: product
+          description: product added to cart
+          schema:
+            $ref: "#/definitions/Product"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: item quantity has been successfully updated
+        401:
+          description: user is unauthorized
+        404:
+          description: item is not found
+definitions:
+  Error:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+  Product:
+    type: object
+    required:
+      - brand
+      - model
+      - productId
+      - quantity
+      - price
+    properties:
+      brand:
+        type: string
+      model:
+        type: string
+      productId:
+        type: string
+      quantity:
+        type: number
+      price:
+        type: number
