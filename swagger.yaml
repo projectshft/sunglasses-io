@@ -1,0 +1,399 @@
+swagger: "2.0"
+info:
+  title: Sunglasses Store
+  description: An API that allows you to manage a store that sells sunglasses
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: get sunglasses brands
+      description: |
+        Allows you to get all brands buyable in our store. It returns an array of brand objects containing the 'id' and the 'name'.
+      tags:
+        - Products
+      parameters:
+        - name: query
+          in: query
+          description: Search for brands
+          required: false
+          type: string
+        - name: alphabetical
+          in: query
+          description: |
+            Sort into alphabetical order.<br><br>**az** (A-Z) and **za** (Z-A)
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - az
+              - za
+        - name: sort
+          in: query
+          description: |
+            Sort by number of products: <br>
+            - **mostProducts** sorts brands in order from the most amount of products _down_ to the least. 
+            - **leastProducts** sorts brands in order from least amount of products _up_ to the most. <br><br>
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - mostProducts
+              - leastProducts
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/brand"
+        "400":
+          description: Malformed request
+        "404":
+          description: Search query does not match any brands
+  /brands/:id/products:
+    get:
+      summary: Get products of certain brand
+      description: |
+        Returns an array of all the products corresponding to a brand id. Products come in the form of an object with a name, description, price, and images.
+      tags:
+        - Products
+      parameters:
+        - name: brand id
+          in: path
+          description: The id of the brand of products you want.
+          required: true
+          type: string
+        - name: query
+          in: query
+          description: Find specific products of a certain brand
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: Sort by price
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - lowToHigh
+              - highToLow
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/product"
+        "400":
+          description: Malformed request
+        "404":
+          description: Search query does not match an products of specified brand
+  /products:
+    get:
+      summary: Get all products
+      description: |
+        Returns an array of all the products currently sold at the store. Sort by price and get products in order from least expensive to most, and most expensive to least. itemLimit limits the number of products returned.
+      tags:
+        - Products
+      parameters:
+        - name: sort
+          in: query
+          description: sort by price
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - lowToHigh
+              - highToLow
+        - name: itemLimit
+          in: query
+          description: limit the number of products returned
+          required: false
+          type: integer
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/product"
+        "400":
+          description: Malformed request
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: login existing user
+      description: |
+        Expects a username and password of a user that already exists in the database. If valid, will return an access token. Access token is necessesary to use the cart.
+      tags:
+        - Login
+      parameters:
+        - in: body
+          name: login
+          description: username and password of user attempting to login
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Acess token
+          schema:
+            type: string
+        "400":
+          description: Malformed request
+        "404":
+          description: Incorrect username or password
+
+  /me/cart:
+    get:
+      summary: get items in cart
+      description: |
+        Returns an array of items that are in that users cart. Each item will include item information and the qunatity of that item.
+      tags:
+        - Cart
+      parameters:
+        - $ref: "#/parameters/accessToken"
+      responses:
+        "200":
+          description: A list of users
+          schema:
+            $ref: "#/definitions/cart"
+        "401":
+          description: Must be logged in to access the cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add to cart
+      description: |
+        Add products to a user's cart
+      tags:
+        - Cart
+  /me/cart/{productId}/:
+    delete:
+      summary: delete cart item
+      description: |
+        Delete an item from the user's cart based on the product id
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: productId
+          description: id of the product to delete.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Item was successfuly removed from cart.  Returns the deleted item
+          schema:
+            $ref: "#/definitions/product"
+        "404":
+          description: Product does not exist in the cart
+        "401":
+          description: Must be logged in to access the cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Edit cart item
+      description: |
+        Change the quantity of an item in the user's cart
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: productId
+          description: id of the product to delete.
+          required: true
+          type: string
+        - in: query
+          name: quantity
+          description: the updated quantity of that priduct in the user's cart
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Successfully updated quantity of item in cart. Returns the updated item.
+          schema:
+            $ref: "#/definitions/cartProduct"
+        "404":
+          description: Product does not exist in the cart
+        "401":
+          description: Must be logged in to access the cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /articles:
+    get:
+      summary: get articles
+      description: get articles about sunglasses
+      tags:
+        - articles
+      responses:
+        "200":
+          description: Returns an array of articles
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/article"
+    post:
+      summary: post new articles
+      description: Admin level users can post new articles. Admin level is REQUIRED.
+      tags:
+        - articles
+      parameters:
+        - $ref: "#/parameters/postArticle"
+      responses:
+        "200":
+          description: Article successfully uploaded. Returns a copy of the article.
+          schema:
+            $ref: "#/definitions/article"
+        "400":
+          description: Information in body is missing or malformed.
+        "401":
+          description: Must be logged in
+        "403":
+          description: This functionality is only allowed to administrators
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /articles/{articleId}:
+
+parameters:
+  accessToken:
+    in: body
+    name: accessToken
+    description: An access token is required to access the cart
+    required: true
+    schema:
+      type: string
+  postArticle:
+    in: body
+    name: article
+    description: an object representing the article to be submitted
+    required: true
+    schema:
+      type: object
+      properties:
+        accessToken:
+          description: The access token of an admin
+          type: string
+        article:
+          $ref: "#/definitions/article"
+definitions:
+  brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique identifier of the brand
+      name:
+        type: string
+        description: name of the brand
+  product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique identifier for the product
+      categoryId:
+        type: string
+        description: identifies brand of sunglasses
+      name:
+        type: string
+        description: name of product
+      price:
+        type: integer
+        description: price of product
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: url paths to images of the product
+  cart:
+    type: object
+    properties:
+      quantity:
+        description: number of items in the cart
+        type: integer
+      subtotal:
+        description: calcuulated price of all items in car before tax and shipping
+        type: integer
+      products:
+        description: All products in the cart
+        type: array
+        items:
+          $ref: "#/definitions/cartProduct"
+  cartProduct:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique identifier for the product
+      categoryId:
+        type: string
+        description: identifies brand of sunglasses
+      quantity:
+        type: integer
+        description: number of items in cart
+      name:
+        type: string
+        description: name of product
+      price:
+        type: integer
+        description: price of product
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: url paths to images of the product
+  article:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique identifier of article
+      imageUrl:
+        type: string
+        description: url path to the image for the article
+      title:
+        type: string
+        description: title of the article
+      body:
+        type: string
+        description: Body content of the article
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
