@@ -2,18 +2,18 @@
 const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalHandler');
-const queryString = require('queryString');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const url = require('url');
-const Brand = require('../models/brand')
-const Product = require('../models/product')
+// const Brand = require('../models/brand')
+// const Product = require('../models/product')
 
 
 // State holding variables 
 let brands = [];
 let products = [];
+let users = [];
 let cart = [];
 let accessTokens = [];
 let failedLoginAttempts = {};
@@ -49,60 +49,47 @@ console.log(`Server is listening on ${PORT}`);
 });
 
 myRouter.get('/v1/brands', (request, response) => {
-  const query = url.parse(request.url, true).query;
-     
-  // instead of an error code and message, all brands
-  // are returned to show the user what the sunglass shop carries 
-  // instead of telling them there is no such brand.  
-  if(!query.nameOfBrand) {
-    const brandsToReturn = Brand.getBrands();
+  if(!brands) {
+    response.writeHead(404, 'There are no brands to return');
+    return response.end();
+  } else {
     response.writeHead(200, { 'Content-Type': 'application/json'});
-    return response.end(JSON.stringify(brandsToReturn));
-  } 
+    return response.end(JSON.stringify(brands));
+  }
 });
 
-// Public route - all users of the API can access products by brand name 
-// myRouter.get("v1/brands/:id/products", (request, response) => {
-//   const query = url.parse(request.url, true).query;
+myRouter.get('/v1/products', (request, response) => {
+  if(!products) {
+    response.writeHead(404, 'There are no products to return');
+    return response.end();
+  } else {
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(products));
+  }
+});
+
+// GET products by
+myRouter.get('/v1/brands/:id/products', (request, response) => {
+  //console.log(request.body);
+  const { id } = request.params;
+  const brand = brands.find(brand =>brand.id == id);
+  //console.log(brand);
+  const productsByBrand = products.filter(product => product.categoryId == id);
+  //
+  console.log(productsByBrand);
+   
+  if (!brand) {
+    response.writeHead(404, 'No results were found');
+    return response.end();
+  } else if (!productsByBrand) {
+    result.writeHead(404, 'No results were found');
+    return response.end();
+  } else {
+    res.writeHead(200, { 'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(productsByBrand));
+  }
+});
   
-//   if (!query.brand) {
-//     response.writeHead
-//     const productsOfBrand = Brand.getProductsByBrand();
-//     console.log(productsOfBrand);
-//     const getProductsByBrand
-//     response.writeHead(200, { 'Content-Type': 'application/json' });
-//     return response.end(JSON.stringify(productsOfBrand));
-// //   }
-// })
-
-//   if(!query.productBrand) {
-//     const productsToReturn = Brand.getProductsByBrand()
-//   }
-//   // }
-// }; 
- 
-// // Public route - all users of the API can access products 
-// myRouter.get('/products', function (request, response) {
-//   const query = url.parse(request.url, true).query;
-
-//   const parsedUrl = url.parse(request.originalUrl);
-//   const { query, sort } = queryString.parse(parsedUrl.query);
-//   let productsToReturn = [];
-//   if (query !== undefined) {
-//     productsToReturn = products.filter(product => product.name || product.cateoryId || product.price.includes(query));
-//   }
-//     if(!productsToReturn) {
-//       response.writeHead(404, 'There are no products matching the query');
-//       return response.end();
-//     } else {
-//   productsToReturn = products;
-// }
-// if (sort !== undefined) {
-//   productsToReturn.sort((a, b) => a[sort] - b[sort]);
-// }
-// response.writeHead(200, { "Content-Type": "application/json" });
-// return response.end(JSON.stringify(productsToReturn));
-// });
 
 // //  *******START WORK HERE!!!!!*****************AND TEST QUERY FOR ABOVE 
   
