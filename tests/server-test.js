@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-unused-expressions */
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 
@@ -48,16 +50,16 @@ describe('api/brands', () => {
 
       chai
         .request(server)
-        .get(`/api/brands?q=${alphOrder}`)
+        .get(`/api/brands?alphabetical=${alphOrder}`)
         .end((err, res) => {
           res.should.have.status('200');
-          res.should.be.an('array');
+          res.body.should.be.an('array');
           for (let i = 1; i < res.body.length; i++) {
             if (res.body.length === 1) {
               break;
             }
 
-            if (res.body.length === 1) {
+            if (res.body.length === 0) {
               console.log('No brands to display');
               break;
             }
@@ -66,9 +68,9 @@ describe('api/brands', () => {
             const prevBrand = res.body[i - 1].name.toLowerCase();
 
             if (alphOrder === 'za') {
-              brand.should.be.at.most(prevBrand);
+              (brand <= prevBrand).should.be.true;
             } else {
-              brand.should.be.at.least(prevBrand);
+              (brand >= prevBrand).should.be.true;
             }
           }
           done();
