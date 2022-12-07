@@ -62,7 +62,7 @@ describe('api/brands', () => {
     });
 
     describe('?query=', () => {
-      it('it should return the brand that matches the query', (done) => {
+      it('it should return the brand(s) that match the query', (done) => {
         const query = 'oak';
 
         chai
@@ -123,6 +123,73 @@ describe('api/brands', () => {
             done();
           });
       });
+    });
+
+    describe('/:id/products', () => {
+      it('it should return an array of products', (done) => {
+        const id = '2';
+
+        chai
+          .request(server)
+          .get(`/api/brands/${id}/products`)
+          .end((err, res) => {
+            res.should.have.status('200');
+            res.body.should.be.an('array');
+            res.body.forEach((product) => {
+              product.should.have.own.property('id').that.is.a('string');
+              product.should.have.own
+                .propery('categoryId')
+                .that.equals(id)
+                .and.is.a('string');
+              product.should.have.own.property('name').that.is.a('string');
+              product.should.have.own.property('price').that.is.a('number');
+              product.should.have.own.property('imageUrls').that.is.an('array');
+            });
+            done();
+          });
+      });
+
+      it('it should return an empty array and a 404 for ids that do not match any products', (done) => {
+        chai
+          .request(server)
+          .get(`/api/brands/456/products`)
+          .end((err, res) => {
+            res.should.have.status('404');
+            res.body.should.be.an('array').with.a.lengthOf(0);
+            done();
+          });
+      });
+
+      // });
+
+      it('it should return a 400 for bad requests', (done) => {
+        const param = 'whatThe=what';
+        chai
+          .request(server)
+          .get(`/api/brands/456/products?${param}`)
+          .end((err, res) => {
+            res.should.have.status('400');
+            done();
+          });
+      });
+
+      // describe('query=', () => {
+      //   const query = 'super';
+
+      //   it(`it should only return products matching the query: ${query}`, {
+      //     chai
+      //     .request(server)
+      //     .get(`/api/brands/${id}/products?query=${query}`)
+      //     .end((err, res) => {
+      //       res.should.have.status('200');
+      //       res.body.should.be.an('array');
+      //       res.body.forEach((brand) => {
+      //         brand.name.toLowerCase().should.include(query);
+      //       });
+      //       done();
+      //     });
+      //   });
+      // });
     });
   });
 });
