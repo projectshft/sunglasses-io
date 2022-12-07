@@ -6,6 +6,7 @@ const Router = require('router');
 const bodyParser = require('body-parser');
 const { uid } = require('rand-token');
 const cors = require('cors');
+const url = require('url');
 
 const PORT = 3001;
 const CORS_HEADERS = {
@@ -64,8 +65,17 @@ const server = http
   });
 
 router.get('/api/brands', (request, response) => {
+  const params = queryString.parse(url.parse(request.url).query);
+  let brandsRequested = brands;
+
+  if (params.query !== undefined) {
+    brandsRequested = brands.filter((brand) =>
+      brand.name.toLowerCase().includes(params.query)
+    );
+  }
+
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  return response.end(JSON.stringify(brands));
+  return response.end(JSON.stringify(brandsRequested));
 });
 
 module.exports = server;

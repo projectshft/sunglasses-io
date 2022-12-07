@@ -16,8 +16,8 @@ describe('api/brands', () => {
           res.should.have.status('200');
           res.body.should.be.an('array');
           res.body.forEach((brand) => {
-            brand.should.have.property('id');
-            brand.should.have.property('name');
+            brand.should.have.own.property('id');
+            brand.should.have.own.property('name');
           });
           done();
         });
@@ -26,7 +26,7 @@ describe('api/brands', () => {
 
   describe('?query=', () => {
     it('it should return the brand that matches the query', (done) => {
-      const query = 'oakley';
+      const query = 'oak';
 
       chai
         .request(server)
