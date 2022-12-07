@@ -17,7 +17,7 @@ describe('api/brands', () => {
           res.body.should.be.an('array');
           res.body.forEach((brand) => {
             brand.should.have.property('id');
-            brand.should.have.proptery('name');
+            brand.should.have.property('name');
           });
           done();
         });
@@ -35,7 +35,7 @@ describe('api/brands', () => {
           res.should.have.status('200');
           res.body.should.be.an('array');
           res.body.forEach((brand) => {
-            brand.name.should.include(query);
+            brand.name.toLowerCase().should.include(query);
           });
           done();
         });
