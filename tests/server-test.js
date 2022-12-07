@@ -24,6 +24,42 @@ describe('api/brands', () => {
           done();
         });
     });
+
+    const badRequestTests = [
+      { request: '/api/brands', expectedStatus: 200, query: '' },
+      {
+        request: '/api/brands?alphabetical=za',
+        expectedStatus: 200,
+        query: '?alphabetical=za',
+      },
+      {
+        request: '/api/brands?alphabetical=az',
+        expectedStatus: 200,
+        query: '?alphabetical=az',
+      },
+      {
+        request: '/api/brands?alphabetical=xyz',
+        expectedStatus: 400,
+        query: '?alphabetical=xyz',
+      },
+      {
+        request: '/api/brands?hello=world',
+        expectedStatus: 400,
+        query: '?hello=world',
+      },
+    ];
+
+    badRequestTests.forEach(({ request, expectedStatus, query }) => {
+      it(`${query} should have HTTP status ${expectedStatus}`, (done) => {
+        chai
+          .request(server)
+          .get(request)
+          .end((err, res) => {
+            res.should.have.status(expectedStatus);
+            done();
+          });
+      });
+    });
   });
 
   describe('?query=', () => {
