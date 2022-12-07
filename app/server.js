@@ -66,12 +66,40 @@ const server = http
 
 router.get('/api/brands', (request, response) => {
   const params = queryString.parse(url.parse(request.url).query);
-  let brandsRequested = brands;
+  let brandsRequested = [...brands];
 
   if (params.query !== undefined) {
     brandsRequested = brands.filter((brand) =>
       brand.name.toLowerCase().includes(params.query)
     );
+  }
+
+  if (params.alphabetical !== undefined) {
+    brandsRequested.sort((a, b) => {
+      const brand1 = a.name.toLowerCase();
+      const brand2 = b.name.toLowerCase();
+
+      if (params.alphabetical === 'az') {
+        if (brand1 > brand2) {
+          return 1;
+        }
+
+        if (brand1 < brand2) {
+          return -1;
+        }
+      }
+
+      if (params.alphabetical === 'za') {
+        if (brand1 > brand2) {
+          return -1;
+        }
+
+        if (brand1 < brand2) {
+          return 1;
+        }
+      }
+      return 0;
+    });
   }
 
   response.writeHead(200, { 'Content-Type': 'application/json' });
