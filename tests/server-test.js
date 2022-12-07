@@ -78,6 +78,18 @@ describe('api/brands', () => {
           done();
         });
     });
+
+    it('it should return an empty array and a 404 if query does not match any brands', (done) => {
+      const query = 'sadhs';
+
+      chai
+        .request(server)
+        .get(`/api/brands?query=${query}`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
   });
 
   describe('?alphabetical=', () => {

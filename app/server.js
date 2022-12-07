@@ -38,7 +38,7 @@ const server = http
     if (error) {
       console.log('Error on server startup: ', error);
     } else {
-      console.log(`Server is listening at http://localhost:${PORT}`);
+      // console.log(`Server is listening at http://localhost:${PORT}`);
     }
 
     fs.readFile('initial-data/users.json', 'utf-8', (err, data) => {
@@ -46,7 +46,7 @@ const server = http
         throw err;
       }
       users = JSON.parse(data);
-      console.log('User data loaded');
+      // console.log('User data loaded');
     });
 
     fs.readFile('initial-data/brands.json', 'utf-8', (err, data) => {
@@ -54,7 +54,7 @@ const server = http
         throw err;
       }
       brands = JSON.parse(data);
-      console.log('Brand data loaded');
+      // console.log('Brand data loaded');
     });
 
     fs.readFile('initial-data/products.json', 'utf-8', (err, data) => {
@@ -62,7 +62,7 @@ const server = http
         throw err;
       }
       products = JSON.parse(data);
-      console.log('Product data loaded');
+      // console.log('Product data loaded');
     });
   });
 
@@ -81,15 +81,14 @@ router.get('/api/brands', (request, response) => {
     brandsRequested = brands.filter((brand) =>
       brand.name.toLowerCase().includes(params.query)
     );
+
+    if (brandsRequested.length === 0) {
+      response.writeHead(404);
+      return response.end('Search query does not match any brands');
+    }
   }
 
   if (params.alphabetical !== undefined) {
-    // if (params.alphabetical !== 'za' || params.alphabetical !== 'az') {
-    //   response.writeHead(400);
-    //   return response.end(
-    //     'alphabetical paramter only accepts "za" and "az" and values'
-    //   );
-    // }
     if (params.alphabetical === 'za' || params.alphabetical === 'az') {
       brandsRequested.sort((a, b) => {
         const brand1 = a.name.toLowerCase();
