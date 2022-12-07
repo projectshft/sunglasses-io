@@ -5,6 +5,7 @@ const queryString = require('querystring');
 const Router = require('router');
 const bodyParser = require('body-parser');
 const { uid } = require('rand-token');
+const cors = require('cors');
 
 const PORT = 3001;
 const CORS_HEADERS = {
@@ -19,6 +20,7 @@ let products = [];
 
 const router = Router();
 router.use(bodyParser.json());
+router.use(cors());
 
 const server = http
   .createServer((request, response) => {
