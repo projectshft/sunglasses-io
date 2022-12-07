@@ -20,7 +20,7 @@ let products = [];
 const router = Router();
 router.use(bodyParser.json());
 
-http
+const server = http
   .createServer((request, response) => {
     if (request.method === 'OPTIONS') {
       response.writeHead(200, CORS_HEADERS);
@@ -60,3 +60,5 @@ http
       console.log('Product data loaded');
     });
   });
+
+module.exports = server;
