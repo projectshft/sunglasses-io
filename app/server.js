@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
@@ -20,6 +21,7 @@ const CORS_HEADERS = {
 let users = [];
 let brands = [];
 let products = [];
+const accessTokens = [];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -143,5 +145,56 @@ router.get('/api/brands/:id/products', (request, response) => {
 
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(requestedProducts));
+});
+
+router.get('/api/products', (request, response) => {
+  const queryParams = queryString.parse(url.parse(request.url).query);
+
+  if (!checkValidParams(queryParams, ['offset', 'itemLimit', 'query'])) {
+    response.writeHead(400);
+    return response.end(
+      'this endpoint only accepts "offset", and "itemLimit" as parameters'
+    );
+  }
+
+  // if (queryParams.query !== undefined) {
+
+  // }
+  response.writeHead(200, { 'Content-Type': 'applications/json' });
+  return response.end(JSON.stringify(products));
+});
+
+router.post('/api/login', (request, response) => {
+  const { username, password } = request.body;
+  if (username && password) {
+    const user = users.find(
+      (user) =>
+        user.login.username === username && user.login.password === password
+    );
+
+    if (user) {
+      response.writeHead(200, { 'Content-Type': 'Application/json' });
+
+      const currentAccessToken = accessTokens.find(
+        (tokenObject) => tokenObject.username === username
+      );
+
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      }
+      const newAccessToken = {
+        username,
+        lastUpdated: new Date(),
+        token: uid(16),
+      };
+      accessTokens.push(newAccessToken);
+      return response.end(JSON.stringify(newAccessToken.token));
+    }
+    response.writeHead(401, 'incorrect username or password');
+    return response.end();
+  }
+  response.writeHead(400, 'incorrectly formatted response');
+  return response.end();
 });
 module.exports = server;
