@@ -34,19 +34,19 @@ paths:
             enum:
               - az
               - za
-        - name: sort
-          in: query
-          description: |
-            Sort by number of products: <br>
-            - **mostProducts** sorts brands in order from the most amount of products _down_ to the least. 
-            - **leastProducts** sorts brands in order from least amount of products _up_ to the most. <br><br>
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - mostProducts
-              - leastProducts
+        # - name: sort
+        #   in: query
+        #   description: |
+        #     Sort by number of products: <br>
+        #     - **mostProducts** sorts brands in order from the most amount of products _down_ to the least.
+        #     - **leastProducts** sorts brands in order from least amount of products _up_ to the most. <br><br>
+        #   required: false
+        #   type: array
+        #   items:
+        #     type: string
+        #     enum:
+        #       - mostProducts
+        #       - leastProducts
       responses:
         "200":
           description: An array of brands
@@ -58,7 +58,7 @@ paths:
           description: Malformed request
         "404":
           description: Search query does not match any brands
-  /brands/:id/products:
+  /brands/{id}/products:
     get:
       summary: Get products of certain brand
       description: |
@@ -66,26 +66,26 @@ paths:
       tags:
         - Products
       parameters:
-        - name: brand id
+        - name: id
           in: path
           description: The id of the brand of products you want.
           required: true
           type: string
-        - name: query
-          in: query
-          description: Find specific products of a certain brand
-          required: false
-          type: string
-        - name: sort
-          in: query
-          description: Sort by price
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - lowToHigh
-              - highToLow
+        # - name: query
+        #   in: query
+        #   description: Find specific products of a certain brand
+        #   required: false
+        #   type: string
+        # - name: sort
+        #   in: query
+        #   description: Sort by price
+        #   required: false
+        #   type: array
+        #   items:
+        #     type: string
+        #     enum:
+        #       - lowToHigh
+        #       - highToLow
       responses:
         "200":
           description: An array of products
@@ -105,21 +105,26 @@ paths:
       tags:
         - Products
       parameters:
-        - name: sort
-          in: query
-          description: sort by price
-          required: false
-          type: array
-          items:
-            type: string
-            enum:
-              - lowToHigh
-              - highToLow
+        # - name: sort
+        #   in: query
+        #   description: sort by price
+        #   required: false
+        #   type: array
+        #   items:
+        #     type: string
+        #     enum:
+        #       - lowToHigh
+        #       - highToLow
         - name: itemLimit
           in: query
           description: limit the number of products returned
           required: false
           type: integer
+        - name: offset
+          in: query
+          description: the amount to offset results by
+          type: integer
+          required: false
       responses:
         "200":
           description: An array of products
@@ -129,6 +134,8 @@ paths:
               $ref: "#/definitions/product"
         "400":
           description: Malformed request
+        "404":
+          description: query did not match any products
         default:
           description: Unexpected error
           schema:
@@ -162,7 +169,7 @@ paths:
             type: string
         "400":
           description: Malformed request
-        "404":
+        "401":
           description: Incorrect username or password
 
   /me/cart:
@@ -191,6 +198,34 @@ paths:
         Add products to a user's cart
       tags:
         - Cart
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: product id, quantity, and the access token of current user
+          schema:
+            type: object
+            required:
+              - productId
+              - accessToken
+            properties:
+              productId:
+                type: string
+              accessToken:
+                type: string
+              quantity:
+                type: integer
+      responses:
+        "200":
+          description: returns product just added to the cart
+          schema:
+            $ref: "#/definitions/product"
+        "400":
+          description: no access token provided
+        "401":
+          description: incorrect access token
+        "404":
+          description: no products that match that id
   /me/cart/{productId}/:
     delete:
       summary: delete cart item
@@ -282,7 +317,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /articles/{articleId}:
+  # /articles/{articleId}:
 
 parameters:
   accessToken:
@@ -291,7 +326,10 @@ parameters:
     description: An access token is required to access the cart
     required: true
     schema:
-      type: string
+      type: object
+      properties:
+        accessToken:
+          type: string
   postArticle:
     in: body
     name: article
