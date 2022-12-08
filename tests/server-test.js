@@ -366,34 +366,29 @@ describe('/api/login', () => {
 describe('/api/me/cart', () => {
   describe('GET', () => {
     it('it should return a cart object, only if access token is provided', (done) => {
-      const requester = chai.request(server);
-      Promise.all([
-        chai
-          .request(server)
-          .post('/api/me/cart')
-          .send({ productId: '3', quantity: 4, accessToken: '12345678' }),
-        chai
-          .request(server)
-          .get('/api/me/cart')
-          .send({ accessToken: '12345678' }),
-      ])
-        .then((responses) => {
-          const getRequest = responses[0];
-          const postRequest = responses[1];
-          getRequest.should.have.status('200');
-          getRequest.body.should.be.an('object');
-          postRequest.should.have.status('200');
-          postRequest.body.should.be.an('array');
-          postRequest.body.forEach((product) => {
-            product.should.have.property('quantity');
-            product.should.have.property('subtotal');
-            product.should.have.property('products').that.is.an('array');
+      const requester = chai.request(server).keepOpen();
+      requester
+        .post('/api/me/cart')
+        .send({ productId: '3', quantity: 4, accessToken: '12345678' })
+        .then(() =>
+          requester.get('/api/me/cart').send({ accessToken: '12345678' })
+        )
+        .then((res) => {
+          res.should.have.status('200');
+          res.body.should.be.an('array');
+          res.body.forEach((product) => {
+            product.should.have.property('quantity').that.is.an('number');
+            product.should.have.own.property('id').that.is.a('string');
+            product.should.have.own.property('categoryId').that.is.a('string');
+            product.should.have.own.property('name').that.is.a('string');
+            product.should.have.own.property('price').that.is.a('number');
+            product.should.have.own.property('imageUrls').that.is.an('array');
           });
-
+          requester.close();
           done();
         })
         .catch((err) => {
-          console.log(err);
+          requester.close();
           done(err);
         });
     });
@@ -404,7 +399,7 @@ describe('/api/me/cart', () => {
         .end((err, res) => {
           should.not.exist(err);
           res.should.have.status('400');
-          res.res.statusMessage.should.be('access token required');
+          res.res.statusMessage.should.equal('access token required');
           done();
         });
     });
@@ -416,7 +411,7 @@ describe('/api/me/cart', () => {
         .end((err, res) => {
           should.not.exist(err);
           res.should.have.status('401');
-          res.res.statusMessage.should.be(
+          res.res.statusMessage.should.equal(
             'access token does not match, please login'
           );
           done();
