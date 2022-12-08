@@ -138,7 +138,7 @@ describe('api/brands', () => {
             res.body.forEach((product) => {
               product.should.have.own.property('id').that.is.a('string');
               product.should.have.own
-                .propery('categoryId')
+                .property('categoryId')
                 .that.equals(id)
                 .and.is.a('string');
               product.should.have.own.property('name').that.is.a('string');
@@ -160,18 +160,16 @@ describe('api/brands', () => {
           });
       });
 
+      // it('it should return a 400 for bad requests', (done) => {
+      //   const param = 'whatThe=what';
+      //   chai
+      //     .request(server)
+      //     .get(`/api/brands/456/products?${param}`)
+      //     .end((err, res) => {
+      //       res.should.have.status('400');
+      //       done();
+      //     });
       // });
-
-      it('it should return a 400 for bad requests', (done) => {
-        const param = 'whatThe=what';
-        chai
-          .request(server)
-          .get(`/api/brands/456/products?${param}`)
-          .end((err, res) => {
-            res.should.have.status('400');
-            done();
-          });
-      });
 
       // describe('query=', () => {
       //   const query = 'super';

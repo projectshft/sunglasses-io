@@ -126,4 +126,22 @@ router.get('/api/brands', (request, response) => {
   return response.end(JSON.stringify(brandsRequested));
 });
 
+router.get('/api/brands/:id/products', (request, response) => {
+  if (request.params.id === undefined) {
+    response.writeHead(400);
+    return response.end('brand id is required for this endpoint');
+  }
+
+  const requestedProducts = products.filter(
+    (product) => product.categoryId === request.params.id
+  );
+
+  if (requestedProducts.length === 0) {
+    response.writeHead(404, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(requestedProducts));
+  }
+
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(requestedProducts));
+});
 module.exports = server;
