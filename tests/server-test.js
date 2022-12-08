@@ -486,15 +486,77 @@ describe('/api/me/cart', () => {
 
 describe('/api/me/:productId', () => {
   describe('DELETE', () => {
-    it('it should delete the specified item from the cart, and return the deleted item', () => {});
+    it('it should delete the specified item from the cart, and return the deleted item', (done) => {
+      const requester = chai.request(server).keepOpen();
+      requester
+        .post('/api/me/cart')
+        .send({ productId: '3', quantity: 4, accessToken: '12345678' })
+        .then(() => {
+          requester.delete('/api/me/3').send({ accessToken: '12345678' });
+        })
+        .then((res) => {
+          should.exist(res);
+          res.should.have.status('200');
+          res.body.should.be.an('object');
+          res.body.should.have.property('id').that.equals('3');
+          res.body.should.have.property('quantity').that.equals(4);
+        })
+        .then(() => {
+          requester.get('/api/me/cart').send({ accessToken: '12345678' });
+        })
+        .then((res) => {
+          res.body.should.be.an('array');
+          res.body.forEach((product) => {
+            product.id.should.not.equal('3');
+          });
+          done();
+        })
+        .then(() => requester.close())
+        .catch((err) => {
+          done(err);
+          requester.close();
+        });
+    });
 
-    it('the cart should no longer have the deleted item in it', () => {});
+    it('it should return a 400 if no access token is provided', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/3')
+        .end((err, res) => {
+          res.should.have.status('400');
+          res.res.statusMessage.should.equal('access token required');
+          done();
+        });
+    });
 
-    it('it should return a 400 if no access token is provided', () => {});
+    it('it should return a 401 if incorrect access token is provided', (done) => {
+      chai
+        .request(server)
+        .delete('/api/me/cart')
+        .send({ accessToken: 'ds0808j0' })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('401');
+          res.res.statusMessage.should.equal(
+            'access token does not match, please login'
+          );
+          done();
+        });
+    });
 
-    it('it should return a 401 if incorrect access token is provided', () => {});
-
-    it('it should return a 404 if the product id does not match any products in the cart', () => {});
+    it('it should return a 404 if the product id does not match any products in the cart', (done) => {
+      chai
+        .request(server)
+        .get('/api/me/3')
+        .send({ accessToken: 'ds0808j0' })
+        .end((err, res) => {
+          res.should.have.status('404');
+          res.res.statusMessage.should.equal(
+            'product id does not match any products in the cart'
+          );
+          done();
+        });
+    });
   });
   describe('POST', () => {
     it('it should update the quantity of the specified item, and return updated item', () => {});
