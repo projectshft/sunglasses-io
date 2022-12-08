@@ -323,3 +323,48 @@ describe('api/brands', () => {
     });
   });
 });
+
+describe('/api/login', () => {
+  it('it should return an access token if correct login credentials provided', (done) => {
+    chai
+      .request(server)
+      .post('/api/login')
+      .send({ username: 'yellowleopard753', password: 'jonjon' })
+      .end((err, res) => {
+        should.not.exist(err);
+        res.should.have.status('200');
+        res.body.should.be.a('string');
+        done();
+      });
+  });
+
+  it('it should return a 401 if incorrect credentials', (done) => {
+    chai
+      .request(server)
+      .post('/api/login')
+      .send({ username: 'incorrect', password: 'credential' })
+      .end((err, res) => {
+        should.not.exist(err);
+        res.should.have.status('401');
+        res.body.should.be
+          .a('string')
+          .that.equals('incorrect username or password');
+        done();
+      });
+  });
+
+  it('it should return a 400 if request is incorrectly formatted', (done) => {
+    chai
+      .request(server)
+      .post('/api/login')
+      .send({ username: '', psswd: 'jonjon' })
+      .end((err, res) => {
+        should.not.exist(err);
+        res.should.have.status('400');
+        res.body.should.be
+          .a('string')
+          .that.equals('incorrectly formatted response');
+        done();
+      });
+  });
+});
