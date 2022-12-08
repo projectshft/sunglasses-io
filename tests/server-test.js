@@ -491,8 +491,13 @@ describe('/api/me/:productId', () => {
       requester
         .post('/api/me/cart')
         .send({ productId: '3', quantity: 4, accessToken: '12345678' })
-        .then(() => {
-          requester.delete('/api/me/3').send({ accessToken: '12345678' });
+        .then((res) => {
+          chai
+            .request(server)
+            .delete('/api/me/cart/3')
+            .send({ accessToken: '12345678' });
+          // chai.request(server).delete('/api/me/3');
+          // .send({ accessToken: '12345678' });
         })
         .then((res) => {
           should.exist(res);
@@ -513,15 +518,15 @@ describe('/api/me/:productId', () => {
         })
         .then(() => requester.close())
         .catch((err) => {
-          done(err);
           requester.close();
+          done(err);
         });
     });
 
     it('it should return a 400 if no access token is provided', (done) => {
       chai
         .request(server)
-        .delete('/api/me/3')
+        .delete('/api/me/cart/3')
         .end((err, res) => {
           res.should.have.status('400');
           res.res.statusMessage.should.equal('access token required');
@@ -532,7 +537,7 @@ describe('/api/me/:productId', () => {
     it('it should return a 401 if incorrect access token is provided', (done) => {
       chai
         .request(server)
-        .delete('/api/me/cart')
+        .delete('/api/me/cart/3')
         .send({ accessToken: 'ds0808j0' })
         .end((err, res) => {
           should.not.exist(err);
@@ -547,8 +552,8 @@ describe('/api/me/:productId', () => {
     it('it should return a 404 if the product id does not match any products in the cart', (done) => {
       chai
         .request(server)
-        .get('/api/me/3')
-        .send({ accessToken: 'ds0808j0' })
+        .delete('/api/me/cart/456')
+        .send({ accessToken: '12345678' })
         .end((err, res) => {
           res.should.have.status('404');
           res.res.statusMessage.should.equal(
@@ -559,14 +564,68 @@ describe('/api/me/:productId', () => {
     });
   });
   describe('POST', () => {
-    it('it should update the quantity of the specified item, and return updated item', () => {});
+    it('it should update the quantity of the specified item, and return updated item', (done) => {
+      const requester = chai.request(server).keepOpen();
+      requester
+        .post('/api/me/cart')
+        .send({ productId: '3', quantity: 4, accessToken: '12345678' })
+        .then(() => {
+          requester
+            .post('/api/me/cart/3')
+            .send({ accessToken: '12345678', quantity: 2 });
+        })
+        .then((res) => {
+          res.should.have.status('200');
+          res.body.should.be.an('object');
+          res.body.quantity.should.equal(2);
+          requester.close();
+        })
+        .catch((err) => {
+          requester.close();
+          done(err);
+        });
+    });
 
     it('updated item should have updated quantity inside the cart', () => {});
 
-    it('it should return a 400 if no access token is provided', () => {});
+    it('it should return a 400 if no access token is provided', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart/3')
+        .end((err, res) => {
+          res.should.have.status('400');
+          res.res.statusMessage.should.equal('access token required');
+          done();
+        });
+    });
 
-    it('it should return a 401 if incorrect access token is provided', () => {});
+    it('it should return a 401 if incorrect access token is provided', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart/3')
+        .send({ accessToken: 'ds0808j0' })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('401');
+          res.res.statusMessage.should.equal(
+            'access token does not match, please login'
+          );
+          done();
+        });
+    });
 
-    it('it should return a 404 if the product id does not match any products in the cart', () => {});
+    it('it should return a 404 if the product id does not match any products in the cart', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart/456')
+        .send({ accessToken: '12345678' })
+        .end((err, res) => {
+          res.should.have.status('404');
+          res.res.statusMessage.should.equal(
+            'product id does not match any products in the cart'
+          );
+          done();
+        });
+    });
   });
 });
