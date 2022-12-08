@@ -319,5 +319,44 @@ router.delete('/api/me/cart/:productId', (request, response) => {
   }
 });
 
+router.post('/api/me/cart/:productId', (request, response) => {
+  const validToken = checkForValidAccessToken(request);
+  // const validToken = 200;
+  if (validToken === '401') {
+    response.writeHead(401, 'access token does not match, please login');
+    return response.end();
+  }
+
+  if (validToken === '400') {
+    response.writeHead(400, 'access token required');
+    return response.end();
+  }
+  const { productId } = request.params;
+  if (productId) {
+    const { username } = accessTokens.find(
+      (tokenObj) => (tokenObj.token = request.body.accessToken)
+    );
+
+    const user = users.find((user) => user.login.username === username);
+    if (user) {
+      const product = user.cart.find((product) => product.id === productId);
+      if (product) {
+        product.quantity = request.body.quantity
+        response.writeHead(
+          200,
+          { 'Content-Type': 'application/json' },
+          'item successfully removed'
+        );
+        return response.end(JSON.stringify(product));
+      }
+      response.writeHead(
+        404,
+        'product id does not match any products in the cart'
+      );
+      response.end();
+    }
+  }
+});
+
 module.exports.server = server;
 module.exports.accessTokens = accessTokens;
