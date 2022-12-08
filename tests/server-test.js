@@ -366,12 +366,16 @@ describe('/api/login', () => {
 describe('/api/me/cart', () => {
   describe('GET', () => {
     it('it should return a cart object, only if access token is provided', (done) => {
-      const requester = chai.request(server).keepOpen();
+      const requester = chai.request(server);
       Promise.all([
-        requester
+        chai
+          .request(server)
           .post('/api/me/cart')
           .send({ productId: '3', quantity: 4, accessToken: '12345678' }),
-        requester.get('/api/me/cart').send({ accessToken: '12345678' }),
+        chai
+          .request(server)
+          .get('/api/me/cart')
+          .send({ accessToken: '12345678' }),
       ])
         .then((responses) => {
           const getRequest = responses[0];
@@ -383,43 +387,15 @@ describe('/api/me/cart', () => {
           postRequest.body.forEach((product) => {
             product.should.have.property('quantity');
             product.should.have.property('subtotal');
-            product.should.have.property('products');
+            product.should.have.property('products').that.is.an('array');
           });
-          // done();
-        })
-        .then(() => {
-          requester.close();
+
           done();
         })
         .catch((err) => {
           console.log(err);
-          requester.close();
-          done();
+          done(err);
         });
-      // requester
-      //   .post('/api/me/cart')
-      //   .send({ productId: '3', quantity: 4, accessToken: '12345678' })
-      //   .then((getResponse) => {
-      //     console.log(getResponse.body);
-      //     getResponse.body.should.be.an('object');
-      //     return requester
-      //       .get('/api/me/cart')
-      //       .send({ accessToken: '12345678' })
-      //       .then((res) => {
-      //         // should.not.exist(err);
-      //         should.exist(res);
-      //         res.should.have.status('200');
-      //         res.body.should.be.an('array');
-      //         res.body.forEach((product) => {
-      //           product.should.have.property('quantity');
-      //           // product.should.have.proptery('subtotal');
-      //           product.should.have.property('products');
-      //           done();
-      //         });
-      //       });
-      //   })
-      //   .then(() => requester.close())
-      //   .then(() => done());
     });
     it('it should return a 400 if no access token is provided', (done) => {
       chai
