@@ -10,6 +10,8 @@ const cors = require('cors');
 const url = require('url');
 
 const checkValidParams = require('../helpers/checkValidParams.js');
+// const checkForValidAccessToken =
+//   require('../helpers/checkForValidAccessToken').default;
 
 const PORT = 3001;
 const CORS_HEADERS = {
@@ -21,7 +23,9 @@ const CORS_HEADERS = {
 let users = [];
 let brands = [];
 let products = [];
-const accessTokens = [];
+const accessTokens = [
+  { username: 'yellowleopard753', lastUpdate: new Date(), token: '12345678' },
+];
 
 const router = Router();
 router.use(bodyParser.json());
@@ -197,4 +201,82 @@ router.post('/api/login', (request, response) => {
   response.writeHead(400, 'incorrectly formatted response');
   return response.end();
 });
-module.exports = server;
+
+const checkForValidAccessToken = (request) => {
+  const requestToken = request.body.accessToken;
+
+  if (requestToken) {
+    const token = accessTokens.find(
+      (tokenObj) => tokenObj.token === requestToken
+    );
+    if (!token) {
+      return '401';
+    }
+  } else {
+    return '400';
+  }
+  return '200';
+};
+
+router.get('/api/me/cart', (request, response) => {
+  const validToken = checkForValidAccessToken(request);
+  // const validToken = 200;
+  if (validToken === '401') {
+    response.writeHead(401, 'access token does not match, please login');
+    return response.end();
+  }
+
+  if (validToken === '400') {
+    response.writeHead(400, 'access token required');
+    return response.end();
+  }
+
+  const { username } = accessTokens.find(
+    (tokenObj) => (tokenObj.token = request.body.accessToken)
+  );
+
+  const user = users.find((user) => user.login.username === username);
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(user.cart));
+});
+
+router.post('/api/me/cart', (request, response) => {
+  const validToken = checkForValidAccessToken(request);
+  // const validToken = 200;
+  if (validToken === '401') {
+    response.writeHead(401, 'access token does not match, please login');
+    return response.end();
+  }
+
+  if (validToken === '400') {
+    response.writeHead(400, 'access token required');
+    return response.end();
+  }
+
+  let product = products.find(
+    (product) => product.id === request.body.productId
+  );
+
+  if (product) {
+    if (request.body.quantity) {
+      product = { ...product, quantity: request.body.quantity };
+    }
+    const { username } = accessTokens.find(
+      (tokenObj) => (tokenObj.token = request.body.accessToken)
+    );
+
+    const user = users.find((user) => user.login.username === username);
+    if (user) {
+      user.cart.push(product);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(product));
+    }
+    response.writeHead(404, 'user does not exist');
+    return response.end();
+  }
+  response.writeHead(404, 'product id does not match any products');
+  return response.end();
+});
+
+module.exports.server = server;
+module.exports.accessTokens = accessTokens;
