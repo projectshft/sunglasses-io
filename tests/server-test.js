@@ -3,7 +3,7 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 
-const server = require('../app/server');
+const { server } = require('../app/server');
 const products = require('../initial-data/products.json');
 
 const should = chai.should();
@@ -366,28 +366,60 @@ describe('/api/login', () => {
 describe('/api/me/cart', () => {
   describe('GET', () => {
     it('it should return a cart object, only if access token is provided', (done) => {
-      chai
-        .request(server)
-        .post('/api/me/cart')
-        .send({ productId: '3', quantity: 4, accessToken: '12345678' })
-        .end(() =>
-          chai
-            .request(server)
-            .get('/api/me/cart')
-            .send({ accessToken: '12345678' })
-            .end((err, res) => {
-              should.not.exist(err);
-              res.should.have.status('200');
-              res.body.should.be.an('object');
-              res.body.should.have.property('quantity').that.is.an('integer');
-              res.body.should.have.proptery('subtotal').that.is.an('integer');
-              res.body.should.have
-                .property('products')
-                .that.is.an('array')
-                .of('object');
-              done();
-            })
-        );
+      const requester = chai.request(server).keepOpen();
+      Promise.all([
+        requester
+          .post('/api/me/cart')
+          .send({ productId: '3', quantity: 4, accessToken: '12345678' }),
+        requester.get('/api/me/cart').send({ accessToken: '12345678' }),
+      ])
+        .then((responses) => {
+          const getRequest = responses[0];
+          const postRequest = responses[1];
+          getRequest.should.have.status('200');
+          getRequest.body.should.be.an('object');
+          postRequest.should.have.status('200');
+          postRequest.body.should.be.an('array');
+          postRequest.body.forEach((product) => {
+            product.should.have.property('quantity');
+            product.should.have.property('subtotal');
+            product.should.have.property('products');
+          });
+          // done();
+        })
+        .then(() => {
+          requester.close();
+          done();
+        })
+        .catch((err) => {
+          console.log(err);
+          requester.close();
+          done();
+        });
+      // requester
+      //   .post('/api/me/cart')
+      //   .send({ productId: '3', quantity: 4, accessToken: '12345678' })
+      //   .then((getResponse) => {
+      //     console.log(getResponse.body);
+      //     getResponse.body.should.be.an('object');
+      //     return requester
+      //       .get('/api/me/cart')
+      //       .send({ accessToken: '12345678' })
+      //       .then((res) => {
+      //         // should.not.exist(err);
+      //         should.exist(res);
+      //         res.should.have.status('200');
+      //         res.body.should.be.an('array');
+      //         res.body.forEach((product) => {
+      //           product.should.have.property('quantity');
+      //           // product.should.have.proptery('subtotal');
+      //           product.should.have.property('products');
+      //           done();
+      //         });
+      //       });
+      //   })
+      //   .then(() => requester.close())
+      //   .then(() => done());
     });
     it('it should return a 400 if no access token is provided', (done) => {
       chai
@@ -415,8 +447,9 @@ describe('/api/me/cart', () => {
         });
     });
   });
+
   describe('POST', () => {
-    const productId = 8;
+    const productId = '8';
     it('it should return the product just posted', (done) => {
       chai
         .request(server)
@@ -444,7 +477,7 @@ describe('/api/me/cart', () => {
         .end((err, res) => {
           should.not.exist(err);
           res.should.have.status('400');
-          res.res.statusMessage.should.be('access token required');
+          res.res.statusMessage.should.equal('access token required');
           done();
         });
     });
@@ -456,7 +489,7 @@ describe('/api/me/cart', () => {
         .end((err, res) => {
           should.not.exist(err);
           res.should.have.status('401');
-          res.res.statusMessage.should.be(
+          res.res.statusMessage.should.equal(
             'access token does not match, please login'
           );
           done();
@@ -467,12 +500,12 @@ describe('/api/me/cart', () => {
       chai
         .request(server)
         .post('/api/me/cart')
-        .send({ productId: 345, accessToken: 'ds0808j0' })
+        .send({ productId: 345, accessToken: '12345678' })
         .end((err, res) => {
           should.not.exist(err);
-          res.should.have.status('401');
-          res.res.statusMessage.should.be(
-            'access token does not match, please login'
+          res.should.have.status('404');
+          res.res.statusMessage.should.equal(
+            'product id does not match any products'
           );
           done();
         });
