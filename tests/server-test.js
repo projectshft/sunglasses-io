@@ -189,173 +189,318 @@ describe('api/brands', () => {
       //   });
       // });
     });
-    describe('/products', () => {
-      it('it should return an array of products', (done) => {
-        chai
-          .request(server)
-          .get(`/api/products`)
-          .end((err, res) => {
-            res.should.have.status('200');
-            res.body.should.be.an('array');
-            res.body.forEach((product) => {
-              product.should.have.own.property('id').that.is.a('string');
-              product.should.have.own
-                .property('categoryId')
-                .that.is.a('string');
-              product.should.have.own.property('name').that.is.a('string');
-              product.should.have.own.property('price').that.is.a('number');
-              product.should.have.own.property('imageUrls').that.is.an('array');
-            });
-            done();
+  });
+});
+
+describe('api/products', () => {
+  describe('GET', () => {
+    it('it should return an array of products', (done) => {
+      chai
+        .request(server)
+        .get(`/api/products`)
+        .end((err, res) => {
+          res.should.have.status('200');
+          res.body.should.be.an('array');
+          res.body.forEach((product) => {
+            product.should.have.own.property('id').that.is.a('string');
+            product.should.have.own.property('categoryId').that.is.a('string');
+            product.should.have.own.property('name').that.is.a('string');
+            product.should.have.own.property('price').that.is.a('number');
+            product.should.have.own.property('imageUrls').that.is.an('array');
           });
-      });
-
-      it('it should return a 400 for bad requests', (done) => {
-        const param = 'whatThe=what';
-        chai
-          .request(server)
-          .get(`/api/products?${param}`)
-          .end((err, res) => {
-            res.should.have.status('400');
-            done();
-          });
-      });
-
-      // const query = 'super';
-      // describe('?query=', () => {
-      //   it(`it should return an array of products matching the query '${query}'`, (done) => {
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?q=${query}`)
-      //       .end((err, res) => {
-      //         res.should.have.status('200');
-      //         res.should.be.an('array');
-      //         res.body.forEach((product) => {
-      //           product.should.have.own.property('id').that.is.a('string');
-      //           product.should.have.own
-      //             .property('categoryId')
-      //             .that.is.a('string');
-      //           product.should.have.own.property('name').that.is.a('string');
-      //           product.should.have.own.property('price').that.is.a('number');
-      //           product.should.have.own
-      //             .property('imageUrls')
-      //             .that.is.an('array');
-      //           product.name.toLowerCase.should.include(query);
-      //         });
-      //         done();
-      //       });
-      //   });
-      //   it('it should return an empty array and a 404 if query does not match any products', (done) => {
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?q=${query}`)
-      //       .end((err, res) => {
-      //         res.should.have.status('404');
-      //         res.body.should.be.an('array').with.lengthOf(0);
-      //         done();
-      //       });
-      //   });
-      // });
-
-      // describe('?itemLimit', () => {
-      //   const itemLimit = 5;
-      //   it(`it should return no more than specified item limit ${itemLimit}`, (done) => {
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?itemLimit=${itemLimit}`)
-      //       .end((err, res) => {
-      //         res.should.have.status('200');
-      //         res.body.should.be.an('array').with.lengthOf.at.most(itemLimit);
-      //         done();
-      //       });
-      //   });
-      //   it(`it should return a 400 if itemLimit is not a positive integer`, (done) => {
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?itemLimit=-23.2`)
-      //       .end((err, res) => {
-      //         res.should.have.status('400');
-      //         done();
-      //       });
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?itemLimit=five`)
-      //       .end((err, res) => {
-      //         res.should.have.status('400');
-      //         done();
-      //       });
-      //   });
-      // });
-      // describe('?offset', () => {
-      //   const offset = 5;
-      //   it(`it should return an array of products offset from the master list by ${offset}`, (done) => {
-      //     const masterOffset = products.slice(offset - 1, products.length - 1);
-
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?offset=${offset}`)
-      //       .end((err, res) => {
-      //         res.should.have.status('200');
-      //         res.body.should.be.an('array');
-      //         res.body.should.deep.equal(masterOffset);
-      //         done();
-      //       });
-      //   });
-      //   it(`it should return a 400 if itemLimit is not a positive integer`, (done) => {
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?offset=-23.2`)
-      //       .end((err, res) => {
-      //         res.should.have.status('400');
-      //         done();
-      //       });
-      //     chai
-      //       .request(server)
-      //       .get(`/api/products?offset=five`)
-      //       .end((err, res) => {
-      //         res.should.have.status('400');
-      //         done();
-      //       });
-      // });
-      // });
+          done();
+        });
     });
+
+    it('it should return a 400 for bad requests', (done) => {
+      const param = 'whatThe=what';
+      chai
+        .request(server)
+        .get(`/api/products?${param}`)
+        .end((err, res) => {
+          res.should.have.status('400');
+          done();
+        });
+    });
+
+    // const query = 'super';
+    // describe('?query=', () => {
+    //   it(`it should return an array of products matching the query '${query}'`, (done) => {
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?q=${query}`)
+    //       .end((err, res) => {
+    //         res.should.have.status('200');
+    //         res.should.be.an('array');
+    //         res.body.forEach((product) => {
+    //           product.should.have.own.property('id').that.is.a('string');
+    //           product.should.have.own
+    //             .property('categoryId')
+    //             .that.is.a('string');
+    //           product.should.have.own.property('name').that.is.a('string');
+    //           product.should.have.own.property('price').that.is.a('number');
+    //           product.should.have.own
+    //             .property('imageUrls')
+    //             .that.is.an('array');
+    //           product.name.toLowerCase.should.include(query);
+    //         });
+    //         done();
+    //       });
+    //   });
+    //   it('it should return an empty array and a 404 if query does not match any products', (done) => {
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?q=${query}`)
+    //       .end((err, res) => {
+    //         res.should.have.status('404');
+    //         res.body.should.be.an('array').with.lengthOf(0);
+    //         done();
+    //       });
+    //   });
+    // });
+
+    // describe('?itemLimit', () => {
+    //   const itemLimit = 5;
+    //   it(`it should return no more than specified item limit ${itemLimit}`, (done) => {
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?itemLimit=${itemLimit}`)
+    //       .end((err, res) => {
+    //         res.should.have.status('200');
+    //         res.body.should.be.an('array').with.lengthOf.at.most(itemLimit);
+    //         done();
+    //       });
+    //   });
+    //   it(`it should return a 400 if itemLimit is not a positive integer`, (done) => {
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?itemLimit=-23.2`)
+    //       .end((err, res) => {
+    //         res.should.have.status('400');
+    //         done();
+    //       });
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?itemLimit=five`)
+    //       .end((err, res) => {
+    //         res.should.have.status('400');
+    //         done();
+    //       });
+    //   });
+    // });
+    // describe('?offset', () => {
+    //   const offset = 5;
+    //   it(`it should return an array of products offset from the master list by ${offset}`, (done) => {
+    //     const masterOffset = products.slice(offset - 1, products.length - 1);
+
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?offset=${offset}`)
+    //       .end((err, res) => {
+    //         res.should.have.status('200');
+    //         res.body.should.be.an('array');
+    //         res.body.should.deep.equal(masterOffset);
+    //         done();
+    //       });
+    //   });
+    //   it(`it should return a 400 if itemLimit is not a positive integer`, (done) => {
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?offset=-23.2`)
+    //       .end((err, res) => {
+    //         res.should.have.status('400');
+    //         done();
+    //       });
+    //     chai
+    //       .request(server)
+    //       .get(`/api/products?offset=five`)
+    //       .end((err, res) => {
+    //         res.should.have.status('400');
+    //         done();
+    //       });
+    // });
+    // });
   });
 });
 
 describe('/api/login', () => {
-  it('it should return an access token if correct login credentials provided', (done) => {
-    chai
-      .request(server)
-      .post('/api/login')
-      .send({ username: 'yellowleopard753', password: 'jonjon' })
-      .end((err, res) => {
-        res.should.have.status('200');
-        res.body.should.be.a('string');
-        done();
-      });
-  });
+  describe('POST', () => {
+    it('it should return an access token if correct login credentials provided', (done) => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({ username: 'yellowleopard753', password: 'jonjon' })
+        .end((err, res) => {
+          res.should.have.status('200');
+          res.body.should.be.a('string');
+          done();
+        });
+    });
 
-  it('it should return a 401 if incorrect credentials', (done) => {
-    chai
-      .request(server)
-      .post('/api/login')
-      .send({ username: 'incorrect', password: 'credential' })
-      .end((err, res) => {
-        res.should.have.status('401');
-        res.res.statusMessage.should.equal('incorrect username or password');
-        done();
-      });
-  });
+    it('it should return a 401 if incorrect credentials', (done) => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({ username: 'incorrect', password: 'credential' })
+        .end((err, res) => {
+          res.should.have.status('401');
+          res.res.statusMessage.should.equal('incorrect username or password');
+          done();
+        });
+    });
 
-  it('it should return a 400 if request is incorrectly formatted', (done) => {
-    chai
-      .request(server)
-      .post('/api/login')
-      .send({ username: '', psswd: 'jonjon' })
-      .end((err, res) => {
-        res.should.have.status('400');
-        res.res.statusMessage.should.equal('incorrectly formatted response');
-        done();
-      });
+    it('it should return a 400 if request is incorrectly formatted', (done) => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({ username: '', psswd: 'jonjon' })
+        .end((err, res) => {
+          res.should.have.status('400');
+          res.res.statusMessage.should.equal('incorrectly formatted response');
+          done();
+        });
+    });
+  });
+});
+
+describe('/api/me/cart', () => {
+  describe('GET', () => {
+    it('it should return a cart object, only if access token is provided', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send({ productId: '3', quantity: 4, accessToken: '12345678' })
+        .end(() =>
+          chai
+            .request(server)
+            .get('/api/me/cart')
+            .send({ accessToken: '12345678' })
+            .end((err, res) => {
+              should.not.exist(err);
+              res.should.have.status('200');
+              res.body.should.be.an('object');
+              res.body.should.have.property('quantity').that.is.an('integer');
+              res.body.should.have.proptery('subtotal').that.is.an('integer');
+              res.body.should.have
+                .property('products')
+                .that.is.an('array')
+                .of('object');
+              done();
+            })
+        );
+    });
+    it('it should return a 400 if no access token is provided', (done) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('400');
+          res.res.statusMessage.should.be('access token required');
+          done();
+        });
+    });
+    it('it should return a 401 if incorrect access token is provided', (done) => {
+      chai
+        .request(server)
+        .get('/api/me/cart')
+        .send({ accessToken: 'ds0808j0' })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('401');
+          res.res.statusMessage.should.be(
+            'access token does not match, please login'
+          );
+          done();
+        });
+    });
+  });
+  describe('POST', () => {
+    const productId = 8;
+    it('it should return the product just posted', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send({ productId, accessToken: '12345678' })
+        .end((err, res) => {
+          res.should.have.status('200');
+          res.body.should.be.an('object');
+          res.body.should.have.own
+            .property('id')
+            .that.is.a('string')
+            .and.equals(productId);
+          res.body.should.have.own.property('categoryId').that.is.a('string');
+          res.body.should.have.own.property('name').that.is.a('string');
+          res.body.should.have.own.property('price').that.is.a('number');
+          res.body.should.have.own.property('imageUrls').that.is.an('array');
+          done();
+        });
+    });
+    it('it should return a 400 if no access token is provided', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send({ productId })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('400');
+          res.res.statusMessage.should.be('access token required');
+          done();
+        });
+    });
+    it('it should return a 401 if incorrect access token is provided', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send({ productId, accessToken: 'ds0808j0' })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('401');
+          res.res.statusMessage.should.be(
+            'access token does not match, please login'
+          );
+          done();
+        });
+    });
+
+    it('it should return a 404 if the product id does not match any products', (done) => {
+      chai
+        .request(server)
+        .post('/api/me/cart')
+        .send({ productId: 345, accessToken: 'ds0808j0' })
+        .end((err, res) => {
+          should.not.exist(err);
+          res.should.have.status('401');
+          res.res.statusMessage.should.be(
+            'access token does not match, please login'
+          );
+          done();
+        });
+    });
+  });
+});
+
+describe('/api/me/:productId', () => {
+  describe('DELETE', () => {
+    it('it should delete the specified item from the cart, and return the deleted item', () => {});
+
+    it('the cart should no longer have the deleted item in it', () => {});
+
+    it('it should return a 400 if no access token is provided', () => {});
+
+    it('it should return a 401 if incorrect access token is provided', () => {});
+
+    it('it should return a 404 if the product id does not match any products in the cart', () => {});
+  });
+  describe('POST', () => {
+    it('it should update the quantity of the specified item, and return updated item', () => {});
+
+    it('updated item should have updated quantity inside the cart', () => {});
+
+    it('it should return a 400 if no access token is provided', () => {});
+
+    it('it should return a 401 if incorrect access token is provided', () => {});
+
+    it('it should return a 404 if the product id does not match any products in the cart', () => {});
   });
 });
