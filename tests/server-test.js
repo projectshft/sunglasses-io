@@ -4,6 +4,7 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 
 const server = require('../app/server');
+const products = require('../initial-data/products.json');
 
 const should = chai.should();
 chai.use(chaiHttp);
@@ -126,9 +127,8 @@ describe('api/brands', () => {
     });
 
     describe('/:id/products', () => {
-      it('it should return an array of products', (done) => {
-        const id = '2';
-
+      const id = '2';
+      it(`it should return an array of products with the category id of ${id}`, (done) => {
         chai
           .request(server)
           .get(`/api/brands/${id}/products`)
@@ -190,6 +190,136 @@ describe('api/brands', () => {
       //     });
       //   });
       // });
+    });
+    describe('/products', () => {
+      it('it should return an array of products', (done) => {
+        chai
+          .request(server)
+          .get(`/api/products`)
+          .end((err, res) => {
+            res.should.have.status('200');
+            res.body.should.be.an('array');
+            res.body.forEach((product) => {
+              product.should.have.own.property('id').that.is.a('string');
+              product.should.have.own
+                .property('categoryId')
+                .that.is.a('string');
+              product.should.have.own.property('name').that.is.a('string');
+              product.should.have.own.property('price').that.is.a('number');
+              product.should.have.own.property('imageUrls').that.is.an('array');
+            });
+            done();
+          });
+      });
+
+      it('it should return a 400 for bad requests', (done) => {
+        const param = 'whatThe=what';
+        chai
+          .request(server)
+          .get(`/api/products?${param}`)
+          .end((err, res) => {
+            res.should.have.status('400');
+            done();
+          });
+      });
+
+      const query = 'super';
+      describe('?query=', () => {
+        it(`it should return an array of products matching the query '${query}'`, (done) => {
+          chai
+            .request(server)
+            .get(`/api/products?q=${query}`)
+            .end((err, res) => {
+              res.should.have.status('200');
+              res.should.be.an('array');
+              res.body.forEach((product) => {
+                product.should.have.own.property('id').that.is.a('string');
+                product.should.have.own
+                  .property('categoryId')
+                  .that.is.a('string');
+                product.should.have.own.property('name').that.is.a('string');
+                product.should.have.own.property('price').that.is.a('number');
+                product.should.have.own
+                  .property('imageUrls')
+                  .that.is.an('array');
+                product.name.toLowerCase.should.include(query);
+              });
+              done();
+            });
+        });
+        it('it should return an empty array and a 404 if query does not match any products', (done) => {
+          chai
+            .request(server)
+            .get(`/api/products?q=${query}`)
+            .end((err, res) => {
+              res.should.have.status('404');
+              res.body.should.be.an('array').with.lengthOf(0);
+              done();
+            });
+        });
+      });
+
+      describe('?itemLimit', () => {
+        const itemLimit = 5;
+        it(`it should return no more than specified item limit ${itemLimit}`, (done) => {
+          chai
+            .request(server)
+            .get(`/api/products?itemLimit=${itemLimit}`)
+            .end((err, res) => {
+              res.should.have.status('200');
+              res.body.should.be.an('array').with.lengthOf.at.most(itemLimit);
+              done();
+            });
+        });
+        it(`it should return a 400 if itemLimit is not a positive integer`, (done) => {
+          chai
+            .request(server)
+            .get(`/api/products?itemLimit=-23.2`)
+            .end((err, res) => {
+              res.should.have.status('400');
+              done();
+            });
+          chai
+            .request(server)
+            .get(`/api/products?itemLimit=five`)
+            .end((err, res) => {
+              res.should.have.status('400');
+              done();
+            });
+        });
+      });
+      describe('?offset', () => {
+        const offset = 5;
+        it(`it should return an array of products offset from the master list by ${offset}`, (done) => {
+          const masterOffset = products.slice(offset - 1, products.length - 1);
+
+          chai
+            .request(server)
+            .get(`/api/products?offset=${offset}`)
+            .end((err, res) => {
+              res.should.have.status('200');
+              res.body.should.be.an('array');
+              res.body.should.deep.equal(masterOffset);
+              done();
+            });
+        });
+        it(`it should return a 400 if itemLimit is not a positive integer`, (done) => {
+          chai
+            .request(server)
+            .get(`/api/products?offset=-23.2`)
+            .end((err, res) => {
+              res.should.have.status('400');
+              done();
+            });
+          chai
+            .request(server)
+            .get(`/api/products?offset=five`)
+            .end((err, res) => {
+              res.should.have.status('400');
+              done();
+            });
+        });
+      });
     });
   });
 });
