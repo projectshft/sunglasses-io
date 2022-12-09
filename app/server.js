@@ -14,11 +14,6 @@ const checkValidParams = require('../helpers/checkValidParams.js');
 //   require('../helpers/checkForValidAccessToken').default;
 
 const PORT = 3001;
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'Origin, X-Requested-With, Content-Type, Accept, X-Authentication',
-};
 
 let users = [];
 let brands = [];
@@ -28,23 +23,19 @@ const accessTokens = [
 ];
 
 const router = Router();
+
 router.use(bodyParser.json());
 router.use(cors());
 
 const server = http
   .createServer((request, response) => {
-    if (request.method === 'OPTIONS') {
-      response.writeHead(200, CORS_HEADERS);
-      return response.end();
-    }
-
     router(request, response, finalHandler(request, response));
   })
   .listen(PORT, (error) => {
     if (error) {
       console.log('Error on server startup: ', error);
     } else {
-      // console.log(`Server is listening at http://localhost:${PORT}`);
+      console.log(`Server is listening at http://localhost:${PORT}`);
     }
 
     fs.readFile('initial-data/users.json', 'utf-8', (err, data) => {
@@ -52,7 +43,6 @@ const server = http
         throw err;
       }
       users = JSON.parse(data);
-      // console.log('User data loaded');
     });
 
     fs.readFile('initial-data/brands.json', 'utf-8', (err, data) => {
@@ -60,7 +50,6 @@ const server = http
         throw err;
       }
       brands = JSON.parse(data);
-      // console.log('Brand data loaded');
     });
 
     fs.readFile('initial-data/products.json', 'utf-8', (err, data) => {
@@ -68,7 +57,6 @@ const server = http
         throw err;
       }
       products = JSON.parse(data);
-      // console.log('Product data loaded');
     });
   });
 
@@ -143,7 +131,9 @@ router.get('/api/brands/:id/products', (request, response) => {
   );
 
   if (requestedProducts.length === 0) {
-    response.writeHead(404, { 'Content-Type': 'application/json' });
+    response.writeHead(404, 'No brands to match that id', {
+      'Content-Type': 'application/json',
+    });
     return response.end(JSON.stringify(requestedProducts));
   }
 
@@ -155,7 +145,7 @@ router.get('/api/products', (request, response) => {
   const queryParams = queryString.parse(url.parse(request.url).query);
 
   if (!checkValidParams(queryParams, ['offset', 'itemLimit', 'query'])) {
-    response.writeHead(400);
+    response.writeHead(400, 'Invalid query parameters');
     return response.end(
       'this endpoint only accepts "offset", and "itemLimit" as parameters'
     );
@@ -164,6 +154,7 @@ router.get('/api/products', (request, response) => {
   // if (queryParams.query !== undefined) {
 
   // }
+
   response.writeHead(200, { 'Content-Type': 'applications/json' });
   return response.end(JSON.stringify(products));
 });
@@ -203,11 +194,11 @@ router.post('/api/login', (request, response) => {
 });
 
 const checkForValidAccessToken = (request) => {
-  const requestToken = request.body.accessToken;
+  const tokenInRequest = request.body.accessToken;
 
-  if (requestToken) {
+  if (tokenInRequest) {
     const token = accessTokens.find(
-      (tokenObj) => tokenObj.token === requestToken
+      (tokenObj) => tokenObj.token === tokenInRequest
     );
     if (!token) {
       return '401';
@@ -218,25 +209,36 @@ const checkForValidAccessToken = (request) => {
   return '200';
 };
 
+const findUser = (accessToken) => {
+  const { username } = accessTokens.find(
+    (tokenObj) => (tokenObj.token = accessToken)
+  );
+
+  if (username) {
+    return users.find((user) => user.login.username === username);
+  }
+  return undefined;
+};
+
 router.get('/api/me/cart', (request, response) => {
-  const validToken = checkForValidAccessToken(request);
-  if (validToken === '401') {
+  const tokenStatus = checkForValidAccessToken(request);
+  if (tokenStatus === '401') {
     response.writeHead(401, 'access token does not match, please login');
     return response.end();
   }
 
-  if (validToken === '400') {
+  if (tokenStatus === '400') {
     response.writeHead(400, 'access token required');
     return response.end();
   }
 
-  const { username } = accessTokens.find(
-    (tokenObj) => (tokenObj.token = request.body.accessToken)
-  );
-
-  const user = users.find((user) => user.login.username === username);
-  response.writeHead(200, { 'Content-Type': 'application/json' });
-  return response.end(JSON.stringify(user.cart));
+  const user = findUser(request.body.accessToken);
+  if (user) {
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    return response.end(JSON.stringify(user.cart));
+  }
+  response.writeHead(404, 'user not found');
+  return response.end();
 });
 
 router.post('/api/me/cart', (request, response) => {
@@ -260,11 +262,7 @@ router.post('/api/me/cart', (request, response) => {
     if (request.body.quantity) {
       product = { ...product, quantity: request.body.quantity };
     }
-    const { username } = accessTokens.find(
-      (tokenObj) => (tokenObj.token = request.body.accessToken)
-    );
-
-    const user = users.find((user) => user.login.username === username);
+    const user = findUser(request.body.accessToken);
     if (user) {
       user.cart.push(product);
       response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -291,11 +289,8 @@ router.delete('/api/me/cart/:productId', (request, response) => {
   }
   const { productId } = request.params;
   if (productId) {
-    const { username } = accessTokens.find(
-      (tokenObj) => (tokenObj.token = request.body.accessToken)
-    );
+    const user = findUser(request.body.accessToken);
 
-    const user = users.find((user) => user.login.username === username);
     if (user) {
       const product = user.cart.find((product) => product.id === productId);
       if (product) {
@@ -333,20 +328,15 @@ router.post('/api/me/cart/:productId', (request, response) => {
   }
   const { productId } = request.params;
   if (productId) {
-    const { username } = accessTokens.find(
-      (tokenObj) => (tokenObj.token = request.body.accessToken)
-    );
+    const user = findUser(request.body.accessToken);
 
-    const user = users.find((user) => user.login.username === username);
     if (user) {
       const product = user.cart.find((product) => product.id === productId);
       if (product) {
-        product.quantity = request.body.quantity
-        response.writeHead(
-          200,
-          { 'Content-Type': 'application/json' },
-          'item successfully removed'
-        );
+        product.quantity = request.body.quantity;
+        response.writeHead(200, 'item successfully removed', {
+          'Content-Type': 'application/json',
+        });
         return response.end(JSON.stringify(product));
       }
       response.writeHead(
