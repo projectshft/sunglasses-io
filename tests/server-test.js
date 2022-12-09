@@ -491,14 +491,15 @@ describe('/api/me/:productId', () => {
       requester
         .post('/api/me/cart')
         .send({ productId: '3', quantity: 4, accessToken: '12345678' })
-        .then((res) => {
-          chai
-            .request(server)
-            .delete('/api/me/cart/3')
-            .send({ accessToken: '12345678' });
+        .then(
+          (res) =>
+            chai
+              .request(server)
+              .delete('/api/me/cart/3')
+              .send({ accessToken: '12345678' })
           // chai.request(server).delete('/api/me/3');
           // .send({ accessToken: '12345678' });
-        })
+        )
         .then((res) => {
           should.exist(res);
           res.should.have.status('200');
@@ -506,9 +507,12 @@ describe('/api/me/:productId', () => {
           res.body.should.have.property('id').that.equals('3');
           res.body.should.have.property('quantity').that.equals(4);
         })
-        .then(() => {
-          requester.get('/api/me/cart').send({ accessToken: '12345678' });
-        })
+        .then(() =>
+          chai
+            .request(server)
+            .get('/api/me/cart')
+            .send({ accessToken: '12345678' })
+        )
         .then((res) => {
           res.body.should.be.an('array');
           res.body.forEach((product) => {
@@ -569,24 +573,23 @@ describe('/api/me/:productId', () => {
       requester
         .post('/api/me/cart')
         .send({ productId: '3', quantity: 4, accessToken: '12345678' })
-        .then(() => {
+        .then(() =>
           requester
             .post('/api/me/cart/3')
-            .send({ accessToken: '12345678', quantity: 2 });
-        })
+            .send({ accessToken: '12345678', quantity: 2 })
+        )
         .then((res) => {
           res.should.have.status('200');
           res.body.should.be.an('object');
           res.body.quantity.should.equal(2);
           requester.close();
+          done();
         })
         .catch((err) => {
           requester.close();
           done(err);
         });
     });
-
-    it('updated item should have updated quantity inside the cart', () => {});
 
     it('it should return a 400 if no access token is provided', (done) => {
       chai
