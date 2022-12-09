@@ -115,16 +115,16 @@ paths:
         #     enum:
         #       - lowToHigh
         #       - highToLow
-        - name: itemLimit
-          in: query
-          description: limit the number of products returned
-          required: false
-          type: integer
-        - name: offset
-          in: query
-          description: the amount to offset results by
-          type: integer
-          required: false
+        # - name: itemLimit
+        #   in: query
+        #   description: limit the number of products returned
+        #   required: false
+        #   type: integer
+        # - name: offset
+        #   in: query
+        #   description: the amount to offset results by
+        #   type: integer
+        #   required: false
       responses:
         "200":
           description: An array of products
@@ -239,6 +239,7 @@ paths:
           description: id of the product to delete.
           required: true
           type: string
+        - $ref: "#/parameters/accessToken"
       responses:
         "200":
           description: Item was successfuly removed from cart.  Returns the deleted item
@@ -264,11 +265,17 @@ paths:
           description: id of the product to delete.
           required: true
           type: string
-        - in: query
-          name: quantity
-          description: the updated quantity of that priduct in the user's cart
+        - in: body
+          name: data
           required: true
-          type: integer
+          description: object containing accessToken and quantity
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              quantity:
+                type: integer
       responses:
         "200":
           description: Successfully updated quantity of item in cart. Returns the updated item.
@@ -282,41 +289,41 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/Error"
-  /articles:
-    get:
-      summary: get articles
-      description: get articles about sunglasses
-      tags:
-        - articles
-      responses:
-        "200":
-          description: Returns an array of articles
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/article"
-    post:
-      summary: post new articles
-      description: Admin level users can post new articles. Admin level is REQUIRED.
-      tags:
-        - articles
-      parameters:
-        - $ref: "#/parameters/postArticle"
-      responses:
-        "200":
-          description: Article successfully uploaded. Returns a copy of the article.
-          schema:
-            $ref: "#/definitions/article"
-        "400":
-          description: Information in body is missing or malformed.
-        "401":
-          description: Must be logged in
-        "403":
-          description: This functionality is only allowed to administrators
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
+  # /articles:
+  #   get:
+  #     summary: get articles
+  #     description: get articles about sunglasses
+  #     tags:
+  #       - articles
+  #     responses:
+  #       '200':
+  #         description: Returns an array of articles
+  #         schema:
+  #           type: array
+  #           items:
+  #             $ref: '#/definitions/article'
+  #   post:
+  #     summary: post new articles
+  #     description: Admin level users can post new articles. Admin level is REQUIRED.
+  #     tags:
+  #       - articles
+  #     parameters:
+  #       - $ref: '#/parameters/postArticle'
+  #     responses:
+  #       '200':
+  #         description: Article successfully uploaded. Returns a copy of the article.
+  #         schema:
+  #           $ref: '#/definitions/article'
+  #       '400':
+  #         description: Information in body is missing or malformed.
+  #       '401':
+  #         description: Must be logged in
+  #       '403':
+  #         description: This functionality is only allowed to administrators
+  #       default:
+  #         description: Unexpected error
+  #         schema:
+  #           $ref: '#/definitions/Error'
   # /articles/{articleId}:
 
 parameters:
@@ -330,19 +337,19 @@ parameters:
       properties:
         accessToken:
           type: string
-  postArticle:
-    in: body
-    name: article
-    description: an object representing the article to be submitted
-    required: true
-    schema:
-      type: object
-      properties:
-        accessToken:
-          description: The access token of an admin
-          type: string
-        article:
-          $ref: "#/definitions/article"
+  # postArticle:
+  #   in: body
+  #   name: article
+  #   description: an object representing the article to be submitted
+  #   required: true
+  #   schema:
+  #     type: object
+  #     properties:
+  #       accessToken:
+  #         description: The access token of an admin
+  #         type: string
+  #       article:
+  #         $ref: '#/definitions/article'
 definitions:
   brand:
     type: object
@@ -410,21 +417,21 @@ definitions:
         items:
           type: string
           description: url paths to images of the product
-  article:
-    type: object
-    properties:
-      id:
-        type: string
-        description: unique identifier of article
-      imageUrl:
-        type: string
-        description: url path to the image for the article
-      title:
-        type: string
-        description: title of the article
-      body:
-        type: string
-        description: Body content of the article
+  # article:
+  #   type: object
+  #   properties:
+  #     id:
+  #       type: string
+  #       description: unique identifier of article
+  #     imageUrl:
+  #       type: string
+  #       description: url path to the image for the article
+  #     title:
+  #       type: string
+  #       description: title of the article
+  #     body:
+  #       type: string
+  #       description: Body content of the article
   Error:
     type: object
     properties:
