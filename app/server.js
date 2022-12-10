@@ -121,26 +121,6 @@ router.post('/cart', (req, res) => {
     }
   });
 
-  router.delete('/cart', (req, res) => {
-    try {
-      const accessToken = req.headers['access-token'];
-      const userInfo = accessTokens.find(token => token.accessToken === accessToken);
-      if (!userInfo) {
-        throw new Error('Invalid access token');
-      }
-      const product = products.find(product => product.id === req.body.productId);
-      if (!product) {
-        throw new Error('Invalid item id');
-      }
-      cart = cart.filter(cartItem => cartItem.id !== req.body.productId);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(cart));
-    } catch (error) {
-      res.writeHead(401, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: error.message }));
-    }
-  });
-
 
 const server = http.createServer((req, res) => {
   router(req, res, finalhandler(req, res));

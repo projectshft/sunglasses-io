@@ -104,19 +104,6 @@ describe('/cart', () => {
       done();
     });
   })
-  // it ('should delete an item from the cart', (done) => {
-  //   chai
-  //   .request(server)
-  //   .delete(`/cart`)
-  //   .set('access-token', 'qwertyuiopasdfgh')
-  //   .send({productId: '1'})
-  //   .end((err, res) => {
-  //     chai.expect(res.status).to.equal(200);
-  //     chai.expect(res.body).to.be.an('array');
-  //     chai.expect(res.body).to.not.include({id: '1'});
-  //     done();
-  //   });
-  // })
 })
 
 
