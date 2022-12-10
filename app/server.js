@@ -29,11 +29,22 @@ const cart = [{
 
 const router = Router();
 
+//get list of brands
 router.get('/brands', (req, res) => {
+    try{
+        if(brands.length === 0){
+            throw new Error('there are no brands')
+        }
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(brands));
+    }
+    catch(error){
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: error.message }));
+    }
 });
 
+//get specific product
 router.get('/products/:id', (req, res) => {
     try{
   const productId = req.params.id;
@@ -51,14 +62,24 @@ router.get('/products/:id', (req, res) => {
     }
 });
 
+//get list of products
 router.get('/products', (req, res) => {
+    try{
+        if(products.length===0){
+            throw new Error('there are no products')
+        }
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(products));
+    }
+  catch(error){
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: error.message }));
+  }
 });
 
 router.use(bodyParser.json());
 
-
+//log in
 router.post('/login', (req, res) => {
     try{
   const { username, password } = req.body;
