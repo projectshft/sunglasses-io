@@ -81,7 +81,44 @@ describe('/cart', () => {
       done();
     });
   })
+  it('should return a 401 error if invalid item is added to cart', (done) =>{
+    chai
+    .request(server)
+    .post('/cart')
+    .set('access-token', 'qwertyuiopasdfgh')
+    .send({productId: '9000'})
+    .end((err, res) => {
+      chai.expect(res.status).to.equal(401);
+      chai.expect(res.body.message).to.equal('that item simply does not exist')
+      done();
+    });
+  })
+  it('should return 401 error if there is no access token', (done) =>{
+    chai
+    .request(server)
+    .post('/cart')
+    .send({productId: '1'})
+    .end((err, res) => {
+      chai.expect(res.status).to.equal(401);
+      chai.expect(res.body.message).to.equal('A man has no face. A man with no face cannot add to a cart.')
+      done();
+    });
+  })
+  // it ('should delete an item from the cart', (done) => {
+  //   chai
+  //   .request(server)
+  //   .delete(`/cart`)
+  //   .set('access-token', 'qwertyuiopasdfgh')
+  //   .send({productId: '1'})
+  //   .end((err, res) => {
+  //     chai.expect(res.status).to.equal(200);
+  //     chai.expect(res.body).to.be.an('array');
+  //     chai.expect(res.body).to.not.include({id: '1'});
+  //     done();
+  //   });
+  // })
 })
+
 
 describe('/login', () => {
   it('should return an access token to the header', (done) => {

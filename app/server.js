@@ -18,7 +18,14 @@ const accessTokens = [{
     accessToken: 'qwertyuiopasdfgh'
 }];
 
-const cart = [];
+const cart = [{
+    id: "1",
+    categoryId: "1",
+    name: "Superglasses",
+    description: "The best glasses in the world",
+    price:150,
+    imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+}];
 
 const router = Router();
 
@@ -98,12 +105,12 @@ router.post('/cart', (req, res) => {
       const accessToken = req.headers['access-token'];
       const userInfo = accessTokens.find(token => token.accessToken === accessToken);
       if (!userInfo) {
-        throw new Error('Invalid access token');
+        throw new Error('A man has no face. A man with no face cannot add to a cart.');
       }
    
       const product = products.find(product => product.id === req.body.productId);
       if (!product) {
-        throw new Error('Invalid item id');
+        throw new Error('that item simply does not exist');
       }
       cart.push(product)
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -114,19 +121,18 @@ router.post('/cart', (req, res) => {
     }
   });
 
-  router.delete('/cart/:itemId', (req, res) => {
+  router.delete('/cart', (req, res) => {
     try {
       const accessToken = req.headers['access-token'];
       const userInfo = accessTokens.find(token => token.accessToken === accessToken);
       if (!userInfo) {
         throw new Error('Invalid access token');
       }
-      const itemId = req.params.itemId;
-      const product = products.find(product => product.id === itemId);
+      const product = products.find(product => product.id === req.body.productId);
       if (!product) {
         throw new Error('Invalid item id');
       }
-      cart = cart.filter(cartItem => cartItem.item.id !== itemId);
+      cart = cart.filter(cartItem => cartItem.id !== req.body.productId);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(cart));
     } catch (error) {
