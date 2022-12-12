@@ -150,40 +150,41 @@ console.log(accessTokens);
 
 // CODE ABOVE WORKS!!!  GETTING AN ACCESS TOKEN SUCCESSFULLY, IT IS BEING ADDED TO ACCESS TOKENS ARRAY 
 //NOW WORKING ON PULLING ACCESS TOKEN FROM ARRAY, VERFYING IF NOT EXPIRED AND ACCESSING CART 12/9/22
-// const getValidTokenFromRequest = (req) => {
-//   const parsedUrl = require('url').parse(req.url, true);
-
-//   if(!parsedUrl.query.accessToken) return null
-  
-//   let currentAccessToken = accessTokens.find((accessToken) => {
-//     return accessToken.token === parsedUrl.query.accessToken
-//   })
-//   return currentAccessToken ? currentAccessToken : null;
-// }
 
 // // GET current user's cart
 myRouter.get('/v1/me/cart', (request, response) => {
-  const login = queryString.parse(request._parsedUrl.query)
+  let currentAccessToken = getValidTokenFromRequest(request);
 
-  if(login.username && login.password) {
-  
-  let currentAccessToken = accessTokens.find((accessToken) => {
-    return accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
-    
-  })
   if(!currentAccessToken) {
-    response.writeHead(401, 'You must be logged in to access cart');
+    response.writeHead(401, 'You must be logged in to view your cart');
     return response.end();
-  } else {
-    let cart = users.find((user) => {
-      return user.cart;
-    })
-    console.log('cart accessTokens', accessTokens)
-    response.writeHead(200, { 'Content-Type': 'application/json'});
-    return response.end(JSON.stringify(cart));
   }
-}
-});
+
+  let currentUser = users.find((user) => {
+    return user.login.username == currentAccessToken.username
+    });
+    response.writeHead(200, { 'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(currentUser.cart));
+  });
+
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url,true)
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure its valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+
 
 
 
