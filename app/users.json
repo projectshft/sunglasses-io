@@ -1,0 +1,15 @@
+[
+    {
+    "login": {
+      "username": "srichards",
+      "password": "tucker"
+    },
+    "cart": [
+        {
+          "productId": "1234",
+          "quantity": 2
+        }
+      ]
+    }
+  
+]

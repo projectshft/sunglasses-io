@@ -16,7 +16,7 @@ const url = require('url');
 let brands = [];
 let products = [];
 let users = [];
-let accessTokens = ['abc123def456ghi789'];
+let accessTokens = [];
 let cart = [];
 
 
@@ -105,7 +105,6 @@ myRouter.get('/v1/brands/:id/products', (request, response) => {
 myRouter.post("/v1/login", (request, response) => {
 	const login = queryString.parse(request._parsedUrl.query)
 
-
   if(login.username && login.password) {
     
     // if username and password being used match a registered user, user is userObject including username, password and accessToken
@@ -114,16 +113,17 @@ myRouter.post("/v1/login", (request, response) => {
     })
 
     if(user) {
-      // if there is a user, then loggedInUser is true, if no user, then loggedInUser is false and unAuthUser is true
       
+      response.writeHead(200, Object.assign({ 'Content-Type': 'application/json'}));
+
       let currentAccessToken = accessTokens.find((tokenObject) => {
         return tokenObject.username == user.login.username;
       });
 
       if (currentAccessToken) {
-        console.log(currentAccessToken)
+        console.log('acc tokens', accessTokens)
         currentAccessToken.lastUpdated = new Date();
-        console.log(currentAccessToken)
+        console.log('current acc token', currentAccessToken)
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
         let newAccessToken = {
@@ -132,6 +132,8 @@ myRouter.post("/v1/login", (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
+        console.log('see if new added', accessTokens)
+        console.log('new access token', newAccessToken)
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
@@ -144,40 +146,47 @@ myRouter.post("/v1/login", (request, response) => {
   }
 });
 
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url,true)
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure its valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-    });
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
+console.log(accessTokens);
 
-// GET current user's cart
+// CODE ABOVE WORKS!!!  GETTING AN ACCESS TOKEN SUCCESSFULLY, IT IS BEING ADDED TO ACCESS TOKENS ARRAY 
+//NOW WORKING ON PULLING ACCESS TOKEN FROM ARRAY, VERFYING IF NOT EXPIRED AND ACCESSING CART 12/9/22
+// const getValidTokenFromRequest = (req) => {
+//   const parsedUrl = require('url').parse(req.url, true);
+
+//   if(!parsedUrl.query.accessToken) return null
+  
+//   let currentAccessToken = accessTokens.find((accessToken) => {
+//     return accessToken.token === parsedUrl.query.accessToken
+//   })
+//   return currentAccessToken ? currentAccessToken : null;
+// }
+
+// // GET current user's cart
 myRouter.get('/v1/me/cart', (request, response) => {
-  let currentAccessToken = getValidTokenFromRequest(request);
-  console.log(currentAccessToken)
+  const login = queryString.parse(request._parsedUrl.query)
+
+  if(login.username && login.password) {
+  
+  let currentAccessToken = accessTokens.find((accessToken) => {
+    return accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT;
+    
+  })
   if(!currentAccessToken) {
     response.writeHead(401, 'You must be logged in to access cart');
     return response.end();
   } else {
     let cart = users.find((user) => {
       return user.cart;
-      
-    }) 
-    console.log(cart)
-    response.writeHead(200, { 'Content-Type': 'application/json' });
+    })
+    console.log('cart accessTokens', accessTokens)
+    response.writeHead(200, { 'Content-Type': 'application/json'});
     return response.end(JSON.stringify(cart));
   }
-})
+}
+});
+
+
+
 
 
 
