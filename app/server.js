@@ -151,38 +151,67 @@ console.log(accessTokens);
 // CODE ABOVE WORKS!!!  GETTING AN ACCESS TOKEN SUCCESSFULLY, IT IS BEING ADDED TO ACCESS TOKENS ARRAY 
 //NOW WORKING ON PULLING ACCESS TOKEN FROM ARRAY, VERFYING IF NOT EXPIRED AND ACCESSING CART 12/9/22
 
-// // GET current user's cart
+// // GET current user's cart = MUST HAVE USERNAME, PASSWORD AND ACCESSTOKEN AS PARAMS
 myRouter.get('/v1/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
 
-  if(!currentAccessToken) {
+  const login = queryString.parse(request._parsedUrl.query)
+
+  if(!login.username && login.password && login.currentAccessToken) {
     response.writeHead(401, 'You must be logged in to view your cart');
     return response.end();
   }
 
-  let currentUser = users.find((user) => {
+  let user = users.find((user) => {
     return user.login.username == currentAccessToken.username
     });
     response.writeHead(200, { 'Content-Type': 'application/json'});
-    return response.end(JSON.stringify(currentUser.cart));
+    return response.end(JSON.stringify(user.cart));
   });
 
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url,true)
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure its valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-    });
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
+// myRouter.post('/v1/me/cart/:productId', (request, response) => {
+//   let currentAccessToken = getValidTokenFromRequest(request);
+
+//   const login = queryString.parse(request._parsedUrl.query)
+
+//   if(!login.username && login.password && login.currentAccessToken) {
+//     response.writeHead(401, 'You must be logged in to view your cart');
+//     return response.end();
+//   }
+ 
+//   let user = users.find((user) => {
+//     return user.login.username == currentAccessToken.username
+//     });
+  
+//     let { productId } = request.params;
+//     let product = products.find(product => product.id == productId)
+
+//     if(!product) {
+//       response.writeHead(400, 'Unable to locate product');
+//       return response.end();
+//     }
+//     response.writeHead(200, { 'Content-Type': 'application/json'});
+//     currentUser.cart.push(product);
+//     return response.end(JSON.stringify(cart));
+//   });
+
+
+// var getValidTokenFromRequest = function(request) {
+//   var parsedUrl = require('url').parse(request.url,true)
+//   if (parsedUrl.query.accessToken) {
+//     // Verify the access token to make sure its valid and not expired
+//     let currentAccessToken = accessTokens.find((accessToken) => {
+//       return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+//     });
+//     if (currentAccessToken) {
+//       return currentAccessToken;
+//     } else {
+//       return null;
+//     }
+//   } else {
+//     return null;
+//   }
+// };
 
 
 
