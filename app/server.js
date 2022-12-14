@@ -17,6 +17,7 @@ let brands = [];
 let products = [];
 let users = [];
 let accessTokens = [];
+let cart = [];
 
 // Establish port 
 const PORT = 3001;
@@ -165,6 +166,7 @@ myRouter.post('/v1/me/cart/:id', (request, response) => {
   }
   
   const { id } = request.params;
+  console.log(desiredProduct)
   const desiredProduct = products.find((products) => {
     return products.id == id;
   });
@@ -175,7 +177,8 @@ myRouter.post('/v1/me/cart/:id', (request, response) => {
   } else {
     response.writeHead(200, { 'Content-Type': 'application/json'});
     cart.push(desiredProduct);
-    return response.end(JSON.stringify(cart));
+    console.log(cart)
+    return response.end(JSON.stringify(desiredProduct));
   }
   });
 
