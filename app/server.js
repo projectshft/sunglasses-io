@@ -157,29 +157,30 @@ myRouter.get('/v1/me/cart', (request, response) => {
     return response.end(JSON.stringify(user.cart));
   });
  
-myRouter.post('/v1/me/cart/:id', (request, response) => { 
-  let currentAccessToken = getValidTokenFromRequest(request);
-
-  if(!currentAccessToken) {
-    response.writeHead(401, 'You must be logged in to access your cart');
-    return response.end();
-  }
+  myRouter.post('/v1/me/cart/:id', (request, response) => {
+    console.log('request', request);
+    let currentAccessToken = getValidTokenFromRequest(request);
   
-  const { id } = request.params;
-  console.log(desiredProduct)
-  const desiredProduct = products.find((products) => {
-    return products.id == id;
-  });
+    if(!currentAccessToken) {
+      response.writeHead(401, 'You must be logged in to access your cart');
+      return response.end();
+    }
+    console.log('id', request.params.id);
+    const { id } = request.params;
+    const desiredProduct = products.find((products) => {
+      return products.id == id;
+    });
+    console.log(desiredProduct)
   
-  if(!desiredProduct){
-    response.writeHead(404, 'No results were found');
-    return response.end();
-  } else {
-    response.writeHead(200, { 'Content-Type': 'application/json'});
-    cart.push(desiredProduct);
-    console.log(cart)
-    return response.end(JSON.stringify(desiredProduct));
-  }
+    if(!desiredProduct){
+      response.writeHead(404, 'No results were found');
+      return response.end();
+    } else {
+      response.writeHead(200, { 'Content-Type': 'application/json'});
+      cart.push(desiredProduct);
+      console.log(cart)
+      return response.end(JSON.stringify(desiredProduct));
+    }
   });
 
   var getValidTokenFromRequest = function(request) {
@@ -198,20 +199,5 @@ myRouter.post('/v1/me/cart/:id', (request, response) => {
     return null;
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports = server;
