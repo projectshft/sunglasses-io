@@ -8,17 +8,15 @@ const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const url = require('url');
 
+// DO NOT INTEND TO USE, WILL DELETE WHEN READY TO SUBMIT
 // const Brand = require('../models/brand')
 // const Product = require('../models/product')
-
 
 // State holding variables 
 let brands = [];
 let products = [];
 let users = [];
 let accessTokens = [];
-let cart = [];
-
 
 // Establish port 
 const PORT = 3001;
@@ -57,6 +55,7 @@ fs.readFile('app/users.json', 'utf8', function (error, data) {
 console.log(`Server is listening on ${PORT}`);
 });
 
+// GET all brands
 myRouter.get('/v1/brands', (request, response) => {
   if(!brands) {
     response.writeHead(404, 'There are no brands to return');
@@ -67,6 +66,7 @@ myRouter.get('/v1/brands', (request, response) => {
   }
 });
 
+// GET all products
 myRouter.get('/v1/products', (request, response) => {
   if(!products) {
     response.writeHead(404, 'There are no products to return');
@@ -77,18 +77,12 @@ myRouter.get('/v1/products', (request, response) => {
   }
 });
 
-// GET products by brand
+// GET products by brand id
 myRouter.get('/v1/brands/:id/products', (request, response) => {
-  //console.log(request.body);
   const { id } = request.params;
   const brand = brands.find(brand =>brand.id == id);
-  //console.log(brand);
   const productsByBrand = products.filter(product => product.categoryId == id);
-  //
-  // console.log(productsByBrand);
-  // console.log(brand);
-  // console.log(request.body);
-   
+    
   if (!brand) {
     response.writeHead(404, 'No results were found');
     return response.end();
@@ -101,7 +95,7 @@ myRouter.get('/v1/brands/:id/products', (request, response) => {
   }
 });
 
-// POST login
+// POST user login
 myRouter.post("/v1/login", (request, response) => {
 	const login = queryString.parse(request._parsedUrl.query)
 
@@ -121,7 +115,6 @@ myRouter.post("/v1/login", (request, response) => {
       });
 
       if (currentAccessToken) {
-        console.log('acc tokens', accessTokens)
         currentAccessToken.lastUpdated = new Date();
         console.log('current acc token', currentAccessToken)
         return response.end(JSON.stringify(currentAccessToken.token));
@@ -146,72 +139,68 @@ myRouter.post("/v1/login", (request, response) => {
   }
 });
 
-console.log(accessTokens);
-
-// CODE ABOVE WORKS!!!  GETTING AN ACCESS TOKEN SUCCESSFULLY, IT IS BEING ADDED TO ACCESS TOKENS ARRAY 
-//NOW WORKING ON PULLING ACCESS TOKEN FROM ARRAY, VERFYING IF NOT EXPIRED AND ACCESSING CART 12/9/22
-
-// // GET current user's cart = MUST HAVE USERNAME, PASSWORD AND ACCESSTOKEN AS PARAMS
+// // GET current user's cart = CAN ACCESS WITH JUST ACCESS TOKEN
 myRouter.get('/v1/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-
-  const login = queryString.parse(request._parsedUrl.query)
-
-  if(!login.username && login.password && login.currentAccessToken) {
-    response.writeHead(401, 'You must be logged in to view your cart');
+  
+ 
+  if(!currentAccessToken) {
+    response.writeHead(401, 'You must be logged in to access your cart');
     return response.end();
   }
-
-  let user = users.find((user) => {
+  
+ let user = users.find((user) => {
     return user.login.username == currentAccessToken.username
     });
     response.writeHead(200, { 'Content-Type': 'application/json'});
     return response.end(JSON.stringify(user.cart));
   });
-
-// myRouter.post('/v1/me/cart/:productId', (request, response) => {
-//   let currentAccessToken = getValidTokenFromRequest(request);
-
-//   const login = queryString.parse(request._parsedUrl.query)
-
-//   if(!login.username && login.password && login.currentAccessToken) {
-//     response.writeHead(401, 'You must be logged in to view your cart');
-//     return response.end();
-//   }
  
-//   let user = users.find((user) => {
-//     return user.login.username == currentAccessToken.username
-//     });
+myRouter.post('/v1/me/cart/:id', (request, response) => { 
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if(!currentAccessToken) {
+    response.writeHead(401, 'You must be logged in to access your cart');
+    return response.end();
+  }
   
-//     let { productId } = request.params;
-//     let product = products.find(product => product.id == productId)
+  const { id } = request.params;
+  const desiredProduct = products.find((products) => {
+    return products.id == id;
+  });
+  
+  if(!desiredProduct){
+    response.writeHead(404, 'No results were found');
+    return response.end();
+  } else {
+    response.writeHead(200, { 'Content-Type': 'application/json'});
+    cart.push(desiredProduct);
+    return response.end(JSON.stringify(cart));
+  }
+  });
 
-//     if(!product) {
-//       response.writeHead(400, 'Unable to locate product');
-//       return response.end();
-//     }
-//     response.writeHead(200, { 'Content-Type': 'application/json'});
-//     currentUser.cart.push(product);
-//     return response.end(JSON.stringify(cart));
-//   });
+  var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url,true)
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure its valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+     return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 
-// var getValidTokenFromRequest = function(request) {
-//   var parsedUrl = require('url').parse(request.url,true)
-//   if (parsedUrl.query.accessToken) {
-//     // Verify the access token to make sure its valid and not expired
-//     let currentAccessToken = accessTokens.find((accessToken) => {
-//       return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-//     });
-//     if (currentAccessToken) {
-//       return currentAccessToken;
-//     } else {
-//       return null;
-//     }
-//   } else {
-//     return null;
-//   }
-// };
+
+
+
+
 
 
 
