@@ -6,8 +6,12 @@
     },
     "cart": [
         {
-          "productId": "1234",
-          "quantity": 2
+          "id": "3",
+          "name": "superglasses",
+          "description": "best pair ever",
+          "quantity": "1", 
+          "price": "150"
+
         }
       ]
     }
