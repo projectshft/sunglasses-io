@@ -4,7 +4,6 @@ const finalHandler = require('finalhandler');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
-const Cart = require('../models/cart')
 
 let brands = []
 let products = []
