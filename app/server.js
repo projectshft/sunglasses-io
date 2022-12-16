@@ -8,10 +8,6 @@ const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const url = require('url');
 
-// DO NOT INTEND TO USE, WILL DELETE WHEN READY TO SUBMIT
-// const Brand = require('../models/brand')
-// const Product = require('../models/product')
-
 // State holding variables 
 let brands = [];
 let products = [];
@@ -38,6 +34,7 @@ server.listen(PORT, (error) => {
     return console.log('Error on Server Startup: ', error)
   } 
 
+// Enable access to json data files  
 fs.readFile('app/brands.json', 'utf8', function (error, data) {
   if (error) throw error;
   brands = JSON.parse(data);
@@ -68,7 +65,7 @@ myRouter.get('/v1/brands', (request, response) => {
 });
 
 // GET all products
-myRouter.get('/v1/products', (request, response) => {
+myRouter.get('/v1/products', (request, response) => {  //problem:  items in my cart have a quantity property, should I go back to Object.assign instead of adding quantity to all products?
   if(!products) {
     response.writeHead(404, 'There are no products to return');
     return response.end();
@@ -140,21 +137,23 @@ myRouter.post("/v1/login", (request, response) => {
   }
 });
 
-// // GET current user's cart = CAN ACCESS WITH JUST ACCESS TOKEN
+// // GET current user's cart 
 myRouter.get('/v1/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-  
- 
+   
   if(!currentAccessToken) {
     response.writeHead(401, 'You must be logged in to access your cart');
     return response.end();
   }
   
- let user = users.find((user) => {
+  let currentUser = users.find((user) => {
     return user.login.username == currentAccessToken.username
-    });
+  });
+
+  let cart = currentUser.cart;
+
     response.writeHead(200, { 'Content-Type': 'application/json'});
-    return response.end(JSON.stringify(user.cart));
+    return response.end(JSON.stringify(cart));
   });
  
   myRouter.post('/v1/me/cart/:id', (request, response) => {
@@ -165,24 +164,123 @@ myRouter.get('/v1/me/cart', (request, response) => {
       response.writeHead(401, 'You must be logged in to access your cart');
       return response.end();
     }
+
+    let currentUser = users.find((user) => {
+      return user.login.username == currentAccessToken.username
+    });
+  
+    let cart = currentUser.cart;
+
     console.log('id', request.params.id);
     const { id } = request.params;
     const desiredProduct = products.find((products) => {
-      return products.id == id;
-    });
+      return products.id == id 
+      });
+   
+       
     console.log(desiredProduct)
   
     if(!desiredProduct){
-      response.writeHead(404, 'No results were found');
+      response.writeHead(404, 'The product was not found');
       return response.end();
-    } else {
-      response.writeHead(200, { 'Content-Type': 'application/json'});
-      cart.push(desiredProduct);
-      console.log(cart)
-      return response.end(JSON.stringify(desiredProduct));
+    } 
+
+    if(!cart) {
+      currentUser['cart'] = [];
     }
+
+    if(desiredProduct) {
+
+      if(cart.length) {
+        const index = cart.findIndex(item => item.id === desiredProduct.id)
+        if (index === -1) {
+          desiredProduct['quantity'] = 1;
+          cart.push(desiredProduct)
+          console.log('cart', cart)
+        } else {
+        cart = [...cart];
+        cart[index].quantity += 1;
+        console.log('cart', cart)
+      }
+    } else {
+      desiredProduct['quantity'] = 1;
+      cart.push(desiredProduct)
+   }
+     
+      response.writeHead(200, { 'Content-Type': 'application/json'});
+      return response.end(JSON.stringify(cart))
+    };
   });
 
+
+  myRouter.delete('/v1/me/cart/:id', (request, response) => {
+    console.log('request', request);
+    let currentAccessToken = getValidTokenFromRequest(request);
+  
+    if(!currentAccessToken) {
+      response.writeHead(401, 'You must be logged in to access your cart');
+      return response.end();
+    }
+
+    let currentUser = users.find((user) => {
+      return user.login.username == currentAccessToken.username
+    });
+  
+    const cart = currentUser.cart;
+
+    console.log('id', request.params.id);
+    const { id } = request.params;
+    
+    if(cart.length) {
+      response.writeHead(200, { 'Content-Type': 'application/json'});
+    let productIndex = cart.findIndex((product) => product.id == id);
+
+      if (productIndex > -1) {
+        cart.splice(productIndex, 1);
+      }
+      return response.end(JSON.stringify(cart));
+    }
+    });
+    myRouter.post('/v1/me/cart/:id/:quantity', (request, response) => {
+      console.log('request', request);
+      let currentAccessToken = getValidTokenFromRequest(request);
+    
+      if(!currentAccessToken) {
+        response.writeHead(401, 'You must be logged in to access your cart');
+        return response.end();
+      }
+
+      let currentUser = users.find((user) => {
+        return user.login.username == currentAccessToken.username
+      });
+    
+      const cart = currentUser.cart;
+
+
+      console.log('id', request.params.id);
+      console.log('quantity', request.params.quantity);
+      const params = {
+        "desiredProduct": {
+          "id": request.params.id,
+          "quantity": request.params.quantity
+        }
+      };
+      
+      const desiredProductIndex = cart.findIndex((product => product.id == params.desiredProduct.id));
+      console.log('before update', cart[desiredProductIndex] )  
+
+      cart[desiredProductIndex].quantity = params.desiredProduct.quantity
+      console.log('after update', cart[desiredProductIndex])  
+      
+      response.writeHead(200, { 'Content-Type': 'application/json'});
+       
+
+        console.log('cart', cart)
+        return response.end(JSON.stringify(cart));
+      });
+     
+    
+    
   var getValidTokenFromRequest = function(request) {
   var parsedUrl = require('url').parse(request.url,true)
   if (parsedUrl.query.accessToken) {

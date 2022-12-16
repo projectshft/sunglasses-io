@@ -4,16 +4,6 @@
       "username": "srichards",
       "password": "tucker"
     },
-    "cart": [
-        {
-          "id": "3",
-          "name": "superglasses",
-          "description": "best pair ever",
-          "quantity": "1", 
-          "price": "150"
-
-        }
-      ]
-    }
-  
+    "cart": []
+  }
 ]
