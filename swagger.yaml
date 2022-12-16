@@ -1,0 +1,226 @@
+swagger: '2.0'
+info:
+  title: Sunglasses
+  description: An API to support the sunglasses.io platform
+  version: 1.0.0
+host: api.sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/products:
+    get:
+      summary: returns all products
+      description: |
+        The glasses endpoint allows you to search glasses by string
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: true
+          type: string
+      tags:
+        - Glasses
+      responses:
+        '200':
+          description: An array of glasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pair'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/login:
+    post:
+      summary: User Profile 
+      description: >-
+        The User Profile endpoint returns information about the user that
+        has authorized with the application.
+      tags:
+      - login
+      responses:
+        '200':
+          description: logged in successfully
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/me/cart:
+    get:
+      summary: User cart 
+      description: 
+      tags:
+        - User
+      responses:
+        '200':
+          description: cart information for a user
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/me/cart/{id}:
+    post:
+      summary: Add a pair to the cart
+      description: |
+        This endpoint allows you to add an item to the cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the pair to add
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Added item to cart successfully
+          schema:
+            $ref: '#definitions/Pair'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      summary: Edit the amount of this item in the cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the pair to edit
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Edited item Succesfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    delete:
+      summary: Delete this item from the cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the pair to delete
+          required: true
+          type: string
+      tags:
+        - User
+      responses:
+        '200':
+          description: Deleted item successfully
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/brands:
+    get:
+      summary: All brands of sunglasses
+      description: >
+        All the sunglass brands
+      tags:
+      - Brands
+      responses:
+        '200':
+          description: An array of sunglass brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /api/brands/{id}/products:
+    get:
+      summary: Get all products by brand
+      description: |
+        Get all products of given brand by id
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: Got all products of this brand
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Pair:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a pair of glasses.
+      brandId:
+        type: string
+        description: The id of the brand the pair belongs to.
+      name:
+        type: string
+        description: Name of the product
+  cartItem:
+    type: object
+    properties:
+      quantity: 
+        type: integer
+        description: amount of this item in cart
+      pair:
+         $ref: '#/definitions/Pair'
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  User:
+    type: object
+    properties:
+      username:
+        type: string
+        description: login user name
+      first_name:
+        type: string
+        description: First name of the user.
+      last_name:
+        type: string
+        description: Last name of the user.
+      email:
+        type: string
+        description: Email address of the user
+      cart:
+        $ref: '#/definitions/Cart'
+  Cart:
+    type: array
+    items:
+          $ref: '#/definitions/Pair'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
