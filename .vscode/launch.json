@@ -6,8 +6,8 @@
     "configurations": [
         {
             "args": [
-                "-u",
-                "tdd",
+                // "-u",
+                // "tdd",
                 "--timeout",
                 "999999",
                 "--colors",

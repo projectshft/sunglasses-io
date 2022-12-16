@@ -65,7 +65,7 @@ myRouter.get('/v1/brands', (request, response) => {
 });
 
 // GET all products
-myRouter.get('/v1/products', (request, response) => {  //problem:  items in my cart have a quantity property, should I go back to Object.assign instead of adding quantity to all products?
+myRouter.get('/v1/products', (request, response) => {  
   if(!products) {
     response.writeHead(404, 'There are no products to return');
     return response.end();
@@ -98,14 +98,12 @@ myRouter.post("/v1/login", (request, response) => {
 	const login = queryString.parse(request._parsedUrl.query)
 
   if(login.username && login.password) {
-    
     // if username and password being used match a registered user, user is userObject including username, password and accessToken
     let user = users.find((user) => {
       return user.login.username === login.username && user.login.password === login.password;
     })
 
     if(user) {
-      
       response.writeHead(200, Object.assign({ 'Content-Type': 'application/json'}));
 
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -114,7 +112,7 @@ myRouter.post("/v1/login", (request, response) => {
 
       if (currentAccessToken) {
         currentAccessToken.lastUpdated = new Date();
-        console.log('current acc token', currentAccessToken)
+        //console.log('current acc token', currentAccessToken)
         return response.end(JSON.stringify(currentAccessToken.token));
       } else {
         let newAccessToken = {
@@ -123,8 +121,8 @@ myRouter.post("/v1/login", (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        console.log('see if new added', accessTokens)
-        console.log('new access token', newAccessToken)
+        //console.log('see if new added', accessTokens)
+        //console.log('new access token', newAccessToken)
         return response.end(JSON.stringify(newAccessToken.token));
       }
     } else {
@@ -148,16 +146,17 @@ myRouter.get('/v1/me/cart', (request, response) => {
   
   let currentUser = users.find((user) => {
     return user.login.username == currentAccessToken.username
-  });
+  })
 
   let cart = currentUser.cart;
 
     response.writeHead(200, { 'Content-Type': 'application/json'});
     return response.end(JSON.stringify(cart));
-  });
+});
  
+  // POST to user's cart by product ID
   myRouter.post('/v1/me/cart/:id', (request, response) => {
-    console.log('request', request);
+    //console.log('request', request);
     let currentAccessToken = getValidTokenFromRequest(request);
   
     if(!currentAccessToken) {
@@ -171,15 +170,12 @@ myRouter.get('/v1/me/cart', (request, response) => {
   
     let cart = currentUser.cart;
 
-    console.log('id', request.params.id);
+    //console.log('id', request.params.id);
     const { id } = request.params;
     const desiredProduct = products.find((products) => {
       return products.id == id 
-      });
-   
-       
-    console.log(desiredProduct)
-  
+    });
+    //console.log(desiredProduct)
     if(!desiredProduct){
       response.writeHead(404, 'The product was not found');
       return response.end();
@@ -190,31 +186,30 @@ myRouter.get('/v1/me/cart', (request, response) => {
     }
 
     if(desiredProduct) {
-
       if(cart.length) {
         const index = cart.findIndex(item => item.id === desiredProduct.id)
         if (index === -1) {
-          desiredProduct['quantity'] = 1;
+          Object.assign(desiredProduct, {quantity: 1})
           cart.push(desiredProduct)
-          console.log('cart', cart)
+          //console.log('cart', cart)
         } else {
         cart = [...cart];
         cart[index].quantity += 1;
-        console.log('cart', cart)
+        //console.log('cart', cart)
+        }
+      } else {
+        Object.assign(desiredProduct, {quantity: 1})
+      //desiredProduct['quantity'] = 1;  //this method added quantity property onto products themselves 
+        cart.push(desiredProduct)
       }
-    } else {
-      desiredProduct['quantity'] = 1;
-      cart.push(desiredProduct)
-   }
-     
       response.writeHead(200, { 'Content-Type': 'application/json'});
       return response.end(JSON.stringify(cart))
-    };
-  });
+    }
+});
 
-
+  // DELETE item from user's cart by product ID
   myRouter.delete('/v1/me/cart/:id', (request, response) => {
-    console.log('request', request);
+    //console.log('request', request);
     let currentAccessToken = getValidTokenFromRequest(request);
   
     if(!currentAccessToken) {
@@ -228,21 +223,22 @@ myRouter.get('/v1/me/cart', (request, response) => {
   
     const cart = currentUser.cart;
 
-    console.log('id', request.params.id);
+    //console.log('id', request.params.id);
     const { id } = request.params;
     
     if(cart.length) {
       response.writeHead(200, { 'Content-Type': 'application/json'});
     let productIndex = cart.findIndex((product) => product.id == id);
-
       if (productIndex > -1) {
         cart.splice(productIndex, 1);
       }
       return response.end(JSON.stringify(cart));
     }
-    });
+  });
+
+    // POST to update product quantity by product ID
     myRouter.post('/v1/me/cart/:id/:quantity', (request, response) => {
-      console.log('request', request);
+      //console.log('request', request);
       let currentAccessToken = getValidTokenFromRequest(request);
     
       if(!currentAccessToken) {
@@ -252,13 +248,12 @@ myRouter.get('/v1/me/cart', (request, response) => {
 
       let currentUser = users.find((user) => {
         return user.login.username == currentAccessToken.username
-      });
+      })
     
       const cart = currentUser.cart;
 
-
-      console.log('id', request.params.id);
-      console.log('quantity', request.params.quantity);
+      //console.log('id', request.params.id);
+      //console.log('quantity', request.params.quantity);
       const params = {
         "desiredProduct": {
           "id": request.params.id,
@@ -267,20 +262,18 @@ myRouter.get('/v1/me/cart', (request, response) => {
       };
       
       const desiredProductIndex = cart.findIndex((product => product.id == params.desiredProduct.id));
-      console.log('before update', cart[desiredProductIndex] )  
+      //console.log('before update', cart[desiredProductIndex] )  //this works
 
       cart[desiredProductIndex].quantity = params.desiredProduct.quantity
-      console.log('after update', cart[desiredProductIndex])  
+      //console.log('after update', cart[desiredProductIndex])  
       
       response.writeHead(200, { 'Content-Type': 'application/json'});
-       
-
-        console.log('cart', cart)
-        return response.end(JSON.stringify(cart));
-      });
+      //console.log('cart', cart)
+      return response.end(JSON.stringify(cart));
+});
      
     
-    
+  // Helper function 
   var getValidTokenFromRequest = function(request) {
   var parsedUrl = require('url').parse(request.url,true)
   if (parsedUrl.query.accessToken) {
