@@ -1,0 +1,285 @@
+swagger: "2.0"
+info:
+  title: "Sunglasses Store 2.0"
+  description: "API for Sunglasses store platforms"
+  version: "1.0.0"
+  
+host: "sunglasses.swagger-io"
+basePath: "/v1"
+schemes:
+- "http"
+paths:
+  /brands:
+    get:
+      tags:
+      - "brands"
+      summary: "Returns a list of all brands by brand name"
+      description: "Lists all brands carried by the store"
+      operationId: "getBrands"
+      produces:
+      - "application/json"
+      parameters: 
+      - name: "brands"
+        in: "query"
+        description: "search field"
+        type: "string"
+        required: true
+      responses:
+        "200":
+          description: "Returned a list of brands"
+          schema:
+            $ref: '#/definitions/Brands'
+        default:
+          description: "Invalid request"
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      tags:
+      - "brands"
+      summary: "Returns sunglasses inventory by brand ID"
+      description: "Returns a list of sunglasses by brand ID"
+      operationId: "getProductsByBrand"
+      produces:
+      - "application/json"
+      parameters: 
+      - name: "id"
+        in: "path"
+        description: "brand ID"
+        type: "string"
+        required: true
+      responses:
+        "200":
+          description: "Successfully returned array products by brand"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: "Error"
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      tags:
+      - "Products"
+      summary: "Returns a list of all products"
+      description: "Returns a list of all products"
+      produces:
+      - "application/json"
+      parameters: 
+      - name: "products"
+        in: "query"
+        description: "products"
+        type: "string"
+        required: true
+      responses:
+        "200":
+          description: "Returned a list of products"
+          schema:
+            type: "array"
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: "Error"
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      tags:
+      - "Login"
+      summary: "Logs user into the database"
+      description: "Logs user into the database"
+      produces:
+      - "application/json"
+      parameters:
+        - name: "username"
+          in: "query"
+          description: "The username for login in clear text"
+          required: false
+          type: "string"
+        - name: "password"
+          in: "query"
+          description: "The password for login in clear text"
+          required: false
+          type: "string"
+      responses:
+        "200":
+          description: "Returns user cart"
+          schema:
+            type: "string"
+        "400":
+          description: "Invalid username /or password"
+  /me/cart:
+    get:
+      tags:
+      - "Cart"
+      summary: "Returns user cart"
+      description: "Returns user cart"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "cart"
+        description: "Returns user cart"
+        required: true
+        schema:
+          type: "array"
+          items: 
+            $ref: '#/definitions/Cart'
+      responses:
+        "200":
+          description: "Returns user cart"
+  /me/cart/{id}:
+    post:
+      tags:
+      - "Cart"
+      summary: "Add item to user cart by ID"
+      description: "Add item to user cart by ID"  
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "id of desired item to add to cart"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "product added to cart"
+        default:
+          description: "Error"
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{id}:
+    delete:
+      tags:
+      - "Cart"
+      summary: "Delete item from cart by ID"
+      description: "Use integer IDs with positive integer value. Negative or non-integer values will generate API errors.  This can onyk be done by the logged-in user."  
+      operationId: "deleteFromCart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "productId"
+          in: "path"
+          description: "ID of the order that needs to be deleted"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Item successfully deleted from cart"
+        default:
+          description: "Error"
+          schema:
+            $ref: '#/definitions/Error'
+    /me/cart/{id}/{quantity}
+    post:
+      tags:
+      - "Cart"
+      summary: "Update quantity of item in cart by product ID and index"
+      description: "Update quantity of item in cart by product ID and index"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "update quantity"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Increases product quantity by 1"
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: "Error"
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  brands:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Identifier for brand"
+      name:
+        type: "string"
+        description: "Name of brand"
+  error:
+    type: "object"
+    properties:
+      code: 
+        type: "string"
+      message:
+        type: "string"
+  products:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "The product identifier"
+      name:
+        type: "string"
+        description: "The name of the product"
+      description:
+        type: "string"
+        description: "description of glasses"
+      price:
+        type: "integer"
+        description: "The price of the sunglasses"
+      imageURLs:
+        type: "string"
+        description: "The URLs for the images representing the product"
+            
+  cart:
+    type: "array"
+    items: 
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+          example: 5
+        categoryId: 
+          type: "integer"
+          description: "brand"
+        name:
+          type: "string"
+          description: "product name"
+        description:
+          type: "string"
+          description: "description of product"
+        price:
+          type: "integer"
+          format: "int32"
+          description: "product price"
+        imageUrls:
+          type: "string"
+          description: "image Url"
+  users:
+    type: "object"
+    properties:
+     login:
+        type: "object"
+        description: "login info of the user"
+        properties: 
+          username:
+            type: "string"
+            description: "username"
+          password: 
+          type: "string"
+          description: "password"
+        cart:
+          type: "array"
+          description: "cart of the user"
+          properties:
+            items:
+              $ref: '#/definitions/Product'
+
+     
+    
+  
+
+    
