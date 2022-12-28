@@ -1,0 +1,265 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Sunglasses API
+  description: Sunglasses API for Parsity Eval.
+  contact:
+    name: Armando Torrez
+    url: https://github.com/atorrez007
+    email: atorrez007@protonmail.com
+host: localhost:8001
+basePath: /api
+schemes:
+  - http
+paths:
+  /products:
+    get:
+      summary: Products
+      description: This will return an array of products available
+      tags:
+        - Products
+      responses:
+        "200":
+          description: The array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Cannot GET /api/brand/
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: GET Product by ID
+      description: This will return the product according to product id.
+      parameters:
+        - name: id
+          in: path
+          description: the id of the product to get.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Product not found.
+        default:
+          description: Uknown error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /brands:
+    get:
+      summary: GET Brands
+      description: This will return an array of brands available
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: Successful
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+
+  /brands/{id}/products:
+    get:
+      summary: GET Products by Brand ID
+      description: This will return an array of products available by brand id.
+      parameters:
+        - name: id
+          in: path
+          description: the id of the product to get.
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: Successful
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+  /login:
+    post:
+      summary: Login user
+      description: Requires a username and password that exists in database.
+      parameters:
+        - name: login
+          in: body
+          description: username and password
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      tags:
+        - Login
+      responses:
+        "200":
+          description: Access Granted
+          schema:
+            type: string
+            items:
+              $ref: "#/definitions/Login"
+        "401":
+          description: User not found
+          schema:
+            type: string
+        default:
+          description: Unexpected error
+  /me/cart:
+    get:
+      summary: GET items in the cart
+      description: Gets items in the shopping cart
+      parameters:
+        - $ref: "#/parameters/accessToken"
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Array of shopping cart products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "401":
+          description: Please login to view cart contents.
+        default:
+          description: Unexpected error
+
+  /me/cart/{productId}:
+    post:
+      summary: Add item to cart
+      description: Adds products to cart according to product id
+      parameters:
+        - $ref: "#/parameters/accessToken"
+        - name: productId
+          in: path
+          description: the id of the product to add
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Product added to cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "401":
+          description: Please login to edit cart
+        "404":
+          description: Not a product
+        default:
+          description: Unexpected error
+    delete:
+      summary: Delete item from cart
+      description: Remove products from cart according to product id
+      parameters:
+        - $ref: "#/parameters/accessToken"
+        - name: productId
+          in: path
+          description: the id of the product to add
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Will return cart with item removed.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "401":
+          description: Please login to edit cart
+        default:
+          description: Unexpected error
+        "404":
+          description: Not a product in cart
+parameters:
+  accessToken:
+    in: body
+    name: accessToken
+    description: Login required to get an access token.
+    required: true
+    schema:
+      type: object
+      properties:
+        accessToken:
+          type: string
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Identifier for brand
+      name:
+        type: string
+        description: Name of brand
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The product identifier
+      categoryId:
+        type: string
+        description: The product identifier
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: description of glasses
+      price:
+        type: integer
+        description: The price of the sunglasses
+      imageURLs:
+        type: string
+        description: The URLs for the images representing the product
+  Login:
+    type: string
+    properties:
+      accessToken:
+        type: string
+        description: randomized token
+  Cart:
+    type: object
+    properties:
+      products:
+        type: object
+        description: The collection of products in the cart.
+        items:
+          $ref: "#/definitions/Product"

@@ -184,7 +184,7 @@ myRouter.get("/api/me/cart", (request, response) => {
     );
     return response.end(JSON.stringify(cart));
   } catch (error) {
-    response.writeHead(400, { "Content-Type": "application/json" });
+    response.writeHead(401, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ message: error.message }));
   }
 });
@@ -194,6 +194,7 @@ myRouter.get("/api/me/cart", (request, response) => {
 myRouter.delete("/api/me/cart/:cartItemId", (request, response) => {
   try {
     const cartItemId = request.params.cartItemId;
+
     const accessToken = request.headers["access-token"];
     const accountLogin = accessTokens.find(
       (code) => code.accessToken === accessToken
@@ -210,15 +211,15 @@ myRouter.delete("/api/me/cart/:cartItemId", (request, response) => {
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify(cart));
   } catch (error) {
-    response.writeHead(400, { "Content-Type": "application/json" });
+    response.writeHead(401, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ message: error.message }));
   }
 });
 
 // User permission will be evaluated for this request.
-myRouter.post("/api/me/cart/", (request, response) => {
+myRouter.post("/api/me/cart/:productId", (request, response) => {
   try {
-    const productItem = request.body.productItem;
+    const productId = request.params.productId;
     const accessToken = request.headers["access-token"];
     const accountLogin = accessTokens.find(
       (code) => code.accessToken === accessToken
@@ -227,7 +228,7 @@ myRouter.post("/api/me/cart/", (request, response) => {
       throw new Error("Please login to view cart contents.");
     }
     // This helper method will check the request body and
-    const product = products.find((product) => product.id === productItem);
+    const product = products.find((product) => product.id === productId);
     if (!product) {
       throw new Error("Not a product.");
     }

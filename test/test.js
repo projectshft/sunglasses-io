@@ -122,7 +122,7 @@ describe("Cart API", () => {
         .request(server)
         .get("/api/me/cart")
         .end((err, response) => {
-          response.should.have.status(400);
+          response.should.have.status(401);
           response.body.message.should.equal(
             "Please login to view cart contents."
           );
@@ -132,33 +132,33 @@ describe("Cart API", () => {
   });
 
   // Post Tests
-  describe("POST /api/products/me/cart", () => {
+  describe("POST /api/me/cart/:productId", () => {
     it("should post the product to cart by product ID", (done) => {
+      let productId = "1";
       chai
         .request(server)
-        .post("/api/me/cart")
+        .post(`/api/me/cart/${productId}`)
         .set("access-token", "kmQWrczyuEkRE6VV")
-        .send({ productItem: "1" })
         .end((err, response) => {
           response.should.have.status(200);
           done();
         });
     });
     it("should return an error if post product ID is not in range", (done) => {
+      let productId = "0";
       chai
         .request(server)
-        .post("/api/me/cart")
-        .send({ productItem: "-1" })
+        .post(`/api/me/cart/${productId}`)
         .end((err, response) => {
           response.should.have.status(401);
           done();
         });
     });
     it("should return an error if user is not logged in", (done) => {
+      let productId = "1";
       chai
         .request(server)
-        .post("/api/me/cart")
-        .send({ productItem: "1" })
+        .post(`/api/me/cart/${productId}`)
         .end((err, response) => {
           response.should.have.status(401);
           response.body.message.should.equal(
@@ -215,7 +215,7 @@ describe("Cart API", () => {
         .delete(`/api/me/cart/${id}`)
         .set("access-token", "kmQWrczyuEkRE6VV")
         .end((err, response) => {
-          response.should.have.status(400);
+          response.should.have.status(401);
           response.body.message.should.equal("Not a product in cart.");
           done();
         });
@@ -226,7 +226,7 @@ describe("Cart API", () => {
         .request(server)
         .delete(`/api/me/cart/${id}`)
         .end((err, response) => {
-          response.should.have.status(400);
+          response.should.have.status(401);
           response.body.message.should.equal(
             "Please login to view cart contents."
           );
