@@ -16,11 +16,16 @@ myRouter.use(bodyParser.json());
 // variable value for 15 minutes
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
+//creates web server object
 server = http.createServer(function (request, response) {
+  //final handler (have googled plenty of time and need someone to explain)
+  myRouter(request, response, finalHandler(request,response));
+})
+
+server.listen(PORT, error => {
   //handle error
   if (error) {
     return console.log("Error on Server Startup: ", error);
   };
+});
 
-
-}).listen(PORT);
