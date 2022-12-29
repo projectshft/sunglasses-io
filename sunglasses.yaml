@@ -45,7 +45,7 @@ paths:
           type: string
       responses:
         "200":
-          description: successful operation
+          description: Successful
           schema:
             type: array
             items:
@@ -72,7 +72,6 @@ paths:
               $ref: "#/definitions/Brand"
         default:
           description: Unexpected error
-
   /brands/{id}/products:
     get:
       summary: GET Products by Brand ID
@@ -103,7 +102,7 @@ paths:
       parameters:
         - name: login
           in: body
-          description: username and password
+          description: Username and password for authentication
           required: true
           schema:
             type: object
@@ -133,7 +132,7 @@ paths:
   /me/cart:
     get:
       summary: GET items in the cart
-      description: Gets items in the shopping cart
+      description: Get items in the shopping cart
       parameters:
         - $ref: "#/parameters/accessToken"
       tags:
@@ -146,7 +145,7 @@ paths:
             items:
               $ref: "#/definitions/Product"
         "401":
-          description: Please login to view cart contents.
+          description: Please login to view cart contents
         default:
           description: Unexpected error
 
@@ -190,7 +189,7 @@ paths:
         - Cart
       responses:
         "200":
-          description: Will return cart with item removed.
+          description: Will return cart with item removed
           schema:
             type: array
             items:
@@ -238,16 +237,16 @@ definitions:
         description: The product identifier
       categoryId:
         type: string
-        description: The product identifier
+        description: The brand identifier
       name:
         type: string
         description: The name of the product
       description:
         type: string
-        description: description of glasses
+        description: The description of product
       price:
         type: integer
-        description: The price of the sunglasses
+        description: The price of the product
       imageURLs:
         type: string
         description: The URLs for the images representing the product
