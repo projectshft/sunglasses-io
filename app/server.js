@@ -84,14 +84,14 @@ const server = http
     });
   });
 
-// Gives directions to access api.
-myRouter.get("/", (request, response) => {
-  response.writeHead(
-    200,
-    Object.assign({ "Content-Type": "application/json" })
-  );
-  response.end("There's nothing to see here, please visit /api/products");
-});
+// // Gives directions to access api.
+// myRouter.get("/", (request, response) => {
+//   response.writeHead(
+//     200,
+//     Object.assign({ "Content-Type": "application/json" })
+//   );
+//   response.end("There's nothing to see here, please visit /api/products");
+// });
 
 // Gets list of products
 myRouter.get("/api/products", (request, response) => {
@@ -123,8 +123,6 @@ myRouter.get("/api/brands", (request, response) => {
   return response.end(JSON.stringify(brands));
 });
 
-// needs to generate all items with brandId.
-// Gets sunglasses products according to brand id.
 myRouter.get("/api/brands/:id/products", (request, response) => {
   try {
     const brandId = request.params.id;
@@ -168,7 +166,8 @@ myRouter.post("/api/login", (request, response) => {
   }
 });
 
-// Need to evaluate if user is logged in at this point.
+// These end-points require authentication.
+
 myRouter.get("/api/me/cart", (request, response) => {
   try {
     const accessToken = request.headers["access-token"];
@@ -189,8 +188,32 @@ myRouter.get("/api/me/cart", (request, response) => {
   }
 });
 
-// delete item by id.
-// User permission will be evaluated for this request.
+myRouter.post("/api/me/cart/:productId", (request, response) => {
+  try {
+    const productId = request.params.productId;
+    const accessToken = request.headers["access-token"];
+    const accountLogin = accessTokens.find(
+      (code) => code.accessToken === accessToken
+    );
+    if (!accountLogin) {
+      throw new Error("Please login to add to cart.");
+    }
+    // This helper method will check the request body and
+    const product = products.find((product) => product.id === productId);
+    if (!product) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ message: "Product not in inventory." }));
+      return;
+    }
+    cart.push(product);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(cart));
+  } catch (error) {
+    response.writeHead(401, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ message: error.message }));
+  }
+});
+
 myRouter.delete("/api/me/cart/:cartItemId", (request, response) => {
   try {
     const cartItemId = request.params.cartItemId;
@@ -200,39 +223,16 @@ myRouter.delete("/api/me/cart/:cartItemId", (request, response) => {
       (code) => code.accessToken === accessToken
     );
     if (!accountLogin) {
-      throw new Error("Please login to view cart contents.");
+      throw new Error("Please login to edit cart.");
     }
 
     const product = cart.find((product) => product.id === cartItemId);
     if (!product) {
-      throw new Error("Not a product in cart.");
+      response.writeHead(404, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ message: "Not a product in cart." }));
+      return;
     }
     cart = cart.filter((cartItem) => cartItem.id !== cartItemId);
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(cart));
-  } catch (error) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    response.end(JSON.stringify({ message: error.message }));
-  }
-});
-
-// User permission will be evaluated for this request.
-myRouter.post("/api/me/cart/:productId", (request, response) => {
-  try {
-    const productId = request.params.productId;
-    const accessToken = request.headers["access-token"];
-    const accountLogin = accessTokens.find(
-      (code) => code.accessToken === accessToken
-    );
-    if (!accountLogin) {
-      throw new Error("Please login to view cart contents.");
-    }
-    // This helper method will check the request body and
-    const product = products.find((product) => product.id === productId);
-    if (!product) {
-      throw new Error("Not a product.");
-    }
-    cart.push(product);
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify(cart));
   } catch (error) {

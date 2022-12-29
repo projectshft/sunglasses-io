@@ -20,7 +20,7 @@ describe("Cart API", () => {
           done();
         });
     });
-    // Error test for wrong URL.
+
     it("should not GET all the products", (done) => {
       chai
         .request(server)
@@ -45,9 +45,10 @@ describe("Cart API", () => {
         });
     });
     it("should return an error if no product in range", (done) => {
+      let id = "15";
       chai
         .request(server)
-        .get("/api/products/-1")
+        .get(`/api/products/${id}`)
         .end((err, response) => {
           response.should.have.status(404);
           response.body.message.should.equal("Product not found.");
@@ -103,7 +104,33 @@ describe("Cart API", () => {
     });
   });
 
-  // needs authentication
+  describe("POST /api/login", () => {
+    it("should return an access token as a string", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send({ username: "lazywolf342", password: "tucker" })
+        .end((err, response) => {
+          response.should.have.status(200);
+          response.body.should.be.a("string");
+          done();
+        });
+    });
+    it("should error if incorrect credentials", (done) => {
+      chai
+        .request(server)
+        .post("/api/login")
+        .send({ username: "johndoe", password: "password" })
+        .end((err, response) => {
+          response.should.have.status(401);
+          response.body.message.should.equal("User not found.");
+          done();
+        });
+    });
+  });
+
+  // These end-points require authentication.
+
   describe("GET /api/me/cart", () => {
     it("should retrieve contents in cart", (done) => {
       chai
@@ -141,16 +168,19 @@ describe("Cart API", () => {
         .set("access-token", "kmQWrczyuEkRE6VV")
         .end((err, response) => {
           response.should.have.status(200);
+          response.body.should.be.an("array");
           done();
         });
     });
     it("should return an error if post product ID is not in range", (done) => {
-      let productId = "0";
+      let productId = "15";
       chai
         .request(server)
         .post(`/api/me/cart/${productId}`)
+        .set("access-token", "kmQWrczyuEkRE6VV")
         .end((err, response) => {
-          response.should.have.status(401);
+          response.should.have.status(404);
+          response.body.message.should.equal("Product not in inventory.");
           done();
         });
     });
@@ -161,35 +191,7 @@ describe("Cart API", () => {
         .post(`/api/me/cart/${productId}`)
         .end((err, response) => {
           response.should.have.status(401);
-          response.body.message.should.equal(
-            "Please login to view cart contents."
-          );
-          done();
-        });
-    });
-  });
-
-  // Login
-  describe("POST /api/login", () => {
-    it("should return an access token as a string", (done) => {
-      chai
-        .request(server)
-        .post("/api/login")
-        .send({ username: "lazywolf342", password: "tucker" })
-        .end((err, response) => {
-          response.should.have.status(200);
-          response.body.should.be.a("string");
-          done();
-        });
-    });
-    it("should error if incorrect credentials", (done) => {
-      chai
-        .request(server)
-        .post("/api/login")
-        .send({ username: "johndoe", password: "password" })
-        .end((err, response) => {
-          response.should.have.status(401);
-          response.body.message.should.equal("User not found.");
+          response.body.message.should.equal("Please login to add to cart.");
           done();
         });
     });
@@ -205,6 +207,7 @@ describe("Cart API", () => {
         .set("access-token", "kmQWrczyuEkRE6VV")
         .end((err, response) => {
           response.should.have.status(200);
+          response.body.should.be.an("array");
           done();
         });
     });
@@ -215,7 +218,7 @@ describe("Cart API", () => {
         .delete(`/api/me/cart/${id}`)
         .set("access-token", "kmQWrczyuEkRE6VV")
         .end((err, response) => {
-          response.should.have.status(401);
+          response.should.have.status(404);
           response.body.message.should.equal("Not a product in cart.");
           done();
         });
@@ -227,9 +230,7 @@ describe("Cart API", () => {
         .delete(`/api/me/cart/${id}`)
         .end((err, response) => {
           response.should.have.status(401);
-          response.body.message.should.equal(
-            "Please login to view cart contents."
-          );
+          response.body.message.should.equal("Please login to edit cart.");
           done();
         });
     });

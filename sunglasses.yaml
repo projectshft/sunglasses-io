@@ -40,7 +40,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: the id of the product to get.
+          description: the id of the product to get
           required: true
           type: string
       responses:
@@ -51,7 +51,7 @@ paths:
             items:
               $ref: "#/definitions/Product"
         "404":
-          description: Product not found.
+          description: Product not found
         default:
           description: Uknown error
           schema:
@@ -92,6 +92,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Product"
+        "404":
+          description: Brand does not exist
         default:
           description: Unexpected error
   /login:
@@ -167,11 +169,11 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: "#/definitions/Cart"
         "401":
-          description: Please login to edit cart
+          description: Please login to add to cart
         "404":
-          description: Not a product
+          description: Product not in inventory
         default:
           description: Unexpected error
     delete:
@@ -192,7 +194,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Product"
+              $ref: "#/definitions/Cart"
         "401":
           description: Please login to edit cart
         default:
@@ -250,16 +252,13 @@ definitions:
         type: string
         description: The URLs for the images representing the product
   Login:
-    type: string
+    type: object
     properties:
       accessToken:
         type: string
         description: randomized token
   Cart:
+    allOf:
+      - $ref: "#/definitions/Product"
     type: object
-    properties:
-      products:
-        type: object
-        description: The collection of products in the cart.
-        items:
-          $ref: "#/definitions/Product"
+    description: The collection of products in the cart.
