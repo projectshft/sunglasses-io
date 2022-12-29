@@ -104,7 +104,6 @@ myRouter.get("/api/products/:id", (request, response) => {
   }
 });
 
-// Gets list of brands
 myRouter.get("/api/brands", (request, response) => {
   response.writeHead(
     200,
@@ -188,7 +187,7 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     if (!accountLogin) {
       throw new Error("Please login to add to cart.");
     }
-    // This helper method will check the request body and
+
     const product = products.find((product) => product.id === productId);
     if (!product) {
       response.writeHead(404, { "Content-Type": "application/json" });
