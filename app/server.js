@@ -84,16 +84,6 @@ const server = http
     });
   });
 
-// // Gives directions to access api.
-// myRouter.get("/", (request, response) => {
-//   response.writeHead(
-//     200,
-//     Object.assign({ "Content-Type": "application/json" })
-//   );
-//   response.end("There's nothing to see here, please visit /api/products");
-// });
-
-// Gets list of products
 myRouter.get("/api/products", (request, response) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(products));
@@ -217,7 +207,6 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
 myRouter.delete("/api/me/cart/:cartItemId", (request, response) => {
   try {
     const cartItemId = request.params.cartItemId;
-
     const accessToken = request.headers["access-token"];
     const accountLogin = accessTokens.find(
       (code) => code.accessToken === accessToken
