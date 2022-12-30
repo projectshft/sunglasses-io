@@ -20,8 +20,11 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 //creates web server object
 let server = http.createServer(function (request, response) {
-  const loadedProducts = JSON.parse(fs.readFileSync("./initial-data/products.json","utf-8"));
-  Products.addProducts(loadedProducts);
+  Products.deleteBoth();
+  const importedProducts = JSON.parse(fs.readFileSync("./initial-data/products.json","utf-8"));
+  const importedBrands = JSON.parse(fs.readFileSync("./initial-data/brands.json","utf-8"));
+  Products.addProducts(importedProducts);
+  Products.addBrands(importedBrands);
   //final handler (have googled plenty of time and need someone to explain)
   myRouter(request, response, finalHandler(request,response));
 })
@@ -29,10 +32,32 @@ let server = http.createServer(function (request, response) {
 server.listen(PORT);
 
 myRouter
+  .get("/v1/brands", (request, response) => {
+    //return list of brands
+    console.log("in brands");
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end(JSON.stringify(Products.getAllBrands()));
+  })
+
+myRouter
 .get("/v1/products", (request, response) => {
-  //Returns list of brands
+  //Returns list of products
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(Products.getAll()))
+  return response.end(JSON.stringify(Products.getAllProducts()));
+})
+
+myRouter
+.get("/v1/products/:id", (request, response) => {
+  //find product
+  const foundProduct = Products.getProductsById(request.params.id);
+  //if product not found return 400
+  if(!foundProduct) {
+    response.writeHead(400);
+    return response.end("Product Not Found");
+  }
+  // Return product object
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(foundProduct));
 })
 
 module.exports = server;
