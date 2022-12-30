@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 let products = [];
 let brands = [];
 
@@ -5,11 +7,6 @@ class Products {
   constructor(params) {
     Object.assign(this, params);
   };
-
-  static deleteBoth() {
-    brands = [];
-    products = [];
-  }
 
   static addProducts(newProducts) {
     newProducts.forEach((product) => products.push(product));
@@ -37,6 +34,9 @@ class Products {
     return filteredProducts;
   }
 };
+
+Products.addProducts(JSON.parse(fs.readFileSync("./initial-data/products.json","utf-8")));
+Products.addBrands(JSON.parse(fs.readFileSync("./initial-data/brands.json","utf-8")));
 
 //Exports the product for use elsewhere
 module.exports = Products;
