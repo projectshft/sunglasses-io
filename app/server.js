@@ -34,3 +34,5 @@ myRouter
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Products.getAll()))
 })
+
+module.exports = server;
