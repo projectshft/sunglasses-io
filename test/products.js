@@ -20,7 +20,7 @@ describe("Products", () => {
           res.body.should.be.an("array");
           res.body.length.should.eql(11);
           done();
-        })
-    })
-  })
-})
+        });
+    });
+  });
+});
