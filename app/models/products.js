@@ -30,6 +30,12 @@ class Products {
   static getAllBrands() {
     return brands;
   }
+
+  static filterByBrand(_brand) {
+    const brandObject = brands.find((brand) => brand.name === _brand );
+    const filteredProducts = products.filter((product) => product.categoryId === brandObject.id);
+    return filteredProducts;
+  }
 };
 
 //Exports the product for use elsewhere

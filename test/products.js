@@ -26,7 +26,7 @@ describe("Brands", () => {
     it("it should GET products filtered by brand", done => {
       chai
         .request(server)
-        .get("/v1/brands/findProductsByBrand?brand=Oakly")
+        .get("/v1/brands/Oakley")
         .end((err, res) => {
           res.should.have.a.status("200");
           res.body.should.be.an("array");
