@@ -34,9 +34,16 @@ server.listen(PORT);
 myRouter
   .get("/v1/brands", (request, response) => {
     //return list of brands
-    console.log("in brands");
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(Products.getAllBrands()));
+  })
+
+myRouter
+  .get("/v1/brands/:brand", (request, response) => {
+    //return list of products by brand
+    const productsByBrand = Products.filterByBrand(request.params.brand);
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(productsByBrand))
   })
 
 myRouter
