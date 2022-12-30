@@ -21,9 +21,7 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 //creates web server object
 let server = http.createServer(function (request, response) {
   const loadedProducts = JSON.parse(fs.readFileSync("./initial-data/products.json","utf-8"));
-  console.log("hello");
   Products.addProducts(loadedProducts);
-  Products.getAll();
   //final handler (have googled plenty of time and need someone to explain)
   myRouter(request, response, finalHandler(request,response));
 })
@@ -33,7 +31,6 @@ server.listen(PORT);
 myRouter
 .get("/v1/products", (request, response) => {
   //Returns list of brands
-  console.log("Bye");
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Products.getAll()))
 })
