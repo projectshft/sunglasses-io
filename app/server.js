@@ -130,9 +130,7 @@ myRouter.post("/api/login", (request, response) => {
 
 myRouter.get("/api/me/cart", (request, response) => {
   try {
-    // Pulls access token from header.
     const accessToken = request.headers["access-token"];
-    // Evaluates if access token is same as on file.
     const accountLogin = accessTokens.find(
       (code) => code.accessToken === accessToken
     );
