@@ -1,42 +1,12 @@
 var http = require("http");
 var fs = require("fs");
 var finalHandler = require("finalhandler");
-var queryString = require("querystring");
 var Router = require("router");
 var bodyParser = require("body-parser");
 var uid = require("rand-token").uid;
 
 const PORT = 8001;
 
-let users = [];
-let products = [];
-let brands = [];
-let cart = [
-  {
-    id: "4",
-    categoryId: "2",
-    name: "Better glasses",
-    description: "The best glasses in the world",
-    price: 1500,
-    imageUrls: [
-      "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-      "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-      "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-    ],
-  },
-  {
-    id: "5",
-    categoryId: "2",
-    name: "Glasses",
-    description: "The most normal glasses in the world",
-    price: 150,
-    imageUrls: [
-      "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-      "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-      "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-    ],
-  },
-];
 let accessTokens = [
   {
     username: "lazywolf342",
@@ -142,11 +112,12 @@ myRouter.post("/api/login", (request, response) => {
       throw new Error("User not found.");
     }
     let newAccessToken = {
-      username: user.username,
-      password: user.password,
+      username: user.login.username,
+      password: user.login.password,
       accessToken: uid(16),
     };
     accessTokens.push(newAccessToken);
+    // console.log(accessTokens);
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify(newAccessToken.accessToken));
   } catch (error) {
@@ -159,18 +130,26 @@ myRouter.post("/api/login", (request, response) => {
 
 myRouter.get("/api/me/cart", (request, response) => {
   try {
+    // Pulls access token from header.
     const accessToken = request.headers["access-token"];
+    // Evaluates if access token is same as on file.
     const accountLogin = accessTokens.find(
       (code) => code.accessToken === accessToken
     );
+
     if (!accountLogin) {
       throw new Error("Please login to view cart contents.");
     }
+
+    const currentUser = users.find(
+      (item) => item.login.username === accountLogin.username
+    );
+
     response.writeHead(
       200,
       Object.assign(CORS_HEADERS, { "Content-Type": "application/json" })
     );
-    return response.end(JSON.stringify(cart));
+    return response.end(JSON.stringify(currentUser.cart));
   } catch (error) {
     response.writeHead(401, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ message: error.message }));
@@ -187,16 +166,18 @@ myRouter.post("/api/me/cart/:productId", (request, response) => {
     if (!accountLogin) {
       throw new Error("Please login to add to cart.");
     }
-
+    const currentUser = users.find(
+      (item) => item.login.username === accountLogin.username
+    );
     const product = products.find((product) => product.id === productId);
     if (!product) {
       response.writeHead(404, { "Content-Type": "application/json" });
       response.end(JSON.stringify({ message: "Product not in inventory." }));
       return;
     }
-    cart.push(product);
+    currentUser.cart.push(product);
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(cart));
+    response.end(JSON.stringify(currentUser.cart));
   } catch (error) {
     response.writeHead(401, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ message: error.message }));
@@ -213,16 +194,22 @@ myRouter.delete("/api/me/cart/:cartItemId", (request, response) => {
     if (!accountLogin) {
       throw new Error("Please login to edit cart.");
     }
-
-    const product = cart.find((product) => product.id === cartItemId);
+    const currentUser = users.find(
+      (item) => item.login.username === accountLogin.username
+    );
+    const product = currentUser.cart.find(
+      (product) => product.id === cartItemId
+    );
     if (!product) {
       response.writeHead(404, { "Content-Type": "application/json" });
       response.end(JSON.stringify({ message: "Not a product in cart." }));
       return;
     }
-    cart = cart.filter((cartItem) => cartItem.id !== cartItemId);
+    currentUser.cart = currentUser.cart.filter(
+      (cartItem) => cartItem.id !== cartItemId
+    );
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(cart));
+    response.end(JSON.stringify(currentUser.cart));
   } catch (error) {
     response.writeHead(401, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ message: error.message }));

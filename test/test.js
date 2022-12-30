@@ -8,7 +8,6 @@ chai.should();
 chai.use(chaiHttp);
 
 describe("Cart API", () => {
-  // GET Tests
   describe("GET /api/products", () => {
     it("should GET all the products", (done) => {
       chai
@@ -158,7 +157,6 @@ describe("Cart API", () => {
     });
   });
 
-  // Post Tests
   describe("POST /api/me/cart/:productId", () => {
     it("should post the product to cart by product ID", (done) => {
       let productId = "1";
@@ -197,10 +195,9 @@ describe("Cart API", () => {
     });
   });
 
-  // Delete Test - needs credentials
   describe("DELETE /api/me/cart/:id", () => {
     it("should DELETE item in cart by product ID", (done) => {
-      let id = "5";
+      let id = "4";
       chai
         .request(server)
         .delete(`/api/me/cart/${id}`)
