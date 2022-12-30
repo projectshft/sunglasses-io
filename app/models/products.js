@@ -5,7 +5,7 @@ class Products {
     Object.assign(this, params);
   };
 
-  static addProducts(newProducts = [...newProducts]) {
+  static addProducts(newProducts) {
     newProducts.forEach((product) => products.push(product));
   };
 
@@ -14,3 +14,5 @@ class Products {
   };
 };
 
+//Exports the product for use elsewhere
+module.exports = Products;
