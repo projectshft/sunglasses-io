@@ -20,11 +20,6 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 //creates web server object
 let server = http.createServer(function (request, response) {
-  Products.deleteBoth();
-  const importedProducts = JSON.parse(fs.readFileSync("./initial-data/products.json","utf-8"));
-  const importedBrands = JSON.parse(fs.readFileSync("./initial-data/brands.json","utf-8"));
-  Products.addProducts(importedProducts);
-  Products.addBrands(importedBrands);
   //final handler (have googled plenty of time and need someone to explain)
   myRouter(request, response, finalHandler(request,response));
 })
