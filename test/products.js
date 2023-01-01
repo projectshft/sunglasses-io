@@ -66,8 +66,23 @@ describe("Products", () => {
             "price":150,
             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
           });
-          done();
+          done()
         });
     });
   });
 });
+
+describe("User", () =>{
+  describe("/GET User", () => {
+    it("it should login the user with correct inputs", done => {
+      chai
+      .request(server)
+      .get("/v1/user/login")
+      .end((err, res) =>{
+        res.should.have.a.status("200");
+        done();
+      })
+      
+    })
+  })
+})
