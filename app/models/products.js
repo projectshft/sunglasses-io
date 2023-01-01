@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 let products = [];
 let brands = [];
 
