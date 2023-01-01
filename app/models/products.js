@@ -35,8 +35,5 @@ class Products {
   }
 };
 
-Products.addProducts(JSON.parse(fs.readFileSync("./initial-data/products.json","utf-8")));
-Products.addBrands(JSON.parse(fs.readFileSync("./initial-data/brands.json","utf-8")));
-
 //Exports the product for use elsewhere
 module.exports = Products;

@@ -24,7 +24,25 @@ let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request,response));
 })
 
-server.listen(PORT);
+//fs read json data and use it for products class
+server.listen(PORT, error => {
+  //immediatly handle error
+  if (error) {
+    return console.log("Error on Server Startup: ", error);
+  }
+  //Parse JSON string data
+  fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
+    if (error) throw error;
+    const parsedProducts = JSON.parse(data);
+    Products.addProducts(parsedProducts);
+  });
+
+  fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
+    if (error) throw error;
+    const parsedBrands = JSON.parse(data);
+    Products.addBrands(parsedBrands);
+  })
+});
 
 myRouter
   .get("/v1/brands", (request, response) => {
