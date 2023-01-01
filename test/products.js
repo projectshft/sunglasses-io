@@ -26,7 +26,7 @@ describe("Brands", () => {
     it("it should GET products filtered by brand", done => {
       chai
         .request(server)
-        .get("/v1/brands/Oakley")
+        .get("/v1/brands/Oakley/products")
         .end((err, res) => {
           res.should.have.a.status("200");
           res.body.should.be.an("array");
@@ -77,7 +77,7 @@ describe("User", () =>{
     it("it should login the user with correct inputs", done => {
       chai
       .request(server)
-      .get("/v1/user/login")
+      .get("v1/user/login?email=natalia.ramos%40example.com&password=waters")
       .end((err, res) =>{
         res.should.have.a.status("200");
         done();

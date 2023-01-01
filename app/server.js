@@ -7,8 +7,11 @@ const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const Products = require('./models/products')
 
-
 const PORT = 3001;
+
+// API key giving use of server
+// Created with https://www.uuidgenerator.net/
+const VALID_API_KEYS = ["e347a542-b8dc-49a7-a5c5-aa6c889b1826","ae77856f-3796-4fa9-836e-b80beb50ae5e"]
 
 // Setup router
 var myRouter = Router();
@@ -20,6 +23,8 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 //creates web server object
 let server = http.createServer(function (request, response) {
+  //if(!VALID_API_KEYS.includes(request.))
+  
   //final handler (have googled plenty of time and need someone to explain)
   myRouter(request, response, finalHandler(request,response));
 })
@@ -62,8 +67,8 @@ myRouter
 
   //return list of products by brand
 myRouter
-  .get("/v1/brands/:brand", (request, response) => {
-    const productsByBrand = JSON.stringify(Products.filterByBrand(request.params.brand));
+  .get("/v1/brands/:brand/products", (request, response) => {
+    const productsByBrand = JSON.stringify(Products.filterProductsByBrand(request.params.brand));
     if(!productsByBrand){
       response.writeHead(400, "Invalid brand")
       return response.end();
@@ -89,7 +94,7 @@ myRouter
   }
   
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end();
+  return response.end(allProducts);
 })
 
 //Returns product by id property
@@ -105,6 +110,12 @@ myRouter
   // Return product object
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(foundProduct));
+})
+
+//Logs in user by creating an access token if password and username is valid
+myRouter
+.get("/v1/login", (request, response) => {
+  //parse url
 })
 
 module.exports = server;
