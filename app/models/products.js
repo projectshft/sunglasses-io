@@ -7,7 +7,7 @@ class Products {
   };
 
   static addProducts(newProducts) {
-    newProducts.forEach((product) => products.push(product));
+    products = [...newProducts]
   };
 
   static getAllProducts() {
@@ -19,14 +19,14 @@ class Products {
   }
 
   static addBrands(newBrands) {
-    newBrands.forEach((brand) => brands.push(brand));
+    brands = [...newBrands];
   };
 
   static getAllBrands() {
     return brands;
   }
 
-  static filterByBrand(_brand) {
+  static filterProductsByBrand(_brand) {
     const brandObject = brands.find((brand) => brand.name === _brand );
     if(!brandObject){
       return undefined;
