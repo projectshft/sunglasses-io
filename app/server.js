@@ -30,7 +30,7 @@ server.listen(PORT, error => {
   if (error) {
     return console.log("Error on Server Startup: ", error);
   }
-  //Parse JSON string data
+  //read json files, error handle, parse data, add to module state
   fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
     if (error) throw error;
     const parsedProducts = JSON.parse(data);
@@ -44,28 +44,29 @@ server.listen(PORT, error => {
   })
 });
 
+//return list of brands
 myRouter
   .get("/v1/brands", (request, response) => {
-    //return list of brands
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(Products.getAllBrands()));
   })
 
+  //return list of products by brand
 myRouter
   .get("/v1/brands/:brand", (request, response) => {
-    //return list of products by brand
     const productsByBrand = Products.filterByBrand(request.params.brand);
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(JSON.stringify(productsByBrand))
   })
 
+//Returns list of products
 myRouter
 .get("/v1/products", (request, response) => {
-  //Returns list of products
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(Products.getAllProducts()));
 })
 
+//Returns product by id property
 myRouter
 .get("/v1/products/:id", (request, response) => {
   //find product
