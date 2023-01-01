@@ -49,7 +49,10 @@ myRouter
   .get("/v1/brands", (request, response) => {
     const allBrands = Products.getAllBrands()
     //if brands.json data is empty
-    if(allBrands.length === 0 || !allBrands){
+    if(!allBrands){
+      response.writeHead(500, "Internal Server Error")
+    }
+    if(allBrands.length === 0){
       response.writeHead(404, "No brands available")
     }
     
@@ -79,7 +82,7 @@ myRouter
   const allProducts = JSON.stringify(Products.getAllProducts())
   
   if(!allProducts){
-    response.writeHead(500, "Products did not load")
+    response.writeHead(500, "Internal Server Error")
   }
   if(allProducts.length === 0){
     response.writeHead(404, "No products available")
@@ -94,7 +97,7 @@ myRouter
 .get("/v1/products/:id", (request, response) => {
   //find product
   const foundProduct = Products.getProductsById(request.params.id);
-  //if product not found return 400
+  //if product not found return 404
   if(!foundProduct) {
     response.writeHead(404);
     return response.end("Product not found");
