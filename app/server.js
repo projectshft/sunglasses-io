@@ -47,23 +47,46 @@ server.listen(PORT, error => {
 //return list of brands
 myRouter
   .get("/v1/brands", (request, response) => {
+    const allBrands = Products.getAllBrands()
+    //if brands.json data is empty
+    if(allBrands.length === 0 || !allBrands){
+      response.writeHead(404, "No brands available")
+    }
+    
     response.writeHead(200, {"Content-Type": "application/json"});
-    return response.end(JSON.stringify(Products.getAllBrands()));
+    return response.end(JSON.stringify(allBrands));
   })
 
   //return list of products by brand
 myRouter
   .get("/v1/brands/:brand", (request, response) => {
-    const productsByBrand = Products.filterByBrand(request.params.brand);
+    const productsByBrand = JSON.stringify(Products.filterByBrand(request.params.brand));
+    if(!productsByBrand){
+      response.writeHead(400, "Invalid brand")
+      return response.end();
+    }
+    if(productsByBrand.length === 0){
+      response.writeHead(404, "Product under this brand not found")
+      return response.end();
+    }
     response.writeHead(200, { "Content-Type": "application/json" });
-    return response.end(JSON.stringify(productsByBrand))
+    return response.end(productsByBrand)
   })
 
 //Returns list of products
 myRouter
 .get("/v1/products", (request, response) => {
+  const allProducts = JSON.stringify(Products.getAllProducts())
+  
+  if(!allProducts){
+    response.writeHead(500, "Products did not load")
+  }
+  if(allProducts.length === 0){
+    response.writeHead(404, "No products available")
+  }
+  
   response.writeHead(200, { "Content-Type": "application/json" });
-  return response.end(JSON.stringify(Products.getAllProducts()));
+  return response.end();
 })
 
 //Returns product by id property
@@ -73,8 +96,8 @@ myRouter
   const foundProduct = Products.getProductsById(request.params.id);
   //if product not found return 400
   if(!foundProduct) {
-    response.writeHead(400);
-    return response.end("Product Not Found");
+    response.writeHead(404);
+    return response.end("Product not found");
   }
   // Return product object
   response.writeHead(200, {"Content-Type": "application/json"});

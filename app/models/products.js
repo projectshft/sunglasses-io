@@ -28,6 +28,9 @@ class Products {
 
   static filterByBrand(_brand) {
     const brandObject = brands.find((brand) => brand.name === _brand );
+    if(!brandObject){
+      return undefined;
+    }
     const filteredProducts = products.filter((product) => product.categoryId === brandObject.id);
     return filteredProducts;
   }
