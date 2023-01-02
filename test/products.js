@@ -83,7 +83,7 @@ describe("User", () =>{
     it("it should login the user with correct inputs", done => {
       chai
       .request(server)
-      .get("/api/user/login?email=natalia.ramos%40example.com&password=waters")
+      .get("/api/login?email=natalia.ramos%40example.com&password=waters")
       .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("200");
