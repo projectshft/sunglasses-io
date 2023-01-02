@@ -6,6 +6,7 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
 const Products = require('./models/products')
+const Users = require('./models/users');
 
 const PORT = 3001;
 
@@ -49,6 +50,12 @@ server.listen(PORT, error => {
     if (error) throw error;
     const parsedBrands = JSON.parse(data);
     Products.addBrands(parsedBrands);
+  })
+
+  fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
+    if (error) throw error;
+    const parsedUsers = JSON.parse(data);
+    Products.addUsers(parsedUsers);
   })
 });
 
@@ -119,6 +126,11 @@ myRouter
 myRouter
 .get("/api/login", (request, response) => {
   //parse url
+  const parsedUrl = require("url").parse(request.url,true)
+  const eMail = parsedUrl.query.email;
+  const passWord = parsedUrl.query.password;
+  
+  return response.end();
 })
 
 module.exports = server;
