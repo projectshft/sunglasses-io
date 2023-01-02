@@ -11,8 +11,8 @@ class Users {
   };
 
   static authenticatedUser(_email,_password){
-    foundUser = users.find(user => {
-      user.email === _email && user.login.password === _password;
+    const foundUser = users.find(user => {
+      return user.email == _email && user.login.password == _password;
     })
     return foundUser;
   }
