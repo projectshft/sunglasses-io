@@ -1,5 +1,4 @@
 let users = [];
-let accessTokens = [];
 
 class Users {
   constructor(params) {
@@ -10,7 +9,7 @@ class Users {
     users = [..._users]
   };
 
-  static authenticatedUser(_email,_password){
+  static authenticateUser(_email,_password){
     const foundUser = users.find(user => {
       return user.email == _email && user.login.password == _password;
     })
