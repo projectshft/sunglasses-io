@@ -11,9 +11,13 @@ class Tokens {
   }
 
   static findCurrent(_user){
-    const _currentToken = accessTokens.find((tokenObject) => {
-      return tokenObject.username == _user.login.username;
-    })
+    let _currentToken = accessTokens.find((accessToken)=> {
+      return _user.login.username == accessToken.userName;
+    });
+    
+    // const _currentToken = accessTokens.find((tokenObject) => {
+    //   return tokenObject.username == _user.login.username;
+    // })
 
     if(_currentToken){
       _currentToken.lastUpdated = new Date();
