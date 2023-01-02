@@ -108,10 +108,24 @@ describe("User", () =>{
 
 describe("Cart", () => {
   describe("/POST user", () => {
-    it("it should NOT login user with invalid access token", done => {
+    it("it should NOT add to cart with invalid access token", done => {
       chai
         .request(server)
-        .post("api/user/cart/4")
+        .post("/api/user/cart/1?accessToken=zjOqXWCjXBEPd1pV")
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
+        .end((err, res) => {
+          res.should.have.a.status("401");
+          done();
+        });
+    });
+  });
+
+  describe("/DELETE user", () => {
+    it("it should NOT delete from the cart with invalid access token", done => {
+      chai
+        .request(server)
+        .post("/api/user/cart/3?accessToken=zjOqXWCjXBEPd1pV")
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("401");
           done();
