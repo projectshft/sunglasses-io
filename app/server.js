@@ -19,9 +19,6 @@ var myRouter = Router();
 //makes it so router uses middleware bodyParser to parse body to json
 myRouter.use(bodyParser.json());
 
-// variable value for 15 minutes
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
-
 //creates web server object
 let server = http.createServer(function (request, response) {
   if(!VALID_API_KEYS.includes(request.headers["x-authentication"])){
@@ -111,7 +108,7 @@ myRouter
 myRouter
 .get("/api/products/:id", (request, response) => {
   //find product
-  const foundProduct = Products.getProductsById(request.params.id);
+  const foundProduct = Products.getProductById(request.params.id);
   //if product not found return 404
   if(!foundProduct) {
     response.writeHead(404);
@@ -150,6 +147,50 @@ myRouter
   }else{
     response.writeHead(400,"Submit username AND password")
     return response.end();
+  }
+})
+
+myRouter
+.get("/api/cart", (request,response) => {
+  let currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  //if user not logged in
+  if(!currentAccessToken) {
+    response.writeHead(401, "Log in to view cart");
+    return response.end();
+  } else {
+    //retrieve cart and return it
+    response.writeHead(200,{"Content-Type": "application/json"});
+    response.end(Users.getUserCart(currentAccessToken))
+  }
+})
+
+myRouter
+.post("/api/cart/:productId", (request,response) => {
+  let currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  //if user not logged in
+  if(!currentAccessToken) {
+    response.writeHead(401, "Log in to view cart");
+    return response.end();
+  } else {
+    response.writeHead(200,{"Content-Type": "application/json"});
+    const product = Products.getProductById(request.params.productId);
+    //**** Ideally change it so that it's adding to loaded in users cart...
+    Users.addToUserCart(product, currentAccessToken)
+    return response.end(product);
+  }
+})
+
+myRouter
+.delete("/api/cart:productId", (request,response) => {
+  let currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  //if user not logged in
+  if(!currentAccessToken) {
+    response.writeHead(401, "Log in to view cart");
+    return response.end();
+  } else {
+    response.writeHead(200,{"Content-Type": "application/json"});
+    Users.deleteFromUserCart(request.params.productId, currentAccessToken);
+    return response.end(Users.getUserCart(currentAccessToken));
   }
 })
 
