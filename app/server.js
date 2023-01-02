@@ -55,7 +55,7 @@ server.listen(PORT, error => {
   fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
     const parsedUsers = JSON.parse(data);
-    Products.addUsers(parsedUsers);
+    Users.addUsers(parsedUsers);
   })
 });
 
@@ -130,10 +130,10 @@ myRouter
   const eMail = parsedUrl.query.email;
   const passWord = parsedUrl.query.password;
   if(eMail && passWord){
-    const user = authenticatedUser(eMail,passWord);
+    const user = Users.authenticatedUser(eMail,passWord);
     if(user){
-      response.writeHead(200,{"Content-type: ": "application/json"});
-      return response.end()
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(user));
     }else{
       response.writeHead(401,"Invalid username or password")
       return response.end();
