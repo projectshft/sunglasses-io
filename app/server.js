@@ -129,8 +129,21 @@ myRouter
   const parsedUrl = require("url").parse(request.url,true)
   const eMail = parsedUrl.query.email;
   const passWord = parsedUrl.query.password;
+  if(eMail && passWord){
+    const user = authenticatedUser(eMail,passWord);
+    if(user){
+      response.writeHead(200,{"Content-type: ": "application/json"});
+      return response.end()
+    }else{
+      response.writeHead(401,"Invalid username or password")
+      return response.end();
+    }
+
+  }else{
+    response.writeHead(400,"Submit username AND password")
+    return response.end();
+  }
   
-  return response.end();
 })
 
 module.exports = server;
