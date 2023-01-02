@@ -7,7 +7,7 @@ class Products {
   };
 
   static addProducts(newProducts) {
-    products = [...newProducts]
+    return products.push(...newProducts);
   };
 
   static getAllProducts() {
@@ -15,7 +15,8 @@ class Products {
   };
 
   static getProductById(id) {
-    return products.find(product => product.id = id);
+      let foundProduct = products.find(product => product.id == id);
+      return foundProduct;
   }
 
   static addBrands(newBrands) {
