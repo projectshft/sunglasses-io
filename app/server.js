@@ -23,7 +23,10 @@ const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 //creates web server object
 let server = http.createServer(function (request, response) {
-  //if(!VALID_API_KEYS.includes(request.))
+  if(!VALID_API_KEYS.includes(request.headers["x-authentication"])){
+    response.writeHead(401,"You need to have a valid API key to use this API");
+    return response.end();
+  }
   
   //final handler (have googled plenty of time and need someone to explain)
   myRouter(request, response, finalHandler(request,response));
@@ -51,7 +54,7 @@ server.listen(PORT, error => {
 
 //return list of brands
 myRouter
-  .get("/v1/brands", (request, response) => {
+  .get("/api/brands", (request, response) => {
     const allBrands = Products.getAllBrands()
     //if brands.json data is empty
     if(!allBrands){
@@ -67,7 +70,7 @@ myRouter
 
   //return list of products by brand
 myRouter
-  .get("/v1/brands/:brand/products", (request, response) => {
+  .get("/api/brands/:brand/products", (request, response) => {
     const productsByBrand = JSON.stringify(Products.filterProductsByBrand(request.params.brand));
     if(!productsByBrand){
       response.writeHead(400, "Invalid brand")
@@ -83,7 +86,7 @@ myRouter
 
 //Returns list of products
 myRouter
-.get("/v1/products", (request, response) => {
+.get("/api/products", (request, response) => {
   const allProducts = JSON.stringify(Products.getAllProducts())
   
   if(!allProducts){
@@ -99,7 +102,7 @@ myRouter
 
 //Returns product by id property
 myRouter
-.get("/v1/products/:id", (request, response) => {
+.get("/api/products/:id", (request, response) => {
   //find product
   const foundProduct = Products.getProductsById(request.params.id);
   //if product not found return 404
@@ -114,7 +117,7 @@ myRouter
 
 //Logs in user by creating an access token if password and username is valid
 myRouter
-.get("/v1/login", (request, response) => {
+.get("/api/login", (request, response) => {
   //parse url
 })
 

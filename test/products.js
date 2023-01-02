@@ -9,12 +9,15 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
+//add a failed api test
+
 describe("Brands", () => {
   describe("/GET brands", () => {
     it("it should GET all brands", done =>{
       chai
         .request(server)
-        .get("/v1/brands")
+        .get("/api/brands")
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("200");
           res.body.should.be.an("array");
@@ -26,7 +29,8 @@ describe("Brands", () => {
     it("it should GET products filtered by brand", done => {
       chai
         .request(server)
-        .get("/v1/brands/Oakley/products")
+        .get("/api/brands/Oakley/products")
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("200");
           res.body.should.be.an("array");
@@ -42,7 +46,8 @@ describe("Products", () => {
     it("it should GET all the products", done => {
       chai
         .request(server)
-        .get("/v1/products")
+        .get("/api/products")
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("200");
           res.body.should.be.an("array");
@@ -54,7 +59,8 @@ describe("Products", () => {
     it("it should GET product by ID", done =>{
       chai
         .request(server)
-        .get("/v1/products/1")
+        .get("/api/products/1")
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("200");
           res.body.should.be.an("object");
@@ -77,7 +83,8 @@ describe("User", () =>{
     it("it should login the user with correct inputs", done => {
       chai
       .request(server)
-      .get("v1/user/login?email=natalia.ramos%40example.com&password=waters")
+      .get("/api/user/login?email=natalia.ramos%40example.com&password=waters")
+      .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("200");
         done();
