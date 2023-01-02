@@ -11,14 +11,12 @@ class Tokens {
   }
 
   static findCurrent(_user){
+    //look for current token by user's username
     let _currentToken = accessTokens.find((accessToken)=> {
-      return _user.login.username == accessToken.userName;
+      return _user.login.username == accessToken.username;
     });
-    
-    // const _currentToken = accessTokens.find((tokenObject) => {
-    //   return tokenObject.username == _user.login.username;
-    // })
 
+    //if there is a token then update lastUpdated property 
     if(_currentToken){
       _currentToken.lastUpdated = new Date();
       return _currentToken;
@@ -27,6 +25,7 @@ class Tokens {
     }
   }
 
+  //create a new token
   static createToken(_user) {
     let _newAccessToken = {
       username: _user.login.username,
