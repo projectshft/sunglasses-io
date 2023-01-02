@@ -4,7 +4,6 @@ let Products = require("../app/models/products");
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../app/server.js");
-
 let should = chai.should();
 
 chai.use(chaiHttp);
@@ -72,7 +71,7 @@ describe("Products", () => {
             "price":150,
             "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
           });
-          done()
+          done();
         });
     });
   });
@@ -83,28 +82,40 @@ describe("User", () =>{
     it("it should login the user with correct inputs", done => {
       chai
       .request(server)
-      .get("/api/login?email=natalia.ramos%40example.com&password=waters")
+      .get("/api/user/login?email=natalia.ramos%40example.com&password=waters")
       .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("200");
         res.body.should.be.a("string");
         done();
-      })
+      });
       
     })
     it("it should NOT login user with incorrect password", done => {
       chai
       .request(server)
-      .get("/api/login?email=natalia.ramos%40example.com&password=wrongpassword")
+      .get("/api/user/login?email=natalia.ramos%40example.com&password=wrongpassword")
       .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("401");
         done();
-      })
-    })
-  })
+      });
+    });
 
-/*   describe("/POST user", () => {
-    it("should")
-  }) */
+    
+  });
+});
+
+describe("Cart", () => {
+  describe("/POST user", () => {
+    it("it should NOT login user with invalid access token", done => {
+      chai
+        .request(server)
+        .post("api/user/cart/4")
+        .end((err, res) => {
+          res.should.have.a.status("401");
+          done();
+        });
+    });
+  });
 })
