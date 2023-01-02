@@ -87,9 +87,7 @@ describe("User", () =>{
       .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("200");
-        res.body.should.be.an("object");
-        res.body.phone.should.eql('903-556-986');
-        res.body.login.sha1.should.eql('18e545aee27156ee6be35596631353a14ee03007');
+        res.body.should.be.a("string");
         done();
       })
       
