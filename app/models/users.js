@@ -1,4 +1,5 @@
 let users = [];
+let cart = [];
 
 class Users {
   constructor(params) {
@@ -6,8 +7,14 @@ class Users {
   };
 
   static addUsers(_users){
-    users = [..._users]
+    users = [..._users];
+    cart = [];
   };
+
+  static addCart(_user) {
+    cart = [];
+    cart = [..._user.cart];
+  }
 
   static authenticateUser(_email,_password){
     const foundUser = users.find(user => {
@@ -16,21 +23,22 @@ class Users {
     return foundUser;
   }
 
-  static addToUserCart(_product, _currentAccessToken){
-    const currentUser = users.find((userObject) => userObject.login.username == _currentAccessToken.username);
-    currentUser.cart.push(_product);
-  };
-
-  static getUserCart(_currentAccessToken){
-    const currentUser = users.find((userObject) => userObject.login.username == _currentAccessToken.username);
-    return currentUser.cart;
+  static getUserCart(){
+    return cart;
   }
 
+  static addToUserCart(_product, _currentAccessToken){
+    cart.push(_product);
+  };
+
   static deleteFromUserCart(_id, _currentAccessToken){
-    const currentUser = users.find((userObject) => userObject.login.username == _currentAccessToken.username);
-    currentUser.cart = currentUser.cart.filter(productObject => {
-      productObject.id !== _id
+    // let currentUserIndex = users.findIndex((userObject) => {
+    //   return userObject.login.username = _currentAccessToken.username;
+    // })
+    const filteredCart = cart.filter(cartObject => {
+      return parseInt(cartObject.id) !== parseInt(_id)
     })
+    return cart = filteredCart;
   }
 }
 
