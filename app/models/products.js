@@ -14,7 +14,7 @@ class Products {
     return products;
   };
 
-  static getProductsById(id) {
+  static getProductById(id) {
     return products.find(product => product.id = id);
   }
 
