@@ -29,12 +29,18 @@ class Users {
 
   static addToUserCart(_product, _currentAccessToken){
     cart.push(_product);
+    //update users cart in users object
+    let currentUserIndex = users.findIndex((userObject) => {
+      return userObject.login.username.length === _currentAccessToken.username.length;
+    });
+    users[currentUserIndex].cart = cart;
+    return;
   };
 
   static deleteFromUserCart(_id, _currentAccessToken){
-    // let currentUserIndex = users.findIndex((userObject) => {
-    //   return userObject.login.username = _currentAccessToken.username;
-    // })
+    let currentUserIndex = users.findIndex((userObject) => {
+      return userObject.login.username.length === _currentAccessToken.username.length;
+    });
     const itemtoDelete = cart.filter(cartObject => {
       return parseInt(cartObject.id) === parseInt(_id);
     })
@@ -45,6 +51,10 @@ class Users {
       const filteredCart = cart.filter(cartObject => {
         return parseInt(cartObject.id) !== parseInt(_id)
       })
+      
+      //update users cart in users object
+      users[currentUserIndex].cart = filteredCart;
+      console.log(users[currentUserIndex].cart);
       return cart = filteredCart;
     }
   }
