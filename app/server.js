@@ -131,6 +131,7 @@ myRouter
     if(user){
       //since user authenticated return will be succesful at this point and response will be json
       response.writeHead(200, {"Content-Type": "application/json"});
+      Users.addCart(user);
       //Look for access token and if not found new one is made
       const currentAccessToken = Tokens.findCurrent(user);
       //if currentAccessToken is not found
@@ -160,7 +161,7 @@ myRouter
   } else {
     //retrieve cart and return it
     response.writeHead(200,{"Content-Type": "application/json"});
-    response.end(Users.getUserCart(currentAccessToken))
+    response.end(JSON.stringify(Users.getUserCart()))
   }
 })
 
@@ -173,15 +174,15 @@ myRouter
     return response.end();
   } else {
     response.writeHead(200,{"Content-Type": "application/json"});
-    const product = Products.getProductById(request.params.productId);
+    let product = Products.getProductById(request.params.productId);
     //**** Ideally change it so that it's adding to loaded in users cart...
-    Users.addToUserCart(product, currentAccessToken)
-    return response.end(product);
+    Users.addToUserCart(product, currentAccessToken);
+    return response.end(JSON.stringify(Users.getUserCart()));
   }
 })
 
 myRouter
-.delete("/api/cart:productId", (request,response) => {
+.delete("/api/cart/:productId", (request,response) => {
   let currentAccessToken = Tokens.getValidTokenFromRequest(request);
   //if user not logged in
   if(!currentAccessToken) {
@@ -190,7 +191,7 @@ myRouter
   } else {
     response.writeHead(200,{"Content-Type": "application/json"});
     Users.deleteFromUserCart(request.params.productId, currentAccessToken);
-    return response.end(Users.getUserCart(currentAccessToken));
+    return response.end(JSON.stringify(Users.getUserCart()));
   }
 })
 
