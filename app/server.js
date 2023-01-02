@@ -16,6 +16,7 @@ const VALID_API_KEYS = ["e347a542-b8dc-49a7-a5c5-aa6c889b1826","ae77856f-3796-4f
 
 // Setup router
 var myRouter = Router();
+
 //makes it so router uses middleware bodyParser to parse body to json
 myRouter.use(bodyParser.json());
 
@@ -56,7 +57,7 @@ server.listen(PORT, error => {
   })
 });
 
-//return list of brands
+//GET list of all brands at the store
 myRouter
   .get("/api/brands", (request, response) => {
     const allBrands = Products.getAllBrands()
@@ -72,7 +73,7 @@ myRouter
     return response.end(JSON.stringify(allBrands));
   })
 
-  //return list of products by brand
+//Gets products by brand name
 myRouter
   .get("/api/brands/:brand/products", (request, response) => {
     const productsByBrand = JSON.stringify(Products.filterProductsByBrand(request.params.brand));
@@ -119,9 +120,9 @@ myRouter
   return response.end(JSON.stringify(foundProduct));
 })
 
-//Logs in user by creating an access token if password and username is valid
+//LOG IN user, checks for access tokens by user, creates new access token if expired or null
 myRouter
-.get("/api/login", (request, response) => {
+.get("/api/user/login", (request, response) => {
   //parse url
   const parsedUrl = require("url").parse(request.url,true)
   const eMail = parsedUrl.query.email;
@@ -151,8 +152,9 @@ myRouter
   }
 })
 
+// GET current user's whole cart
 myRouter
-.get("/api/cart", (request,response) => {
+.get("/api/user/cart", (request,response) => {
   let currentAccessToken = Tokens.getValidTokenFromRequest(request);
   //if user not logged in
   if(!currentAccessToken) {
@@ -165,33 +167,46 @@ myRouter
   }
 })
 
+//POST product by productID to the current user's cart 
 myRouter
-.post("/api/cart/:productId", (request,response) => {
+.post("/api/user/cart/:productId", (request,response) => {
   let currentAccessToken = Tokens.getValidTokenFromRequest(request);
   //if user not logged in
   if(!currentAccessToken) {
-    response.writeHead(401, "Log in to view cart");
+    response.writeHead(401, "Log-in to view cart");
     return response.end();
   } else {
     response.writeHead(200,{"Content-Type": "application/json"});
     let product = Products.getProductById(request.params.productId);
-    //**** Ideally change it so that it's adding to loaded in users cart...
-    Users.addToUserCart(product, currentAccessToken);
-    return response.end(JSON.stringify(Users.getUserCart()));
+    //**** Ideally change it so that it's adding into the user object's cart... ***
+    if(product){
+      Users.addToUserCart(product, currentAccessToken);
+      return response.end(JSON.stringify(Users.getUserCart()));
+    }
+    response.writeHead(400, "Product not found");
+    return response.end();
   }
 })
 
+//DELETE product by productId in the cart
 myRouter
-.delete("/api/cart/:productId", (request,response) => {
+.delete("/api/user/cart/:productId", (request,response) => {
   let currentAccessToken = Tokens.getValidTokenFromRequest(request);
   //if user not logged in
   if(!currentAccessToken) {
     response.writeHead(401, "Log in to view cart");
     return response.end();
   } else {
-    response.writeHead(200,{"Content-Type": "application/json"});
-    Users.deleteFromUserCart(request.params.productId, currentAccessToken);
-    return response.end(JSON.stringify(Users.getUserCart()));
+    const editedCart = Users.deleteFromUserCart(request.params.productId, currentAccessToken);
+    //if cart was edited then success
+    if(editedCart){
+      response.writeHead(200,{"Content-Type": "application/json"});
+      return response.end(JSON.stringify(Users.getUserCart()));
+    } else {
+      response.writeHead(400, "Item not present to delete");
+      return response.end();
+    }
+    
   }
 })
 

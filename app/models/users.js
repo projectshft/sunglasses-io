@@ -35,10 +35,18 @@ class Users {
     // let currentUserIndex = users.findIndex((userObject) => {
     //   return userObject.login.username = _currentAccessToken.username;
     // })
-    const filteredCart = cart.filter(cartObject => {
-      return parseInt(cartObject.id) !== parseInt(_id)
+    const itemtoDelete = cart.filter(cartObject => {
+      return parseInt(cartObject.id) === parseInt(_id);
     })
-    return cart = filteredCart;
+    if(itemtoDelete.length == 0){
+      return null;
+    }
+    else{
+      const filteredCart = cart.filter(cartObject => {
+        return parseInt(cartObject.id) !== parseInt(_id)
+      })
+      return cart = filteredCart;
+    }
   }
 }
 
