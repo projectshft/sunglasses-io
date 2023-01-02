@@ -4,9 +4,9 @@ const finalHandler = require('finalhandler');
 const queryString = require('querystring');
 const Router = require('router');
 const bodyParser   = require('body-parser');
-const uid = require('rand-token').uid;
 const Products = require('./models/products')
 const Users = require('./models/users');
+const Tokens = require('./models/access-token')
 
 const PORT = 3001;
 
@@ -130,20 +130,27 @@ myRouter
   const eMail = parsedUrl.query.email;
   const passWord = parsedUrl.query.password;
   if(eMail && passWord){
-    const user = Users.authenticatedUser(eMail,passWord);
+    const user = Users.authenticateUser(eMail,passWord);
     if(user){
+      //since user authenticated return will be succesful at this point and response will be json
       response.writeHead(200, {"Content-Type": "application/json"});
-      return response.end(JSON.stringify(user));
+      //Look for access token and if not found new one is made
+      const currentAccessToken = Tokens.findCurrent(user);
+      //if currentAccessToken is not found
+      if(!currentAccessToken){
+        const newAccessToken = Tokens.createToken(user);
+        Tokens.pushNewTokenToAccessTokens(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+      return response.end(currentAccessToken.token);
     }else{
       response.writeHead(401,"Invalid username or password")
       return response.end();
     }
-
   }else{
     response.writeHead(400,"Submit username AND password")
     return response.end();
   }
-  
 })
 
 module.exports = server;
