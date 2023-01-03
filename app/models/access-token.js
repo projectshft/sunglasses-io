@@ -1,4 +1,3 @@
-const { access } = require("fs");
 const { uid } = require("rand-token");
 
 let accessTokens = [];
@@ -36,9 +35,8 @@ class Tokens {
     accessTokens.push(_newAccessToken);
     return _newAccessToken
   }
-
-
-
+  
+  //grabs the token value from request URL
   static getValidTokenFromRequest(_request) {
     let parsedUrl = require("url").parse(_request.url,true);
     //if access token is present in URL then find local state token
@@ -47,7 +45,6 @@ class Tokens {
       let currentAccessToken = accessTokens.find((accessToken)=> {
         return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
       });
-
       if(currentAccessToken) {
         return currentAccessToken;
       } else {
