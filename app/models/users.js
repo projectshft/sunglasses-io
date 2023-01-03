@@ -1,5 +1,5 @@
-let users = [];
-let cart = [];
+const users = [];
+const cart = [];
 
 class Users {
   constructor(params) {
@@ -8,12 +8,12 @@ class Users {
   
   //populates all the users into users variable
   static addUsers(_users){
-    users = [..._users];
+    users.push(..._users);
   };
 
 //populate cart with user's object's cart
   static addCart(_user) {
-    cart = [..._user.cart];
+    cart.push(..._user.cart);
   }
 
   //find user by matching with paramter inputs
@@ -32,22 +32,26 @@ class Users {
   //uses parameters to add input product to current user
   static addToUserCart(_product, _currentAccessToken){
     cart.push(_product);
+
     //update users cart in users object
-    let currentUserIndex = users.findIndex((userObject) => {
+    const currentUserIndex = users.findIndex((userObject) => {
       return userObject.login.username.length === _currentAccessToken.username.length;
     });
+
     users[currentUserIndex].cart = cart;
     return;
   };
 
   //uses parameters to delete an item from current user's cart
   static deleteFromUserCart(_id, _currentAccessToken){
-    let currentUserIndex = users.findIndex((userObject) => {
+    const currentUserIndex = users.findIndex((userObject) => {
       return userObject.login.username.length === _currentAccessToken.username.length;
     });
+
     const itemtoDelete = cart.filter(cartObject => {
       return parseInt(cartObject.id) === parseInt(_id);
     })
+    
     if(itemtoDelete.length == 0){
       return null;
     }
@@ -57,8 +61,11 @@ class Users {
       })
       
       //update users cart in users object
-      users[currentUserIndex].cart = filteredCart;
-      return cart = filteredCart;
+      users[currentUserIndex].cart.forEach(product => users[currentUserIndex].cart.pop(users[currentUserIndex].cart.indexOf(product)));
+      users[currentUserIndex].cart.push(...filteredCart);
+      cart.forEach(product => cart.pop(users[currentUserIndex].cart.indexOf(product)));
+      cart.push(...filteredCart);
+      return cart;
     }
   }
 }

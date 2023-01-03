@@ -1,5 +1,5 @@
-let products = [];
-let brands = [];
+const products = [];
+const brands = [];
 
 class Products {
   constructor(params) {
@@ -8,7 +8,7 @@ class Products {
 
   //pushes uploaded new products into products variable
   static addProducts(newProducts) {
-    return products.push(...newProducts);
+    products.push(...newProducts);
   };
 
   //grabs all the products available in the store
@@ -18,13 +18,13 @@ class Products {
 
   //return product by searching by product ID
   static getProductById(id) {
-      let foundProduct = products.find(product => product.id == id);
+      const foundProduct = products.find(product => product.id == id);
       return foundProduct;
   }
 
   //adds all the brands to the brands variable
   static addBrands(newBrands) {
-    brands = [...newBrands];
+    brands.push(...newBrands);
   };
 
   //returns all the brands
