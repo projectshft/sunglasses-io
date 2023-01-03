@@ -21,12 +21,12 @@ var myRouter = Router();
 myRouter.use(bodyParser.json());
 
 //creates web server object
-let server = http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
   if(!VALID_API_KEYS.includes(request.headers["x-authentication"])){
     response.writeHead(401,"You need to have a valid API key to use this API");
     return response.end();
   }
-  
+
   //final handler (have googled plenty of time and need someone to explain)
   myRouter(request, response, finalHandler(request,response));
 })
@@ -37,19 +37,18 @@ server.listen(PORT, error => {
   if (error) {
     return console.log("Error on Server Startup: ", error);
   }
+
   //read json files, error handle, parse data, add to module state
   fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
     if (error) throw error;
     const parsedProducts = JSON.parse(data);
     Products.addProducts(parsedProducts);
   });
-
   fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
     if (error) throw error;
     const parsedBrands = JSON.parse(data);
     Products.addBrands(parsedBrands);
   })
-
   fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
     const parsedUsers = JSON.parse(data);
@@ -62,13 +61,14 @@ myRouter
   .get("/api/brands", (request, response) => {
     const allBrands = Products.getAllBrands()
     //if brands.json data is empty
+
     if(!allBrands){
       response.writeHead(500, "Internal Server Error")
     }
     if(allBrands.length === 0){
       response.writeHead(404, "No brands available")
     }
-    
+
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(allBrands));
   })
@@ -77,6 +77,7 @@ myRouter
 myRouter
   .get("/api/brands/:brand/products", (request, response) => {
     const productsByBrand = JSON.stringify(Products.filterProductsByBrand(request.params.brand));
+    
     if(!productsByBrand){
       response.writeHead(400, "Invalid brand")
       return response.end();
@@ -85,6 +86,7 @@ myRouter
       response.writeHead(404, "Product under this brand not found")
       return response.end();
     }
+
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(productsByBrand)
   })
@@ -100,7 +102,7 @@ myRouter
   if(allProducts.length === 0){
     response.writeHead(404, "No products available")
   }
-  
+
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(allProducts);
 })
@@ -110,11 +112,13 @@ myRouter
 .get("/api/products/:id", (request, response) => {
   //find product
   const foundProduct = Products.getProductById(request.params.id);
+
   //if product not found return 404
   if(!foundProduct) {
     response.writeHead(404);
     return response.end("Product not found");
   }
+
   // Return product object
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(foundProduct));
@@ -130,6 +134,7 @@ myRouter
   if(email && password){
     //check for user and check if password is correct. Returns user if valid.
     const user = Users.authenticateUser(email,password);
+    
     if(user){
       response.writeHead(200, {"Content-Type": "application/json"});
       Users.addCart(user);
@@ -145,6 +150,7 @@ myRouter
       response.writeHead(401,"Invalid username or password")
       return response.end();
     }
+
   }else{
     response.writeHead(400,"Submit username AND password")
     return response.end();
@@ -154,7 +160,8 @@ myRouter
 // GET current user's whole cart
 myRouter
 .get("/api/user/cart", (request,response) => {
-  let currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  const currentAccessToken = Tokens.getValidTokenFromRequest(request);
+
   //if user not logged in
   if(!currentAccessToken) {
     response.writeHead(401, "Log in to view cart");
@@ -169,7 +176,8 @@ myRouter
 //POST product by productID to the current user's cart 
 myRouter
 .post("/api/user/cart/:productId", (request,response) => {
-  let currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  const currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  
   //if user not logged in
   if(!currentAccessToken) {
     response.writeHead(401, "Log-in to view cart");
@@ -177,12 +185,13 @@ myRouter
   } else {
     response.writeHead(200,{"Content-Type": "application/json"});
     //get product by ID
-    let product = Products.getProductById(request.params.productId);
+    const product = Products.getProductById(request.params.productId);
     //if product present then add to the current user's cart
     if(product){
       Users.addToUserCart(product, currentAccessToken);
       return response.end(JSON.stringify(Users.getUserCart()));
     }
+
     response.writeHead(400, "Product not found");
     return response.end();
   }
@@ -191,8 +200,9 @@ myRouter
 //DELETE product by productId in the cart
 myRouter
 .delete("/api/user/cart/:productId", (request,response) => {
-  let currentAccessToken = Tokens.getValidTokenFromRequest(request);
+  const currentAccessToken = Tokens.getValidTokenFromRequest(request);
   //if user not logged in
+  
   if(!currentAccessToken) {
     response.writeHead(401, "Log in to view cart");
     return response.end();

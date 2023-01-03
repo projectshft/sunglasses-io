@@ -1,6 +1,6 @@
 const { uid } = require("rand-token");
 
-let accessTokens = [];
+const accessTokens = [];
 // variable value for 15 minutes
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
@@ -13,9 +13,10 @@ class Tokens {
   //If no token found return undefined
   static findCurrent(_user){
     //look for current token by _user's username
-    let _currentToken = accessTokens.find((accessToken)=> {
+    const _currentToken = accessTokens.find((accessToken)=> {
       return _user.login.username == accessToken.username;
     });
+
     //if there is a token then update lastUpdated property 
     if(_currentToken){
       _currentToken.lastUpdated = new Date();
@@ -27,22 +28,24 @@ class Tokens {
 
   //create a new token
   static createToken(_user) {
-    let _newAccessToken = {
+    const _newAccessToken = {
       username: _user.login.username,
       lastUpdated: new Date(),
       token: uid(16)
     }
+
     accessTokens.push(_newAccessToken);
     return _newAccessToken
   }
   
   //grabs the token value from request URL
   static getValidTokenFromRequest(_request) {
-    let parsedUrl = require("url").parse(_request.url,true);
+    const parsedUrl = require("url").parse(_request.url,true);
     //if access token is present in URL then find local state token
+    
     if(parsedUrl.query.accessToken){
       //Find token and make sure it's not expired
-      let currentAccessToken = accessTokens.find((accessToken)=> {
+      const currentAccessToken = accessTokens.find((accessToken)=> {
         return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
       });
       if(currentAccessToken) {
