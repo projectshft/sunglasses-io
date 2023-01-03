@@ -38,7 +38,7 @@ class Users {
       return userObject.login.username.length === _currentAccessToken.username.length;
     });
 
-    users[currentUserIndex].cart = cart;
+    users[currentUserIndex].cart.push(_product);
     return;
   };
 
@@ -51,7 +51,7 @@ class Users {
     const itemtoDelete = cart.filter(cartObject => {
       return parseInt(cartObject.id) === parseInt(_id);
     })
-    
+
     if(itemtoDelete.length == 0){
       return null;
     }
