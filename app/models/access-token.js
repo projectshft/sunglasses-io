@@ -10,12 +10,13 @@ class Tokens {
     Object.assign(this, params);
   }
 
+  //Look for access token and if present udpate the lastUpdated property
+  //If no token found return undefined
   static findCurrent(_user){
-    //look for current token by user's username
+    //look for current token by _user's username
     let _currentToken = accessTokens.find((accessToken)=> {
       return _user.login.username == accessToken.username;
     });
-
     //if there is a token then update lastUpdated property 
     if(_currentToken){
       _currentToken.lastUpdated = new Date();
@@ -32,12 +33,11 @@ class Tokens {
       lastUpdated: new Date(),
       token: uid(16)
     }
+    accessTokens.push(_newAccessToken);
     return _newAccessToken
   }
 
-  static pushNewTokenToAccessTokens(_newAccessToken){
-    accessTokens.push(_newAccessToken);
-  }
+
 
   static getValidTokenFromRequest(_request) {
     let parsedUrl = require("url").parse(_request.url,true);

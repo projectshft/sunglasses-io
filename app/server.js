@@ -133,12 +133,11 @@ myRouter
     if(user){
       response.writeHead(200, {"Content-Type": "application/json"});
       Users.addCart(user);
-      //Look for access token and if not found new one is made
+      //Look for access token and if found date is upated
       const currentAccessToken = Tokens.findCurrent(user);
-      //if currentAccessToken is not found
+      //if currentAccessToken is not found create a new token and return token to user
       if(!currentAccessToken){
         const newAccessToken = Tokens.createToken(user);
-        Tokens.pushNewTokenToAccessTokens(newAccessToken);
         return response.end(JSON.stringify(newAccessToken.token));
       }
       return response.end(currentAccessToken.token);
