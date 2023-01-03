@@ -1,0 +1,274 @@
+swagger: '2.0'
+info:
+  title: Sunglasses Shop
+  description: An API to support the Sunglasses.io shop
+  version: 1.0.0
+host: sunglasses.io
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+
+# 1) Path to login
+  post:
+    summary: User login
+    description: 
+      The User Login endpoint allows users to log into their account 
+    consumes:
+      -application/json
+    parameters:
+      -in: body
+        name: user login credentials
+        description: user login credentials
+        schema: 
+          type: string
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+    tags:
+      Login
+    responses:
+      '200':
+        description: Login successful
+        schema:
+          $ref: '#/definitions/Login'
+      '404':
+        description: Login failed
+        schema:
+          $ref: '#/definitions/Login'
+      default:
+        description: Login failed
+        schema:
+          $ref: '#/definitions/Error'
+
+# 2) Path for sunglass brands
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint return information the store's available brands.
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        '404'
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+# 3) Path for searching sunglasses by brand 
+  /brands/{id}/products:
+    get:
+      summary: Search results for a brand 
+      description: 
+        This endpoint returns a list of products for the brand the user searches for
+      parameters:
+        - name: id
+          in: path
+          description: The id of the product branded searched for
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products by brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        '404'
+          description: Not found
+          schema:
+            $ref: '#/definitions/Error'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+#4) Path for products
+  /products
+    get:
+      summary: Products
+      description: 
+        The products endpoint returns a list of products in the store
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+#5) User cart
+  /user/cart:
+    get:
+      summary: User's cart
+      description: 
+        This endpoint returns a list of products the user has added to their cart
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of goals in the category
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Goal'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+          default:
+            description: Unexpected error
+            schema:
+            $ref: "#/definitions/Error"
+    
+    post:
+      summary: Add product to user's cart
+      description: 
+        This endpoint allows a user to add a prodcut to their cart
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: An updated array of products 
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: Not found
+          schema:
+            $ref: "#/definitions/Error"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+#6) Delete item from cart
+  /user/cart/{productId}:
+    delete:
+      summary: Delete product
+      description: 
+        This endpoint allows the user to delete a product from their cart
+      parameters:
+        product_id: product_id,
+        quantity: quantity,
+        unit_price: unit_price,
+        required: true
+        type: string
+      tags:
+        - Cart
+      responses:
+    "200":
+      description: An updated array of products and quantities currently in the user cart
+      schema:
+        type: array
+        items:
+          $ref: "#/definitions/CartItem"
+    "401":
+      description: Unauthorized
+      schema:
+        $ref: "#/definitions/Error"
+    "404":
+      description: Not found
+      schema:
+        $ref: "#/definitions/Error"
+    default:
+      description: Unexpected error
+      schema:
+        $ref: "#/definitions/Error"
+
+
+#Definitions
+definitions:
+  Product:
+    type: object
+    properties:
+      product_id:
+        type: string
+        description: Unique identifier representing a specific product for a given brand.
+      description:
+        type: string
+        description: Description of product.
+      display_name:
+        type: string
+        description: Display name of product.
+      imageURLS::
+        type: string
+        description: Image URL representing the product.
+      price:
+        type: number
+        description: Price of product
+
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of user
+      last_name:
+        type: string
+        description: Last name of user
+      email:
+        type: string
+        description: user email
+      login:
+        type: object
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
