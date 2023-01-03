@@ -54,7 +54,6 @@ class Users {
       
       //update users cart in users object
       users[currentUserIndex].cart = filteredCart;
-      console.log(users[currentUserIndex].cart);
       return cart = filteredCart;
     }
   }
