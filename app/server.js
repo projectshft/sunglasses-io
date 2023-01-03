@@ -125,10 +125,10 @@ myRouter
 .get("/api/user/login", (request, response) => {
   //parse url
   const parsedUrl = require("url").parse(request.url,true)
-  const eMail = parsedUrl.query.email;
-  const passWord = parsedUrl.query.password;
-  if(eMail && passWord){
-    const user = Users.authenticateUser(eMail,passWord);
+  const {email, password} = parsedUrl.query
+
+  if(email && password){
+    const user = Users.authenticateUser(email,password);
     if(user){
       //since user authenticated return will be succesful at this point and response will be json
       response.writeHead(200, {"Content-Type": "application/json"});
