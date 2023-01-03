@@ -7,8 +7,7 @@ const brands = require('../initial-data/brands.json')
 should = chai.should();
 chai.use(chaiHttp)  
 
-// All Brands
-describe('Brands', () => {
+// All Brands (passed)
   describe('Get brands', () => {
     it('Should return all brands', done => {
       chai 
@@ -16,12 +15,11 @@ describe('Brands', () => {
         .get('/brands')
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an("array");
-          res.body.length.should.be.eql(5);
+          res.body.should.be.an('array');
+          res.body.length.should.be.equal(5);
           res.body[0].should.have.keys('id', 'name');
           done();
         })
       })
     })
-  })
 

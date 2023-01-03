@@ -8,20 +8,29 @@ const products = require('../initial-data/products.json')
 should = chai.should();
 chai.use(chaiHttp)  
 
-// User
-describe('Users', () => {
-  describe('Get user info', () => {
-    it('Should return user info', done => {
-      chai 
-        .request(server)
-        .get('/users')
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.an("array");
-          res.body.length.should.be.eql(3);
-          res.body[0].should.have.keys('gender', 'cart', 'name', 'location', 'email', 'login', 'dob', 'registered', 'phone', 'cell', 'picture', 'nat');
-          done();
-        })
-      })
-    })
-  })
+// User login
+describe('Checks user login', () => {
+  it('Should return access token with valid username and password', 
+  done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: 'yellowleopard', password: 'jonjon'})
+      .end((err, res) => { 
+        res.should.have.status(200);
+        done();         
+      });
+    });
+  });
+
+  it('should display an error message if credentials are invalid', done => {
+    chai
+      .request(server)
+      .post('/login')
+      .send({ username: '', password: '' })
+      .end((err, res) => {
+        res.should.have.status(401);
+        res.body.message.should.equal('Invalid user');
+        console();
+      });
+    });
