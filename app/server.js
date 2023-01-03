@@ -128,9 +128,9 @@ myRouter
   const {email, password} = parsedUrl.query
 
   if(email && password){
+    //check for user and check if password is correct. Returns user if valid.
     const user = Users.authenticateUser(email,password);
     if(user){
-      //since user authenticated return will be succesful at this point and response will be json
       response.writeHead(200, {"Content-Type": "application/json"});
       Users.addCart(user);
       //Look for access token and if not found new one is made
@@ -177,8 +177,9 @@ myRouter
     return response.end();
   } else {
     response.writeHead(200,{"Content-Type": "application/json"});
+    //get product by ID
     let product = Products.getProductById(request.params.productId);
-    //**** Ideally change it so that it's adding into the user object's cart... ***
+    //if product present then add to the current user's cart
     if(product){
       Users.addToUserCart(product, currentAccessToken);
       return response.end(JSON.stringify(Users.getUserCart()));
@@ -206,7 +207,6 @@ myRouter
       response.writeHead(400, "Item not present to delete");
       return response.end();
     }
-    
   }
 })
 
