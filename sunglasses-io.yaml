@@ -1,0 +1,309 @@
+swagger: "2.0"
+info:
+  title: Sunglasses Store
+  description: An API for a sunglasses web app store
+  version: 1.0.0
+host: localhost:3000
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Gets all brands from the store
+      description: The brands endpoint allows the user to see all the brands
+      parameters:
+        - name: query
+          in: query
+          description: Search query string for brand in store
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Brands returned
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        "404":
+          description: Brands not found
+      security:
+      - api_key: []
+  /brands/{brand}/products:
+    get:
+      tags:
+        - "Brands"
+      summary: "Gets products of same brand"
+      description: "This endpoint allows user to filter products by brand"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "brand"
+        in: "path"
+        description: "Brand of sunglasses to filter for"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "success"
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/Product"
+        "400":
+          description: "invalid brand"
+      security:
+      - api_key: []
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Gets all products or queried product object
+      description: The products endpoint returns all sunglasses or searched for product which match query
+      parameters:
+        - name: query
+          in: query
+          description: Search query string for specific product name
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Products found
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Product not found
+      security:
+      - api_key: []
+  /products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Gets the product by the product ID
+      description: This endpoint allows users to see an individual product
+      parameters:
+        - name: id
+          in: path
+          description: The id of the sunglasses brand
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Product found
+          schema:
+            $ref: '#/definitions/Product'
+        "404":
+          description: Products not found
+      security:
+      - api_key: []
+  /user/login:
+    get:
+      tags:
+      - "User"
+      summary: "Logs user into the system while providing a token"
+      description: "Logs user in"
+      operationId: "loginUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "email"
+        in: "query"
+        description: "The user name for login"
+        required: true
+        type: "string"
+      - name: "password"
+        in: "query"
+        description: "The password for login in clear text"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "string"
+          headers:
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        "400":
+          description: "Invalid username/password supplied"
+      security:
+      - api_key: []
+  /user/cart:
+    get:
+      tags:
+      - "User"
+      summary: Gets user's cart
+      description: This endpoint returns an array of objects from a user's cart
+      responses:
+        "200":
+          description: Cart found
+          schema:
+            $ref: "#/definitions/Cart"
+        "404":
+          description: Cart not found
+      security:
+      - api_key: []
+  /user/cart/{productId}:
+    post:
+      tags: 
+        - User
+      summary: Adds product to user's cart
+      description: This endpoint uses the id url parameter to add the correlated product with the id to the user's cart
+      parameters:
+      - in: path
+        name: productId
+        description: The id of the product to add to cart
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Product deleted from the cart
+          schema:
+            $ref: "#/definitions/Cart"
+        "404":
+          description: Product not found
+    delete:
+      tags: 
+        - User
+      summary: Deletes product from user's cart
+      description: This endpoint uses the id url parameter to delete the correlated product with the id from the user's cart
+      parameters:
+      - in: path
+        name: productId
+        description: The id of the product to delete from the cart
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Product deleted from the cart
+          schema:
+            $ref: "#/definitions/Cart"
+        "404":
+          description: Product not found
+      security:
+      - api_key: []
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for brands
+      name:
+        type: string
+        description: Name of the brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique ID of the product
+      categoryId:
+        type: string
+        description: ID correlated with brands endpoint ID
+      name:
+        type: string
+        description: Name of the product.
+      description:
+        type: string
+        description: Description of the product.
+      price:
+        type: number
+        description: Price of product.
+      imageUrls:
+        type: string
+        description: URL for image of the product
+  User:
+    type: object
+    properties:
+      gender:
+        type: "string"
+        description: Gender of user
+      cart:
+        $ref: '#/definitions/Cart'
+      name:
+        type: string
+        description: The name of the category
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: user's delivery street address
+          city:
+            type: string
+            description: user's delivery city
+          state:
+            type: string
+            description: user's delivery state
+          postcode:
+            type: integer
+            description: user's zipcode/postcode
+      email:
+        type: string
+        description: user's email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: user's login username
+          password:
+            type: string
+            description: user's account password
+          salt:
+            type: string
+            description: user's salt 
+          md5:
+            type: string
+            description: user's md5
+          sha1:
+            type: string
+            description: user's sha1
+          sha256:
+            type: string
+            description: user's sha256
+      dob:
+        type: string
+        description: user's date of birth
+      registered:
+        type: string
+        description: date user registered their account
+      phone:
+        type: string
+        description: user's phone number
+      cell:
+        type: string
+        description: user's cell phone number
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: large size image of profile picture
+          medium:
+            type: string
+            description: medium size image of profile picture
+          thumbnail:
+            type: string
+            description: thumbnail size image of profile picture
+      nat:
+        type: string
+        description: Country where user is using web app
+  Cart:
+    type: array
+    items:
+      $ref: "#/definitions/Product"
