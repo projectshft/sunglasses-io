@@ -7,7 +7,7 @@ let server = require("../app/server.js");
 let should = chai.should();
 
 chai.use(chaiHttp);
-
+var token = null;
 //add a failed api test
 
 describe("Brands", () => {
@@ -82,11 +82,13 @@ describe("User", () =>{
     it("it should login the user with correct inputs", done => {
       chai
       .request(server)
-      .get("/api/user/login?email=natalia.ramos%40example.com&password=waters")
+      .get("/api/user/login")
+      .query({email: "natalia.ramos@example.com", password: "waters"})
       .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("200");
         res.body.should.be.a("string");
+        token = JSON.parse(res.text);
         done();
       });
       
@@ -94,7 +96,8 @@ describe("User", () =>{
     it("it should NOT login user with incorrect password", done => {
       chai
       .request(server)
-      .get("/api/user/login?email=natalia.ramos%40example.com&password=wrongpassword")
+      .get("/api/user/login")
+      .query({email: "natalia.ramos@example.com", password: "wrongpassword"})
       .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
       .end((err, res) =>{
         res.should.have.a.status("401");
@@ -108,23 +111,50 @@ describe("User", () =>{
 
 describe("Cart", () => {
   describe("/POST user", () => {
-    it("it should NOT add to cart with invalid access token", done => {
+    it("it should add to cart", done => {
       chai
         .request(server)
-        .post("/api/user/cart/1?accessToken=zjOqXWCjXBEPd1pV")
+        .post("/api/user/cart/1")
+        .query({accessToken: token})
         .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
-          res.should.have.a.status("401");
+          res.should.have.a.status("200");
+          done();
+        });
+    });
+
+    it("it should NOT add to cart with invalid product ID", done => {
+      chai
+        .request(server)
+        .post("/api/user/cart/30")
+        .query({accessToken: token})
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
+        .end((err, res) => {
+          res.should.have.a.status("400");
           done();
         });
     });
   });
 
   describe("/DELETE user", () => {
+    it("it should delete from the cart", done => {
+      chai
+        .request(server)
+        .delete("/api/user/cart/1")
+        .query({accessToken: token})
+        .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
+        .end((err, res) => {
+          res.should.have.a.status("200");
+          res.body.should.be.a("array");
+          res.body.length.should.be.equal(0);
+          done();
+        });
+    });
     it("it should NOT delete from the cart with invalid access token", done => {
       chai
         .request(server)
-        .post("/api/user/cart/3?accessToken=zjOqXWCjXBEPd1pV")
+        .delete("/api/user/cart/1")
+        .query({accessToken: "invalidToken"})
         .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("401");
