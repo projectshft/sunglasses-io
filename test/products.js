@@ -116,6 +116,15 @@ describe("Cart", () => {
         .set("x-authentication", "e347a542-b8dc-49a7-a5c5-aa6c889b1826")
         .end((err, res) => {
           res.should.have.a.status("200");
+          res.body.should.be.an("array");
+          res.body.should.deep.equal([{
+            "id": "1",
+            "categoryId": "1",
+            "name": "Superglasses",
+            "description": "The best glasses in the world",
+            "price":150,
+            "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+          }])
           done();
         });
     });
