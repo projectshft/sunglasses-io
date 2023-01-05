@@ -1,0 +1,300 @@
+swagger: "2.0"
+info:
+  title: Shades-R-Us
+  description: An API with Shades-R-Us store data
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Get sunglass brands
+      description: |
+        The Brand endpoint contains all sunglass brands in the store, which is an array with brand objects containing id and name properties
+      tags:
+        - Brands
+      parameters:
+        - name: query
+          in: query
+          description: Search brands
+          required: false
+          type: string
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/brand"
+        "400":
+          description: Bad request
+        "404":
+          description: query doesnt match any sunglass brands
+  /brands/{id}/products:
+    get:
+      summary: Get products by brand
+      description: |
+        Returns an array of all the products by brand
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          description: brand id of the product you want
+          required: true
+          type: string
+      responses:
+        "200":
+          description: array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/product"
+        "400":
+          description: Bad request
+        "404":
+          description: query doesnt match any products
+  /products:
+    get:
+      summary: Returns all products
+      description: |
+        An array of all products sold at the store.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/product"
+        "400":
+          description: bad request
+        "404":
+          description: query did not match any products
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: login user
+      description: |
+        Allows a user to login and will return an access token needed for the cart.
+      tags:
+        - Login
+      parameters:
+        - in: body
+          name: login
+          description: username and password
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Acess token
+          schema:
+            type: string
+        "400":
+          description: bad request
+        "401":
+          description: Username or Password that you're using to sign in, is invalid
+  /me/cart:
+    get:
+      summary: items in cart
+      description: |
+        an array of items that are in users cart
+      tags:
+        - Cart
+      parameters:
+        - $ref: "#/parameters/accessToken"
+      responses:
+        "200":
+          description: A list of users
+          schema:
+            $ref: "#/definitions/cart"
+        "401":
+          description: login to access the cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add to cart
+      description: |
+        Add products to cart
+      tags:
+        - Cart
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: product id, quantity, and the access token of current user
+          schema:
+            type: object
+            required:
+              - productId
+              - accessToken
+            properties:
+              productId:
+                type: string
+              accessToken:
+                type: string
+              quantity:
+                type: integer
+      responses:
+        "200":
+          description: returns product added to the cart
+          schema:
+            $ref: "#/definitions/product"
+        "400":
+          description: missing access token
+        "401":
+          description: incorrect access token
+  /me/cart/{productId}:
+    delete:
+      summary: delete item from cart
+      description: |
+        Delete an item from the cart
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: productId
+          description: prodcut id
+          required: true
+          type: string
+        - $ref: "#/parameters/accessToken"
+      responses:
+        "200":
+          description: removes item from cart and shows removed item
+          schema:
+            $ref: "#/definitions/product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Edit cart item
+      description: |
+        Changes the quantity of an item in cart
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: productId
+          description: product id to delete
+          required: true
+          type: string
+        - in: body
+          name: data
+          required: true
+          description: object with accessToken and quantity
+          schema:
+            type: object
+            properties:
+              accessToken:
+                type: string
+              quantity:
+                type: integer
+      responses:
+        "200":
+          description: Successfully updated quantity of item in cart. Returns the updated item.
+          schema:
+            $ref: "#/definitions/cartItem"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+parameters:
+  accessToken:
+    in: body
+    name: accessToken
+    description: access token for login
+    required: true
+    schema:
+      type: object
+      properties:
+        accessToken:
+          type: string
+definitions:
+  brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id
+      name:
+        type: string
+        description: brand name
+  product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: product id
+      categoryId:
+        type: string
+        description: brand of sunglasses
+      name:
+        type: string
+        description: product name
+      price:
+        type: integer
+        description: product price
+  cart:
+    type: object
+    properties:
+      quantity:
+        description: number of items in the cart
+        type: integer
+      products:
+        description: products in cart
+        type: array
+        items:
+          $ref: "#/definitions/cartItem"
+  cartItem:
+    type: object
+    properties:
+      id:
+        type: string
+        description: product id
+      categoryId:
+        type: string
+        description: category id
+      quantity:
+        type: integer
+        description: number of products in cart
+      name:
+        type: string
+        description: product name
+      price:
+        type: integer
+        description: product price
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: url link for product images
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
