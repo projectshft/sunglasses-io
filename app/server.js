@@ -41,11 +41,19 @@ server.listen(PORT, err => {
 });
 
 
-// test 1 (passing, no err test written):
+// test 1 (passing, no err test written)
 myRouter.get('/api/brands', (req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(brands));
 })
+
+//test 2 (passing, no err tests written)
+myRouter.get("/api/products", function (req, res) {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  return res.end(JSON.stringify(products));
+});
+
+//test 3 
 
 
 

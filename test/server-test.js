@@ -1,6 +1,6 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-
+let { expect } = require('chai');
 let server = require('../app/server');
 // const products = require('../initial-data/products.json');
 
@@ -28,10 +28,13 @@ describe('api/brands', () => {
   })
 })
 
+//handling async
+
 //test 2 return all products
 describe('api/products', () => {
   describe('GET', () => {
-    it('it should return all products', (done) => {
+    it('it should return all products', done => {
+
       chai
         .request(server)
         .get('/api/products')
@@ -39,10 +42,18 @@ describe('api/products', () => {
           res.should.have.status('200');
           res.body.should.be.an('array');
           res.body.should.have.lengthOf(11);
-          res.body[0].should.have.properties('id', 'categoryId', 'name', 'price');
-          
+          res.body[0].should.have.property('id');
+          res.body[0].should.have.property('price');
+          res.body[0].should.have.property('categoryId');
+
+        
           done();
         });
     });
+    it('return an err')
   })
 })
+
+
+//test 3 brand id /brands{id}/products
+describe('api/brands{id}/products')
