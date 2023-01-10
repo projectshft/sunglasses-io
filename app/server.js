@@ -3,7 +3,7 @@ var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
-// to parse request bodies
+// to parse req bodies
 var bodyParser = require('body-parser');
 // to generate access tokens
 var uid = require('rand-token').uid;
@@ -17,7 +17,9 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
-const accessTokens = [];
+const accessTokens = [
+  { username: 'lazywolf342', password: 'tucker' }
+];
 
 chai.request('http://localhost:3001');
 should = chai.should();
@@ -41,19 +43,81 @@ server.listen(PORT, err => {
 });
 
 
-// test 1 (passing, no err test written)
+// test 1 (passing)
 myRouter.get('/api/brands', (req, res) => {
+  if(!brands) {
+    res.writeHead(404, 'doesnt match any sunglass brands');
+    return res.end();
+  } else {
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(brands));
+  }
 })
 
-//test 2 (passing, no err tests written)
+//test 2 (passing)
 myRouter.get("/api/products", function (req, res) {
+  if(!products) {
+    res.writeHead(404, 'did not match any products');
+    return res.end();
+  } else {
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(products));
+  }
 });
 
-//test 3 
+//test 3 (passing)
+myRouter.get('/api/brands/:id/products', (req, res) => {
+  let returnProducts = products.filter(
+    (product) => product.categoryId === req.params.id
+  );
+  if (returnProducts.length === 0) {
+    res.writeHead(404, 'does not match any brands');
+    return res.end();
+  } else {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify(returnProducts));
+}});
+
+//test 4 (passing)
+
+myRouter.post('/api/login', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  if (username && password) {
+    const currentUser = users.find(
+      (currentUser) =>  currentUser.login.username === username && currentUser.login.password === password
+    );
+
+    if (currentUser) {
+      res.writeHead(200, { 'Content-Type': 'Application/json' });
+
+      const currentAccessToken = accessTokens.find(
+        (token) => token.username === username
+      );
+
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return res.end(JSON.stringify(currentAccessToken.token));
+      }
+      const addAccessToken = {
+        username,
+        token: uid(16),
+      };
+      accessTokens.push(addAccessToken);
+      return res.end(JSON.stringify(addAccessToken.token));
+    }
+    res.writeHead(401, 'incorrect username or password');
+    return res.end();
+  }
+  res.writeHead(400, 'invalid request');
+  return res.end();
+});
+
+// test 5
+
+
+
+
 
 
 

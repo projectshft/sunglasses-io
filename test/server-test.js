@@ -2,7 +2,9 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 let { expect } = require('chai');
 let server = require('../app/server');
-// const products = require('../initial-data/products.json');
+
+const brands = require('../initial-data/brands.json')
+const products = require('../initial-data/products.json')
 
 const should = chai.should();
 chai.use(chaiHttp);
@@ -28,7 +30,7 @@ describe('api/brands', () => {
   })
 })
 
-//handling async
+
 
 //test 2 return all products
 describe('api/products', () => {
@@ -50,10 +52,48 @@ describe('api/products', () => {
           done();
         });
     });
-    it('return an err')
+  })
+})
+
+const id = '2';
+//test 3 brand id products
+describe(`/api/brands/:${id}/products`, () => {
+  it(`return an array of products with the category id of ${id}`, (done) => {
+    chai
+      .request(server)
+      .get(`/api/brands/${id}/products`)
+      .end((err, res) => {
+        res.should.have.status('200');
+        res.body.should.be.an('array');
+        res.body.forEach((product) => {
+          product.should.have.property('categoryId').that.equals(id);
+          product.should.have.property('name');
+          product.should.have.property('price');
+          product.should.have.property('imageUrls');
+        });
+        done();
+        });
+    })
+  })
+
+
+//test 4 POST /api/login
+  
+describe('/api/login', () => {
+  describe('POST', () => {
+    it('returns an access token if login is valid', (done) => {
+      chai
+        .request(server)
+        .post('/api/login')
+        .send({ username: 'lazywolf342', password: 'tucker' })
+        .end((err, res) => {
+          res.should.have.status('200');
+          res.body.should.be.a('string');
+          done();
+        });
+    });
   })
 })
 
 
-//test 3 brand id /brands{id}/products
-describe('api/brands{id}/products')
+//test 5 

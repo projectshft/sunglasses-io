@@ -34,7 +34,7 @@ paths:
           description: Bad request
         "404":
           description: query doesnt match any sunglass brands
-  /brands/{id}/products:
+  /brands/:{id}/products:
     get:
       summary: Get products by brand
       description: |
@@ -110,7 +110,7 @@ paths:
         "400":
           description: bad request
         "401":
-          description: Username or Password that you're using to sign in, is invalid
+          description: Username or Password that you're using to sign in, isnt invalid
   /me/cart:
     get:
       summary: items in cart
