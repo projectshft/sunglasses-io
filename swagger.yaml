@@ -106,14 +106,17 @@ paths:
         "200":
           description: Acess token
           schema:
-            type: string
+            type: object
+            items:
+              accessToken: token from logging in
+              $ref: "#/definitions?Me"
         "400":
           description: bad request
         "401":
           description: Username or Password that you're using to sign in, isnt invalid
   /me/cart:
     get:
-      summary: items in cart
+      summary: items in users cart
       description: |
         an array of items that are in users cart
       tags:
@@ -122,11 +125,11 @@ paths:
         - $ref: "#/parameters/accessToken"
       responses:
         "200":
-          description: A list of users
+          description: A list of user cart
           schema:
-            $ref: "#/definitions/cart"
-        "401":
-          description: login to access the cart
+            type: array
+            items:
+              $ref: "#/definitions/Me/properties/cart"
         default:
           description: Unexpected error
           schema:
@@ -138,31 +141,25 @@ paths:
       tags:
         - Cart
       parameters:
-        - in: body
-          name: request
+        - name: cart
+          in: body
+          description: Product to be added to the cart
           required: true
-          description: product id, quantity, and the access token of current user
           schema:
-            type: object
-            required:
-              - productId
-              - accessToken
-            properties:
-              productId:
-                type: string
-              accessToken:
-                type: string
-              quantity:
-                type: integer
+            $ref: '#/definitions/Products'
+      tags:
+        - User
       responses:
-        "200":
-          description: returns product added to the cart
+        '200':
+          description: Current users updated cart
           schema:
-            $ref: "#/definitions/product"
-        "400":
-          description: missing access token
-        "401":
-          description: incorrect access token
+            type: array
+            items:
+              $ref: '#/definitions/Me/properties/cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /me/cart/{productId}:
     delete:
       summary: delete item from cart
