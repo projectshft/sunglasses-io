@@ -1,0 +1,265 @@
+swagger: "2.0"
+info:
+  description: "Sunglasses.io server for Eval"
+  version: 1.0.0
+  title: Sunglasses API
+host: api.sunglasses.io
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      tags:
+        - Brand
+      summary: Brands
+      description: |
+        Brands endpoint allows you to see available brands
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        "400":
+          description: No Brands Found
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - Product
+      summary: Brand by ID
+      description: |
+        Endpoint allows user to to get product by brand ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of the brands products to view
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Product"
+        "400":
+          description: ID not found
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - Product
+      summary: Products
+      description: |
+        Gets availalble products
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "400":
+          description: Not Found
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - User
+      summary: User Login
+      description: Log in for cart function
+      parameters:
+        - name: email
+          in: query
+          type: string
+          description: user email
+        - name: password
+          in: query
+          type: string
+          description: user password
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: Invalid Credentials
+          schema:
+            $ref: "#/definitions/User"
+  /me/cart:
+    get:
+      summary: User's Cart
+      description: This endpoint allows a user to access their cart.
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: Must be logged in
+          schema:
+            type: string
+    post:
+      tags:
+        - Cart
+      summary: Change quantity
+      description: Changes the quantity of an item in the cart
+      parameters:
+        - name: token
+          in: query
+          type: string
+          description: User Token
+          required: true
+        - name: cartItemId
+          in: query
+          type: string
+          description: Id of cart item
+          required: true
+        - name: quantity
+          in: query
+          type: string
+          description: Quantity being changed
+          required: true
+      responses:
+        "200":
+          description: Quantity Changed
+          schema:
+            $ref: "#/definitions/CartItem"
+        "400":
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - Cart
+      summary: Remove cart item
+      description: Removes an item from the cart
+      parameters:
+        - name: token
+          in: query
+          type: string
+          description: User Token
+          required: true
+        - name: productId
+          in: path
+          description: Product Id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Cart item deleted
+          schema:
+            $ref: "#/definitions/CartItem"
+        "400":
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - Cart
+      summary: Add new item
+      description: Adds a new item to the cart
+      parameters:
+        - name: token
+          in: query
+          type: string
+          description: User Token
+          required: true
+        - name: productId
+          in: path
+          description: Product Id
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Cart item added
+          schema:
+            $ref: "#/definitions/CartItem"
+        "400":
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Brand ID
+      name:
+        type: string
+        description: Name of the brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Product ID
+      categoryId:
+        type: string
+        description: ID of the brand associated with the product
+      name:
+        type: string
+        description: Name of the product
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: integer
+        format: int32
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: Image urls for the associated product
+  User:
+    type: object
+    properties:
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/CartItem"
+      email:
+        type: string
+        description: Email of the user
+      token:
+        type: string
+        description: User Token
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+  CartItem:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Cart item ID
+      productId:
+        type: string
+        description: Uses product id to pull information about product
+      quantity:
+        type: integer
+        format: int32
+        description: Quantity of items in the cart
