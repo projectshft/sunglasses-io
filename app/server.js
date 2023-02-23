@@ -53,3 +53,15 @@ myRouter.get('/v1/brands/:id/products', (request, response) => {
     response.end(JSON.stringify(brandProducts));
   }
 });
+
+myRouter.get('/v1/products', (request, response) => {
+  if(!products) {
+    response.writeHead(404, "There are no products to return");
+    return response.end();
+  } else {
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(products));
+  }
+});
+
+module.exports = server

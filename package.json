@@ -14,6 +14,7 @@
     "body-parser": "^1.18.2",
     "finalhandler": "latest",
     "http": "latest",
+    "mocha": "^10.2.0",
     "nodemon": "^2.0.20",
     "querystring": "^0.2.0",
     "rand-token": "^0.4.0",

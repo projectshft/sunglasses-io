@@ -11,37 +11,39 @@ describe("Brands", () => {
     it('it should return a list of all brands', (done) => {
       chai
         .request(server)
-        .get('/brands')
+        .get('/v1/brands')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(5);
+          done();
         })
     })
   });
 
   describe("/Get products by brand id", () => {
     it('it should return a list of products by brand id', (done) => {
+      let brandId = "2"
       chai 
         .request(server)
-        .get('/brands/:id/products')
+        .get(`/v1/brands/${brandId}/products`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.should.have.property('brandId');
-          res.body.property.should.be.eql(brand.id);
+          res.body[0].should.have.property('brandId');
+          res.body[0]['brandId'].should.be.eql('2');
           done();
         })
     })
   });
-})
+});
 
 describe('Products', () => {
   describe('/GET products', () => {
     it('it should return a list of all products', (done) => {
       chai
         .request(server)
-        .get('/products')
+        .get('/v1/products')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
