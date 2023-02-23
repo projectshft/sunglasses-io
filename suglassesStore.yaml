@@ -124,6 +124,12 @@ paths:
         This endpoint allows you to add a product to the user's cart
       tags:
         - User
+      parameters:
+        - name: productId
+          in: query
+          description: id of product to be added to cart
+          required: true
+          type: string
       responses:
         '200':
           description: Product successfully added
@@ -155,6 +161,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /me/cart/{productId}/{updQuantity}:          
     post:
       summary: Update the quantity of an item in the user's cart
       description: |
@@ -165,6 +172,11 @@ paths:
         - name: productId
           in: path
           description: the id of the product to update
+          required: true
+          type: string
+        - name: updQuantity
+          in: path
+          description: the new quantity of the product
           required: true
           type: string
       responses:
@@ -227,9 +239,7 @@ definitions:
         type: string
         description: Gender name of the user.
       cart:
-        type: array
-        items: 
-          $ref: '#/definitions/Cart'
+        $ref: '#/definitions/Cart'
       name:
         type: object
         properties:
