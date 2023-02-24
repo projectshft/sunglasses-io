@@ -12,7 +12,8 @@ let brands = [];
 let product = {};
 let user = {};
 let cart = [];
-
+let accessTokens = [];
+console.log(accessTokens)
 const PORT = 3001;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -63,5 +64,44 @@ myRouter.get('/v1/products', (request, response) => {
     response.end(JSON.stringify(products));
   }
 });
+
+myRouter.post('/v1/login', (request, response) => {
+  if(request.body.username && request.body.password) {
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+    if(user) {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      return response.end(JSON.stringify(user));
+      
+      // Check to see if there is an existing access token for the user.  If so, use that token.
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      // Check to see if access token is current
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        // Otherwise, create a new token for the user
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token))
+      }
+    } else {
+      response.writeHead(401, "Invalid username of password");
+      return response.end();
+    }
+  } else {
+    response.writeHead(400, "Incorrectly formatted request");
+    return response.end();
+  }
+})
+
 
 module.exports = server
