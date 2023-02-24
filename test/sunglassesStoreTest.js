@@ -63,18 +63,8 @@ describe('User', () => {
         .send({"username": "yellowleopard753", "password": "jonjon"})
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an('object');
-          res.body.should.have.property('gender');
-          res.body.should.have.property('cart');
-          res.body.should.have.property('name');
-          res.body.should.have.property('location');
-          res.body.should.have.property('email');
-          res.body.should.have.property('dob');
-          res.body.should.have.property('registered');
-          res.body.should.have.property('phone');
-          res.body.should.have.property('cell');
-          res.body.should.have.property('picture');
-          res.body.should.have.property('nat');
+          res.body.should.be.an('array');
+          res.body.length.should.eql(1);
           done();
         })
     })
@@ -84,7 +74,7 @@ describe('User', () => {
     it("should return the contents of the user's cart", (done) => {
       chai 
         .request(server)
-        .get('/me/cart')
+        .get('/v1/me/cart')
         .end((err, res), (done) => {
           res.should.have.status(200);
           res.should.be.an('array');
@@ -97,11 +87,12 @@ describe('User', () => {
     it('should add a specific product to cart', (done) => {
       chai
         .request(server)
-        .post('/me/cart')
+        .post('/v1/me/cart/:productId')
         .end((err, res), (done) => {
           res.should.have.status(200);
           res.should.be.an('array');
           res.body.length.should.eql(1);
+          done();
         })
     })
   });
@@ -144,6 +135,7 @@ describe('User', () => {
         .post('/me/cart/:productId/:updQuantity')
         .end((err, res) => {
           res.should.have.status(200);
+          done();
         })
     })
   })

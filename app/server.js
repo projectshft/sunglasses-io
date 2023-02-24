@@ -11,7 +11,7 @@ let products = [];
 let brands = [];
 let users = [];
 let product = {};
-let user = users[0];
+let user = {};
 let cart = [];
 let accessTokens = [];
 
@@ -111,7 +111,7 @@ myRouter.post('/v1/login', (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(user))
+        return response.end(JSON.stringify(accessTokens))
       }
     } else {
       response.writeHead(401, "Invalid username of password");
@@ -125,7 +125,7 @@ myRouter.post('/v1/login', (request, response) => {
 
 myRouter.get('/v1/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
-
+  console.log(currentAccessToken);
   if (!currentAccessToken) {
     response.writeHead(401, "You need to be logged in to see your cart");
     return response.end();
