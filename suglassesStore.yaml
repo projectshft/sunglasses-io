@@ -82,17 +82,6 @@ paths:
         The User login endpoint allows the user to login into the store.
       tags:
         - User
-      parameters:
-        - name: Email
-          in: query
-          description: Email address of user
-          required: false
-          type: string
-        - name: password
-          in: query
-          description: Password of user
-          required: false
-          type: string
       responses:
         '200':
           description: User login successful
