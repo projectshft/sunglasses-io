@@ -11,7 +11,7 @@ let products = [];
 let brands = [];
 let users = [];
 let product = {};
-let user = {};
+let user = users[0];
 let cart = [];
 let accessTokens = [];
 
@@ -123,7 +123,7 @@ myRouter.post('/v1/login', (request, response) => {
   }
 })
 
-myRouter.get('/v1/me/cart', (request, response)=> {
+myRouter.get('/v1/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -131,12 +131,30 @@ myRouter.get('/v1/me/cart', (request, response)=> {
     return response.end();
   } 
     // Access user profile
-    let user = users.find((user) => {
-      return user.login.username == currentAccessToken.username;
-    });
+  let user = users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
     
-    response.writeHead(200, { 'Content-Type': 'application/json'});
-    return response.end(JSON.stringify(user.cart));
+  response.writeHead(200, { 'Content-Type': 'application/json'});
+  return response.end(JSON.stringify(user.cart));
 });
+
+myRouter.delete('/v1/me/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to be logged in to access your cart");
+    return response.end();
+  } 
+  // Access user profile
+  // let user = users.find((user) => {
+  //   return user.login.username == currentAccessToken.username;
+  // });
+  let product = user.cart.find( p => p.id == request.params.productId) 
+  console.log(product);
+  // let updatedCart = user.cart.filter( p => p.id == request.params.productId) {
+
+  // }
+})
 
 module.exports = server

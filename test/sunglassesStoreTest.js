@@ -8,7 +8,7 @@ chai.use(chaiHttp);
 
 describe("Brands", () => {
   describe("/GET brands", () => {
-    it('it should return a list of all brands', (done) => {
+    it('should return a list of all brands', (done) => {
       chai
         .request(server)
         .get('/v1/brands')
@@ -22,7 +22,7 @@ describe("Brands", () => {
   });
 
   describe("/Get products by brand id", () => {
-    it('it should return a list of products by brand id', (done) => {
+    it('should return a list of products by brand id', (done) => {
       let brandId = "2"
       chai 
         .request(server)
@@ -40,7 +40,7 @@ describe("Brands", () => {
 
 describe('Products', () => {
   describe('/GET products', () => {
-    it('it should return a list of all products', (done) => {
+    it('should return a list of all products', (done) => {
       chai
         .request(server)
         .get('/v1/products')
@@ -56,33 +56,32 @@ describe('Products', () => {
 
 describe('User', () => {
   describe('/POST login', () => {
-    it('it should login in user and return user information', (done) => {
+    it('should login user and return user information', (done) => {
       chai 
         .request(server)
-        .post('/login')
-        // .set('content-type', 'application/json')
-        .send({"username": 'yellowleopard753', "password": 'jonjon'})
+        .post('/v1/login')
+        .send({"username": "yellowleopard753", "password": "jonjon"})
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('object');
-          // res.body.should.have.property('gender');
-          // res.body.should.have.property('cart');
-          // res.body.should.have.property('name');
-          // res.body.should.have.proptery('location');
-          // res.body.should.have.property('email');
-          // res.body.should.have.property('dob');
-          // res.body.should.have.property('registered');
-          // res.body.should.have.property('phone');
-          // res.body.should.have.property('cell');
-          // res.body.should.have.property('picture');
-          // res.body.should.have.property('nat');
+          res.body.should.have.property('gender');
+          res.body.should.have.property('cart');
+          res.body.should.have.property('name');
+          res.body.should.have.property('location');
+          res.body.should.have.property('email');
+          res.body.should.have.property('dob');
+          res.body.should.have.property('registered');
+          res.body.should.have.property('phone');
+          res.body.should.have.property('cell');
+          res.body.should.have.property('picture');
+          res.body.should.have.property('nat');
           done();
         })
     })
   });
 
   describe('/GET Access cart', () => {
-    it("it should return the contents of the user's cart", (done) => {
+    it("should return the contents of the user's cart", (done) => {
       chai 
         .request(server)
         .get('/me/cart')
@@ -95,7 +94,7 @@ describe('User', () => {
   });
 
   describe('/POST Add product to cart', () => {
-    it('it should add a specific product to cart', (done) => {
+    it('should add a specific product to cart', (done) => {
       chai
         .request(server)
         .post('/me/cart')
@@ -108,7 +107,7 @@ describe('User', () => {
   });
 
   describe('/DELETE product from cart', () => {
-    it('it should delete a specified product from the cart', (done) => {
+    it('should delete a specified product from the cart', (done) => {
       let cart = {
         id: 1,
         brandId: 1,
@@ -139,7 +138,7 @@ describe('User', () => {
   })
 
   describe('/POST Update quantity of an item in cart', () => {
-    it('it should update the quantity of a specific item in the cart', (done) => {
+    it('should update the quantity of a specific item in the cart', (done) => {
       chai
         .request(server)
         .post('/me/cart/:productId/:updQuantity')
