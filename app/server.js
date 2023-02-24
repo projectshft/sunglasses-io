@@ -9,14 +9,35 @@ const uid = require('rand-token').uid;
 // State holding variables
 let products = [];
 let brands = [];
+let users = [];
 let product = {};
 let user = {};
 let cart = [];
 let accessTokens = [];
-console.log(accessTokens)
+
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
 const PORT = 3001;
 const myRouter = Router();
 myRouter.use(bodyParser.json());
+
+// Helper method to proccess access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 const server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
@@ -72,7 +93,6 @@ myRouter.post('/v1/login', (request, response) => {
     });
     if(user) {
       response.writeHead(200, { 'Content-Type': 'application/json' });
-      return response.end(JSON.stringify(user));
       
       // Check to see if there is an existing access token for the user.  If so, use that token.
       let currentAccessToken = accessTokens.find((tokenObject) => {
@@ -91,7 +111,7 @@ myRouter.post('/v1/login', (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token))
+        return response.end(JSON.stringify(user))
       }
     } else {
       response.writeHead(401, "Invalid username of password");
@@ -103,5 +123,20 @@ myRouter.post('/v1/login', (request, response) => {
   }
 })
 
+myRouter.get('/v1/me/cart', (request, response)=> {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to be logged in to see your cart");
+    return response.end();
+  } 
+    // Access user profile
+    let user = users.find((user) => {
+      return user.login.username == currentAccessToken.username;
+    });
+    
+    response.writeHead(200, { 'Content-Type': 'application/json'});
+    return response.end(JSON.stringify(user.cart));
+});
 
 module.exports = server

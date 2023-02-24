@@ -60,7 +60,7 @@ describe('User', () => {
       chai 
         .request(server)
         .post('/login')
-        .set('content-type', 'application/json')
+        // .set('content-type', 'application/json')
         .send({"username": 'yellowleopard753', "password": 'jonjon'})
         .end((err, res) => {
           res.should.have.status(200);
