@@ -11,7 +11,7 @@ describe("Brands", () => {
     it('should return a list of all brands', (done) => {
       chai
         .request(server)
-        .get('/v1/brands')
+        .get('/api/brands')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -26,7 +26,7 @@ describe("Brands", () => {
       let brandId = "2"
       chai 
         .request(server)
-        .get(`/v1/brands/${brandId}/products`)
+        .get(`/api/brands/${brandId}/products`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -43,7 +43,7 @@ describe('Products', () => {
     it('should return a list of all products', (done) => {
       chai
         .request(server)
-        .get('/v1/products')
+        .get('/api/products')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -56,87 +56,95 @@ describe('Products', () => {
 
 describe('User', () => {
   describe('/POST login', () => {
-    it('should login user and return user information', (done) => {
+    it('should login user and return user access token', (done) => {
       chai 
         .request(server)
-        .post('/v1/login')
+        .post('/api/login')
         .send({"username": "yellowleopard753", "password": "jonjon"})
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an('array');
-          res.body.length.should.eql(1);
+          res.body.should.be.a('string');
           done();
         })
     })
   });
 
-  describe('/GET Access cart', () => {
+  describe('/GET Access user cart', () => {
     it("should return the contents of the user's cart", (done) => {
       chai 
         .request(server)
-        .get('/v1/me/cart')
-        .end((err, res), (done) => {
-          res.should.have.status(200);
-          res.should.be.an('array');
-          res.body.length.should.eql(0);
+        .post('/api/login')
+        .send({"username": "yellowleopard753", "password": "jonjon"})
+        .end((err, res) => {
+          chai
+            .request(server)
+            .get(`/api/me/cart?accessToken=${res.body}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.length.should.eql(1);
+            })
+          done();
         })
     })
   });
 
   describe('/POST Add product to cart', () => {
     it('should add a specific product to cart', (done) => {
+      chai 
+        .request(server)
+        .post('/api/login')
+        .send({"username": "yellowleopard753", "password": "jonjon"})
+        .end((err, res) => {
+          let accessToken = `?accessToken=${res.body}`;
+          chai
+            .request(server)
+            .post(`/api/me/cart/2${accessToken}`)
+            .end((err,res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.length.should.eql(2);
+            })
+          done();  
+        }) 
+      })
+  });
+ 
+
+  describe('/DELETE product from cart', () => {
+    it('should delete a specified product from the cart', (done) => {
       chai
         .request(server)
-        .post('/v1/me/cart/:productId')
-        .end((err, res), (done) => {
-          res.should.have.status(200);
-          res.should.be.an('array');
-          res.body.length.should.eql(1);
-          done();
+        .post('/api/login')
+        .send({"username": "yellowleopard753", "password": "jonjon"})
+        .end((err, res) => {
+          let accessToken = `?accessToken=${res.body}`
+          chai
+            .request(server)
+            .post(`/api/me/cart/1${accessToken}`)
+            .end((err, res) => {
+              chai
+                .request(server)
+                .delete(`/api/me/cart/1${accessToken}`)
+                .end((err, res), () => {
+                  res.should.have.status(200);
+                  res.body.should.be.an('array');
+                  res.body.length.should.eql(0); 
+                })
+            })
         })
     })
   });
 
-  describe('/DELETE product from cart', () => {
-    it('should delete a specified product from the cart', (done) => {
-      let cart = {
-        id: 1,
-        brandId: 1,
-        name: "Superglasses",
-        description: "The best glasses in the world",
-        price: 150,
-        imageUrls: [
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
-        ],
-        quantity: 1
-      };
-
-      chai
-        .request(server)
-        .get('/me/cart')
-        .end((err, res) => {
-          chai
-            .request(server)
-            .delete('/me/cart/:productId')
-            .end((err, res), () => {
-              res.should.have.status(200);
-              done();
-            })
-        })
-    })
-  })
-
-  describe('/POST Update quantity of an item in cart', () => {
-    it('should update the quantity of a specific item in the cart', (done) => {
-      chai
-        .request(server)
-        .post('/me/cart/:productId/:updQuantity')
-        .end((err, res) => {
-          res.should.have.status(200);
-          done();
-        })
-    })
-  })
+//   describe('/POST Update quantity of an item in cart', () => {
+//     it('should update the quantity of a specific item in the cart', (done) => {
+//       chai
+//         .request(server)
+//         .post('/me/cart/:productId/:updQuantity')
+//         .end((err, res) => {
+//           res.should.have.status(200);
+//           done();
+//         })
+//     })
+//   })
 });

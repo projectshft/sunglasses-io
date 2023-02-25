@@ -10,12 +10,9 @@ const uid = require('rand-token').uid;
 let products = [];
 let brands = [];
 let users = [];
-let product = {};
-let user = {};
-let cart = [];
 let accessTokens = [];
 
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const TOKEN_VALIDITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 const PORT = 3001;
 const myRouter = Router();
@@ -50,7 +47,7 @@ const server = http.createServer(function (request, response) {
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 });
 
-myRouter.get('/v1/brands', (request, response) => {
+myRouter.get('/api/brands', (request, response) => {
   if(!brands) {
     response.writeHead(404, "There are no brands to return");
     return response.end();
@@ -60,7 +57,7 @@ myRouter.get('/v1/brands', (request, response) => {
   }
 });
 
-myRouter.get('/v1/brands/:id/products', (request, response) => {
+myRouter.get('/api/brands/:id/products', (request, response) => {
   // Find brand by id
   let brand = brands.find((brand) => {
     return brand.id == request.params.id
@@ -76,7 +73,7 @@ myRouter.get('/v1/brands/:id/products', (request, response) => {
   }
 });
 
-myRouter.get('/v1/products', (request, response) => {
+myRouter.get('/api/products', (request, response) => {
   if(!products) {
     response.writeHead(404, "There are no products to return");
     return response.end();
@@ -86,7 +83,7 @@ myRouter.get('/v1/products', (request, response) => {
   }
 });
 
-myRouter.post('/v1/login', (request, response) => {
+myRouter.post('/api/login', (request, response) => {
   if(request.body.username && request.body.password) {
     let user = users.find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
@@ -111,7 +108,7 @@ myRouter.post('/v1/login', (request, response) => {
           token: uid(16)
         }
         accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(accessTokens))
+        return response.end(JSON.stringify(newAccessToken.token))
       }
     } else {
       response.writeHead(401, "Invalid username of password");
@@ -123,9 +120,10 @@ myRouter.post('/v1/login', (request, response) => {
   }
 })
 
-myRouter.get('/v1/me/cart', (request, response) => {
+myRouter.get('/api/me/cart', (request, response) => {
+  // Check if user is actively logged in
   let currentAccessToken = getValidTokenFromRequest(request);
-  console.log(currentAccessToken);
+  
   if (!currentAccessToken) {
     response.writeHead(401, "You need to be logged in to see your cart");
     return response.end();
@@ -135,11 +133,12 @@ myRouter.get('/v1/me/cart', (request, response) => {
     return user.login.username == currentAccessToken.username;
   });
     
-  response.writeHead(200, { 'Content-Type': 'application/json'});
+  response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(user.cart));
 });
 
-myRouter.delete('/v1/me/:productId', (request, response) => {
+myRouter.post('/api/me/cart/:productId', (request, response) => {
+  // Check if user is actively logged in
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if (!currentAccessToken) {
@@ -147,14 +146,44 @@ myRouter.delete('/v1/me/:productId', (request, response) => {
     return response.end();
   } 
   // Access user profile
-  // let user = users.find((user) => {
-  //   return user.login.username == currentAccessToken.username;
-  // });
-  let product = user.cart.find( p => p.id == request.params.productId) 
-  console.log(product);
-  // let updatedCart = user.cart.filter( p => p.id == request.params.productId) {
+  let user = users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
 
-  // }
+  let product = products.find( p => p.id == request.params.productId);
+  if (!product) {
+    response.writeHead(404, "Product not found in the store.");
+    return response.end();
+  } 
+
+  if (!user.cart.includes(product)) {
+    product.quanity = 1;
+    user.cart.push(product);
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    return response.end(JSON.stringify(user.cart));
+  } 
+  // else {
+    // find the index of the product in user.cart and increment the quantity
 })
 
-module.exports = server
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  // Check if user is actively logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to be logged in to access your cart");
+    return response.end();
+  } 
+  // Access user profile
+  let user = users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
+  
+  // update cart to only contain products that have a different id than given in the request
+  let updatedCart = user.cart.filter( p => p.id !== request.params.productId); 
+  user.cart = updatedCart;
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(user.cart));
+});
+
+module.exports = server 
