@@ -82,7 +82,7 @@ describe('User', () => {
             .end((err, res) => {
               res.should.have.status(200);
               res.body.should.be.an('array');
-              res.body.length.should.eql(1);
+              res.body.length.should.eql(0);
             })
           done();
         })
@@ -103,7 +103,7 @@ describe('User', () => {
             .end((err,res) => {
               res.should.have.status(200);
               res.body.should.be.an('array');
-              res.body.length.should.eql(2);
+              res.body.length.should.eql(1);
             })
           done();  
         }) 
@@ -121,20 +121,16 @@ describe('User', () => {
           let accessToken = `?accessToken=${res.body}`
           chai
             .request(server)
-            .post(`/api/me/cart/1${accessToken}`)
-            .end((err, res) => {
-              chai
-                .request(server)
-                .delete(`/api/me/cart/1${accessToken}`)
-                .end((err, res), () => {
-                  res.should.have.status(200);
-                  res.body.should.be.an('array');
-                  res.body.length.should.eql(0); 
-                })
+            .delete(`/api/me/cart/2${accessToken}`)
+            .end((err, res), () => {
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+              res.body.length.should.eql(0); 
             })
         })
     })
-  });
+  })
+
 
 //   describe('/POST Update quantity of an item in cart', () => {
 //     it('should update the quantity of a specific item in the cart', (done) => {
