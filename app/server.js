@@ -48,7 +48,7 @@ const server = http.createServer(function (request, response) {
 });
 
 myRouter.get('/api/brands', (request, response) => {
-  if(!brands) {
+  if (!brands) {
     response.writeHead(404, "There are no brands to return");
     return response.end();
   } else {
@@ -64,7 +64,7 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
   })
   // Filter out products that are not from that brand
   let brandProducts = products.filter(p => p.brandId === brand.id);
-  if(!brandProducts) {
+  if (!brandProducts) {
     response.writeHead(404, "There are no products to return");
     return response.end();
   } else {
@@ -74,7 +74,7 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
 });
 
 myRouter.get('/api/products', (request, response) => {
-  if(!products) {
+  if (!products) {
     response.writeHead(404, "There are no products to return");
     return response.end();
   } else {
@@ -84,11 +84,11 @@ myRouter.get('/api/products', (request, response) => {
 });
 
 myRouter.post('/api/login', (request, response) => {
-  if(request.body.username && request.body.password) {
+  if (request.body.username && request.body.password) {
     let user = users.find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
     });
-    if(user) {
+    if (user) {
       response.writeHead(200, { 'Content-Type': 'application/json' });
       
       // Check to see if there is an existing access token for the user.  If so, use that token.

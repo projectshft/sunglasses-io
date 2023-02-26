@@ -122,10 +122,11 @@ describe('User', () => {
           chai
             .request(server)
             .delete(`/api/me/cart/2${accessToken}`)
-            .end((err, res), () => {
+            .end((err, res) => {
               res.should.have.status(200);
               res.body.should.be.an('array');
               res.body.length.should.eql(0); 
+              done();
             })
         })
     })
