@@ -7,7 +7,7 @@ let should = chai.should();
 chai.use(chaiHttp);
 
 describe("Brands", () => {
-  describe("/GET brands", () => {
+  describe("/GET List of Brands", () => {
     it('should return a list of all brands', (done) => {
       chai
         .request(server)
@@ -21,7 +21,7 @@ describe("Brands", () => {
     })
   });
 
-  describe("/Get products by brand id", () => {
+  describe("/Get List of Products by Brand", () => {
     it('should return a list of products by brand id', (done) => {
       let brandId = "2"
       chai 
@@ -39,7 +39,7 @@ describe("Brands", () => {
 });
 
 describe('Products', () => {
-  describe('/GET products', () => {
+  describe('/GET List of All Products', () => {
     it('should return a list of all products', (done) => {
       chai
         .request(server)
@@ -55,7 +55,7 @@ describe('Products', () => {
 });
 
 describe('User', () => {
-  describe('/POST login', () => {
+  describe('/POST User Login', () => {
     it('should login user and return user access token', (done) => {
       chai 
         .request(server)
@@ -69,7 +69,7 @@ describe('User', () => {
     })
   });
 
-  describe('/GET Access user cart', () => {
+  describe('/GET User Cart', () => {
     it("should return the contents of the user's cart", (done) => {
       chai 
         .request(server)
@@ -89,7 +89,7 @@ describe('User', () => {
     })
   });
 
-  describe('/POST Add product to cart', () => {
+  describe('/POST Add Product to User Cart', () => {
     it('should add a specific product to cart', (done) => {
       chai 
         .request(server)
@@ -104,6 +104,9 @@ describe('User', () => {
               res.should.have.status(200);
               res.body.should.be.an('array');
               res.body.length.should.eql(1);
+              res.body[0].should.have.property('id');
+              res.body[0]['id'].should.be.eql('2');
+              res.body[0].should.have.property('quantity');
               res.body[0]['quantity'].should.eql(1);
             })
           done();  
@@ -111,7 +114,7 @@ describe('User', () => {
       })
   });
  
-  describe('/POST Update quantity of an item in cart', () => {
+  describe("/POST Update the Quantity of a Product in the User's Cart", () => {
     it('should update the quantity of a specific item in the cart', (done) => {
       chai 
         .request(server)
@@ -127,6 +130,7 @@ describe('User', () => {
                 res.body.should.be.an('array');
                 res.body.length.should.be.eql(1);
                 res.body[0].should.have.property('id');
+                res.body[0]['id'].should.be.eql('2');
                 res.body[0].should.have.property('quantity');
                 res.body[0]['quantity'].should.be.eql(3);
               })
@@ -136,7 +140,7 @@ describe('User', () => {
   })
 
 
-  describe('/DELETE product from cart', () => {
+  describe("/DELETE Remove a Product by id from User's Cart", () => {
     it('should delete a specified product from the cart', (done) => {
       chai
         .request(server)

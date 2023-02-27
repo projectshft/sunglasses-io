@@ -47,6 +47,7 @@ const server = http.createServer(function (request, response) {
   brands = JSON.parse(fs.readFileSync("./initial-data/brands.json", "utf-8"));
 });
 
+// /GET List of Brands
 myRouter.get('/api/brands', (request, response) => {
   if (!brands) {
     response.writeHead(404, "There are no brands to return");
@@ -57,6 +58,7 @@ myRouter.get('/api/brands', (request, response) => {
   }
 });
 
+// /GET List of Products by Brand
 myRouter.get('/api/brands/:id/products', (request, response) => {
   // Find brand by id
   let brand = brands.find((brand) => {
@@ -73,6 +75,7 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
   }
 });
 
+// /GET List of All Products
 myRouter.get('/api/products', (request, response) => {
   if (!products) {
     response.writeHead(404, "There are no products to return");
@@ -83,6 +86,7 @@ myRouter.get('/api/products', (request, response) => {
   }
 });
 
+// /POST User Login
 myRouter.post('/api/login', (request, response) => {
   if (request.body.username && request.body.password) {
     let user = users.find((user) => {
@@ -120,6 +124,7 @@ myRouter.post('/api/login', (request, response) => {
   }
 })
 
+// /GET User Cart
 myRouter.get('/api/me/cart', (request, response) => {
   // Check if user is actively logged in
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -137,6 +142,7 @@ myRouter.get('/api/me/cart', (request, response) => {
   return response.end(JSON.stringify(user.cart));
 });
 
+// /POST Add Product to User Cart
 myRouter.post('/api/me/cart/:productId', (request, response) => {
   // Check if user is actively logged in
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -170,8 +176,30 @@ myRouter.post('/api/me/cart/:productId', (request, response) => {
     return response.end(JSON.stringify(user.cart));
   }
     
-})
-  // /POST set quantity of item in cart 
+});
+
+// /DELETE Remove a Product by id from User's Cart
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  // Check if user is actively logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to be logged in to access your cart");
+    return response.end();
+  } 
+  // Access user profile
+  let user = users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
+  
+  // update cart to only contain products that have a different id than given in the request
+  let updatedCart = user.cart.filter( p => p.id !== request.params.productId); 
+  user.cart = updatedCart;
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(user.cart));
+});
+
+// /POST Update the Quantity of a Product in the User's Cart 
 myRouter.post('/api/me/cart/:productId/:updQuantity', (request, response) => {
   // Check if user is actively logged in
   let currentAccessToken = getValidTokenFromRequest(request);
@@ -205,26 +233,6 @@ myRouter.post('/api/me/cart/:productId/:updQuantity', (request, response) => {
     // return updated user cart
     return response.end(JSON.stringify(user.cart));
   }
-})
-
-myRouter.delete('/api/me/cart/:productId', (request, response) => {
-  // Check if user is actively logged in
-  let currentAccessToken = getValidTokenFromRequest(request);
-
-  if (!currentAccessToken) {
-    response.writeHead(401, "You need to be logged in to access your cart");
-    return response.end();
-  } 
-  // Access user profile
-  let user = users.find((user) => {
-    return user.login.username == currentAccessToken.username;
-  });
-  
-  // update cart to only contain products that have a different id than given in the request
-  let updatedCart = user.cart.filter( p => p.id !== request.params.productId); 
-  user.cart = updatedCart;
-  response.writeHead(200, { 'Content-Type': 'application/json' });
-  return response.end(JSON.stringify(user.cart));
 });
 
 module.exports = server 

@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Sunglasses Store API
   description: An API to support the Sunglasses Store platform
@@ -24,22 +24,22 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: An array of brands
           schema:
             type: array
             items:
-              $ref: '#/definitions/Brand'
+              $ref: "#/definitions/Brand"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /brands/{id}/products:
     get:
       summary: Products by Brand
       description: |
         The Products by Brand endpoint returns a list of products from a specific brand.
-      tags: 
+      tags:
         - Brands
       parameters:
         - name: id
@@ -48,13 +48,13 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: Display of products from a brand
-          schema: 
+          schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
-      
+              $ref: "#/definitions/Product"
+
   /products:
     get:
       summary: List of all products
@@ -69,12 +69,12 @@ paths:
           required: false
           type: string
       responses:
-        '200':
+        "200":
           description: Display of all products
           schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
+              $ref: "#/definitions/Product"
   /login:
     post:
       summary: User login
@@ -83,14 +83,14 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: Successful Login. User Access Token.
           schema:
             type: string
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /me/cart:
     get:
       summary: Access Cart
@@ -99,17 +99,17 @@ paths:
       tags:
         - User
       responses:
-        '200':
+        "200":
           description: Cart of user
           schema:
-            $ref: '#/definitions/Cart'
+            $ref: "#/definitions/Cart"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
   /me/cart/{productId}:
     delete:
-      summary: Delete a product by id from user's cart
+      summary: Remove a product by id from user's cart
       description: |
         This endpoint allows the user to delete a product from the cart
       tags:
@@ -121,14 +121,14 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: Item successfully removed
           schema:
-            $ref: '#/definitions/Cart'
+            $ref: "#/definitions/Cart"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
     post:
       summary: Add product to user cart
       description: |
@@ -142,15 +142,15 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: Product successfully added
           schema:
-            $ref: '#/definitions/Cart'
+            $ref: "#/definitions/Cart"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'        
-  /me/cart/{productId}/{updQuantity}:          
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}/{updQuantity}:
     post:
       summary: Update the quantity of an item in the user's cart
       description: |
@@ -169,14 +169,14 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: Quantity succesfully updated
           schema:
-            $ref: '#/definitions/Cart'
+            $ref: "#/definitions/Cart"
         default:
           description: Unexpected error
           schema:
-            $ref: '#/definitions/Error'
+            $ref: "#/definitions/Error"
 definitions:
   Product:
     type: object
@@ -198,7 +198,7 @@ definitions:
         description: The price of the product
       imageURL:
         type: array
-        items: 
+        items:
           type: string
         description: Array of URLs for images of the product
   Brand:
@@ -213,12 +213,12 @@ definitions:
         description: The name of the brand
   Cart:
     type: array
-    items: 
+    items:
       allOf:
-        - $ref: '#/definitions/Product'
+        - $ref: "#/definitions/Product"
         - type: object
           properties:
-            quantity: 
+            quantity:
               type: number
               description: The quantity of this product in the cart
   Error:
