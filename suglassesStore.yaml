@@ -1,0 +1,233 @@
+swagger: "2.0"
+info:
+  title: Sunglasses Store API
+  description: An API to support the Sunglasses Store platform
+  version: 1.0.0
+host: api.sunglassesstore.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to see a list sunglasses brands that are featured in the store.
+      tags:
+        - Brands
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: Products by Brand
+      description: |
+        The Products by Brand endpoint returns a list of products from a specific brand.
+      tags:
+        - Brands
+      parameters:
+        - name: id
+          in: path
+          description: the id of the brand
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Display of products from a brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+
+  /products:
+    get:
+      summary: List of all products
+      description: |
+        The Products endpoint returns a list of all products in the store and allows the user to search for products using different parameters.
+      tags:
+        - Products
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Display of all products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+  /login:
+    post:
+      summary: User login
+      description: |
+        The User login endpoint allows the user to login into the store.
+      tags:
+        - User
+      responses:
+        "200":
+          description: Successful Login. User Access Token.
+          schema:
+            type: string
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: Access Cart
+      description: |
+        The Access Cart endpoint returns the contents of the user's cart.
+      tags:
+        - User
+      responses:
+        "200":
+          description: Cart of user
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      summary: Remove a product by id from user's cart
+      description: |
+        This endpoint allows the user to delete a product from the cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to remove
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Item successfully removed
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add product to user cart
+      description: |
+        This endpoint allows you to add a product to the user's cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: id of product to be added to cart
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Product successfully added
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}/{updQuantity}:
+    post:
+      summary: Update the quantity of an item in the user's cart
+      description: |
+        This endpoint allows the user to update the amount of of an in their cart.
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: the id of the product to update
+          required: true
+          type: string
+        - name: updQuantity
+          in: path
+          description: the new quantity of the product
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Quantity succesfully updated
+          schema:
+            $ref: "#/definitions/Cart"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      brandId:
+        type: string
+        description: The id of the brand this product belongs to.
+      name:
+        type: string
+        description: Name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: number
+        description: The price of the product
+      imageURL:
+        type: array
+        items:
+          type: string
+        description: Array of URLs for images of the product
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: |
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+  Cart:
+    type: array
+    items:
+      allOf:
+        - $ref: "#/definitions/Product"
+        - type: object
+          properties:
+            quantity:
+              type: number
+              description: The quantity of this product in the cart
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
