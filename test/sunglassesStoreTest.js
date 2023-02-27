@@ -104,12 +104,37 @@ describe('User', () => {
               res.should.have.status(200);
               res.body.should.be.an('array');
               res.body.length.should.eql(1);
+              res.body[0]['quantity'].should.eql(1);
             })
           done();  
         }) 
       })
   });
  
+  describe('/POST Update quantity of an item in cart', () => {
+    it('should update the quantity of a specific item in the cart', (done) => {
+      chai 
+        .request(server)
+        .post('/api/login')
+        .send({"username": "yellowleopard753", "password": "jonjon"})
+        .end((err, res) => {
+          let accessToken = `?accessToken=${res.body}`;
+            chai
+              .request(server)
+              .post(`/api/me/cart/2/3${accessToken}`)
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.an('array');
+                res.body.length.should.be.eql(1);
+                res.body[0].should.have.property('id');
+                res.body[0].should.have.property('quantity');
+                res.body[0]['quantity'].should.be.eql(3);
+              })
+          done();
+        })
+    })
+  })
+
 
   describe('/DELETE product from cart', () => {
     it('should delete a specified product from the cart', (done) => {
@@ -131,17 +156,5 @@ describe('User', () => {
         })
     })
   })
-
-
-//   describe('/POST Update quantity of an item in cart', () => {
-//     it('should update the quantity of a specific item in the cart', (done) => {
-//       chai
-//         .request(server)
-//         .post('/me/cart/:productId/:updQuantity')
-//         .end((err, res) => {
-//           res.should.have.status(200);
-//           done();
-//         })
-//     })
-//   })
 });
+

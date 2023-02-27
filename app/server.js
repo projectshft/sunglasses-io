@@ -132,7 +132,7 @@ myRouter.get('/api/me/cart', (request, response) => {
   let user = users.find((user) => {
     return user.login.username == currentAccessToken.username;
   });
-    
+  // sucess and return user cart 
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(user.cart));
 });
@@ -157,13 +157,54 @@ myRouter.post('/api/me/cart/:productId', (request, response) => {
   } 
 
   if (!user.cart.includes(product)) {
-    product.quanity = 1;
+    product.quantity = 1;
     user.cart.push(product);
     response.writeHead(200, { 'Content-Type': 'application/json' })
     return response.end(JSON.stringify(user.cart));
+  } else {
+    // if product is already in cart, find index of product
+    let productIndex = user.cart.findIndex( p => p.id === product.id);
+    // increase quantity of product by 1
+    user.cart[productIndex].quantity += 1;
+    response.writeHead(200, 'Product already in cart - quantity of item increased by 1.')
+    return response.end(JSON.stringify(user.cart));
+  }
+    
+})
+  // /POST set quantity of item in cart 
+myRouter.post('/api/me/cart/:productId/:updQuantity', (request, response) => {
+  // Check if user is actively logged in
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to be logged in to access your cart");
+    return response.end();
   } 
-  // else {
-    // find the index of the product in user.cart and increment the quantity
+  // Access user profile
+  let user = users.find((user) => {
+    return user.login.username == currentAccessToken.username;
+  });
+
+  let product = products.find( p => p.id == request.params.productId);
+  if (!product) {
+    response.writeHead(404, "Product not found in the store.");
+    return response.end();
+  } 
+
+  if (!user.cart.includes(product)) {
+    // if product is not in user cart
+    response.writeHead(404, "Product not found in user cart, please add product to cart.");
+    return response.end();
+  } else {
+    // Find index of product to update quantity
+    let productIndex = user.cart.findIndex( p => p.id === product.id);
+    // update quantity to equal the quantity in the request params 
+    user.cart[productIndex].quantity = Number(request.params.updQuantity);
+
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    // return updated user cart
+    return response.end(JSON.stringify(user.cart));
+  }
 })
 
 myRouter.delete('/api/me/cart/:productId', (request, response) => {
