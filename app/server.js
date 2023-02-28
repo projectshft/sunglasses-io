@@ -2,7 +2,6 @@ const http = require('http');
 const fs = require('fs');
 const url = require('url');
 const finalHandler = require('finalhandler');
-const queryString = require('querystring');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
@@ -11,11 +10,11 @@ const uid = require('rand-token').uid;
 let brands = [];
 let products = [];
 let users = [];
-let accessTokens = ["oPblTB0dxgWMOBzr"];
+let accessTokens = [];
 let failedLoginAttempts = {};
 
 const PORT = process.env.PORT || 3001;
-const VALID_API_KEYS = ["88312679-04c9-4351-85ce-3ed75293b449","1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7"];
+const VALID_API_KEYS = ["b04adb11-e837-4aea-be4d-23a3d3791fbf","e3f04ad1-0326-4c2e-bcbe-5f9790b9969c", "d657c35c-2acf-4cdf-a774-8de571ddaf85"];
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 // Setup router
@@ -75,7 +74,7 @@ server.listen(PORT, "127.0.0.1", (err) => {
 // GET all brands - all users can access with API key
 router.get("/api/brands", (req, res) => {
   if (!brands) {
-    res.writeHead(404, "There aren't any brands to return");
+    res.writeHead(404, "Brands not found");
     res.end();
   } else {
     res.writeHead(200, {"Content-Type": "application/json"});
@@ -88,7 +87,7 @@ router.get("/api/brands/:categoryId/products", (req, res) => {
   const { categoryId } = req.params;
   const brand = brands.find(brand => brand.id == categoryId);
   if (!brand) {
-    res.writeHead(404, "That brand does not exist");
+    res.writeHead(404, "Brand Not Found");
     return res.end();
   } else {
     const relatedProducts = products.filter(product => product.categoryId === categoryId);
@@ -100,7 +99,7 @@ router.get("/api/brands/:categoryId/products", (req, res) => {
 // GET all products - All users can access with API key
 router.get("/api/products", (req, res) => {
   if (!products) {
-    res.writeHead(404, "There aren't any products to return");
+    res.writeHead(404, "Products Not Found");
     return res.end();
   } else {
     res.writeHead(200, {"Content-Type": "application/json"});
@@ -293,9 +292,14 @@ router.post("/api/me/cart/:productID", (req, res) => {
         res.writeHead(404, "Your shopping cart is empty");
         return res.end();
       } else {
-        if (user.cart.id === productID) {
-          user.cart.quantity +=1;
-        }
+        user.cart.map(item => {
+          if (item.id == productID) {
+            item.quantity += 1;
+          } else {
+            res.writeHead(404, "Product not found in your cart");
+            return res.end();
+          }
+        })
         res.writeHead(200, {'Content-Type': 'application/json'});
         return res.end(JSON.stringify(user.cart));
       }
