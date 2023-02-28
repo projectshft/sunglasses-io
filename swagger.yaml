@@ -1,0 +1,217 @@
+swagger: '2.0'
+info:
+  title: Shades API
+  description: Find the perfect pair of UV-blockers with the Shades API
+  version: "1.0.0"
+host: 127.0.0.1:3001
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint returns information about the brands of sunglasses. The response includes the brands name and id number.
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        401:
+          description: Authentification required
+        404:
+          description: Brands Not Found
+  /brands/:id/products:
+    get:
+      summary: Specific Brand Products
+      description: |
+        The Brands Products endpoint returns information about all of the products of a chosen brand of sunglasses. The response includes the products name, id number, description, price, and image.
+      tags:
+        - Brands
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: Authentification required
+        404:
+          description: Brand Not Found
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint returns information about the all products. The response includes the product name, id number, description, price, and an image.
+      tags:
+        - Products
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        401:
+          description: Authentification required
+        404:
+          description: Products Not Found
+  /login:
+    post:
+      summary: User Login
+      description: |
+        The Login endpoint requires a username and password so the user can receive an access token, allowing them to access their cart. 
+      tags:
+        - Login
+      responses:
+        200:
+          description: An access token
+          schema:
+            type: string
+            items:
+              $ref: '#/definitions/Login'
+        400:
+          description: Incorrectly formatted response
+ 
+        401:
+          description: Authentification required
+  /me/cart:
+    get:
+      summary: Users Cart Inventory
+      description: The User Inventory endpoint allows a user that is logged in to return all products currently in the users cart.
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsQuantity'
+        401:
+          description: Authentification required
+        403:
+          description: No access to this cart
+    post:
+      summary: Increase Item Quantity In Users Cart
+      description: The User Quantity Increase endpoint allows a user who is logged in to increase the product quantity in their cart.
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsQuantity'
+        401:
+          description: Authentification required
+        403:
+          description: No access to this cart
+        404:
+          description: Shopping cart is empty
+  /me/cart/:productId/:
+    delete:
+      summary: Delete Cart Item
+      description: The Delete Cart Item endpoint allows a user that is logged in to delete an item in their cart.
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsQuantity'
+        401:
+          description: Authentification required
+        403:
+          description: No access to this cart
+        404:
+          description: Shopping cart is empty
+    post:
+      summary: Change Cart Quantity
+      description: The Change Cart Quantity endpoint allows a user who is logged in to chan ge the quantity of a product in their cart.
+      tags:
+        - User
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProductsQuantity'
+        401:
+          description: Authentification required
+        403:
+          description: No access to this cart
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique brand identification number.
+      name:
+        type: string
+        description: Display name of brand.
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product identification number
+      category_id:
+        type: string
+        description: Product category identification number.
+      name:
+        type: string
+        description: Display name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+      image_Url:
+        type: array
+        items:
+          type: string
+          description: Array of jpegs representing the product.
+  Login:
+    type: string
+    description: Access Token
+  ProductsQuantity:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product identification number
+      category_id:
+        type: string
+        description: Product category identification number.
+      name:
+        type: string
+        description: Display name of product.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: integer
+        format: int32
+      image_Url:
+        type: array
+        items:
+          type: string
+          description: Array of jpegs representing the product.
+      quantity:
+        type: integer
+        format: int32
