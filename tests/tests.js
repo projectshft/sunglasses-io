@@ -36,10 +36,93 @@ describe("Brands", () => {
   });
 });
 
+describe("Products", () => {
+  describe("/GET Products", () => {
+    it('should return all the Products', (done) => {
+      chai.request(server)
+        .get('/api/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(11);
+          done();
+        })
+    })
+  });
+});
 
-// GET Products
-// POST Login
-// GET User Cart
-// POST Add to Cart
-// POST Update Cart Quantity
-// DELETE Remove from Cart
+describe("User", () => {
+  describe("/POST User Login", () => {
+    it('should authenticate user', (done) => {
+      chai.request(server)
+        .post('/api/login')
+        .send({ "username": "lazywolf342", "password": "tucker" })
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('string');
+          done();
+        })
+    })
+  });
+
+  describe("/GET User Cart", () => {
+    it('should return users cart', (done) => {
+      chai.request(server)
+        .get('/api/me/cart')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        })
+    })
+  });
+
+  describe("/POST Add to Cart", () => {
+    it('should add items to user cart', (done) => {
+      chai.request(server)
+        .post('/api/me/cart/add/11')
+        .send({
+          "id": "11",
+          "categoryId": "5",
+          "name": "Habanero",
+          "description": "The spiciest glasses in the world",
+          "price":153,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        })
+    })
+  });
+
+  describe("/POST Update Cart Quantity", () => {
+    it('should update items in user cart', (done) => {
+      chai.request(server)
+        .post('/api/me/cart/update/11')
+        .send({
+          "id": "11",
+          "quantity": "2"})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        })
+    })
+  });
+
+  describe("/DELETE Delete items in cart", () => {
+    it('should remove items from user cart', (done) => {
+      chai.request(server)
+        .post('/api/me/cart/delete/11')
+        .send({
+          "id": "11",
+          "quantity": "2"})
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          done();
+        })
+    })
+  });
+});

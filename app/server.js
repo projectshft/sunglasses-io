@@ -1,28 +1,26 @@
-var http = require('http');
-var fs = require('fs');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var uid = require('rand-token').uid;
+const http = require('http');
+const fs = require('fs');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const uid = require('rand-token').uid;
 
 const PORT = 3001;
 
-// Define local state variables to store data (in place of database)
+//  local state variables to store data (in place of database)
 let brands = [];
 let products = [];
 let users = [];
-
+let user;
+let userAuth = false; // dummy auth until we learn passport
 
 // Setup Router
 const myRouter = Router();
 myRouter.use(bodyParser.json());
 
 // Setup Server
-const server = http.createServer(function (request, response) {
-  
-  // --- Logic for CORS Preflight and Verify API key here ---
-  
+const server = http.createServer(function (request, response) {  
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT, error => {
   if (!error) {
@@ -31,25 +29,18 @@ const server = http.createServer(function (request, response) {
     return console.log("Error on Server Startup: ", error);
   }
 
-  // Load in Brands data
+  // Load Data
   fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded`);
   });
-
-  // Load in Products data
   fs.readFile("initial-data/products.json", "utf8", (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} products loaded`);
   });
-
-  // Load in Users data
   fs.readFile("initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
-    console.log(`Server setup: ${users.length} users loaded`);
   });
 
 });
@@ -72,11 +63,9 @@ myRouter.get('/api/brands', (request, response) => {
 
 // GET Products by Brand
 myRouter.get('/api/brands/:id/products', (request, response) => {
-  // Get brand by id
   let brand = brands.find((brand) => {
     return brand.id === request.params.id
   })
-  // Return only products whose id matches id in params
   let productsByBrand = products.filter(p => p.categoryId === brand.id);
   if (productsByBrand.length === 0) {
     response.writeHead(404, "No products found");
@@ -87,9 +76,107 @@ myRouter.get('/api/brands/:id/products', (request, response) => {
   }
 });
 
+// GET all Products
+myRouter.get('/api/products', (request, response) => {
+  if (products.length === 0) {
+    response.writeHead(404, "No products found");
+    return response.end();
+  } else {
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(products));
+  }
+});
 
+// POST User Login
+myRouter.post('/api/login', (request, response) => {
+  if (request.body.username && request.body.password) {
+    user = users.find(user => {
+      return user.login.username === request.body.username && user.login.password === request.body.password;
+    });
+    if (user) {
+      response.writeHead(200, { 'Content-Type': 'application/json' })
+      userAuth = true;
+      response.end();
+    }
+  } else {
+    response.writeHead(401, "Invalid username or password");
+    return response.end();
+  }
+});
 
+// GET User Cart
+myRouter.get('/api/me/cart', (request, response) => {
+  if (userAuth) {
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(user.cart));
+  } else {
+    response.writeHead(401, "user not authenticated");
+    return response.end();
+  }
+});
 
+// POST Add to Cart
+myRouter.post('/api/me/cart/add/:productId', (request, response) => {
+  const productId = request.params.productId;
+  const product = products.find(product => product.id === productId);
+  user = users[0] // hard coded for simplicity for now.
+  userAuth = true;
+  if (userAuth) {
+    if (product) {
+      user.cart.push(product);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(user.cart));
+    } else {
+      response.writeHead(404, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({ message: "Product not found" }));
+    }
+  } else {
+    response.writeHead(401, "Invalid username or password");
+    return response.end();
+  }
+});
+
+// POST Update Cart Quantity
+myRouter.post('/api/me/cart/update/:productId', (request, response) => {
+  const productId = request.params.productId;
+  const product = products.find(product => product.id === productId);
+  user = users[0] 
+  userAuth = true;
+  if (userAuth) {
+    if (product) {
+      user.cart.push(product);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(user.cart));
+    } else {
+      response.writeHead(404, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({ message: "Product not found" }));
+    }
+  } else {
+    response.writeHead(401, "Invalid username or password");
+    return response.end();
+  }
+});
+
+// DELETE Remove from Cart
+myRouter.post('/api/me/cart/delete/:productId', (request, response) => {
+  const productId = request.params.productId;
+  const product = products.find(product => product.id === productId);
+  user = users[0] 
+  userAuth = true;
+  if (userAuth) {
+    if (product) {
+      user.cart = user.cart.filter(product => product.id !== productId);
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify(user.cart));
+    } else {
+      response.writeHead(404, { 'Content-Type': 'application/json' });
+      response.end(JSON.stringify({ message: "Product not found" }));
+    }
+  } else {
+    response.writeHead(401, "Invalid username or password");
+    return response.end();
+  }
+});
 
 
 module.exports = server;
