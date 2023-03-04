@@ -1,0 +1,332 @@
+swagger: "2.0"
+info:
+  title: Sunglasses.io
+  description: An API to find and order glasses from Sunglasses.io
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint returns brand names and ids.
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/:id/products:
+    get:
+      summary: Products by Brand
+      description: |
+        The Products by Brand endpoint returns products based on Brand.
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of products by brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Products
+      description: |
+        The Products endpoint returns information on a product such as its id, categoryId, name, description, price, and image URLs.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Login
+      description: |
+        The Login endpoint authenticates a user and requires a valid username and password.
+      tags:
+        - Login
+      responses:
+        "200":
+          description: An access token.
+          schema:
+            type: string
+            items:
+              $ref: "#/definitions/Login"
+        "401":
+          description: Authentification failed.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: Returns products in users cart
+      description: |
+        The User Cart endpoint returns products in a users cart.
+      tags:
+        - User Cart
+      responses:
+        "200":
+          description: An array of products in users cart.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Authentification failed
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add product to users cart
+      description: |
+        The User Cart endpoint allows a user to delete a product from their cart.
+      tags:
+        - User Cart
+      responses:
+        "200":
+          description: An array of products in users cart.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Authentification failed
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/:productId:
+    delete:
+      summary: Deletes a product in users cart
+      description: |
+        The User Cart endpoint allows users to delete products from cart.
+      tags:
+        - User Cart
+      responses:
+        "200":
+          description: An array of products in users cart.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Authentification failed
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Updates quantity of a product in users cart
+      description: |
+        The User Cart endpoint allows users to update quantities in their cart.
+      tags:
+        - User Cart
+      responses:
+        "200":
+          description: An array of products in users cart.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        "401":
+          description: Authentification failed
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: A description of the product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the product.
+      imageUrls:
+        type: array
+        items:
+          type: string
+          format: uri
+  CartItem:
+    type: object
+    description: Items in a users cart.
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: The id of the category this product belongs to.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: A description of the product.
+      price:
+        type: integer
+        format: int32
+        description: The price of the product.
+      imageUrls:
+        type: array
+        items:
+          type: string
+          format: uri
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: The gender of the user.
+      cart:
+        type: array
+        description: The users cart.
+        items:
+          type: object
+          description: Items in the users cart.
+      name:
+        type: object
+        description: The name of the user.
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: The users address.
+          city:
+            type: string
+            description: The users city.
+          state:
+            type: string
+            description: The users state.
+          postcode:
+            type: integer
+            format: int32
+            description: The users zip code.
+      email:
+        type: string
+        format: email
+        description: The users email address.
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: The users username.
+          password:
+            type: string
+            description: Theusers password.
+          salt:
+            type: string
+            description: A random string used to salt the password
+          md5:
+            type: string
+            description: The MD5 hash of the password
+          sha1:
+            type: string
+            description: The SHA-1 hash of the password
+          sha256:
+            type: string
+            description: The SHA-256 hash of the password
+      dob:
+        type: string
+        format: date-time
+        description: The users birthdate.
+      registered:
+        type: string
+        format: date-time
+        description: The date and time when the user registered.
+      phone:
+        type: string
+        description: The users phone number.
+      cell:
+        type: string
+        description: The users cell phone number.
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: The URL of the large profile picture.
+            format: uri
+          medium:
+            type: string
+            description: The URL of the medium profile picture.
+            format: uri
+          thumbnail:
+            type: string
+            description: The URL of the thumbnail profile picture.
+            format: uri
+      nat:
+        type: string
+        description: The users two letter country code.
+  Login:
+    type: string
+    description: An access token.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
