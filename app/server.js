@@ -15,11 +15,11 @@ let users = [];
 
 
 // Setup Router
-var myRouter = Router();
+const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-// Create Server
-http.createServer(function (request, response) {
+// Setup Server
+const server = http.createServer(function (request, response) {
   
   // --- Logic for CORS Preflight and Verify API key here ---
   
@@ -30,7 +30,7 @@ http.createServer(function (request, response) {
   } else {
     return console.log("Error on Server Startup: ", error);
   }
-  
+
   // Load in Brands data
   fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
     if (error) throw error;
@@ -58,3 +58,38 @@ http.createServer(function (request, response) {
 myRouter.get("/", (request, response) => {
   response.end("This is the root endpoint, nothing to see here.");
 });
+
+// GET Brands
+myRouter.get('/api/brands', (request, response) => {
+  if (brands.length === 0) {
+    response.writeHead(404, "No brands found");
+    return response.end();
+  } else {
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(brands));
+  }
+});
+
+// GET Products by Brand
+myRouter.get('/api/brands/:id/products', (request, response) => {
+  // Get brand by id
+  let brand = brands.find((brand) => {
+    return brand.id === request.params.id
+  })
+  // Return only products whose id matches id in params
+  let productsByBrand = products.filter(p => p.categoryId === brand.id);
+  if (productsByBrand.length === 0) {
+    response.writeHead(404, "No products found");
+    return response.end();
+  } else {
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    response.end(JSON.stringify(productsByBrand));
+  }
+});
+
+
+
+
+
+
+module.exports = server;
