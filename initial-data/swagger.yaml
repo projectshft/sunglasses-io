@@ -1,0 +1,346 @@
+swagger: "2.0"
+info:
+  description: |
+    We sell your favorite brand name sunglasses at a quarter to half the cost.  We will be out the competitor every time
+  version: 1.0.0
+  title: Sunglass Sun Store and Apparel
+  # host: api.sunstore.com
+  # basePath: /v2
+tags:
+  - name: brands
+    description: Search for a particular brand to return products
+  - name: products
+    description: Gather a list of all available products
+  - name: login
+    description: Input login information to view users cart
+  - name: me
+    description: Actions related to deleting and editing the amout of items in the users cart
+# schemes:
+# - https
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+produces: -application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint allows you to filter search results based on brand name and will return results
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - brands
+      responses:
+        "200":
+          description: An array of products based on search
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Products"
+        "400":
+          description: No products with that name
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: List of products based on selecting brand
+      description: |
+        All Products based on brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the current brand
+          required: true
+          type: string
+      tags:
+        - brands
+      responses:
+        200:
+          description: Array of products based on selection of brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Products"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - products
+      summary: All products
+      description: By default all products are available for any user to view
+      responses:
+        200:
+          description: all glasses avaiable
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Products"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - login
+      summary: Logs Customoer in for access to store
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Users"
+            type: string
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      consumes:
+        - application/json
+      responses:
+        200:
+          description: Successfully logged in basic auth will be provided
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+        401:
+          description: unauthorized access
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      tags:
+        - me
+      summary: user is able to view items in their cart
+      security:
+        - BasicAuth: []
+      description: user is able to see the items in their cart after the login process
+      produces:
+        - application/json
+      responses:
+        200:
+          description: success
+        403:
+          description: unauthorized user
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - me
+      summary: user adds to cart
+      security:
+        - BasicAuth: []
+      description: user is able to login after logging in with credentials
+      consumes:
+        - application/json
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/Products"
+        403:
+          description: anauthorized user
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - store
+      summary: Delete purchase order by ID
+      security:
+        - BasicAuth: []
+      description: customer can delete an order in their cart
+      operationId: deleteOrder
+      produces:
+        - application/json
+      parameters:
+        - name: productId
+          in: path
+          description: ID of the product that need deleted
+          required: true
+          type: string
+          minimum: 1.0
+      responses:
+        200:
+          description: success item deleted
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Order not found
+    post:
+      tags:
+        - me
+      summary: Updates a users cart quantity
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: productId
+          in: path
+          description: ID of product that needs updtate
+          required: true
+          type: string
+      responses:
+        405:
+          description: Invalid input
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: the identifier for the brand to match up to the product
+      name:
+        type: string
+        description: the brand name of glasses
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: the identifier of the product in stock
+      categoryId:
+        type: string
+        description: the identifier of the product to match up to the brand
+      name:
+        type: string
+        description: the style of sunglasses
+      description:
+        type: string
+        description: a verbal description of the sunglasses
+      price:
+        type: integer
+        format: int32
+        description: the price of the sunglasses
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: images related to product
+  Users:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: users gender
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/Products"
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: Users title
+          first:
+            type: string
+            description: users first name
+          last:
+            type: string
+            description: users last name
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: users street address
+          city:
+            type: string
+            description: users city
+          state:
+            type: string
+            description: users state
+          postcode:
+            type: integer
+            format: int32
+            description: users zip code
+      email:
+        type: string
+        description: users email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: username
+          password:
+            type: string
+            description: password
+          salt:
+            type: string
+            description: salt key
+          md5:
+            type: string
+            description: md5
+          sha1:
+            type: string
+            description: sha1
+          sha256:
+            type: string
+            description: sha256
+      dob:
+        type: string
+        description: users birthday
+      registered:
+        type: string
+        description: users registration date
+      phone:
+        type: string
+        description: users phone number
+      cell:
+        type: string
+        description: users cellular
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: larger imageURL of user
+          medium:
+            type: string
+            description: med imageURL of user
+          thumbnail:
+            type: string
+            description: thumbnail imageURL of user
+      nat:
+        type: string
+        description: users nationality
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+# basePath: /BENCORBETT44/petExample/1.0.0
+schemes:
+  - https
+  - http
+# Added by API Auto Mocking Plugin
+basePath: /BENCORBETT44/SunglassesEval/1.0.0
