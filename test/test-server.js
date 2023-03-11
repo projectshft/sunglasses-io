@@ -34,3 +34,17 @@ describe("/GET products in brand", () => {
   })
 })
 
+// TODO: Test GET brands endpoint
+describe("/GET products", () => {
+  it("it should GET all the products", (done) => {
+    chai
+      .request(server)
+      .get(`/api/products`)
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.body.should.be.an("array");
+        done();
+      })
+  })
+})
+

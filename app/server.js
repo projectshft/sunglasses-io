@@ -38,4 +38,10 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
   return response.end(JSON.stringify(relatedProducts));
 })
 
+// TODO: GET all products
+myRouter.get('/api/products', function(request, response) {
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(Products));
+})
+
 module.exports = server;
