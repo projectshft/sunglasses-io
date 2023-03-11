@@ -31,26 +31,16 @@ paths:
       tags:
         - brands
       responses:
-        "200":
-          description: Successful response
+        200:
+          description: Successful response return list of brands
           schema:
             type: array
             items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: id associated with brand
-                name:
-                  type: string
-                  description: name of brand
-        "400":
+              $ref: "#/definitions/Brands"
+        400:
           description: Unexpected error
           schema:
-            type: object
-            properties:
-              message:
-                type: string
+            $ref: "#/definitions/Error"
   /brands/{brandId}/products:
     get:
       summary: Return Products Based on brand id
@@ -70,28 +60,15 @@ paths:
           schema:
             type: array
             items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: the id of the product in stock
-                brandId:
-                  type: string
-                  description: unique id to match with brand
-                description:
-                  type: string
-                  description: a brief description of the product
-                price:
-                  type: integer
-                  format: int32
-                  description: the price of product
-                imageUrl:
-                  type: string
-                  description: image of product
+              $ref: "#/definitions/Products"
         400:
           description: bad input parameter
+          schema:
+            $ref: "#/definitions/Error"
         404:
           description: URL not recognized
+          schema:
+            $ref: "#/definitions/Error"
   /products:
     get:
       summary: All Products
@@ -103,36 +80,11 @@ paths:
         200:
           description: Successful response
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: the id of the product in stock
-                brandId:
-                  type: string
-                  description: unique id to match with brand
-                brandName:
-                  type: string
-                  description: the name of the brand
-                description:
-                  type: string
-                  description: a brief description of the product
-                price:
-                  type: integer
-                  format: int32
-                  description: the price of product
-                imageUrl:
-                  type: string
-                  description: image of product
+            $ref: "#/definitions/Products"
         400:
           description: Unexpected error
           schema:
-            type: object
-            properties:
-              message:
-                type: string
+            $ref: "#/definitions/Error"
   /login:
     post:
       summary: User Login
@@ -141,16 +93,16 @@ paths:
       tags:
         - login
       parameters:
-        - name: username
-          in: header
-          type: string
-          required: true
-        - name: password
-          in: header
-          description: password for login
-          type: string
-          required: true
+        - in: body
+          name: login
+          description: The login form for username and password
+          schema:
+            $ref: "#/definitions/Login"
       responses:
+        200:
+          description: user now has access to cart
+          schema:
+            $ref: "#/definitions/Users"
         201:
           description: Successful response token created
           schema:
@@ -158,16 +110,17 @@ paths:
             items:
               type: object
               properties:
-                userId:
-                  type: string
-                  description: id of user logged in to grant access
                 userAuth:
                   type: string
                   description: token that allows user to access their cart
         401:
           description: unauthorized user
+          schema:
+            $ref: "#/definitions/Error"
         400:
           description: bad request
+          schema:
+            $ref: "#/definitions/Error"
   /me/cart:
     get:
       summary: User can view their cart
@@ -181,32 +134,15 @@ paths:
         200:
           description: Success
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: the id of the product in stock
-                brandName:
-                  type: string
-                  description: brand name of the sunglasses
-                quantity:
-                  type: integer
-                  format: int32
-                  description: the quantity of the item in cart
-                price:
-                  type: integer
-                  format: int32
-                  description: the price of product
-                totalPrice:
-                  type: integer
-                  format: int32
-                  description: total price of the order
+            $ref: "#/definitions/Cart"
         400:
           description: bad request
+          schema:
+            $ref: "#/definitions/Error"
         401:
           description: unauthorized to access store
+          schema:
+            $ref: "#/definitions/Error"
     post:
       summary: Add items
       description: |
@@ -219,32 +155,15 @@ paths:
         201:
           description: item added to cart
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: the id of the product in stock
-                brandName:
-                  type: string
-                  description: brand name of the sunglasses
-                quantity:
-                  type: integer
-                  format: int32
-                  description: the quantity of the item in cart
-                price:
-                  type: integer
-                  format: int32
-                  description: the price of product
-                totalPrice:
-                  type: integer
-                  format: int32
-                  description: total price of the order
+            $ref: "#/definitions/Cart"
         400:
           description: bad request
+          schema:
+            $ref: "#/definitions/Error"
         401:
           description: unauthorized to access store
+          schema:
+            $ref: "#/definitions/Error"
   /me/cart/{productId}:
     delete:
       summary: Delete product
@@ -261,36 +180,18 @@ paths:
           required: true
           type: integer
       responses:
-        200:
-          description: item in cart successfully delete
+        204:
+          description: No content to send back displaying updated cart
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: the id of the product in stock
-                brandName:
-                  type: string
-                  description: brand name of the sunglasses
-                quantity:
-                  type: integer
-                  format: int32
-                  description: the updated quantity of the item in cart
-                price:
-                  type: integer
-                  format: int32
-                  description: the price of product
-                totalPrice:
-                  type: integer
-                  format: int32
-                  description: total price of the order
+            $ref: "#/definitions/Cart"
         400:
           description: bad request
+          schema:
+            $ref: "#/definitions/Error"
         401:
           description: unauthorized to access store
-
+          schema:
+            $ref: "#/definitions/Error"
     post:
       summary: Edit quantity
       description: |
@@ -309,74 +210,181 @@ paths:
         201:
           description: item in cart successfully updated
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: the id of the product in stock
-                brandName:
-                  type: string
-                  description: brand name of the sunglasses
-                quantity:
-                  type: integer
-                  format: int32
-                  description: the updated quantity of the item in cart
-                price:
-                  type: integer
-                  format: int32
-                  description: the price of product
-                totalPrice:
-                  type: integer
-                  format: int32
-                  description: total price of the order
+            $ref: "#/definitions/Cart"
         400:
           description: bad request
+          schema:
+            $ref: "#/definitions/Error"
         401:
           description: unauthorized to access store
+          schema:
+            $ref: "#/definitions/Error"
         404:
           description: not found URL not recognized
+          schema:
+            $ref: "#/definitions/Error"
         405:
           description: Method not allowed
+          schema:
+            $ref: "#/definitions/Error"
 
 definitions:
-  InventoryItem:
+  Brands:
     type: object
-    required:
-      - id
-      - name
-      - manufacturer
-      - releaseDate
     properties:
       id:
         type: string
-        format: uuid
-        example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        description: the identifier for the brand to match up to the product
       name:
         type: string
-        example: Widget Adapter
-      releaseDate:
-        type: string
-        format: date-time
-        example: "2016-08-29T09:12:33.001Z"
-      manufacturer:
-        $ref: "#/definitions/Manufacturer"
-  Manufacturer:
-    required:
-      - name
+        description: the brand name of glasses
+  Products:
+    type: object
     properties:
+      id:
+        type: string
+        description: the identifier of the product in stock
+      categoryId:
+        type: string
+        description: the identifier of the product to match up to the brand
       name:
         type: string
-        example: ACME Corporation
-      homePage:
+        description: the style of sunglasses
+      description:
         type: string
-        format: url
-        example: https://www.acme-corp.com
+        description: a verbal description of the sunglasses
+      price:
+        type: integer
+        format: int32
+        description: the price of the sunglasses
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: images related to product
+  Users:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: users gender
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/Cart"
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: Users title
+          first:
+            type: string
+            description: users first name
+          last:
+            type: string
+            description: users last name
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: users street address
+          city:
+            type: string
+            description: users city
+          state:
+            type: string
+            description: users state
+          postcode:
+            type: integer
+            format: int32
+            description: users zip code
+      email:
+        type: string
+        description: users email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: username
+          password:
+            type: string
+            description: password
+          salt:
+            type: string
+            description: salt key
+          md5:
+            type: string
+            description: md5
+          sha1:
+            type: string
+            description: sha1
+          sha256:
+            type: string
+            description: sha256
+      dob:
+        type: string
+        description: users birthday
+      registered:
+        type: string
+        description: users registration date
       phone:
         type: string
-        example: 408-867-5309
+        description: users phone number
+      cell:
+        type: string
+        description: users cellular
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: larger imageURL of user
+          medium:
+            type: string
+            description: med imageURL of user
+          thumbnail:
+            type: string
+            description: thumbnail imageURL of user
+      nat:
+        type: string
+        description: users nationality
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: the username for login
+      password:
+        type: string
+        description: the password for login
+  Cart:
+    type: object
+    properties:
+      id:
+        type: string
+        description: the identifier of the product
+      name:
+        type: string
+        description: the name of the brand
+      price:
+        type: integer
+        format: int32
+        description: price of item
+      totalPrice:
+        type: integer
+        format: int32
+        description: total price of all items
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
 # Added by API Auto Mocking Plugin
 host: virtserver.swaggerhub.com
 # Added by API Auto Mocking Plugin
-basePath: /BENCORBETT44/SimpleSunglassees/1.0.0
