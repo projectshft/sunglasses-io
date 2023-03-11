@@ -6,6 +6,8 @@ var Router = require('router');
 var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
+const Brands = require('../initial-data/brands.json');
+
 const PORT = 3001;
 
 // Setup router
@@ -18,9 +20,8 @@ let server = http.createServer(function (request, response) {
 
 // TODO: GET all brands
 myRouter.get('/brands', function(request, response) {
-  console.log('recieved lol')
-  response.writeHead(200);
-  return response.end();
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(Brands));
 })
 
 module.exports = server;
