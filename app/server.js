@@ -12,8 +12,15 @@ const PORT = 3001;
 let myRouter = Router();
 myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response))
 }).listen(PORT);
 
+// TODO: GET all brands
+myRouter.get('/brands', function(request, response) {
+  console.log('recieved lol')
+  response.writeHead(200);
+  return response.end();
+})
 
+module.exports = server;

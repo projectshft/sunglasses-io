@@ -7,7 +7,7 @@ chai.use(chaiHttp);
 
 // TODO: Test GET brands endpoint
 describe("/GET brands", () => {
-  it("should GET all the brands", (done) => {
+  it("it should GET all the brands", (done) => {
     chai
       .request(server)
       .get("/brands")
