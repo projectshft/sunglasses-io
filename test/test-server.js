@@ -67,14 +67,26 @@ describe("/POST login", () => {
 })
 
 // TODO: Get user's cart
-/*
 describe("/GET cart", () => {
   it("it should get the current user's cart", (done) => {
-    // identify current user by sha1
-    let currentUser = "f9a60bbf8b550c10712e470d713784c3ba78a68e";
+    let user = {
+      "username": "yellowleopard753",
+      "password": "jonjon"
+    }
     chai
       .request(server)
-      .
+      .post(`/api/login`)
+      .send(user)
+      .end((err, res) => {
+        chai
+          .request(server)
+          .get(`/api/me/cart?accessToken=${res.body}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an("array");
+            res.body.length.should.be.eql(0);
+            done()
+          })
+      })
   })
 })
-*/

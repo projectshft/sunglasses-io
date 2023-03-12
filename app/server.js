@@ -11,8 +11,29 @@ const Products = require('../initial-data/products.json');
 const Users = require('../initial-data/users.json');
 
 const PORT = 3001;
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 let accessTokens = [];
+
+// Helper method to process access token
+let getAccessToken = function (request) {
+  let parsedUrl = require("url").parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == parsedUrl.query.accessToken && new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
 
 // Setup router
 let myRouter = Router();
@@ -84,6 +105,19 @@ myRouter.post(`/api/login`, function(request, response) {
         return response.end(JSON.stringify(newAccessToken.token));
       }
     }
+  }
+})
+
+// TODO: GET user's cart
+myRouter.get(`/api/me/cart`, function(request, response) {
+  let currentAccessToken = getAccessToken(request);
+  if (!currentAccessToken) {
+    response.writeHead(400, "Please sign in to view your cart.")
+    return response.end();
+  } else {
+    let cart = currentAccessToken.username.cart
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end(JSON.stringify(cart));
   }
 })
 
