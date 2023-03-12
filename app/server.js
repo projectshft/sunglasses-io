@@ -12,6 +12,8 @@ const Users = require('../initial-data/users.json');
 
 const PORT = 3001;
 
+let accessTokens = [];
+
 // Setup router
 let myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -63,8 +65,24 @@ myRouter.post(`/api/login`, function(request, response) {
       response.writeHead(400, "Incorrect password.");
       return response.end();
     } else {
-      response.writeHead(200, "Logged in succesfully.");
-      return response.end();
+      response.writeHead(200,{"Content-Type": "application/json"});
+      
+      let currentAccessToken = accessTokens.find((token) => {
+        return token.username == username;
+      });
+
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      } else {
+        let newAccessToken = {
+          username: username,
+          lastUpdated: new Date(),
+          token: uid(16),
+        };
+        accessTokens.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
     }
   }
 })

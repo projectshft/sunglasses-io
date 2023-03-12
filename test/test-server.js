@@ -65,3 +65,16 @@ describe("/POST login", () => {
       })
   })
 })
+
+// TODO: Get user's cart
+/*
+describe("/GET cart", () => {
+  it("it should get the current user's cart", (done) => {
+    // identify current user by sha1
+    let currentUser = "f9a60bbf8b550c10712e470d713784c3ba78a68e";
+    chai
+      .request(server)
+      .
+  })
+})
+*/
