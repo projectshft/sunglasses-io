@@ -1,4 +1,4 @@
-let brands = "";
+let Brands = require("../app/models/brands");
 
 let chai = require("chai");
 let chaiHttp = require("chai-http");

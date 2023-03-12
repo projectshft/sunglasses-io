@@ -1,13 +1,24 @@
 var http = require('http');
-var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
+var Brand = require('./models/brands');
+var Product = require('./modles/products');
+//Need other Models-------
+
 var uid = require('rand-token').uid;
 
-const PORT = 3001;
+var myRouter = Router();
+myRouter.use(bodyParser.json());
 
-http.createServer(function (request, response) {
+let server = httpcreateServer(function(request, response) {
+  myRouter(request, response,
+  finalHandler(request,response))
+}).listen(8080);
 
-}).listen(PORT);
+//EndPoint handlers
+//Get Put Post Delete Edit
+
+
+module.exports = server;

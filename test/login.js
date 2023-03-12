@@ -24,7 +24,7 @@ describe("Login", () => {
       .send(login.username, login.password)
       .end((err, res) => {
         res.should.have.status(200);
-        res.body.should
+        res.body.should.have.cookie("userAuth")
         res.should.have.status(201)
         res.body.should.be.an("object");
         res.body.should.have(username)
