@@ -1,18 +1,18 @@
-var http = require('http');
-var finalHandler = require('finalhandler');
-var queryString = require('querystring');
-var Router = require('router');
-var bodyParser   = require('body-parser');
-var Brand = require('./models/brands');
-var Product = require('./modles/products');
+const http = require('http');
+const finalHandler = require('finalhandler');
+const queryString = require('querystring');
+const Router = require('router');
+const bodyParser   = require('body-parser');
+const Brand = require('./models/brands');
+const Product = require('./modles/products');
 //Need other Models-------
 
-var uid = require('rand-token').uid;
+const uid = require('rand-token').uid;
 
-var myRouter = Router();
+const myRouter = Router();
 myRouter.use(bodyParser.json());
 
-let server = httpcreateServer(function(request, response) {
+let server = http.createServer(function(request, response) {
   myRouter(request, response,
   finalHandler(request,response))
 }).listen(8080);
