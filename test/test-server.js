@@ -48,3 +48,20 @@ describe("/GET products", () => {
   })
 })
 
+// TODO: Test POST login endpoint
+describe("/POST login", () => {
+  it("it should POST login info", (done) => {
+    let user = {
+      "username": "yellowleopard753",
+      "password": "jonjon"
+    }
+    chai
+      .request(server)
+      .post(`/api/login`)
+      .send(user)
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      })
+  })
+})
