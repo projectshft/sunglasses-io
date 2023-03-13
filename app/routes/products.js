@@ -1,6 +1,6 @@
-let Products = require('../models/brands');
+let Products = require('../models/products');
 
-function getAllProducts(req, res) {
+function getProducts(req, res) {
   res.send(Products.getAll());
 };
 

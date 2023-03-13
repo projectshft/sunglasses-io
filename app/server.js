@@ -4,6 +4,7 @@ const finalHandler = require('finalhandler');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const Brands = require('./models/brands')
+const Products = require('./models/products')
 //Need other Models-------
 
 // const uid = require('rand-token').uid;
@@ -21,8 +22,11 @@ myRouter.get('/brand', function(request, response) {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(Brands.getAll()));
 });
-//EndPoint handlers
-//Get Put Post Delete Edit
+
+myRouter.get('/products', function(request, response) {
+  response.writeHead(200, {"Content-type": "application/json"});
+  return response.end(JSON.stringify(Products.getAll()));
+})
 
 
 module.exports = server;
