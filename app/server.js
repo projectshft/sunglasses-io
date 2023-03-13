@@ -2,8 +2,9 @@ var http = require('http');
 var fs = require('fs');
 var finalHandler = require('finalhandler');
 var queryString = require('querystring');
+var url = require("url");
 var Router = require('router');
-var bodyParser   = require('body-parser');
+var bodyParser = require('body-parser');
 var uid = require('rand-token').uid;
 
 const Brands = require('../initial-data/brands.json');
@@ -118,6 +119,34 @@ myRouter.get(`/api/me/cart`, function(request, response) {
     let cart = currentAccessToken.username.cart
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(cart));
+  }
+})
+
+// TODO: POST add product to cart
+myRouter.post(`/api/me/cart`, function(request, response) {
+  // TODO: write logic to check access token
+  let currentAccessToken = getAccessToken(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(400, "Please sign in to add product.")
+    return response.end();
+  } else {
+    // TODO: parse product id
+    const parsedUrl = url.parse(request.url);
+    const { productId } = queryString.parse(parsedUrl.query);
+    // TODO: find product id from list of products
+    let product = Products.find(product => product.id = productId)
+
+    if (!product) {
+      response.writeHead(400, "Product not found.")
+      return response.end();
+    } else {
+    // TODO: add product to user's cart
+      let cart = currentAccessToken.username.cart;
+      cart.push(product);
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(cart));
+    }
   }
 })
 
