@@ -135,7 +135,7 @@ myRouter.post(`/api/me/cart`, function(request, response) {
     const parsedUrl = url.parse(request.url);
     const { productId } = queryString.parse(parsedUrl.query);
     // TODO: find product id from list of products
-    let product = Products.find(product => product.id = productId)
+    let product = Products.find(product => product.id == productId)
 
     if (!product) {
       response.writeHead(400, "Product not found.")
@@ -144,6 +144,30 @@ myRouter.post(`/api/me/cart`, function(request, response) {
     // TODO: add product to user's cart
       let cart = currentAccessToken.username.cart;
       cart.push(product);
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(cart));
+    }
+  }
+})
+
+// TODO: DELETE product from user's cart
+myRouter.delete(`/api/me/cart/:productId`, function(request, response) {
+  let currentAccessToken = getAccessToken(request);
+
+  if (!currentAccessToken) {
+    response.writeHead(400, "Please sign in to delete product.")
+    return response.end();
+  } else {
+    let product = Products.find(product => product.id == request.params.productId)
+
+    if(!product) {
+      response.writeHead(400, "Product not found.")
+      return response.end();
+    } else {
+      let cart = currentAccessToken.username.cart;
+      let updatedCart = cart.filter(product => product.id !== request.params.productId);
+      cart = updatedCart;
+      
       response.writeHead(200, {"Content-Type": "application/json"});
       return response.end(JSON.stringify(cart));
     }

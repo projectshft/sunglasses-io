@@ -117,3 +117,29 @@ describe("/POST cart", () => {
   })
 })
 
+// TODO: Delete a product from user's cart
+describe("/DELETE cart", () => {
+  it("it should delete a product from user's cart", (done) => {
+    let user = {
+      "username": "yellowleopard753",
+      "password": "jonjon"
+    }
+    let productId = 1;
+    chai
+      .request(server)
+      .post(`/api/login`)
+      .send(user)
+      .end((err, res) => {
+        chai
+          .request(server)
+          .delete(`/api/me/cart/${productId}?accessToken=${res.body}`)          
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an("array");
+            res.body.length.should.be.eql(0);
+            done();
+          })
+      })
+  })
+})
+
