@@ -54,10 +54,10 @@ return response.end(JSON.stringify(products));
 myRouter.get('/brands/:brandId/products', function(request, response) {
   let myBrand = brands;
   let myProduct = products;
-  let {brandId} =request.params;
+  let {brandId} = request.params;
   if (myId > 5) {
     response.statusCode = 400
-    return response.end("No goal with that id please choose 1 through 5")
+    return response.end("No brand with that id please choose 1 through 5")
   }
   let getProduct = function (brands, product, parameter) {
     let myParam = parameter.toString();
@@ -144,7 +144,50 @@ myRouter.get("/me/cart", function (request, response) {
     if(user) {
       response.writeHead(200, "Access granted")
       return response.end(JSON.stringify(cart));
-    }
+    } 
   }
 })
+
+//POST Me/Cart
+myRouter.post('/me/cart', function (request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if(!currentAccessToken) {
+    response.writeHead(401, "Unauthorized to access shopping cart");
+    return response.end();
+  } else {
+    let cart = users.cart;
+    let user = users.find((user) => {
+      return user.login.username === currentAccessToken.username;
+    });
+    if(user) {
+      response.writeHead(200, "Access granted")
+      return response.end(JSON.stringify(cart));
+    } 
+  }
+});
+
+//DELETE /me/cart/{prodId}
+myRouter.delete('/me/cart/:productId', function (reqest, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if(!currentAccessToken) {
+    response.writeHead(401, "Unauthorized to access shopping cart");
+    return response.end();
+  }
+  
+  let {productId} = request.params;
+  let cart = users.cart;
+
+  const removeItem = function(id) {
+    products = products.filter((p => p.id !=id))
+  };
+
+  cart = removeItem(productId);
+  response.writeHead(200, "Item Successfully remove");
+  return response.end(JSON.stringify(cart));
+
+  
+})
+
 module.exports = server;
