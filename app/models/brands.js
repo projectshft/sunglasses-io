@@ -20,6 +20,33 @@ let brandNames = [
   }
 ]
 
+let matchString = [
+  { 
+    name: "one",
+    numSt: "1"
+  },
+  // {
+  //   name: "two",
+  //   numSt: "2"
+  // },
+  // {
+  //   name: "three",
+  //   numSt: "3"
+  // },
+  // {
+  //   name: "four",
+  //   numSt: "4"
+  // },
+  // {
+  //   name: "fourfour",
+  //   numSt: "4"
+  // },
+  // {
+  //   name: "toto",
+  //   numSt: "2"
+  // }
+]
+
 let matchProductId = [
   {
     name: "black shades",
@@ -31,25 +58,34 @@ let matchProductId = [
   }
 ];
 let matches = [];
-var getProduct = function (brands, product) {
-  product.forEach(prod => {
+
+var getProduct = function (brands, param) {
+  param.forEach(p => {
    let myBrand = brands.find(e =>
-     e.id === prod.categoryId);
+     e.id === p.numSt);
      if (myBrand) {
-       matches.push(myBrand.name)
-       matches.push(prod.name)
+       matches.push(myBrand.id)
+       matches.push(p.name)
      }
  })
 }
 
-getProduct(brandNames, matchProductId);
+getProduct(brandNames, matchString);
 console.log(matches);
+
+var paramMatch = function() {
+  matchString.forEach
+}
 
 
 
 class Brands {
   constructor(params) {
     Object.assign(this, params)
+  }
+
+  static getBrandId(brandId) {
+    return brands.find((e => e.id==brand))
   }
 
   // static addBrand(newBrand) {
