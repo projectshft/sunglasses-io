@@ -3,14 +3,14 @@ let brands = [{
   name: "oakley"
 }];
 
-class Brand {
+class Brands {
   constructor(params) {
-    Object.assign(this,params)
+    Object.assign(this, params)
   }
 
-  static getAllBrands() {
+  static getAll() {
     return brands;
   }
 };
 
-module.exports = Brand;
+module.exports = Brands;

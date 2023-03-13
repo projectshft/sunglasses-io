@@ -2,17 +2,21 @@ let Brands = require("../app/models/brands");
 
 let chai = require("chai");
 let chaiHttp = require("chai-http");
-let server = require("../server");
+let server = require("../app/server");
 
 let should = chai.should();
 
 chai.use(chaiHttp);
 
 describe("Brands", () => {
+  beforeEach(()=>{
+    Brands.removeAll();
+  })
+
   describe("/GET brands", () => {
-    it("it should GET all of the brands", done => {
+    it("it should GET all of the brands", (done) => {
       chai.request(server)
-      .get("/brands")
+      .get(Brands)
       .end((err, res) => {
         res.should.have.status(200)
         res.body.should.be.an("array");
