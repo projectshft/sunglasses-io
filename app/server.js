@@ -167,7 +167,31 @@ myRouter.delete(`/api/me/cart/:productId`, function(request, response) {
       let cart = currentAccessToken.username.cart;
       let updatedCart = cart.filter(product => product.id !== request.params.productId);
       cart = updatedCart;
-      
+
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(cart));
+    }
+  }
+})
+
+// TODO: Change quantity of product
+myRouter.post(`/api/me/cart/:productId/:quantity`, function(request, response) {
+  let currentAccessToken = getAccessToken(request)
+
+  if (!currentAccessToken) {
+    response.writeHead(400, "Please sign in to change quantity.")
+    return response.end();
+  } else {
+    // TODO: find product id in cart
+    let cart = currentAccessToken.username.cart;
+    let product = cart.find(product => product.id == request.params.productId)
+
+    if (!product) {
+      response.writeHead(400, "Can't find product in cart")
+      return response.end(); 
+    } else {
+      // TODO: change quantity in cart
+      product.quantity = parseInt(request.params.quantity);
       response.writeHead(200, {"Content-Type": "application/json"});
       return response.end(JSON.stringify(cart));
     }

@@ -143,3 +143,33 @@ describe("/DELETE cart", () => {
   })
 })
 
+// TODO: Change the quantity from user's cart
+describe("/POST cart", () => {
+  it("it should add product to user's cart", (done) => {
+    let user = {
+      "username": "yellowleopard753",
+      "password": "jonjon"
+    }
+    let productId = 1;
+    let newQuantity = 3;
+    chai
+      .request(server)
+      .post(`/api/login`)
+      .send(user)
+      .end((err, res) => {
+        chai
+          .request(server)
+          .post(`/api/me/cart/${productId}/${newQuantity}?accessToken=${res.body}`)
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an("array");
+            res.body[0].should.have.property('id')
+            res.body[0]['id'].should.be.eql('1')
+            res.body[0].should.have.property('quantity')
+            res.body[0]['quantity'].should.be.eql(3);
+            done();
+          })
+      })
+  })
+})
+
