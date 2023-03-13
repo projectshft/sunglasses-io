@@ -17,7 +17,7 @@ describe('Brands', () => {
     it("it should GET all of the brands", done => {
       chai
       .request(server)
-      .get('/brand')
+      .get('/brands')
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an('array');
@@ -27,39 +27,39 @@ describe('Brands', () => {
     });
   });
 
-  describe('/GET brand and products', () => {
-    it("it should match the brands id with product category id", done => {
-      let brandList = [
-        {
-          name: "o",
-          id: 1
-        },
-        {
-          name: "b",
-          id: 2
-        }
-      ]
-      let productList = [
-        {
-          name: "glass1",
-          categoryId: 2
-        },
-        {
-          name: "glass2",
-          categoryId: 4
-        },
-        {
-          name: "extraGlass",
-          categoryId: 2
-        }
-      ]
+  // describe('/GET brand and products', () => {
+  //   it("it should match the brands id with product category id", done => {
+  //     let brandList = [
+  //       {
+  //         name: "o",
+  //         id: 1
+  //       },
+  //       {
+  //         name: "b",
+  //         id: 2
+  //       }
+  //     ]
+  //     let productList = [
+  //       {
+  //         name: "glass1",
+  //         categoryId: 2
+  //       },
+  //       {
+  //         name: "glass2",
+  //         categoryId: 4
+  //       },
+  //       {
+  //         name: "extraGlass",
+  //         categoryId: 2
+  //       }
+  //     ]
 
-      var requester = chai.request(server).keepOpen()
-      Promise.all([
-        requester.get('/brand'),
-        requester.get('/products')
-      ])
-      .then
-    })
-  })
+  //     var requester = chai.request(server).keepOpen()
+  //     Promise.all([
+  //       requester.get('/brand'),
+  //       requester.get('/products')
+  //     ])
+  //     .then
+  //   })
+  // })
 });

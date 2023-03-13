@@ -71,7 +71,7 @@ var getProduct = function (brands, product, parameter) {
  })
 }
 
-getProduct(brandNames, matchProductId, 3)
+var get = getProduct(brandNames, matchProductId, 1)
 console.log(matches)
 
 class Brands {
@@ -94,30 +94,22 @@ class Brands {
     brands = [];
   }
 
-  static getProduct(brands, product) {
-     product.forEach(prod => {
-      let myBrand = brands.find(e =>
-        e.id === prod.categoryId);
-        if (myBrand) {
-          matches.push(myBrand.name)
-          matches.push(prod.name)
-        }
-    })
+  static getProduct (brands, product, parameter) {
+    let myParam = parameter.toString();
+    product.forEach(prod => {
+     let myBrand = brands.find(e =>
+       e.id === prod.categoryId);
+       if (myBrand.id === myParam) {
+         matches.push(myBrand.name)
+         matches.push(prod.name)
+       }
+   })
   }
-
-  // static getBrand(brandId) {
-  //   return brands.find((brand=>brand.id == brandId))
-  // }
-
+  
   static getAll() {
     return brands
   }
 
-  // static updateBrand(updatedBrand) {
-  //   let brand = brands.find((brand=>brand.id == updatedBrand.id))
-  //   Object.assign(brand, this.updateBrand);
-  //   return brand;
-  // }
 };
 
 
