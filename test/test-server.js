@@ -14,6 +14,7 @@ describe("/GET brands", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array");
+        res.body.length.should.be.eql(5);
         done();
       })
   })
@@ -29,6 +30,7 @@ describe("/GET products in brand", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array")
+        res.body.length.should.be.eql(3);
         done();
       })
   })
@@ -43,6 +45,7 @@ describe("/GET products", () => {
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.an("array");
+        res.body.length.should.be.eql(11);
         done();
       })
   })
