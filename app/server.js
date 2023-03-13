@@ -13,6 +13,7 @@ const fs = require('fs');
 let brands = [];
 let users = [];
 let products = [];
+let filteredProducts = []
 
 // Setup router
 var myRouter = Router();
@@ -31,7 +32,7 @@ let server = http.createServer(function (request, response) {
   user = users[0];
 });
 
-
+//GET Brands
 myRouter.get('/brands', function(request, response) {
   if(!brands) {
     response.writeHead(404, "Nothing to return");
@@ -39,7 +40,7 @@ myRouter.get('/brands', function(request, response) {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(brands));
 });
-
+//GET Products
 myRouter.get('/products', function(request, response) {
   if(!products) {
     response.writeHead(404, "Nothing to return");
@@ -47,11 +48,32 @@ myRouter.get('/products', function(request, response) {
 response.writeHead(200, {"Content-Type": "application/json"});
 return response.end(JSON.stringify(products));
 });
+//Get Products with filtered by brand
+myRouter.get('/brands/:brandId/products', function(request, response) {
+  let myBrand = brands;
+  let myProduct = products;
+  let myId =request.params.brandId;
+  if (myId > 5) {
+    response.statusCode = 400
+    return response.end("No goal with that id please choose 1 through 5")
+  }
+  let getProduct = function (brands, product, parameter) {
+    let myParam = parameter.toString();
+    product.forEach(prod => {
+     let myBrand = brands.find(e =>
+       e.id === prod.categoryId);
+       if (myBrand.id === myParam) {
+         products.push(myBrand.name)
+         products.push(prod.name)
+       }
+   })
+  }
 
-myRouter.get('/brands/:brandId', function(request, response) {
-  let brand = brands.find((b) => {
-    return b.id == request.params.brandId
-  });
+  response.writeHead(200);
+  getProduct(myBrand, myProduct, myId);
+  return response.end();
+
+
 })
 
 

@@ -1,63 +1,4 @@
-let brands = [];
-let products = [];
 
-let brandNames = [
-  {
-    name: "oakley",
-    id: "1"
-  },
-  {
-    name: "rayban",
-    id: "2"
-  },
-  {
-    name: "smith",
-    id: "3"
-  },
-  {
-    name: "noName",
-    id: "4"
-  }
-]
-
-let matchString = [
-  { 
-    name: "one",
-    numSt: "1"
-  },
-  // {
-  //   name: "two",
-  //   numSt: "2"
-  // },
-  // {
-  //   name: "three",
-  //   numSt: "3"
-  // },
-  // {
-  //   name: "four",
-  //   numSt: "4"
-  // },
-  // {
-  //   name: "fourfour",
-  //   numSt: "4"
-  // },
-  // {
-  //   name: "toto",
-  //   numSt: "2"
-  // }
-]
-
-let matchProductId = [
-  {
-    name: "black shades",
-    categoryId: "3"
-  },
-  {
-    name: "blue shades",
-    categoryId: "1"
-  }
-];
-let matches = [];
 
 var getProduct = function (brands, product, parameter) {
   let myParam = parameter.toString();
@@ -105,7 +46,7 @@ class Brands {
        }
    })
   }
-  
+
   static getAll() {
     return brands
   }
