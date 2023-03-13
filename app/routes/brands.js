@@ -1,7 +1,7 @@
-let Brands = require("../models/brands");
+let Brand = require("../models/brands");
 
-function getAllBrands(req, res) {
-  res.send(Brands.getAll());
+function getBrands(req, res) {
+  res.send(Brand.getAll());
 };
 
-module.exports = {getAllBrands};
+module.exports = {getBrands};

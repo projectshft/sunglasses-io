@@ -8,21 +8,22 @@ let should = chai.should();
 
 chai.use(chaiHttp);
 
-describe("Brands", () => {
-  beforeEach(()=>{
+describe('Brands', () => {
+  beforeEach(() => {
     Brands.removeAll();
-  })
+  });
 
-  describe("/GET brands", () => {
-    it("it should GET all of the brands", (done) => {
-      chai.request(server)
-      .get(Brands)
+  describe('/GET brand', () => {
+    it("it should GET all of the brands", done => {
+      chai
+      .request(server)
+      .get('/brand')
       .end((err, res) => {
-        res.should.have.status(200)
-        res.body.should.be.an("array");
+        res.should.have.status(200);
+        res.body.should.be.an('array');
         res.body.length.should.be.eql(0);
         done();
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});
