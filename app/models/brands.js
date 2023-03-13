@@ -59,25 +59,20 @@ let matchProductId = [
 ];
 let matches = [];
 
-var getProduct = function (brands, param) {
-  param.forEach(p => {
+var getProduct = function (brands, product, parameter) {
+  let myParam = parameter.toString();
+  product.forEach(prod => {
    let myBrand = brands.find(e =>
-     e.id === p.numSt);
-     if (myBrand) {
-       matches.push(myBrand.id)
-       matches.push(p.name)
+     e.id === prod.categoryId);
+     if (myBrand.id === myParam) {
+       matches.push(myBrand.name)
+       matches.push(prod.name)
      }
  })
 }
 
-getProduct(brandNames, matchString);
-console.log(matches);
-
-var paramMatch = function() {
-  matchString.forEach
-}
-
-
+getProduct(brandNames, matchProductId, 3)
+console.log(matches)
 
 class Brands {
   constructor(params) {
