@@ -1,0 +1,267 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: Get some cool shades with the Sunglasses API
+  version: "1.0.0"
+# the domain of the service
+host: api.sunglasses.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      tags:
+        - Brands
+      summary: Brand Types
+      description: |
+        The Brands endpoint returns a list of sunglasses brands from the Sunglasses Store.
+      responses:
+        200:
+          description: An array of sunglasses brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/brands/:id/products:
+    get:
+      tags:
+        - Brands
+      summary: Products within a brand
+      description: |
+        The products within a brand endpoint returns a list of products given a brand from the Sunglasses Store.
+      parameters:
+        - name: id
+          in: query
+          description: Id of a brand.
+          required: true
+          type: number
+          format: double
+      responses:
+        200:
+          description: An array of products of a given brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        400:
+          description: That brand id does not exist
+          schema:
+            $ref: "#/definitions/Error"
+  /api/products:
+    get:
+      tags:
+        - Products
+      summary: Products
+      description: |
+        The Products endpoint returns a list of products from the Sunglasses store.
+      responses:
+        200:
+          description: An array of products from the store.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/login:
+    post:
+      tags:
+        - User
+      summary: Logs user into the store
+      description: The Login endpoint logs a user into the store.
+      parameters:
+        - name: username
+          in: query
+          type: string
+          format: uuid
+          description: the customer's username
+        - name: password
+          in: query
+          type: string
+          description: the customer's password
+      responses:
+        200:
+          description: User logged in succesfully.
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        400:
+          description: Username and password is required.
+          schema:
+            $ref: "#/definitions/Error"
+  /api/me/cart:
+    get:
+      tags:
+        - Cart
+      summary: Get user's cart
+      description: The user cart endpoint returns information about the user's cart.
+      responses:
+        200:
+          description: Successfully get user's cart.
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: Please sign in to view your cart.
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - Cart
+      summary: Add product to user's cart
+      description: The add user cart endpoint will add a product to a user's cart.
+      parameters:
+        - name: product Id
+          in: query
+          type: integer
+          format: int32
+          description: Id of the product
+      responses:
+        200:
+          description: Successfully added product to user's cart
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: Product not found.
+          schema:
+            $ref: "#/definitions/Error"
+  /api/me/cart/:productId:
+    delete:
+      tags:
+        - Cart
+      summary: Delete a product from a user's cart
+      description: The delete product endpoint deletes a product from a user's cart.
+      parameters:
+        - name: product Id
+          in: query
+          type: integer
+          format: int32
+          description: Id of the product
+      responses:
+        200:
+          description: Succesfully deleted a product from user's cart.
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: Product not found.
+          schema:
+            $ref: "#/definitions/Error"
+  /api/me/cart/:productId/:quantity:
+    post:
+      tags:
+        - Cart
+      summary: Change the quantity from of a product in the cart
+      description: The change quantity endpoint changes the number of products in the cart.
+      parameters:
+        - name: product Id
+          in: query
+          type: integer
+          format: int32
+          description: Id of the product
+        - name: quantity
+          in: query
+          type: integer
+          format: int32
+          description: quantity of product
+      responses:
+        200:
+          description: Successfully changed quantity.
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: Can't find product in cart.
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Brand Id.
+      name:
+        type: string
+        description: Name of brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Product Id
+      categoryId:
+        type: string
+        description: Id of brand category.
+      name:
+        type: string
+        description: Display name of product.
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: number
+        description: Price of the product.
+      imageUrls:
+        type: array
+        items: {}
+        description: Image urls.
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of user.
+      cart:
+        type: array
+        items: {}
+        description: User's shopping cart.
+      name:
+        type: object
+        description: First and last name of user.
+      location:
+        type: object
+        description: Location of user.
+      email:
+        type: string
+        description: Email of user.
+      login:
+        type: object
+        description: Login info of user.
+      dob:
+        type: string
+        description: DOB of user.
+      registered:
+        type: string
+        description: Registration date of user.
+      phone:
+        type: number
+        description: Phone number of user.
+      cell:
+        type: number
+        description: Cell number of user.
+      picture:
+        type: object
+        description: User profile picture.
+      nat:
+        type: string
+        description: Nationality of user.
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

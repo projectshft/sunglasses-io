@@ -55,7 +55,7 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
   const { id } = request.params;
   const products = Products.find(product => product.categoryId == id);
   if (!products) {
-    response.writeHead(404, "That brand id does not exist");
+    response.writeHead(400, "That brand id does not exist");
     return response.end();
   }
   response.writeHead(200, {"Content-Type": "application/json"});
