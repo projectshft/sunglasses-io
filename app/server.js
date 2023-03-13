@@ -5,15 +5,17 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const fs = require('fs');
 
-//Need other Models-------
 
-// const uid = require('rand-token').uid;
+const uid = require('rand-token').uid;
+const newAccessToken = uid(45);
+
+let accessToken = [];
 
 //state variables
 let brands = [];
 let users = [];
 let products = [];
-let filteredProducts = []
+
 
 // Setup router
 var myRouter = Router();
@@ -48,11 +50,11 @@ myRouter.get('/products', function(request, response) {
 response.writeHead(200, {"Content-Type": "application/json"});
 return response.end(JSON.stringify(products));
 });
-//Get Products with filtered by brand
+//GET Products with filtered by brand
 myRouter.get('/brands/:brandId/products', function(request, response) {
   let myBrand = brands;
   let myProduct = products;
-  let myId =request.params.brandId;
+  let {brandId} =request.params;
   if (myId > 5) {
     response.statusCode = 400
     return response.end("No goal with that id please choose 1 through 5")
@@ -69,13 +71,80 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
    })
   }
 
-  response.writeHead(200);
-  getProduct(myBrand, myProduct, myId);
+  response.writeHead(200, "Success");
+  getProduct(myBrand, myProduct, brandId);
   return response.end();
 
 
 })
+//POST login
+myRouter.post('/login', (request, response) => {
+  if (request.body.username && request.body.password) {
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    });
+    if (user) {
+      response.writeHead(200, "Success")
 
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
 
+      if ( currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken));
+      } else {
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(45)
+        }
+        accessToken.push(newAccessToken);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      response.writeHead(400, "Bad Request");
+      return response.end();
+    }
+  } else {
+    response.writeHead(401, "Unauthorized User");
+    return response.end();
+  }
+})
 
+//Aaron acces token method helper
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+//GET Me/Cart
+myRouter.get("/me/cart", function (request, response) {
+  let currentAccessToken = getValidTokenFromRequest(request);
+
+  if(!currentAccessToken) {
+    response.writeHead(401, "Unauthorized to access shopping cart");
+    return response.end();
+  } else {
+    let cart = users.cart;
+    let user = users.find((user) => {
+      return user.login.username === currentAccessToken.username;
+    });
+    if(user) {
+      response.writeHead(200, "Access granted")
+      return response.end(JSON.stringify(cart));
+    }
+  }
+})
 module.exports = server;
