@@ -129,7 +129,7 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
 
 })
 
-//POST login
+//POST login OK
 myRouter.post('/login', function(request, response)  {
   if (request.body.username && request.body.password) {
     let user = users.find((user) => {
