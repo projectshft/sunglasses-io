@@ -50,10 +50,10 @@ let server = http.createServer(function (request, response) {
   	myRouter(request, response, finalHandler(request, response))
 }).listen(8090, () => {
 
-  if (!VALID_API_KEYS. includes(request.header["x-authentication"])) {
-    response.writeHead(401, "You need a valid API to use this API")
-    return response.end();
-  }
+  // if (!VALID_API_KEYS. includes(request.header["x-authentication"])) {
+  //   response.writeHead(401, "You need a valid API to use this API")
+  //   return response.end();
+  // }
   console.log("Node is running on 8090")
 });
 
