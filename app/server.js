@@ -55,7 +55,7 @@ myRouter.get('/brands', function(request, response) {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(allBrands));
 });
-//GET Products
+//GET Products OK
 myRouter.get('/products', function(request, response) {
   if(!products) {
     response.writeHead(404, "Nothing to return");
@@ -65,28 +65,29 @@ return response.end(JSON.stringify(products));
 });
 //GET Products with filtered by brand
 myRouter.get('/brands/:brandId/products', function(request, response) {
-  let myBrand = brands;
-  let myProduct = products;
   let {brandId} = request.params;
-  if (myId > 5) {
+  if (brandId > 5) {
     response.statusCode = 400
     return response.end("No brand with that id please choose 1 through 5")
   }
-  let getProduct = function (brands, product, parameter) {
+
+  let match = [];
+  let getProduct = function (brand, product, parameter) {
     let myParam = parameter.toString();
     product.forEach(prod => {
-     let myBrand = brands.find(e =>
+     let myBrand = brand.find(e =>
        e.id === prod.categoryId);
        if (myBrand.id === myParam) {
-         products.push(myBrand.name)
-         products.push(prod.name)
+         match.push(myBrand.name)
+         match.push(prod.name)
        }
    })
   }
+  getProduct(brands, products, "2")
 
   response.writeHead(200, "Success");
-  getProduct(myBrand, myProduct, brandId);
-  return response.end();
+  console.log(match)
+  return response.end(match);
 
 
 })
