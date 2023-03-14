@@ -40,6 +40,8 @@ let users = [];
 let products = [];
 
 
+
+
 // Setup router
 var myRouter = Router();
 myRouter.use(bodyParser.json());
@@ -168,18 +170,21 @@ myRouter.post('/login', function(request, response)  {
 //GET Me/Cart
 myRouter.get("/me/cart", function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
+  
+  let userCart = users.find((user) => {
+    return user.cart
+  })
 
   if(!currentAccessToken) {
     response.writeHead(401, "Unauthorized to access shopping cart");
     return response.end();
   } else {
-    let cart = users.cart;
     let user = users.find((user) => {
       return user.login.username === currentAccessToken.username;
     });
     if(user) {
-      response.writeHead(200, "Access granted")
-      return response.end(JSON.stringify(cart));
+      response.writeHead(200, "Access granted user can view cart")
+      return response.end(JSON.stringify(userCart));
     } 
   }
 })
@@ -192,7 +197,6 @@ myRouter.post('/me/cart', function (request, response) {
     response.writeHead(401, "Unauthorized to access shopping cart");
     return response.end();
   } else {
-    let cart = users.cart;
     let user = users.find((user) => {
       return user.login.username === currentAccessToken.username;
     });

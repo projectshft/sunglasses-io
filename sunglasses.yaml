@@ -1,3 +1,4 @@
+---
 swagger: "2.0"
 info:
   description: API for Practicing APIs
@@ -5,229 +6,230 @@ info:
   title: Simpler Sunglasses Store
   contact:
     email: b@simpler.com
+host: virtserver.swaggerhub.com
+basePath: /BENCORBETT44/SimpleSunglassees/1.0.0
 tags:
-  - name: brands
-    description: brands avaialable
-  - name: products
-    description: all avaialable products
-  - name: login
-    description: a place for user to login
-  - name: me/cart
-    description: after logging in user can do specific actions with their cart
+- name: brands
+  description: brands avaialable
+- name: products
+  description: all avaialable products
+- name: login
+  description: a place for user to login
+- name: me/cart
+  description: after logging in user can do specific actions with their cart
 schemes:
-  - https
-# basePath: /v2
+- https
 produces:
-  - application/json
-securityDefinitions:
-  basicAuth:
-    type: basic
+- application/json
 paths:
   /brands:
     get:
+      tags:
+      - brands
       summary: Brands
       description: |
         The Brands endpoint will return a list of brands
-      tags:
-        - brands
+      parameters: []
       responses:
-        200:
+        "200":
           description: Successful response return list of brands
           schema:
             type: array
             items:
-              $ref: "#/definitions/Brands"
-        400:
+              $ref: '#/definitions/Brands'
+        "400":
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /brands/{brandId}/products:
     get:
+      tags:
+      - products
       summary: Return Products Based on brand id
       description: |
         This endpoint will return a list of procucts based on the id of a brand
-      tags:
-        - brands
       parameters:
-        - in: path
-          name: brandId
-          description: numeric ID of a brand
-          required: true
-          type: string
+      - name: brandId
+        in: path
+        description: numeric ID of a brand
+        required: true
+        type: string
       responses:
-        200:
-          description: ID matches brand Success
+        "200":
+          description: product matches brand ID
           schema:
             type: array
             items:
-              $ref: "#/definitions/Products"
-        400:
+              $ref: '#/definitions/Products'
+        "400":
           description: bad input parameter
           schema:
-            $ref: "#/definitions/Error"
-        404:
+            $ref: '#/definitions/Error'
+        "404":
           description: URL not recognized
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /products:
     get:
+      tags:
+      - products
       summary: All Products
       description: |
         All products in the store will be returned
-      tags:
-        - products
+      parameters: []
       responses:
-        200:
+        "200":
           description: Successful response
           schema:
-            $ref: "#/definitions/Products"
-        400:
+            $ref: '#/definitions/Products'
+        "400":
           description: Unexpected error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /login:
     post:
+      tags:
+      - login
       summary: User Login
       description: |
         Allows user to login so that they can view and edit their cart
-      tags:
-        - login
       parameters:
-        - in: body
-          name: login
-          description: The login form for username and password
-          schema:
-            $ref: "#/definitions/Login"
+      - in: body
+        name: login
+        description: The login form for username and password
+        required: false
+        schema:
+          $ref: '#/definitions/Users/properties/login'
       responses:
-        200:
+        "200":
           description: user now has access to cart
           schema:
-            $ref: "#/definitions/Users"
-        201:
+            $ref: '#/definitions/Users'
+        "201":
           description: Successful response token created
           schema:
             type: array
             items:
-              type: object
-              properties:
-                userAuth:
-                  type: string
-                  description: token that allows user to access their cart
-        401:
+              $ref: '#/definitions/inline_response_201'
+        "401":
           description: unauthorized user
           schema:
-            $ref: "#/definitions/Error"
-        400:
+            $ref: '#/definitions/Error'
+        "400":
           description: bad request
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /me/cart:
     get:
+      tags:
+      - me/cart
       summary: User can view their cart
       description: |
         After providing login user can view their cart
-      tags:
-        - me/cart
+      parameters: []
       security:
-        - basicAuth: []
+      - basicAuth: []
       responses:
-        200:
+        "200":
           description: Success
           schema:
-            $ref: "#/definitions/Cart"
-        400:
+            $ref: '#/definitions/Cart'
+        "400":
           description: bad request
           schema:
-            $ref: "#/definitions/Error"
-        401:
+            $ref: '#/definitions/Error'
+        "401":
           description: unauthorized to access store
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
     post:
+      tags:
+      - me/cart
       summary: Add items
       description: |
         After providing login user can add items to their cart
-      tags:
-        - me/cart
+      parameters: []
       security:
-        - basicAuth: []
+      - basicAuth: []
       responses:
-        201:
+        "201":
           description: item added to cart
           schema:
-            $ref: "#/definitions/Cart"
-        400:
+            $ref: '#/definitions/Cart'
+        "400":
           description: bad request
           schema:
-            $ref: "#/definitions/Error"
-        401:
+            $ref: '#/definitions/Error'
+        "401":
           description: unauthorized to access store
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /me/cart/{productId}:
-    delete:
-      summary: Delete product
-      description: |
-        User is able to delete selected product
-      tags:
-        - me/cart
-      security:
-        - basicAuth: []
-      parameters:
-        - in: path
-          name: productId
-          description: numeric ID of product
-          required: true
-          type: integer
-      responses:
-        204:
-          description: No content to send back displaying updated cart
-          schema:
-            $ref: "#/definitions/Cart"
-        400:
-          description: bad request
-          schema:
-            $ref: "#/definitions/Error"
-        401:
-          description: unauthorized to access store
-          schema:
-            $ref: "#/definitions/Error"
     post:
+      tags:
+      - me/cart
       summary: Edit quantity
       description: |
         User is able to edit the quantity of selected product
-      tags:
-        - me/cart
-      security:
-        - basicAuth: []
       parameters:
-        - in: path
-          name: productId
-          description: numeric ID of product
-          required: true
-          type: integer
+      - name: productId
+        in: path
+        description: numeric ID of product
+        required: true
+        type: integer
+      security:
+      - basicAuth: []
       responses:
-        201:
+        "201":
           description: item in cart successfully updated
           schema:
-            $ref: "#/definitions/Cart"
-        400:
+            $ref: '#/definitions/Cart'
+        "400":
           description: bad request
           schema:
-            $ref: "#/definitions/Error"
-        401:
+            $ref: '#/definitions/Error'
+        "401":
           description: unauthorized to access store
           schema:
-            $ref: "#/definitions/Error"
-        404:
+            $ref: '#/definitions/Error'
+        "404":
           description: not found URL not recognized
           schema:
-            $ref: "#/definitions/Error"
-        405:
+            $ref: '#/definitions/Error'
+        "405":
           description: Method not allowed
           schema:
-            $ref: "#/definitions/Error"
-
+            $ref: '#/definitions/Error'
+    delete:
+      tags:
+      - me/cart
+      summary: Delete product
+      description: |
+        User is able to delete selected product
+      parameters:
+      - name: productId
+        in: path
+        description: numeric ID of product
+        required: true
+        type: integer
+      security:
+      - basicAuth: []
+      responses:
+        "204":
+          description: No content to send back displaying updated cart
+          schema:
+            $ref: '#/definitions/Cart'
+        "400":
+          description: bad request
+          schema:
+            $ref: '#/definitions/Error'
+        "401":
+          description: unauthorized to access store
+          schema:
+            $ref: '#/definitions/Error'
+securityDefinitions:
+  basicAuth:
+    type: basic
 definitions:
   Brands:
     type: object
@@ -271,59 +273,16 @@ definitions:
       cart:
         type: array
         items:
-          $ref: "#/definitions/Cart"
+          $ref: '#/definitions/Cart'
       name:
-        type: object
-        properties:
-          title:
-            type: string
-            description: Users title
-          first:
-            type: string
-            description: users first name
-          last:
-            type: string
-            description: users last name
+        $ref: '#/definitions/Users_name'
       location:
-        type: object
-        properties:
-          street:
-            type: string
-            description: users street address
-          city:
-            type: string
-            description: users city
-          state:
-            type: string
-            description: users state
-          postcode:
-            type: integer
-            format: int32
-            description: users zip code
+        $ref: '#/definitions/Users_location'
       email:
         type: string
         description: users email
       login:
-        type: object
-        properties:
-          username:
-            type: string
-            description: username
-          password:
-            type: string
-            description: password
-          salt:
-            type: string
-            description: salt key
-          md5:
-            type: string
-            description: md5
-          sha1:
-            type: string
-            description: sha1
-          sha256:
-            type: string
-            description: sha256
+        $ref: '#/definitions/Users_login'
       dob:
         type: string
         description: users birthday
@@ -337,17 +296,7 @@ definitions:
         type: string
         description: users cellular
       picture:
-        type: object
-        properties:
-          large:
-            type: string
-            description: larger imageURL of user
-          medium:
-            type: string
-            description: med imageURL of user
-          thumbnail:
-            type: string
-            description: thumbnail imageURL of user
+        $ref: '#/definitions/Users_picture'
       nat:
         type: string
         description: users nationality
@@ -385,6 +334,73 @@ definitions:
         format: int32
       message:
         type: string
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-# Added by API Auto Mocking Plugin
+  inline_response_201:
+    type: object
+    properties:
+      tokenId:
+        type: string
+        description: identifier for the users login token
+      userAuth:
+        type: string
+        description: token that allows user to access their cart
+  Users_name:
+    type: object
+    properties:
+      title:
+        type: string
+        description: Users title
+      first:
+        type: string
+        description: users first name
+      last:
+        type: string
+        description: users last name
+  Users_location:
+    type: object
+    properties:
+      street:
+        type: string
+        description: users street address
+      city:
+        type: string
+        description: users city
+      state:
+        type: string
+        description: users state
+      postcode:
+        type: integer
+        format: int32
+        description: users zip code
+  Users_login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: username
+      password:
+        type: string
+        description: password
+      salt:
+        type: string
+        description: salt key
+      md5:
+        type: string
+        description: md5
+      sha1:
+        type: string
+        description: sha1
+      sha256:
+        type: string
+        description: sha256
+  Users_picture:
+    type: object
+    properties:
+      large:
+        type: string
+        description: larger imageURL of user
+      medium:
+        type: string
+        description: med imageURL of user
+      thumbnail:
+        type: string
+        description: thumbnail imageURL of user
