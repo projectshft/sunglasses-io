@@ -180,11 +180,11 @@ myRouter.get("/me/cart", function (request, response) {
     return response.end();
   } else {
     let user = users.find((user) => {
-      return user.login.username === currentAccessToken.username;
+      return user.login.username;
     });
     if(user) {
       response.writeHead(200, "Access granted user can view cart")
-      return response.end(JSON.stringify(userCart));
+      return response.end(JSON.stringify(users));
     } 
   }
 })
@@ -208,7 +208,7 @@ myRouter.post('/me/cart', function (request, response) {
 });
 
 //DELETE /me/cart/{prodId}
-myRouter.delete('/me/cart/:productId', function (reqest, response) {
+myRouter.delete('/me/cart/:productId', function (request, response) {
   let currentAccessToken = getValidTokenFromRequest(request);
 
   if(!currentAccessToken) {
@@ -226,8 +226,6 @@ myRouter.delete('/me/cart/:productId', function (reqest, response) {
   cart = removeItem(productId);
   response.writeHead(200, "Item Successfully remove");
   return response.end(JSON.stringify(cart));
-
-  
 })
 
 module.exports = server;
