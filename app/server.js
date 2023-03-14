@@ -7,13 +7,37 @@ const fs = require('fs');
 
 
 const uid = require('rand-token').uid;
-const newAccessToken = uid(45);
+const newAccessToken = uid(16);
+
+const VALID_API_KEYS = ["faf42c36-c25b-11ed-afa1-0242ac120002", "faf42f1a-c25b-11ed-afa1-0242ac120002"];
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
 
 let accessToken = [];
+
+//helper
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    let currentAccessToken = accessToken.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) <
+      TOKEN_VALIDITY_TIMEOUT;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
 
 //state variables
 let brands = [];
 let users = [];
+let user = users[0]
 let products = [];
 
 
@@ -25,6 +49,10 @@ let server = http.createServer(function (request, response) {
   	myRouter(request, response, finalHandler(request, response))
 }).listen(8090, () => {
 
+  if (!VALID_API_KEYS. includes(request.header["x-authentication"])) {
+    response.writeHead(401, "You need a valid API to use this API")
+    return response.end();
+  }
   console.log("Node is running on 8090")
 });
 
@@ -49,12 +77,11 @@ fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
 
 //GET Brands OK
 myRouter.get('/brands', function(request, response) {
-  let allBrands = brands
-  if(!allBrands) {
+  if(!brands) {
     response.writeHead(404, "Nothing to return");
   }
   response.writeHead(200, {"Content-Type": "application/json"});
-  return response.end(JSON.stringify(allBrands));
+  return response.end(JSON.stringify(brands));
 });
 
 //GET Products OK
@@ -104,7 +131,38 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
 })
 
 //POST login
-myRouter.post('/login', (request, response) => {
+myRouter.post('/login', function(request, response)  {
+  if (request.body.username && request.body.password) {
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.login.password;
+    });
+
+    if (user) {
+      response.writeHead(200, {"Content-Type": "application/json"});
+      let userAuth = accessToken.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+
+      if (userAuth) {
+        userAuth.lastUpdated = new Date();
+        return response.end(JSON.stringify(userAuth.token));
+      } else {
+        let newUserAuth = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        accessToken.push(newUserAuth);
+        return response.end(JSON.stringify(newUserAuth.token));
+      }
+    } else {
+      response.writeHead(401, "Invalid Login");
+      return response.end();
+    }
+  } else {
+    response.writehead(400, "Incorrect format");
+    return response.end();
+  }
 })
 
 
@@ -141,7 +199,7 @@ myRouter.post('/me/cart', function (request, response) {
     });
     if(user) {
       response.writeHead(200, "Access granted")
-      return response.end(JSON.stringify(cart));
+      return response.end(JSON.stringify(user.cart));
     } 
   }
 });
@@ -170,3 +228,4 @@ myRouter.delete('/me/cart/:productId', function (reqest, response) {
 })
 
 module.exports = server;
+module.exports = users;
