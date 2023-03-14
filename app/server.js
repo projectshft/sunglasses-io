@@ -37,7 +37,6 @@ var getValidTokenFromRequest = function(request) {
 //state variables
 let brands = [];
 let users = [];
-let user = users[0]
 let products = [];
 
 
@@ -134,7 +133,7 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
 myRouter.post('/login', function(request, response)  {
   if (request.body.username && request.body.password) {
     let user = users.find((user) => {
-      return user.login.username == request.body.username && user.login.password == request.login.password;
+      return user.login.username == request.body.username && user.login.password == request.body.password;
     });
 
     if (user) {
@@ -228,4 +227,3 @@ myRouter.delete('/me/cart/:productId', function (reqest, response) {
 })
 
 module.exports = server;
-module.exports = users;

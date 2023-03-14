@@ -12,7 +12,11 @@ chai.use(chaiHttp);
 describe("Login", () => {
   describe("/POST login data", () => {
     it("post all required login data", done => {
-      let user = users[0]
+      //post users data tried other passwords
+      let user = {
+        "username": "lazywolf342",
+        "password": "tucker"
+      }
       chai
       .request(server)
       .post('/login')
