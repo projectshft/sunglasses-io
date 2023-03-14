@@ -26,33 +26,27 @@ let server = http.createServer(function (request, response) {
 }).listen(8090, () => {
 
   console.log("Node is running on 8090")
-// //Brands
-//   brands = JSON.parse(fs.readFileSync("../initial-data/brands.json", "utf-8"));
-// //products
-//   products = JSON.parse(fs.readFileSync("../initial-data/products.json", "utf-8"));
-// //all users
-//   users = JSON.parse(fs.readFileSync("./initial-data/users.json", "utf-8"));
-//   user = users[0];
 });
 
+//Brands file
 fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
   if (error) throw error;
   brands = JSON.parse(data);
   console.log(`Server setup: ${brands.length}`)
 });
-
+//users file
 fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
   if (error) throw error;
   users = JSON.parse(data);
   console.log(`Server setup: ${users.length}`)
 });
-
+//products file
 fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
   if (error) throw error;
   products = JSON.parse(data);
   console.log(`Server setup: ${products.length}`)
 });
-//GET Brands
+//GET Brands OK
 myRouter.get('/brands', function(request, response) {
   let allBrands = brands
   if(!allBrands) {
