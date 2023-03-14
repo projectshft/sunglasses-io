@@ -3,7 +3,7 @@ let chaiHttp = require("chai-http");
 let server = require("../server");
 
 let should = chai.should();
-
+var agent = chai.request.agent(server)
 
 chai.use(chaiHttp);
 
@@ -14,14 +14,13 @@ describe('Me/cart', () => {
       "username": "lazywolf342",
       "password": "tucker"
     }
-    chai
-    .request(server)
+    agent
     .post('/login')
     .send(user).then((response) => {
       console.log(response.data)
-      chai
+      agent
       .get('/me/cart')
-      .send(currentAccessToken)
+      // .send(response.currentAccessToken)
     })
     .end((err, res) => {
       res.should.have.status(200);
