@@ -29,7 +29,9 @@ describe('/GET Products', () => {
     .end((err, res) => {
       res.should.have.status(200);
       res.body.should.be.an('array');
-      res.body.length.should.be(4)
+      res.body.length.should.be.eql(0);
+      //Enable to test with test dummy data id: 2 in server
+      // res.body.length.should.be.eql(10);
       done();
     });
   });

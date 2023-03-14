@@ -46,6 +46,7 @@ fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
   products = JSON.parse(data);
   console.log(`Server setup: ${products.length}`)
 });
+
 //GET Brands OK
 myRouter.get('/brands', function(request, response) {
   let allBrands = brands
@@ -55,6 +56,7 @@ myRouter.get('/brands', function(request, response) {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(allBrands));
 });
+
 //GET Products OK
 myRouter.get('/products', function(request, response) {
   if(!products) {
@@ -63,11 +65,12 @@ myRouter.get('/products', function(request, response) {
 response.writeHead(200, {"Content-Type": "application/json"});
 return response.end(JSON.stringify(products));
 });
-//GET Products with filtered by brand
+
+//GET Products with filtered by brand OK
 myRouter.get('/brands/:brandId/products', function(request, response) {
   let {brandId} = request.params;
   if (brandId > 5) {
-    response.statusCode = 400
+    response.writeHead(400, "No parameter with that ID")
     return response.end("No brand with that id please choose 1 through 5")
   }
 
@@ -80,68 +83,30 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
        if (myBrand.id === myParam) {
          match.push(myBrand.name)
          match.push(prod.name)
+         match.push(prod.price)
+         match.push(prod.description)
+         match.push(prod.imageUrls)
        }
    })
   }
-  getProduct(brands, products, "2")
 
-  response.writeHead(200, "Success");
-  console.log(match)
-  return response.end(match);
+  //For Test with id 2
+  // getProduct(brands, products, "2")
+
+  //disable  below for test
+   getProduct(brands, products, brandId);
+  products = match;
+  console.log(products)
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(products));
 
 
 })
+
 //POST login
 myRouter.post('/login', (request, response) => {
-  if (request.body.username && request.body.password) {
-    let user = users.find((user) => {
-      return user.login.username == request.body.username && user.login.password == request.body.password;
-    });
-    if (user) {
-      response.writeHead(200, "Success")
-
-      let currentAccessToken = accessTokens.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
-      });
-
-      if ( currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken));
-      } else {
-        let newAccessToken = {
-          username: user.login.username,
-          lastUpdated: new Date(),
-          token: uid(45)
-        }
-        accessToken.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
-      }
-    } else {
-      response.writeHead(400, "Bad Request");
-      return response.end();
-    }
-  } else {
-    response.writeHead(401, "Unauthorized User");
-    return response.end();
-  }
 })
 
-//Aaron acces token method helper
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url, true);
-  if (parsedUrl.query.accessToken) {
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-    });
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
 
 //GET Me/Cart
 myRouter.get("/me/cart", function (request, response) {
