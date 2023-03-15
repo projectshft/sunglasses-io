@@ -5,28 +5,13 @@ const Router = require('router');
 const bodyParser   = require('body-parser');
 const fs = require('fs');
 
-
 const uid = require('rand-token').uid;
-const newAccessToken = uid(16);
-
-const VALID_API_KEYS = ["faf42c36-c25b-11ed-afa1-0242ac120002", "faf42f1a-c25b-11ed-afa1-0242ac120002"];
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000;
-
 let accessToken = [];
-
-//helper
-var getValidTokenFromRequest = function(request) {
-  return accessToken;
-};
-
 
 //state variables
 let brands = [];
 let users = [];
 let products = [];
-
-
-
 
 // Setup router
 var myRouter = Router();
@@ -35,13 +20,7 @@ myRouter.use(bodyParser.json());
 let server = http.createServer(function (request, response) {
   	myRouter(request, response, finalHandler(request, response))
 }).listen(8090, () => {
-
-  // if (!VALID_API_KEYS. includes(request.header["x-authentication"])) {
-  //   response.writeHead(401, "You need a valid API to use this API")
-  //   return response.end();
-  // }
   console.log("Node is running on 8090")
-  console.log(accessToken);
 });
 
 //Brands file
@@ -108,7 +87,7 @@ myRouter.get('/brands/:brandId/products', function(request, response) {
   //For Test with id 2
   // getProduct(brands, products, "2")
 
-  //disable  below for test
+  //disable  below for dummy test
    getProduct(brands, products, brandId);
   products = match;
   console.log(products)
@@ -148,13 +127,10 @@ myRouter.post('/login', function(request, response)  {
     return response.end();
   }
 })
-// console.log(accessToken);
 
-//GET Me/Cart
+//GET Me/Cart OK
 myRouter.get("/me/cart", function (request, response) {
   let authUser = users.find(user => user.username === accessToken.username)
-
-  console.log(users)
 
   if (authUser) {
     response.writeHead(200, "Access granted")
@@ -165,41 +141,69 @@ myRouter.get("/me/cart", function (request, response) {
   }
 })
 
-//POST Me/Cart
+//POST Me/Cart OK
 myRouter.post('/me/cart', function (request, response) {
   let authUser = users.find(user => user.username === accessToken.username)
 
+  let product = products.find((p) => {
+    return p.id && p.categoryId && p.price;
+  })
 
   console.log(users)
 
   if (authUser) {
-    response.writeHead(200, "Access granted")
-    return response(JSON.stringify(authUser.cart))
+    let cart = authUser.cart;
+    cart.push(product)
+    response.writeHead(201, "Access granted")
+    return response(JSON.stringify(cart))
   } else {
     response.writeHead(401, "Unauthorized to access shopping cart");
     return response.end();
   }
 });
 
-//DELETE /me/cart/{prodId}
-myRouter.delete('/me/cart/:productId', function (request, response) {
-  let currentAccessToken = getValidTokenFromRequest(request);
-
-  if(!currentAccessToken) {
-    response.writeHead(401, "Unauthorized to access shopping cart");
-    return response.end();
-  }
+//DELETE Item OK
+myRouter.delete('/me/cart/:productid', function (request, response) {
+  let {productid} = request.params;
+  let stringProduct = productid.toString();
   
-  let {productId} = request.params;
-  let cart = users.cart;
+  let authUser = users.find(user => user.username === accessToken.username)
 
-  const removeItem = function(id) {
-    products = products.filter((p => p.id !=id))
-  };
+  let cart = authUser.cart;
+  let index = cart.indexOf(stringProduct);
 
-  cart = removeItem(productId);
-  response.writeHead(200, "Item Successfully remove");
-  return response.end(JSON.stringify(cart));
+  if (authUser) {
+    let newCart = cart.splice(index);
+    response.writeHead(200, "Access granted")
+    return response(JSON.stringify(newCart))
+    } else {
+      response.writeHead(401, "Unauthorized to access shopping cart");
+      return response.end();
+    }
+})
+
+//POST Quantity OK
+myRouter.post('/me/cart/:productid', function (request, response) {
+  let {productid} = request.params;
+  let stringProduct = productid.toString();
+
+  let productToEdit = products.filter(p => {
+    return p.id === stringProduct;
+  })
+  
+  let authUser = users.find(user => user.username === accessToken.username)
+
+  let cart = authUser.cart;
+
+
+  if (authUser) {
+    let addCart = cart.push(productToEdit);
+    response.writeHead(200, "Access granted")
+    return response(JSON.stringify(addCart))
+    } else {
+      response.writeHead(401, "Unauthorized to access shopping cart");
+      return response.end();
+    }
 })
 
 module.exports = server;

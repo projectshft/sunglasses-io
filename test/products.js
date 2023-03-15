@@ -30,7 +30,7 @@ describe('Products', () => {
     });
   });
   
-  describe('/GET Products', () => {
+  describe('/GET Products/:id', () => {
     it("it should GET all of the products that match brandId", done => {
       chai
       .request(server)
