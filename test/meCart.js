@@ -1,31 +1,31 @@
+
 let chai = require("chai");
 let chaiHttp = require("chai-http");
-let server = require("../server");
+let server = require("../server.js");
 
 let should = chai.should();
-var agent = chai.request.agent(server)
-
 chai.use(chaiHttp);
 
-describe('Me/cart', () => {
-  it("it should GET all of the items in users cart", done => {
-
-    let user = {
+//This test posts users data and gives them access to their cart
+describe('/GET Cart', () => {
+  it("it should GET items in users cart", done => {
+    let login_details = {
       "username": "lazywolf342",
       "password": "tucker"
     }
+    var agent = chai.request.agent(server)
     agent
     .post('/login')
-    .send(user).then((response) => {
-      console.log(response.data)
-      agent
-      .get('/me/cart')
-      // .send(response.currentAccessToken)
-    })
-    .end((err, res) => {
-      res.should.have.status(200);
-      done();
-    });
+    .send(login_details)
+    done()
+    .then(function (res) {
+      const token = res.body[0].token;
+      expect(res).to.have.cookie(token)
+      return agent.get('/me/cart')
+      .then(function (res) {
+         expect(res).to.have.status(200);
+         agent.close();
+      });
   });
-});
-
+})
+})

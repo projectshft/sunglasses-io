@@ -16,21 +16,7 @@ let accessToken = [];
 
 //helper
 var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url, true);
-  if (parsedUrl.query.accessToken) {
-    let currentAccessToken = accessToken.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) <
-      TOKEN_VALIDITY_TIMEOUT;
-    });
-
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
+  return accessToken;
 };
 
 
@@ -55,6 +41,7 @@ let server = http.createServer(function (request, response) {
   //   return response.end();
   // }
   console.log("Node is running on 8090")
+  console.log(accessToken);
 });
 
 //Brands file
@@ -139,23 +126,19 @@ myRouter.post('/login', function(request, response)  {
     });
 
     if (user) {
-      response.writeHead(200, {"Content-Type": "application/json"});
-      let userAuth = accessToken.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
-      });
-
-      if (userAuth) {
-        userAuth.lastUpdated = new Date();
-        return response.end(JSON.stringify(userAuth.token));
-      } else {
-        let newUserAuth = {
-          username: user.login.username,
-          lastUpdated: new Date(),
-          token: uid(16)
-        }
-        accessToken.push(newUserAuth);
-        return response.end(JSON.stringify(newUserAuth.token));
+      let newUserAuth = {
+        username: user.login.username,
+        lastUpdated: new Date(),
+        token: uid(16)
       }
+      accessToken.push(newUserAuth);
+      console.log(JSON.stringify(accessToken));
+      console.log(newUserAuth)
+      console.log(accessToken[0])
+      let match = users.find(user => user.username === accessToken.username)
+      console.log(match.cart);
+      response.writeHead(200, {"Content-Type": "application/json"});
+      return response.end(JSON.stringify(accessToken));
     } else {
       response.writeHead(401, "Invalid Login");
       return response.end();
@@ -165,45 +148,36 @@ myRouter.post('/login', function(request, response)  {
     return response.end();
   }
 })
-
+// console.log(accessToken);
 
 //GET Me/Cart
 myRouter.get("/me/cart", function (request, response) {
-  let currentAccessToken = getValidTokenFromRequest(request);
-  
-  let userCart = users.find((user) => {
-    return user.cart
-  })
+  let authUser = users.find(user => user.username === accessToken.username)
 
-  if(!currentAccessToken) {
+  console.log(users)
+
+  if (authUser) {
+    response.writeHead(200, "Access granted")
+    return response(JSON.stringify(authUser.cart))
+  } else {
     response.writeHead(401, "Unauthorized to access shopping cart");
     return response.end();
-  } else {
-    let user = users.find((user) => {
-      return user.login.username;
-    });
-    if(user) {
-      response.writeHead(200, "Access granted user can view cart")
-      return response.end(JSON.stringify(users));
-    } 
   }
 })
 
 //POST Me/Cart
 myRouter.post('/me/cart', function (request, response) {
-  let currentAccessToken = getValidTokenFromRequest(request);
+  let authUser = users.find(user => user.username === accessToken.username)
 
-  if(!currentAccessToken) {
+
+  console.log(users)
+
+  if (authUser) {
+    response.writeHead(200, "Access granted")
+    return response(JSON.stringify(authUser.cart))
+  } else {
     response.writeHead(401, "Unauthorized to access shopping cart");
     return response.end();
-  } else {
-    let user = users.find((user) => {
-      return user.login.username === currentAccessToken.username;
-    });
-    if(user) {
-      response.writeHead(200, "Access granted")
-      return response.end(JSON.stringify(user.cart));
-    } 
   }
 });
 
