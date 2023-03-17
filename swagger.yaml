@@ -1,0 +1,281 @@
+swagger: "2.0"
+info:
+  title: Sunglasses IO
+  description: Mockup sunglasses store API
+  version: 1.0.0
+host: localhost:3001
+basePath: /api
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Lists all brands
+      description: |
+        The Brands endpoint displays the different brands
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/:categoryId/products:
+    get:
+      summary: Shows products from a specific brand ID
+      description: >-
+        This endpoint shows all the products from a specific brand
+      parameters:
+        - name: id
+          in: path
+          description: The id of the brand to display
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: Shows products by specific ID
+          schema:
+            $ref: "#/definitions/Products"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Shows all products
+      description: |
+        This endpoint shows all products
+      tags:
+        - Products
+      responses:
+        "200":
+          description: List of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Products"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: Login screen
+      description: |
+        This endpoint allows a user to login
+      parameters:
+        - name: login
+          in: body
+          description: username and password
+          required: true
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      tags:
+        - User
+      responses:
+        "200":
+          description: Logged in
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: Shows the current users cart
+      description: This endpoint allows the logged in user to view the items in their cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: View cart successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add to cart???
+      description: |
+        This endpoint allows you to add to your cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: Item added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/:productId:
+    delete:
+      summary: Delete item in cart
+      description: >
+        Deletes an product from the users cart
+      parameters:
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+      tags:
+        - User
+      responses:
+        "200":
+          description: Deleted successfully
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add item to cart?
+      description: >
+        Adds an item to the current users cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: Item added successfully as
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product
+      categoryId:
+        type: string
+        description: Brand of the specific product
+      name:
+        type: string
+        description: Name of the specific product
+      description:
+        type: string
+        description: Discription of the specific product
+      price:
+        type: string
+        description: Price of the specific product
+      imageUrls:
+        type: array
+        items:
+          type: string
+
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand
+      name:
+        type: string
+        description: The name of the brand
+
+  User:
+    type: object
+    properties:
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: Title of the user
+          first:
+            type: string
+            description: First name of the user
+          last:
+            type: string
+            description: Last name of the user
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: Street address of the user
+          city:
+            type: string
+            description: City of the user
+          state:
+            type: string
+            description: State of the user
+          postcode:
+            type: number
+            description: Postal Code of the user
+      email:
+        type: string
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: Username of the user
+          password:
+            type: string
+            description: Password of the user
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+      registered:
+        type: string
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+        properties:
+          small:
+            type: string
+          medium:
+            type: string
+          large:
+            type: string
+      nat:
+        type: string
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
