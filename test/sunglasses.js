@@ -8,7 +8,7 @@ chai.use(chaiHttp);
 
 describe('Sunglasses', () => {
   describe('/GET sunglasses', () => {
-    it('it should GET all the sunglasses', (done) => {
+    it('should GET all the sunglasses', (done) => {
       chai
         .request(server)
         .get('/sunglasses')
@@ -23,8 +23,8 @@ describe('Sunglasses', () => {
 });
 
 describe('User', () => {
-  describe('/POST user info')
-    it('should return the user info as an object and a token when POST correct login info', (done) => {
+  describe('/POST user info', () => {
+    it('should return the user info as an object when POST correct login info', (done) => {
       const validLogin = {
         username: 'yellowleopard753',
         password: 'jonjon'
@@ -38,12 +38,12 @@ describe('User', () => {
           res.should.have.status(200);
           res.body.should.be.an('object');
           res.body.should.have.property('cart');
-          res.body.should.have.property('accessToken');
           done();
         });
     });
 
-    it('should return an error when provided with th wrong login credentials', (done) => {
+
+    it('should return an error when provided with the wrong login credentials', (done) => {
       const invalidCredentials = {
         username: 'yellowleopard753',
         password: 'nope'
@@ -58,13 +58,13 @@ describe('User', () => {
           done();
         });
     });
+  });
 });
 
 describe('Cart', () => {
   describe('/POST sunglasses by ID to cart', () => {
     it('should POST specific sunglasses to cart and update the quantity', (done) => {
       const sunglassesId = '1';
-      const apiKey = '53456';
 
       const cartItemUpdate = {
         sunglassesId: sunglassesId,
@@ -75,7 +75,6 @@ describe('Cart', () => {
       chai
         .request(server)
         .post(`/cart/sunglasses/${sunglassesId}/addToCart`)
-        .set('api_key', apiKey)
         .send(cartItemUpdate)
         .end((err, res) => {
           res.should.have.status(200);
@@ -87,12 +86,49 @@ describe('Cart', () => {
         });
     });
 
-    it('should return an error when provided with a non existent sunglasses ID', (done) => {
-      const invalidSunglassesId = '999';
-      const apiKey = '53456';
+    it('should return an error when provided with a wrong action', (done) => {
+      const sunglassesId = '1';
 
       const cartItemUpdate = {
         sunglassesId: sunglassesId,
+        action: 'wrong',
+        quantity: 5
+      };
+
+      chai
+        .request(server)
+        .post(`/cart/sunglasses/${sunglassesId}/addToCart`)
+        .send(cartItemUpdate)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should return an error when provided with a no quantity', (done) => {
+      const sunglassesId = '1';
+
+      const cartItemUpdate = {
+        sunglassesId: sunglassesId,
+        action: 'update_quantity',
+        quantity: NaN
+      };
+
+      chai
+        .request(server)
+        .post(`/cart/sunglasses/${sunglassesId}/addToCart`)
+        .send(cartItemUpdate)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should return an error when provided with a non existent sunglasses ID', (done) => {
+      const invalidSunglassesId = '999';
+
+      const cartItemUpdate = {
+        sunglassesId: invalidSunglassesId,
         action: 'update_quantity',
         quantity: 5
       };
@@ -100,28 +136,6 @@ describe('Cart', () => {
       chai
         .request(server)
         .post(`/cart/sunglasses/${invalidSunglassesId}/addToCart`)
-        .set('api_key', apiKey)
-        .send(cartItemUpdate)
-        .end((err, res) => {
-          res.should.have.status(401);
-          done();
-        });
-    });
-
-    it('should return an error when provided with a non existent API key', (done) => {
-      const sunglassesId = '1';
-      const invalidApiKey = '9999';
-
-      const cartItemUpdate = {
-        sunglassesId: sunglassesId,
-        action: 'update_quantity',
-        quantity: 5
-      };
-
-      chai
-        .request(server)
-        .post(`/cart/sunglasses/${sunglassesId}/addToCart`)
-        .set('api_key', invalidApiKey)
         .send(cartItemUpdate)
         .end((err, res) => {
           res.should.have.status(401);
@@ -133,7 +147,6 @@ describe('Cart', () => {
   describe('/PUT remove sunglasses by ID', () => {
     it('should remove specific sunglasses from the cart', (done) => {
       const sunglassesId = '1';
-      const apiKey = '53456';
 
       const cartItemUpdate = {
         sunglassesId: sunglassesId,
@@ -143,7 +156,6 @@ describe('Cart', () => {
       chai
         .request(server)
         .put(`/cart/sunglasses/${sunglassesId}/changeQuantity`)
-        .set('api_key', apiKey)
         .send(cartItemUpdate)
         .end((err, res) => {
           res.should.have.status(200);
@@ -155,39 +167,35 @@ describe('Cart', () => {
         });
     });
 
-    it('should return an error when provided with a non existent sunglasses ID', (done) => {
-      const invalidSunglassesId = '999';
-      const apiKey = '53456';
+    it('should return an error when provided with a wrong action', (done) => {
+      const sunglassesId = '1';
 
       const cartItemUpdate = {
         sunglassesId: sunglassesId,
+        action: 'wrong'
+      };
+
+      chai
+        .request(server)
+        .put(`/cart/sunglasses/${sunglassesId}/changeQuantity`)
+        .send(cartItemUpdate)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    });
+
+    it('should return an error when provided with a non existent sunglasses ID', (done) => {
+      const invalidSunglassesId = '999';
+
+      const cartItemUpdate = {
+        sunglassesId: invalidSunglassesId,
         action: 'remove'
       };
 
       chai
         .request(server)
         .put(`/cart/sunglasses/${invalidSunglassesId}/changeQuantity`)
-        .set('api_key', apiKey)
-        .send(cartItemUpdate)
-        .end((err, res) => {
-          res.should.have.status(401);
-          done();
-        });
-    });
-
-    it('should return an error when provided with a non existent API key', (done) => {
-      const sunglassesId = '1';
-      const invalidApiKey = '9999';
-
-      const cartItemUpdate = {
-        sunglassesId: sunglassesId,
-        action: 'remove'
-      };
-
-      chai
-        .request(server)
-        .put(`/cart/sunglasses/${sunglassesId}/changeQuantity`)
-        .set('api_key', invalidApiKey)
         .send(cartItemUpdate)
         .end((err, res) => {
           res.should.have.status(401);
@@ -197,35 +205,20 @@ describe('Cart', () => {
   });
 
   describe('/POST checkout', () => {
-    it("should process the checkout and return a confirmation message, total price, and purchased items", (done) => {
-      const apiKey = '53456';
+    it('should process the checkout and return a confirmation message, total price, and purchased items', (done) => {
 
       chai
         .request(server)
-        .post("/cart/checkout")
-        .set("api_key", apiKey)
+        .post('/cart/checkout')
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an("object");
-          res.body.should.have.property("message");
-          res.body.message.should.be.a("string");
-          res.body.should.have.property("totalPrice");
-          res.body.totalPrice.should.be.a("number");
-          res.body.should.have.property("purchasedItems");
-          res.body.purchasedItems.should.be.an("array");
-          done();
-        });
-    });
-
-    it('should return an error when provided with a non existent API key', (done) => {
-      const invalidApiKey = '9999';
-
-      chai
-        .request(server)
-        .put('/cart/checkout')
-        .set('api_key', invalidApiKey)
-        .end((err, res) => {
-          res.should.have.status(401);
+          res.body.should.be.an('object');
+          res.body.should.have.property('message');
+          res.body.message.should.be.a('string');
+          res.body.should.have.property('totalPrice');
+          res.body.totalPrice.should.be.a('number');
+          res.body.should.have.property('purchasedItems');
+          res.body.purchasedItems.should.be.an('array');
           done();
         });
     });
@@ -238,9 +231,9 @@ describe('Brands', () => {
       chai.request(server)
         .get('/brands')
         .end((err, res) => {
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.an('array');
-          expect(res.body.length).to.equal(5);
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.equal(5);
           done();
         });
     });
