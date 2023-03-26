@@ -2,12 +2,9 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../app/server');
 
-// const expect = chai.expect();
 const should = chai.should();
 
 chai.use(chaiHttp);
-
-// Add more test cases if needed, like testing the behavior when there is no valid API key or the cart is empty.
 
 describe('Sunglasses', () => {
   describe('/GET sunglasses', () => {
@@ -220,7 +217,18 @@ describe('Cart', () => {
         });
     });
 
-    // Add more test cases if needed, like testing the behavior when there is no valid API key or the cart is empty.
+    it('should return an error when provided with a non existent API key', (done) => {
+      const invalidApiKey = '9999';
+
+      chai
+        .request(server)
+        .put('/cart/checkout')
+        .set('api_key', invalidApiKey)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
   });
 });
 
@@ -248,7 +256,7 @@ describe('Brands', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.forEach(product => {
-            expect(product.categoryId).to.equal(brandId);
+            product.categoryId.should.equal(brandId);
           });
           done();
         });
