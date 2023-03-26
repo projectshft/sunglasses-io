@@ -1,0 +1,346 @@
+swagger: "2.0"
+info:
+  title: Sunglasses.io
+  description: An API to support sunglasses.io
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: Authorization
+paths:
+  /sunglasses:
+    get:
+      tags:
+        - Sunglasses
+      summary: Search for sunglasses
+      description: |
+        The Sunglasses endpoint allows you to search sunglasses based on different filters such as brand and color.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.
+          required: false
+          type: array
+          items:
+            type: string
+            enum:
+              - price
+      responses:
+        "200":
+          description: An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me:
+    post:
+      tags:
+        - User
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the sunglasses.io user that
+        has authorized with the application.
+      responses:
+        "200":
+          description: Profile information for a user
+          schema:
+            $ref: "#/definitions/User"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /cart/sunglasses/{sunglassesId}/addToCart:
+    post:
+      security:
+        - api_key: []
+      tags:
+        - Cart
+      summary: Add sunglasses to cart
+      description: |
+        This endpoint allows you to add chosen sunglasses to your cart.
+      parameters:
+        - name: sunglassesId
+          in: path
+          description: Add sunglasses to cart by sunglassesId
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Sunglasses added to cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /cart/sunglasses/{sunglassesId}/changeQuantity:
+    put:
+      security:
+        - api_key: []
+      tags:
+        - Cart
+      summary: Update quantity or remove item from the cart
+      description: |
+        This endpoint allows you to update the quantity of a chosen item or remove it from the cart.
+      parameters:
+        - name: sunglassesId
+          in: path
+          description: Update cart based on sunglassesId
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Cart has been updated
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItemUpdate"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /cart/checkout:
+    post:
+      security:
+        - api_key: []
+      tags:
+        - Cart
+      summary: Process checkout
+      description: |
+        This endpoint processes the checkout for the items in the user's cart.
+      responses:
+        "200":
+          description: Checkout processed successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: A confirmation message for the successful checkout.
+              totalPrice:
+                type: number
+                description: The total price of the items in the cart.
+              purchasedItems:
+                type: array
+                items:
+                  $ref: "#/definitions/CartItem"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands:
+    get:
+      tags:
+        - Brands
+      summary: Brands
+      description: >
+        Brands define groupings of sunglasses for browsing.
+      parameters:
+        - name: limit
+          in: query
+          description: The number of results to limit the search to
+          required: false
+          type: number
+          format: int32
+      responses:
+        "200":
+          description: An array of categories
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{brandId}/sunglasses:
+    get:
+      tags:
+        - Brands
+      summary: Sunglasses in Brand
+      description: >
+        All the sunglasses in a given brand
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand to search for sunglasses in.
+          required: true
+          type: string
+      responses:
+        "200":
+          description: An array of sunglasses in the brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Sunglasses"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Sunglasses:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the sunglasses.
+      categoryId:
+        type: string
+        description: The id of the brand the sunglasses belongs to.
+      name:
+        type: string
+        description: The name of the chosen sunglasses.
+      description:
+        type: string
+        description: Description of product.
+      price:
+        type: number
+        description: The price of the chosen sunglasses.
+      imageUrls:
+        type: array
+        items:
+          type: string
+        description: The URL for the image representing the goal.
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the brand.
+      name:
+        type: string
+        description: The name of the brand.
+  CartItem:
+    type: object
+    properties:
+      sunglassesId:
+        type: string
+        description: A unique identifier for the sunglasses.
+      quantity:
+        type: integer
+        format: int32
+        description: The quantity of the sunglasses in the cart.
+  CartItemUpdate:
+    type: object
+    properties:
+      sunglassesId:
+        type: string
+      action:
+        type: string
+        enum: [update_quantity, remove]
+      quantity:
+        type: integer
+        format: int32
+        minimum: 1
+        description: Required to update with 'update_quantity'
+    required:
+      - sunglassesId
+      - action
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of sunglasses.io user.
+      cart:
+        type: array
+        items:
+          type: object
+          properties:
+            product:
+              type: string
+            quantity:
+              type: string
+        description: The users current cart.
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
+      email:
+        type: string
+        format: email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            format: password
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        format: date-time
+      registered:
+        type: string
+        format: date-time
+      phone:
+        pattern: \d{3}[\-]\d{3}[\-]\d{4}
+        type: string
+      cell:
+        pattern: \d{3}[\-]\d{3}[\-]\d{4}
+        type: string
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
