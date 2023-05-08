@@ -11,6 +11,7 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
+let accessTokens = [];
 //cart will probably need to be an empty array to post product/brand db info to;
 
 //Setup for the router
@@ -82,8 +83,16 @@ myRouter.post('/api/login', (request, response) =>{
       return user.login.username == request.body.username && user.login.password == request.body.password;
     })
     if(user) {
+      response.writeHead(200, 'login successful');
       // console.log(user);
-      return response.end();
+      let newAccessToken = {
+        username: user.login.username,
+        lastUpdated: new Date(),
+        token: uid(16)
+      }
+      accessTokens.push(newAccessToken);
+      console.log(accessTokens[0].token);
+      return response.end(JSON.stringify(newAccessToken.token));
     }
     response.writeHead(401, 'invalid username or password');
     return response.end();
