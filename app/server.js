@@ -47,7 +47,20 @@ myRouter.get("/api/brands", function(request,response) {
 })
 
 //GET all products of a single brand (by categoryId)
-
+myRouter.get("/api/brands/:id/products", (request, response) =>{
+  const { id } = request.params;
+  const category = brands.find(category => category.id == id);
+  if (!category) {
+    response.writeHead(404, "That brand does not exist");
+    return response.end()
+  }
+  response.writeHead(200, { "Content-Type": "application/json" });
+  const relatedProducts = products.filter(
+    products => products.categoryId === id
+  )
+  // console.log(relatedProducts);
+  return response.end(JSON.stringify(relatedProducts));
+})
 //GET all products
 myRouter.get("/api/products", function(request,response) {
 
