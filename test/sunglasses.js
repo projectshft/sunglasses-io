@@ -62,7 +62,7 @@ describe("Sunglasses", () => {
 
   describe("User", () => {
     describe('/POST Login', () => {
-      it("User should enter a valid username/password to request access token", (done) => {
+      it("User should enter both a username/password to request access token", (done) => {
         let credentials = {
           username: 'abcd', 
           password: ''
@@ -74,6 +74,35 @@ describe("Sunglasses", () => {
           .end((err, res) =>{
             res.should.have.status(400);
             done();
+          })
+      })
+      it("User should enter a valid username and password", (done) => {
+        let credentials = {
+          username: 'abcd',
+          password: 'wxyz'
+        }
+        chai
+          .request(server)
+          .post('/api/login')
+          .send(credentials)
+          .end((err, res) => {
+            res.should.have.status(401)
+            done();
+          })
+      })
+      it("User should be granted access token if credentials are valid", (done) => {
+        let credentials = {
+          username: 'lazywolf342',
+          password: 'tucker'
+        }
+        chai
+          .request(server)
+          .post('/api/login')
+          .send(credentials)
+          .end((err, res) => {
+            res.body.should.be.an('object')
+            res.body.should.have.property('token');
+
           })
       })
     })

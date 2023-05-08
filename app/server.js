@@ -10,6 +10,7 @@ const PORT = 3001;
 
 let brands = [];
 let products = [];
+let users = [];
 //cart will probably need to be an empty array to post product/brand db info to;
 
 //Setup for the router
@@ -30,15 +31,15 @@ server.listen(PORT, err => {
   //populate products
   products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
   // console.log(products);
+  //populate users
+  users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
 
 })
 //GET all brands
 myRouter.get("/api/brands", function(request,response) {
-
   if(!request) {
     return console.log('request not defined')
   }
-
   let brandsToReturn = [];
   brandsToReturn = brands;
   // console.log('brands to return', brandsToReturn);
@@ -63,11 +64,9 @@ myRouter.get("/api/brands/:id/products", (request, response) =>{
 })
 //GET all products
 myRouter.get("/api/products", function(request,response) {
-
   if(!request) {
     return console.log('request not defined')
   }
-
   let productsToReturn = [];
   productsToReturn = products;
   console.log('products to return', productsToReturn);
@@ -78,8 +77,15 @@ myRouter.get("/api/products", function(request,response) {
 myRouter.post('/api/login', (request, response) =>{
   // console.log(request.body)
   if(request.body.username && request.body.password) {
-    console.log(request.body.username, ' --- ',request.body.password)
-    
+    // console.log(request.body.username, ' --- ',request.body.password)
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && user.login.password == request.body.password;
+    })
+    if(user) {
+      // console.log(user);
+      return response.end();
+    }
+    response.writeHead(401, 'invalid username or password');
     return response.end();
   }
   response.writeHead(400, "incorrectly formatted response");
