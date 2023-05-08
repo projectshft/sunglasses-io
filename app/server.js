@@ -8,20 +8,29 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
+//api key storage
+const VALID_API_KEYS = ["98738203-8dsj-0983-9f72-di29dk38djk3", "8di3k99l-5305-8dk3-1849-zjdf938jfj98"];
+
+
 let brands = [];
 let products = [];
 let users = [];
 let accessTokens = [];
+let failedLoginAttempts = {};
 //cart will probably need to be an empty array to post product/brand db info to;
+
 
 //Setup for the router
 let myRouter = Router();
 myRouter.use(bodyParser.json());
 //Setup for server
 let server = http.createServer(function (request, response) {
+
+
   if(!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
     response.writeHead(401, "You need to have a valid API key to use this API")
   }
+  // console.log(request.headers);
   
   response.writeHead(200);
 
@@ -75,21 +84,43 @@ myRouter.get("/api/products", function(request,response) {
   }
   let productsToReturn = [];
   productsToReturn = products;
-  console.log('products to return', productsToReturn);
+  // console.log('products to return', productsToReturn);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsToReturn));
 })
+
+//Functions to help manage failed requests by username
+let getNumFailedLoginRequestsForUsername = (username) => {
+  let currentNumFailedRequests = failedLoginAttempts[username];
+  if(currentNumFailedRequests) {
+    return currentNumFailedRequests;
+  }
+  return 0;
+}
+let setNumFailedLoginRequestsForUsername = (username, numFails) => {
+  failedLoginAttempts[username] = numFails;
+}
+
 //User Login request
 myRouter.post('/api/login', (request, response) =>{
   // console.log(request.body)
-  if(request.body.username && request.body.password) {
+  if(request.body.username && request.body.password && getNumFailedLoginRequestsForUsername(request.body.username) < 3) {
     // console.log(request.body.username, ' --- ',request.body.password)
     let user = users.find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
     })
     if(user) {
+      setNumFailedLoginRequestsForUsername(request.body.username, 0);
       response.writeHead(200, 'login successful');
       // console.log(user);
+      let currentAccessToken = accessTokens.find((tokenObj) => {
+        return tokenObj.username == user.login.username;
+      })
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      }
+      //Create new access token if one doesn't already exist
       let newAccessToken = {
         username: user.login.username,
         lastUpdated: new Date(),
@@ -99,6 +130,8 @@ myRouter.post('/api/login', (request, response) =>{
       console.log(accessTokens[0].token);
       return response.end(JSON.stringify(newAccessToken.token));
     }
+    let numFailsForUser = getNumFailedLoginRequestsForUsername(request.body.username);
+    setNumFailedLoginRequestsForUsername(request.body.username, ++numFailsForUser);
     response.writeHead(401, 'invalid username or password');
     return response.end();
   }

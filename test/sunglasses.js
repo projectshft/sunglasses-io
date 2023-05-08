@@ -12,6 +12,7 @@ describe("Sunglasses", () => {
       .get("/api/brands")
       .end((err, res) => {
         res.should.have.status(200)
+        done();
       })
   })
   describe("Brands", () => {
@@ -98,7 +99,7 @@ describe("Sunglasses", () => {
             done();
           })
       })
-      it("User should be granted access token if credentials are valid", (done) => {
+      it("User should be granted access token if credentials are valid and they don't already have one", (done) => {
         let credentials = {
           username: 'lazywolf342',
           password: 'tucker'
@@ -107,8 +108,9 @@ describe("Sunglasses", () => {
           .request(server)
           .post('/api/login')
           .send(credentials)
-          .end((err, res) => {
-            console.log(res)
+          .end((err,res) => {
+            // console.log(res)
+            res.should.have.status(200);
             res.text.should.be.a('string')
             // res.body.should.have.property('token');
             done();
