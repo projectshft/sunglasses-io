@@ -74,5 +74,16 @@ myRouter.get("/api/products", function(request,response) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(productsToReturn));
 })
+//User Login request
+myRouter.post('/api/login', (request, response) =>{
+  // console.log(request.body)
+  if(request.body.username && request.body.password) {
+    console.log(request.body.username, ' --- ',request.body.password)
+    
+    return response.end();
+  }
+  response.writeHead(400, "incorrectly formatted response");
+  return response.end();
+})
 
 module.exports = server;

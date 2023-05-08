@@ -60,5 +60,24 @@ describe("Sunglasses", () => {
     })
   })
 
+  describe("User", () => {
+    describe('/POST Login', () => {
+      it("User should enter a valid username/password to request access token", (done) => {
+        let credentials = {
+          username: 'abcd', 
+          password: ''
+        }
+        chai
+          .request(server)
+          .post('/api/login')
+          .send(credentials)
+          .end((err, res) =>{
+            res.should.have.status(400);
+            done();
+          })
+      })
+    })
+  })
+
 })
 
