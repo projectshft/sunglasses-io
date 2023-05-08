@@ -19,7 +19,12 @@ let myRouter = Router();
 myRouter.use(bodyParser.json());
 //Setup for server
 let server = http.createServer(function (request, response) {
+  if(!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
+    response.writeHead(401, "You need to have a valid API key to use this API")
+  }
+  
   response.writeHead(200);
+
     myRouter(request, response, finalHandler(request, response))
 });
 

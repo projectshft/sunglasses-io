@@ -6,6 +6,14 @@ let expect = chai.expect;
 chai.use(chaiHttp);
 
 describe("Sunglasses", () => {
+  it("Client should have a valid API Key", (done) => {
+    chai
+      .request(server)
+      .get("/api/brands")
+      .end((err, res) => {
+        res.should.have.status(200)
+      })
+  })
   describe("Brands", () => {
     describe("/GET brand", () => {
       it("it should GET all the brands", (done) => {
