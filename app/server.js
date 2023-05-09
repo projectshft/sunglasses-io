@@ -10,14 +10,16 @@ const PORT = 3001;
 
 //api key storage
 const VALID_API_KEYS = ["98738203-8dsj-0983-9f72-di29dk38djk3", "8di3k99l-5305-8dk3-1849-zjdf938jfj98"];
+const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 10000;
 
 
 let brands = [];
 let products = [];
 let users = [];
+let currentUser = {};
 let accessTokens = [];
 let failedLoginAttempts = {};
-//cart will probably need to be an empty array to post product/brand db info to;
+//Cart is property of each user in JSON file
 
 
 //Setup for the router
@@ -101,6 +103,12 @@ let setNumFailedLoginRequestsForUsername = (username, numFails) => {
   failedLoginAttempts[username] = numFails;
 }
 
+//Function to set the current user
+let setCurrentUser = (user) => {
+  currentUser = user;
+}
+
+
 //User Login request
 myRouter.post('/api/login', (request, response) =>{
   // console.log(request.body)
@@ -109,6 +117,8 @@ myRouter.post('/api/login', (request, response) =>{
     let user = users.find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
     })
+    setCurrentUser(user);
+    // console.log(currentUser);
     if(user) {
       setNumFailedLoginRequestsForUsername(request.body.username, 0);
       response.writeHead(200, 'login successful');
@@ -127,7 +137,7 @@ myRouter.post('/api/login', (request, response) =>{
         token: uid(16)
       }
       accessTokens.push(newAccessToken);
-      console.log(accessTokens[0].token);
+      // console.log(accessTokens[0].token);
       return response.end(JSON.stringify(newAccessToken.token));
     }
     let numFailsForUser = getNumFailedLoginRequestsForUsername(request.body.username);
@@ -137,6 +147,72 @@ myRouter.post('/api/login', (request, response) =>{
   }
   response.writeHead(400, "incorrectly formatted response");
   return response.end();
+});
+
+let getValidTokenFromRequest = () => {
+  let currentAccessToken = accessTokens.find((accessToken) => {
+    return accessToken.username == currentUser.login.username && ((new Date) - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT);
+  });
+  if(currentAccessToken) {
+    return currentAccessToken;
+  }
+  return null;
+}
+
+myRouter.post("/api/me/cart", (request, response) =>{
+  let currentAccessToken = getValidTokenFromRequest();
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to proceed with this call");
+    return response.end();
+  }
+  let productToAdd = products.find((product) => {
+    return product.id == request.body.id
+  })
+  //User should only be able to add to their own cart
+  if(currentUser.login.username == currentAccessToken.username){
+    currentUser.cart.push(productToAdd);
+    // console.log(currentUser.cart);
+    response.writeHead(200, 'add to cart successful');
+    return response.end();
+  }
+  response.writeHead(401, 'add to cart unsuccessful: invalide access token');
+  return response.end();
+})
+//get current user's cart
+myRouter.get('/api/me/cart', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest();
+  // console.log(currentAccessToken);
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to proceed with this call");
+    console.log(response);
+    return response.end();
+  }
+  let cartToReturn = [];
+  cartToReturn = currentUser.cart;
+  // console.log(currentUser.cart);
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(cartToReturn));  
+})
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  let currentAccessToken = getValidTokenFromRequest();
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to proceed with this call");
+    console.log(response);
+    return response.end();
+  }
+  const { idToRemove } = request.params.productId;
+  //Current user should be able to delete products from only their cart
+  if(currentUser.login.username == currentAccessToken.username){
+    // console.log('cart before deletion', currentUser.cart);
+    currentUser.cart = currentUser.cart.filter(product => product.id !== request.params.productId);
+    // console.log('cart after deletion: ', currentUser.cart);
+    response.writeHead(200, 'deletion successful');
+    
+    return response.end();
+  }
+  response.writeHead(404, 'product does not exist in cart');
+  return response.end();
+
 })
 
 module.exports = server;

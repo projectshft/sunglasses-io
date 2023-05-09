@@ -108,16 +108,113 @@ describe("Sunglasses", () => {
           .request(server)
           .post('/api/login')
           .send(credentials)
-          .end((err,res) => {
-            // console.log(res)
+          .end((err,res) => {            
             res.should.have.status(200);
-            res.text.should.be.a('string')
-            // res.body.should.have.property('token');
+            res.text.should.be.a('string')            
             done();
           })
       })
     })
+    describe("/GET user's cart", () => {
+      it("The cart data should be retrieved for the current User", (done) => {
+        let credentials = {
+          username: 'lazywolf342',
+          password: 'tucker'
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(credentials)
+        .end((err,res) => {          
+          res.should.have.status(200);
+          res.text.should.be.a('string')         
+          chai
+          .request(server)
+          .get('/api/me/cart')
+          .end((err, res) => {
+            res.should.have.status(200);
+            res.body.should.be.an('array');
+            done();
+          })
+        })
+      })
+    })
+    describe('/POST to user\'s cart', () => {
+      it('Users should be able to add a product to their cart', (done) => {
+        let product = {
+          name: 'Peanut Butter',
+          id: '10'
+        }
+        let credentials = {
+          username: 'lazywolf342',
+          password: 'tucker'
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(credentials)
+        .end((err,res) => {          
+          res.should.have.status(200);
+          res.text.should.be.a('string')
+          chai
+          .request(server)
+          .post('/api/me/cart')
+          .send(product)
+          .end((err, res) => {
+            res.should.have.status(200);
+            chai
+              .request(server)
+              .get('/api/me/cart')
+              .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.eql([{
+                  id: "10",
+                  categoryId: "5",
+                  name: "Peanut Butter",
+                  description: "The stickiest glasses in the world",
+                  price: 103,
+                  imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+              }])
+                done();
+              })
+          })
+        })
+      })
+    })
+    describe('/DELETE from user\'s cart', () => {
+      it('Users should be able to remove a product from a cart', (done) => {
+        let product = {
+          name: 'Peanut Butter',
+          id: '10'
+        }
+        let credentials = {
+          username: 'lazywolf342',
+          password: 'tucker'
+        }
+        chai
+        .request(server)
+        .post('/api/login')
+        .send(credentials)
+        .end((err,res) => {          
+          res.should.have.status(200);
+          res.text.should.be.a('string')
+          chai
+          .request(server)
+          .post('/api/me/cart')
+          .send(product)
+          .end((err, res) => {
+            res.should.have.status(200);
+            chai
+              .request(server)
+              .delete('/api/me/cart/'+ product.id)
+              .end((err, res) => {
+                should.exist(res);
+                res.should.have.status(200);
+                done();
+              })
+          })
+        })
+      })
+    })
   })
-
 })
-
