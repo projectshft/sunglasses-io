@@ -167,14 +167,15 @@ describe("Sunglasses", () => {
               .get('/api/me/cart')
               .end((err, res) => {
                 res.should.have.status(200);
-                res.body.should.eql([{
+                res.body.should.eql([{product: {
                   id: "10",
                   categoryId: "5",
                   name: "Peanut Butter",
                   description: "The stickiest glasses in the world",
                   price: 103,
                   imageUrls:["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-              }])
+              },
+              quantity: 1}])
                 done();
               })
           })
@@ -214,6 +215,32 @@ describe("Sunglasses", () => {
               })
           })
         })
+      })
+    })
+    describe('/POST change product quantity', () => {
+      it('user should be able to change the quantity of a product in their cart', (done) => {
+        let quantityData = {
+          quantity: 5
+        }
+        let product = {
+          name: 'Peanut Butter',
+          id: '10'
+        }
+        chai
+          .request(server)
+          .post('/api/me/cart')
+          .send(product)
+          .end((err, res) => {
+            res.should.have.status(200);
+            chai
+              .request(server)
+              .post('/api/me/cart/'+ product.id)
+              .send(quantityData)
+              .end((req, res) => {
+                res.should.have.status(200);
+                done();
+              })
+          })
       })
     })
   })

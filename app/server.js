@@ -12,30 +12,24 @@ const PORT = 3001;
 const VALID_API_KEYS = ["98738203-8dsj-0983-9f72-di29dk38djk3", "8di3k99l-5305-8dk3-1849-zjdf938jfj98"];
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 10000;
 
-
+//state-holding variables, cart is kept inside currentUser via /POST /api/me/cart
 let brands = [];
 let products = [];
 let users = [];
 let currentUser = {};
 let accessTokens = [];
 let failedLoginAttempts = {};
-//Cart is property of each user in JSON file
-
 
 //Setup for the router
 let myRouter = Router();
 myRouter.use(bodyParser.json());
+
 //Setup for server
 let server = http.createServer(function (request, response) {
-
-
   if(!VALID_API_KEYS.includes(request.headers["x-authentication"])) {
     response.writeHead(401, "You need to have a valid API key to use this API")
   }
-  // console.log(request.headers);
-  
   response.writeHead(200);
-
     myRouter(request, response, finalHandler(request, response))
 });
 
@@ -44,13 +38,10 @@ server.listen(PORT, err => {
   console.log(`server running on port port ${PORT}`);
   //populate brands
   brands = JSON.parse(fs.readFileSync("initial-data/brands.json", "utf-8"));
-  // console.log(brands);
   //populate products
   products = JSON.parse(fs.readFileSync("initial-data/products.json", "utf-8"));
-  // console.log(products);
   //populate users
   users = JSON.parse(fs.readFileSync("initial-data/users.json", "utf-8"));
-
 })
 //GET all brands
 myRouter.get("/api/brands", function(request,response) {
@@ -59,7 +50,6 @@ myRouter.get("/api/brands", function(request,response) {
   }
   let brandsToReturn = [];
   brandsToReturn = brands;
-  // console.log('brands to return', brandsToReturn);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brandsToReturn));
 })
@@ -76,7 +66,6 @@ myRouter.get("/api/brands/:id/products", (request, response) =>{
   const relatedProducts = products.filter(
     products => products.categoryId === id
   )
-  // console.log(relatedProducts);
   return response.end(JSON.stringify(relatedProducts));
 })
 //GET all products
@@ -108,21 +97,16 @@ let setCurrentUser = (user) => {
   currentUser = user;
 }
 
-
 //User Login request
 myRouter.post('/api/login', (request, response) =>{
-  // console.log(request.body)
   if(request.body.username && request.body.password && getNumFailedLoginRequestsForUsername(request.body.username) < 3) {
-    // console.log(request.body.username, ' --- ',request.body.password)
     let user = users.find((user) => {
       return user.login.username == request.body.username && user.login.password == request.body.password;
     })
     setCurrentUser(user);
-    // console.log(currentUser);
     if(user) {
       setNumFailedLoginRequestsForUsername(request.body.username, 0);
       response.writeHead(200, 'login successful');
-      // console.log(user);
       let currentAccessToken = accessTokens.find((tokenObj) => {
         return tokenObj.username == user.login.username;
       })
@@ -137,7 +121,6 @@ myRouter.post('/api/login', (request, response) =>{
         token: uid(16)
       }
       accessTokens.push(newAccessToken);
-      // console.log(accessTokens[0].token);
       return response.end(JSON.stringify(newAccessToken.token));
     }
     let numFailsForUser = getNumFailedLoginRequestsForUsername(request.body.username);
@@ -148,7 +131,7 @@ myRouter.post('/api/login', (request, response) =>{
   response.writeHead(400, "incorrectly formatted response");
   return response.end();
 });
-
+//function to return the access token for requests that require user authorization
 let getValidTokenFromRequest = () => {
   let currentAccessToken = accessTokens.find((accessToken) => {
     return accessToken.username == currentUser.login.username && ((new Date) - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT);
@@ -170,8 +153,17 @@ myRouter.post("/api/me/cart", (request, response) =>{
   })
   //User should only be able to add to their own cart
   if(currentUser.login.username == currentAccessToken.username){
-    currentUser.cart.push(productToAdd);
-    // console.log(currentUser.cart);
+    let productDataAlreadyInCart = currentUser.cart.find((productData) => {
+      return productData.product.id == request.body.id;
+    })
+    if(productDataAlreadyInCart) {
+      //this will just increase the quantity property for the cart data object containing the product object with the matching productId from the request params
+      ++productDataAlreadyInCart.quantity;
+      response.writeHead(200, 'additional unit added to cart');
+      return response.end();
+    }
+    currentUser.cart
+    .push({product: productToAdd, quantity: 1});
     response.writeHead(200, 'add to cart successful');
     return response.end();
   }
@@ -181,7 +173,6 @@ myRouter.post("/api/me/cart", (request, response) =>{
 //get current user's cart
 myRouter.get('/api/me/cart', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest();
-  // console.log(currentAccessToken);
   if (!currentAccessToken) {
     response.writeHead(401, "You need to have access to proceed with this call");
     console.log(response);
@@ -189,10 +180,10 @@ myRouter.get('/api/me/cart', (request, response) => {
   }
   let cartToReturn = [];
   cartToReturn = currentUser.cart;
-  // console.log(currentUser.cart);
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(cartToReturn));  
 })
+//Current user can delete a product from their cart based on productId
 myRouter.delete('/api/me/cart/:productId', (request, response) => {
   let currentAccessToken = getValidTokenFromRequest();
   if (!currentAccessToken) {
@@ -200,19 +191,39 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
     console.log(response);
     return response.end();
   }
-  const { idToRemove } = request.params.productId;
   //Current user should be able to delete products from only their cart
   if(currentUser.login.username == currentAccessToken.username){
-    // console.log('cart before deletion', currentUser.cart);
-    currentUser.cart = currentUser.cart.filter(product => product.id !== request.params.productId);
-    // console.log('cart after deletion: ', currentUser.cart);
+    //filtering the cart array to remove any element with a product id maching the id from params
+    currentUser.cart = currentUser.cart.filter(product => product.product.id !== request.params.productId);
     response.writeHead(200, 'deletion successful');
-    
     return response.end();
   }
   response.writeHead(404, 'product does not exist in cart');
   return response.end();
+})
+//Change quantity of item
+myRouter.post('/api/me/cart/:productId', (request,response) => {
+  let currentAccessToken = getValidTokenFromRequest();
+  if (!currentAccessToken) {
+    response.writeHead(401, "You need to have access to proceed with this call");
+    return response.end();
+  }
 
+  //User should only be able to modify quantities in their own cart
+  if(currentUser.login.username == currentAccessToken.username) {
+    let productDataAlreadyInCart = currentUser.cart.find((productData) => {
+      return productData.product.id == request.params.productId;
+    })
+    //gets the index of the productData element inside the cart array that has the same productId as the request params
+    let indexOfItemToChangeQuantity = currentUser.cart.findIndex((productData) => productData.product.id == request.params.productId)
+    //setting the quantity of the product in the cart equal to the user-input quantity from request body
+    currentUser.cart[indexOfItemToChangeQuantity].quantity = request.body.quantity;
+    
+    response.writeHead(200, 'Quantity updated successfully');
+    return response.end();
+  }
+  response.writeHead(401,'Quantity not updated: invalid access');
+  return response.end();
 })
 
 module.exports = server;
