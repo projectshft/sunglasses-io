@@ -112,5 +112,69 @@ describe('Sunglasses', () => {
     });
   });
 
-  
+  describe('/GET Cart', () => {
+    it('Should show the user cart in an array', (done) => {
+      let exampleproduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      const authToken = 'your-auth-token';
+
+      Sunglasses.addToCart(exampleproduct)
+
+      chai  
+        .request(server)
+        .get('/user/cart')
+        .set('Authorization', `Bearer ${authToken}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.forEach((cartItem) => {
+            expect(cartItem).to.be.an("object");
+            //we will be adding the brand during the get request
+            expect(product).to.include.all.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls', 'brand')
+          });
+          done();
+        })
+    });
+
+    it('Should return empty array if there are no items', (done) => {
+      Sunglasses.clearCart();
+
+      const authToken = 'your-auth-token';
+
+      chai  
+        .request(server)
+        .get('/user/cart')
+        .set('Authorization', `Bearer ${authToken}`)
+        .end((err, res) => {
+          res.should.have.status(204);
+          res.body.should.be.an("array")
+          //return 204 no content and empty array
+          done();
+        });
+
+    });
+
+    it('Should not let us view without Auth', (done) => {
+      const authToken = 'wrong-token'
+
+      chai  
+        .request(server)
+        .get('/user/cart')
+        .set('Authorization', `Bearer ${authToken}`)
+        .end((err, res) => {
+          res.should.have.status(401);
+          res.body.should.have.property('error');
+          res.body.error.should.equal('Invalid brand ID');
+          done();
+        });
+    })
+  })
+
 })
