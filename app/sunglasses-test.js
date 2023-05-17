@@ -27,6 +27,7 @@ describe('Sunglasses', () => {
         });
     });
   });
+
   describe('/GET Brand Products', () => {
     it('Should get the products of a given brand', (done) => {
       //arrange
@@ -46,5 +47,70 @@ describe('Sunglasses', () => {
           done();
         })
     });
+
+    it('Should return an error if incorrect id', (done) => {
+      let id = 'a'
+
+      chai  
+      .request(server)
+      .get(`/brand/${id}/products`)
+      .end((err, res) => {
+        res.should.have.status(400);
+        res.body.should.have.property('error');
+        res.body.error.should.equal('Invalid brand ID');
+        done();
+      })
+    });
+
+    it('Should return an error if brand Id does not exist', (done) => {
+      let id = 0
+
+      chai  
+      .request(server)
+      .get(`/brand/${id}/products`)
+      .end((err, res) => {
+        res.should.have.status(404);
+        res.body.should.have.property('error');
+        res.body.error.should.equal('Brand not Found');
+        done();
+      })
+    });
+
+    it('Should not return an eror if no content to return', (done) => {
+      //clear all the products
+      Sunglasses.clearAllProducts();
+
+      let id = 1;
+
+      chai  
+      .request(server)
+      .get(`/brand/${id}/products`)
+      .end((err, res) => {
+        res.should.have.status(204);
+        res.body.should.be.an("array")
+        res.body.length.should.be.eq(0);
+        done();
+      })
+    });
   });
+
+  describe('/GET Products', () => {
+    it('Should get all the products available', (done) => {
+
+      chai
+        .request(server)
+        .get('/products')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array")
+          res.body.forEach((product) => {
+            expect(product).to.be.an("object");
+            expect(product).to.include.all.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls')
+          });
+          done();
+        })
+    });
+  });
+
+  
 })
