@@ -253,7 +253,7 @@ describe('Sunglasses', () => {
   });
 
   describe('/PUT Cart', () => {
-    it('should update the products quantity in the cart if logged in', () => {
+    it('should update the products quantity in the cart if logged in', (done) => {
       const authToken = 'your-auth-token';
 
       const id = 2;
@@ -281,10 +281,45 @@ describe('Sunglasses', () => {
         .end((err, res) => {
           res.should.have.status(201);
           // array of 5? object? Need to figure out how to display
+          done();
         })
 
 
     });
+    //if not logged in
+  });
+
+  describe('/DELETE Cart', () => {
+    it('Should DELETE the given product if logged in', (done) => {
+      const authToken = 'your-auth-token';
+
+      const id = 2;
+
+      // put stuff in the cart
+
+      let exampleproduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      Sunglasses.addToCart(exampleproduct); // add to cart
+
+      chai
+        .request(server)
+        .delete(`/product/${id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .end((err, res) => {
+          res.should.have.status(204);
+          done();
+        })
+
+
+    });
+    //if not logged in 
   });
 
 })
