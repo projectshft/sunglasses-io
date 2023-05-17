@@ -174,7 +174,82 @@ describe('Sunglasses', () => {
           res.body.error.should.equal('Invalid brand ID');
           done();
         });
-    })
+    });
+  });
+
+  describe('/POST Cart', () => {
+    it('Should post a new product to the cart if logged in', (done) => {
+      const authToken = 'your-auth-token';
+
+      let exampleproduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      chai
+        .request(server)
+        .post('/product/cart')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(exampleProduct) //req body
+        .end((err, res) => {
+          res.should.have.status(201);
+          res.body.should.be.an('object')
+          expect(res.body).to.include.all.keys('id', 'categoryId', 'name', 'description', 'price', 'imageUrls');
+          done();
+        });
+
+
+    });
+    
+    it('Should not post a new product to the cart if not logged in', (done) => {
+      const authToken = 'wrong-token';
+
+      let exampleproduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      chai
+        .request(server)
+        .post('/product/cart')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(exampleProduct) //req body
+        .end((err, res) => {
+          res.should.have.status(401);
+        done();
+        });
+    });
+
+    it('Should not return ', (done) => {
+      const authToken = 'your-auth-token';
+
+      let exampleproduct = {
+        "id": "500",
+        "categoryId": "500",
+        "name": "Blackc;x,l;ldf,g Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      chai
+        .request(server)
+        .post('/product/cart')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(exampleProduct) //req body
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
   })
 
 })
