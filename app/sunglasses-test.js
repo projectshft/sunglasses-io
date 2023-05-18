@@ -1,12 +1,12 @@
 const expect = require('chai');
-
 const chai = require("chai");
-
 const chaiHttp = require("chai-http");
-
 const server = require("../server");
-
 const should = chai.should();
+
+const API_KEY = 'xyz'
+
+const Sunglasses = require('./sunglasses.model')
 
 chai.use(chaiHttp);
 
@@ -18,6 +18,7 @@ describe('Sunglasses', () => {
       chai
         .request(server)
         .get('/brands')
+        .set('API-Key', API_KEY)
       //assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -35,7 +36,8 @@ describe('Sunglasses', () => {
       //act
       chai
         .request(server)
-        .get(`/brand/${id}/products`)
+        .get(`/brand/${categoryId}/products`)
+        .set('API-Key', API_KEY)
       //assert
         .end((err, res) => {
           res.should.have.status(200);
@@ -54,6 +56,7 @@ describe('Sunglasses', () => {
       chai  
       .request(server)
       .get(`/brand/${id}/products`)
+      .set('API-Key', API_KEY)
       .end((err, res) => {
         res.should.have.status(400);
         res.body.should.have.property('error');
@@ -68,6 +71,7 @@ describe('Sunglasses', () => {
       chai  
       .request(server)
       .get(`/brand/${id}/products`)
+      .set('API-Key', API_KEY)
       .end((err, res) => {
         res.should.have.status(404);
         res.body.should.have.property('error');
@@ -85,6 +89,7 @@ describe('Sunglasses', () => {
       chai  
       .request(server)
       .get(`/brand/${id}/products`)
+      .set('API-Key', API_KEY)
       .end((err, res) => {
         res.should.have.status(204);
         res.body.should.be.an("array")
@@ -100,6 +105,7 @@ describe('Sunglasses', () => {
       chai
         .request(server)
         .get('/products')
+        .set('API-Key', API_KEY)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array")
@@ -131,6 +137,7 @@ describe('Sunglasses', () => {
         .request(server)
         .get('/user/cart')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -152,6 +159,7 @@ describe('Sunglasses', () => {
         .request(server)
         .get('/user/cart')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .end((err, res) => {
           res.should.have.status(204);
           res.body.should.be.an("array")
@@ -168,6 +176,7 @@ describe('Sunglasses', () => {
         .request(server)
         .get('/user/cart')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.have.property('error');
@@ -194,6 +203,7 @@ describe('Sunglasses', () => {
         .request(server)
         .post('/product/cart')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .send(exampleProduct) //req body
         .end((err, res) => {
           res.should.have.status(201);
@@ -221,6 +231,7 @@ describe('Sunglasses', () => {
         .request(server)
         .post('/product/cart')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .send(exampleProduct) //req body
         .end((err, res) => {
           res.should.have.status(401);
@@ -244,6 +255,7 @@ describe('Sunglasses', () => {
         .request(server)
         .post('/product/cart')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .send(exampleProduct) //req body
         .end((err, res) => {
           res.should.have.status(404);
@@ -277,6 +289,7 @@ describe('Sunglasses', () => {
         .request(server)
         .put(`/product/${id}`)
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .send(updatedQuantity)
         .end((err, res) => {
           res.should.have.status(201);
@@ -312,6 +325,7 @@ describe('Sunglasses', () => {
         .request(server)
         .delete(`/product/${id}`)
         .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
         .end((err, res) => {
           res.should.have.status(204);
           done();
@@ -321,5 +335,8 @@ describe('Sunglasses', () => {
     });
     //if not logged in 
   });
+
+  //describe search, will need to use query string
+  //describe email
 
 })
