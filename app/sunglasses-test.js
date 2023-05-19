@@ -1,7 +1,7 @@
 const expect = require('chai');
 const chai = require("chai");
 const chaiHttp = require('chai-http');
-const {server} = require('./server');
+const server = require('./server');
 const should = chai.should();
 
 const API_KEY = 'xyz'
@@ -21,6 +21,21 @@ describe('Sunglasses', () => {
           res.should.have.status(200);
           res.body.should.be.an("array");
           res.body.length.should.be.eq(5);
+          done();
+        });
+    });
+
+    it('Should return an array if no brands are there', (done) => {
+      Sunglasses.removeBrands();
+
+      chai
+        .request(server)
+        .get('/brands')
+        .set('API-Key', API_KEY)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.be.eq(0);
           done();
         });
     });
