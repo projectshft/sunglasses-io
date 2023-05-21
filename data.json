@@ -1,0 +1,63 @@
+{
+    "sunglasses": [
+      {
+        "brand": "Ray-Ban",
+        "name": "Aviator",
+        "itemId": "123",
+        "price": 150,
+        "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
+        "quantityAvailable": 10,
+        "quantityAdded": 0
+      },
+      {
+        "brand": "Oakley",
+        "name": "Holbrook",
+        "itemId": "456",
+        "price": 120,
+        "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
+        "quantityAvailable": 5,
+        "quantityAdded": 0
+      }, 
+      {
+        "brand": "Oakley",
+        "name": "Holbrook",
+        "itemId": "456",
+        "price": 100,
+        "imageURL": "https://nypost.com/wp-content/uploads/sites/2/2023/02/sunglass-new.gif?resize=1536,1024",
+        "quantityAvailable": 15,
+        "quantityAdded": 0
+      }
+    ],
+    "user": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com"
+    },
+    "checkoutRequest": {
+      "cart": [
+        {
+          "brand": "Ray-Ban",
+          "name": "Aviator",
+          "itemId": "123",
+          "price": 150,
+          "imageURL": "https://robbreport.com/wp-content/uploads/2023/04/RR_Sunglasses_Brands_lead.jpg?w=1000",
+          "quantityAvailable": 10,
+          "quantityAdded": 1
+        }
+      ],
+      "user": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john.doe@example.com"
+      }
+    },
+    "login": {
+      "username": "johndoe",
+      "password": "password123"
+    },
+    "error": {
+      "code": 500,
+      "message": "Internal Server Error",
+      "fields": "field_name"
+    }
+  }
