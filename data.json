@@ -3,7 +3,7 @@
       {
         "brand": "Ray-Ban",
         "name": "Aviator",
-        "itemId": "123",
+        "itemId": "1",
         "price": 150,
         "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
         "quantityAvailable": 10,
@@ -12,16 +12,16 @@
       {
         "brand": "Oakley",
         "name": "Holbrook",
-        "itemId": "456",
+        "itemId": "2",
         "price": 120,
         "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
         "quantityAvailable": 5,
         "quantityAdded": 0
       }, 
       {
-        "brand": "Oakley",
-        "name": "Holbrook",
-        "itemId": "456",
+        "brand": "Persol",
+        "name": "Wiley",
+        "itemId": "3",
         "price": 100,
         "imageURL": "https://nypost.com/wp-content/uploads/sites/2/2023/02/sunglass-new.gif?resize=1536,1024",
         "quantityAvailable": 15,
