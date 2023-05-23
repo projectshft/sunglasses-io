@@ -1,26 +1,25 @@
-// const state = {
-//   products: [],
-//   users: [],
-//   brands: []
-// }
+const state = {
+  products: [],
+  users: [],
+  brands: []
+}
 
 class Sunglasses {
   constructor(params) {
     Object.assign(this, params);
   };
 
+  static setState(currentState) {
+    state.products = currentState.products;
+    state.users = currentState.users;
+    state.brands = currentState.brands;
+  }; 
 
-  // static setState(currentState) {
-  //   state.products = currentState.products;
-  //   state.users = currentState.users;
-  //   state.brands = currentState.brands;
-  // }; might use if we can get it to work
-
-  static getAllBrands(state) {
+  static getAllBrands() {
     return state.brands;
   };
 
-  static findBrand(state, id) {
+  static findBrand(id) {
     const brand = state.brands.find((brand) => {
       return brand.id == id;
     });
@@ -28,7 +27,7 @@ class Sunglasses {
     return brand;
   };
 
-  static findUser(state, userName) {
+  static findUser(userName) {
     const user = state.users.find((user) => {
       return user.login.username == userName;
     });
@@ -36,7 +35,7 @@ class Sunglasses {
     return user;
   };
 
-  static filterProducts(state, id) {
+  static filterProducts(id) {
     const products = state.products.filter((product) => {
       return product.categoryId == id;
     })
@@ -44,7 +43,7 @@ class Sunglasses {
     return products;
   };
 
-  static getProducts(state) {
+  static getProducts() {
     return state.products;
   };
 

@@ -30,8 +30,6 @@ let server = http.createServer(async (req, res) => {
     res.end();
   };
 
-  createStateObject();
-
   myRouter(req, res, finalHandler(req, res));
 
 }).listen(PORT, error => {
@@ -39,17 +37,61 @@ let server = http.createServer(async (req, res) => {
     return console.log("Error on Server Startup: ", error);
   };
 
-  
-
   console.log(`Server is listening on ${PORT}`);
 });
+
+const readFileAsync = (file) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(file, "utf8", (error, data) => {
+      if(error) {
+        reject(error);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+};
+
+const isStateFinished = async (req, res, next) => {
+  try {
+    if (state.products.length === 0) {
+      let productData = await readFileAsync("./initial-data/products.json");
+      state.products = JSON.parse(productData);
+    }
+
+    if (state.users.length === 0) {
+      let userData = await readFileAsync("./initial-data/users.json");
+      state.users = JSON.parse(userData);
+    }
+
+    if (state.brands.length === 0) {
+      let brandData = await readFileAsync("./initial-data/brands.json");
+      state.brands = JSON.parse(brandData);
+    }
+
+    next();
+
+  } catch (error) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ error: 'Error occurred while reading file paths' }));
+  }
+};
+
+const finishState = (req, res, next) => {
+  Sunglasses.setState(state)
+  next();
+}
+
+
+myRouter.use(isStateFinished);
+myRouter.use(finishState);
 
 
 //Routes
 
-myRouter.get('/brands', isStateFinished, (req, res) => {
+myRouter.get('/brands', (req, res) => {
   
-  const brands = Sunglasses.getAllBrands(state);
+  const brands = Sunglasses.getAllBrands();
   
   res.writeHead(200, { "Content-Type": "application/json" });
 	return res.end(JSON.stringify(brands));
@@ -66,13 +108,13 @@ myRouter.get('/brand/:brandId/products', (req, res) => {
     return res.end(JSON.stringify(errorRes));
   }
 
-  let brand = Sunglasses.findBrand(state, id);
+  let brand = Sunglasses.findBrand(id);
 
   if(!brand) {
     res.writeHead(404, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({error: 'Brand not Found'}));
   } else {
-      let brandProducts = Sunglasses.filterProducts(state, id);
+      let brandProducts = Sunglasses.filterProducts(id);
 
       if(!brandProducts) {
         res.writeHead(404, { "Content-Type": "application/json" });
@@ -85,7 +127,7 @@ myRouter.get('/brand/:brandId/products', (req, res) => {
 });
 
 myRouter.get('/products', (req, res) => {
-  const allProducts = Sunglasses.getProducts(state)
+  const allProducts = Sunglasses.getProducts()
 
   res.writeHead(200, { "Content-Type": "application/json" });
   return res.end(JSON.stringify(allProducts));
@@ -101,7 +143,7 @@ myRouter.get('/user/:username/cart', (req, res) => {
 
   let userName = req.params.username;
 
-  const currentUser = Sunglasses.findUser(state, userName);
+  const currentUser = Sunglasses.findUser(userName);
 
   if(!currentUser) {
     res.writeHead(404, { "Content-Type": "application/json" });
@@ -125,7 +167,7 @@ myRouter.post('/product/:username/cart', (req, res) => {
 
   let userName = req.params.username;
 
-  let user = Sunglasses.findUser(state, userName);
+  let user = Sunglasses.findUser(userName);
 
   if(!user) {
     res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -138,45 +180,8 @@ myRouter.post('/product/:username/cart', (req, res) => {
   res.end(JSON.stringify({success: `${cart}`}))
 });
 
-// myRouter.put()
 
-
-module.exports = server;
+module.exports = server
 
 
 
-// const createStateObject = () => {
-//   fs.readFile("./initial-data/products.json", "utf8", (error, data) => {
-//     if (error) throw error;
-//     state.products = JSON.parse(data);
-//   });
-  
-//   fs.readFile("./initial-data/users.json", "utf8", (error, data) => {
-//     if (error) throw error;
-//     state.users = JSON.parse(data);
-//   });
-
-//   fs.readFile("./initial-data/brands.json", "utf8", (error, data) => {
-//     if (error) throw error;
-//     state.brands = JSON.parse(data);
-//   });
-// };
-
-// const isStateFinished = (req, res, next) => {
-//   let retryCount = 0;
-//   let retryWait = 1000;
-
-//   if(state.brands.length === 5) {
-//     Sunglasses.setState(state);
-//     next();
-//   } else if(retryCount < 10) {
-//     retryCount++;
-
-//     this.setTimeout(() => {
-//       isStateFinished(req, res, next);
-//     }, retryWait);
-
-//   } else {
-//     console.log('not ye')
-//   }
-// };
