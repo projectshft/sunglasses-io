@@ -217,41 +217,187 @@ describe('Sunglasses', () => {
     });
   });
 
-  // describe('/PUT Cart', () => {
-  //   it('should update the products quantity in the cart if logged in', (done) => {
-  //     const authToken = 'your-auth-token';
+  describe('/PUT Cart', () => {
+    it('should update the products quantity in the cart (addition)', (done) => {
+      const authToken = 'your-auth-token';
 
-  //     const productId = 2;
+      const userName = 'yellowleopard753';
 
-  //     const updatedQuantity = 5;
+      let requestBody = {
+        updatedQuantity: 5,
+        product: {
+          "id": "2",
+          "categoryId": "1",
+          "name": "Black Sunglasses",
+          "description": "The best glasses in the world",
+          "price":100,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+      };
 
-  //     // put stuff in the cart
+      const newCart = [];
 
-  //     let exampleProduct = {
-  //       "id": "2",
-  //       "categoryId": "1",
-  //       "name": "Black Sunglasses",
-  //       "description": "The best glasses in the world",
-  //       "price":100,
-  //       "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-  //     };
+      const updateCart = () => {
+        for (let i = 1; i <= requestBody.updatedQuantity; i++) {
+          newCart.push(exampleProduct);
+        }
+      };
 
-  //     chai
-  //       .request(server)
-  //       .put(`/product/${userName}/cart`)
-  //       .set('Authorization', `Bearer ${authToken}`)
-  //       .set('API-Key', API_KEY)
-  //       .send(updatedQuantity)
-  //       .end((err, res) => {
-  //         res.should.have.status(201);
-  //         // array of 5? object? Need to figure out how to display
-  //         done();
-  //       });
+      // put stuff in the cart
+
+      let exampleProduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      let exampleUser =  {
+        "gender": "female",
+        "cart":[],
+        "name": {
+            "title": "mrs",
+            "first": "susanna",
+            "last": "richards"
+        },
+        "location": {
+            "street": "2343 herbert road",
+            "city": "duleek",
+            "state": "donegal",
+            "postcode": 38567
+        },
+        "email": "susanna.richards@example.com",
+        "login": {
+            "username": "yellowleopard753",
+            "password": "jonjon",
+            "salt": "eNuMvema",
+            "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+            "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+            "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+        },
+        "dob": "1954-10-09 10:47:17",
+        "registered": "2003-08-03 01:12:24",
+        "phone": "031-941-6700",
+        "cell": "081-032-7884",
+        "picture": {
+            "large": "https://randomuser.me/api/portraits/women/55.jpg",
+            "medium": "https://randomuser.me/api/portraits/med/women/55.jpg",
+            "thumbnail": "https://randomuser.me/api/portraits/thumb/women/55.jpg"
+        },
+        "nat": "IE"
+    };
+
+      Sunglasses.addToCart(exampleUser, exampleProduct);
+
+      updateCart();
+
+      chai
+        .request(server)
+        .put(`/product/${userName}/cart`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
+        .send(requestBody)
+        .end((err, res) => {
+          res.should.have.status(201);
+          res.body.should.deep.equal(newCart);
+          // array of 5? object? Need to figure out how to display
+          done();
+        });
 
 
-  //   });
-  //   //if not logged in
-  // });
+    });
+    
+    it('should update the products quantity in the cart (subrtaction)', (done) => {
+      const authToken = 'your-auth-token';
+
+      const userName = 'yellowleopard753';
+
+      let requestBody = {
+        updatedQuantity: 2,
+        product: {
+          "id": "2",
+          "categoryId": "1",
+          "name": "Black Sunglasses",
+          "description": "The best glasses in the world",
+          "price":100,
+          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+        }
+      };
+
+      const newCart = [];
+
+      const updateCart = () => {
+        for (let i = 1; i <= requestBody.updatedQuantity; i++) {
+          newCart.push(exampleProduct);
+        }
+      };
+
+      // put stuff in the cart
+
+      let exampleProduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      let exampleUser =  {
+        "gender": "female",
+        "cart":[],
+        "name": {
+            "title": "mrs",
+            "first": "susanna",
+            "last": "richards"
+        },
+        "location": {
+            "street": "2343 herbert road",
+            "city": "duleek",
+            "state": "donegal",
+            "postcode": 38567
+        },
+        "email": "susanna.richards@example.com",
+        "login": {
+            "username": "yellowleopard753",
+            "password": "jonjon",
+            "salt": "eNuMvema",
+            "md5": "a8be2a69c8c91684588f4e1a29442dd7",
+            "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
+            "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
+        },
+        "dob": "1954-10-09 10:47:17",
+        "registered": "2003-08-03 01:12:24",
+        "phone": "031-941-6700",
+        "cell": "081-032-7884",
+        "picture": {
+            "large": "https://randomuser.me/api/portraits/women/55.jpg",
+            "medium": "https://randomuser.me/api/portraits/med/women/55.jpg",
+            "thumbnail": "https://randomuser.me/api/portraits/thumb/women/55.jpg"
+        },
+        "nat": "IE"
+      };
+
+      updateCart();
+
+      chai
+        .request(server)
+        .put(`/product/${userName}/cart`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
+        .send(requestBody)
+        .end((err, res) => {
+          res.should.have.status(201);
+          res.body.should.deep.equal(newCart);
+          // array of 5? object? Need to figure out how to display
+          done();
+        });
+
+
+    });
+  });
 
   // describe('/DELETE Cart', () => {
   //   it('Should DELETE the given product if logged in', (done) => {

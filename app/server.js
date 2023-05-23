@@ -20,26 +20,6 @@ const state = {
   brands: []
 }
 
-myRouter.use(bodyParser.json());
-
-let server = http.createServer(async (req, res) => {
-  
-  if(!VALID_API_KEYS.includes(req.headers['api-key']) || req.headers['api-key'] == undefined) {
-    console.log('apikey', req.headers)
-    res.writeHead(401, "Valid API Key needed")
-    res.end();
-  };
-
-  myRouter(req, res, finalHandler(req, res));
-
-}).listen(PORT, error => {
-  if (error) {
-    return console.log("Error on Server Startup: ", error);
-  };
-
-  console.log(`Server is listening on ${PORT}`);
-});
-
 const readFileAsync = (file) => {
   return new Promise((resolve, reject) => {
     fs.readFile(file, "utf8", (error, data) => {
@@ -81,6 +61,26 @@ const finishState = (req, res, next) => {
   Sunglasses.setState(state)
   next();
 }
+
+myRouter.use(bodyParser.json());
+
+let server = http.createServer(async (req, res) => {
+  
+  if(!VALID_API_KEYS.includes(req.headers['api-key']) || req.headers['api-key'] == undefined) {
+    console.log('apikey', req.headers)
+    res.writeHead(401, "Valid API Key needed")
+    res.end();
+  };
+
+  myRouter(req, res, finalHandler(req, res));
+
+}).listen(PORT, error => {
+  if (error) {
+    return console.log("Error on Server Startup: ", error);
+  };
+
+  console.log(`Server is listening on ${PORT}`);
+});
 
 
 myRouter.use(isStateFinished);
@@ -179,6 +179,60 @@ myRouter.post('/product/:username/cart', (req, res) => {
   res.writeHead(201, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({success: `${cart}`}))
 });
+
+myRouter.put('/product/:username/cart', (req, res) => {
+  const token = req.headers.authorization
+  if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({error: 'Unauthorized, need Auth Token'}));
+  };
+
+  let userName = req.params.username;
+  let productToUpdate = req.body.product;
+  let updatedQuantity = req.body.updatedQuantity
+
+  const userCheck = Sunglasses.findUser(userName);
+  const productCheck = Sunglasses.filterProducts(productToUpdate.id);
+
+  if(!userCheck || productCheck.length === 0) {
+    res.writeHead(404, { 'Content-Type':'application/json' });
+    return res.end(JSON.stringify({error: 'User not found'}));
+  }
+
+  const currentProductInCart = Sunglasses.filterProductInCart(userName, productToUpdate);
+
+  const differenceToApply = currentProductInCart.length - updatedQuantity
+
+  if(differenceToApply <= 0) {
+    let quantityToAdd = Math.abs(differenceToApply);
+    const updatedCartAdd = Sunglasses.updateCartAdd(userName, quantityToAdd, productToUpdate);
+
+    const cartToCompare = updatedCartAdd.filter((item) => {
+      return item.id == productToUpdate.id;
+    });
+
+    if(cartToCompare.length === updatedQuantity) {
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(updatedCartAdd));
+    }
+    
+  } else {
+    let quantityToSubtract = differenceToApply;
+    
+    const updatedCartSub = Sunglasses.updateCartSub(userName, updatedQuantity, productToUpdate);
+
+    cartToCompare = updatedCartSub.filter((item) => {
+      return item.id == productToUpdate.id;
+    });
+
+    if(cartToCompare.length === updatedQuantity) {
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify(updatedCartSub));
+    }
+
+  }
+});
+
 
 
 module.exports = server
