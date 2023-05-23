@@ -6,8 +6,7 @@
         "itemId": "1",
         "price": 150,
         "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
-        "quantityAvailable": 10,
-        "quantityAdded": 0
+        "quantityAvailable": 10
       },
       {
         "brand": "Oakley",
@@ -15,8 +14,7 @@
         "itemId": "2",
         "price": 120,
         "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
-        "quantityAvailable": 5,
-        "quantityAdded": 0
+        "quantityAvailable": 5
       }, 
       {
         "brand": "Persol",
@@ -24,15 +22,27 @@
         "itemId": "3",
         "price": 100,
         "imageURL": "https://nypost.com/wp-content/uploads/sites/2/2023/02/sunglass-new.gif?resize=1536,1024",
-        "quantityAvailable": 15,
-        "quantityAdded": 0
+        "quantityAvailable": 15
       }
     ],
-    "user": {
-      "first_name": "John",
-      "last_name": "Doe",
-      "email": "john.doe@example.com"
-    },
+    "users": [
+        {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com", 
+            "userId": "1", 
+            "username": "John1",
+            "password": "56789"
+        },
+        {
+            "first_name": "Beck",
+            "last_name": "Zhou",
+            "email": "beck@example.com", 
+            "userId": "",
+            "username": "Beck",
+            "password": "12345"
+        }
+    ],  
     "checkoutRequest": {
       "cart": [
         {
@@ -44,16 +54,7 @@
           "quantityAvailable": 10,
           "quantityAdded": 1
         }
-      ],
-      "user": {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john.doe@example.com"
-      }
-    },
-    "login": {
-      "username": "johndoe",
-      "password": "password123"
+      ]
     },
     "error": {
       "code": 500,
