@@ -180,6 +180,22 @@ myRouter.post('/product/:username/cart', (req, res) => {
   res.end(JSON.stringify({success: `${cart}`}))
 });
 
+myRouter.post('/login', (req, res) => {
+  const username = req.body.userName;
+  const password = req.body.password;
+  const authToken = 'your-auth-token'
+
+  const validUser = Sunglasses.validateUser(username, password);
+
+  if(!validUser) {
+    res.writeHead(401, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({error: 'Invalid Username or Password'}))
+  }
+
+  res.writeHead(201, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(authToken));
+});
+
 myRouter.put('/product/:username/cart', (req, res) => {
   const token = req.headers.authorization
   if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {

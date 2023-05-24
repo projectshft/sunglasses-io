@@ -109,6 +109,14 @@ class Sunglasses {
     return newCart
   };
 
+  static validateUser(username, password) {
+    const findUser = state.users.find((user) => {
+      return user.login.username == username && user.login.password == password;
+    });
+
+    return findUser;
+  }
+
   static validateRemoval(cart, product){
     let valid = false;
 
@@ -121,7 +129,7 @@ class Sunglasses {
     }
 
     return valid;
-  }
+  };
 
 }
 

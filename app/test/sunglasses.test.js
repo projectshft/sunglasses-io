@@ -217,6 +217,46 @@ describe('Sunglasses', () => {
     });
   });
 
+  describe('/POST Login', () => {
+    it('Should verify that you are an actual user & return Auth token', (done) => {
+      let loginCredentials = {
+        userName: "yellowleopard753",
+        password: 'jonjon'
+      };
+
+      const authToken = 'your-auth-token';
+
+      chai  
+        .request(server)
+        .post(`/login`)
+        .set('API-Key', API_KEY)
+        .send(loginCredentials)
+        .end((req, res) => {
+          res.should.have.status(201);
+          res.body.should.deep.equal(authToken);
+          done()
+        });
+    });
+
+    it('Should error if you invalid credentials', (done) => {
+      let loginCredentials = {
+        userName: "wrongUser",
+        password: 'jonjon'
+      };
+
+      chai  
+        .request(server)
+        .post(`/login`)
+        .set('API-Key', API_KEY)
+        .send(loginCredentials)
+        .end((req, res) => {
+          res.should.have.status(401);
+          res.body.should.have.property('error', 'Invalid Username or Password')
+          done()
+        });
+    });
+  });
+
   describe('/PUT Cart', () => {
     it('should update the products quantity in the cart (addition)', (done) => {
       const authToken = 'your-auth-token';
