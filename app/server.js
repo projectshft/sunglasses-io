@@ -1,7 +1,8 @@
 const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
-const queryString = require('querystring');
+const querystring = require('querystring');
+const url = require('url');
 const Router = require('router')
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
@@ -156,6 +157,22 @@ myRouter.get('/user/cart', (req, res) => {
   res.end(JSON.stringify(cart));
 });
 
+myRouter.get('/search', (req, res) => {
+  const parsedUrl = url.parse(req.url);
+  const searchQuery = querystring.parse(parsedUrl.query);
+  const searchQueryArr = searchQuery.query.split(' ');
+
+  let valuesToReturn = Sunglasses.keywordFilter(searchQueryArr);
+
+  if(!valuesToReturn) {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({error: `Sorry, we're not google. Try searching Brands or Products`}));
+  }
+
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(valuesToReturn));
+});
+
 myRouter.post('/product/:productId/cart', (req, res) => {
   const token = req.headers.authorization
   if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {
@@ -295,6 +312,8 @@ myRouter.delete('/product/:productId/cart', (req, res) => {
   res.end(JSON.stringify(newCart));
 
 });
+
+
 
 
 

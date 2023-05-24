@@ -70,6 +70,31 @@ class Sunglasses {
     return specificProductArr
   };
 
+  static keywordFilter(array) {
+    const search =  array.map(word => word.toLowerCase());
+    
+    const wordCount = search.reduce((accum, word) => {
+      if(word === 'brand' || word === 'brands') {
+        return { ...accum, brand: accum.brand + 1 }
+      } else if(word === 'product' || word === 'products'){
+        return { ...accum, product: accum.product + 1 }
+      } else if(word === 'sunglasses'){
+        return { ...accum, sunglasses: accum.sunglasses + 1 }
+      } else {
+        return accum
+      }
+
+    }, { brand: 0, product: 0, sunglasses: 0 });
+    
+    if(wordCount.brand > wordCount.product && wordCount.brand > wordCount.sunglasses) {
+      return state.brands;
+    } else if(wordCount.product > wordCount.brand || wordCount.sunglasses > wordCount.brand) {
+      return state.products;
+    } else {
+      return null;
+    }
+  };
+
   static updateCartAdd(userName, quantity, product) {
     const user = Sunglasses.findUser(userName);
 
@@ -122,7 +147,7 @@ class Sunglasses {
     });
 
     return findUser;
-  }
+  };
 
   static validateRemoval(cart, product){
     let valid = false;

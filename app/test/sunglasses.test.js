@@ -253,6 +253,41 @@ describe('Sunglasses', () => {
     });
   });
 
+  describe('/GET Search', () => {
+    it('Should be able to return the correct info based on the search', (done) => {
+      const exampleQuery = 'I want to view the brands';
+
+      chai
+        .request(server)
+        .get(`/search?query=${exampleQuery}`)
+        .set('API-Key', API_KEY)
+        .end((req, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.forEach((brand) => {
+            brand.should.include.all.keys('id', 'name');
+          });
+          done();
+        });
+
+    });
+
+    it('Should return 404 if no keywords are found', (done) => {
+      const exampleQuery = 'I want to view the stuff';
+
+      chai
+        .request(server)
+        .get(`/search?query=${exampleQuery}`)
+        .set('API-Key', API_KEY)
+        .end((req, res) => {
+          res.should.have.status(404);
+          res.body.should.have.property('error', `Sorry, we're not google. Try searching Brands or Products`);
+          done();
+        });
+
+    });
+  });
+
   describe('/PUT Cart', () => {
     it('should update the products quantity in the cart (addition)', (done) => {
       const authToken = 'your-auth-token';
