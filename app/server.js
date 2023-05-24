@@ -7,10 +7,15 @@ var bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 
+module.exports = app;
+
 const PORT = 3002;
 
 // Read the JSON file
-const jsonData = fs.readFileSync("data.json", "utf-8");
+//const jsonData = fs.readFileSync("data.json", "utf-8");
+//const jsonData = fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf-8');
+const jsonData = fs.readFileSync(__dirname + '/../data.json', 'utf-8');
+
 
 const VALID_API_KEYS = [
   "88312679-04c9-4351-85ce-3ed75293b449",
@@ -76,54 +81,53 @@ app.post("/sunglasses/login", function (request, response) {
 
 // POST /api/login
 app.post("/sunglasses/login", function (request, response) {
-    const { username, password } = request.body;
-  
-    // Check if the username and password are provided
-    if (username && password) {
-      let user = users.find((user) => {
-        return user.username === username && user.password === password;
-      });
-  
-      if (user) {
-        // Generate a new access token
-        let newAccessToken = {
-          username: user.username,
-          lastUpdated: new Date(),
-          token: uid(16),
-        };
-        accessTokens.push(newAccessToken);
-        
-        // Return the access token as the response
-        response.status(200).json(newAccessToken);
-      } else {
-        response.status(401).send("Invalid username or password");
-      }
+  const { username, password } = request.body;
+
+  // Check if the username and password are provided
+  if (username && password) {
+    let user = users.find((user) => {
+      return user.username === username && user.password === password;
+    });
+
+    if (user) {
+      // Generate a new access token
+      let newAccessToken = {
+        username: user.username,
+        lastUpdated: new Date(),
+        token: uid(16),
+      };
+      accessTokens.push(newAccessToken);
+
+      // Return the access token as the response
+      response.status(200).json(newAccessToken);
     } else {
-      response.status(400).send("Incorrectly formatted request");
+      response.status(401).send("Invalid username or password");
     }
-  });
-  
-  // Shopping cart - Show cart - GET /api/me/cart
-  app.get("/sunglasses/me/cart", function (request, response) {
-    // Check if user is logged in (authenticated)
-    if (isUserLoggedIn(request)) {
-      // Return the cart contents
-      response.status(200).json(cart);
-    } else {
-      response.status(401).send("Unauthorized access");
-    }
-  });
-  
-  // Helper function to check if user is logged in
-  function isUserLoggedIn(request) {
-    // Implement your authentication logic here
-    // For example, check if the user has a valid session or token
-    
-    // Assuming you have a valid access token stored in the request
-    const accessToken = request.headers.authorization;
-    return accessTokens.find((token) => token.token === accessToken);
+  } else {
+    response.status(400).send("Incorrectly formatted request");
   }
-  
+});
+
+// Shopping cart - Show cart - GET /api/me/cart
+app.get("/sunglasses/me/cart", function (request, response) {
+  // Check if user is logged in (authenticated)
+  if (isUserLoggedIn(request)) {
+    // Return the cart contents
+    response.status(200).json(cart);
+  } else {
+    response.status(401).send("Unauthorized access");
+  }
+});
+
+// Helper function to check if user is logged in
+function isUserLoggedIn(request) {
+  // Implement your authentication logic here
+  // For example, check if the user has a valid session or token
+
+  // Assuming you have a valid access token stored in the request
+  const accessToken = request.headers.authorization;
+  return accessTokens.find((token) => token.token === accessToken);
+}
 
 // shoping cart - add items - POST /api/me/cart
 app.post("/sunglasses/me/cart/add/:productId", function (request, response) {
@@ -157,6 +161,7 @@ app.post("/sunglasses/me/cart/add/:productId", function (request, response) {
 //   .createServer(function (request, response) {
 //     myRouter(request, response, finalHandler(request, response));
 //   })
+
 app.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
 });
