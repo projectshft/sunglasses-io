@@ -34,6 +34,14 @@ class Sunglasses {
     
     return user;
   };
+  
+  static findProduct(id) {
+    let product = state.products.find((item) => {
+      return item.id == id;
+    });
+
+    return product;
+  };
 
   static filterProducts(id) {
     const products = state.products.filter((product) => {

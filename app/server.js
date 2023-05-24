@@ -133,7 +133,7 @@ myRouter.get('/products', (req, res) => {
   return res.end(JSON.stringify(allProducts));
 });
 
-myRouter.get('/user/:username/cart', (req, res) => {
+myRouter.get('/user/cart', (req, res) => {
 
   if(!VALID_AUTH_TOKENS.includes(req.headers.authorization) || req.headers.authorization == undefined) {
 
@@ -141,7 +141,7 @@ myRouter.get('/user/:username/cart', (req, res) => {
     return res.end(JSON.stringify({error: 'Unauthorized, need Auth Token'}));
   };
 
-  let userName = req.params.username;
+  let userName = req.body.username;
 
   const currentUser = Sunglasses.findUser(userName);
 
@@ -156,25 +156,32 @@ myRouter.get('/user/:username/cart', (req, res) => {
   res.end(JSON.stringify(cart));
 });
 
-myRouter.post('/product/:username/cart', (req, res) => {
+myRouter.post('/product/:productId/cart', (req, res) => {
   const token = req.headers.authorization
   if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({error: 'Unauthorized, need Auth Token'}));
   };
 
-  let product = req.body
+  let userName = req.body.username
 
-  let userName = req.params.username;
+  let productId = req.params.productId;
 
   let user = Sunglasses.findUser(userName);
+
+  let productToAdd = Sunglasses.findProduct(productId);
 
   if(!user) {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({error: 'User not found'}));
   }
 
- let cart = Sunglasses.addToCart(user, product);
+  if(!productToAdd) {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({error: 'Product not found'}));
+  }
+
+ let cart = Sunglasses.addToCart(user, productToAdd);
 
   res.writeHead(201, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({success: `${cart}`}))
@@ -196,23 +203,28 @@ myRouter.post('/login', (req, res) => {
   res.end(JSON.stringify(authToken));
 });
 
-myRouter.put('/product/:username/cart', (req, res) => {
+myRouter.put('/product/:productId/:quantity/cart', (req, res) => {
   const token = req.headers.authorization
   if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({error: 'Unauthorized, need Auth Token'}));
   };
 
-  let userName = req.params.username;
-  let productToUpdate = req.body.product;
-  let updatedQuantity = req.body.updatedQuantity
+  let userName = req.body.username;
+  let productId = req.params.productId;
+  let updatedQuantity = req.params.quantity
 
   const userCheck = Sunglasses.findUser(userName);
-  const productCheck = Sunglasses.filterProducts(productToUpdate.id);
+  const productToUpdate = Sunglasses.findProduct(productId);
 
-  if(!userCheck || productCheck.length === 0) {
+  if(!userCheck) {
     res.writeHead(404, { 'Content-Type':'application/json' });
     return res.end(JSON.stringify({error: 'User not found'}));
+  }
+
+  if(!productToUpdate) {
+    res.writeHead(404, { 'Content-Type':'application/json' });
+    return res.end(JSON.stringify({error: 'Product not found'}));
   }
 
   const currentProductInCart = Sunglasses.filterProductInCart(userName, productToUpdate);
@@ -227,21 +239,19 @@ myRouter.put('/product/:username/cart', (req, res) => {
       return item.id == productToUpdate.id;
     });
 
-    if(cartToCompare.length === updatedQuantity) {
+    if(cartToCompare.length == updatedQuantity) {
       res.writeHead(201, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(updatedCartAdd));
     }
     
   } else {
-    let quantityToSubtract = differenceToApply;
-    
     const updatedCartSub = Sunglasses.updateCartSub(userName, updatedQuantity, productToUpdate);
 
     cartToCompare = updatedCartSub.filter((item) => {
       return item.id == productToUpdate.id;
     });
 
-    if(cartToCompare.length === updatedQuantity) {
+    if(cartToCompare.length == updatedQuantity) {
       res.writeHead(201, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify(updatedCartSub));
     }

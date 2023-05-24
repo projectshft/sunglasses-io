@@ -100,15 +100,18 @@ describe('Sunglasses', () => {
   describe('/GET Cart', () => {
     it('Should show the user cart in an array', (done) => {
 
-      let userName = "yellowleopard753"
+      let credentials = {
+        username: "yellowleopard753"
+      }
 
       const authToken = 'your-auth-token';
 
       chai  
         .request(server)
-        .get(`/user/${userName}/cart`)
+        .get(`/user/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
+        .send(credentials)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
@@ -121,9 +124,10 @@ describe('Sunglasses', () => {
       let userName = "yellowleopard753"
       chai  
         .request(server)
-        .get(`/user/${userName}/cart`)
+        .get(`/user/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
+        .send(userName)
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.have.property('error');
@@ -136,7 +140,9 @@ describe('Sunglasses', () => {
   describe('/POST Cart', () => {
     it('Should post a new product to the cart if logged in', (done) => {
       const authToken = 'your-auth-token';
-      let userName = "yellowleopard753";
+      let credentials = {
+        username: "yellowleopard753"
+      };
 
       let exampleProduct = {
         "id": "2",
@@ -147,12 +153,14 @@ describe('Sunglasses', () => {
         "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
       };
 
+      let productId = 2;
+
       chai
         .request(server)
-        .post(`/product/${userName}/cart`)
+        .post(`/product/${productId}/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
-        .send(exampleProduct) //req body
+        .send(credentials) //req body
         .end((err, res) => {
           res.should.have.status(201);
           res.body.should.be.an('object');
@@ -166,22 +174,17 @@ describe('Sunglasses', () => {
     
     it('Should not post a new product to the cart if not logged in', (done) => {
       const authToken = 'wrong-token';
-      let userName = "yellowleopard753";
-      let exampleProduct = {
-        "id": "2",
-        "categoryId": "1",
-        "name": "Black Sunglasses",
-        "description": "The best glasses in the world",
-        "price":100,
-        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      let credentials = {
+        username: "yellowleopard753"
       };
+      let productId = 2;
 
       chai
         .request(server)
-        .post(`/product/${userName}/cart`)
+        .post(`/product/${productId}/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
-        .send(exampleProduct) 
+        .send(credentials) 
         .end((err, res) => {
           res.should.have.status(401);
           res.body.should.have.property('error', 'Unauthorized, need Auth Token')
@@ -189,29 +192,22 @@ describe('Sunglasses', () => {
         });
     });
 
-    it('Should not return ', (done) => {
+    it('Should not return if invalid product', (done) => {
       const authToken = 'your-auth-token';
-      let userName = "wrongUsername"
-
-
-      let exampleProduct = {
-        "id": "500",
-        "categoryId": "500",
-        "name": "Blackc;x,l;ldf,g Sunglasses",
-        "description": "The best glasses in the world",
-        "price":100,
-        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      let credentials = {
+        username: "yellowleopard753"
       };
+      let productId = 5000;
 
       chai
         .request(server)
-        .post(`/product/${userName}/cart`)
+        .post(`/product/${productId}/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
-        .send(exampleProduct) //req body
+        .send(credentials) //req body
         .end((err, res) => {
           res.should.have.status(404);
-          res.body.should.have.property('error', 'User not found')
+          res.body.should.have.property('error', 'Product not found')
           done();
         });
     });
@@ -261,29 +257,21 @@ describe('Sunglasses', () => {
     it('should update the products quantity in the cart (addition)', (done) => {
       const authToken = 'your-auth-token';
 
-      const userName = 'yellowleopard753';
-
-      let requestBody = {
-        updatedQuantity: 5,
-        product: {
-          "id": "2",
-          "categoryId": "1",
-          "name": "Black Sunglasses",
-          "description": "The best glasses in the world",
-          "price":100,
-          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-        }
+      const credentials = {
+        username: 'yellowleopard753'
       };
+
+      let updatedQuantity = 5;
 
       const newCart = [];
 
       const updateCart = () => {
-        for (let i = 1; i <= requestBody.updatedQuantity; i++) {
+        for (let i = 1; i <= updatedQuantity; i++) {
           newCart.push(exampleProduct);
         }
       };
 
-      // put stuff in the cart
+      // put products in the cart
 
       let exampleProduct = {
         "id": "2",
@@ -335,14 +323,13 @@ describe('Sunglasses', () => {
 
       chai
         .request(server)
-        .put(`/product/${userName}/cart`)
+        .put(`/product/${exampleProduct.id}/${updatedQuantity}/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
-        .send(requestBody)
+        .send(credentials)
         .end((err, res) => {
           res.should.have.status(201);
           res.body.should.deep.equal(newCart);
-          // array of 5? object? Need to figure out how to display
           done();
         });
 
@@ -352,29 +339,21 @@ describe('Sunglasses', () => {
     it('should update the products quantity in the cart (subrtaction)', (done) => {
       const authToken = 'your-auth-token';
 
-      const userName = 'yellowleopard753';
-
-      let requestBody = {
-        updatedQuantity: 2,
-        product: {
-          "id": "2",
-          "categoryId": "1",
-          "name": "Black Sunglasses",
-          "description": "The best glasses in the world",
-          "price":100,
-          "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-        }
+      const credentials = {
+        username: 'yellowleopard753'
       };
+
+      let updatedQuantity = 1;
 
       const newCart = [];
 
       const updateCart = () => {
-        for (let i = 1; i <= requestBody.updatedQuantity; i++) {
+        for (let i = 1; i <= updatedQuantity; i++) {
           newCart.push(exampleProduct);
         }
       };
 
-      // put stuff in the cart
+      // put products in the cart
 
       let exampleProduct = {
         "id": "2",
@@ -385,56 +364,19 @@ describe('Sunglasses', () => {
         "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
       };
 
-      let exampleUser =  {
-        "gender": "female",
-        "cart":[],
-        "name": {
-            "title": "mrs",
-            "first": "susanna",
-            "last": "richards"
-        },
-        "location": {
-            "street": "2343 herbert road",
-            "city": "duleek",
-            "state": "donegal",
-            "postcode": 38567
-        },
-        "email": "susanna.richards@example.com",
-        "login": {
-            "username": "yellowleopard753",
-            "password": "jonjon",
-            "salt": "eNuMvema",
-            "md5": "a8be2a69c8c91684588f4e1a29442dd7",
-            "sha1": "f9a60bbf8b550c10712e470d713784c3ba78a68e",
-            "sha256": "4dca9535634c102fbadbe62dc5b37cd608f9f3ced9aacf42a5669e5a312690a0"
-        },
-        "dob": "1954-10-09 10:47:17",
-        "registered": "2003-08-03 01:12:24",
-        "phone": "031-941-6700",
-        "cell": "081-032-7884",
-        "picture": {
-            "large": "https://randomuser.me/api/portraits/women/55.jpg",
-            "medium": "https://randomuser.me/api/portraits/med/women/55.jpg",
-            "thumbnail": "https://randomuser.me/api/portraits/thumb/women/55.jpg"
-        },
-        "nat": "IE"
-      };
-
       updateCart();
 
       chai
         .request(server)
-        .put(`/product/${userName}/cart`)
+        .put(`/product/${exampleProduct.id}/${updatedQuantity}/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
-        .send(requestBody)
+        .send(credentials)
         .end((err, res) => {
           res.should.have.status(201);
           res.body.should.deep.equal(newCart);
-          // array of 5? object? Need to figure out how to display
           done();
         });
-
 
     });
   });
