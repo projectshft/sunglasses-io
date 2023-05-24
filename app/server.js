@@ -259,21 +259,27 @@ myRouter.put('/product/:productId/:quantity/cart', (req, res) => {
   }
 });
 
-myRouter.delete('/product/:username/cart', (req, res) => {
+myRouter.delete('/product/:productId/cart', (req, res) => {
   const token = req.headers.authorization
   if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {
     res.writeHead(401, { "Content-Type": "application/json" });
     return res.end(JSON.stringify({error: 'Unauthorized, need Auth Token'}));
   };
 
-  let productToRemove = req.body;
-  let userName = req.params.username;
+  let productId = req.params.productId;
+  let userName = req.body.username;
 
   const user = Sunglasses.findUser(userName);
+  const productToRemove = Sunglasses.findProduct(productId);
 
   if(!user) {
     res.writeHead(404, { 'Content-Type':'application/json' });
     return res.end(JSON.stringify({error: 'User not found'}));
+  }
+
+  if(!productToRemove) {
+    res.writeHead(404, { 'Content-Type':'application/json' });
+    return res.end(JSON.stringify({error: 'Product not found'}));
   }
 
   const newCart = Sunglasses.removeCartItems(user, productToRemove);

@@ -112,8 +112,7 @@ class Sunglasses {
     });
 
     let index = state.users.indexOf(user);
-    state.users[index] = newCart;
-
+    state.users[index].cart = newCart;
     return newCart
   };
 

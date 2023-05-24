@@ -384,13 +384,9 @@ describe('Sunglasses', () => {
   describe('/DELETE Cart', () => {
     it('Should DELETE the given product if logged in', (done) => {
       const authToken = 'your-auth-token';
-      const userName = 'yellowleopard753';
-
-
-      const id = 2;
-
-      // put stuff in the cart
-
+      const credentials = {
+        username: 'yellowleopard753'
+      };
       let exampleProduct = {
         "id": "2",
         "categoryId": "1",
@@ -399,16 +395,37 @@ describe('Sunglasses', () => {
         "price":100,
         "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
       };
+      let productId = 2
 
       chai
         .request(server)
-        .delete(`/product/${userName}/cart`)
+        .delete(`/product/${productId}/cart`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('API-Key', API_KEY)
-        .send(exampleProduct)
+        .send(credentials)
         .end((err, res) => {
           res.should.have.status(204);
           res.body.should.not.include(exampleProduct);
+          done();
+        });
+    });
+
+    it('Should Error if product is wrong', (done) => {
+      const authToken = 'your-auth-token';
+      const credentials = {
+        username: 'yellowleopard753'
+      };
+      let productId = 404;
+
+      chai
+        .request(server)
+        .delete(`/product/${productId}/cart`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
+        .send(credentials)
+        .end((err, res) => {
+          res.should.have.status(404);
+          res.body.should.have.property('error', 'Product not found');
           done();
         });
     });
