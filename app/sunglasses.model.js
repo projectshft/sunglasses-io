@@ -98,6 +98,31 @@ class Sunglasses {
     return reduceCart;
   };
 
+  static removeCartItems(user, product) {
+    const newCart = user.cart.filter((item) => {
+      return item.id !== product.id;
+    });
+
+    let index = state.users.indexOf(user);
+    state.users[index] = newCart;
+
+    return newCart
+  };
+
+  static validateRemoval(cart, product){
+    let valid = false;
+
+    const check = cart.filter((item) => {
+      return item.id == product.id;
+    });
+
+    if(check.length === 0) {
+      valid = true;
+    }
+
+    return valid;
+  }
+
 }
 
 module.exports = Sunglasses;

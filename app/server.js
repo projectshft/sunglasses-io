@@ -233,6 +233,37 @@ myRouter.put('/product/:username/cart', (req, res) => {
   }
 });
 
+myRouter.delete('/product/:username/cart', (req, res) => {
+  const token = req.headers.authorization
+  if(!VALID_AUTH_TOKENS.includes(token) || token == undefined) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({error: 'Unauthorized, need Auth Token'}));
+  };
+
+  let productToRemove = req.body;
+  let userName = req.params.username;
+
+  const user = Sunglasses.findUser(userName);
+
+  if(!user) {
+    res.writeHead(404, { 'Content-Type':'application/json' });
+    return res.end(JSON.stringify({error: 'User not found'}));
+  }
+
+  const newCart = Sunglasses.removeCartItems(user, productToRemove);
+
+  const validateRemoval = Sunglasses.validateRemoval(newCart, productToRemove);
+
+  if(!validateRemoval) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({error: 'Unable to delete, try again'}));
+  } 
+
+  res.writeHead(204, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(newCart));
+
+});
+
 
 
 module.exports = server

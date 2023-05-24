@@ -399,41 +399,37 @@ describe('Sunglasses', () => {
     });
   });
 
-  // describe('/DELETE Cart', () => {
-  //   it('Should DELETE the given product if logged in', (done) => {
-  //     const authToken = 'your-auth-token';
-
-  //     const id = 2;
-
-  //     // put stuff in the cart
-
-  //     let exampleproduct = {
-  //       "id": "2",
-  //       "categoryId": "1",
-  //       "name": "Black Sunglasses",
-  //       "description": "The best glasses in the world",
-  //       "price":100,
-  //       "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
-  //     };
-
-  //     Sunglasses.addToCart(exampleproduct); // add to cart
-
-  //     chai
-  //       .request(server)
-  //       .delete(`/product/${id}`)
-  //       .set('Authorization', `Bearer ${authToken}`)
-  //       .set('API-Key', API_KEY)
-  //       .end((err, res) => {
-  //         res.should.have.status(204);
-  //         done();
-  //       })
+  describe('/DELETE Cart', () => {
+    it('Should DELETE the given product if logged in', (done) => {
+      const authToken = 'your-auth-token';
+      const userName = 'yellowleopard753';
 
 
-  //   });
-  //   //if not logged in 
-  // });
+      const id = 2;
 
-  //describe search, will need to use query string
-  //describe email
+      // put stuff in the cart
 
-})
+      let exampleProduct = {
+        "id": "2",
+        "categoryId": "1",
+        "name": "Black Sunglasses",
+        "description": "The best glasses in the world",
+        "price":100,
+        "imageUrls":["https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg","https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"]
+      };
+
+      chai
+        .request(server)
+        .delete(`/product/${userName}/cart`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('API-Key', API_KEY)
+        .send(exampleProduct)
+        .end((err, res) => {
+          res.should.have.status(204);
+          res.body.should.not.include(exampleProduct);
+          done();
+        });
+    });
+  });
+
+});
