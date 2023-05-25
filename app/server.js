@@ -5,7 +5,9 @@ var queryString = require("querystring");
 var Router = require("router");
 var bodyParser = require("body-parser");
 const express = require("express");
+const { use } = require("chai");
 const app = express();
+var uid = require('rand-token').uid;
 
 module.exports = app;
 
@@ -27,7 +29,6 @@ const sunglassesData = JSON.parse(jsonData).sunglasses;
 const cart = [];
 let storeUsers = JSON.parse(jsonData).users;
 let accessTokens = [];
-let failLoginAttempts = {};
 
 //set up router
 var myRouter = Router();
@@ -64,7 +65,7 @@ app.get("/sunglasses/brand/:itemId", function (request, response) {
   }
 });
 
-//creat login - POST /api/login
+// login call - POST /api/login
 // app.post("/sunglasses/login", function (request, response) {
 //   const creatLogin = {
 //     username: request.body.username,
@@ -83,39 +84,48 @@ app.get("/sunglasses/brand/:itemId", function (request, response) {
 
 //POST login
 app.post("/sunglasses/login", function (request, response) {
-  if (request.username && request.password) {
-    const { username, password } = request.body;
-    console.log(username, password);
-    storeUsers.push({ username, password });
+    console.log(request.body);
+
+  if (request.body.username && request.body.password) {
+    let user = storeUsers.find((login) => {
+      return (
+        login.username == request.body.username &&
+        login.password == request.body.password
+      );
+    });
+    if (user) {
+      let newAccessToken = {
+        username: request.body.username,
+        lastUpdated: new Date(),
+        token: uid(16),
+      };
+      console.log(newAccessToken); 
+      accessTokens.push(newAccessToken);
+      return response.end(JSON.stringify(newAccessToken.token));
+    } else {
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+  } else {
+    response.writeHead(400, "Incorrectly formatted response");
+    return response.end();
   }
 });
 
-//   // Check if the username and password are provided
-//   if (username && password) {
-//     let user = users.find((user) => {
-//       console.log(user);
-//       return user.username === username && user.password === password;
-//     });
-
-//     if (user) {
-//       // how to? Generate a new access token
-//       let newAccessToken = {
-//         username: user.username,
-//         lastUpdated: new Date(),
-//         token: uid(16),
-//       };
-//       accessTokens.push(newAccessToken);
-//       console.log(newAccessToken);
-
-//       // Return the access token as the response
-//       response.status(200).json(newAccessToken);
-//     } else {
-//       response.status(401).send("Invalid username or password");
-//     }
+//   if (request.body.username && request.body.password) {
+//     const newUser = {
+//       username: request.body.username,
+//       password: request.body.password,
+//       userId: storeUsers.length += 1
+//     };
+//     storeUsers.push(newUser);
+//     console.log(storeUsers);
+//     //response.end(201);
 //   } else {
-//     response.status(400).send("Incorrectly formatted request");
+//     response
+//       .status(404)
+//       .send("username and password are required to create a login");
 //   }
-
 
 // Shopping cart - Show cart - GET /api/me/cart
 app.get("/sunglasses/me/cart", function (request, response) {
@@ -130,7 +140,6 @@ app.get("/sunglasses/me/cart", function (request, response) {
 //working
 // shoping cart - add items - POST /api/me/cart
 app.post("/sunglasses/me/cart/add", function (request, response) {
-  //URL itemId
   const thisItemId = request.body.itemId;
   //console.log(thisItemId);
 
