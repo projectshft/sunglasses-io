@@ -3,7 +3,7 @@
       {
         "brand": "Ray-Ban",
         "name": "Aviator",
-        "itemId": "1",
+        "itemId": 1,
         "price": 150,
         "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
         "quantityAvailable": 10
@@ -11,7 +11,7 @@
       {
         "brand": "Oakley",
         "name": "Holbrook",
-        "itemId": "2",
+        "itemId": 2,
         "price": 120,
         "imageURL": "https://hips.hearstapps.com/hmg-prod/images/mh-3-27-glasses-6421ad477a07c.png?crop=1.00xw:1.00xh;0,0&resize=1200:*",
         "quantityAvailable": 5
@@ -38,7 +38,7 @@
             "first_name": "Beck",
             "last_name": "Zhou",
             "email": "beck@example.com", 
-            "userId": "",
+            "userId": "2",
             "username": "Beck",
             "password": "12345"
         }
