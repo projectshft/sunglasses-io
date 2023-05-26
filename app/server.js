@@ -1,3 +1,5 @@
+const app2 = require('./server');
+
 var http = require("http");
 var fs = require("fs");
 var finalHandler = require("finalhandler");
@@ -8,7 +10,6 @@ const express = require("express");
 const { use } = require("chai");
 var uid = require("rand-token").uid;
 
-module.exports = app;
 
 const PORT = 3002;
 
@@ -132,7 +133,7 @@ app.post("/sunglasses/me/cart/add", function (request, response) {
     return item.itemId === thisItemId;
   });
   if (!item) {
-    response.status(404).send("The sunglasses with this id is not found1");
+    response.status(404).send("The sunglasses with this id is not found");
   } else {
     let newCartItem = {
       brand: item.brand,
@@ -161,7 +162,7 @@ app.delete("/sunglasses/me/cart/delete", function (request, response) {
     response.status(404).send("This sunglasses is not in the cart");
   } else {
     cart.pop(item);
-    response.status(201).send("Item deleted from cart");
+    response.status(201).send("Item deleted successfully");
   }
 });
 
@@ -192,3 +193,5 @@ app.put("/sunglasses/me/cart/change/:productId", function (request, response) {
 app.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
 });
+
+module.exports = app;
