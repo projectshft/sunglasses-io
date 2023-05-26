@@ -6,8 +6,7 @@ var Router = require("router");
 var bodyParser = require("body-parser");
 const express = require("express");
 const { use } = require("chai");
-const app = express();
-var uid = require('rand-token').uid;
+var uid = require("rand-token").uid;
 
 module.exports = app;
 
@@ -18,12 +17,6 @@ const PORT = 3002;
 //const jsonData = fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf-8');
 const jsonData = fs.readFileSync(__dirname + "/../data.json", "utf-8");
 
-const VALID_API_KEYS = [
-  "88312679-04c9-4351-85ce-3ed75293b449",
-  "1a5c45d3-8ce7-44da-9e78-02fb3c1a71b7",
-];
-const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
-
 //varibles
 const sunglassesData = JSON.parse(jsonData).sunglasses;
 const cart = [];
@@ -31,14 +24,13 @@ let storeUsers = JSON.parse(jsonData).users;
 let accessTokens = [];
 
 //set up router
-var myRouter = Router();
+const app = express();
 app.use(bodyParser.json());
 
 app.get("/", function (request, response) {
   response.end("Welcome to the sunglasses store!");
 });
 
-//working
 //public route - endpoint for 'search for my glasses' - GET /api/brands
 app.get("/sunglasses", function (request, response) {
   const searchGlasses = sunglassesData.map((sunglasses) => {
@@ -51,7 +43,6 @@ app.get("/sunglasses", function (request, response) {
   response.end(JSON.stringify(searchGlasses));
 });
 
-//working
 // individual product and its info - GET /api/brands/:id/products
 app.get("/sunglasses/brand/:itemId", function (request, response) {
   //look up the item, if it doesnt exist, return 404
@@ -65,27 +56,32 @@ app.get("/sunglasses/brand/:itemId", function (request, response) {
   }
 });
 
-// login call - POST /api/login
-// app.post("/sunglasses/login", function (request, response) {
-//   const creatLogin = {
-//     username: request.body.username,
-//     password: request.body.password,
-//     email: request.body.email,
-//     first_name: request.body.first_name,
-//     last_name: request.body.last_name,
-//     userId: (sunglassesData.user.length += 1),
-//   };
-// });
-
-// shoping cart - show cart - GET /api/me/cart
-//authentification needed to see cart
-
-// POST /api/login
+// Helper method to process access token
+//I had trouble with the authentication this part is not working
+function getValidTokenFromRequest(request) {
+  if (request.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return (
+        accessToken.token == request.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+      );
+    });
+    if (currentAccessToken) {
+      console.log("currentaccesstoken :", currentAccessToken);
+      return currentAccessToken;
+    } else {
+      console.log("innernull");
+      return null;
+    }
+  } else {
+    console.log("outernull");
+    return null;
+  }
+}
 
 //POST login
 app.post("/sunglasses/login", function (request, response) {
-    console.log(request.body);
-
   if (request.body.username && request.body.password) {
     let user = storeUsers.find((login) => {
       return (
@@ -99,8 +95,9 @@ app.post("/sunglasses/login", function (request, response) {
         lastUpdated: new Date(),
         token: uid(16),
       };
-      console.log(newAccessToken); 
+      //console.log(newAccessToken);
       accessTokens.push(newAccessToken);
+      response.status(200);
       return response.end(JSON.stringify(newAccessToken.token));
     } else {
       response.writeHead(401, "Invalid username or password");
@@ -112,53 +109,47 @@ app.post("/sunglasses/login", function (request, response) {
   }
 });
 
-//   if (request.body.username && request.body.password) {
-//     const newUser = {
-//       username: request.body.username,
-//       password: request.body.password,
-//       userId: storeUsers.length += 1
-//     };
-//     storeUsers.push(newUser);
-//     console.log(storeUsers);
-//     //response.end(201);
-//   } else {
-//     response
-//       .status(404)
-//       .send("username and password are required to create a login");
-//   }
-
 // Shopping cart - Show cart - GET /api/me/cart
-app.get("/sunglasses/me/cart", function (request, response) {
+app.post("/sunglasses/me/cart", function (request, response) {
   // Check if user is logged in (authenticated)
-  if (isUserLoggedIn(request)) {
-    response.status(200).json(cart);
+  let currentAccessToken = accessTokens[0].token;
+  if (!currentAccessToken) {
+    response.status(401, "You need access to see the cart");
+    return response.end();
   } else {
-    response.status(401).send("Unauthorized access");
+    return response.status(200, cart);
   }
 });
 
-//working
 // shoping cart - add items - POST /api/me/cart
 app.post("/sunglasses/me/cart/add", function (request, response) {
+  //let currentAccessToken = getValidTokenFromRequest(accessTokens);
+  //   if (accessTokens) {
+  //     console.log(accessTokens);
   const thisItemId = request.body.itemId;
-  //console.log(thisItemId);
 
   const item = sunglassesData.find((item) => {
     return item.itemId === thisItemId;
   });
-
   if (!item) {
     response.status(404).send("The sunglasses with this id is not found1");
   } else {
-    //console.log(item);
-    cart.push(item);
-    //console.log(cart);
+    let newCartItem = {
+      brand: item.brand,
+      name: item.name,
+      price: item.price,
+      quantityAdded: 1,
+    };
+    cart.push(newCartItem);
     // Return a response indicating the item was successfully added to the cart
     response.status(201).send("Item added to the cart");
   }
+  //   } else {
+  //     response.status(401, "You need access to add items to cart");
+  //     return response.end();
+  //   }
 });
 
-//working
 // shopping cart - delete items - DELETE /api/me/cart/:productId
 app.delete("/sunglasses/me/cart/delete", function (request, response) {
   const thisItemId = request.body.itemId;
@@ -169,29 +160,34 @@ app.delete("/sunglasses/me/cart/delete", function (request, response) {
   if (!item) {
     response.status(404).send("This sunglasses is not in the cart");
   } else {
-    console.log(item);
     cart.pop(item);
     response.status(201).send("Item deleted from cart");
   }
 });
 
 // shopping cart - change quanity - POST /api/me/cart/:productId
-app.put("/sunglasses/me/cart/:productId/change", function (request, response) {
+//ex. {"itemId": "2", "action":"increase""}
+app.put("/sunglasses/me/cart/change/:productId", function (request, response) {
   const thisItemId = request.params.itemId;
   const item = cart.find((item) => {
     item.itemId === thisItemId;
   });
+
+  const action = request.body.action;
+
   if (!item) {
-    return response.end("This sunglasses is not in the cart");
+    return response.end(400, "This sunglasses is not in the cart");
+  } else if (action === "increase" || action === "decrese") {
+    if (action === "increase") {
+      item.quantityAdded += 1;
+    } else if (action === "decrease" && item.quantityAdded > 0) {
+      item.quantityAdded -= 1;
+    }
+    response.status(201).send("quantity changed");
   } else {
+    response.status(400).json({ error: 'Bad Request' });
   }
 });
-
-//create server
-// http
-//   .createServer(function (request, response) {
-//     myRouter(request, response, finalHandler(request, response));
-//   })
 
 app.listen(PORT, () => {
   console.log(`listening on ${PORT}`);

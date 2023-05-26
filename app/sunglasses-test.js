@@ -13,7 +13,7 @@ chai.use(chaiHttp);
 
 const sunglassesData = require("../data.json");
 
-describe("Sunglasses API ", () => {
+describe("Sunglasses API", () => {
   describe("GET /sunglasses", () => {
     it("should return an array of sunglasses", (done) => {
       chai
@@ -22,8 +22,12 @@ describe("Sunglasses API ", () => {
         .end((err, res) => {
           expect(err).to.be.null;
           expect(res).to.have.status(200);
-          expect(res).to.be.an("array");
           expect(res).to.be.json;
+          expect(res.body).to.be.an("array");
+          res.body.forEach((sunglasses) => {
+            expect(sunglasses).to.have.property("name");
+            expect(sunglasses).to.have.property("brand");
+          });
           done();
         });
     });
@@ -35,7 +39,7 @@ describe("Individual sunglasses info", () => {
     it("should return an object of detaild of the sunglasses return", (done) => {
       chai
         .request(app)
-        .get("/sunglasses")
+        .get("/sunglasses/")
         .end((err, res) => {
           expect(err).to.be.null;
           expect(res).to.have.status(200);
@@ -47,27 +51,18 @@ describe("Individual sunglasses info", () => {
   });
 });
 
-describe("creat login", () => {
+describe("login call", () => {
   describe("POST /sunglasses/login", () => {
-    it("should create an new account", () => {
-      //this could be wrong
-      const newAccount = {
-        first_name: "1",
-        last_name: "2",
-        email: "beck.com",
-        userId: "123",
-        username: "beck",
-        password: "456",
-      };
-
+    it("should check if an account exists", (done) => {
       chai
         .request(app)
         .post("/sunglasses/login")
-        //?
-        .send(newAccount)
+        .send({
+          username: "John1",
+          password: "56789",
+        })
         .end((err, res) => {
-          expect(err).to.be.null;
-          expect(res).to.have.status(201);
+          expect(res).to.have.status(200);
           expect(res).to.be.an("object");
           expect(res).to.be.json;
           // Additional assertions for the response body, if needed
@@ -77,7 +72,6 @@ describe("creat login", () => {
   });
 });
 
-//dont think i need this
 // describe("User profile", () => {
 //   describe("GET /sunglasses/me");
 //   it("should return a user profile", (done) => {
@@ -157,29 +151,28 @@ describe("creat login", () => {
 //   });
 // });
 
-// describe("Add item to shopping cart", () => {
-//   describe("POST /sunglasses/me/add/:itemId", () => {
-//     it("should add an item to the cart", (done) => {
-//       const newItem = {
-//         brand: "Some Brand",
-//         name: "Some Name",
-//       };
+describe("Add item to shopping cart", () => {
+  describe("POST /sunglasses/me/add", () => {
+    it("should add an item to the cart", (done) => {
+      const newItem = {
+        brand: "Some Brand",
+        name: "Some Name",
+      };
 
-//       chai
-//         .request(app)
-//         .post("/sunglasses/me/add/1")
-//         .send(newItem)
-//         .end((err, res) => {
-//           expect(err).to.be.null;
-//           expect(res).to.have.status(201);
-//           expect(res).to.be.an("array");
-//           expect(res).to.be.json;
-//           // Additional assertions for the response body, if needed
-//           done();
-//         });
-//     });
-//   });
-// });
+      chai
+        .request(app)
+        .post("/sunglasses/me/add")
+        .send(newItem)
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(201);
+          expect(res).to.be.an("object");
+          expect(res).to.be.json;
+          done();
+        });
+    });
+  });
+});
 
 // describe("Delete item from shopping cart", () => {
 //   describe("DELETE /sunglasses/me/cart/:productId", () => {
