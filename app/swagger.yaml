@@ -1,0 +1,181 @@
+swagger: '2.0'
+info:
+  title: Sunglasses store
+  description: An API to support the sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /sunglasses:
+    get:
+      summary: search 
+      description: |
+        This end point allows user to search the sunglasses
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      tags:
+        - Glasses
+      responses:
+        '200':
+          description: |
+            An array of sunglasses
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Glasses'
+        default:
+          description: Unexpected error
+          schema:
+              $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: User login
+      description: |
+        Endpoint for user login.
+      tags:
+        - Login
+      responses:
+        '200':
+          description: Login info for a user
+          schema:
+            $ref: '#/definitions/Login'
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the user that has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: |
+            Profile information for a user
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+  /me/glasses/{id}/add:
+    post:
+      summary: Add a sunglasses to the cart
+      description: |
+        This endpoint allows you add a sunglasses to the cart
+      parameters:
+        - name: id
+          in: path
+          description: The id of the sunglasse to add
+          required: true
+          type: string
+      tags:
+        - Add to cart
+      responses:
+        '200':
+          description: Add to cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /checkout:
+    post:
+      summary: Checkout
+      description: |
+        This endpoint allows users to checkout their items.
+      parameters:
+        - name: checkoutRequest
+          in: body
+          description: The request body containing cart and user information.
+          required: true
+          schema:
+            $ref: '#/definitions/CheckoutRequest'
+      tags:
+        - Checkout
+      responses:
+        '200':
+          description: Successful checkout
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions: 
+  Glasses: 
+    type: object
+    properties: 
+      brand: 
+        type: string
+        description: |
+          The brand of the sunglasses. 
+      name: 
+        type: string
+        description: |
+          The name of the sunglasses.
+      itemId: 
+        type: string 
+        description: |
+          The unique identifier of the item being added. to the cart.
+      price: 
+        type: integer
+        description: |
+          The price of the sunglasses.
+      imageURL:
+        type: string
+        description: |
+          The URL for the image representing the item.
+      quantityAvailable: 
+        type: integer
+        description: |
+          the quantity of the sunglasses available.
+      quantityAdded: 
+        type: integer
+        description: the quantity of sunglasses added.
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: |
+          First name of the user.
+      last_name:
+        type: string
+        description: |
+          Last name of the user.
+      email:
+        type: string
+        description: |
+          Email address of the user
+  CheckoutRequest:
+    type: object
+    properties:
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/Glasses'
+      user:
+        $ref: '#/definitions/User'
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: |
+          The username or email of the user.
+      password:
+        type: string
+        description: |
+          The password for authentication.
+  Error:
+    type: object
+    properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        fields:
+          type: string
