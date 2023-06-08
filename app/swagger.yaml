@@ -1,0 +1,12 @@
+swagger: "2.0"
+info:
+  description: "This is a sunglasses store server."
+  version: "1.0.0"
+  title: "Swagger Sunglasses 2.0"
+host: "api.sunglasses.com"
+schemes:
+  -http
+basePath: /v1
+produces: 
+  -application/json
+paths:
