@@ -1,0 +1,291 @@
+# this is an example of the Sunglasses API
+# as a demonstration of an API spec in YAML
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses store
+  version: "1.0.0"
+# the domain of the service
+host: api.sunglasses.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /api/v1
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        Returns a list of brands
+      tags:
+        - Brands
+      parameters:
+        - name: brand
+          in: query
+          description: Search for brand
+          required: false
+          type: string
+      responses:
+        200:
+          description: Successful
+          schema:
+            items:
+              $ref: "#/definitions/Brand"
+        404:
+          description: Brand not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{brandId}/products:
+    get:
+      summary: Products of a specific brand
+      description: |
+        Returns a list of products given a specific brand id
+      tags:
+        - Brands
+      parameters:
+        - name: brandId
+          in: path
+          description: Search for products by brandId
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful
+          schema:
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: Brand id not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: Products
+      description: |
+        Returns a list of products
+      tags:
+        - Products
+      responses:
+        200:
+          description: Successful
+          schema:
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: Products not found
+        default:
+          description: Unexpected Error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: Returns user cart
+      description: |
+        Returns information that is in the User's cart
+      tags:
+        - User
+      responses:
+        200:
+          description: Cart information for a user
+          schema:
+            $ref: "#/definitions/User"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add product to user cart
+      description: |
+        Add product information to User's cart
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: query
+          description: The id of the product to add to cart
+          required: true
+          type: string
+      responses:
+        200:
+          description: Add to cart is successful
+        default:
+          description: Unexpected error
+  /me/cart/{productId}:
+    delete:
+      summary: Removes product from cart
+      description: |
+        Removes a product from a user's cart by using the product id
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product being removed
+          required: true
+          type: string
+      responses:
+        200:
+          description: Remove from cart is successful
+        default:
+          description: Unexpected error
+    post:
+      summary: Updates the a product in cart
+      description: |
+        Updates the quantity of a product in the user cart by product id
+      tags:
+        - User
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product being updated
+          required: true
+          type: string
+      responses:
+        200:
+          description: Product update successful
+        default:
+          description: Unexpected error
+  /user/login:
+    get:
+      summary: Logs user into the system
+      description: ""
+      tags:
+        - User
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: false
+          type: string
+        - name: password
+          in: query
+          description: The password for login
+          required: false
+          type: string
+      responses:
+        200:
+          description: Successful
+        400:
+          description: Invalid username/password
+        default:
+          description: Unexpected error
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand.
+      name:
+        type: string
+        description: The name of the brand.
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a product.
+      categoryId:
+        type: string
+        description: Unique identifier for the category of a product.
+      name:
+        type: string
+        description: The name of the product.
+      description:
+        type: string
+        description: A description of the product.
+      price:
+        type: integer
+        format: int32
+        description: The price for the product.
+      imageUrls:
+        description: List of urls for pictures of the product.
+        type: array
+        items:
+          type: string
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the user.
+      cart:
+        description: Array of product objects in the cart.
+        type: array
+        items:
+          type: object
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
+      email:
+        type: string
+        description: User's email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+      registered:
+        type: string
+      phone:
+        type: string
+      cell:
+        type: string
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+          medium:
+            type: string
+          thumbnail:
+            type: string
+      nat:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
