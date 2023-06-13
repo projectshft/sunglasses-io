@@ -30,7 +30,7 @@ let server = http.createServer(function (request, response) {
   fs.readFile("./initial-data/brands.json", "utf-8", (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    console.log(`Server Setup: ${brands.length} stores loaded`);
+    console.log(`Server Setup: ${brands.length} brands loaded`);
   })
   
   fs.readFile("./initial-data/products.json", "utf-8", (error, data) => {
@@ -53,5 +53,61 @@ myRouter.get("/brands", function(request, response) {
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(brands));
 });
+
+myRouter.get("/brands/:id/products", function(request, response) {
+// filter function to find products with a specific brand id
+  const foundProducts = products.filter((product=>product.categoryId == request.params.id))
+
+  if (!foundProducts) {
+    response.writeHead(404);
+    return response.end("Products not found");
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(foundProducts));
+});
+
+myRouter.get("/products", function(request, response) {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(products));
+});
+
+myRouter.get("/me/cart", function(request, response) {
+  const userCart = users[0].cart
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(userCart));
+});
+
+myRouter.post("/me/cart", function(request, response) {
+  const userCart = users[0].cart;
+  const addedProduct = request.body;
+
+  if (!addedProduct.quantity) {
+    addedProduct.quantity = 1
+  } else {
+    addedProduct.quantity += 1
+  }
+
+  userCart.push(addedProduct);
+  
+  response.writeHead(200, { "Content-Type": "application/json" });
+  return response.end(JSON.stringify(userCart));
+})
+
+myRouter.delete("/me/cart/:productId", function(request, response) {
+  const userCart = request.body;
+  const foundProduct = userCart.filter((product=>product.id == request.params.productId));
+
+  if (!foundProduct) {
+    response.writeHead(404);
+    return response.end("Product Not Found");
+  }
+
+  const updatedCart = userCart.filter((product=>product.id !== request.params.productId));
+
+  response.writeHead(200, { "Content-Type": "application/json"});
+  return response.end(JSON.stringify(updatedCart));
+})
 
 module.exports = server;
