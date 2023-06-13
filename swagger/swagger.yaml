@@ -22,12 +22,6 @@ paths:
         Returns a list of brands
       tags:
         - Brands
-      parameters:
-        - name: brand
-          in: query
-          description: Search for brand
-          required: false
-          type: string
       responses:
         200:
           description: Successful
