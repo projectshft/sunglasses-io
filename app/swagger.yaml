@@ -210,7 +210,7 @@ definitions:
           lastName:
             type: string
             description: last name of user
-      location:
+      Location:
         type: object
         properties:
           street:
@@ -229,6 +229,52 @@ definitions:
             type: string
             description: email of user
           login:
+            $ref: '#/definition/User_login'
+          dob: 
+            type: string
+            description: users birthday
+          registered:
+            type: string
+            description: users registration date/time
+          phone: 
+            type: string
+            description: users phone number
+          cell:
+            type: string
+            description: users cell number
+          picture:
+            $ref: '#/description/User_picture'
+          nat:
+            type: string
+            description: users nationality
+        Login:
+          type: object
+          properties:
+            username:
+              type: string
+              description: username
+            password: 
+              type: string
+              description: password
+        Cart: 
+          type: object
+          properties:
+            id:
+              type: string
+              description: unique id of product
+            name:
+              type: string
+              description: name of product
+            price:
+              type: integer
+              description: price of item
+            total price:
+              type: integer
+              description: total price of item
+
+
+
+          
       
       
 
