@@ -146,7 +146,7 @@ paths:
           description: Product update successful
         default:
           description: Unexpected error
-  /user/login:
+  /api/login:
     get:
       summary: Logs user into the system
       description: ""
