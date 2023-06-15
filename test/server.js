@@ -1,5 +1,3 @@
-// Bring in chai
-// Bring in server
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let chaiThings = require("chai-things");
@@ -10,7 +8,6 @@ chai.use(chaiHttp);
 chai.use(chaiThings);
 
 let testToken = null;
-
 
 describe("Brands", () => {
   // GET brands test
@@ -233,24 +230,36 @@ describe("User", () => {
       chai
         .request(server)
         .delete(`/me/cart/${productId}?accessToken=${testToken}`)
-        //.send(cart)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.not.have.property("id", productId)
+          res.body.should.not.have.property("id", productId);
           done();
         });
     });
 
     // test error if user is not logged in
     it("should return an error if not logged in", (done) => {
+      const productId = "1";
+
       chai
         .request(server)
-        .post(`/me/cart?accessToken=`)
+        .post(`/me/cart/${productId}?accessToken=`)
         .end((err, res) => {
           res.should.have.status(401);
           done();
         });
-    });    
+    });   
+    
+    it("should return an error if product with the specified id is not found", (done) => {
+      productId = "20";
+      chai
+        .request(server)
+        .post(`/me/cart/${productId}?accessToken=${testToken}`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
   });
 
   // POST change quantity of product in cart test
@@ -265,7 +274,7 @@ describe("User", () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
-          res.body.should.contain.a.thing.with.property("quantity", 2)
+          res.body.should.contain.a.thing.with.property("quantity", 2);
           done();
         });
     });
@@ -280,5 +289,16 @@ describe("User", () => {
           done();
         });
     }); 
+
+    it("should return an error if product with the specified id is not found", (done) => {
+      productId = "20";
+      chai
+        .request(server)
+        .post(`/me/cart/${productId}?accessToken=${testToken}`)
+        .end((err, res) => {
+          res.should.have.status(404);
+          done();
+        });
+    });
   });
 });

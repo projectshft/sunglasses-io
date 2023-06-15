@@ -25,21 +25,21 @@ let server = http.createServer(function (request, response) {
 }).listen(PORT, error => {
   if (error) {
     return console.log("Error on Server Startup: ", error);
-  }
+  };
 
   // Load brands into server
   fs.readFile("./initial-data/brands.json", "utf-8", (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
     console.log(`Server Setup: ${brands.length} brands loaded`);
-  })
+  });
   
   // Load products into server
   fs.readFile("./initial-data/products.json", "utf-8", (error, data) => {
     if (error) throw error;
     products = JSON.parse(data);
     console.log(`Server Setup: ${products.length} products loaded`);
-  })
+  });
   
   // Load users into server
   fs.readFile("./initial-data/users.json", "utf-8", (error, data) => {
@@ -65,10 +65,10 @@ myRouter.get("/brands/:id/products", function(request, response) {
   if (!brand) {
     response.writeHead(404);
     return response.end("Brand not found");
-  }
+  };
 
   // filter function to find products with a specific brand id
-  const foundProducts = products.filter((product=>product.categoryId == request.params.id))
+  const foundProducts = products.filter((product=>product.categoryId == request.params.id));
 
   // header for successful status and returns products with specific brand ID
   response.writeHead(200, { "Content-Type": "application/json" });
@@ -110,7 +110,7 @@ myRouter.post("/login", function(request, response) {
         username: user.login.username,
         lastUpdated: new Date(),
         token: uid(16)
-      }
+      };
       accessTokens.push(newAccessToken);
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify(newAccessToken));
@@ -181,7 +181,7 @@ myRouter.post("/me/cart", function(request, response) {
     addedProduct.quantity = 1
   } else {
     addedProduct.quantity += 1
-  }
+  };
 
   // add product to user's cart
   userCart.push(addedProduct);
@@ -250,7 +250,7 @@ myRouter.post("/me/cart/:productId", function(request, response) {
   };
 
   // plus 1 quantity of desired product
-  foundProduct.quantity += 1
+  foundProduct.quantity += 1;
     
   response.writeHead(200, { "Content-Type": "application/json" });
   return response.end(JSON.stringify(userCart));
