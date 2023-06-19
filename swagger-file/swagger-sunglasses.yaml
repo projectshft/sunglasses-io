@@ -1,0 +1,356 @@
+# this is an example of the Sunglass Store API
+# as a demonstration of an API spec in YAML
+swagger: "2.0"
+info:
+  title: "Sunglasses Website Store API"
+  description: "An API to support the sunglasses website platform"
+  version: "1.0.0"
+# the domain of the service
+host: "localhost:3001"
+# will be prefixed to all paths
+basePath: "/apiv1"
+produces:
+  - "application/json"
+tags:
+  - name: "brands"
+    description: "Everything about our sunglass brands"
+  - name: "products"
+    description: "Everything about a specific sunglass product"
+  - name: "user"
+    description: "Everything about our current user"
+# array of all schemes that your API supports
+schemes:
+  - "https"
+paths:
+  /brands:
+    get:
+      tags:
+        - "brands"
+      summary: "Sunglass Brands"
+      description: |
+        The Brands endpoint returns information about the available sunglass brands offered by the store website.
+      parameters:
+        - name: "query"
+          in: "query"
+          description: "Search sunglass brands"
+          required: false
+          type: "string"
+      responses:
+        "200":
+          description: "An array of brands"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brands"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Brand Not Found"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - "brands"
+      summary: "Specific sunglass brand products"
+      description: |
+        The products of a specific Brand endpoint returns information about the available sunglass products based on the id of the brand offered by the store website.
+      parameters:
+        - name: "id"
+          in: "path"
+          description: "Specific sunglass brand id products"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "An array of specific sunglass brand id products"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Products"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Items Not Found"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      tags:
+        - "products"
+      summary: "All available sunglass products"
+      description: |
+        The products endpoint returns information about the available sunglass products offered by the store website.
+      responses:
+        "200":
+          description: "An array of products"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Products"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Product Not Found"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - "user"
+      summary: "User login"
+      description: |
+        The login endpoint returns access token information to authorized usage of the store website application.
+      parameters:
+        - name: "username"
+          in: "query"
+          description: "User name or email to login"
+          required: false
+          type: "string"
+        - name: "password"
+          in: "query"
+          description: "Unique phrase authentication"
+          required: false
+          type: "string"
+      responses:
+        "200":
+          description: "Successful access token"
+          schema:
+            type: "string"
+            items:
+              $ref: "#/definitions/User"
+        "400":
+          description: "Bad Request"
+        "401":
+          description: "Unauthorized Login Username and/or Password"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      tags:
+        - "user"
+      summary: "Login user's cart"
+      description: |
+        The login user cart endpoint returns the current contents information of the user's cart.
+      responses:
+        "200":
+          description: "An array of products in the login user's cart successful"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Products"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - "user"
+      summary: "Add products to the login user's cart"
+      description: |
+        The add products to login user cart endpoint returns the contents information added by user.
+      parameters:
+        - name: "productId"
+          in: "body"
+          description: "Specific sunglass brand id products added to cart by login user"
+          required: true
+          schema:
+            $ref: "#/definitions/Products"
+      responses:
+        "200":
+          description: "An array of products added to the login user's cart successful"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Products"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - "user"
+      summary: "Delete products from the login user's cart"
+      description: |
+        The delete products to login user cart endpoint removes the specific contents with matching product id by user.
+      parameters:
+        - name: "productId"
+          in: "path"
+          description: "Specific sunglass product deleted from cart by login user"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Product removed from the login user's cart successful"
+          schema:
+            items:
+              $ref: "#/definitions/Cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - "user"
+      summary: "Edit and update product quantity in the login user's cart"
+      description: |
+        The edit and update product quantity to login user cart endpoint allows the user to modify the cart contents information.
+      parameters:
+        - name: "productId"
+          in: "path"
+          description: "Specific sunglass product quantity is updated in the cart by login user"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "Product quantity updated in the login user's cart successful"
+          schema:
+            items:
+              $ref: "#/definitions/Cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brands:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Unique identifier representing a specific brand"
+      name:
+        type: "string"
+        description: "Unique name representing a specific brand"
+  Products:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        description: "Unique identifier representing a specific product"
+      categoryId:
+        type: "string"
+        description: "Unique identifier representing a specific category the product belongs to"
+      name:
+        type: "string"
+        description: "Unique name representing a specific product"
+      description:
+        type: "string"
+        description: "Text description of a specific product"
+      price:
+        type: "integer"
+        format: "int32"
+        description: "Price of a specific product"
+      imageURLs:
+        type: "array"
+        items:
+          type: "string"
+          format: "uri"
+          description: "The URL for the image representing a specific product"
+  User:
+    type: "object"
+    properties:
+      gender:
+        type: "string"
+        description: "The gender of the login user"
+      cart:
+        type: "array"
+        description: "The cart of the login user"
+        items:
+          type: "object"
+          description: "The current contents of the login user's cart"
+      name:
+        type: "object"
+        description: "The name of the login user"
+        properties:
+          title:
+            type: "string"
+          first:
+            type: "string"
+          last:
+            type: "string"
+      location:
+        type: "object"
+        properties:
+          street:
+            type: "string"
+            description: "The current street address of the login user"
+          city:
+            type: "string"
+            description: "The current city of the login user"
+          state:
+            type: "string"
+            description: "The current state of the login user"
+          postcode:
+            type: "integer"
+            format: "int32"
+            description: "The current zip code of the login user"
+      email:
+        type: "string"
+        format: "email"
+        description: "The email of the login user"
+      login:
+        type: "object"
+        properties:
+          username:
+            type: "string"
+            description: "Unique username or email identifier representing the user"
+          password:
+            type: "string"
+            format: "password"
+            description: "Unique phrase authentication"
+      dob:
+        type: "string"
+        format: "date-time"
+        description: "The birth date of the login user"
+      registered:
+        type: "string"
+        format: "date-time"
+        description: "The date and time when the login user created account"
+      phone:
+        type: "string"
+        description: "The current phone number of the login user"
+      cell:
+        type: "string"
+        description: "The current cell phone number of the login user"
+      picture:
+        type: "object"
+        properties:
+          large:
+            type: "string"
+            format: "uri"
+            description: "The URL of a large profile picture of the login user"
+          medium:
+            type: "string"
+            format: "uri"
+            description: "The URL of a medium profile picture of the login user"
+          thumbnail:
+            type: "string"
+            format: "uri"
+            description: "The URL of a thumbnail profile picture of the login user"
+      nat:
+        type: "string"
+        description: "The current country two-letter code of the login user"
+  Cart:
+    allOf:
+      - $ref: "#/definitions/Products"
+    type: "object"
+    description: "Current product contents of login user's cart"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
+      fields:
+        type: "string"
