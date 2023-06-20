@@ -1,0 +1,294 @@
+swagger: "2.0"
+info:
+  description: This is a sunglasses store server.
+  version: "1.0.0"
+  title: Swagger Sunglasses 2.0
+host: api.sunglasses.com
+schemes:
+  -http
+basePath: /api
+produces: 
+  -application/json
+paths:
+  /brands:
+    get:
+      summary: Lists all brands of sunglasses
+      description: |
+        The brands endpoints returns all the brands of sunglasses
+      tags: brands
+      parameters:
+        name: brand
+        in: query
+        description: brands available for filtering
+        required: true
+        type: string
+      responses:
+        "200":
+          description: array of brands
+          schema:
+          type: array
+          items:
+          $ref: "#/definitions/Brands"
+        "default":
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/brands/:id/products:
+    get:
+      summary: sunglasses from a specific brand based on id
+      descriptions: |
+        The endpoint displays products from a selected brand
+      tags: brand id
+      parameters:
+        name: brand id
+        in: path
+        description: id of brand selected to display
+        required: true
+       type: string
+      responses:
+        "200":
+          description: all products of selected brand id
+          schema:
+          type: array
+          items:
+         $ref: "#/definitions/brands/products"
+        "default":
+            description: Unexpected error
+            schema:
+            $ref: "#/definitions/Error"
+  /products
+    get:
+      summary: all products
+      descriptions: |
+        The endpoint displays all products
+      ags: products
+      parameters:
+        name: product
+        in: path
+        description: all products
+        required: true
+        type: string
+     responses:
+        "200":
+         description: success
+         schema:
+         $ref: "#/definitions/Products"
+        "default":
+          description: Unexpected error
+          schema:
+          $ref: "#/definitions/Error"
+  /login
+    post:
+      summary: user login
+      description: |
+        a user can login to account
+      tags: login
+      parameters:
+        name: username
+        in: body
+        description: login credentals entered
+        required: false
+      responses: 
+        "200":
+          description: user login
+          schema:
+          $ref: "#/definitions/Login"
+        "400":
+          description: invalid username/password
+          schema:
+          $ref: "#/definitions/Error"
+  /me/cart
+    get:
+      summary: user's cart
+      description: |
+        user can view their cart
+      tags: cart
+      responses:
+        "200":
+          description: user cart
+          schema:
+          $ref: "#/definitions/me/Cart"
+        "default":
+          description: Unexpected error
+          schema:
+          $ref: "#/definitions/Error"
+    post:
+      summary: add to cart
+      description: |
+        adds products to user's cart
+      responses: 
+        "200":
+          description: product added to user cart
+          schema:
+          $ref: "#/definitions/me/Cart"
+        "default":
+          description: Unexpected error
+          schema:
+          $ref: "#/definitions/Error"
+  /me/cart/:productId
+    delete:
+      summary: delete from cart
+      description: delete a product from a user's cart
+      parameters: 
+        name: productId
+        in: path
+        description: Id of product to be deleted
+        required: false
+        type: number
+      responses:
+        "200":
+          description: product deleted from cart
+          schema:
+          type: array
+          $ref: "#/definitions/Cart"
+        "default":
+          description: Unexpected error
+          schema:
+          $ref: "#/definitions/Error"
+    post:
+      summary: change quanity
+      description: |
+        change the quantity of products in the cart
+      parameters:
+        name: product Id
+        in: path
+        description: Id of product
+        required: true
+        type: number
+      responses:
+        "200":
+          description: change quantity of product in cart
+          schema:
+          type: array
+          $ref: "#/definitions/Cart"
+        "default":
+          description: Unexpected error
+          schema:
+          $ref: "#/definitions/Error"
+securityDefinitions:
+  basicAuth:
+    type: basic
+definitions:
+  Brands:
+    type: object
+    properties:
+    id:
+      type: string
+      description: unique identifier for brand of product
+    name:
+      type: string
+      description: the name of the brand
+  Products:
+    type: object
+    properties:
+    id:
+      type: string
+      description: unique identifier for the specific product
+    categoryId: 
+      type: string
+      description: unique identifier of the product that matches a brand
+    name:
+      type: string
+      description: sunglass style
+    price: 
+      type: integer
+      description: price of the sunglasses
+    imageUrls:
+      type: array
+      description: images of the product
+  Users: 
+    type: object
+    properties:
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: title of user
+          firstName:
+            type: string
+          lastName:
+            type: string
+            description: last name of user
+      Location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: street address of user
+          city:
+            type: string
+            description: city of user
+          state: 
+            type: string
+            description: state of user
+          postcode:
+            type: string
+            description: postcode of user
+          email:
+            type: string
+            description: email of user
+          login:
+            $ref: '#/definition/User_login'
+          dob: 
+            type: string
+            description: users birthday
+          registered:
+            type: string
+            description: users registration date/time
+          phone: 
+            type: string
+            description: users phone number
+          cell:
+            type: string
+            description: users cell number
+          picture:
+            $ref: '#/description/User_picture'
+          nat:
+            type: string
+            description: users nationality
+        Login:
+          type: object
+          properties:
+            username:
+              type: string
+              description: username
+            password: 
+              type: string
+              description: password
+        Cart: 
+          type: object
+          properties:
+            id:
+              type: string
+              description: unique id of product
+            name:
+              type: string
+              description: name of product
+            price:
+              type: integer
+              description: price of item
+            total price:
+              type: integer
+              description: total price of item
+
+
+
+          
+      
+      
+
+
+
+
+      
+        
+
+
+        
+
+
+
+
+
+
