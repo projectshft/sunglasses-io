@@ -61,7 +61,7 @@ describe('/POST Cart', () => {
     var agent = chai.request.agent(server)
     agent
     .post('/login')
-    .send(login_details)
+    .send(login_info)
     done()
     .then(function (res) {
       const token = res.body[0].token;
@@ -84,7 +84,7 @@ describe('/POST Cart', () => {
       var agent = chai.request.agent(server)
       agent
       .post('/login')
-      .send(login_details)
+      .send(login_info)
       done()
       .then(function (res) {
         const token = res.body[0].token;
