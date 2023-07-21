@@ -9,7 +9,6 @@ var uid = require('rand-token').uid;
 const PORT = 3001;
 
 //api key storage
-const VALID_API_KEYS = ["98738203-8dsj-0983-9f72-di29dk38djk3", "8di3k99l-5305-8dk3-1849-zjdf938jfj98"];
 const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 10000;
 
 //state-holding variables, cart is kept inside currentUser via /POST /api/me/cart
