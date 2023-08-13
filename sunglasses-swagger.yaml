@@ -1,0 +1,201 @@
+swagger: '2.0'
+info:
+  title: Sunglasses
+  description: An API to support the Sunglasses store website
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: Returns a list of brands.
+      tags: 
+        - brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{id}/products:
+    get:
+      summary: Sunglasses from a specific brand
+      description: displays products from a specific brand
+      tags:
+        - brand id
+      parameters:
+      - in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        '200':
+          description: An array of products from a brand id
+          schema:
+            $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Products
+      description: Return a list of products
+      tags:
+      - products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Login
+      description: User login
+      tags:
+      - login
+      responses:
+        '200':
+          description: User login 
+          schema:
+            $ref: '#/definitions/Login'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Cart
+      description: Returns a list of products in the users cart
+      tags:
+      - cart
+      responses:
+        '200':
+          description: An array of products in the cart
+          schema: 
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add to Cart
+      description: Add a product to the users cart
+      tags:
+      - addToCart
+      responses:
+        '200':
+          description: Product added success
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      summary: delete from cart
+      description: delete a product from a user's cart
+      parameters: 
+      - in: path
+        name: productId
+        required: true
+        type: integer
+      responses:
+        '200':
+          description: product deleted from cart
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: change quanity
+      description: change the quantity of products in the cart
+      parameters:
+      - in: path
+        name: productId
+        description: Id of product
+        required: true
+        type: number
+      responses:
+        '200':
+          description: change quantity of product in cart
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a brand
+      products:
+        type: array
+        items: 
+          type: string
+        description: an array of all product from the specified brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the product
+      brandId:
+        type: string
+        description: Id that corresponds to the brand of the product
+      name:
+        type: string
+        description: Name of the product
+      price:
+        type: integer
+        description: Price of the product
+      imageURL:
+        type: array
+        items:
+          type: string
+        description: An array of image URLs for the product
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        description: Username
+      password:
+        type: string
+        description: Password
+  Cart:
+    type: object
+    properties:
+      products:
+        type: array
+        description: array of products in the cart
+        items:
+          type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
