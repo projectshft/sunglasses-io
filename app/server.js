@@ -17,15 +17,26 @@ let products = []
 let myRouter = Router()
 myRouter.use(bodyParser.json())
 
-http.createServer(function (request, response) {
-    myRouter(request, response, finalHandler(request, response))
-}).listen(PORT, () => {
-    // Load brands data
-    brands = JSON.parse(fs.readFileSync('brands.json', 'utf-8'))
+const server = http
+    .createServer(function (request, response) {
+        myRouter(request, response, finalHandler(request, response))
+    })
+    .listen(PORT, () => {
+        // Load brands data
+        brands = JSON.parse(
+            fs.readFileSync('../initial-data/brands.json', 'utf-8')
+        )
 
-    // Load users data
-    users = JSON.parse(fs.readFileSync('users.json', 'utf-8'))
+        // Load users data
+        users = JSON.parse(
+            fs.readFileSync('../initial-data/users.json', 'utf-8')
+        )
 
-    // Load products data
-    products = JSON.parse(fs.readFileSync('products.json', 'utf-8'))
-})
+        // Load products data
+        products = JSON.parse(
+            fs.readFileSync('../initial-data/products.json', 'utf-8')
+        )
+    })
+
+// Export for TDD
+module.exports = server
