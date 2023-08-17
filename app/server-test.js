@@ -3,6 +3,7 @@ let chaiHttp = require('chai-http')
 chai.use(chaiHttp)
 let server = require('./server.js')
 let should = chai.should()
+let expect = chai.expect
 
 // Reference chai-http documentation: https://www.chaijs.com/plugins/chai-http/
 describe('Server', () => {
