@@ -7,6 +7,7 @@ var bodyParser = require('body-parser')
 var uid = require('rand-token').uid
 
 const PORT = 3001
+// const hostname = 'localhost'
 
 // Variables
 let brands = []
@@ -37,6 +38,28 @@ const server = http
             fs.readFileSync('../initial-data/products.json', 'utf-8')
         )
     })
+
+// GET brands
+myRouter.get('/api/brands', function (request, response) {
+    if (!brands) {
+        response.writeHead(404, 'error')
+        response.end()
+    } else {
+        response.writeHead(200, { 'Content-Type': 'application/json' })
+        return response.end(JSON.stringify(brands))
+    }
+})
+
+// GET products
+myRouter.get('api/products', function (request, response) {
+    if (!products) {
+        response.writeHead(404, 'error')
+        response.end()
+    } else {
+        response.writeHead(200, { 'Content-Type': 'application/json' })
+        return response.end(JSON.stringify(products))
+    }
+})
 
 // Export for TDD
 module.exports = server
