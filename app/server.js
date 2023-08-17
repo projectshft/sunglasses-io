@@ -18,26 +18,22 @@ let products = []
 let myRouter = Router()
 myRouter.use(bodyParser.json())
 
-const server = http
-    .createServer(function (request, response) {
-        myRouter(request, response, finalHandler(request, response))
-    })
-    .listen(PORT, () => {
-        // Load brands data
-        brands = JSON.parse(
-            fs.readFileSync('../initial-data/brands.json', 'utf-8')
-        )
+const server = http.createServer(function (request, response) {
+    myRouter(request, response, finalHandler(request, response))
+})
 
-        // Load users data
-        users = JSON.parse(
-            fs.readFileSync('../initial-data/users.json', 'utf-8')
-        )
+server.listen(PORT, () => {
+    // Load brands data
+    brands = JSON.parse(fs.readFileSync('../initial-data/brands.json', 'utf-8'))
 
-        // Load products data
-        products = JSON.parse(
-            fs.readFileSync('../initial-data/products.json', 'utf-8')
-        )
-    })
+    // Load users data
+    users = JSON.parse(fs.readFileSync('../initial-data/users.json', 'utf-8'))
+
+    // Load products data
+    products = JSON.parse(
+        fs.readFileSync('../initial-data/products.json', 'utf-8')
+    )
+})
 
 // GET brands
 myRouter.get('/api/brands', function (request, response) {
@@ -46,18 +42,18 @@ myRouter.get('/api/brands', function (request, response) {
         response.end()
     } else {
         response.writeHead(200, { 'Content-Type': 'application/json' })
-        return response.end(JSON.stringify(brands))
+        response.end(JSON.stringify(brands))
     }
 })
 
 // GET products
-myRouter.get('api/products', function (request, response) {
+myRouter.get('/api/products', function (request, response) {
     if (!products) {
         response.writeHead(404, 'error')
         response.end()
     } else {
         response.writeHead(200, { 'Content-Type': 'application/json' })
-        return response.end(JSON.stringify(products))
+        response.end(JSON.stringify(products))
     }
 })
 

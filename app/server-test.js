@@ -45,7 +45,7 @@ describe('Server', () => {
             chai.request(server)
                 .get('/api/products')
                 .end(function (err, res) {
-                    console.log(res)
+                    // console.log(res)
                     res._body.should.deep.equal([
                         {
                             id: '1',
