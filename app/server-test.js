@@ -184,4 +184,52 @@ describe('Server', () => {
                 })
         })
     })
+    describe('/GET Products/:id', () => {
+        it('it should GET all the prodcts in a specified brand', (done) => {
+            chai.request(server)
+                .get('/api/brands/1/products') // <= Get all the products from Oakley
+                .end(function (err, res) {
+                    // console.log(res._body)
+                    res._body.should.deep.equal([
+                        {
+                            id: '1',
+                            categoryId: '1',
+                            name: 'Superglasses',
+                            description: 'The best glasses in the world',
+                            price: 150,
+                            imageUrls: [
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                            ],
+                        },
+                        {
+                            id: '2',
+                            categoryId: '1',
+                            name: 'Black Sunglasses',
+                            description: 'The best glasses in the world',
+                            price: 100,
+                            imageUrls: [
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                            ],
+                        },
+                        {
+                            id: '3',
+                            categoryId: '1',
+                            name: 'Brown Sunglasses',
+                            description: 'The best glasses in the world',
+                            price: 50,
+                            imageUrls: [
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                            ],
+                        },
+                    ])
+                    done() // <= Call done to signal callback end
+                })
+        })
+    })
 })

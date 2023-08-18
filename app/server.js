@@ -57,5 +57,28 @@ myRouter.get('/api/products', function (request, response) {
     }
 })
 
+// GET products from a specified brand
+myRouter.get('/api/brands/:id/products', function (request, response) {
+    if (!products) {
+        response.writeHead(404, 'error')
+        response.end()
+    } else {
+        // Get the brand ID from the request
+        const brandId = request.params.id
+        // Make a new array of all theproducts from that brand ID
+        let brandProdArr = []
+        products.map((product) => {
+            if (product.categoryId === brandId) {
+                brandProdArr.push(product)
+                return
+            } else {
+                return
+            }
+        })
+        response.writeHead(200, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify(brandProdArr))
+    }
+})
+
 // Export for TDD
 module.exports = server
