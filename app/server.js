@@ -13,6 +13,7 @@ const PORT = 3001
 let brands = []
 let users = []
 let products = []
+let userIsLoggedIn = false
 
 // Setup Router
 let myRouter = Router()
@@ -77,6 +78,54 @@ myRouter.get('/api/brands/:id/products', function (request, response) {
         })
         response.writeHead(200, { 'Content-Type': 'application/json' })
         response.end(JSON.stringify(brandProdArr))
+    }
+})
+
+// POST Login
+// myRouter.post('/api/login', function (request, response) {
+//     // Make sure there is a username and password in the request
+//     if (request.body.username && request.body.password) {
+//         let user = users.find(
+//             (user) =>
+//                 user.login.username === username &&
+//                 user.login.password === password
+//         )
+//         if (!user) {
+//             response.writeHead(401, 'Invalid username or password')
+//             response.end()
+//         } else {
+//             userIsLoggedIn = true
+//             response.writeHead(200, { 'Content-Type': 'application/json' })
+//             response.end()
+//         }
+//     }
+// })
+
+myRouter.post('/api/login', (request, response) => {
+    // get credentials from post
+    const { username, password } = request.body
+    //check if username and password are not empty
+    if (username && password) {
+        let user = users.find(
+            // Find the user in the users file
+            (user) =>
+                user.login.username === username &&
+                user.login.password === password
+        )
+        if (user) {
+            // if the user exists
+            validUser = true
+            response.writeHead(200, { 'Content-Type': 'application/json' })
+            response.end()
+        } else {
+            // If credentials were entered but not found
+            response.writeHead(401, 'Invalid username or password')
+            response.end()
+        }
+    } else {
+        // if one or both of the username and password were not entered
+        response.writeHead(400, 'Incorrectly formatted response')
+        response.end()
     }
 })
 

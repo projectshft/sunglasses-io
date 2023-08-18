@@ -232,4 +232,22 @@ describe('Server', () => {
                 })
         })
     })
+    // POST /api/login
+    describe('/POST Login', () => {
+        it('it should login the user if credentials are a match', (done) => {
+            //set correct credentials to test with
+            let credentials = {
+                username: 'lazywolf342',
+                password: 'tucker',
+            }
+            chai.request(server)
+                .post('/api/login')
+                .send(credentials)
+                .end(function (err, res) {
+                    // console.log(res)
+                    res.should.have.status(200)
+                    done() // <= Call done to signal callback end
+                })
+        })
+    })
 })
