@@ -250,4 +250,85 @@ describe('Server', () => {
                 })
         })
     })
+    // GET /api/me/cart
+    describe('/GET Cart', () => {
+        it('it should return the cart of the logged in user', (done) => {
+            chai.request(server)
+                .get('/api/me/cart')
+                .end(function (err, res) {
+                    // console.log(res._body)
+                    res.should.have.status(200)
+                    // res._body.should.deep.equal([])
+                    done() // <= Call done to signal callback end
+                })
+        })
+    })
+    // POST /api/me/cart/:productId
+    describe('/POST item to users cart', () => {
+        it('it adds a product to the users cart', (done) => {
+            chai.request(server)
+                .post('/api/me/cart/2')
+                .end(function (err, res) {
+                    // console.log(res._body)
+                    res.should.have.status(200)
+                    res._body.should.deep.equal([
+                        {
+                            id: '2',
+                            categoryId: '1',
+                            name: 'Black Sunglasses',
+                            description: 'The best glasses in the world',
+                            price: 100,
+                            imageUrls: [
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                            ],
+                            qty: '1',
+                        },
+                    ])
+                    done() // <= Call done to signal callback end
+                })
+        })
+    })
+
+    // DELETE /api/me/cart/:productId
+    describe('/DELETE item from users cart', () => {
+        it('it deletes a product to the users cart', (done) => {
+            chai.request(server)
+                .delete('/api/me/cart/2')
+                .end(function (err, res) {
+                    // console.log(res._body)
+                    res.should.have.status(200)
+                    done() // <= Call done to signal callback end
+                })
+        })
+    })
+
+    // Change quantity of a product in the users cart
+    describe('/POST quantity of item in users cart', () => {
+        it('it changes the quantity of a product in the users cart', (done) => {
+            chai.request(server).post('/api/me/cart/4').end()
+            chai.request(server)
+                .post('/api/me/cart/4/3')
+                .end(function (err, res) {
+                    // console.log(res._body)
+                    res._body.should.deep.equal([
+                        {
+                            id: '4',
+                            categoryId: '2',
+                            name: 'Better glasses',
+                            description: 'The best glasses in the world',
+                            price: 1500,
+                            imageUrls: [
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                                'https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg',
+                            ],
+                            qty: '3',
+                        },
+                    ])
+                    done() // <= Call done to signal callback end
+                })
+        })
+    })
 })
