@@ -2,6 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const finalHandler = require('finalhandler');
 const queryString = require('querystring');
+const url = require('url');
 const Router = require('router');
 const bodyParser   = require('body-parser');
 const uid = require('rand-token').uid;
@@ -52,9 +53,29 @@ myRouter.get('/api/brands/:brandId/products', function(request, response) {
     }
     return acc;
   }, [])
-
   response.writeHead(200, { "Content-Type": "application/json" });
 	return response.end(JSON.stringify(brandProducts));
 })
+
+// Set up /api/products endpoint handler
+myRouter.get('/api/products', function(request, response) {
+  const queryParams = queryString.parse(url.parse(request.url).query);
+
+  // If search term provided, return only products that match
+  if (queryParams.query) {
+    let matchingProducts = products.filter((product) => 
+      product.name.includes(queryParams.query) || product.description.includes(queryParams.query));
+    response.writeHead(200, { "Content-Type": "application/json" });
+	  return response.end(JSON.stringify(matchingProducts));
+  }
+
+	// If no search term, return all products
+	response.writeHead(200, { "Content-Type": "application/json" });
+	return response.end(JSON.stringify(products));
+});
+
+// Set up /api/login endpoint handler
+// Set up /api/me/cart endpoint handler
+// Set up /api/me/cart/{productId} endpoint handler
 
 module.exports = server;

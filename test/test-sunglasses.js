@@ -82,7 +82,7 @@ describe('Products', () => {
 
       chai
         .request(server)
-        .get(`/api/products?q=${searchTerm}`)
+        .get(`/api/products?query=${searchTerm}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
