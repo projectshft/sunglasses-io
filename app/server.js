@@ -99,8 +99,10 @@ myRouter.get('/api/products', (request, response) => {
   if (queryParams.query) {
     const matchingProducts = products.filter(
       (product) =>
-        product.name.includes(queryParams.query) ||
-        product.description.includes(queryParams.query)
+        product.name.toLowerCase().includes(queryParams.query.toLowerCase()) ||
+        product.description
+          .toLowerCase()
+          .includes(queryParams.query.toLowerCase())
     );
     response.writeHead(200, { 'Content-Type': 'application/json' });
     return response.end(JSON.stringify(matchingProducts));

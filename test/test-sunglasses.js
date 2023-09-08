@@ -15,14 +15,14 @@ const users = require('../initial-data/users.json');
 describe('Brands', () => {
   // GET /api/brands
   describe('GET /api/brands', () => {
-    it('it should get all the brands', (done) => {
+    it('should get all the brands', (done) => {
       chai
         .request(server)
         .get('/api/brands')
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
-          res.body.length.should.be.eql(5);
+          res.body.length.should.eql(5);
           done();
         });
     });
@@ -82,6 +82,20 @@ describe('Products', () => {
 
     it('should get only products matching the search term if one is provided', (done) => {
       const searchTerm = 'Habanero';
+
+      chai
+        .request(server)
+        .get(`/api/products?query=${searchTerm}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.length.should.be.eql(1);
+          done();
+        });
+    });
+
+    it('should get products matching the search term even if different case', (done) => {
+      const searchTerm = 'HABANERO';
 
       chai
         .request(server)
