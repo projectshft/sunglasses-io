@@ -9,18 +9,21 @@ const { uid } = require('rand-token');
 
 const PORT = 3001;
 const TOKEN_VALIDITY_TIMEOUT = 30 * 60 * 1000;
+let brands = [];
+let products = [];
+let users = [];
 const accessTokens = [
   {
     username: 'yellowleopard753',
     lastUpdated: new Date(),
     token: 'oo5DD2jLOTLR9s5t'
+  },
+  {
+    username: 'lazywolf342',
+    lastUpdated: new Date(),
+    token: 'SjlNLkhNnA7DuCJb'
   }
 ];
-
-// Import data
-const brands = require('../initial-data/brands.json');
-const products = require('../initial-data/products.json');
-const users = require('../initial-data/users.json');
 
 // Set up router
 const myRouter = Router();
@@ -31,7 +34,30 @@ const server = http
   .createServer((request, response) => {
     myRouter(request, response, finalHandler(request, response));
   })
-  .listen(PORT);
+  .listen(PORT, (error) => {
+    if (error) {
+      return console.log('Error on Server Startup: ', error);
+    }
+
+    // Load data
+    fs.readFile('./initial-data/brands.json', (error, data) => {
+      if (error) throw error;
+      brands = JSON.parse(data);
+      console.log(`Server setup: ${brands.length} brands loaded`);
+    });
+
+    fs.readFile('./initial-data/products.json', (error, data) => {
+      if (error) throw error;
+      products = JSON.parse(data);
+      console.log(`Server setup: ${products.length} products loaded`);
+    });
+
+    fs.readFile('./initial-data/users.json', (error, data) => {
+      if (error) throw error;
+      users = JSON.parse(data);
+      console.log(`Server setup: ${users.length} users loaded`);
+    });
+  });
 
 // Set up /api/brands endpoint handler
 myRouter.get('/api/brands', (request, response) => {
@@ -232,7 +258,11 @@ myRouter.put('/api/me/cart/:productId', (request, response) => {
 
   // Otherwise, if request is valid, update product and return 200
   const currentUser = getCurrentUser(currentAccessToken);
-  currentUser.cart.filter((item) => item.id !== productId);
+  // const currentProduct = getProductById(productId);
+  const productToUpdate = currentUser.cart.find(
+    (item) => item.id === productId
+  );
+  Object.assign(productToUpdate, request.body);
   response.writeHead(200);
   return response.end();
 });

@@ -30,7 +30,7 @@ describe('Brands', () => {
 
   // GET /api/brands/{brandId}/products
   describe('GET /api/brands/{brandId}/products', () => {
-    it('it should get all the products of a given brand', (done) => {
+    it('should get all the products of a given brand', (done) => {
       chai
         .request(server)
         .get('/api/brands/1/products')
@@ -42,7 +42,7 @@ describe('Brands', () => {
         });
     });
 
-    it('it should return a 400 error if the brand ID is not a positive integer', (done) => {
+    it('should return a 400 error if the brand ID is not a positive integer', (done) => {
       chai
         .request(server)
         .get('/api/brands/a/products')
@@ -52,7 +52,7 @@ describe('Brands', () => {
         });
     });
 
-    it('it should return a 404 error if a given brand does not exist', (done) => {
+    it('should return a 404 error if a given brand does not exist', (done) => {
       chai
         .request(server)
         .get('/api/brands/6/products')
@@ -68,7 +68,7 @@ describe('Brands', () => {
 describe('Products', () => {
   // GET /api/products
   describe('GET /api/products', () => {
-    it('it should get all the products if no search term is provided', (done) => {
+    it('should get all the products if no search term is provided', (done) => {
       chai
         .request(server)
         .get('/api/products')
@@ -80,7 +80,7 @@ describe('Products', () => {
         });
     });
 
-    it('it should get only products matching the search term if one is provided', (done) => {
+    it('should get only products matching the search term if one is provided', (done) => {
       const searchTerm = 'Habanero';
 
       chai
@@ -156,7 +156,7 @@ describe('Cart', () => {
   describe('GET /api/me/cart', () => {
     beforeEach(() => {});
 
-    it('should return an empty array before any items are added', (done) => {
+    it('should return an empty array if the cart is empty', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
       const currentUser = users[0];
       currentUser.cart = [];
@@ -172,11 +172,9 @@ describe('Cart', () => {
         });
     });
 
-    it('should return an array with the added items after any are added', (done) => {
-      const accessToken = 'oo5DD2jLOTLR9s5t';
-      const currentUser = users[0];
-      const productToAdd = products[0];
-      currentUser.cart.push(productToAdd);
+    it('should return an array with the added items if the cart is not empty', (done) => {
+      const accessToken = 'SjlNLkhNnA7DuCJb';
+      const product = products[0];
 
       chai
         .request(server)
@@ -185,7 +183,7 @@ describe('Cart', () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
-          res.body.should.deep.eql([productToAdd]);
+          res.body.should.eql([product]);
           done();
         });
     });
@@ -219,7 +217,7 @@ describe('Cart', () => {
         });
     });
 
-    it('it should return a 400 error if the product ID is not a positive integer', (done) => {
+    it('should return a 400 error if the product ID is not a positive integer', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = { id: 'a' };
 
@@ -247,7 +245,7 @@ describe('Cart', () => {
         });
     });
 
-    it('it should return a 404 error if a given product does not exist', (done) => {
+    it('should return a 404 error if a given product does not exist', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = { id: '20' };
 
@@ -277,7 +275,7 @@ describe('Cart', () => {
         });
     });
 
-    it('it should return a 400 error if the product ID is not a positive integer', (done) => {
+    it('should return a 400 error if the product ID is not a positive integer', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = 'a';
 
@@ -303,7 +301,7 @@ describe('Cart', () => {
         });
     });
 
-    it('it should return a 404 error if a given product does not exist', (done) => {
+    it('should return a 404 error if a given product does not exist', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = '20';
 
@@ -321,12 +319,11 @@ describe('Cart', () => {
   describe('PUT /api/me/cart/{productId}', () => {
     it("should update an item from a user's cart given a product ID", (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
-      const productId = '1';
-      let updatedProduct;
+      const updatedProduct = { id: '1', quantity: 2 };
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .put(`/api/me/cart/${updatedProduct.id}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(200);
@@ -334,14 +331,13 @@ describe('Cart', () => {
         });
     });
 
-    it('it should return a 400 error if the product ID is not a positive integer', (done) => {
+    it('should return a 400 error if the product ID is not a positive integer', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
-      const productId = 'a';
-      let updatedProduct;
+      const updatedProduct = { id: 'a', quantity: 2 };
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .put(`/api/me/cart/${updatedProduct.id}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(400);
@@ -351,12 +347,11 @@ describe('Cart', () => {
 
     it('should return a 401 error if user is not logged in', (done) => {
       const accessToken = null;
-      const productId = '1';
-      let updatedProduct;
+      const updatedProduct = { id: '1', quantity: 2 };
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .put(`/api/me/cart/${updatedProduct.id}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(401);
@@ -364,14 +359,13 @@ describe('Cart', () => {
         });
     });
 
-    it('it should return a 404 error if a given product does not exist', (done) => {
+    it('should return a 404 error if a given product does not exist', (done) => {
       const accessToken = 'oo5DD2jLOTLR9s5t';
-      const productId = '12';
-      let updatedProduct;
+      const updatedProduct = { id: '20', quantity: 2 };
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .put(`/api/me/cart/${updatedProduct.id}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(404);
@@ -385,6 +379,7 @@ describe('Cart', () => {
 // GET /api/brands/:id/products
 // GET /api/products
 // POST /api/login
+
 // GET /api/me/cart
 // POST /api/me/cart
 // DELETE /api/me/cart/:productId
