@@ -8,7 +8,14 @@ const bodyParser = require('body-parser');
 const { uid } = require('rand-token');
 
 const PORT = 3001;
-const accessTokens = [];
+const TOKEN_VALIDITY_TIMEOUT = 30 * 60 * 1000;
+const accessTokens = [
+  {
+    username: 'yellowleopard753',
+    lastUpdated: new Date(),
+    token: 'oo5DD2jLOTLR9s5t'
+  }
+];
 
 // Import data
 const brands = require('../initial-data/brands.json');
@@ -38,24 +45,22 @@ myRouter.get('/api/brands/:brandId/products', (request, response) => {
   const { brandId } = request.params;
 
   // If brand ID parameter is invalid, return 400 error
-  if (!parseInt(brandId) || parseInt(brandId) <= 0) {
+  if (!isPositiveInteger(brandId)) {
     response.writeHead(400);
     return response.end('Bad request. ID must be an integer and larger than 0');
   }
 
   // If brand ID does not exist, return 404 error
-  if (!brands.find((brand) => brand.id === brandId)) {
+  if (!idExists(brandId, brands)) {
     response.writeHead(404);
     return response.end('A brand with the specified ID was not found');
   }
 
   // Otherwise, return all products for a given brand
-  const brandProducts = products.reduce((acc, product) => {
-    if (product.categoryId === brandId) {
-      acc.push(product);
-    }
-    return acc;
-  }, []);
+  const brandProducts = products.filter(
+    (product) => product.categoryId === brandId
+  );
+
   response.writeHead(200, { 'Content-Type': 'application/json' });
   return response.end(JSON.stringify(brandProducts));
 });
@@ -124,6 +129,150 @@ myRouter.post('/api/login', (request, response) => {
 });
 
 // Set up /api/me/cart endpoint handler
+// GET - get items in cart
+myRouter.get('/api/me/cart', (request, response) => {
+  const currentAccessToken = getValidToken(request);
+
+  if (!currentAccessToken) {
+    // If user is not logged in, return 401 error
+    response.writeHead(401, 'Not authorized');
+    return response.end();
+  }
+
+  // If user is logged in, get their info
+  const currentUser = getCurrentUser(currentAccessToken);
+
+  // Then return their cart
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  return response.end(JSON.stringify(currentUser.cart));
+});
+
+// POST - add item to cart
+myRouter.post('/api/me/cart', (request, response) => {
+  const currentAccessToken = getValidToken(request);
+
+  if (!currentAccessToken) {
+    // If user is not logged in, return 401 error
+    response.writeHead(401, 'Not authorized');
+    return response.end();
+  }
+
+  // If product ID is not a positive integer, return 400 error
+  if (!isPositiveInteger(request.body.id)) {
+    response.writeHead(400);
+    return response.end('Bad request. ID must be an integer and larger than 0');
+  }
+
+  // If product does not exist, return 404 error
+  if (!idExists(request.body.id, products)) {
+    response.writeHead(404);
+    return response.end('A product with the specified ID was not found');
+  }
+
+  // Otherwise, if request is valid, add product to cart and return 200
+  const currentUser = getCurrentUser(currentAccessToken);
+  currentUser.cart.push(getProductById(request.body.id));
+  response.writeHead(200);
+  return response.end();
+});
+
 // Set up /api/me/cart/{productId} endpoint handler
+// DELETE - delete item from cart
+myRouter.delete('/api/me/cart/:productId', (request, response) => {
+  const { productId } = request.params;
+  const currentAccessToken = getValidToken(request);
+
+  if (!currentAccessToken) {
+    // If user is not logged in, return 401 error
+    response.writeHead(401, 'Not authorized');
+    return response.end();
+  }
+
+  // If product ID is not a positive integer, return 400 error
+  if (!isPositiveInteger(productId)) {
+    response.writeHead(400);
+    return response.end('Bad request. ID must be an integer and larger than 0');
+  }
+
+  // If product does not exist, return 404 error
+  if (!idExists(productId, products)) {
+    response.writeHead(404);
+    return response.end('A product with the specified ID was not found');
+  }
+
+  // Otherwise, if request is valid, delete product from cart and return 200
+  const currentUser = getCurrentUser(currentAccessToken);
+  currentUser.cart.filter((item) => item.id !== productId);
+  response.writeHead(200);
+  return response.end();
+});
+
+// PUT - update item quantity in cart
+myRouter.put('/api/me/cart/:productId', (request, response) => {
+  const { productId } = request.params;
+  const currentAccessToken = getValidToken(request);
+
+  if (!currentAccessToken) {
+    // If user is not logged in, return 401 error
+    response.writeHead(401, 'Not authorized');
+    return response.end();
+  }
+
+  // If product ID is not a positive integer, return 400 error
+  if (!isPositiveInteger(productId)) {
+    response.writeHead(400);
+    return response.end('Bad request. ID must be an integer and larger than 0');
+  }
+
+  // If product does not exist, return 404 error
+  if (!idExists(productId, products)) {
+    response.writeHead(404);
+    return response.end('A product with the specified ID was not found');
+  }
+
+  // Otherwise, if request is valid, update product and return 200
+  const currentUser = getCurrentUser(currentAccessToken);
+  currentUser.cart.filter((item) => item.id !== productId);
+  response.writeHead(200);
+  return response.end();
+});
+
+//
+// Helper functions
+//
+
+// Check if request parameter is positive integer
+const isPositiveInteger = (parameter) =>
+  parseInt(parameter) && parseInt(parameter) > 0;
+
+// Check if ID exists in array
+const idExists = (id, array) => array.find((item) => item.id === id);
+
+// Process access token
+const getValidToken = (request) => {
+  const parsedUrl = url.parse(request.url, true);
+
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    const currentAccessToken = accessTokens.find(
+      (accessToken) =>
+        accessToken.token === parsedUrl.query.accessToken &&
+        new Date() - accessToken.lastUpdated < TOKEN_VALIDITY_TIMEOUT
+    );
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    }
+    return null;
+  }
+  return null;
+};
+
+// Get the logged in user
+const getCurrentUser = (accessToken) =>
+  users.find((user) => user.login.username === accessToken.username);
+
+// Get product by ID
+const getProductById = (id) => products.find((product) => product.id === id);
 
 module.exports = server;

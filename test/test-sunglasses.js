@@ -6,6 +6,11 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
+// Import data
+const brands = require('../initial-data/brands.json');
+const products = require('../initial-data/products.json');
+const users = require('../initial-data/users.json');
+
 // Brands
 describe('Brands', () => {
   // GET /api/brands
@@ -127,7 +132,7 @@ describe('Login', () => {
         });
     });
 
-    it('should return a 400 error if either username and/or password are missing', (done) => {
+    it('should return a 400 error if username and/or password are missing', (done) => {
       const loginInfo = {
         username: 'yellowleopard753',
         password: ''
@@ -149,14 +154,16 @@ describe('Login', () => {
 describe('Cart', () => {
   // GET /api/me/cart
   describe('GET /api/me/cart', () => {
-    beforeEach(() => {
-      user.cart = [];
-    });
+    beforeEach(() => {});
 
     it('should return an empty array before any items are added', (done) => {
+      const accessToken = 'oo5DD2jLOTLR9s5t';
+      const currentUser = users[0];
+      currentUser.cart = [];
+
       chai
         .request(server)
-        .get('/api/me/cart')
+        .get(`/api/me/cart?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
@@ -166,24 +173,29 @@ describe('Cart', () => {
     });
 
     it('should return an array with the added items after any are added', (done) => {
-      product = products[0];
-      user.cart.push(product);
+      const accessToken = 'oo5DD2jLOTLR9s5t';
+      const currentUser = users[0];
+      const productToAdd = products[0];
+      currentUser.cart.push(productToAdd);
 
       chai
         .request(server)
-        .get('/api/me/cart')
+        .get(`/api/me/cart?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.body.length.should.be.eql(1);
+          res.body.should.deep.eql([productToAdd]);
           done();
         });
     });
 
     it('should return a 401 error if user is not logged in', (done) => {
+      const accessToken = null;
+
       chai
         .request(server)
-        .get('/api/me/cart')
+        .get(`/api/me/cart?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(401);
           done();
@@ -194,11 +206,12 @@ describe('Cart', () => {
   // POST /api/me/cart
   describe('POST /api/me/cart', () => {
     it("should add an item to a user's cart given a product ID", (done) => {
-      const productId = '1';
+      const accessToken = 'oo5DD2jLOTLR9s5t';
+      const productId = { id: '1' };
 
       chai
         .request(server)
-        .post('/api/me/cart')
+        .post(`/api/me/cart?accessToken=${accessToken}`)
         .send(productId)
         .end((err, res) => {
           res.should.have.status(200);
@@ -207,11 +220,12 @@ describe('Cart', () => {
     });
 
     it('it should return a 400 error if the product ID is not a positive integer', (done) => {
-      const productId = 'a';
+      const accessToken = 'oo5DD2jLOTLR9s5t';
+      const productId = { id: 'a' };
 
       chai
         .request(server)
-        .post('/api/me/cart')
+        .post(`/api/me/cart?accessToken=${accessToken}`)
         .send(productId)
         .end((err, res) => {
           res.should.have.status(400);
@@ -220,11 +234,12 @@ describe('Cart', () => {
     });
 
     it('should return a 401 error if user is not logged in', (done) => {
-      const productId = '1';
+      const accessToken = null;
+      const productId = { id: '1' };
 
       chai
         .request(server)
-        .post('/api/me/cart')
+        .post(`/api/me/cart?accessToken=${accessToken}`)
         .send(productId)
         .end((err, res) => {
           res.should.have.status(401);
@@ -233,11 +248,12 @@ describe('Cart', () => {
     });
 
     it('it should return a 404 error if a given product does not exist', (done) => {
-      const productId = '12';
+      const accessToken = 'oo5DD2jLOTLR9s5t';
+      const productId = { id: '20' };
 
       chai
         .request(server)
-        .get('/api/me/cart')
+        .post(`/api/me/cart?accessToken=${accessToken}`)
         .send(productId)
         .end((err, res) => {
           res.should.have.status(404);
@@ -249,11 +265,12 @@ describe('Cart', () => {
   // DELETE /api/me/cart/{productId}
   describe('DELETE /api/me/cart/{productId}', () => {
     it("should delete an item from a user's cart given a product ID", (done) => {
+      const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = '1';
 
       chai
         .request(server)
-        .delete(`/api/me/cart/${productId}`)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200);
           done();
@@ -261,11 +278,12 @@ describe('Cart', () => {
     });
 
     it('it should return a 400 error if the product ID is not a positive integer', (done) => {
+      const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = 'a';
 
       chai
         .request(server)
-        .delete(`/api/me/cart/${productId}`)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(400);
           done();
@@ -273,11 +291,12 @@ describe('Cart', () => {
     });
 
     it('should return a 401 error if user is not logged in', (done) => {
+      const accessToken = null;
       const productId = '1';
 
       chai
         .request(server)
-        .delete(`/api/me/cart/${productId}`)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(401);
           done();
@@ -285,11 +304,12 @@ describe('Cart', () => {
     });
 
     it('it should return a 404 error if a given product does not exist', (done) => {
-      const productId = '12';
+      const accessToken = 'oo5DD2jLOTLR9s5t';
+      const productId = '20';
 
       chai
         .request(server)
-        .delete(`/api/me/cart/${productId}`)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(404);
           done();
@@ -300,12 +320,13 @@ describe('Cart', () => {
   // PUT /api/me/cart/{productId}
   describe('PUT /api/me/cart/{productId}', () => {
     it("should update an item from a user's cart given a product ID", (done) => {
+      const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = '1';
       let updatedProduct;
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}`)
+        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(200);
@@ -314,12 +335,13 @@ describe('Cart', () => {
     });
 
     it('it should return a 400 error if the product ID is not a positive integer', (done) => {
+      const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = 'a';
       let updatedProduct;
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}`)
+        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(400);
@@ -328,12 +350,13 @@ describe('Cart', () => {
     });
 
     it('should return a 401 error if user is not logged in', (done) => {
+      const accessToken = null;
       const productId = '1';
       let updatedProduct;
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}`)
+        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(401);
@@ -342,12 +365,13 @@ describe('Cart', () => {
     });
 
     it('it should return a 404 error if a given product does not exist', (done) => {
+      const accessToken = 'oo5DD2jLOTLR9s5t';
       const productId = '12';
       let updatedProduct;
 
       chai
         .request(server)
-        .put(`/api/me/cart/${productId}`)
+        .put(`/api/me/cart/${productId}?accessToken=${accessToken}`)
         .send(updatedProduct)
         .end((err, res) => {
           res.should.have.status(404);
