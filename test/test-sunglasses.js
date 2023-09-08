@@ -111,10 +111,26 @@ describe('Login', () => {
         });
     });
 
-    it('should return a 400 error if invalid username and/or password are provided', (done) => {
+    it('should return a 401 error if invalid username and/or password are provided', (done) => {
       const loginInfo = {
         username: 'yellowleopard753',
         password: 'waters'
+      };
+
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(loginInfo)
+        .end((err, res) => {
+          res.should.have.status(401);
+          done();
+        });
+    });
+
+    it('should return a 400 error if either username and/or password are missing', (done) => {
+      const loginInfo = {
+        username: 'yellowleopard753',
+        password: ''
       };
 
       chai

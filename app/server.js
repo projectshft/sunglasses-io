@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const { uid } = require('rand-token');
 
 const PORT = 3001;
+const accessTokens = [];
 
 // Import data
 const brands = require('../initial-data/brands.json');
@@ -80,6 +81,48 @@ myRouter.get('/api/products', (request, response) => {
 });
 
 // Set up /api/login endpoint handler
+myRouter.post('/api/login', (request, response) => {
+  // Check whether both username and password are provided in request
+  if (request.body.username && request.body.password) {
+    // If so, look for user in existing users
+    const foundUser = users.find(
+      (user) =>
+        user.login.username === request.body.username &&
+        user.login.password === request.body.password
+    );
+
+    // If user exists
+    if (foundUser) {
+      // Check for existing access token
+      const currentAccessToken = accessTokens.find(
+        (tokenObject) => tokenObject.username === foundUser.login.username
+      );
+      // Update the last updated value to extend login
+      if (currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+      }
+      // If no existing access token, create a new token with the user value and a "random" token
+      const newAccessToken = {
+        username: foundUser.login.username,
+        lastUpdated: new Date(),
+        token: uid(16)
+      };
+      accessTokens.push(newAccessToken);
+      return response.end(JSON.stringify(newAccessToken.token));
+    }
+    // If username and/or password are incorrect, return 401 error
+    response.writeHead(401, 'Invalid username or password');
+    return response.end();
+  }
+  // If they are missing one of the parameters, return 400 error
+  response.writeHead(
+    400,
+    'Bad request. Both username and password are required'
+  );
+  return response.end();
+});
+
 // Set up /api/me/cart endpoint handler
 // Set up /api/me/cart/{productId} endpoint handler
 
