@@ -140,18 +140,17 @@ myRouter.post('/api/login', (request, response) => {
         token: uid(16)
       };
       accessTokens.push(newAccessToken);
+
+      response.writeHead(200, { 'Content-Type': 'application/json' });
       return response.end(JSON.stringify(newAccessToken.token));
     }
     // If username and/or password are incorrect, return 401 error
-    response.writeHead(401, 'Invalid username or password');
-    return response.end();
+    response.writeHead(401);
+    return response.end('Invalid username or password');
   }
   // If they are missing one of the parameters, return 400 error
-  response.writeHead(
-    400,
-    'Bad request. Both username and password are required'
-  );
-  return response.end();
+  response.writeHead(400);
+  return response.end('Bad request. Both username and password are required');
 });
 
 // Set up /api/me/cart endpoint handler
@@ -161,8 +160,8 @@ myRouter.get('/api/me/cart', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401, 'Not authorized');
-    return response.end();
+    response.writeHead(401);
+    return response.end('Not authorized');
   }
 
   // If user is logged in, get their info
@@ -179,8 +178,8 @@ myRouter.post('/api/me/cart', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401, 'Not authorized');
-    return response.end();
+    response.writeHead(401);
+    return response.end('Not authorized');
   }
 
   // If product ID is not a positive integer, return 400 error
@@ -210,8 +209,8 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401, 'Not authorized');
-    return response.end();
+    response.writeHead(401);
+    return response.end('Not authorized');
   }
 
   // If product ID is not a positive integer, return 400 error
@@ -240,8 +239,8 @@ myRouter.put('/api/me/cart/:productId', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401, 'Not authorized');
-    return response.end();
+    response.writeHead(401);
+    return response.end('Not authorized');
   }
 
   // If product ID is not a positive integer, return 400 error
