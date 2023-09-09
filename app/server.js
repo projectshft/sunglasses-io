@@ -1,5 +1,6 @@
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
 const finalHandler = require('finalhandler');
 const queryString = require('querystring');
 const url = require('url');
@@ -40,23 +41,32 @@ const server = http
     }
 
     // Load data
-    fs.readFile('./initial-data/brands.json', (error, data) => {
-      if (error) throw error;
-      brands = JSON.parse(data);
-      console.log(`Server setup: ${brands.length} brands loaded`);
-    });
+    fs.readFile(
+      path.join(__dirname, '..', 'initial-data', 'brands.json'),
+      (error, data) => {
+        if (error) throw error;
+        brands = JSON.parse(data);
+        console.log(`Server setup: ${brands.length} brands loaded`);
+      }
+    );
 
-    fs.readFile('./initial-data/products.json', (error, data) => {
-      if (error) throw error;
-      products = JSON.parse(data);
-      console.log(`Server setup: ${products.length} products loaded`);
-    });
+    fs.readFile(
+      path.join(__dirname, '..', 'initial-data', 'products.json'),
+      (error, data) => {
+        if (error) throw error;
+        products = JSON.parse(data);
+        console.log(`Server setup: ${products.length} products loaded`);
+      }
+    );
 
-    fs.readFile('./initial-data/users.json', (error, data) => {
-      if (error) throw error;
-      users = JSON.parse(data);
-      console.log(`Server setup: ${users.length} users loaded`);
-    });
+    fs.readFile(
+      path.join(__dirname, '..', 'initial-data', 'users.json'),
+      (error, data) => {
+        if (error) throw error;
+        users = JSON.parse(data);
+        console.log(`Server setup: ${users.length} users loaded`);
+      }
+    );
   });
 
 // Set up /api/brands endpoint handler
