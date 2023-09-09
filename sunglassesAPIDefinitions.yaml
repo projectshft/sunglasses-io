@@ -1,0 +1,339 @@
+swagger: '2.0'
+info:
+  title: Sunglasses Store API
+  description: An API to support a fictional sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - https
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Get brands
+      description: |
+        The brands endpoint returns available brands
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brand'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/{brandId}/products:
+    get: 
+      summary: Get products by brand
+      description: |
+        Returns products by brand
+      parameters:
+        - name: brandId
+          in: path
+          description: The id of the brand
+          required: true
+          type: string
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '400':
+          description: Bad request. ID must be an integer and larger than 0
+        '404':
+          description: A brand with the specified ID was not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /products:
+    get:
+      summary: Get products
+      description: |
+        Returns list of products meeting search string
+      parameters:
+        - name: query
+          in: query
+          description: Optional search query
+          required: false
+          type: string
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Logs in a user
+      description: |
+        The login endpoint logs in an existing user
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          type: string
+      tags:
+        - Login
+      responses:
+        '200':
+          description: User successfully logged in
+        '400':
+          description: Bad request. Both username and password are required
+        '401':
+          description: Invalid username or password
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Get products in user's cart
+      description: |
+        This endpoint returns the products in the cart of a logged-in user
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        '401':
+          description: Not authorized
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add an item to a user's cart
+      description: |
+        This endpoint adds a product to the cart of the logged-in user
+      parameters:
+        - name: productId
+          in: query
+          description: The product to be added
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item added successfully
+        '400':
+          description: Bad request. ID must be an integer and larger than 0.
+        '401':
+          description: Not authorized
+        '404':
+          description: A product with the specified ID was not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      summary: Remove an item from a user's cart
+      description: |
+        This endpoint removes a product from the cart of the logged-in user
+      parameters:
+        - name: productId
+          in: path
+          description: The product to be deleted
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item deleted successfully
+        '400':
+          description: Bad request. ID must be an integer and larger than 0.
+        '401':
+          description: Not authorized
+        '404':
+          description: A product with the specified ID was not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Update quantity of an item in a user's cart
+      description: |
+        This endpoint updates the quantity of an item in a logged-in user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The product to be updated
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item updated successfully
+        '400':
+          description: Bad request. ID must be an integer and larger than 0.
+        '401':
+          description: Not authorized
+        '404':
+          description: A product with the specified ID was not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the brand
+      name:
+        type: string
+        description: Name of the brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: The unique identifier for the product
+      categoryId:
+        type: string
+        description: The id of the brand
+      name:
+        type: string
+        description: The name of the category
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: number
+        description: Product price
+      imageUrls:
+        type: array
+        description: Product image URLs
+        items:
+          type: string
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: The user's gender
+      cart:
+        type: array
+        description: Items in user's cart
+        items:
+          $ref: '#/definitions/Product'
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: Title of the user
+          first:
+            type: string
+            description: First name of the user
+          last:
+            type: string
+            description: Last name of the user
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: Street address of the user
+          city:
+            type: string
+            description: City of the user
+          state:
+            type: string
+            description: State of the user
+          postcode:
+            type: string
+            description: Postcode of the user
+      email:
+        type: string
+        description: Email address of the user
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+            description: Username of the user
+          password:
+            type: string
+            description: Password of the user
+          salt:
+            type: string
+            description: Salt of the user
+          md5:
+            type: string
+            description: MD5 of the user
+          sha1:
+            type: string
+            description: SHA1 of the user
+          sha256:
+            type: string
+            description: SHA256 of the user
+      dob:
+        type: string
+        description: Date of birth of the user
+      registered:
+        type: string
+        description: Date user registered account
+      phone:
+        type: string
+        description: Home phone number of the useer
+      cell:
+        type: string
+        description: Cell phone number of the user
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: Profile picture (large)
+          medium:
+            type: string
+            description: Profile picture (medium)
+          thumbnail:
+            type: string
+            description: Profile picture (thumbnail)
+      nat:
+        type: string
+        description: Nationality of the user
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
