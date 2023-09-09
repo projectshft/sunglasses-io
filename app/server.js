@@ -72,14 +72,12 @@ myRouter.get('/api/brands/:brandId/products', (request, response) => {
 
   // If brand ID parameter is invalid, return 400 error
   if (!isPositiveInteger(brandId)) {
-    response.writeHead(400);
-    return response.end('Bad request. ID must be an integer and larger than 0');
+    return return400Error(response);
   }
 
   // If brand ID does not exist, return 404 error
   if (!idExists(brandId, brands)) {
-    response.writeHead(404);
-    return response.end('A brand with the specified ID was not found');
+    return return404Error(response);
   }
 
   // Otherwise, return all products for a given brand
@@ -147,12 +145,10 @@ myRouter.post('/api/login', (request, response) => {
       return response.end(JSON.stringify(newAccessToken.token));
     }
     // If username and/or password are incorrect, return 401 error
-    response.writeHead(401);
-    return response.end('Invalid username or password');
+    return return401Error(response);
   }
   // If they are missing one of the parameters, return 400 error
-  response.writeHead(400);
-  return response.end('Bad request. Both username and password are required');
+  return return400Error(response);
 });
 
 // Set up /api/me/cart endpoint handler
@@ -162,8 +158,7 @@ myRouter.get('/api/me/cart', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401);
-    return response.end('Not authorized');
+    return return401Error(response);
   }
 
   // If user is logged in, get their info
@@ -180,20 +175,17 @@ myRouter.post('/api/me/cart', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401);
-    return response.end('Not authorized');
+    return return401Error(response);
   }
 
   // If product ID is not a positive integer, return 400 error
   if (!isPositiveInteger(request.body.id)) {
-    response.writeHead(400);
-    return response.end('Bad request. ID must be an integer and larger than 0');
+    return return400Error(response);
   }
 
   // If product does not exist, return 404 error
   if (!idExists(request.body.id, products)) {
-    response.writeHead(404);
-    return response.end('A product with the specified ID was not found');
+    return return404Error(response);
   }
 
   // Otherwise, if request is valid, add product to cart and return 200
@@ -211,20 +203,17 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401);
-    return response.end('Not authorized');
+    return return401Error(response);
   }
 
   // If product ID is not a positive integer, return 400 error
   if (!isPositiveInteger(productId)) {
-    response.writeHead(400);
-    return response.end('Bad request. ID must be an integer and larger than 0');
+    return return400Error(response);
   }
 
   // If product does not exist, return 404 error
   if (!idExists(productId, products)) {
-    response.writeHead(404);
-    return response.end('A product with the specified ID was not found');
+    return return404Error(response);
   }
 
   // Otherwise, if request is valid, delete product from cart and return 200
@@ -241,20 +230,17 @@ myRouter.post('/api/me/cart/:productId', (request, response) => {
 
   if (!currentAccessToken) {
     // If user is not logged in, return 401 error
-    response.writeHead(401);
-    return response.end('Not authorized');
+    return return401Error(response);
   }
 
   // If product ID is not a positive integer, return 400 error
   if (!isPositiveInteger(productId)) {
-    response.writeHead(400);
-    return response.end('Bad request. ID must be an integer and larger than 0');
+    return return400Error(response);
   }
 
   // If product does not exist, return 404 error
   if (!idExists(productId, products)) {
-    response.writeHead(404);
-    return response.end('A product with the specified ID was not found');
+    return return404Error(response);
   }
 
   // Get current user info
@@ -265,10 +251,7 @@ myRouter.post('/api/me/cart/:productId', (request, response) => {
 
   // If product is not in cart, return 404 error
   if (!productToUpdate) {
-    response.writeHead(404);
-    return response.end(
-      'A product with the specified ID was not found in cart'
-    );
+    return return404Error(response);
   }
 
   // Otherwise, if request is valid, update product and return 200
@@ -314,5 +297,23 @@ const getCurrentUser = (accessToken) =>
 
 // Get product by ID
 const getProductById = (id) => products.find((product) => product.id === id);
+
+// Return 400 error
+const return400Error = (response) => {
+  response.writeHead(400);
+  return response.end('Bad request. ID must be an integer and larger than 0');
+};
+
+// Return 404 error
+const return404Error = (response) => {
+  response.writeHead(404);
+  return response.end('Specified ID was not found');
+};
+
+// Return 401 error
+const return401Error = (response) => {
+  response.writeHead(401);
+  return response.end('Not authorized');
+};
 
 module.exports = server;
