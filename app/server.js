@@ -234,8 +234,8 @@ myRouter.delete('/api/me/cart/:productId', (request, response) => {
   return response.end();
 });
 
-// PUT - update item quantity in cart
-myRouter.put('/api/me/cart/:productId', (request, response) => {
+// POST - update item quantity in cart
+myRouter.post('/api/me/cart/:productId', (request, response) => {
   const { productId } = request.params;
   const currentAccessToken = getValidToken(request);
 
@@ -257,12 +257,21 @@ myRouter.put('/api/me/cart/:productId', (request, response) => {
     return response.end('A product with the specified ID was not found');
   }
 
-  // Otherwise, if request is valid, update product and return 200
+  // Get current user info
   const currentUser = getCurrentUser(currentAccessToken);
-  // const currentProduct = getProductById(productId);
   const productToUpdate = currentUser.cart.find(
     (item) => item.id === productId
   );
+
+  // If product is not in cart, return 404 error
+  if (!productToUpdate) {
+    response.writeHead(404);
+    return response.end(
+      'A product with the specified ID was not found in cart'
+    );
+  }
+
+  // Otherwise, if request is valid, update product and return 200
   Object.assign(productToUpdate, request.body);
   response.writeHead(200);
   return response.end();
