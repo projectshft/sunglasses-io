@@ -1,4 +1,5 @@
-import { IncomingMessage, ServerResponse } from "http";
+import { IncomingMessage } from "http";
+import { ServerResponse } from "http";
 
 const http = require('http');
 const fs = require('fs');
