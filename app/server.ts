@@ -1,7 +1,6 @@
-// TypeScript types
-import { IncomingMessage } from "http";
-import { ServerResponse } from "http";
-import { Server } from "http";
+// Type imports
+import { IncomingMessage, ServerResponse, Server } from "http";
+import { Request, Response } from "express";
 
 // Module imports
 const http = require("http");
@@ -12,8 +11,14 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 
+// Type interfaces
+interface BrandObject {
+  id: string;
+  name: string;
+}
+
 // Brands
-let brands: object[] = [];
+let brands: BrandObject[] = [];
 
 // Products
 const products: object[] = [];
@@ -51,20 +56,17 @@ const server: Server = http
   });
 
 // Routes
-router.get(
-  "/api/",
-  (request: IncomingMessage, response: ServerResponse): void => {
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify("Server is up and running"));
-  }
-);
+router.get("/api/", (request: Request, response: Response): void => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(JSON.stringify("Server is up and running"));
+});
 
 // Sunglasses
 router.get(
   "/api/sunglasses/brands",
   (
-    request: IncomingMessage,
-    response: ServerResponse
+    request: Request,
+    response: Response
   ): void | ServerResponse<IncomingMessage> => {
     if (brands.length <= 0) {
       response.writeHead(404, { "Content-Type": "application/json" });
@@ -78,6 +80,42 @@ router.get(
   }
 );
 
+router.get(
+  "/api/sunglasses/brands/:brandId",
+  (
+    request: Request,
+    response: Response
+  ): void | ServerResponse<IncomingMessage> => {
+    if (brands.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify(`${response.statusCode}: Brands not found`)
+      );
+    }
+
+    const brandId = request.params.brandId;
+
+    if (!brandId) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({ [response.statusCode]: "Bad request" })
+      );
+    }
+
+    const brand = brands.find((item) => item.id === brandId);
+
+    if (!brand) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({ [response.statusCode]: "Brand not found" })
+      );
+    }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(brand));
+  }
+);
+
 // Development routes (testing-specific)
 
 // Remove brands
@@ -85,6 +123,24 @@ router.post(
   "/dev/testing/remove-brands",
   (request: IncomingMessage, response: ServerResponse) => {
     brands = [];
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end();
+  }
+);
+
+// Add brands back
+router.post(
+  "/dev/testing/add-brands",
+  (request: IncomingMessage, response: ServerResponse) => {
+    fs.readFile(
+      "initial-data/brands.json",
+      "utf8",
+      (error: any, data: string) => {
+        if (error) throw error;
+
+        brands = JSON.parse(data);
+      }
+    );
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end();
   }

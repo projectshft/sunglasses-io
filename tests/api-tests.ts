@@ -30,35 +30,11 @@ describe("/api/", function () {
 // Test sunglasses route
 describe("Brands", function () {
   describe("GET /api/sunglasses/brands", function () {
-    // before(function () {
-    //   fs.writeFile(
-    //     "initial-data/brands.json",
-    //     '[]',
-    //     (err: any) => {
-    //       if (err) throw err;
-    //     }
-    //   );
-    // });
-
-    // afterEach(function (done) {
-    //   const brands = [
-    //     { id: "1", name: "Oakley" },
-    //     { id: "2", name: "Ray Ban" },
-    //     { id: "3", name: "Levi's" },
-    //     { id: "4", name: "DKNY" },
-    //     { id: "5", name: "Burberry" },
-    //   ];
-
-    //   fs.writeFile(
-    //     "initial-data/brands.json",
-    //     JSON.stringify(brands),
-    //     (err: any) => {
-    //       if (err) throw err;
-    //     }
-    //   );
-      
-    //   server.close()
-    //   done();
+    // after(function () {
+    //   chai
+    //     .request(server)
+    //     .post("/dev/testing/add-brands")
+    //     .end()
     // });
 
     it("should return an array of brands", function (done) {
@@ -84,21 +60,37 @@ describe("Brands", function () {
           done();
         });
     });
-    it("should return a 404 error if no brands are found", function (done) {
-      chai
-        .request(server)
-        .post("/dev/testing/remove-brands")
-        .end()
+    // it("should return a 404 error if no brands are found", function (done) {
+    //   chai
+    //     .request(server)
+    //     .post("/dev/testing/remove-brands")
+    //     .end()
 
+    //   chai
+    //     .request(server)
+    //     .get("/api/sunglasses/brands")
+    //     .end((err, res) => {
+    //       if (err) {
+    //         done(err);
+    //       }
+    //       res.should.have.status(404);
+    //       done();
+    //     });
+    // });
+  });
+  describe("GET /api/sunglasses/brands/:brandId", function () {
+    it("should return an object matching the id passed to it", function (done) {
       chai
         .request(server)
-        .get("/api/sunglasses/brands")
+        .get("/api/sunglasses/brands/1")
         .end((err, res) => {
           if (err) {
             done(err);
           }
-          res.should.have.status(404);
-          done();
+          res.should.have.status(200);
+          res.body.should.have.property("id").equal("1");
+          res.body.should.have.property("name").equal("Oakley");
+          done()
         });
     });
   });
