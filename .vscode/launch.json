@@ -8,8 +8,10 @@
             "type": "node",
             "request": "launch",
             "name": "Sunglasses.io",
-            "program": "${workspaceRoot}/app/server.ts",
-            "preLaunchTask": "tsc: build - tsconfig.json"
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script", "start"
+            ]
         },
         {
             "name": "Run ts-mocha Tests",

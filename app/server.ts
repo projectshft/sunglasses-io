@@ -14,11 +14,6 @@ const uid = require("rand-token").uid;
 
 // Brands
 let brands: object[] = [];
-fs.readFileSync("initial-data/brands.json", "utf8", (error: any, data: string) => {
-  if (error) throw error;
-
-  brands = (JSON.parse(data));
-});
 
 // Products
 const products: object[] = [];
@@ -42,11 +37,11 @@ const server: Server = http
       return console.log("Error on Server Startup: ", error);
     }
 
-    // fs.readFile("initial-data/brands.json", "utf8", (error: any, data: string) => {
-    //   if (error) throw error;
+    fs.readFile("initial-data/brands.json", "utf8", (error: any, data: string) => {
+      if (error) throw error;
 
-    //   brands = (JSON.parse(data));
-    // });
+      brands = (JSON.parse(data));
+    });
 
     console.log(`Server is listening on ${PORT}`);
   });
