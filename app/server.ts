@@ -12,6 +12,15 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 
+// Brands
+let brands: object[] = [];
+
+// Products
+const products: object[] = [];
+
+// Users
+const users: object[] = [];
+
 const PORT = 3001;
 
 // Router setup
@@ -28,13 +37,25 @@ const server: Server = http
       return console.log("Error on Server Startup: ", error);
     }
 
+    fs.readFile("initial-data/brands.json", "utf8", (error: any, data: string) => {
+      if (error) throw error;
+
+      brands = (JSON.parse(data));
+    });
+
     console.log(`Server is listening on ${PORT}`);
   });
 
 // Routes
-router.get("/", (request: IncomingMessage, response: ServerResponse) => {
+router.get("/api/", (request: IncomingMessage, response: ServerResponse) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   response.end(JSON.stringify("Server is up and running"));
+});
+
+// Sunglasses
+router.get("/api/sunglasses/brands", (request: IncomingMessage, response: ServerResponse) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(JSON.stringify(brands));
 });
 
 // Exports
