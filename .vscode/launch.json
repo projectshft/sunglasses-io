@@ -10,6 +10,16 @@
             "name": "Sunglasses.io",
             "program": "${workspaceRoot}/app/server.ts",
             "preLaunchTask": "tsc: build - tsconfig.json"
+        },
+        {
+            "name": "Run ts-mocha Tests",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/ts-mocha",
+            "args": [
+                "${workspaceFolder}/tests/api-tests.ts"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ]
 }

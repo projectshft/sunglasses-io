@@ -34,7 +34,7 @@ const server: Server = http
 // Routes
 router.get("/", (request: IncomingMessage, response: ServerResponse) => {
   response.writeHead(200, { "Content-Type": "application/json" });
-  response.end("Server is up and running");
+  response.end(JSON.stringify("Server is up and running"));
 });
 
 // Exports
