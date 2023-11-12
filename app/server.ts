@@ -26,9 +26,10 @@ const products: object[] = [];
 // Users
 const users: object[] = [];
 
-const PORT = 3001;
 
 // Router setup
+const PORT = 3001;
+
 const router = Router();
 router.use(bodyParser.json());
 
@@ -56,6 +57,8 @@ const server: Server = http
   });
 
 // Routes
+
+// Root /api/
 router.get("/api/", (request: Request, response: Response): void => {
   response.writeHead(200, { "Content-Type": "application/json" });
   response.end(JSON.stringify("Server is up and running"));
@@ -95,7 +98,7 @@ router.get(
 
     const brandId = request.params.brandId;
 
-    if (!brandId) {
+    if (isNaN(Number(brandId))) {
       response.writeHead(401, { "Content-Type": "application/json" });
       return response.end(
         JSON.stringify({ [response.statusCode]: "Bad request" })
@@ -116,12 +119,12 @@ router.get(
   }
 );
 
-// Development routes (testing-specific)
+// Development routes for testing
 
 // Remove brands
 router.post(
   "/dev/testing/remove-brands",
-  (request: IncomingMessage, response: ServerResponse) => {
+  (request: Request, response: Response) => {
     brands = [];
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end();
@@ -131,7 +134,7 @@ router.post(
 // Add brands back
 router.post(
   "/dev/testing/add-brands",
-  (request: IncomingMessage, response: ServerResponse) => {
+  (request: Request, response: Response) => {
     fs.readFile(
       "initial-data/brands.json",
       "utf8",

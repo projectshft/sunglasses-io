@@ -93,5 +93,17 @@ describe("Brands", function () {
           done()
         });
     });
+    it("should return a 401 error if the id is incorrectly formatted", function (done) {
+      chai
+        .request(server)
+        .get("/api/sunglasses/brands/a")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          done()
+        });
+    });
   });
 });
