@@ -14,6 +14,10 @@ tags:
   description: Log in to the website, retrieve from and change products in cart.
 - name: subscribe
   description: Subscribe to newsletter (or unsubcribe) using email address.
+- name: articles
+  description: Access article content.
+- name: news
+  description: Access news content.
 schemes:
 - http
 produces:
@@ -163,15 +167,6 @@ paths:
           description: User successfully authenticated. Returns access token string.
           schema:
             $ref: "#/definitions/AccessToken"
-          # headers:
-          #   X-Rate-Limit:
-          #     type: "integer"
-          #     format: "int32"
-          #     description: "calls per hour allowed by the user"
-          #   X-Expires-After:
-          #     type: "string"
-          #     format: "date-time"
-          #     description: "date in UTC when token expires"
         401:
           description: Invalid username or password
   /user/cart:
@@ -194,14 +189,156 @@ paths:
         400: 
           description: Bad request
         401: 
-          description: Unable to authenticate access token
+          description: Unauthorized
         404: 
           description: Products not found
-  
+    post:
+      tags:
+      - user
+      summary: Add a product to user's cart
+      description: ""
+      parameters:
+      - name: productId
+        type: string
+        in: query
+        description: productId to add to cart
+        required: true
+      responses:
+        200:
+          description: Successfully added product to cart
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404: 
+          description: Product not found
+  /user/cart/{productId}:
+    delete:
+      tags:
+      - user
+      summary: Delete product from user's cart
+      description: ""
+      parameters:
+      - name: productId
+        in: path
+        type: string
+        required: true
+        description: product to delete from cart
+      responses:
+        200: 
+          description: Product matching productId successfully removed from cart
+        400: 
+          description: Bad request
+        401: 
+          description: Unauthorized
+        404:
+          description: Product not found
+    put:
+      tags:
+      - user
+      summary: Change quantity of product in user's cart
+      description: ""
+      parameters:
+      - name: productId
+        in: path
+        required: true
+        type: string
+        description: product to change quantity
+      - name: quantity
+        in: query
+        type: integer
+        format: int32
+        required: true
+        description: quantity to change product to
+      responses:
+        200: 
+          description: Successfully changed quantity of product
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404: 
+          description: Product not found
+  /subscribe:
+    post:
+      tags:
+      - subscribe
+      summary: Add email to mailing list
+      description: Enter a correctly formatted email (name@example.com) to add that email to Sunglasses.io's mailing list.
+      parameters:
+      - name: email
+        in: query
+        type: string
+        format: email
+        required: true
+      responses:
+        200: 
+          description: Email successfully added to mailing list
+        400: 
+          description: Bad request
+  /subscribe/removeSubscription:
+    post:
+      tags:
+      - subscribe
+      summary: Remove subscription to mailing list
+      description: Enter an email that has been previously subscribed to the mailing list to remove the subscription.
+      parameters:
+      - name: email
+        in: query
+        type: string
+        format: email
+        required: true
+      responses:
+        200:
+          description: Email successfully removed from mailing list
+        400: 
+          description: Bad request
+        404: 
+          description: Email not found
+  /articles:
+    get:
+      tags:
+      - articles
+      summary: Retrieve list of articles
+      parameters:
+      - name: articleId
+        in: query
+        type: string
+        required: false
+        description: Optional articleId to retrieve individual article
+      responses:
+        200:
+          description: Array of articles returned
+          schema:
+            $ref: "#/definitions/Article"
+        400: 
+          description: Bad request
+        404: 
+          description: Article not found
+  /news:
+    get:
+      tags:
+      - news
+      summary: Retrieve list of news posts
+      parameters:
+      - name: newsId
+        in: query
+        type: string
+        required: false
+        description: Optional newsId to retrieve individual post
+      responses:
+        200:
+          description: Array of news posts returned
+          schema:
+            $ref: "#/definitions/Article"
+        400: 
+          description: Bad request
+        404: 
+          description: News post not found
 securityDefinitions:
   api_key:
     type: "apiKey"
-    name: "api_key"
+    name: "X-Authentication"
     in: "header"
 definitions:
   Brand: 
@@ -354,98 +491,14 @@ definitions:
           nat: 
             type: string
             description: Two letter ISO code
-  Order:
-    type: "object"
+  Article:
+    type: object
     properties:
-      id:
-        type: "integer"
-        format: "int64"
-      petId:
-        type: "integer"
-        format: "int64"
-      quantity:
-        type: "integer"
-        format: "int32"
-      shipDate:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "Order Status"
-        enum:
-        - "placed"
-        - "approved"
-        - "delivered"
-      complete:
-        type: "boolean"
-        default: false
-    xml:
-      name: "Order"
-  Category:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Category"
-
-  Tag:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Tag"
-  Pet:
-    type: "object"
-    required:
-    - "name"
-    - "photoUrls"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      category:
-        $ref: "#/definitions/Category"
-      name:
-        type: "string"
-        example: "doggie"
-      photoUrls:
-        type: "array"
-        xml:
-          name: "photoUrl"
-          wrapped: true
-        items:
-          type: "string"
-      tags:
-        type: "array"
-        xml:
-          name: "tag"
-          wrapped: true
-        items:
-          $ref: "#/definitions/Tag"
-      status:
-        type: "string"
-        description: "pet status in the store"
-        enum:
-        - "available"
-        - "pending"
-        - "sold"
-    xml:
-      name: "Pet"
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
+      id: 
+        type: integer
+        format: int32
+      title:
+        type: string
+      text:
+        type: string
+        description: Text content of article
