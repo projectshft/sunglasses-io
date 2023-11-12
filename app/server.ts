@@ -1,5 +1,6 @@
 import { IncomingMessage } from "http";
 import { ServerResponse } from "http";
+import { Server } from "http";
 
 const http = require('http');
 const fs = require('fs');
@@ -15,7 +16,7 @@ const PORT = 3001;
 const router = Router();
 router.use(bodyParser.json());
 
-http.createServer(function (request: IncomingMessage, response: ServerResponse) {
+const server: Server = http.createServer(function (request: IncomingMessage, response: ServerResponse) {
   router(request, response, finalHandler(request, response));
 }).listen(PORT, (error: any) => {
   if (error) {
@@ -29,3 +30,5 @@ router.get("/", (request: IncomingMessage, response: ServerResponse) => {
   response.writeHead(200, { "Content-Type": "application/json" });
   response.end("Server is up and running");
 });
+
+module.exports = server;
