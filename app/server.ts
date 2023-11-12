@@ -14,6 +14,11 @@ const uid = require("rand-token").uid;
 
 // Brands
 let brands: object[] = [];
+fs.readFileSync("initial-data/brands.json", "utf8", (error: any, data: string) => {
+  if (error) throw error;
+
+  brands = (JSON.parse(data));
+});
 
 // Products
 const products: object[] = [];
@@ -37,11 +42,11 @@ const server: Server = http
       return console.log("Error on Server Startup: ", error);
     }
 
-    fs.readFile("initial-data/brands.json", "utf8", (error: any, data: string) => {
-      if (error) throw error;
+    // fs.readFile("initial-data/brands.json", "utf8", (error: any, data: string) => {
+    //   if (error) throw error;
 
-      brands = (JSON.parse(data));
-    });
+    //   brands = (JSON.parse(data));
+    // });
 
     console.log(`Server is listening on ${PORT}`);
   });
@@ -54,8 +59,21 @@ router.get("/api/", (request: IncomingMessage, response: ServerResponse) => {
 
 // Sunglasses
 router.get("/api/sunglasses/brands", (request: IncomingMessage, response: ServerResponse) => {
+  if (brands.length <= 0) {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(JSON.stringify(`${response.statusCode}: Brands not found`));
+  }
+
   response.writeHead(200, { "Content-Type": "application/json" });
   response.end(JSON.stringify(brands));
+});
+
+// Development routes (testing-specific)
+
+// Remove brands
+router.post("/dev/testing/remove-brands", (request: IncomingMessage, response: ServerResponse) => {
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end();
 });
 
 // Exports
