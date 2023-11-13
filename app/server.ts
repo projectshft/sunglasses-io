@@ -26,7 +26,6 @@ const products: object[] = [];
 // Users
 const users: object[] = [];
 
-
 // Router setup
 const PORT = 3001;
 
@@ -74,12 +73,12 @@ router.get(
     if (brands.length <= 0) {
       response.writeHead(404, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify(`${response.statusCode}: Brands not found`)
+        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Brands not found" })
       );
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(brands));
+    response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: brands }));
   }
 );
 
@@ -92,7 +91,7 @@ router.get(
     if (brands.length <= 0) {
       response.writeHead(404, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify(`${response.statusCode}: Brands not found`)
+        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Brand not found" })
       );
     }
 
@@ -101,7 +100,7 @@ router.get(
     if (isNaN(Number(brandId))) {
       response.writeHead(401, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify({ [response.statusCode]: "Bad request" })
+        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Bad request" })
       );
     }
 
@@ -110,12 +109,12 @@ router.get(
     if (!brand) {
       response.writeHead(404, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify({ [response.statusCode]: "Brand not found" })
+        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Brand not found" })
       );
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(brand));
+    response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: brand }));
   }
 );
 
