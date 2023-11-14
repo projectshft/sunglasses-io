@@ -64,6 +64,8 @@ router.get("/api/", (request: Request, response: Response): void => {
 });
 
 // Sunglasses
+
+// GET list of brands
 router.get(
   "/api/sunglasses/brands",
   (
@@ -82,6 +84,7 @@ router.get(
   }
 );
 
+// GET brand by id
 router.get(
   "/api/sunglasses/brands/:brandId",
   (

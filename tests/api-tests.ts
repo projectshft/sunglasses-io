@@ -27,24 +27,27 @@ describe("/api/", function () {
   });
 });
 
-// Test sunglasses route
+// Test sunglasses routes
 describe("Brands", function () {
   describe("GET /api/sunglasses/brands", function () {
-    after( function (done) {
-       chai
+    after(function (done) {
+      chai
         .request(server)
         .post("/dev/testing/add-brands")
-        .end(() => done())
+        .end(() => done());
     });
 
-    it("should return an array of brands", function (done) {
-      const brands = [
-        { id: "1", name: "Oakley" },
-        { id: "2", name: "Ray Ban" },
-        { id: "3", name: "Levi's" },
-        { id: "4", name: "DKNY" },
-        { id: "5", name: "Burberry" },
-      ];
+    it("should return an array of brand objects", function (done) {
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: [
+          { id: "1", name: "Oakley" },
+          { id: "2", name: "Ray Ban" },
+          { id: "3", name: "Levi's" },
+          { id: "4", name: "DKNY" },
+          { id: "5", name: "Burberry" },
+        ],
+      };
 
       chai
         .request(server)
@@ -54,17 +57,13 @@ describe("Brands", function () {
             done(err);
           }
           res.should.have.status(200);
-          res.body.should.be.an("array");
-          res.body.length.should.equal(5);
-          res.body.should.deep.equal(brands);
+          res.body.should.be.an("object");
+          res.body.should.deep.equal(responseObject);
           done();
         });
     });
     it("should return a 404 error if no brands are found", function (done) {
-      chai
-        .request(server)
-        .post("/dev/testing/remove-brands")
-        .end()
+      chai.request(server).post("/dev/testing/remove-brands").end();
 
       chai
         .request(server)
@@ -79,7 +78,14 @@ describe("Brands", function () {
     });
   });
   describe("GET /api/sunglasses/brands/:brandId", function () {
-    it("should return an object matching the id passed to it", function (done) {
+    it("should return the brand object matching the id passed in the path", function (done) {
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: {
+          id: "1",
+          name: "Oakley",
+        },
+      };
       chai
         .request(server)
         .get("/api/sunglasses/brands/1")
@@ -88,9 +94,8 @@ describe("Brands", function () {
             done(err);
           }
           res.should.have.status(200);
-          res.body.should.have.property("id").equal("1");
-          res.body.should.have.property("name").equal("Oakley");
-          done()
+          res.body.should.deep.equal(responseObject);
+          done();
         });
     });
     it("should return a 401 error if the id is incorrectly formatted", function (done) {
@@ -102,8 +107,44 @@ describe("Brands", function () {
             done(err);
           }
           res.should.have.status(401);
-          done()
+          done();
         });
     });
+  });
+  describe("GET /api/sunglasses/products", function () {
+    it("should return all products if no limit or search queries are present", function (done) {
+      let productData;
+
+      fs.readFileSync(
+        "initial-data/products.json",
+        "utf8",
+        (error: any, data: string) => {
+          if (error) throw error;
+  
+          productData = JSON.parse(data);
+        }
+      );
+
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: productData
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    // it should return an array of products with length <= limit if limit query is present
+    // it should return all products with a description matching the search query
+    // it should return a 400 error if limit query is NaN
+    // it should return a 404 message if no products are found matching the search query
   });
 });
