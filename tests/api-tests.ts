@@ -165,6 +165,33 @@ describe("Brands", function () {
           done();
         });
     });
+    it("should return all products with descriptions matching the search query", function (done) {
+      // Read and parse product data
+      const data = fs.readFileSync(
+        "initial-data/products.json",
+        "utf8"
+      );
+      const parsedData = JSON.parse(data);
+      
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: parsedData.slice(0, 4)
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products?search=the best glasses in the world")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+
+    });
     // it should return all products with a description matching the search query
     // it should return a 400 error if limit query is NaN
     // it should return a 404 message if no products are found matching the search query

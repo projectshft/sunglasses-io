@@ -173,6 +173,24 @@ router.get(
       return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products.slice(Number(limit)) }))
     }
 
+    if (search) {
+      const filteredProducts: ProductObject[] = [];
+      const regex = search.toLowerCase();
+
+      for (let i = 0; i < products.length; i++) {
+        const description = products[i].description.toLowerCase();
+        const found = description.match(regex);
+        if (found !== null) {
+          filteredProducts.push(products[i]);
+        }
+      }
+      //const filteredProducts = products.filter((prod) => prod.description.match(regex));
+      //const filteredProducts = products.filter((product) => product.description.toLowerCase().includes(search.toLowerCase()));
+
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: filteredProducts }))
+    }
+
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products }));
   }
