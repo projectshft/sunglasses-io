@@ -196,32 +196,32 @@ router.get(
 // Development routes for testing
 
 // Remove brands
-router.post(
-  "/dev/testing/remove-brands",
-  (request: Request, response: Response) => {
-    brands = [];
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end();
-  }
-);
+// router.post(
+//   "/dev/testing/remove-brands",
+//   (request: Request, response: Response) => {
+//     brands = [];
+//     response.writeHead(200, { "Content-Type": "application/json" });
+//     response.end();
+//   }
+// );
 
-// Add brands back
-router.post(
-  "/dev/testing/add-brands",
-  (request: Request, response: Response) => {
-    fs.readFile(
-      "initial-data/brands.json",
-      "utf8",
-      (error: any, data: string) => {
-        if (error) throw error;
+// // Add brands back
+// router.post(
+//   "/dev/testing/add-brands",
+//   (request: Request, response: Response) => {
+//     fs.readFile(
+//       "initial-data/brands.json",
+//       "utf8",
+//       (error: any, data: string) => {
+//         if (error) throw error;
 
-        brands = JSON.parse(data);
-      }
-    );
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end();
-  }
-);
+//         brands = JSON.parse(data);
+//       }
+//     );
+//     response.writeHead(200, { "Content-Type": "application/json" });
+//     response.end();
+//   }
+// );
 
 // Exports
 module.exports = server;

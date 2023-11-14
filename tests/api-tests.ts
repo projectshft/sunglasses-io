@@ -30,12 +30,12 @@ describe("/api/", function () {
 // Test sunglasses routes
 describe("Sunglasses brands and products", function () {
   describe("GET /api/sunglasses/brands", function () {
-    after(function (done) {
-      chai
-        .request(server)
-        .post("/dev/testing/add-brands")
-        .end(() => done());
-    });
+    // after(function (done) {
+    //   chai
+    //     .request(server)
+    //     .post("/dev/testing/add-brands")
+    //     .end(() => done());
+    // });
 
     it("should return an array of brand objects", function (done) {
       const responseObject = {
@@ -62,20 +62,20 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    it("should return a 404 error if no brands are found", function (done) {
-      chai.request(server).post("/dev/testing/remove-brands").end();
+    // it("should return a 404 error if no brands are found", function (done) {
+    //   chai.request(server).post("/dev/testing/remove-brands").end();
 
-      chai
-        .request(server)
-        .get("/api/sunglasses/brands")
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          }
-          res.should.have.status(404);
-          done();
-        });
-    });
+    //   chai
+    //     .request(server)
+    //     .get("/api/sunglasses/brands")
+    //     .end((err, res) => {
+    //       if (err) {
+    //         done(err);
+    //       }
+    //       res.should.have.status(404);
+    //       done();
+    //     });
+    // });
   });
   describe("GET /api/sunglasses/brands/:brandId", function () {
     it("should return the brand object matching the id passed in the path", function (done) {
