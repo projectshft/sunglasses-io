@@ -160,13 +160,18 @@ router.get(
   }
 );
 
-// GET all products
+// GET products
 router.get(
   "/api/sunglasses/products",
   (request: Request, response: Response): void | ServerResponse => {
     // Get URL params
     const parsedUrl = urlParser.parse(request.url, true);
     const { limit, search } = parsedUrl.query;
+
+    if (limit) {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products.slice(Number(limit)) }))
+    }
 
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products }));
