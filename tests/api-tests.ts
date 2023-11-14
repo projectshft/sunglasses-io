@@ -113,21 +113,15 @@ describe("Brands", function () {
   });
   describe("GET /api/sunglasses/products", function () {
     it("should return all products if no limit or search queries are present", function (done) {
-      let productData;
-
-      fs.readFileSync(
+      const data = fs.readFileSync(
         "initial-data/products.json",
-        "utf8",
-        (error: any, data: string) => {
-          if (error) throw error;
-  
-          productData = JSON.parse(data);
-        }
+        "utf8"
       );
 
+      const parsedData = JSON.parse(data);
       const responseObject = {
-        responseCode: 200,
-        responseMessage: productData
+        "responseCode": 200,
+        "responseMessage": parsedData
       };
 
       chai

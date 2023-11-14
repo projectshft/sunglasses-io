@@ -10,6 +10,7 @@ const queryString = require("querystring");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
+const urlParser = require('url');
 
 // Type interfaces
 interface BrandObject {
@@ -17,11 +18,23 @@ interface BrandObject {
   name: string;
 }
 
+interface ProductObject {
+  id: string,
+  categoryId: string,
+  name: string,
+  description: string,
+  price: number,
+  imageUrls: Array<string>
+}
+
+// interface ResponseObject extends Response {
+//   _parsedUrl: any;
+// }
 // Brands
 let brands: BrandObject[] = [];
 
 // Products
-const products: object[] = [];
+let products: ProductObject[] = [];
 
 // Users
 const users: object[] = [];
@@ -52,6 +65,16 @@ const server: Server = http
       }
     );
 
+    fs.readFile(
+      "initial-data/products.json",
+      "utf8",
+      (error: any, data: string) => {
+        if (error) throw error;
+
+        products = JSON.parse(data);
+      }
+    );
+
     console.log(`Server is listening on ${PORT}`);
   });
 
@@ -68,33 +91,38 @@ router.get("/api/", (request: Request, response: Response): void => {
 // GET list of brands
 router.get(
   "/api/sunglasses/brands",
-  (
-    request: Request,
-    response: Response
-  ): void | ServerResponse<IncomingMessage> => {
+  (request: Request, response: Response): void | ServerResponse => {
     if (brands.length <= 0) {
       response.writeHead(404, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Brands not found" })
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Brands not found",
+        })
       );
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: brands }));
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: brands,
+      })
+    );
   }
 );
 
 // GET brand by id
 router.get(
   "/api/sunglasses/brands/:brandId",
-  (
-    request: Request,
-    response: Response
-  ): void | ServerResponse<IncomingMessage> => {
+  (request: Request, response: Response): void | ServerResponse => {
     if (brands.length <= 0) {
       response.writeHead(404, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Brand not found" })
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Brand not found",
+        })
       );
     }
 
@@ -103,7 +131,10 @@ router.get(
     if (isNaN(Number(brandId))) {
       response.writeHead(401, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Bad request" })
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Bad request",
+        })
       );
     }
 
@@ -112,12 +143,33 @@ router.get(
     if (!brand) {
       response.writeHead(404, { "Content-Type": "application/json" });
       return response.end(
-        JSON.stringify({ responseCode: response.statusCode, responseMessage: "Brand not found" })
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Brand not found",
+        })
       );
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: brand }));
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: brand,
+      })
+    );
+  }
+);
+
+// GET all products
+router.get(
+  "/api/sunglasses/products",
+  (request: Request, response: Response): void | ServerResponse => {
+    // Get URL params
+    const parsedUrl = urlParser.parse(request.url, true);
+    const { limit, search } = parsedUrl.query;
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products }));
   }
 );
 
