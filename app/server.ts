@@ -184,9 +184,6 @@ router.get(
           filteredProducts.push(products[i]);
         }
       }
-      //const filteredProducts = products.filter((prod) => prod.description.match(regex));
-      //const filteredProducts = products.filter((product) => product.description.toLowerCase().includes(search.toLowerCase()));
-
       response.writeHead(200, { "Content-Type": "application/json" });
       return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: filteredProducts }))
     }

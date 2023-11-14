@@ -114,16 +114,13 @@ describe("Brands", function () {
   describe("GET /api/sunglasses/products", function () {
     it("should return all products if no limit or search queries are present", function (done) {
       // Read and parse product data
-      const data = fs.readFileSync(
-        "initial-data/products.json",
-        "utf8"
-      );
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
       const parsedData = JSON.parse(data);
-      
+
       // Object to match
       const responseObject = {
         responseCode: 200,
-        responseMessage: parsedData
+        responseMessage: parsedData,
       };
 
       chai
@@ -138,19 +135,15 @@ describe("Brands", function () {
           done();
         });
     });
-    // it should return an array of products with length <= limit if limit query is present
     it("should return an array of products with length <= limit if limit query is present", function (done) {
       // Read and parse product data
-      const data = fs.readFileSync(
-        "initial-data/products.json",
-        "utf8"
-      );
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
       const parsedData = JSON.parse(data);
-      
+
       // Object to match
       const responseObject = {
         responseCode: 200,
-        responseMessage: parsedData.slice(3)
+        responseMessage: parsedData.slice(3),
       };
 
       chai
@@ -167,16 +160,13 @@ describe("Brands", function () {
     });
     it("should return all products with descriptions matching the search query", function (done) {
       // Read and parse product data
-      const data = fs.readFileSync(
-        "initial-data/products.json",
-        "utf8"
-      );
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
       const parsedData = JSON.parse(data);
-      
+
       // Object to match
       const responseObject = {
         responseCode: 200,
-        responseMessage: parsedData.slice(0, 4)
+        responseMessage: parsedData.slice(0, 4),
       };
 
       chai
@@ -190,9 +180,53 @@ describe("Brands", function () {
           res.body.should.deep.equal(responseObject);
           done();
         });
-
     });
-    // it should return all products with a description matching the search query
+    it("should return all products if search query is empty", function (done) {
+      // Read and parse product data
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
+      const parsedData = JSON.parse(data);
+
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: parsedData,
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products?search=")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    it("should return all products if limit query is empty", function (done) {
+      // Read and parse product data
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
+      const parsedData = JSON.parse(data);
+
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: parsedData,
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products?limit=")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // it should return a 400 error if limit query is NaN
     // it should return a 404 message if no products are found matching the search query
   });
