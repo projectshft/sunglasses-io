@@ -28,7 +28,7 @@ describe("/api/", function () {
 });
 
 // Test sunglasses routes
-describe("Brands", function () {
+describe("Sunglasses brands and products", function () {
   describe("GET /api/sunglasses/brands", function () {
     after(function (done) {
       chai
@@ -143,7 +143,7 @@ describe("Brands", function () {
       // Object to match
       const responseObject = {
         responseCode: 200,
-        responseMessage: parsedData.slice(3),
+        responseMessage: parsedData.slice(0, 3),
       };
 
       chai
@@ -158,7 +158,7 @@ describe("Brands", function () {
           done();
         });
     });
-    it("should return all products with descriptions matching the search query", function (done) {
+    it("should return products with descriptions matching the search query", function (done) {
       // Read and parse product data
       const data = fs.readFileSync("initial-data/products.json", "utf8");
       const parsedData = JSON.parse(data);

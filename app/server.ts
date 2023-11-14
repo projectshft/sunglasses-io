@@ -170,7 +170,7 @@ router.get(
 
     if (limit) {
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products.slice(Number(limit)) }))
+      return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products.slice(0, Number(limit)) }))
     }
 
     if (search) {
