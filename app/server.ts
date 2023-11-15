@@ -1,6 +1,7 @@
 // Type imports
 import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
+import { BrandObject, ProductObject } from "../types/type-definitions";
 
 // Module imports
 const http = require("http");
@@ -10,26 +11,8 @@ const queryString = require("querystring");
 const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
-const urlParser = require('url');
+const urlParser = require("url");
 
-// Type interfaces
-interface BrandObject {
-  id: string;
-  name: string;
-}
-
-interface ProductObject {
-  id: string,
-  categoryId: string,
-  name: string,
-  description: string,
-  price: number,
-  imageUrls: Array<string>
-}
-
-// interface ResponseObject extends Response {
-//   _parsedUrl: any;
-// }
 // Brands
 let brands: BrandObject[] = [];
 
@@ -168,9 +151,22 @@ router.get(
     const parsedUrl = urlParser.parse(request.url, true);
     const { limit, search } = parsedUrl.query;
 
-    if (limit) {
+    if (limit && isNaN(limit)) {
+      response.writeHead(400, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Bad request",
+        })
+      );
+    } else if (limit && !isNaN(limit)) {
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products.slice(0, Number(limit)) }))
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: products.slice(0, Number(limit)),
+        })
+      );
     }
 
     if (search) {
@@ -184,12 +180,23 @@ router.get(
           filteredProducts.push(products[i]);
         }
       }
+
       response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: filteredProducts }))
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: filteredProducts,
+        })
+      );
     }
 
     response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify({ responseCode: response.statusCode, responseMessage: products }));
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: products,
+      })
+    );
   }
 );
 

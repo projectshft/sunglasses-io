@@ -227,6 +227,24 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
+    it("should return a 400 error if limit query is NaN", function (done) {
+      const responseObject = {
+        responseCode: 400,
+        responseMessage: "Bad request"
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products?limit=a")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // it should return a 400 error if limit query is NaN
     // it should return a 404 message if no products are found matching the search query
   });
