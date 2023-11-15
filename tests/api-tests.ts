@@ -319,7 +319,25 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    // it should return product matching id
+    it("should return a 400 error if id is incorrectly formatted", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 400,
+        responseMessage: "Bad request",
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products/a")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // it should return a 400 error if id is incorrectly formatted
     // it should return a 404 error if the id is not found
   });
