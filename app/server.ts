@@ -304,6 +304,25 @@ router.get(
   }
 );
 
+// User routes
+
+router.get(
+  "/api/user",
+  (request: Request, response: Response): void | ServerResponse => { 
+    const accessToken = request.params.accessToken;
+
+    if (!accessToken) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Unauthorized",
+        })
+      );
+    }
+  }
+);
+
 // Development routes for testing
 
 // Remove brands

@@ -206,7 +206,6 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    // it should return a 404 error if no products with categoryIds matching the brandId
   });
   describe("GET /api/sunglasses/products", function () {
     it("should return all products if no limit or search queries are present", function (done) {
@@ -430,4 +429,35 @@ describe("Sunglasses brands and products", function () {
         });
     });
   });
+});
+
+// User
+describe("User", function () {
+  describe("GET /api/user", function() {
+    it("should return a 401 error if accessToken is missing from search parameters", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 401,
+        responseMessage: "Unauthorized",
+      };
+
+      chai
+        .request(server)
+        .get("/api/user")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    // it should return a 401 error if accessToken is missing from search parameters
+    // it should make sure accessToken is valid and return information on user corresponding with accessToken
+    // it should return a 401 error if accessToken is expired
+    // it should return a 401 error if accessToken is not in accessToken list
+    // it should return a 400 error if accessToken does not match UID pattern
+  });
+
 });
