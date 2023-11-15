@@ -1,4 +1,5 @@
 // Type interfaces
+
 export interface BrandObject {
   id: string;
   name: string;

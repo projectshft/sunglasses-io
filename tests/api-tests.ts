@@ -105,7 +105,7 @@ describe("Sunglasses brands and products", function () {
       const responseObject = {
         responseCode: 400,
         responseMessage: "Bad request",
-      }
+      };
 
       chai
         .request(server)
@@ -123,7 +123,7 @@ describe("Sunglasses brands and products", function () {
       const responseObject = {
         responseCode: 404,
         responseMessage: "Brand not found",
-      }
+      };
 
       chai
         .request(server)
@@ -137,6 +137,40 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
+  });
+  describe("GET /api/sunglasses/brands/:brandId/products", function () {
+    // It should return an array of products with categoryIds matching the brandId
+    it("should return an array of products with categoryIds matching the brandId", function (done) {
+      // Read and parse product data
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
+      const parsedData = JSON.parse(data);
+
+      const brandId = "1";
+
+      const matchingProducts: ProductObject[] = parsedData.filter(
+        (item: ProductObject) => item.categoryId == brandId
+      );
+
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: matchingProducts,
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/brands/1/products")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    // it should return a 400 error if brandId is incorrectly formatted
+    // it should return a 404 error if no products with categoryIds matching the brandId
   });
   describe("GET /api/sunglasses/products", function () {
     it("should return all products if no limit or search queries are present", function (done) {
@@ -257,7 +291,7 @@ describe("Sunglasses brands and products", function () {
     it("should return a 400 error if limit query is NaN", function (done) {
       const responseObject = {
         responseCode: 400,
-        responseMessage: "Bad request"
+        responseMessage: "Bad request",
       };
 
       chai
@@ -275,8 +309,8 @@ describe("Sunglasses brands and products", function () {
     it("should return an empty array if no products are found matching the search query", function (done) {
       const responseObject = {
         responseCode: 200,
-        responseMessage: []
-      }
+        responseMessage: [],
+      };
 
       chai
         .request(server)
@@ -299,7 +333,9 @@ describe("Sunglasses brands and products", function () {
 
       // Get product by id
       const id = "1";
-      const product: ProductObject = parsedData.find((item: ProductObject) => item.id == id);
+      const product: ProductObject = parsedData.find(
+        (item: ProductObject) => item.id == id
+      );
 
       // Object to match
       const responseObject = {
@@ -338,7 +374,24 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    // it should return a 400 error if id is incorrectly formatted
-    // it should return a 404 error if the id is not found
+    it("should return a 404 error if the id is not found", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 404,
+        responseMessage: "Product not found",
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products/111")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(404);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
   });
 });

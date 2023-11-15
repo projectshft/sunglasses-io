@@ -263,6 +263,47 @@ router.get(
     );
   }
 );
+
+// GET products by brandId
+router.get(
+  "/api/sunglasses/brands/:brandId/products",
+  (request: Request, response: Response): void | ServerResponse => {
+    // Check brands and products exist
+    if (products.length <= 0 || brands.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Brands or products not found",
+        })
+      );
+    }
+
+    // Find products by brandId
+    const brandId = request.params.brandId;
+
+    const matchingProducts: ProductObject[] = products.filter((item) => item.categoryId == brandId);
+
+    if (!matchingProducts) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Products not found",
+        })
+      );
+    }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: matchingProducts,
+      })
+    );
+  }
+);
+
 // Development routes for testing
 
 // Remove brands
