@@ -104,7 +104,7 @@ router.get(
       return response.end(
         JSON.stringify({
           responseCode: response.statusCode,
-          responseMessage: "Brand not found",
+          responseMessage: "Brands not found",
         })
       );
     }
@@ -112,7 +112,7 @@ router.get(
     const brandId = request.params.brandId;
 
     if (isNaN(Number(brandId))) {
-      response.writeHead(401, { "Content-Type": "application/json" });
+      response.writeHead(400, { "Content-Type": "application/json" });
       return response.end(
         JSON.stringify({
           responseCode: response.statusCode,
@@ -147,6 +147,17 @@ router.get(
 router.get(
   "/api/sunglasses/products",
   (request: Request, response: Response): void | ServerResponse => {
+    // Check products exist
+    if (products.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Products not found",
+        })
+      );
+    }
+
     // Get URL params
     const parsedUrl = urlParser.parse(request.url, true);
     const { limit, search } = parsedUrl.query;
@@ -200,6 +211,58 @@ router.get(
   }
 );
 
+// GET product by id
+router.get(
+  "/api/sunglasses/products/:productId",
+  (request: Request, response: Response): void | ServerResponse => {
+    // Check products exist
+    if (products.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Products not found",
+        })
+      );
+    }
+
+    // Get productId from search params
+    const productId = request.params.productId;
+
+    if (isNaN(Number(productId))) {
+      response.writeHead(400, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Bad request",
+        })
+      );
+    }
+
+    // Find product
+    const product: ProductObject | undefined = products.find(
+      (item: ProductObject) => item.id == productId
+    );
+
+    if (!product) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Product not found",
+        })
+      );
+    }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: product,
+      })
+    );
+  }
+);
 // Development routes for testing
 
 // Remove brands

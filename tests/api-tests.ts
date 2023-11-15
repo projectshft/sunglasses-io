@@ -1,3 +1,6 @@
+// Type imports
+import { ProductObject, BrandObject } from "../types/type-definitions";
+
 import chai = require("chai");
 import { expect } from "chai";
 import chaiHttp = require("chai-http");
@@ -98,7 +101,12 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    it("should return a 401 error if the id is incorrectly formatted", function (done) {
+    it("should return a 400 error if the id is incorrectly formatted", function (done) {
+      const responseObject = {
+        responseCode: 400,
+        responseMessage: "Bad request",
+      }
+
       chai
         .request(server)
         .get("/api/sunglasses/brands/a")
@@ -106,7 +114,26 @@ describe("Sunglasses brands and products", function () {
           if (err) {
             done(err);
           }
-          res.should.have.status(401);
+          res.should.have.status(400);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    it("should return a 404 error if the id is not found", function (done) {
+      const responseObject = {
+        responseCode: 404,
+        responseMessage: "Brand not found",
+      }
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/brands/100")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(404);
+          res.body.should.deep.equal(responseObject);
           done();
         });
     });
@@ -245,7 +272,55 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    // it should return a 400 error if limit query is NaN
-    // it should return a 404 message if no products are found matching the search query
+    it("should return an empty array if no products are found matching the search query", function (done) {
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: []
+      }
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products?search=abcdefghijklmnopqrstuvwxyz")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+  });
+  describe("GET /api/sunglasses/products/:productId", function () {
+    it("should return product matching id", function (done) {
+      // Read and parse product data
+      const data = fs.readFileSync("initial-data/products.json", "utf8");
+      const parsedData = JSON.parse(data);
+
+      // Get product by id
+      const id = "1";
+      const product: ProductObject = parsedData.find((item: ProductObject) => item.id == id);
+
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: product,
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/products/1")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    // it should return product matching id
+    // it should return a 400 error if id is incorrectly formatted
+    // it should return a 404 error if the id is not found
   });
 });
