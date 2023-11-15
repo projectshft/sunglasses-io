@@ -282,6 +282,16 @@ router.get(
     // Find products by brandId
     const brandId = request.params.brandId;
 
+    if (isNaN(Number(brandId))) {
+      response.writeHead(400, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Bad request",
+        })
+      );
+    }
+
     const matchingProducts: ProductObject[] = products.filter((item) => item.categoryId == brandId);
 
     if (!matchingProducts) {

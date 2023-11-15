@@ -139,7 +139,6 @@ describe("Sunglasses brands and products", function () {
     });
   });
   describe("GET /api/sunglasses/brands/:brandId/products", function () {
-    // It should return an array of products with categoryIds matching the brandId
     it("should return an array of products with categoryIds matching the brandId", function (done) {
       // Read and parse product data
       const data = fs.readFileSync("initial-data/products.json", "utf8");
@@ -169,7 +168,26 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    // it should return a 400 error if brandId is incorrectly formatted
+    it("should return a 400 error if brandId is incorrectly formatted", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 400,
+        responseMessage: "Bad request",
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/brands/a/products")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+   
     // it should return a 404 error if no products with categoryIds matching the brandId
   });
   describe("GET /api/sunglasses/products", function () {
