@@ -294,16 +294,6 @@ router.get(
 
     const matchingProducts: ProductObject[] = products.filter((item) => item.categoryId == brandId);
 
-    if (!matchingProducts) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Products not found",
-        })
-      );
-    }
-
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(
       JSON.stringify({

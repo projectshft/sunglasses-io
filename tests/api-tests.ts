@@ -187,7 +187,25 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-   
+    it("should return an empty array if no products with categoryIds matching the brandId are found", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: [],
+      };
+
+      chai
+        .request(server)
+        .get("/api/sunglasses/brands/111/products")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // it should return a 404 error if no products with categoryIds matching the brandId
   });
   describe("GET /api/sunglasses/products", function () {
