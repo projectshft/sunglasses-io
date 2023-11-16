@@ -65,19 +65,6 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    //   chai.request(server).post("/dev/testing/remove-brands").end();
-
-    //   chai
-    //     .request(server)
-    //     .get("/api/sunglasses/brands")
-    //     .end((err, res) => {
-    //       if (err) {
-    //         done(err);
-    //       }
-    //       res.should.have.status(404);
-    //       done();
-    //     });
-    // });
   });
   describe("GET /api/sunglasses/brands/:brandId", function () {
     it("should return the brand object matching the id passed in the path", function (done) {
