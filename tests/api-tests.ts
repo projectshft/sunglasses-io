@@ -1,10 +1,5 @@
 // Type imports
-import {
-  ProductObject,
-  BrandObject,
-  User,
-  AccessToken,
-} from "../types/type-definitions";
+import { ProductObject, User, AccessToken } from "../types/type-definitions";
 
 import chai = require("chai");
 import { expect } from "chai";
