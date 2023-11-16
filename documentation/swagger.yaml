@@ -8,48 +8,48 @@ info:
 host: localhost:3001
 basePath: /api
 tags:
-- name: sunglasses
-  description: Access brands and product data.
-- name: user
-  description: Log in to the website, retrieve from and change products in cart.
-- name: subscribe
-  description: Subscribe to newsletter (or unsubcribe) using email address.
-- name: articles
-  description: Access article content.
-- name: news
-  description: Access news content.
+  - name: sunglasses
+    description: Access brands and product data.
+  - name: user
+    description: Log in to the website, retrieve from and change products in cart.
+  - name: subscribe
+    description: Subscribe to newsletter (or unsubcribe) using email address.
+  - name: articles
+    description: Access article content.
+  - name: news
+    description: Access news content.
 schemes:
-- http
+  - http
 produces:
-- application/json
+  - application/json
 security:
-- api_key: [] 
+  - api_key: []
 paths:
   /sunglassses/brands:
     get:
       tags:
-      - sunglasses
+        - sunglasses
       summary: Retrieve list of brands
       description: The `/sunglasses/brands` endpoint returns an array of brands with an ID (matching the category ID found on product objects) and name.
       responses:
-        200: 
+        200:
           description: Array of brand objects
-          schema: 
+          schema:
             $ref: "#/definitions/Brand"
         404:
           description: Brands not found
   /sunglasses/brands/{brandId}:
     get:
       tags:
-      - sunglasses
+        - sunglasses
       summary: Retrieve desired brand by unique ID
       description: The `/sunglasses/brands/{brandId}` endpoint returns an object matching the ID passed to brandId.
       parameters:
-      - name: brandId
-        description: Unique ID associated with each brand.
-        in: path
-        type: string
-        required: true
+        - name: brandId
+          description: Unique ID associated with each brand.
+          in: path
+          type: string
+          required: true
       responses:
         200:
           description: Brand object
@@ -60,21 +60,21 @@ paths:
   /sunglasses/products:
     get:
       tags:
-      - sunglasses
+        - sunglasses
       summary: Retrieve list of products
       description: The `/sunglasses/products` endpoint returns a list of all products (limited by the "limit" query) or a list of products with descriptions matching the "search" query.
       parameters:
-      - name: limit
-        description: Number to limit search results to.
-        in: query
-        type: integer
-        format: int64
-        required: false
-      - name: search
-        description: String to match in product description.
-        in: query
-        type: string
-        required: false
+        - name: limit
+          description: Number to limit search results to.
+          in: query
+          type: integer
+          format: int64
+          required: false
+        - name: search
+          description: String to match in product description.
+          in: query
+          type: string
+          required: false
       responses:
         200:
           description: Array of product objects
@@ -87,15 +87,15 @@ paths:
   /sunglasses/products/{productId}:
     get:
       tags:
-      - sunglasses
+        - sunglasses
       summary: Retrieve desired product by unique ID
       description: The `/sunglasses/products/{productId}` endpoint returns a product object with an `id` property matching the productId.
       parameters:
-      - name: productId
-        description: Unique product ID
-        in: path
-        required: true
-        type: string
+        - name: productId
+          description: Unique product ID
+          in: path
+          required: true
+          type: string
       responses:
         200:
           description: Product object matching product ID
@@ -108,15 +108,15 @@ paths:
   /sunglasses/brands/{brandId}/products:
     get:
       tags:
-      - sunglasses
+        - sunglasses
       summary: Retrieve products within a brand
       description: The `/sunglasses/brands/{brandId}/products` endpoint returns an array of product objects with `categoryId` properties matching the brandId.
       parameters:
-      - name: brandId
-        description: Unique brand ID
-        in: path
-        required: true
-        type: string
+        - name: brandId
+          description: Unique brand ID
+          in: path
+          required: true
+          type: string
       responses:
         200:
           description: Array of product objects in brand category
@@ -129,39 +129,37 @@ paths:
   /user:
     get:
       tags:
-      - user
+        - user
       summary: Retrieves data about current user
       description: ""
       parameters:
-      - name: accessToken
-        in: query
-        type: string
-        format: uid
-        required: true
+        - name: accessToken
+          in: query
+          type: string
+          format: uid
+          required: true
       responses:
         200:
           description: User object
           schema:
             $ref: "#/definitions/User"
-        400:
-          description: Bad request
         401:
           description: Unable to authenticate access token
   /user/login:
     post:
       tags:
-      - user
+        - user
       summary: Logs user into website
       description: ""
       consumes:
-      - application/json
+        - application/json
       parameters:
-      - name: credentials
-        in: body
-        description: Username and password pair
-        required: true
-        schema:
-          $ref: "#/definitions/Credentials"
+        - name: credentials
+          in: body
+          description: Username and password pair
+          required: true
+          schema:
+            $ref: "#/definitions/Credentials"
       responses:
         200:
           description: User successfully authenticated. Returns access token string.
@@ -172,37 +170,37 @@ paths:
   /user/cart:
     get:
       tags:
-      - user
+        - user
       summary: Retrieves current contents of user's cart
       description: ""
       parameters:
-      - name: productId
-        type: string
-        in: query
-        description: Optional productId to return just one product
-        required: false
+        - name: productId
+          type: string
+          in: query
+          description: Optional productId to return just one product
+          required: false
       responses:
-        200: 
+        200:
           description: Array of all products in user's cart or product matching productId if query is present.
           schema:
             $ref: "#/definitions/ProductInCart"
-        400: 
+        400:
           description: Bad request
-        401: 
+        401:
           description: Unauthorized
-        404: 
+        404:
           description: Products not found
     post:
       tags:
-      - user
+        - user
       summary: Add a product to user's cart
       description: ""
       parameters:
-      - name: productId
-        type: string
-        in: query
-        description: productId to add to cart
-        required: true
+        - name: productId
+          type: string
+          in: query
+          description: productId to add to cart
+          required: true
       responses:
         200:
           description: Successfully added product to cart
@@ -210,130 +208,130 @@ paths:
           description: Bad request
         401:
           description: Unauthorized
-        404: 
+        404:
           description: Product not found
   /user/cart/{productId}:
     delete:
       tags:
-      - user
+        - user
       summary: Delete product from user's cart
       description: ""
       parameters:
-      - name: productId
-        in: path
-        type: string
-        required: true
-        description: product to delete from cart
+        - name: productId
+          in: path
+          type: string
+          required: true
+          description: product to delete from cart
       responses:
-        200: 
+        200:
           description: Product matching productId successfully removed from cart
-        400: 
+        400:
           description: Bad request
-        401: 
+        401:
           description: Unauthorized
         404:
           description: Product not found
     put:
       tags:
-      - user
+        - user
       summary: Change quantity of product in user's cart
       description: ""
       parameters:
-      - name: productId
-        in: path
-        required: true
-        type: string
-        description: product to change quantity
-      - name: quantity
-        in: query
-        type: integer
-        format: int32
-        required: true
-        description: quantity to change product to
+        - name: productId
+          in: path
+          required: true
+          type: string
+          description: product to change quantity
+        - name: quantity
+          in: query
+          type: integer
+          format: int32
+          required: true
+          description: quantity to change product to
       responses:
-        200: 
+        200:
           description: Successfully changed quantity of product
         400:
           description: Bad request
         401:
           description: Unauthorized
-        404: 
+        404:
           description: Product not found
   /subscribe:
     post:
       tags:
-      - subscribe
+        - subscribe
       summary: Add email to mailing list
       description: Enter a correctly formatted email (name@example.com) to add that email to Sunglasses.io's mailing list.
       parameters:
-      - name: email
-        in: query
-        type: string
-        format: email
-        required: true
+        - name: email
+          in: query
+          type: string
+          format: email
+          required: true
       responses:
-        200: 
+        200:
           description: Email successfully added to mailing list
-        400: 
+        400:
           description: Bad request
   /subscribe/removeSubscription:
     post:
       tags:
-      - subscribe
+        - subscribe
       summary: Remove subscription to mailing list
       description: Enter an email that has been previously subscribed to the mailing list to remove the subscription.
       parameters:
-      - name: email
-        in: query
-        type: string
-        format: email
-        required: true
+        - name: email
+          in: query
+          type: string
+          format: email
+          required: true
       responses:
         200:
           description: Email successfully removed from mailing list
-        400: 
+        400:
           description: Bad request
-        404: 
+        404:
           description: Email not found
   /articles:
     get:
       tags:
-      - articles
+        - articles
       summary: Retrieve list of articles
       parameters:
-      - name: articleId
-        in: query
-        type: string
-        required: false
-        description: Optional articleId to retrieve individual article
+        - name: articleId
+          in: query
+          type: string
+          required: false
+          description: Optional articleId to retrieve individual article
       responses:
         200:
           description: Array of articles returned
           schema:
             $ref: "#/definitions/Article"
-        400: 
+        400:
           description: Bad request
-        404: 
+        404:
           description: Article not found
   /news:
     get:
       tags:
-      - news
+        - news
       summary: Retrieve list of news posts
       parameters:
-      - name: newsId
-        in: query
-        type: string
-        required: false
-        description: Optional newsId to retrieve individual post
+        - name: newsId
+          in: query
+          type: string
+          required: false
+          description: Optional newsId to retrieve individual post
       responses:
         200:
           description: Array of news posts returned
           schema:
             $ref: "#/definitions/Article"
-        400: 
+        400:
           description: Bad request
-        404: 
+        404:
           description: News post not found
 securityDefinitions:
   api_key:
@@ -341,18 +339,18 @@ securityDefinitions:
     name: "X-Authentication"
     in: "header"
 definitions:
-  Brand: 
+  Brand:
     type: object
     properties:
-      id: 
+      id:
         type: string
-      name: 
+      name:
         type: string
         description: Name of brand (for example, "Oakley")
   Product:
     type: object
     properties:
-      id: 
+      id:
         type: string
         description: Unique product ID
       categoryId:
@@ -369,13 +367,13 @@ definitions:
         format: int64
       imageUrls:
         type: array
-        items: 
+        items:
           type: string
           description: Image URL
   ProductInCart:
     type: object
     properties:
-      id: 
+      id:
         type: string
         description: Unique product ID
       categoryId:
@@ -392,7 +390,7 @@ definitions:
         format: int64
       imageUrls:
         type: array
-        items: 
+        items:
           type: string
           description: Image URL
       quantity:
@@ -401,7 +399,7 @@ definitions:
   Credentials:
     type: object
     properties:
-      username: 
+      username:
         type: string
       password:
         type: string
@@ -415,12 +413,12 @@ definitions:
       gender:
         type: string
         enum:
-        - male
-        - female
+          - male
+          - female
       cart:
         type: array
         description: List of products currently in user's cart
-        items: 
+        items:
           $ref: "#/definitions/Product"
       name:
         type: object
@@ -434,7 +432,7 @@ definitions:
       location:
         type: object
         properties:
-          street: 
+          street:
             type: string
           city:
             type: string
@@ -454,7 +452,7 @@ definitions:
           password:
             type: string
             format: password
-          salt: 
+          salt:
             type: string
             format: salt
           md5:
@@ -469,7 +467,7 @@ definitions:
           dob:
             type: string
             format: date-time
-          registered: 
+          registered:
             type: string
             format: date-time
           phone:
@@ -488,13 +486,13 @@ definitions:
               thumbnail:
                 type: string
                 format: url
-          nat: 
+          nat:
             type: string
             description: Two letter ISO code
   Article:
     type: object
     properties:
-      id: 
+      id:
         type: integer
         format: int32
       title:

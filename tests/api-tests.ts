@@ -1,12 +1,18 @@
 // Type imports
-import { ProductObject, BrandObject, User, AccessToken } from "../types/type-definitions";
+import {
+  ProductObject,
+  BrandObject,
+  User,
+  AccessToken,
+} from "../types/type-definitions";
 
 import chai = require("chai");
 import { expect } from "chai";
 import chaiHttp = require("chai-http");
 const fs = require("fs");
 const server = require("../app/server.ts");
-const accessTokensList: AccessToken[] = require("../app/login-methods.ts").accessTokensList;
+const accessTokensList: AccessToken[] =
+  require("../app/login-methods.ts").accessTokensList;
 
 // Define should
 chai.should();
@@ -34,13 +40,6 @@ describe("/api/", function () {
 // Test sunglasses routes
 describe("Sunglasses brands and products", function () {
   describe("GET /api/sunglasses/brands", function () {
-    // after(function (done) {
-    //   chai
-    //     .request(server)
-    //     .post("/dev/testing/add-brands")
-    //     .end(() => done());
-    // });
-
     it("should return an array of brand objects", function (done) {
       const responseObject = {
         responseCode: 200,
@@ -66,7 +65,6 @@ describe("Sunglasses brands and products", function () {
           done();
         });
     });
-    // it("should return a 404 error if no brands are found", function (done) {
     //   chai.request(server).post("/dev/testing/remove-brands").end();
 
     //   chai
@@ -434,26 +432,7 @@ describe("Sunglasses brands and products", function () {
 
 // User
 describe("User", function () {
-  describe("GET /api/user", function() {
-    it("should return a 401 error if accessToken is missing from search parameters", function (done) {
-      // Object to match
-      const responseObject = {
-        responseCode: 401,
-        responseMessage: "Unauthorized",
-      };
-
-      chai
-        .request(server)
-        .get("/api/user")
-        .end((err, res) => {
-          if (err) {
-            done(err);
-          }
-          res.should.have.status(401);
-          res.body.should.deep.equal(responseObject);
-          done();
-        });
-    });
+  describe("GET /api/user", function () {
     it("should return user data if accessToken is valid", function (done) {
       // Load user data
       const data = fs.readFileSync("initial-data/users.json", "utf8");
@@ -482,6 +461,25 @@ describe("User", function () {
           done();
         });
     });
+    it("should return a 401 error if accessToken is missing from search parameters", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 401,
+        responseMessage: "Unauthorized",
+      };
+
+      chai
+        .request(server)
+        .get("/api/user")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     it("should return a 401 error if accessToken is expired", function (done) {
       // Object to match
       const responseObject = {
@@ -501,11 +499,35 @@ describe("User", function () {
           done();
         });
     });
-    // it should return a 401 error if accessToken is not in accessToken list
-    // it should return a 400 error if accessToken does not match UID pattern
-    // accessToken.lastUpdated date should be changed after the accessToken is validated
-  });
+    it("should return a 401 error if accessToken is not in access token list", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 401,
+        responseMessage: "Unauthorized",
+      };
 
+      chai
+        .request(server)
+        .get("/api/user?accessToken=RHKa5dhXEpa7Uw0K")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+  });
+  describe("POST /api/user/login", function () {
+    // should return accessToken if username and password are authenticated
+    // should assign an old accessToken if one already exists and is not expired
+    // should assign a new accessToken if old one does not exist or is expired
+    // should return 401 error if username is missing from request body
+    // should return 401 error if password is missing from request body
+    // should return 401 error if username does not match username in database
+    // should return 401 error if password does not match password corresponding to username
+  });
 });
 
 // Tests for login-methods:
