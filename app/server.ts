@@ -346,6 +346,9 @@ router.get(
       );
     }
 
+    /**
+     * User connected to accessToken
+     */
     const matchedUser = users.find(
       (user) => user.login.username == accessToken.username
     );
