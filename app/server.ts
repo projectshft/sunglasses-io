@@ -26,13 +26,6 @@ let products: ProductObject[] = [];
 // Users
 let users: User[] = [];
 
-// Example access token data
-let accessTokenData = {
-  username: "yellowleopard753",
-  lastUpdated: new Date(),
-  token: "O0WnZSZ8hWlLOLX9",
-};
-
 // Router setup
 const PORT = 3001;
 

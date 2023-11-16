@@ -4,11 +4,18 @@ import { Request } from "express";
 const urlParser = require("url");
 const uid = require("rand-token").uid;
 
-let accessTokensList: AccessToken[] = [{
-  username: "yellowleopard753",
-  lastUpdated: new Date(),
-  token: "O0WnZSZ8hWlLOLX9"
-}]; // hard code example data for now
+let accessTokensList: AccessToken[] = [
+  {
+    username: "yellowleopard753",
+    lastUpdated: new Date(),
+    token: "O0WnZSZ8hWlLOLX9"
+  }, 
+  {
+    username: "lazywolf342",
+    lastUpdated: new Date('November 14, 2023 03:24:00'),
+    token: "zBC4odxxvEiz0iuO"
+  }
+]; // hard code example data for now
 
 const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 

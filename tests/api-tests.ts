@@ -481,7 +481,25 @@ describe("User", function () {
           done();
         });
     });
-    // it should return a 401 error if accessToken is expired
+    it("should return a 401 error if accessToken is expired", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 401,
+        responseMessage: "Unauthorized",
+      };
+
+      chai
+        .request(server)
+        .get("/api/user?accessToken=zBC4odxxvEiz0iuO")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // it should return a 401 error if accessToken is not in accessToken list
     // it should return a 400 error if accessToken does not match UID pattern
   });
