@@ -1,11 +1,12 @@
 // Type imports
-import { ProductObject, BrandObject, User } from "../types/type-definitions";
+import { ProductObject, BrandObject, User, AccessToken } from "../types/type-definitions";
 
 import chai = require("chai");
 import { expect } from "chai";
 import chaiHttp = require("chai-http");
 const fs = require("fs");
 const server = require("../app/server.ts");
+const accessTokensList: AccessToken[] = require("../app/login-methods.ts").accessTokensList;
 
 // Define should
 chai.should();
@@ -502,6 +503,12 @@ describe("User", function () {
     });
     // it should return a 401 error if accessToken is not in accessToken list
     // it should return a 400 error if accessToken does not match UID pattern
+    // accessToken.lastUpdated date should be changed after the accessToken is validated
   });
 
 });
+
+// Tests for login-methods:
+
+// updateAccessToken
+// "should update the date string held by accessToken.lastUpdated

@@ -21,7 +21,6 @@ const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
 const getValidToken = (
   request: Request
-  // accessTokensList: AccessToken[]
 ): null | AccessToken => {
   const parsedUrl = urlParser.parse(request.url, true);
 
@@ -58,6 +57,7 @@ const updateAccessToken = (username: string): void => {
 
 module.exports.getValidToken = getValidToken;
 module.exports.updateAccessToken = updateAccessToken;
+module.exports.accessTokensList = accessTokensList;
 
 export type GetValidAccessToken = typeof getValidToken;
 export type UpdateAccessToken = typeof updateAccessToken;
