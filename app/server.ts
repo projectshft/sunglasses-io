@@ -1,12 +1,8 @@
 // Type imports
 import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
-import {
-  AccessToken,
-  BrandObject,
-  ProductObject,
-} from "../types/type-definitions";
-import { GetValidAccessToken } from "./login-methods";
+import { User, BrandObject, ProductObject } from "../types/type-definitions";
+import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 
 // Module imports
 const http = require("http");
@@ -17,9 +13,10 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 const urlParser = require("url");
-//const createAccessToken: Function = require("../initial-data/access-token.ts");
-const getValidToken: GetValidAccessToken = require("./login-methods.ts").getValidToken;
-
+const getValidToken: GetValidAccessToken =
+  require("./login-methods.ts").getValidToken;
+const updateAccessToken: UpdateAccessToken =
+  require("./login-methods.ts").updateAccessToken;
 // Brands
 let brands: BrandObject[] = [];
 
@@ -27,13 +24,13 @@ let brands: BrandObject[] = [];
 let products: ProductObject[] = [];
 
 // Users
-const users: object[] = [];
+let users: User[] = [];
 
 // Example access token data
 let accessTokenData = {
   username: "yellowleopard753",
   lastUpdated: new Date(),
-  token: "O0WnZSZ8hWlLOLX9"
+  token: "O0WnZSZ8hWlLOLX9",
 };
 
 // Router setup
@@ -52,6 +49,7 @@ const server: Server = http
       return console.log("Error on Server Startup: ", error);
     }
 
+    // Load dummy data
     fs.readFile(
       "initial-data/brands.json",
       "utf8",
@@ -69,6 +67,16 @@ const server: Server = http
         if (error) throw error;
 
         products = JSON.parse(data);
+      }
+    );
+
+    fs.readFile(
+      "initial-data/users.json",
+      "utf8",
+      (error: any, data: string) => {
+        if (error) throw error;
+
+        users = JSON.parse(data);
       }
     );
 
@@ -338,45 +346,29 @@ router.get(
       );
     }
 
-    response.writeHead(200, { "Content-Type": "application/json" });
+    const matchedUser = users.find((user) => user.login.username == accessToken.username);
+
+    if (!matchedUser) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Unauthorized",
+        })
+      );
+    }
+
+    response.writeHead(200, {
+      "Content-Type": "application/json",
+    });
     response.end(
       JSON.stringify({
         responseCode: response.statusCode,
-        responseMessage: accessTokenData,
+        responseMessage: matchedUser,
       })
     );
   }
 );
-
-// Development routes for testing
-
-// Remove brands
-// router.post(
-//   "/dev/testing/remove-brands",
-//   (request: Request, response: Response) => {
-//     brands = [];
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end();
-//   }
-// );
-
-// // Add brands back
-// router.post(
-//   "/dev/testing/add-brands",
-//   (request: Request, response: Response) => {
-//     fs.readFile(
-//       "initial-data/brands.json",
-//       "utf8",
-//       (error: any, data: string) => {
-//         if (error) throw error;
-
-//         brands = JSON.parse(data);
-//       }
-//     );
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end();
-//   }
-// );
 
 // Exports
 module.exports = server;

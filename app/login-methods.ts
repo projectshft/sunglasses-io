@@ -4,7 +4,7 @@ import { Request } from "express";
 const urlParser = require("url");
 const uid = require("rand-token").uid;
 
-const accessTokensList: AccessToken[] = [{
+let accessTokensList: AccessToken[] = [{
   username: "yellowleopard753",
   lastUpdated: new Date(),
   token: "O0WnZSZ8hWlLOLX9"
@@ -33,5 +33,24 @@ const getValidToken = (
   return matchedAccessToken;
 };
 
+const updateAccessToken = (username: string): void => {
+  const newAccessTokensList = accessTokensList.filter((accessToken) => accessToken.username != username);
+  const oldAccessToken = accessTokensList.find((accessToken) => accessToken.username == username);
+
+  if (oldAccessToken) {
+    const newAccessToken = {
+      username: username,
+      lastUpdated: new Date(),
+      token: oldAccessToken.token
+    };
+
+    newAccessTokensList.push(newAccessToken)
+    accessTokensList = newAccessTokensList;
+  }
+};
+
 module.exports.getValidToken = getValidToken;
-export type GetValidAccessToken = typeof getValidToken
+module.exports.updateAccessToken = updateAccessToken;
+
+export type GetValidAccessToken = typeof getValidToken;
+export type UpdateAccessToken = typeof updateAccessToken;
