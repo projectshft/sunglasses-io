@@ -453,8 +453,9 @@ describe("User", function () {
           done();
         });
     });
-    // it should return a 401 error if accessToken is missing from search parameters
-    // it should make sure accessToken is valid and return information on user corresponding with accessToken
+    it("should return user data if accessToken is valid", function (done) {
+
+    });
     // it should return a 401 error if accessToken is expired
     // it should return a 401 error if accessToken is not in accessToken list
     // it should return a 400 error if accessToken does not match UID pattern

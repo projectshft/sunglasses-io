@@ -1,7 +1,12 @@
 // Type imports
 import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
-import { BrandObject, ProductObject } from "../types/type-definitions";
+import {
+  AccessToken,
+  BrandObject,
+  ProductObject,
+} from "../types/type-definitions";
+import { GetValidAccessToken } from "./login-methods";
 
 // Module imports
 const http = require("http");
@@ -12,6 +17,8 @@ const Router = require("router");
 const bodyParser = require("body-parser");
 const uid = require("rand-token").uid;
 const urlParser = require("url");
+//const createAccessToken: Function = require("../initial-data/access-token.ts");
+const getValidToken: GetValidAccessToken = require("./login-methods.ts").getValidToken;
 
 // Brands
 let brands: BrandObject[] = [];
@@ -21,6 +28,13 @@ let products: ProductObject[] = [];
 
 // Users
 const users: object[] = [];
+
+// Example access token data
+let accessTokenData = {
+  username: "yellowleopard753",
+  lastUpdated: new Date(),
+  token: "O0WnZSZ8hWlLOLX9"
+};
 
 // Router setup
 const PORT = 3001;
@@ -292,7 +306,9 @@ router.get(
       );
     }
 
-    const matchingProducts: ProductObject[] = products.filter((item) => item.categoryId == brandId);
+    const matchingProducts: ProductObject[] = products.filter(
+      (item) => item.categoryId == brandId
+    );
 
     response.writeHead(200, { "Content-Type": "application/json" });
     response.end(
@@ -306,10 +322,11 @@ router.get(
 
 // User routes
 
+// GET user data
 router.get(
   "/api/user",
-  (request: Request, response: Response): void | ServerResponse => { 
-    const accessToken = request.params.accessToken;
+  (request: Request, response: Response): void | ServerResponse => {
+    const accessToken = getValidToken(request);
 
     if (!accessToken) {
       response.writeHead(401, { "Content-Type": "application/json" });
@@ -320,6 +337,14 @@ router.get(
         })
       );
     }
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: accessTokenData,
+      })
+    );
   }
 );
 
