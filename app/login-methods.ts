@@ -4,6 +4,9 @@ import { Request } from "express";
 const urlParser = require("url");
 const uid = require("rand-token").uid;
 
+/**
+ * Array of accessTokens - hard-coded for testing
+ */
 let accessTokensList: AccessToken[] = [
   {
     username: "yellowleopard753",
@@ -15,10 +18,19 @@ let accessTokensList: AccessToken[] = [
     lastUpdated: new Date('November 14, 2023 03:24:00'),
     token: "zBC4odxxvEiz0iuO"
   }
-]; // hard code example data for now
+]; 
 
+/**
+ * Time in milliseconds until accessToken expires == 15 minutes
+ */
 const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
+/**
+ * Retrieves a valid accessToken object that matches accessToken in query
+ * @param {Request} request Express server request
+ * @returns {null} null if no accessToken is found
+ * @returns {AccessToken} matchedAccessToken if accessToken is present in accessTokensList and has not expired
+ */
 const getValidToken = (
   request: Request
 ): null | AccessToken => {
@@ -39,6 +51,10 @@ const getValidToken = (
   return matchedAccessToken;
 };
 
+/**
+ * Updates the lastUpdated property of a user's accessToken to the current time
+ * @param {string} username
+ */
 const updateAccessToken = (username: string): void => {
   const newAccessTokensList = accessTokensList.filter((accessToken) => accessToken.username != username);
   const oldAccessToken = accessTokensList.find((accessToken) => accessToken.username == username);
