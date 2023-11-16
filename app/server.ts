@@ -346,7 +346,9 @@ router.get(
       );
     }
 
-    const matchedUser = users.find((user) => user.login.username == accessToken.username);
+    const matchedUser = users.find(
+      (user) => user.login.username == accessToken.username
+    );
 
     if (!matchedUser) {
       response.writeHead(401, { "Content-Type": "application/json" });
@@ -357,6 +359,9 @@ router.get(
         })
       );
     }
+
+    // Update accessToken lastUpdated time
+    updateAccessToken(accessToken.username);
 
     response.writeHead(200, {
       "Content-Type": "application/json",

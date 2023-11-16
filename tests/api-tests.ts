@@ -1,5 +1,5 @@
 // Type imports
-import { ProductObject, BrandObject } from "../types/type-definitions";
+import { ProductObject, BrandObject, User } from "../types/type-definitions";
 
 import chai = require("chai");
 import { expect } from "chai";
@@ -454,22 +454,29 @@ describe("User", function () {
         });
     });
     it("should return user data if accessToken is valid", function (done) {
-      
+      // Load user data
+      const data = fs.readFileSync("initial-data/users.json", "utf8");
+      const parsedData = JSON.parse(data);
 
+      // Get user by username
+      const username = "yellowleopard753";
+      const user: User = parsedData.find(
+        (user: User) => user.login.username == username
+      );
       // Object to match
       const responseObject = {
-        responseCode: 401,
-        responseMessage: "Unauthorized",
+        responseCode: 200,
+        responseMessage: user,
       };
 
       chai
         .request(server)
-        .get("/api/user")
+        .get("/api/user?accessToken=O0WnZSZ8hWlLOLX9")
         .end((err, res) => {
           if (err) {
             done(err);
           }
-          res.should.have.status(401);
+          res.should.have.status(200);
           res.body.should.deep.equal(responseObject);
           done();
         });
