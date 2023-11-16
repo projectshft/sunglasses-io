@@ -17,13 +17,20 @@ const getValidToken: GetValidAccessToken =
   require("./login-methods.ts").getValidToken;
 const updateAccessToken: UpdateAccessToken =
   require("./login-methods.ts").updateAccessToken;
-// Brands
+
+/**
+ * Dummy brands data
+ */
 let brands: BrandObject[] = [];
 
-// Products
+/**
+ * Dummy products data
+ */
 let products: ProductObject[] = [];
 
-// Users
+/**
+ * Dummy users data
+ */
 let users: User[] = [];
 
 // Router setup
