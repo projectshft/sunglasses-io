@@ -23,7 +23,8 @@ const getValidToken: GetValidAccessToken =
   require("./login-methods.ts").getValidToken;
 const updateAccessToken: UpdateAccessToken =
   require("./login-methods.ts").updateAccessToken;
-const getCartContents = require("./cart-methods.ts").getCartContents;
+const getCartContents: GetCartContents =
+  require("./cart-methods.ts").getCartContents;
 
 /**
  * Dummy brands data
@@ -498,6 +499,9 @@ router.get(
       );
     }
 
+    /**
+     * Array of all products in cart, single product in cart if productId is included in query, or null if no product is found matching productId
+     */
     const cart = getCartContents(matchedUser.cart, request);
 
     if (!cart) {
