@@ -5,7 +5,7 @@ import {
   User,
   BrandObject,
   ProductObject,
-  AccessToken,
+  //AccessToken,
 } from "../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 import { GetCartContents } from "./cart-methods";
@@ -14,10 +14,10 @@ import { GetCartContents } from "./cart-methods";
 const http = require("http");
 const fs = require("fs");
 const finalHandler = require("finalhandler");
-const queryString = require("querystring");
+//const queryString = require("querystring");
 const Router = require("router");
 const bodyParser = require("body-parser");
-const uid = require("rand-token").uid;
+//const uid = require("rand-token").uid;
 const urlParser = require("url");
 const getValidToken: GetValidAccessToken =
   require("./login-methods.ts").getValidToken;
