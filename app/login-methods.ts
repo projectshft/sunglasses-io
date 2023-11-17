@@ -56,7 +56,7 @@ const getValidToken = (request: Request): null | AccessToken => {
  * Updates the lastUpdated property of a user's accessToken to the current time
  * @param {string} username
  */
-const updateAccessToken = (username: string): void | AccessToken => {
+const updateAccessToken = (username: string): AccessToken => {
   const newAccessTokensList = accessTokensList.filter(
     (accessToken) => accessToken.username != username
   );
@@ -73,6 +73,8 @@ const updateAccessToken = (username: string): void | AccessToken => {
 
     newAccessTokensList.push(updatedAccessToken);
     accessTokensList = newAccessTokensList;
+
+    return updatedAccessToken;
   }
 
   // Create a new accessToken if no old one exists for user

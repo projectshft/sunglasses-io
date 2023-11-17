@@ -1,7 +1,7 @@
 // Type imports
 import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
-import { User, BrandObject, ProductObject } from "../types/type-definitions";
+import { User, BrandObject, ProductObject, AccessToken } from "../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 
 // Module imports
@@ -334,6 +334,17 @@ router.get(
 router.get(
   "/api/user",
   (request: Request, response: Response): void | ServerResponse => {
+    // Check users exist
+    if (users.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Users not found",
+        })
+      );
+    }
+
     const accessToken = getValidToken(request);
 
     if (!accessToken) {
@@ -381,6 +392,17 @@ router.get(
 router.post(
   "/api/user/login",
   (request: Request, response: Response): void | ServerResponse => {
+    // Check users exist
+    if (users.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Users not found",
+        })
+      );
+    }
+
     const { username, password } = request.body;
 
     if (!username || !password) {
@@ -408,6 +430,9 @@ router.post(
       );
     }
 
+    /**
+     * accessToken object containing username, time when last updated, and 16-character uid token
+     */
     const accessToken = updateAccessToken(username);
 
     response.writeHead(200, { "Content-Type": "application/json" });
