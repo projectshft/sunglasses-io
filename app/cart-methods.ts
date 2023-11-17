@@ -4,7 +4,7 @@ import { ProductInCart, User } from "../types/type-definitions";
 const urlParser = require("url");
 
 /**
- *
+ * Retrieves a single product from a cart if productId exists in query or simply returns the entire cart
  * @param cart Cart property of user object
  * @param request Express server request
  * @returns Product in cart that matches productId in request query
