@@ -565,7 +565,27 @@ describe("User", function () {
           done();
         });
     });
-    
+    it("should return a 401 error if username does not match username in database", function (done) {
+      const requestBody = {
+        username: "thisisnotausername",
+        password: "password"
+      };
+
+      chai
+        .request(server)
+        .post("/api/user/login")
+        .send(requestBody)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.have
+            .property("responseMessage")
+            .equal("Unauthorized");
+          done();
+        });
+    })
     // should return 401 error if username does not match username in database
     // should return 401 error if password does not match password corresponding to username
   });
