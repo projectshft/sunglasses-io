@@ -567,7 +567,7 @@ describe("User", function () {
     it("should return a 401 error if username does not match username in database", function (done) {
       const requestBody = {
         username: "thisisnotausername",
-        password: "password"
+        password: "password",
       };
 
       chai
@@ -588,7 +588,7 @@ describe("User", function () {
     it("should return a 401 error if password does not match password corresponding to username", function (done) {
       const requestBody = {
         username: "lazywolf342",
-        password: "wrongpassword"
+        password: "wrongpassword",
       };
 
       chai
@@ -633,9 +633,26 @@ describe("User", function () {
           res.body.should.deep.equal(responseObject);
           done();
         });
+    });
+    it("should return an empty array if user's cart is empty", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: [],
+      };
 
-    }); 
-    // should return an empty array if user's cart is empty
+      chai
+        .request(server)
+        .get("/api/user/cart?accessToken=zBC4odxxvEiz0iuO")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should return a single product from the cart if productId is included in query
     // should return a 404 error if productId is not found in cart
     // should return a 400 error if productId is incorrectly formatted
