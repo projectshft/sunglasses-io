@@ -22,6 +22,11 @@ let accessTokensList: AccessToken[] = [
     username: "greenlion235",
     lastUpdated: new Date(),
     token: "eE6AanctxgKg9emy"
+  },
+  {
+    username: "expireduser",
+    lastUpdated: new Date("November 14, 2023 03:24:00"),
+    token: "YG9IGRuNKc7fkZlt"
   }
 ];
 
