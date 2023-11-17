@@ -1,7 +1,12 @@
 // Type imports
 import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
-import { User, BrandObject, ProductObject, AccessToken } from "../types/type-definitions";
+import {
+  User,
+  BrandObject,
+  ProductObject,
+  AccessToken,
+} from "../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 
 // Module imports
@@ -345,6 +350,9 @@ router.get(
       );
     }
 
+    /**
+     * accessToken object containing username, time when last updated, and 16-character uid token
+     */
     const accessToken = getValidToken(request);
 
     if (!accessToken) {
@@ -440,6 +448,64 @@ router.post(
       JSON.stringify({
         responseCode: response.statusCode,
         responseMessage: accessToken,
+      })
+    );
+  }
+);
+
+router.get(
+  "/api/user/cart",
+  (request: Request, response: Response): void | ServerResponse => {
+    // Check users exist
+    if (users.length <= 0) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Users not found",
+        })
+      );
+    }
+
+    const accessToken = getValidToken(request);
+
+    if (!accessToken) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Unauthorized",
+        })
+      );
+    }
+
+    /**
+     * User connected to accessToken
+     */
+    const matchedUser = users.find(
+      (user) => user.login.username == accessToken.username
+    );
+
+    if (!matchedUser) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Unauthorized",
+        })
+      );
+    }
+
+    // Update accessToken lastUpdated time
+    updateAccessToken(accessToken.username);
+
+    response.writeHead(200, {
+      "Content-Type": "application/json",
+    });
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: matchedUser.cart,
       })
     );
   }

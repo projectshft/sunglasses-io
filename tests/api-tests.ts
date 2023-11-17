@@ -412,17 +412,17 @@ describe("Sunglasses brands and products", function () {
   });
 });
 
-// User
+// Test user routes
 describe("User", function () {
   describe("GET /api/user", function () {
     it("should return user data if accessToken is valid", function (done) {
       // Load user data
       const data = fs.readFileSync("initial-data/users.json", "utf8");
-      const parsedData = JSON.parse(data);
+      const parsedData: User[] = JSON.parse(data);
 
       // Get user by username
       const username = "yellowleopard753";
-      const user: User = parsedData.find(
+      const user = parsedData.find(
         (user: User) => user.login.username == username
       );
       // Object to match
@@ -524,7 +524,6 @@ describe("User", function () {
           done();
         });
     });
-    // should return 401 error if username is missing from request body
     it("should return a 401 error if username is missing from request body", function (done) {
       const requestBody = {
         password: "tucker",
@@ -607,6 +606,42 @@ describe("User", function () {
           done();
         });
     });
+  });
+  describe("GET /api/user/cart", function () {
+    it("should return products in user's cart if accessToken is valid", function (done) {
+      // Load user data
+      const data = fs.readFileSync("initial-data/users.json", "utf8");
+      const users: User[] = JSON.parse(data);
+
+      // Get cart contents
+      const cart = users[0].cart;
+
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: cart,
+      };
+
+      chai
+        .request(server)
+        .get("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+
+    }); 
+    // should return an empty array if user's cart is empty
+    // should return a single product from the cart if productId is included in query
+    // should return a 404 error if productId is not found in cart
+    // should return a 400 error if productId is incorrectly formatted
+    // should return a 401 error if accessToken is missing from search query
+    // should return a 401 error if accessToken is expired
+    // should return a 401 error if accessToken is not in access token list
   });
 });
 
