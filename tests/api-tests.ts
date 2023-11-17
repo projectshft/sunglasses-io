@@ -686,7 +686,25 @@ describe("User", function () {
           done();
         });
     });
-    // should return a single product from the cart if productId is included in query
+    it("should return a 404 error if productId is not found in cart", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 404,
+        responseMessage: "Product not found",
+      };
+
+      chai
+        .request(server)
+        .get("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9&productId=4")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(404);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should return a 404 error if productId is not found in cart
     // should return a 400 error if productId is incorrectly formatted
     // should return a 401 error if accessToken is missing from search query

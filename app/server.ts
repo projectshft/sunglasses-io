@@ -500,6 +500,16 @@ router.get(
 
     const cart = getCartContents(matchedUser.cart, request);
 
+    if (!cart) {
+      response.writeHead(404, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Product not found",
+        })
+      );
+    }
+
     // Update accessToken lastUpdated time
     updateAccessToken(accessToken.username);
 
