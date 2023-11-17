@@ -378,5 +378,47 @@ router.get(
   }
 );
 
+router.post(
+  "/api/user/login",
+  (request: Request, response: Response): void | ServerResponse => {
+    const { username, password } = request.body;
+
+    if (!username || !password) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Unauthorized",
+        })
+      );
+    }
+
+    /**
+     * User connected to username
+     */
+    const matchedUser = users.find((user) => user.login.username == username);
+
+    if (!matchedUser || matchedUser.login.password != password) {
+      response.writeHead(401, { "Content-Type": "application/json" });
+      return response.end(
+        JSON.stringify({
+          responseCode: response.statusCode,
+          responseMessage: "Unauthorized",
+        })
+      );
+    }
+
+    const accessToken = updateAccessToken(username);
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: accessToken,
+      })
+    );
+  }
+);
+
 // Exports
 module.exports = server;

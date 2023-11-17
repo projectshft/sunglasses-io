@@ -1,4 +1,4 @@
-import { AccessToken, User } from "../types/type-definitions"
+import { AccessToken, User } from "../types/type-definitions";
 import { Request } from "express";
 
 const urlParser = require("url");
@@ -11,14 +11,14 @@ let accessTokensList: AccessToken[] = [
   {
     username: "yellowleopard753",
     lastUpdated: new Date(),
-    token: "O0WnZSZ8hWlLOLX9"
-  }, 
+    token: "O0WnZSZ8hWlLOLX9",
+  },
   {
     username: "lazywolf342",
-    lastUpdated: new Date('November 14, 2023 03:24:00'),
-    token: "zBC4odxxvEiz0iuO"
-  }
-]; 
+    lastUpdated: new Date("November 14, 2023 03:24:00"),
+    token: "zBC4odxxvEiz0iuO",
+  },
+];
 
 /**
  * Time in milliseconds until accessToken expires == 15 minutes
@@ -31,9 +31,7 @@ const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
  * @returns {null} null if no accessToken is found
  * @returns {AccessToken} matchedAccessToken if accessToken is present in accessTokensList and has not expired
  */
-const getValidToken = (
-  request: Request
-): null | AccessToken => {
+const getValidToken = (request: Request): null | AccessToken => {
   const parsedUrl = urlParser.parse(request.url, true);
 
   if (!parsedUrl.query.accessToken) {
@@ -41,7 +39,10 @@ const getValidToken = (
   }
 
   const matchedAccessToken = accessTokensList.find((accessToken) => {
-    return accessToken.token == parsedUrl.query.accessToken && (Number(new Date) - Number(accessToken.lastUpdated)) < SESSION_TIMEOUT;
+    return (
+      accessToken.token == parsedUrl.query.accessToken &&
+      Number(new Date()) - Number(accessToken.lastUpdated) < SESSION_TIMEOUT
+    );
   });
 
   if (!matchedAccessToken) {
@@ -55,25 +56,40 @@ const getValidToken = (
  * Updates the lastUpdated property of a user's accessToken to the current time
  * @param {string} username
  */
-const updateAccessToken = (username: string): void => {
-  const newAccessTokensList = accessTokensList.filter((accessToken) => accessToken.username != username);
-  const oldAccessToken = accessTokensList.find((accessToken) => accessToken.username == username);
+const updateAccessToken = (username: string): void | AccessToken => {
+  const newAccessTokensList = accessTokensList.filter(
+    (accessToken) => accessToken.username != username
+  );
+  const oldAccessToken = accessTokensList.find(
+    (accessToken) => accessToken.username == username
+  );
 
   if (oldAccessToken) {
-    const newAccessToken = {
+    const updatedAccessToken = {
       username: username,
       lastUpdated: new Date(),
-      token: oldAccessToken.token
+      token: oldAccessToken.token,
     };
 
-    newAccessTokensList.push(newAccessToken)
+    newAccessTokensList.push(updatedAccessToken);
     accessTokensList = newAccessTokensList;
   }
+
+  // Create a new accessToken if no old one exists for user
+  const newAccessToken = {
+    username: username,
+    lastUpdated: new Date(),
+    token: uid(16),
+  };
+
+  newAccessTokensList.push(newAccessToken);
+  accessTokensList = newAccessTokensList;
+
+  return newAccessToken;
 };
 
 module.exports.getValidToken = getValidToken;
 module.exports.updateAccessToken = updateAccessToken;
-module.exports.accessTokensList = accessTokensList;
 
 export type GetValidAccessToken = typeof getValidToken;
 export type UpdateAccessToken = typeof updateAccessToken;

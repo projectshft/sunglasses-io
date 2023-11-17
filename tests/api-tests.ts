@@ -502,9 +502,26 @@ describe("User", function () {
     });
   });
   describe("POST /api/user/login", function () {
-    // should return accessToken if username and password are authenticated
-    // should assign an old accessToken if one already exists and is not expired
-    // should assign a new accessToken if old one does not exist or is expired
+    it("should respond with an accessToken if username and password are authenticated", function (done) {
+      // Request body
+      const requestBody = {
+        username: "lazywolf342",
+        password: "tucker"
+      };
+
+      chai
+        .request(server)
+        .post("/api/user/login")
+        .send(requestBody)
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.have.property("responseMessage").with.property("token").length(16);
+          done();
+        });
+    });
     // should return 401 error if username is missing from request body
     // should return 401 error if password is missing from request body
     // should return 401 error if username does not match username in database
@@ -516,3 +533,7 @@ describe("User", function () {
 
 // updateAccessToken
 // "should update the date string held by accessToken.lastUpdated
+
+// login function
+  // should assign an old accessToken if one already exists and is not expired
+  // should assign a new accessToken if old one does not exist or is expired
