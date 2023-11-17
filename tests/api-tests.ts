@@ -643,7 +643,40 @@ describe("User", function () {
 
       chai
         .request(server)
-        .get("/api/user/cart?accessToken=zBC4odxxvEiz0iuO")
+        .get("/api/user/cart?accessToken=eE6AanctxgKg9emy")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    it("should return a single product from the cart if productId is included in query", function (done) {
+      const product = {
+        "id": "1",
+        "categoryId": "1",
+        "name": "Superglasses",
+        "description": "The best glasses in the world",
+        "price": 150,
+        "imageUrls": [
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+        ],
+        "quantity": 1
+      };
+
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: product,
+      };
+
+      chai
+        .request(server)
+        .get("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9&productId=1")
         .end((err, res) => {
           if (err) {
             done(err);

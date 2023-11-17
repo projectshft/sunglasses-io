@@ -8,6 +8,7 @@ import {
   AccessToken,
 } from "../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
+import { GetCartContents } from "./cart-methods";
 
 // Module imports
 const http = require("http");
@@ -22,6 +23,7 @@ const getValidToken: GetValidAccessToken =
   require("./login-methods.ts").getValidToken;
 const updateAccessToken: UpdateAccessToken =
   require("./login-methods.ts").updateAccessToken;
+const getCartContents = require("./cart-methods.ts").getCartContents;
 
 /**
  * Dummy brands data
@@ -496,6 +498,8 @@ router.get(
       );
     }
 
+    const cart = getCartContents(matchedUser.cart, request);
+
     // Update accessToken lastUpdated time
     updateAccessToken(accessToken.username);
 
@@ -505,7 +509,7 @@ router.get(
     response.end(
       JSON.stringify({
         responseCode: response.statusCode,
-        responseMessage: matchedUser.cart,
+        responseMessage: cart,
       })
     );
   }
