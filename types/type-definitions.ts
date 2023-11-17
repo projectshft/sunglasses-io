@@ -14,6 +14,16 @@ export interface ProductObject {
   imageUrls: Array<string>;
 }
 
+export interface ProductInCart {
+  id: string;
+  categoryId: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrls: Array<string>;
+  quantity: number;
+}
+
 export interface AccessToken {
   username: string;
   lastUpdated: Date;
@@ -22,7 +32,7 @@ export interface AccessToken {
 
 export interface User {
   gender: string;
-  cart: Array<ProductObject>; 
+  cart: Array<ProductInCart>;
   name: {
     title: string;
     first: string;
@@ -44,7 +54,7 @@ export interface User {
     sha256: string;
   };
   dob: string;
-  registered: string; 
+  registered: string;
   phone: string;
   cell: string;
   picture: {
