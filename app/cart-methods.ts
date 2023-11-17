@@ -3,7 +3,18 @@ import { ProductInCart, User } from "../types/type-definitions";
 
 const urlParser = require("url");
 
-const getCartContents = (cart: User["cart"], request: Request): null | ProductInCart[] | ProductInCart => {
+/**
+ *
+ * @param cart Cart property of user object
+ * @param request Express server request
+ * @returns Product in cart that matches productId in request query
+ * @returns Null if no product in cart matches the productId
+ * @returns All products in cart if productId does not exist in query
+ */
+const getCartContents = (
+  cart: User["cart"],
+  request: Request
+): null | ProductInCart[] | ProductInCart => {
   const parsedUrl = urlParser.parse(request.url, true);
 
   if (parsedUrl.query.productId) {
