@@ -11,6 +11,7 @@ import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 import { GetCartContents } from "./cart-methods";
 import { BrandsController } from "./controllers/brands";
 import { ProductsController } from "./controllers/products";
+import { UserController } from "./controllers/user";
 
 // Module imports
 const http = require("http");
@@ -29,6 +30,7 @@ const getCartContents: GetCartContents =
   require("./cart-methods.ts").getCartContents;
 const brandsController: BrandsController = require("./controllers/brands.ts");
 const productsController: ProductsController = require("./controllers/products.ts");
+const userController: UserController = require("./controllers/user");
 
 /**
  * Dummy brands data
@@ -139,65 +141,8 @@ router.get(
 // User routes
 
 // GET user data
-router.get(
-  "/api/user",
-  (request: Request, response: Response): void | ServerResponse => {
-    // Check users exist
-    if (users.length <= 0) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Users not found",
-        })
-      );
-    }
-
-    /**
-     * accessToken object containing username, time when last updated, and 16-character uid token
-     */
-    const accessToken = getValidToken(request);
-
-    if (!accessToken) {
-      response.writeHead(401, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Unauthorized",
-        })
-      );
-    }
-
-    /**
-     * User connected to accessToken
-     */
-    const matchedUser = users.find(
-      (user) => user.login.username == accessToken.username
-    );
-
-    if (!matchedUser) {
-      response.writeHead(401, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Unauthorized",
-        })
-      );
-    }
-
-    // Update accessToken lastUpdated time
-    updateAccessToken(accessToken.username);
-
-    response.writeHead(200, {
-      "Content-Type": "application/json",
-    });
-    response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: matchedUser,
-      })
-    );
-  }
+router.get("/api/user", (request: Request, response: Response) =>
+  userController.getUser(request, response, users)
 );
 
 router.post(
