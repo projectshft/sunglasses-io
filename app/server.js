@@ -8,6 +8,8 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
-http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
 
 }).listen(PORT);
+
+module.exports = server
