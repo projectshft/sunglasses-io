@@ -783,7 +783,25 @@ describe("User", function () {
           done();
         });
     });
-    // should add product matching productId in query to cart
+    it("should not add product if product already exists in cart", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: "Product already exists in user's cart. Nothing changed",
+      };
+
+      chai
+        .request(server)
+        .post("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9&productId=1")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should not add product if product already exists in cart
     // should return 400 error if productId is incorrectly formatted
     // should return 401 error if accessToken  is missing from search query

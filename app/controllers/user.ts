@@ -308,6 +308,7 @@ const postUserCart = (
     );
   }
 
+  // If no return at this point, addedProductToCart is proven to be the cart with the added product
   const newCart = addedProductToCart;
 
   matchedUser.cart = newCart;
