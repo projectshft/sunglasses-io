@@ -25,6 +25,7 @@ const updateAccessToken: UpdateAccessToken =
   require("./login-methods.ts").updateAccessToken;
 const getCartContents: GetCartContents =
   require("./cart-methods.ts").getCartContents;
+const sunglassesController = require("./sunglasses.ts");
 
 /**
  * Dummy brands data
@@ -102,28 +103,29 @@ router.get("/api/", (request: Request, response: Response): void => {
 // Sunglasses
 
 // GET list of brands
-router.get(
-  "/api/sunglasses/brands",
-  (request: Request, response: Response): void | ServerResponse => {
-    if (brands.length <= 0) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Brands not found",
-        })
-      );
-    }
+// router.get(
+//   "/api/sunglasses/brands",
+//   (request: Request, response: Response): void | ServerResponse => {
+//     if (brands.length <= 0) {
+//       response.writeHead(404, { "Content-Type": "application/json" });
+//       return response.end(
+//         JSON.stringify({
+//           responseCode: response.statusCode,
+//           responseMessage: "Brands not found",
+//         })
+//       );
+//     }
 
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: brands,
-      })
-    );
-  }
-);
+//     response.writeHead(200, { "Content-Type": "application/json" });
+//     response.end(
+//       JSON.stringify({
+//         responseCode: response.statusCode,
+//         responseMessage: brands,
+//       })
+//     );
+//   }
+// );
+router.get("/api/sunglasses/brands", (request: Request, response: Response) => sunglassesController.getBrands(request, response, brands));
 
 // GET brand by id
 router.get(
