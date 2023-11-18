@@ -1,10 +1,5 @@
 import { Request, Response } from "express";
-import {
-  BrandObject,
-  ProductObject,
-  User,
-  ProductInCart,
-} from "../../types/type-definitions";
+import { User } from "../../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "../login-methods";
 import { ServerResponse } from "http";
 import { GetCartContents } from "../cart-methods";
@@ -236,5 +231,5 @@ export interface UserController {
 module.exports = {
   getUser,
   postUserLogin,
-  getUserCart
+  getUserCart,
 };

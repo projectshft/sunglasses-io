@@ -2,12 +2,12 @@
 import { ProductObject, User, AccessToken } from "../types/type-definitions";
 
 import chai = require("chai");
-import { expect } from "chai";
+//import { expect } from "chai";
 import chaiHttp = require("chai-http");
 const fs = require("fs");
 const server = require("../app/server.ts");
-const accessTokensList: AccessToken[] =
-  require("../app/login-methods.ts").accessTokensList;
+// const accessTokensList: AccessToken[] =
+//   require("../app/login-methods.ts").accessTokensList;
 
 // Define should
 chai.should();
@@ -763,6 +763,13 @@ describe("User", function () {
         });
     });
     
+  });
+  describe("POST /api/user/cart", function () {
+    // should add product matching productId in query to cart
+    // should not add product if product already exists in cart
+    // should return 400 error if productId is incorrectly formatted
+    // should return 401 error if accessToken  is missing from search query
+    // should 
   });
 });
 

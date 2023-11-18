@@ -1,14 +1,7 @@
 // Type imports
 import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
-import {
-  User,
-  BrandObject,
-  ProductObject,
-  //AccessToken,
-} from "../types/type-definitions";
-import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
-import { GetCartContents } from "./cart-methods";
+import { User, BrandObject, ProductObject } from "../types/type-definitions";
 import { BrandsController } from "./controllers/brands";
 import { ProductsController } from "./controllers/products";
 import { UserController } from "./controllers/user";
@@ -17,17 +10,10 @@ import { UserController } from "./controllers/user";
 const http = require("http");
 const fs = require("fs");
 const finalHandler = require("finalhandler");
-//const queryString = require("querystring");
 const Router = require("router");
 const bodyParser = require("body-parser");
-//const uid = require("rand-token").uid;
-//const urlParser = require("url");
-const getValidToken: GetValidAccessToken =
-  require("./login-methods.ts").getValidToken;
-const updateAccessToken: UpdateAccessToken =
-  require("./login-methods.ts").updateAccessToken;
-const getCartContents: GetCartContents =
-  require("./cart-methods.ts").getCartContents;
+
+// Controller imports
 const brandsController: BrandsController = require("./controllers/brands.ts");
 const productsController: ProductsController = require("./controllers/products.ts");
 const userController: UserController = require("./controllers/user");
@@ -145,10 +131,12 @@ router.get("/api/user", (request: Request, response: Response) =>
   userController.getUser(request, response, users)
 );
 
+// POST user login
 router.post("/api/user/login", (request: Request, response: Response) =>
   userController.postUserLogin(request, response, users)
 );
 
+// GET user cart
 router.get("/api/user/cart", (request: Request, response: Response) =>
   userController.getUserCart(request, response, users)
 );
