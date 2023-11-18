@@ -1,0 +1,321 @@
+swagger: '2.0'
+info:
+  title: Sunglasses API
+  description: An API to support the sunglasses store
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - http
+basePath: /api
+produces:
+  - application/json
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint returns all named sunglasses brands. You can also search for products within each brand, by id.
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+        - name: sort
+          in: query
+          description: The sort type on the response.  
+          required: false
+          type: array
+          items:
+            type: string
+            
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /brands/:id/products:
+    get:
+      summary: Products by Brand
+      description: |
+        The Products by Brand endpoint returns all products from a specified brand, indicated by brand id.
+      parameters:
+        - name: id
+          in: query
+          description: The id of the desired brand.
+          required: false
+          type: number
+            
+      tags:
+        - Brands
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Brands/properties/products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /products:
+    get:
+      summary: All Products 
+      description: |
+        The Products endpoint returns all products, from all brands.
+      parameters:
+        - name: id
+          in: query
+          description: The id of the desired product.
+          required: false
+          type: number
+            
+      tags:
+        - Products
+      responses:
+        '200':
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Products'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+  /login: 
+    post: 
+      summary: Login
+      description: |
+        Submit user login information. Returns access token.
+      parameters:
+        - name: username
+          in: query
+          type: string
+          description: username
+          required: true
+        - name: password
+          in: query
+          type: string
+          description: password
+          required: true
+          
+      tags:
+        - Login
+      responses:
+        '200':
+          description: Login is successful
+        '400':
+          description: Request not valid. Username and Password required
+        '401':
+          description: invalid credentials
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      
+      
+  
+  /me:
+    get:
+      summary: User Profile
+      description: >-
+        The User Profile endpoint returns information about the store user that
+        has authorized with the application.
+      tags:
+        - User
+      responses:
+        '200':
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart:
+    get:
+      summary: Get current user's cart
+      description: >-
+        Sends the logged-in user's shopping cart at the time of request.
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Array of cart objects
+          schema:
+            $ref: '#/definitions/Cart'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Add item to cart
+      description: |
+        This endpoint allows you add a new item to the user's cart
+      parameters:
+        - name: item id
+          in: query
+          description: The id of the product to add to the cart
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item added to cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/cart/{productId}:
+    delete:
+      summary: Delete cart item
+      description: |
+        This endpoint allows you to delete a specific item from user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to delete
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item deleted
+        '401':
+          description: User not logged in
+        '404':
+          description: Item with this id does not exist
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      summary: Change quantity of cart item
+      description: |
+        This endpoint allows you to change the quantity of a specific item in user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: The id of the product to change quantity of
+          required: true
+          type: string
+      tags:
+        - Cart
+      responses:
+        '200':
+          description: Item deleted
+        '401':
+          description: User not logged in
+        '404':
+          description: Item with this id does not exist
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for a sunglasses brand.
+      products:
+        type: object
+        description: An object containing all products sold by the brand.
+        properties: 
+          id: 
+            type: string
+            description: Unique identifier for a product
+          name:
+            type: string
+            description: the name of the product
+          price: 
+            type: string
+            description: the cost of the product
+          description: 
+            type: string
+            description: a short description of the product
+      imageURL:
+        type: string
+        description: The URL for the image representing the brand
+        
+  Products:
+        type: object
+        description: An object containing all products sold by all brands.
+        properties: 
+          id: 
+            type: string
+            description: Unique identifier for a product
+          name:
+            type: string
+            description: the name of the product
+          brand: 
+            type: string
+            description: the name of the brand of the product
+          price: 
+            type: string
+            description: the cost of the product
+          description: 
+            type: string
+            description: a short description of the product
+          imageURL:
+             type: string
+             description: The URL for the image representing the product
+            
+  Cart:
+      type: object
+      description: An object containing products a user has selected for purchase.
+      properties:
+        products:
+          type: array
+          items: 
+            $ref: '#/definitions/Products'
+        total:
+          type: integer
+          format: int32
+          description: total price of all items in the cart
+          
+  
+  User:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the user.
+      last_name:
+        type: string
+        description: Last name of the user.
+      email:
+        type: string
+        description: Email address of the user.
+      cart:
+        type: object
+        items: 
+          $ref: '#/definitions/Cart'
+        description: An object containing products a user has selected for purchase, and the total price of all selected products.
+            
+               
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
