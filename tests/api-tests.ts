@@ -900,7 +900,6 @@ describe("User", function () {
           done();
         });
     });
-    // should return 404 error if productId is not found
   });
 });
 

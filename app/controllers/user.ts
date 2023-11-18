@@ -227,7 +227,7 @@ const getUserCart = (
 };
 
 /**
- * Posts product matching productId to user's cart
+ * Posts product matching productId in search query to user's cart
  * @param request Client request to server
  * @param response Server response to client
  * @returns void or ServerResponse
