@@ -103,8 +103,19 @@ router.get("/api/", (request: Request, response: Response): void => {
 // Sunglasses
 
 // GET list of brands
+router.get("/api/sunglasses/brands", (request: Request, response: Response) =>
+  sunglassesController.getBrands(request, response, brands)
+);
+
+// GET brand by id
+router.get(
+  "/api/sunglasses/brands/:brandId",
+  (request: Request, response: Response) =>
+    sunglassesController.getBrandById(request, response, brands)
+);
+
 // router.get(
-//   "/api/sunglasses/brands",
+//   "/api/sunglasses/brands/:brandId",
 //   (request: Request, response: Response): void | ServerResponse => {
 //     if (brands.length <= 0) {
 //       response.writeHead(404, { "Content-Type": "application/json" });
@@ -116,66 +127,43 @@ router.get("/api/", (request: Request, response: Response): void => {
 //       );
 //     }
 
+//     const brandId = request.params.brandId;
+
+//     if (isNaN(Number(brandId))) {
+//       response.writeHead(400, { "Content-Type": "application/json" });
+//       return response.end(
+//         JSON.stringify({
+//           responseCode: response.statusCode,
+//           responseMessage: "Bad request",
+//         })
+//       );
+//     }
+
+//     const brand = brands.find((item) => item.id === brandId);
+
+//     if (!brand) {
+//       response.writeHead(404, { "Content-Type": "application/json" });
+//       return response.end(
+//         JSON.stringify({
+//           responseCode: response.statusCode,
+//           responseMessage: "Brand not found",
+//         })
+//       );
+//     }
+
 //     response.writeHead(200, { "Content-Type": "application/json" });
 //     response.end(
 //       JSON.stringify({
 //         responseCode: response.statusCode,
-//         responseMessage: brands,
+//         responseMessage: brand,
 //       })
 //     );
 //   }
 // );
-router.get("/api/sunglasses/brands", (request: Request, response: Response) => sunglassesController.getBrands(request, response, brands));
-
-// GET brand by id
-router.get(
-  "/api/sunglasses/brands/:brandId",
-  (request: Request, response: Response): void | ServerResponse => {
-    if (brands.length <= 0) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Brands not found",
-        })
-      );
-    }
-
-    const brandId = request.params.brandId;
-
-    if (isNaN(Number(brandId))) {
-      response.writeHead(400, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Bad request",
-        })
-      );
-    }
-
-    const brand = brands.find((item) => item.id === brandId);
-
-    if (!brand) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Brand not found",
-        })
-      );
-    }
-
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: brand,
-      })
-    );
-  }
-);
 
 // GET products
+
+
 router.get(
   "/api/sunglasses/products",
   (request: Request, response: Response): void | ServerResponse => {
