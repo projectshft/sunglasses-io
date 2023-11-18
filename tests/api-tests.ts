@@ -787,7 +787,8 @@ describe("User", function () {
       // Object to match
       const responseObject = {
         responseCode: 200,
-        responseMessage: "Product already exists in user's cart. Nothing changed",
+        responseMessage:
+          "Product already exists in user's cart. Nothing changed",
       };
 
       chai
@@ -802,8 +803,25 @@ describe("User", function () {
           done();
         });
     });
-    // should not add product if product already exists in cart
-    // should return 400 error if productId is incorrectly formatted
+    it("should return 401 error if accessToken is missing from search query", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 401,
+        responseMessage: "Unauthorized",
+      };
+
+      chai
+        .request(server)
+        .get("/api/user/cart")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should return 401 error if accessToken  is missing from search query
     // should return 401 error if accessToken is expired
     // should return 401 error if accessToken is not in access token list
