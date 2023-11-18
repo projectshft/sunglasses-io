@@ -9,6 +9,8 @@ import {
 } from "../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 import { GetCartContents } from "./cart-methods";
+import { BrandsController } from "./brands";
+import { ProductsController } from "./products";
 
 // Module imports
 const http = require("http");
@@ -25,7 +27,8 @@ const updateAccessToken: UpdateAccessToken =
   require("./login-methods.ts").updateAccessToken;
 const getCartContents: GetCartContents =
   require("./cart-methods.ts").getCartContents;
-const sunglassesController = require("./sunglasses.ts");
+const brandsController: BrandsController = require("./brands.ts");
+const productsController: ProductsController = require("./products.ts");
 
 /**
  * Dummy brands data
@@ -104,131 +107,19 @@ router.get("/api/", (request: Request, response: Response): void => {
 
 // GET list of brands
 router.get("/api/sunglasses/brands", (request: Request, response: Response) =>
-  sunglassesController.getBrands(request, response, brands)
+  brandsController.getBrands(request, response, brands)
 );
 
 // GET brand by id
 router.get(
   "/api/sunglasses/brands/:brandId",
   (request: Request, response: Response) =>
-    sunglassesController.getBrandById(request, response, brands)
+    brandsController.getBrandById(request, response, brands)
 );
 
-// router.get(
-//   "/api/sunglasses/brands/:brandId",
-//   (request: Request, response: Response): void | ServerResponse => {
-//     if (brands.length <= 0) {
-//       response.writeHead(404, { "Content-Type": "application/json" });
-//       return response.end(
-//         JSON.stringify({
-//           responseCode: response.statusCode,
-//           responseMessage: "Brands not found",
-//         })
-//       );
-//     }
-
-//     const brandId = request.params.brandId;
-
-//     if (isNaN(Number(brandId))) {
-//       response.writeHead(400, { "Content-Type": "application/json" });
-//       return response.end(
-//         JSON.stringify({
-//           responseCode: response.statusCode,
-//           responseMessage: "Bad request",
-//         })
-//       );
-//     }
-
-//     const brand = brands.find((item) => item.id === brandId);
-
-//     if (!brand) {
-//       response.writeHead(404, { "Content-Type": "application/json" });
-//       return response.end(
-//         JSON.stringify({
-//           responseCode: response.statusCode,
-//           responseMessage: "Brand not found",
-//         })
-//       );
-//     }
-
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(
-//       JSON.stringify({
-//         responseCode: response.statusCode,
-//         responseMessage: brand,
-//       })
-//     );
-//   }
-// );
-
 // GET products
-
-
-router.get(
-  "/api/sunglasses/products",
-  (request: Request, response: Response): void | ServerResponse => {
-    // Check products exist
-    if (products.length <= 0) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Products not found",
-        })
-      );
-    }
-
-    // Get URL params
-    const parsedUrl = urlParser.parse(request.url, true);
-    const { limit, search } = parsedUrl.query;
-
-    if (limit && isNaN(limit)) {
-      response.writeHead(400, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Bad request",
-        })
-      );
-    } else if (limit && !isNaN(limit)) {
-      response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: products.slice(0, Number(limit)),
-        })
-      );
-    }
-
-    if (search) {
-      const filteredProducts: ProductObject[] = [];
-      const regex = search.toLowerCase();
-
-      for (let i = 0; i < products.length; i++) {
-        const description = products[i].description.toLowerCase();
-        const found = description.match(regex);
-        if (found !== null) {
-          filteredProducts.push(products[i]);
-        }
-      }
-
-      response.writeHead(200, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: filteredProducts,
-        })
-      );
-    }
-
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: products,
-      })
-    );
-  }
+router.get("/api/sunglasses/products", (request: Request, response: Response) =>
+  productsController.getProducts(request, response, products)
 );
 
 // GET product by id

@@ -3,7 +3,7 @@ import { BrandObject } from "../types/type-definitions";
 import { ServerResponse } from "http";
 
 /**
- * GET list of brands
+ * Retrieves list of all brands
  * @param request Client request to server
  * @param response Server response to client
  * @returns void or ServerResponse
@@ -33,7 +33,10 @@ const getBrands = (
 };
 
 /**
- * GET brand by id
+ * Retrieves single brand by id in request params
+ * @param request Client request to server
+ * @param response Server response to client
+ * @returns void or ServerResponse
  */
 const getBrandById = (
   request: Request,
@@ -82,6 +85,11 @@ const getBrandById = (
     })
   );
 };
+
+export interface BrandsController {
+  getBrands: typeof getBrands,
+  getBrandById: typeof getBrandById
+}
 
 module.exports = {
   getBrands,
