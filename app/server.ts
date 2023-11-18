@@ -141,5 +141,10 @@ router.get("/api/user/cart", (request: Request, response: Response) =>
   userController.getUserCart(request, response, users)
 );
 
+// POST user cart
+router.post("/api/user/cart", (request: Request, response: Response) =>
+  userController.postUserCart(request, response, users, products)
+);
+
 // Exports
 module.exports = server;

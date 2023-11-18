@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
-import { User } from "../../types/type-definitions";
+import { ProductObject, User } from "../../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "../login-methods";
 import { ServerResponse } from "http";
-import { GetCartContents } from "../cart-methods";
+import { GetCartContents, PostProductToCart } from "../cart-methods";
+
+const fs = require("fs");
 
 const getValidToken: GetValidAccessToken =
   require("../login-methods.ts").getValidToken;
@@ -10,6 +12,8 @@ const updateAccessToken: UpdateAccessToken =
   require("../login-methods.ts").updateAccessToken;
 const getCartContents: GetCartContents =
   require("../cart-methods.ts").getCartContents;
+const postProductToCart: PostProductToCart =
+  require("../cart-methods.ts").postProductToCart;
 
 /**
  * Retrieves current user profile data
@@ -222,14 +226,125 @@ const getUserCart = (
   );
 };
 
+/**
+ * Posts product matching productId to user's cart
+ * @param request Client request to server
+ * @param response Server response to client
+ * @returns void or ServerResponse
+ */
+const postUserCart = (
+  request: Request,
+  response: Response,
+  users: User[],
+  products: ProductObject[]
+): void | ServerResponse => {
+  // Check users exist
+  if (users.length <= 0) {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Users not found",
+      })
+    );
+  }
+
+  const accessToken = getValidToken(request);
+
+  if (!accessToken) {
+    response.writeHead(401, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Unauthorized",
+      })
+    );
+  }
+
+  /**
+   * User connected to accessToken
+   */
+  const matchedUser = users.find(
+    (user) => user.login.username == accessToken.username
+  );
+
+  if (!matchedUser) {
+    response.writeHead(401, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Unauthorized",
+      })
+    );
+  }
+
+  // Update accessToken lastUpdated time
+  updateAccessToken(accessToken.username);
+
+  const addedProductToCart = postProductToCart(
+    matchedUser.cart,
+    products,
+    request
+  );
+
+  if (!addedProductToCart) {
+    response.writeHead(400, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Bad request - productId missing",
+      })
+    );
+  }
+
+  if (typeof addedProductToCart === "string") {
+    response.writeHead(200, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage:
+          "Product already exists in user's cart. Nothing changed",
+      })
+    );
+  }
+
+  const newCart = addedProductToCart;
+
+  matchedUser.cart = newCart;
+
+  const newUsers = users.filter(
+    (user) => user.login.username != matchedUser.login.username
+  );
+
+  newUsers.push(matchedUser);
+
+  fs.writeFile(
+    "./initial-data/users2.json",
+    JSON.stringify(newUsers),
+    (err: any) => {
+      if (err) throw err;
+    }
+  );
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: "Product successfully added to cart",
+    })
+  );
+};
+
 export interface UserController {
   getUser: typeof getUser;
   postUserLogin: typeof postUserLogin;
   getUserCart: typeof getUserCart;
+  postUserCart: typeof postUserCart;
 }
 
 module.exports = {
   getUser,
   postUserLogin,
   getUserCart,
+  postUserCart,
 };

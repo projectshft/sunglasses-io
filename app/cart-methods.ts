@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { ProductInCart, User } from "../types/type-definitions";
+import { ProductInCart, ProductObject, User } from "../types/type-definitions";
 
 const urlParser = require("url");
 
@@ -30,6 +30,46 @@ const getCartContents = (
   return cart;
 };
 
+/**
+ * Posts a product to cart
+ * @param cart Cart property of user object
+ * @param request Express server request
+ */
+const postProductToCart = (
+  cart: User["cart"],
+  products: ProductObject[],
+  request: Request
+): string | null | User["cart"] => {
+  const parsedUrl = urlParser.parse(request.url, true);
+
+  if (parsedUrl.query.productId) {
+    const productInUserCart = cart.find(
+      (item) => item.id == parsedUrl.query.productId
+    );
+    const productInProductsDatabase = products.find(
+      (item) => item.id == parsedUrl.query.productId
+    );
+
+    if (productInUserCart) {
+      return "Product exists in user cart";
+    }
+
+    if (productInProductsDatabase) {
+      const newProductInCart = Object.assign({
+        quantity: 1
+      }, productInProductsDatabase,);
+      const newCart = [...cart];
+
+      newCart.push(newProductInCart);
+      return newCart;
+    }
+  }
+
+  return null;
+};
+
 export type GetCartContents = typeof getCartContents;
+export type PostProductToCart = typeof postProductToCart;
 
 module.exports.getCartContents = getCartContents;
+module.exports.postProductToCart = postProductToCart;

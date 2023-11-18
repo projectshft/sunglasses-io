@@ -655,17 +655,17 @@ describe("User", function () {
     });
     it("should return a single product from the cart if productId is included in query", function (done) {
       const product = {
-        "id": "1",
-        "categoryId": "1",
-        "name": "Superglasses",
-        "description": "The best glasses in the world",
-        "price": 150,
-        "imageUrls": [
+        id: "1",
+        categoryId: "1",
+        name: "Superglasses",
+        description: "The best glasses in the world",
+        price: 150,
+        imageUrls: [
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
         ],
-        "quantity": 1
+        quantity: 1,
       };
 
       // Object to match
@@ -762,14 +762,34 @@ describe("User", function () {
           done();
         });
     });
-    
   });
   describe("POST /api/user/cart", function () {
+    it("should add product matching productId in query to cart", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: "Product successfully added to cart",
+      };
+
+      chai
+        .request(server)
+        .post("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9&productId=11")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should add product matching productId in query to cart
     // should not add product if product already exists in cart
     // should return 400 error if productId is incorrectly formatted
     // should return 401 error if accessToken  is missing from search query
-    // should 
+    // should return 401 error if accessToken is expired
+    // should return 401 error if accessToken is not in access token list
+    // should return 404 error if productId is not found
   });
 });
 
