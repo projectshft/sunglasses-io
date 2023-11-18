@@ -128,95 +128,12 @@ router.get(
   (request: Request, response: Response) =>
     productsController.getProductById(request, response, products)
 );
-//     // Check products exist
-//     if (products.length <= 0) {
-//       response.writeHead(404, { "Content-Type": "application/json" });
-//       return response.end(
-//         JSON.stringify({
-//           responseCode: response.statusCode,
-//           responseMessage: "Products not found",
-//         })
-//       );
-//     }
-
-//     // Get productId from search params
-//     const productId = request.params.productId;
-
-//     if (isNaN(Number(productId))) {
-//       response.writeHead(400, { "Content-Type": "application/json" });
-//       return response.end(
-//         JSON.stringify({
-//           responseCode: response.statusCode,
-//           responseMessage: "Bad request",
-//         })
-//       );
-//     }
-
-//     // Find product
-//     const product: ProductObject | undefined = products.find(
-//       (item: ProductObject) => item.id == productId
-//     );
-
-//     if (!product) {
-//       response.writeHead(404, { "Content-Type": "application/json" });
-//       return response.end(
-//         JSON.stringify({
-//           responseCode: response.statusCode,
-//           responseMessage: "Product not found",
-//         })
-//       );
-//     }
-
-//     response.writeHead(200, { "Content-Type": "application/json" });
-//     response.end(
-//       JSON.stringify({
-//         responseCode: response.statusCode,
-//         responseMessage: product,
-//       })
-//     );
-//   }
-// );
 
 // GET products by brandId
 router.get(
   "/api/sunglasses/brands/:brandId/products",
-  (request: Request, response: Response): void | ServerResponse => {
-    // Check brands and products exist
-    if (products.length <= 0 || brands.length <= 0) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Brands or products not found",
-        })
-      );
-    }
-
-    // Find products by brandId
-    const brandId = request.params.brandId;
-
-    if (isNaN(Number(brandId))) {
-      response.writeHead(400, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Bad request",
-        })
-      );
-    }
-
-    const matchingProducts: ProductObject[] = products.filter(
-      (item) => item.categoryId == brandId
-    );
-
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: matchingProducts,
-      })
-    );
-  }
+  (request: Request, response: Response) =>
+    productsController.getProductByBrandId(request, response, products, brands)
 );
 
 // User routes

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ProductObject } from "../../types/type-definitions";
+import { BrandObject, ProductObject } from "../../types/type-definitions";
 import { ServerResponse } from "http";
 
 const urlParser = require("url");
@@ -137,12 +137,63 @@ const getProductById = (
   );
 };
 
+/**
+ * Retrieves products within a given brand category
+ * @param request Client request to server
+ * @param response Server response to client
+ * @returns void or ServerResponse
+ */
+const getProductByBrandId = (
+  request: Request,
+  response: Response,
+  products: ProductObject[],
+  brands: BrandObject[]
+): void | ServerResponse => {
+  // Check brands and products exist
+  if (products.length <= 0 || brands.length <= 0) {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Brands or products not found",
+      })
+    );
+  }
+
+  // Find products by brandId
+  const brandId = request.params.brandId;
+
+  if (isNaN(Number(brandId))) {
+    response.writeHead(400, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Bad request",
+      })
+    );
+  }
+
+  const matchingProducts: ProductObject[] = products.filter(
+    (item) => item.categoryId == brandId
+  );
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: matchingProducts,
+    })
+  );
+};
+
 export interface ProductsController {
   getProducts: typeof getProducts;
   getProductById: typeof getProductById;
+  getProductByBrandId: typeof getProductByBrandId;
 }
 
 module.exports = {
   getProducts,
-  getProductById
+  getProductById,
+  getProductByBrandId
 };
