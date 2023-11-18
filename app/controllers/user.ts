@@ -297,13 +297,24 @@ const postUserCart = (
     );
   }
 
-  if (typeof addedProductToCart === "string") {
+  if (typeof addedProductToCart === "string" && addedProductToCart === "Product exists in user cart") {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(
       JSON.stringify({
         responseCode: response.statusCode,
         responseMessage:
           "Product already exists in user's cart. Nothing changed",
+      })
+    );
+  }
+
+  if (typeof addedProductToCart === "string") {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage:
+          "Product not found",
       })
     );
   }

@@ -812,7 +812,7 @@ describe("User", function () {
 
       chai
         .request(server)
-        .get("/api/user/cart")
+        .post("/api/user/cart")
         .end((err, res) => {
           if (err) {
             done(err);
@@ -831,7 +831,7 @@ describe("User", function () {
 
       chai
         .request(server)
-        .get("/api/user/cart?accessToken=YG9IGRuNKc7fkZlt")
+        .post("/api/user/cart?accessToken=YG9IGRuNKc7fkZlt")
         .end((err, res) => {
           if (err) {
             done(err);
@@ -850,7 +850,7 @@ describe("User", function () {
 
       chai
         .request(server)
-        .get("/api/user/cart?accessToken=KAXRuelY8ekJpp8X")
+        .post("/api/user/cart?accessToken=KAXRuelY8ekJpp8X")
         .end((err, res) => {
           if (err) {
             done(err);
@@ -860,7 +860,46 @@ describe("User", function () {
           done();
         });
     });
-    // should return 401 error if accessToken is not in access token list
+    it("should return a 400 error if productId is missing from search query", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 400,
+        responseMessage:
+          "Bad request - productId missing",
+      };
+
+      chai
+        .request(server)
+        .post("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(400);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
+    it("should return a 404 error if productId is not found", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 404,
+        responseMessage:
+          "Product not found",
+      };
+
+      chai
+        .request(server)
+        .post("/api/user/cart?accessToken=O0WnZSZ8hWlLOLX9&productId=10120")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(404);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should return 404 error if productId is not found
   });
 });

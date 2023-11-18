@@ -63,6 +63,8 @@ const postProductToCart = (
       newCart.push(newProductInCart);
       return newCart;
     }
+
+    return "Product not found"
   }
 
   return null;
