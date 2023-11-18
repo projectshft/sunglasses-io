@@ -7,6 +7,7 @@ var bodyParser   = require('body-parser');
 var uid = require('rand-token').uid;
 
 const PORT = 3001;
+
 const accessTokens = [
   {
   username: 'yellowleopard753',
@@ -24,19 +25,25 @@ const accessTokens = [
   token: 'e32a7da0-6b18-4a37-a443-055952e19a23'
   }
   ]
-// {
-//   username: 'bob',
-//   lastUpdated: <A valid date>,
-//   token: 'qwertyuiopasdfg1'
-// },
-// {
-//   username: 'bob',
-//   lastUpdated: <A valid date>,
-//   token: 'qwertyuiopasdfg1'
-// }]
+// todo: setup server, create endpoints:
+// GET /api/brands
+// GET /api/brands/:id/products
+// GET /api/products
+// POST /api/login
+// GET /api/me/cart
+// POST /api/me/cart
+// DELETE /api/me/cart/:productId
+// POST /api/me/cart/:productId
 
 const server = http.createServer(function (request, response) {
-
-}).listen(PORT);
+}).listen(PORT, () => {
+  console.log(`server is running on port ${PORT}`);
+  const brands = JSON.parse(fs.readFileSync('initial-data/brands.json'))
+  const users = JSON.parse(fs.readFileSync('initial-data/users.json'))
+  const products = JSON.parse(fs.readFileSync('initial-data/products.json'))
+  console.log("Loading " + brands.length + " brands");
+  console.log("Loading " + users.length + " users");
+  console.log(("Loading " + products.length + " products"));
+});
 
 module.exports = server
