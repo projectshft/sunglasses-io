@@ -822,7 +822,25 @@ describe("User", function () {
           done();
         });
     });
-    // should return 401 error if accessToken  is missing from search query
+    it("should return a 401 error if accessToken is expired", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 401,
+        responseMessage: "Unauthorized",
+      };
+
+      chai
+        .request(server)
+        .get("/api/user/cart?accessToken=YG9IGRuNKc7fkZlt")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(401);
+          res.body.should.deep.equal(responseObject);
+          done();
+        });
+    });
     // should return 401 error if accessToken is expired
     // should return 401 error if accessToken is not in access token list
     // should return 404 error if productId is not found
