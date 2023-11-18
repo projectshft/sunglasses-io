@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BrandObject } from "../types/type-definitions";
+import { BrandObject } from "../../types/type-definitions";
 import { ServerResponse } from "http";
 
 /**
@@ -87,11 +87,11 @@ const getBrandById = (
 };
 
 export interface BrandsController {
-  getBrands: typeof getBrands,
-  getBrandById: typeof getBrandById
+  getBrands: typeof getBrands;
+  getBrandById: typeof getBrandById;
 }
 
 module.exports = {
   getBrands,
-  getBrandById
+  getBrandById,
 };

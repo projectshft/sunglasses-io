@@ -9,8 +9,8 @@ import {
 } from "../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "./login-methods";
 import { GetCartContents } from "./cart-methods";
-import { BrandsController } from "./brands";
-import { ProductsController } from "./products";
+import { BrandsController } from "./controllers/brands";
+import { ProductsController } from "./controllers/products";
 
 // Module imports
 const http = require("http");
@@ -20,15 +20,15 @@ const finalHandler = require("finalhandler");
 const Router = require("router");
 const bodyParser = require("body-parser");
 //const uid = require("rand-token").uid;
-const urlParser = require("url");
+//const urlParser = require("url");
 const getValidToken: GetValidAccessToken =
   require("./login-methods.ts").getValidToken;
 const updateAccessToken: UpdateAccessToken =
   require("./login-methods.ts").updateAccessToken;
 const getCartContents: GetCartContents =
   require("./cart-methods.ts").getCartContents;
-const brandsController: BrandsController = require("./brands.ts");
-const productsController: ProductsController = require("./products.ts");
+const brandsController: BrandsController = require("./controllers/brands.ts");
+const productsController: ProductsController = require("./controllers/products.ts");
 
 /**
  * Dummy brands data
@@ -125,55 +125,57 @@ router.get("/api/sunglasses/products", (request: Request, response: Response) =>
 // GET product by id
 router.get(
   "/api/sunglasses/products/:productId",
-  (request: Request, response: Response): void | ServerResponse => {
-    // Check products exist
-    if (products.length <= 0) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Products not found",
-        })
-      );
-    }
-
-    // Get productId from search params
-    const productId = request.params.productId;
-
-    if (isNaN(Number(productId))) {
-      response.writeHead(400, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Bad request",
-        })
-      );
-    }
-
-    // Find product
-    const product: ProductObject | undefined = products.find(
-      (item: ProductObject) => item.id == productId
-    );
-
-    if (!product) {
-      response.writeHead(404, { "Content-Type": "application/json" });
-      return response.end(
-        JSON.stringify({
-          responseCode: response.statusCode,
-          responseMessage: "Product not found",
-        })
-      );
-    }
-
-    response.writeHead(200, { "Content-Type": "application/json" });
-    response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: product,
-      })
-    );
-  }
+  (request: Request, response: Response) =>
+    productsController.getProductById(request, response, products)
 );
+//     // Check products exist
+//     if (products.length <= 0) {
+//       response.writeHead(404, { "Content-Type": "application/json" });
+//       return response.end(
+//         JSON.stringify({
+//           responseCode: response.statusCode,
+//           responseMessage: "Products not found",
+//         })
+//       );
+//     }
+
+//     // Get productId from search params
+//     const productId = request.params.productId;
+
+//     if (isNaN(Number(productId))) {
+//       response.writeHead(400, { "Content-Type": "application/json" });
+//       return response.end(
+//         JSON.stringify({
+//           responseCode: response.statusCode,
+//           responseMessage: "Bad request",
+//         })
+//       );
+//     }
+
+//     // Find product
+//     const product: ProductObject | undefined = products.find(
+//       (item: ProductObject) => item.id == productId
+//     );
+
+//     if (!product) {
+//       response.writeHead(404, { "Content-Type": "application/json" });
+//       return response.end(
+//         JSON.stringify({
+//           responseCode: response.statusCode,
+//           responseMessage: "Product not found",
+//         })
+//       );
+//     }
+
+//     response.writeHead(200, { "Content-Type": "application/json" });
+//     response.end(
+//       JSON.stringify({
+//         responseCode: response.statusCode,
+//         responseMessage: product,
+//       })
+//     );
+//   }
+// );
 
 // GET products by brandId
 router.get(

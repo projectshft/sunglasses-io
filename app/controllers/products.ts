@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ProductObject } from "../types/type-definitions";
+import { ProductObject } from "../../types/type-definitions";
 import { ServerResponse } from "http";
 
 const urlParser = require("url");
@@ -78,10 +78,71 @@ const getProducts = (
   );
 };
 
+/**
+ * Retrieves product by id in request params
+ * @param request Client request to server
+ * @param response Server response to client
+ * @returns void or ServerResponse
+ */
+const getProductById = (
+  request: Request,
+  response: Response,
+  products: ProductObject[]
+): void | ServerResponse => {
+  // Check products exist
+  if (products.length <= 0) {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Products not found",
+      })
+    );
+  }
+
+  // Get productId from search params
+  const productId = request.params.productId;
+
+  if (isNaN(Number(productId))) {
+    response.writeHead(400, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Bad request",
+      })
+    );
+  }
+
+  // Find product
+  const product: ProductObject | undefined = products.find(
+    (item: ProductObject) => item.id == productId
+  );
+
+  if (!product) {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Product not found",
+      })
+    );
+  }
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: product,
+    })
+  );
+};
+
 export interface ProductsController {
   getProducts: typeof getProducts;
+  getProductById: typeof getProductById;
 }
 
 module.exports = {
   getProducts,
+  getProductById
 };
