@@ -147,7 +147,7 @@ router.post("/api/user/cart", (request: Request, response: Response) =>
 );
 
 // DELETE product from user cart
-router.post("/api/user/cart/:productId", (request: Request, response: Response) =>
+router.delete("/api/user/cart/:productId", (request: Request, response: Response) =>
   userController.deleteProductFromUserCart(request, response, users, products)
 );
 

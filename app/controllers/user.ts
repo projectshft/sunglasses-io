@@ -320,6 +320,7 @@ const deleteProductFromUserCart = (
   products: ProductObject[]
 ): void | ServerResponse => {
   // Check users exist
+  console.log("hello");
   if (users.length <= 0) {
     respondWith404UsersNotFound(response);
   }
