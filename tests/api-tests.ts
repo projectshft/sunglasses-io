@@ -1,13 +1,10 @@
 // Type imports
-import { ProductObject, User, AccessToken } from "../types/type-definitions";
+import { ProductObject, User } from "../types/type-definitions";
 
 import chai = require("chai");
-//import { expect } from "chai";
 import chaiHttp = require("chai-http");
 const fs = require("fs");
 const server = require("../app/server.ts");
-// const accessTokensList: AccessToken[] =
-//   require("../app/login-methods.ts").accessTokensList;
 
 // Define should
 chai.should();
@@ -842,8 +839,8 @@ describe("User", function () {
         });
     });
     it("should return a 401 error if accessToken is not in access token list", function (done) {
-       // Object to match
-       const responseObject = {
+      // Object to match
+      const responseObject = {
         responseCode: 401,
         responseMessage: "Unauthorized",
       };
@@ -864,8 +861,7 @@ describe("User", function () {
       // Object to match
       const responseObject = {
         responseCode: 400,
-        responseMessage:
-          "Bad request - productId missing",
+        responseMessage: "Bad request - productId missing",
       };
 
       chai
@@ -884,8 +880,7 @@ describe("User", function () {
       // Object to match
       const responseObject = {
         responseCode: 404,
-        responseMessage:
-          "Product not found",
+        responseMessage: "Product not found",
       };
 
       chai
@@ -900,6 +895,34 @@ describe("User", function () {
           done();
         });
     });
+  });
+  describe("DELETE /api/user/cart/:productId", function () {
+    it("should delete item matching productId from user's cart", function (done) {
+      // Object to match
+      const responseObject = {
+        responseCode: 200,
+        responseMessage: "Product deleted from cart",
+      };
+
+      chai
+        .request(server)
+        .delete("/api/user/cart/1?accessToken=O0WnZSZ8hWlLOLX9")
+        .end((err, res) => {
+          if (err) {
+            done(err);
+          }
+          res.should.have.status(200);
+          res.body.should.deep.equal(responseObject);
+          done();
+      });
+    });
+    // should delete item matching productId from user's cart
+    // should return a 401 error if accessToken is missing from search query
+    // should return a 401 error if accessToken is expired
+    // should return a 401 error if accessToken is not in access token list
+    // should return a 400 error if productId is missing from search query
+    // should return a 404 error if the product does not exist in user's cart
+    // should return a 404 error if productId does not exist
   });
 });
 

@@ -33,6 +33,7 @@ const getCartContents = (
 /**
  * Posts a product to cart
  * @param cart Cart property of user object
+ * @param products List of products in database
  * @param request Express server request
  */
 const postProductToCart = (
@@ -70,8 +71,45 @@ const postProductToCart = (
   return null;
 };
 
+/**
+ * Deletes a product from cart
+ * @param cart Cart property of user object
+ * @param products List of products in database
+ * @param request Express server request
+ */
+const deleteProductFromCart = (
+  cart: User["cart"],
+  products: ProductObject[],
+  request: Request
+): string | null | User["cart"] => { 
+  const productId = request.params.productId;
+
+  if (productId) {
+    const productInUserCart = cart.find(
+      (item) => item.id == productId
+    );
+    const productInProductsDatabase = products.find(
+      (item) => item.id == productId
+    );
+
+    if (productInUserCart) {
+      const newCart = cart.filter((item) => item.id !== productId);
+
+      return newCart;
+    }
+
+    if (!productInProductsDatabase) {
+     return "Product not found"
+    }
+  }
+
+  return null;
+};
+
 export type GetCartContents = typeof getCartContents;
 export type PostProductToCart = typeof postProductToCart;
+export type DeleteProductFromCart = typeof deleteProductFromCart;
 
 module.exports.getCartContents = getCartContents;
 module.exports.postProductToCart = postProductToCart;
+module.exports.deleteProductFromCart = deleteProductFromCart;

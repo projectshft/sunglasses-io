@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import { ProductObject, User } from "../../types/type-definitions";
 import { GetValidAccessToken, UpdateAccessToken } from "../login-methods";
 import { ServerResponse } from "http";
-import { GetCartContents, PostProductToCart } from "../cart-methods";
+import {
+  GetCartContents,
+  PostProductToCart,
+  DeleteProductFromCart,
+} from "../cart-methods";
 
 const fs = require("fs");
 
@@ -14,7 +18,39 @@ const getCartContents: GetCartContents =
   require("../cart-methods.ts").getCartContents;
 const postProductToCart: PostProductToCart =
   require("../cart-methods.ts").postProductToCart;
+const deleteProductFromCart: DeleteProductFromCart =
+  require("../cart-methods.ts").deleteProductFromCart;
 
+// Response functions
+/**
+ * 404 users not found error
+ * @param response Server response object
+ */
+const respondWith404UsersNotFound = (response: Response) => {
+  response.writeHead(404, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: "Users not found",
+    })
+  );
+};
+
+/**
+ * 401 unauthorized request error
+ * @param response Server response object
+ */
+const respondWith401Unauthorized = (response: Response) => {
+  response.writeHead(401, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: "Unauthorized",
+    })
+  );
+};
+
+// Controller functions
 /**
  * Retrieves current user profile data
  * @param request Client request to server
@@ -28,13 +64,7 @@ const getUser = (
 ): void | ServerResponse => {
   // Check users exist
   if (users.length <= 0) {
-    response.writeHead(404, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Users not found",
-      })
-    );
+    return respondWith404UsersNotFound(response);
   }
 
   /**
@@ -43,13 +73,7 @@ const getUser = (
   const accessToken = getValidToken(request);
 
   if (!accessToken) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   /**
@@ -60,13 +84,7 @@ const getUser = (
   );
 
   if (!matchedUser) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   // Update accessToken lastUpdated time
@@ -96,25 +114,13 @@ const postUserLogin = (
 ): void | ServerResponse => {
   // Check users exist
   if (users.length <= 0) {
-    response.writeHead(404, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Users not found",
-      })
-    );
+    respondWith404UsersNotFound(response);
   }
 
   const { username, password } = request.body;
 
   if (!username || !password) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   /**
@@ -123,13 +129,7 @@ const postUserLogin = (
   const matchedUser = users.find((user) => user.login.username == username);
 
   if (!matchedUser || matchedUser.login.password != password) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   /**
@@ -159,25 +159,13 @@ const getUserCart = (
 ): void | ServerResponse => {
   // Check users exist
   if (users.length <= 0) {
-    response.writeHead(404, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Users not found",
-      })
-    );
+    respondWith404UsersNotFound(response);
   }
 
   const accessToken = getValidToken(request);
 
   if (!accessToken) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   /**
@@ -188,13 +176,7 @@ const getUserCart = (
   );
 
   if (!matchedUser) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   /**
@@ -240,25 +222,13 @@ const postUserCart = (
 ): void | ServerResponse => {
   // Check users exist
   if (users.length <= 0) {
-    response.writeHead(404, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Users not found",
-      })
-    );
+    respondWith404UsersNotFound(response);
   }
 
   const accessToken = getValidToken(request);
 
   if (!accessToken) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   /**
@@ -269,13 +239,7 @@ const postUserCart = (
   );
 
   if (!matchedUser) {
-    response.writeHead(401, { "Content-Type": "application/json" });
-    return response.end(
-      JSON.stringify({
-        responseCode: response.statusCode,
-        responseMessage: "Unauthorized",
-      })
-    );
+    return respondWith401Unauthorized(response);
   }
 
   // Update accessToken lastUpdated time
@@ -297,7 +261,10 @@ const postUserCart = (
     );
   }
 
-  if (typeof addedProductToCart === "string" && addedProductToCart === "Product exists in user cart") {
+  if (
+    typeof addedProductToCart === "string" &&
+    addedProductToCart === "Product exists in user cart"
+  ) {
     response.writeHead(200, { "Content-Type": "application/json" });
     return response.end(
       JSON.stringify({
@@ -313,8 +280,7 @@ const postUserCart = (
     return response.end(
       JSON.stringify({
         responseCode: response.statusCode,
-        responseMessage:
-          "Product not found",
+        responseMessage: "Product not found",
       })
     );
   }
@@ -347,11 +313,95 @@ const postUserCart = (
   );
 };
 
+const deleteProductFromUserCart = (
+  request: Request,
+  response: Response,
+  users: User[],
+  products: ProductObject[]
+): void | ServerResponse => {
+  // Check users exist
+  if (users.length <= 0) {
+    respondWith404UsersNotFound(response);
+  }
+
+  /**
+   * accessToken object containing username, time when last updated, and 16-character uid token
+   */
+  const accessToken = getValidToken(request);
+
+  if (!accessToken) {
+    return respondWith401Unauthorized(response);
+  }
+
+  /**
+   * User connected to accessToken
+   */
+  const matchedUser = users.find(
+    (user) => user.login.username == accessToken.username
+  );
+
+  if (!matchedUser) {
+    return respondWith401Unauthorized(response);
+  }
+
+  // Update accessToken lastUpdated time
+  updateAccessToken(accessToken.username);
+
+  const deletedProductFromCart = deleteProductFromCart(matchedUser.cart, products, request);
+
+  if (!deletedProductFromCart) {
+    response.writeHead(400, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Bad request - productId missing",
+      })
+    );
+  }
+
+  if (typeof(deletedProductFromCart) === "string") {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Product not found",
+      })
+    );
+  }
+
+  const newCart = deletedProductFromCart;
+
+  matchedUser.cart = newCart;
+
+  const newUsers = users.filter(
+    (user) => user.login.username != matchedUser.login.username
+  );
+
+  newUsers.push(matchedUser);
+
+  fs.writeFile(
+    "./initial-data/users2.json",
+    JSON.stringify(newUsers),
+    (err: any) => {
+      if (err) throw err;
+    }
+  );
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: "Product deleted from cart",
+    })
+  );
+};
+
 export interface UserController {
   getUser: typeof getUser;
   postUserLogin: typeof postUserLogin;
   getUserCart: typeof getUserCart;
   postUserCart: typeof postUserCart;
+  deleteProductFromUserCart: typeof deleteProductFromUserCart;
 }
 
 module.exports = {
@@ -359,4 +409,5 @@ module.exports = {
   postUserLogin,
   getUserCart,
   postUserCart,
+  deleteProductFromUserCart,
 };

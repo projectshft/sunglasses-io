@@ -14,13 +14,7 @@ export interface ProductObject {
   imageUrls: Array<string>;
 }
 
-export interface ProductInCart {
-  id: string;
-  categoryId: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrls: Array<string>;
+export interface ProductInCart extends ProductObject {
   quantity: number;
 }
 
