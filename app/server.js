@@ -8,6 +8,10 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
+// Setup router
+let myRouter = Router();
+myRouter.use(bodyParser.json());
+
 const accessTokens = [
   {
   username: 'yellowleopard753',
@@ -45,5 +49,7 @@ const server = http.createServer(function (request, response) {
   console.log("Loading " + users.length + " users");
   console.log(("Loading " + products.length + " products"));
 });
+
+
 
 module.exports = server
