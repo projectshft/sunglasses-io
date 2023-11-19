@@ -4,35 +4,29 @@ var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
+const url = require('url')
 var uid = require('rand-token').uid;
 
 const PORT = 3001;
+
+const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
+
+let brands = [];
+let users = [
+  {
+    username: "yellowleopard753",
+    lastUpdated: new Date(),
+    token: '5e09efdf-9e7e-400f-8468-d79ebf39c185'
+  }
+];
+let products = [];
 
 // Setup router
 let myRouter = Router();
 myRouter.use(bodyParser.json());
 
-const accessTokens = [
-  {
-  username: 'yellowleopard753',
-  lastUpdated: new Date(),
-  token: '723b306d-8f49-4a9e-9cca-8c8b8f3983fd'
-  },
-  {
-  username: 'lazywolf342',
-  lastUpdated: new Date(),
-  token: '5e09efdf-9e7e-400f-8468-d79ebf39c185'
-  },
-  {
-  username: 'greenlion235',
-  lastUpdated: new Date(),
-  token: 'e32a7da0-6b18-4a37-a443-055952e19a23'
-  }
-  ]
+const accessTokens = []
 // todo: setup server, create endpoints:
-// GET /api/brands
-// GET /api/brands/:id/products
-// GET /api/products
 // POST /api/login
 // GET /api/me/cart
 // POST /api/me/cart
@@ -40,16 +34,101 @@ const accessTokens = [
 // POST /api/me/cart/:productId
 
 const server = http.createServer(function (request, response) {
-}).listen(PORT, () => {
+  // Handle CORS Preflight request
+  if (request.method === 'OPTIONS'){
+    response.writeHead(200, CORS_HEADERS);
+    return response.end();
+  }
+
+  myRouter(request, response, finalHandler(request, response))
+  }).listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
-  const brands = JSON.parse(fs.readFileSync('initial-data/brands.json'))
-  const users = JSON.parse(fs.readFileSync('initial-data/users.json'))
-  const products = JSON.parse(fs.readFileSync('initial-data/products.json'))
+   brands = JSON.parse(fs.readFileSync('initial-data/brands.json'))
+   users = JSON.parse(fs.readFileSync('initial-data/users.json'))
+   products = JSON.parse(fs.readFileSync('initial-data/products.json'))
   console.log("Loading " + brands.length + " brands");
   console.log("Loading " + users.length + " users");
   console.log(("Loading " + products.length + " products"));
 });
 
+myRouter.get('/api/brands', function(request,response) {
+  response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  // Return all brands
+  return response.end(JSON.stringify(brands));
+});
 
+myRouter.get('/api/brands/:id/products', function(request,response) {
+  response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  if(!products){
+    response.writeHead(404, 'no products found');
+  }
+  const productsByBrand = products.filter((product) => 
+     product.categoryId === request.params.id
+  );
+  if (productsByBrand.length == 0) {
+    response.writeHead(404, 'Brand by that id not found')
+  }
+  // Return brand's products
+  return response.end(JSON.stringify(productsByBrand));
+});
+
+myRouter.get('/api/products', function(request,response) {
+  response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  if(!products){
+    response.writeHead(404, 'no products found');
+  }
+  const queryParams = queryString.parse(url.parse(request.url).query);
+  if (queryParams.searchTerm)
+  {
+  const productsBySearch = products.filter((product) => 
+     (product.name.toLowerCase().includes(queryParams.searchTerm.toLowerCase()) ||
+     product.description.toLowerCase().includes(queryParams.searchTerm.toLowerCase())
+  ))
+  if (productsBySearch.length == 0) {
+    response.writeHead(404, 'invalid search term')
+  }
+  // Return  products
+  return response.end(JSON.stringify(productsBySearch));
+  }
+  else {return response.end(JSON.stringify(products));}
+});
+
+myRouter.post('/api/login', function(request, response) {
+  const queryParams = queryString.parse(url.parse(request.url).query);
+  const currentUser = queryParams.username;
+  const password = queryParams.password;
+  // Check if there is a user with param username, store it if so
+  const validUser = users.find(user => user.login.username === currentUser);
+   // Check if that user's password is correct, store it if so
+  const validPassword = users.find(user => user.login.password === password);
+  // reject if username or password is empty
+  if (!currentUser || !password) 
+    {response.writeHead(400, 'username and password required'); return response.end()}
+  if (!validUser || !validPassword)
+    {response.writeHead(401, 'invalid credentials'); return response.end()}
+  else {
+    let currentAccessToken = accessTokens.find((tokenObject) => {
+      return tokenObject.username == validUser;
+    });
+    if (currentAccessToken) {
+      currentAccessToken.lastUpdated = new Date();
+      console.log(currentAccessToken);
+      console.log(accessTokens);
+      return response.end(JSON.stringify(currentAccessToken.token));
+    } else {
+      // Create a new token with the user value and a "random" token
+      let newAccessToken = {
+        username: validUser,
+        lastUpdated: new Date(),
+        token: uid(16)
+      }
+      accessTokens.push(newAccessToken);
+      console.log(newAccessToken);
+      console.log(accessTokens);
+      return response.end(JSON.stringify(newAccessToken.token));
+    }
+}
+}
+)
 
 module.exports = server

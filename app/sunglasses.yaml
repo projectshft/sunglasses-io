@@ -47,12 +47,6 @@ paths:
       summary: Products by Brand
       description: |
         The Products by Brand endpoint returns all products from a specified brand, indicated by brand id.
-      parameters:
-        - name: search term
-          in: query
-          description: The search term for desired product.
-          required: false
-          type: string
 
       tags:
         - Brands
@@ -76,7 +70,7 @@ paths:
       description: |
         The Products endpoint returns all products, from all brands.
       parameters:
-        - name: search
+        - name: searchTerm
           in: query
           description: The search term for desired product.
           required: false
