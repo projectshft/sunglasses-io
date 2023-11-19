@@ -155,8 +155,12 @@ paths:
           description: Array of cart objects
           schema:
             $ref: "#/definitions/Cart"
-        "401":
+        "400":
+          description: access token required
+        "403":
           description: invalid access token
+        "404":
+          description: cart is empty
         default:
           description: Unexpected error
           schema:
@@ -170,6 +174,11 @@ paths:
           in: query
           description: The id of the product to add to the cart
           required: true
+          type: string
+        - name: quantity
+          in: query
+          description: How many of the product to add to the cart
+          required: false
           type: string
         - name: accessToken
           in: query
