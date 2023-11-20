@@ -1,6 +1,6 @@
 // Type imports
-import { IncomingMessage, ServerResponse, Server } from "http";
 import { Request, Response } from "express";
+import { IncomingMessage, ServerResponse, Server } from "http";
 import { User, BrandObject, ProductObject } from "../types/type-definitions";
 import { BrandsController } from "./controllers/brands";
 import { ProductsController } from "./controllers/products";
