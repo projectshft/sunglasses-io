@@ -9,8 +9,6 @@ var uid = require('rand-token').uid;
 
 const PORT = 3001;
 
-
-
 // token-checking helper method
 const getValidTokenFromRequest = function(request) {
   const TOKEN_VALIDITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes
@@ -30,8 +28,10 @@ const getValidTokenFromRequest = function(request) {
   }
 };
 
+// handle cors
 const CORS_HEADERS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"Origin, X-Requested-With, Content-Type, Accept, X-Authentication"};
 
+// state-holding variables
 let brands = [];
 let users = [];
 let products = [];
@@ -40,13 +40,14 @@ let products = [];
 let myRouter = Router();
 myRouter.use(bodyParser.json());
 
+// initialize one user's access token for testing
 const accessTokens = [ {
   username: "yellowleopard753",
   lastUpdated: new Date(),
   token: '5e09efdf-9e7e-400f-8468-d79ebf39c185'
 }]
 
-
+// set up server, read files, and log successful file reads
 const server = http.createServer(function (request, response) {
   // Handle CORS Preflight request
   if (request.method === 'OPTIONS'){
@@ -60,10 +61,8 @@ const server = http.createServer(function (request, response) {
    brands = JSON.parse(fs.readFileSync('initial-data/brands.json'))
    users = JSON.parse(fs.readFileSync('initial-data/users.json'))
    products = JSON.parse(fs.readFileSync('initial-data/products.json'))
-  console.log("Loading " + brands.length + " brands");
-  console.log("Loading " + users.length + " users");
-  console.log(("Loading " + products.length + " products"));
 });
+
 
 myRouter.get('/api/brands', function(request,response) {
   response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
@@ -73,14 +72,19 @@ myRouter.get('/api/brands', function(request,response) {
 
 myRouter.get('/api/brands/:id/products', function(request,response) {
   response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+  // Return 404 if no product parameter is found
   if(!products){
     response.writeHead(404, 'no products found');
+    return response.end();
   }
+  // filter product array by requested brand
   const productsByBrand = products.filter((product) => 
      product.categoryId === request.params.id
   );
+  // If no products exist matching categoryId, return 404
   if (productsByBrand.length == 0) {
-    response.writeHead(404, 'Brand by that id not found')
+    response.writeHead(404, 'Brand by that id not found');
+    return response.end();
   }
   // Return brand's products
   return response.end(JSON.stringify(productsByBrand));
@@ -88,18 +92,24 @@ myRouter.get('/api/brands/:id/products', function(request,response) {
 
 myRouter.get('/api/products', function(request,response) {
   response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+
+  // if product array is empty return 404
   if(!products){
     response.writeHead(404, 'no products found');
   }
   const queryParams = queryString.parse(url.parse(request.url).query);
+
+  // if there is a search term, filter products by search term in item name or description
   if (queryParams.searchTerm)
   {
   const productsBySearch = products.filter((product) => 
      (product.name.toLowerCase().includes(queryParams.searchTerm.toLowerCase()) ||
      product.description.toLowerCase().includes(queryParams.searchTerm.toLowerCase())
   ))
+
+  // handle zero results
   if (productsBySearch.length == 0) {
-    response.writeHead(404, 'invalid search term')
+    response.writeHead(404, 'search returned zero results')
   }
   // Return  products
   return response.end(JSON.stringify(productsBySearch));
@@ -111,17 +121,23 @@ myRouter.post('/api/login', function(request, response) {
   const queryParams = queryString.parse(url.parse(request.url).query);
   const currentUser = queryParams.username;
   const password = queryParams.password;
-  // Check if there is a user with param username, store it if so
-  const validUser = users.find(user => user.login.username === currentUser).login.username;
-   // Check if that user's password is correct, store it if so
-  const validPassword = users.find(user => user.login.password === password).login.password;
-  // reject if username or password is empty
+  // handle missing credentials
   if (!currentUser || !password) 
     {response.writeHead(400, 'username and password required'); return response.end()}
-  if (!validUser || !validPassword)
+
+  // handle wrong credentials
+    if (!users.find(user => user.login.username == currentUser) || !users.find(user => user.login.password == password))
     {response.writeHead(401, 'invalid credentials'); return response.end()}
+  
+  // reject if username or password is empty
+    
   else {
+      // Check if there is a user with param username, store it if so
+    const validUser = users.find(user => user.login.username == currentUser).login.username;
+   // Check if that user's password is correct, store it if so
     response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
+
+    // check for existing access token
     let currentAccessToken = accessTokens.find((tokenObject) => {
       return tokenObject.username == validUser
     });
@@ -146,14 +162,18 @@ myRouter.get('/api/me/cart', function(request,response) {
   const validToken = getValidTokenFromRequest(request);
   const queryParams = queryString.parse(url.parse(request.url).query);
 
+  // handle no token
   if (!queryParams.accessToken) {
     response.writeHead(401, 'access token required');
     return response.end();
   }
+
+  // handle invalid token
   if (!validToken) {
     response.writeHead(401, 'invalid access token');
     return response.end();
   }
+
   else{
   response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
   const activeUser = accessTokens.find((accessToken) => accessToken.token == validToken.token).username;
@@ -170,18 +190,21 @@ myRouter.get('/api/me/cart', function(request,response) {
 myRouter.post('/api/me/cart', function(request,response) {
   const validToken = getValidTokenFromRequest(request);
   const queryParams = queryString.parse(url.parse(request.url).query);
-  const quantity = queryParams.quantity;
+  let quantity = queryParams.quantity;
+  if (!quantity){quantity = 1}
   const id = queryParams.productId;
   const validProduct = products.find(product => product.id == id)
-
+// handle no product by that id
   if (!validProduct) {
-    response.writeHead(401, 'no product with that id exists');
+    response.writeHead(404, 'no product with that id exists');
     return response.end();
   }
+  // handle quantity is NaN
   if (quantity && isNaN(quantity)) {
     response.writeHead(400, 'quantity must be a number');
     return response.end();
   }
+  // handle missing or wrong tokens
   if (!queryParams.accessToken) {
     response.writeHead(401, 'access token required');
     return response.end();
@@ -190,7 +213,7 @@ myRouter.post('/api/me/cart', function(request,response) {
     response.writeHead(401, 'invalid access token');
     return response.end();
   }
-
+  // find the user's cart, add the item, and return updated cart
   else{
   response.writeHead(200, Object.assign(CORS_HEADERS,{'Content-Type': 'application/json'}));
   const activeUser = accessTokens.find((accessToken) => accessToken.token == validToken.token).username;
@@ -201,8 +224,6 @@ myRouter.post('/api/me/cart', function(request,response) {
     {response.writeHead(403, 'item already in cart. To change item quantity, use endpoint POST /api/me/cart/:productId');
     return response.end();
   }
-  
-  if (!quantity){quantity = 1}
   const newItem = 
     {
       id: validProduct.id,
@@ -224,7 +245,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
   const itemToDelete = cart.find(item => item.id == validProduct.id)
 
   if (!validProduct) {
-    response.writeHead(401, 'no product with that id exists');
+    response.writeHead(404, 'no product with that id exists');
     return response.end();
   }
   if (!queryParams.accessToken) {
@@ -236,7 +257,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
     return response.end();
   }
   if (!itemToDelete) {
-    response.writeHead(403, 'this item is not in the cart');
+    response.writeHead(404, 'this item is not in the cart');
     return response.end();
   }
   else{
@@ -246,6 +267,7 @@ myRouter.delete('/api/me/cart/:productId', function(request,response) {
   }
 });
 
+// change item quantity in cart
 myRouter.post('/api/me/cart/:productId', function(request,response) {
   const validToken = getValidTokenFromRequest(request);
   if (!validToken) {
@@ -258,8 +280,9 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
     response.writeHead(401, 'access token required');
     return response.end();
   }
+  // handle no quantity, or 0 quantity
   const quantity = queryParams.quantity;
-  if (!quantity || quantity == 0) {
+  if (!quantity || quantity == 0 || isNaN(quantity)) {
     response.writeHead(401, 'valid quantity required');
     return response.end();
   }
@@ -267,7 +290,7 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
   const id = request.params.productId;
   const validProduct = products.find(product => product.id == id);
   if (!validProduct) {
-    response.writeHead(401, 'no product with that id exists');
+    response.writeHead(404, 'no product with that id exists');
     return response.end();
   }
 
@@ -275,8 +298,9 @@ myRouter.post('/api/me/cart/:productId', function(request,response) {
   const cart = users.find(user => user.login.username == activeUser).cart;
   const itemToUpdate = cart.find(item => item.id == validProduct.id)
   
+  // handle item is not in cart
   if (!itemToUpdate) {
-    response.writeHead(403, 'this item is not in the cart');
+    response.writeHead(404, 'this item is not in the cart');
     return response.end();
   }
   else{
