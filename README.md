@@ -11,3 +11,5 @@ To run this project locally, fork and clone it, then `cd` into the project direc
 If you're interested in testing the server further and seeing the kind of data it serves, copy the contents of `documentation/swagger.yaml` and paste them in the [Swagger Editor](https://editor.swagger.io/) to view the full API documentation. Start up the server using `npm start` and use [Postman](https://www.postman.com/) to test the different routes on the API, which has the root URL `localhost:3001`.
 
 ## Debugging in VS Code
+
+This project is also congfigured for debugging in VS Code. You can utilize the debugger by clicking on the "Run and Debug" button on the left tool column in VS Code and then selecting either "Sunglasses.io" to debug the server or "Run ts-mocha Tests" to debug the tests.
