@@ -147,8 +147,18 @@ router.post("/api/user/cart", (request: Request, response: Response) =>
 );
 
 // DELETE product from user cart
-router.delete("/api/user/cart/:productId", (request: Request, response: Response) =>
-  userController.deleteProductFromUserCart(request, response, users, products)
+router.delete(
+  "/api/user/cart/:productId",
+  (request: Request, response: Response) =>
+    userController.deleteProductFromUserCart(request, response, users, products)
+);
+
+// PUT change product quantity
+router.put(
+  "/api/user/cart/:productId",
+  (request: Request, response: Response) => {
+    userController.putProductQuantity(request, response, users, products);
+  }
 );
 
 // Exports

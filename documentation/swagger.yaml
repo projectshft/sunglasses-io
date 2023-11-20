@@ -12,12 +12,6 @@ tags:
     description: Access brands and product data.
   - name: user
     description: Log in to the website, retrieve from and change products in cart.
-  - name: subscribe
-    description: Subscribe to newsletter (or unsubcribe) using email address.
-  - name: articles
-    description: Access article content.
-  - name: news
-    description: Access news content.
 schemes:
   - http
 produces:
@@ -275,82 +269,6 @@ paths:
           description: Unauthorized
         404:
           description: Product not found
-  /subscribe:
-    post:
-      tags:
-        - subscribe
-      summary: Add email to mailing list
-      description: Enter a correctly formatted email (name@example.com) to add that email to Sunglasses.io's mailing list.
-      parameters:
-        - name: email
-          in: query
-          type: string
-          format: email
-          required: true
-      responses:
-        200:
-          description: Email successfully added to mailing list
-        400:
-          description: Bad request
-  /subscribe/removeSubscription:
-    post:
-      tags:
-        - subscribe
-      summary: Remove subscription to mailing list
-      description: Enter an email that has been previously subscribed to the mailing list to remove the subscription.
-      parameters:
-        - name: email
-          in: query
-          type: string
-          format: email
-          required: true
-      responses:
-        200:
-          description: Email successfully removed from mailing list
-        400:
-          description: Bad request
-        404:
-          description: Email not found
-  /articles:
-    get:
-      tags:
-        - articles
-      summary: Retrieve list of articles
-      parameters:
-        - name: articleId
-          in: query
-          type: string
-          required: false
-          description: Optional articleId to retrieve individual article
-      responses:
-        200:
-          description: Array of articles returned
-          schema:
-            $ref: "#/definitions/Article"
-        400:
-          description: Bad request
-        404:
-          description: Article not found
-  /news:
-    get:
-      tags:
-        - news
-      summary: Retrieve list of news posts
-      parameters:
-        - name: newsId
-          in: query
-          type: string
-          required: false
-          description: Optional newsId to retrieve individual post
-      responses:
-        200:
-          description: Array of news posts returned
-          schema:
-            $ref: "#/definitions/Article"
-        400:
-          description: Bad request
-        404:
-          description: News post not found
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -507,14 +425,3 @@ definitions:
           nat:
             type: string
             description: Two letter ISO code
-  Article:
-    type: object
-    properties:
-      id:
-        type: integer
-        format: int32
-      title:
-        type: string
-      text:
-        type: string
-        description: Text content of article

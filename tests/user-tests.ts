@@ -13,6 +13,9 @@ chai.should();
 // Allow chai to use chaiHttp middleware
 chai.use(chaiHttp);
 
+/**
+ * Test user routes. User routes allow access to user data and manipulation of a user's cart contents. Each route requires either a username and password verification (as is the case for the login route) or an accessToken included in the search query.
+ */
 const testUser = () => {
   describe("User", function () {
     describe("GET /api/user", function () {
@@ -615,7 +618,49 @@ const testUser = () => {
             done();
           });
       });
-      // should return a 404 error if productId does not exist
+    });
+    describe("PUT /api/user/cart/:productId", function () {
+      it("should allow a user to change the quantity of a given product in their cart", function (done) {
+        const productAfterChangedQuantity = {
+          id: "3",
+          categoryId: "1",
+          name: "Brown Sunglasses",
+          description: "The best glasses in the world",
+          price: 50,
+          imageUrls: [
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+          ],
+          quantity: 15,
+        };
+        // Object to match
+        const responseObject = {
+          responseCode: 200,
+          responseMessage: productAfterChangedQuantity,
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/3?accessToken=O0WnZSZ8hWlLOLX9&quantity=15")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(200);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      // should allow a user to change the quantity of a given product in their cart
+      // should return a 400 error if quantity is not included in search query
+      // should return a 400 error if quantity is not a number
+      // should return a 400 error if quantity is <= 0
+      // should return a 400 error if product does not exist in user's cart
+      // should return a 401 error if accessToken is missing from search query
+      // should return a 401 error if accessToken is expired
+      // should return a 401 error if accessToken is not in access token list
+      // should return a 404 error if productId does not exist in database
     });
   });
 };

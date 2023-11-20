@@ -6,6 +6,7 @@ import {
   GetCartContents,
   PostProductToCart,
   DeleteProductFromCart,
+  ChangeProductQuantity,
 } from "../cart-methods";
 
 const fs = require("fs");
@@ -20,6 +21,7 @@ const postProductToCart: PostProductToCart =
   require("../cart-methods.ts").postProductToCart;
 const deleteProductFromCart: DeleteProductFromCart =
   require("../cart-methods.ts").deleteProductFromCart;
+const changeProductQuantity: ChangeProductQuantity = require("../cart-methods.ts").changeProductQuantity;
 
 // Response functions
 /**
@@ -400,12 +402,105 @@ const deleteProductFromUserCart = (
   );
 };
 
+const putProductQuantity = (
+  request: Request,
+  response: Response,
+  users: User[],
+  products: ProductObject[]
+): void | ServerResponse => {
+  // Check users exist
+  if (users.length <= 0) {
+    respondWith404UsersNotFound(response);
+  }
+
+  /**
+   * accessToken object containing username, time when last updated, and 16-character uid token
+   */
+  const accessToken = getValidToken(request);
+
+  if (!accessToken) {
+    return respondWith401Unauthorized(response);
+  }
+
+  /**
+   * User connected to accessToken
+   */
+  const matchedUser = users.find(
+    (user) => user.login.username == accessToken.username
+  );
+
+  if (!matchedUser) {
+    return respondWith401Unauthorized(response);
+  }
+
+  // Update accessToken lastUpdated time
+  updateAccessToken(accessToken.username);
+
+  const changedQuantity = changeProductQuantity(
+    matchedUser.cart,
+    products,
+    request
+  );
+
+  if (!changedQuantity) {
+    response.writeHead(400, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Bad request",
+      })
+    );
+  }
+
+  if (typeof changedQuantity === "string") {
+    response.writeHead(404, { "Content-Type": "application/json" });
+    return response.end(
+      JSON.stringify({
+        responseCode: response.statusCode,
+        responseMessage: "Product not found",
+      })
+    );
+  }
+
+  const newCart = changedQuantity;
+
+  matchedUser.cart = newCart;
+
+  const newUsers = users.filter(
+    (user) => user.login.username != matchedUser.login.username
+  );
+
+  newUsers.push(matchedUser);
+
+  fs.writeFile(
+    "./initial-data/users2.json",
+    JSON.stringify(newUsers),
+    (err: any) => {
+      if (err) throw err;
+    }
+  );
+
+  // Respond with updated product data from user's cart
+  const productChanged = matchedUser.cart.find(
+    (item) => item.id == request.params.productId
+  );
+
+  response.writeHead(200, { "Content-Type": "application/json" });
+  response.end(
+    JSON.stringify({
+      responseCode: response.statusCode,
+      responseMessage: productChanged,
+    })
+  );
+};
+
 export interface UserController {
   getUser: typeof getUser;
   postUserLogin: typeof postUserLogin;
   getUserCart: typeof getUserCart;
   postUserCart: typeof postUserCart;
   deleteProductFromUserCart: typeof deleteProductFromUserCart;
+  putProductQuantity: typeof putProductQuantity;
 }
 
 module.exports = {
@@ -414,4 +509,5 @@ module.exports = {
   getUserCart,
   postUserCart,
   deleteProductFromUserCart,
+  putProductQuantity,
 };

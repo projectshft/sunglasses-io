@@ -107,10 +107,56 @@ const deleteProductFromCart = (
   return null;
 };
 
+/**
+ * Changes the quantity of a product in user's cart
+ * @param cart Cart property of user object
+ * @param products List of products in database
+ * @param request Express server request
+ */
+const changeProductQuantity = (
+  cart: User["cart"],
+  products: ProductObject[],
+  request: Request
+): string | null | User["cart"] => {
+  const productId = request.params.productId;
+
+  const parsedUrl = urlParser.parse(request.url, true);
+  const quantity = parsedUrl.query.quantity;
+
+  if (!quantity || isNaN(Number(quantity)) || Number(quantity) <= 0) {
+    return null;
+  }
+
+  if (!productId) {
+    return null;
+  }
+
+  const productInUserCart = cart.find((item) => item.id == productId);
+  const productInProductsDatabase = products.find(
+    (item) => item.id == productId
+  );
+
+  if (!productInProductsDatabase) {
+    return "Product not found";
+  }
+
+  if (!productInUserCart) {
+    return null;
+  }
+
+  const newCart = cart.filter((item) => item.id !== productId);
+  const newProduct = { ...productInUserCart, quantity: Number(quantity) };
+  newCart.push(newProduct);
+
+  return newCart;
+};
+
 export type GetCartContents = typeof getCartContents;
 export type PostProductToCart = typeof postProductToCart;
 export type DeleteProductFromCart = typeof deleteProductFromCart;
+export type ChangeProductQuantity = typeof changeProductQuantity;
 
 module.exports.getCartContents = getCartContents;
 module.exports.postProductToCart = postProductToCart;
 module.exports.deleteProductFromCart = deleteProductFromCart;
+module.exports.changeProductQuantity = changeProductQuantity;
