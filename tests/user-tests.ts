@@ -652,15 +652,158 @@ const testUser = () => {
             done();
           });
       });
-      // should allow a user to change the quantity of a given product in their cart
-      // should return a 400 error if quantity is not included in search query
-      // should return a 400 error if quantity is not a number
-      // should return a 400 error if quantity is <= 0
-      // should return a 400 error if product does not exist in user's cart
-      // should return a 401 error if accessToken is missing from search query
-      // should return a 401 error if accessToken is expired
-      // should return a 401 error if accessToken is not in access token list
-      // should return a 404 error if productId does not exist in database
+      it("should return a 400 error if quantity is not included in search query", function (done) {
+         // Object to match
+         const responseObject = {
+          responseCode: 400,
+          responseMessage: "Bad request",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/3?accessToken=O0WnZSZ8hWlLOLX9")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(400);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 400 error if quantity is not a number", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 400,
+          responseMessage: "Bad request",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/3?accessToken=O0WnZSZ8hWlLOLX9&quantity=abc")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(400);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 400 error if quantity is <= 0", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 400,
+          responseMessage: "Bad request",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/3?accessToken=O0WnZSZ8hWlLOLX9&quantity=-5")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(400);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 400 error if product does not exist in user's cart", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 400,
+          responseMessage: "Bad request",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/5?accessToken=O0WnZSZ8hWlLOLX9&quantity=10")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(400);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 401 error if accessToken is missing from search query", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 401,
+          responseMessage: "Unauthorized",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/3?accessToken=&quantity=10")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(401);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 401 error if accessToken is expired", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 401,
+          responseMessage: "Unauthorized",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/1?accessToken=YG9IGRuNKc7fkZlt&quantity=10")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(401);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 401 error if accessToken is not in access token list", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 401,
+          responseMessage: "Unauthorized",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/1?accessToken=gDEGck8MDkxiohx8&quantity=10")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(401);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 404 error if productId does not exist in database", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 404,
+          responseMessage: "Product not found",
+        };
+
+        chai
+          .request(server)
+          .put("/api/user/cart/300?accessToken=O0WnZSZ8hWlLOLX9&quantity=15")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(404);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
     });
   });
 };
