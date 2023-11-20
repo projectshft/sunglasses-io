@@ -2,7 +2,7 @@
 
 This is an API created for "Sunglasses.io" -- a fictitious sunglasses e-commerce site. The API serves user data, authenticates users (using basic username and password matching, not real cryptography), and serves data on the brands and products that the store sells.
 
-This project was built with TypeScript using test-driven-development (TDD) principles.
+This project was built with TypeScript and Node.js using test-driven-development (TDD) principles.
 
 ## Run Locally
 
