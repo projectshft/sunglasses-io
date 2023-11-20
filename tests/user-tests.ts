@@ -529,7 +529,7 @@ const testUser = () => {
 
         chai
           .request(server)
-          .post("/api/user/cart/1")
+          .delete("/api/user/cart/1")
           .end((err, res) => {
             if (err) {
               done(err);
@@ -539,11 +539,82 @@ const testUser = () => {
             done();
           });
       });
-      // should return a 401 error if accessToken is missing from search query
-      // should return a 401 error if accessToken is expired
-      // should return a 401 error if accessToken is not in access token list
-      // should return a 400 error if productId is missing from search query
-      // should return a 404 error if the product does not exist in user's cart
+      it("should return a 401 error if accessToken is expired", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 401,
+          responseMessage: "Unauthorized",
+        };
+
+        chai
+          .request(server)
+          .delete("/api/user/cart/1?accessToken=YG9IGRuNKc7fkZlt")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(401);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 401 error if accessToken is not in access token list", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 401,
+          responseMessage: "Unauthorized",
+        };
+
+        chai
+          .request(server)
+          .delete("/api/user/cart/1?accessToken=KAXRuelY8ekJpp8X")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(401);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 400 error if product does not exist in user's cart", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 400,
+          responseMessage: "Bad request",
+        };
+
+        chai
+          .request(server)
+          .delete("/api/user/cart/5?accessToken=O0WnZSZ8hWlLOLX9")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(400);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
+      it("should return a 404 error if productId does not exist in database", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 404,
+          responseMessage: "Product not found",
+        };
+
+        chai
+          .request(server)
+          .delete("/api/user/cart/21312?accessToken=O0WnZSZ8hWlLOLX9")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(404);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
       // should return a 404 error if productId does not exist
     });
   });

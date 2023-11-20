@@ -56,16 +56,19 @@ const postProductToCart = (
     }
 
     if (productInProductsDatabase) {
-      const newProductInCart = Object.assign({
-        quantity: 1
-      }, productInProductsDatabase,);
+      const newProductInCart = Object.assign(
+        {
+          quantity: 1,
+        },
+        productInProductsDatabase
+      );
       const newCart = [...cart];
 
       newCart.push(newProductInCart);
       return newCart;
     }
 
-    return "Product not found"
+    return "Product not found";
   }
 
   return null;
@@ -81,13 +84,11 @@ const deleteProductFromCart = (
   cart: User["cart"],
   products: ProductObject[],
   request: Request
-): string | null | User["cart"] => { 
+): string | null | User["cart"] => {
   const productId = request.params.productId;
 
   if (productId) {
-    const productInUserCart = cart.find(
-      (item) => item.id == productId
-    );
+    const productInUserCart = cart.find((item) => item.id == productId);
     const productInProductsDatabase = products.find(
       (item) => item.id == productId
     );
@@ -99,7 +100,7 @@ const deleteProductFromCart = (
     }
 
     if (!productInProductsDatabase) {
-     return "Product not found"
+      return "Product not found";
     }
   }
 

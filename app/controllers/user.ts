@@ -320,7 +320,6 @@ const deleteProductFromUserCart = (
   products: ProductObject[]
 ): void | ServerResponse => {
   // Check users exist
-  console.log("hello");
   if (users.length <= 0) {
     respondWith404UsersNotFound(response);
   }
@@ -348,19 +347,23 @@ const deleteProductFromUserCart = (
   // Update accessToken lastUpdated time
   updateAccessToken(accessToken.username);
 
-  const deletedProductFromCart = deleteProductFromCart(matchedUser.cart, products, request);
+  const deletedProductFromCart = deleteProductFromCart(
+    matchedUser.cart,
+    products,
+    request
+  );
 
   if (!deletedProductFromCart) {
     response.writeHead(400, { "Content-Type": "application/json" });
     return response.end(
       JSON.stringify({
         responseCode: response.statusCode,
-        responseMessage: "Bad request - productId missing",
+        responseMessage: "Bad request",
       })
     );
   }
 
-  if (typeof(deletedProductFromCart) === "string") {
+  if (typeof deletedProductFromCart === "string") {
     response.writeHead(404, { "Content-Type": "application/json" });
     return response.end(
       JSON.stringify({
