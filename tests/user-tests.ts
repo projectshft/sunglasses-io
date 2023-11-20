@@ -1,15 +1,11 @@
 // Type imports
-import { ProductObject, User } from "../types/type-definitions";
-import { TestSunglasses } from "./sunglasses-tests";
+import { User } from "../types/type-definitions";
 
 // Module imports
 import chai = require("chai");
 import chaiHttp = require("chai-http");
 const fs = require("fs");
 const server = require("../app/server.ts");
-
-// Test imports
-const testSunglasses: TestSunglasses = require("./sunglasses-tests");
 
 // Define should
 chai.should();
@@ -524,7 +520,25 @@ const testUser = () => {
             done();
           });
       });
-      // should delete item matching productId from user's cart
+      it("should return a 401 error if accessToken is missing from search query", function (done) {
+        // Object to match
+        const responseObject = {
+          responseCode: 401,
+          responseMessage: "Unauthorized",
+        };
+
+        chai
+          .request(server)
+          .post("/api/user/cart/1")
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            }
+            res.should.have.status(401);
+            res.body.should.deep.equal(responseObject);
+            done();
+          });
+      });
       // should return a 401 error if accessToken is missing from search query
       // should return a 401 error if accessToken is expired
       // should return a 401 error if accessToken is not in access token list

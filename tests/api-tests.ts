@@ -1,3 +1,7 @@
+/**
+ * Entry point for tests.
+ */
+
 // Type imports
 import { TestSunglasses } from "./sunglasses-tests";
 import { TestUser } from "./user-tests";
