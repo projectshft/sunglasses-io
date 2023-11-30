@@ -1,0 +1,427 @@
+swagger: "2.0"
+info:
+  description: Server for the Sunglasses.io e-commerce shop. This project was built as a part of [Parsity.io's](https://parsity.io) curriculum and is not a "real" production-ready API.
+  version: 1.0.0
+  title: Sunglasses.io API
+  contact:
+    email: jordan.c.cox.1@gmail.com
+host: localhost:3001
+basePath: /api
+tags:
+  - name: sunglasses
+    description: Access brands and product data.
+  - name: user
+    description: Log in to the website, retrieve from and change products in cart.
+schemes:
+  - http
+produces:
+  - application/json
+security:
+  - api_key: []
+paths:
+  /sunglassses/brands:
+    get:
+      tags:
+        - sunglasses
+      summary: Retrieve list of brands
+      description: The `/sunglasses/brands` endpoint returns an array of brands with an ID (matching the category ID found on product objects) and name.
+      responses:
+        200:
+          description: Array of brand objects
+          schema:
+            $ref: "#/definitions/Brand"
+        404:
+          description: Brands not found
+  /sunglasses/brands/{brandId}:
+    get:
+      tags:
+        - sunglasses
+      summary: Retrieve desired brand by unique ID
+      description: The `/sunglasses/brands/{brandId}` endpoint returns an object matching the ID passed to brandId.
+      parameters:
+        - name: brandId
+          description: Unique ID associated with each brand.
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Brand object
+          schema:
+            $ref: "#/definitions/Brand"
+        404:
+          description: Brand not found
+  /sunglasses/products:
+    get:
+      tags:
+        - sunglasses
+      summary: Retrieve list of products
+      description: The `/sunglasses/products` endpoint returns a list of all products (limited by the "limit" query) or a list of products with descriptions matching the "search" query.
+      parameters:
+        - name: limit
+          description: Number to limit search results to.
+          in: query
+          type: integer
+          format: int64
+          required: false
+        - name: search
+          description: String to match in product description.
+          in: query
+          type: string
+          required: false
+      responses:
+        200:
+          description: Array of product objects
+          schema:
+            $ref: "#/definitions/Product"
+        404:
+          description: Products not found
+        400:
+          description: Bad request
+  /sunglasses/products/{productId}:
+    get:
+      tags:
+        - sunglasses
+      summary: Retrieve desired product by unique ID
+      description: The `/sunglasses/products/{productId}` endpoint returns a product object with an `id` property matching the productId.
+      parameters:
+        - name: productId
+          description: Unique product ID
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Product object matching product ID
+          schema:
+            $ref: "#/definitions/Product"
+        400:
+          description: Bad request
+        404:
+          description: Product not found
+  /sunglasses/brands/{brandId}/products:
+    get:
+      tags:
+        - sunglasses
+      summary: Retrieve products within a brand
+      description: The `/sunglasses/brands/{brandId}/products` endpoint returns an array of product objects with `categoryId` properties matching the brandId.
+      parameters:
+        - name: brandId
+          description: Unique brand ID
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Array of product objects in brand category
+          schema:
+            $ref: "#/definitions/Product"
+        400:
+          description: Bad request
+        404:
+          description: Products not found
+  /user:
+    get:
+      tags:
+        - user
+      summary: Retrieves data about current user
+      description: ""
+      parameters:
+        - name: accessToken
+          in: query
+          type: string
+          format: uid
+          required: true
+      responses:
+        200:
+          description: User object
+          schema:
+            $ref: "#/definitions/User"
+        401:
+          description: Unable to authenticate access token
+  /user/login:
+    post:
+      tags:
+        - user
+      summary: Logs user into website
+      description: ""
+      consumes:
+        - application/json
+      parameters:
+        - name: credentials
+          in: body
+          description: Username and password pair
+          required: true
+          schema:
+            $ref: "#/definitions/Credentials"
+      responses:
+        200:
+          description: User successfully authenticated. Returns access token string.
+          schema:
+            $ref: "#/definitions/AccessToken"
+        401:
+          description: Invalid username or password
+  /user/cart:
+    get:
+      tags:
+        - user
+      summary: Retrieves current contents of user's cart
+      description: ""
+      parameters:
+        - name: accessToken
+          in: query
+          type: string
+          format: uid
+          required: true
+        - name: productId
+          type: string
+          in: query
+          description: Optional productId to return just one product
+          required: false
+      responses:
+        200:
+          description: Array of all products in user's cart or product matching productId if query is present.
+          schema:
+            $ref: "#/definitions/ProductInCart"
+        401:
+          description: Unauthorized
+        404:
+          description: Products not found
+    post:
+      tags:
+        - user
+      summary: Add a product to user's cart
+      description: ""
+      parameters:
+        - name: accessToken
+          in: query
+          type: string
+          format: uid
+          required: true
+        - name: productId
+          type: string
+          in: query
+          description: productId to add to cart
+          required: true
+      responses:
+        200:
+          description: Successfully added product to cart
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Product not found
+  /user/cart/{productId}:
+    delete:
+      tags:
+        - user
+      summary: Delete product from user's cart
+      description: ""
+      parameters:
+        - name: accessToken
+          in: query
+          type: string
+          format: uid
+          required: true
+        - name: productId
+          in: path
+          type: string
+          required: true
+          description: product to delete from cart
+      responses:
+        200:
+          description: Product matching productId successfully removed from cart
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Product not found
+    put:
+      tags:
+        - user
+      summary: Change quantity of product in user's cart
+      description: ""
+      parameters:
+        - name: accessToken
+          in: query
+          type: string
+          format: uid
+          required: true
+        - name: productId
+          in: path
+          required: true
+          type: string
+          description: product to change quantity
+        - name: quantity
+          in: query
+          type: integer
+          format: int32
+          required: true
+          description: quantity to change product to
+      responses:
+        200:
+          description: Successfully changed quantity of product
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        404:
+          description: Product not found
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "X-Authentication"
+    in: "header"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: Name of brand (for example, "Oakley")
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product ID
+      categoryId:
+        type: string
+        description: Brand ID that product belong to
+      name:
+        type: string
+        description: Product name
+      description:
+        type: string
+        description: Product description
+      price:
+        type: integer
+        format: int64
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: Image URL
+  ProductInCart:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique product ID
+      categoryId:
+        type: string
+        description: Brand ID that product belong to
+      name:
+        type: string
+        description: Product name
+      description:
+        type: string
+        description: Product description
+      price:
+        type: integer
+        format: int64
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: Image URL
+      quantity:
+        type: integer
+        format: int32
+  Credentials:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+        format: password
+  AccessToken:
+    type: string
+    format: uid
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        enum:
+          - male
+          - female
+      cart:
+        type: array
+        description: List of products currently in user's cart
+        items:
+          $ref: "#/definitions/Product"
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+          first:
+            type: string
+          last:
+            type: string
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+          city:
+            type: string
+          state:
+            type: string
+          postcode:
+            type: integer
+            format: int32
+      email:
+        type: string
+        format: email
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+            format: password
+          salt:
+            type: string
+            format: salt
+          md5:
+            type: string
+            format: md5
+          sha1:
+            type: string
+            format: sha1
+          sha256:
+            type: string
+            format: sha256
+          dob:
+            type: string
+            format: date-time
+          registered:
+            type: string
+            format: date-time
+          phone:
+            type: string
+          cell:
+            type: string
+          picture:
+            type: object
+            properties:
+              large:
+                type: string
+                format: url
+              medium:
+                type: string
+                format: url
+              thumbnail:
+                type: string
+                format: url
+          nat:
+            type: string
+            description: Two letter ISO code
