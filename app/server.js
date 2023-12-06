@@ -26,7 +26,7 @@ const server = http.createServer(function (request, response) {
   const requestToken = request.headers['x-authentication'];
   if (!validateToken(requestToken)) {
     response.writeHead(401, "Unauthorized ")
-    return responseq.end();
+    return response.end();
   }
   myRouter(request, response, finalHandler(request, response));
 }).listen(PORT, (error) => {
