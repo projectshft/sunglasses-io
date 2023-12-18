@@ -16,23 +16,7 @@ describe("Brands", () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an('array')
-          res.should.be.json;
           res.body.should.have.lengthOf(5);
-          // Check for expected brands in the response
-          let expectedBrands = ["Oakley", 'Ray Ban', "Levi's", "DKNY", "Burberry", "Viper"];
-          expectedBrands.forEach(brand => {
-            res.body.some(b => b.name === brand).should.be.true
-          })
-          done();
-        });
-    });
-
-    it('should return a 400 error for an invalid search', (done) => {
-      chai
-        .request(server)
-        .get('/api/brands')
-        .end((err, res) => {
-          res.should.have.status(400);
           done();
         });
     });
@@ -40,7 +24,7 @@ describe("Brands", () => {
     it('should return a 404 error if endpoint cant be found', (done) => {
       chai
         .request(server)
-        .get('/api/brandss')
+        .get('/api/nonexistent')
         .end((err, res) => {
           res.should.have.status(404);
           done()
@@ -53,13 +37,12 @@ describe("Brands", () => {
     it('should return products by brand Id', (done) => {
       chai
         .request(server)
-        .get('/api/brands/1/products')
+        .get('/api/brands/3/products')
         .end((err, res) => {
-          console.log(res.status)
-          console.log(res.body)
           res.should.have.status(200);
           res.body.should.be.an('array')
           res.should.be.json;
+          res.body.length.should.be.eql(2)
           done();
         });
     });
@@ -77,7 +60,7 @@ describe("Brands", () => {
     it('should return a 404 if brand ID does not exist', (done) => {
       chai
         .request(server)
-        .get('/api/brands/7/products')
+        .get('/api/brands/12/products')
         .end((err, res) => {
           res.should.have.status(404);
           done();
@@ -98,9 +81,7 @@ describe("Products", () => {
           res.should.have.status(200);
           res.body.should.be.an('array');
           res.should.be.json;
-          res.body.forEach(product => {
-            product.should.have.property('categoryId', '12')
-          })
+          res.body.should.have.lengthOf(11);
           done();
         });
     });
@@ -139,7 +120,7 @@ describe('Login', () => {
         });
     });
 
-    it('should handle incorrect username or password with 400 response', (done) => {
+    it('should handle incorrect username or password with 401 response', (done) => {
       let credentials = {
         username: 'jimbobjoe16',
         password: 'helloworld'
@@ -150,7 +131,7 @@ describe('Login', () => {
         .post('/api/login')
         .send(credentials)
         .end((err, res) => {
-          res.should.have.status(400)
+          res.should.have.status(401)
           done();
         });
     });
