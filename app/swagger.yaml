@@ -1,0 +1,292 @@
+swagger: "2.0"
+info:
+  title: Sunglasses API
+  description: An API to support the Sunglasses Store platform
+  version: 1.0.0
+host: localhost:3001
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      summary: Brands
+      description: |
+        The Brands endpoint returns all the brands of sunglasses for sale
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: An array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brands"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/brands/{id}/products:
+    get:
+      summary: Products by brand
+      description: >-
+        Returns all products with the corresponding brand id. The brand id is represented in the products model as "categoryId."
+      parameters:
+        - name: id
+          in: path
+          description: the id of the brand of products to return
+          required: true
+          type: integer
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: Information for a product from a particular brand
+          schema:
+            $ref: "#/definitions/Products"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/products:
+    get:
+      summary: Find products
+      description: |
+        This endpoint returns all products
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: "#/definitions/Products"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/login:
+    post:
+      summary: Login
+      description: |
+        This endpoint allows users to login and access their shopping cart
+      parameters:
+        - name: "username"
+          in: "body"
+          description: username for login
+          required: true
+          type: string
+        - name: "password"
+          in: body
+          description: password for login
+          required: true
+          type: string
+          format: password
+      tags:
+        - User
+      responses:
+        "200":
+          description: Login is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/me/cart:
+    get:
+      summary: View Cart
+      description: |
+        returns the products in current user's cart
+      tags:
+        - User
+      responses:
+        "200":
+          description: Cart display successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Add to Cart
+      description: |
+        Adds item to current user's cart
+      parameters:
+        - name: "body"
+          in: "body"
+          description: product added to cart
+          required: true
+          schema:
+            $ref: "#/definitions/Products"
+      tags:
+        - User
+      responses:
+        "200":
+          description: Add-to-cart is successful
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /api/me/cart/{productId}:
+    delete:
+      summary: Remove from Cart
+      description: >
+        Removes an item from cart
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: "string"
+      tags:
+        - User
+      responses:
+        "200":
+          description: Item successfully removed
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: Change Quantity
+      description: >
+        Change the quantity of a product in the current user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: the id of the product to change the cart quantity for
+          required: true
+          type: "string"
+      tags:
+        - User
+      responses:
+        "200":
+          description: Quantity modified
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brands:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the brand.
+      name:
+        type: string
+        description: name of brand
+  Products:
+    type: object
+    properties:
+      id:
+        type: string
+        description: >-
+          The unique identifier given to the product
+      categoryId:
+        type: string
+        description: >-
+          The unique identifier of the product's category
+      name:
+        type: string
+        description: The name of the sunglasses
+      description:
+        type: string
+        description: Summary of the product
+      price:
+        type: number
+        description: Sales price of the product
+      imageUrls:
+        type: array
+        items: {}
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: Gender of the Sunglasses user.
+      cart:
+        type: array
+        items: {}
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: example Mrs.
+          first:
+            type: string
+            description: first name
+          last:
+            type: string
+            description: last name
+      location:
+        type: object
+        properties:
+          street:
+            type: string
+            description: User's street address
+          city:
+            type: string
+            description: User's city for address
+          state:
+            type: string
+            description: User's state for address
+          postcode:
+            type: number
+            description: User's postal zip code
+      email:
+        type: string
+        description: User's email address
+      login:
+        type: object
+        properties:
+          username:
+            type: string
+          password:
+            type: string
+          salt:
+            type: string
+          md5:
+            type: string
+          sha1:
+            type: string
+          sha256:
+            type: string
+      dob:
+        type: string
+        description: date/time of birth
+      registered:
+        type: string
+        description: date/time of registration to the Sunglasses platform
+      phone:
+        type: string
+        description: phone number (home)
+      cell:
+        type: string
+        description: mobile phone number
+      picture:
+        type: object
+        properties:
+          large:
+            type: string
+            description: Image URL (large size)
+          medium:
+            type: string
+            description: Image URL (medium size)
+          thumbnail:
+            type: string
+            description: Image URL (small size)
+      nat:
+        type: string
+        description: nationality
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
