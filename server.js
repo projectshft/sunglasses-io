@@ -45,14 +45,14 @@ let server = http.createServer(function (request, response) {
   });
 });
 
+// gets all brands 
 myRouter.get('/api/brands', function(request, response) {
   response.writeHead(200, {"Content-Type": "application/json"});
-  console.log("get(/api/brands): ");
-  console.log(brands);
   return response.end(JSON.stringify(brands));
 
 });
 
+// gets all products of brand with specified id
 myRouter.get('/api/brands/:id/products', function(request, response) {
   // variable for brand with associated :id
   const brandSelection = brands.find((brand) => {
@@ -72,14 +72,76 @@ myRouter.get('/api/brands/:id/products', function(request, response) {
   return response.end(JSON.stringify(brandProducts));
 });
 
+// gets all products 
 myRouter.get('/api/products', function(request, response) {
   response.writeHead(200, {"Content-Type": "application/json"});
   return response.end(JSON.stringify(products));
 });
 
+// handles login attempt
 myRouter.post('/api/login', function(request, response) {
-  const usernameInput = users.find() 
+  // checks username and password input to verify authorization
+  if(request.body.username && request.body.password){
+    let user = users.find((user) => {
+      return user.login.username == request.body.username && 
+      user.login.password == request.body.password;
+    });
+    // input username and password for a user are found and match and login is successful
+    if(user){
+      response.writeHead(200, {"Content-Type": "application/json"});
+      // access token created
+      let currentAccessToken = accessTokens.find((tokenObject) => {
+        return tokenObject.username == user.login.username;
+      });
+      // Update access token timeout period if it exists
+      if(currentAccessToken) {
+        currentAccessToken.lastUpdated = new Date();
+        return response.end(JSON.stringify(currentAccessToken.token));
+        // create new access token with user and "random" token
+      } else {
+        let newAccessToken = {
+          username: user.login.username,
+          lastUpdated: new Date(),
+          token: uid(16)
+        }
+        console.log("server token: ");
+        accessTokens.push(newAccessToken);
+        console.log(newAccessToken.token);
+        // console.log("request: ");
+        // console.log(request);
+        console.log("request.body: ");
+        console.log(request.body);
+        return response.end(JSON.stringify(newAccessToken.token));
+      }
+    } else {
+      response.writeHead(401, "Invalid username or password");
+      return response.end();
+    }
+
+  } else if(request.body.username == undefined || request.body.password == undefined){
+    response.writeHead(400, "Incorrectly formatted response: missing username and/or password input");
+    return response.end();
+  } 
 });
+
+// Helper method to process access token
+var getValidTokenFromRequest = function(request) {
+  var parsedUrl = require('url').parse(request.url, true);
+  if (parsedUrl.query.accessToken) {
+    // Verify the access token to make sure it's valid and not expired
+    let currentAccessToken = accessTokens.find((accessToken) => {
+      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
+    });
+
+    if (currentAccessToken) {
+      return currentAccessToken;
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
 
 myRouter.get('/api/me/cart', function(request, response) {
 
