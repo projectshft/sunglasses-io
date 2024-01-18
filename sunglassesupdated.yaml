@@ -1,0 +1,262 @@
+swagger: "2.0"
+info:
+  title: Sunglasses-io eval
+  description: An API to support the Sunglasses-io platform
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - http
+basePath: /v1
+
+tags:
+  - name: "store"
+    description: "Accessing Your sunglasses orders"
+  - name: "user"
+    description: "Operations about the user"
+paths:
+  /store/brands:
+    get:
+      tags:
+        - "store"
+      summary: "Returns brands of sunglasses sold by store"
+      description: "Returns a list of brands available for purchase"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "search"
+          in: "query"
+          description: "Search for brands by name"
+          required: false
+          type: "string"
+      responses:
+        200:
+          description: "Successful Operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        404:
+          description: "Brands not found"
+  /store/brands/{Id}/products:
+    get:
+      tags:
+        - "store"
+      summary: "Return products by brand Id"
+      description: "Returns products associated with a specific brand"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "Id"
+          in: "path"
+          description: "ID of sunglasses brand to be fetched"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful Operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        400:
+          description: "Invalid ID"
+        404:
+          description: "Brand Not Found"
+  /store/products:
+    get:
+      tags:
+        - "store"
+      summary: "Returns all inventory of the store"
+      description: "Returns a list of all products"
+      operationId: "getInventory"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "query"
+          in: "query"
+          required: false
+          type: "string"
+      responses:
+        200:
+          description: "Successful Operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: "Invetory not found"
+  /login:
+    post:
+      tags:
+        - "user"
+      summary: "User Login"
+      description: "Logs in user and returns an access token"
+      operationId: "userLogin"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "credentials"
+          required: true
+          schema:
+            $ref: "#/definitions/Credentials"
+      responses:
+        200:
+          description: "Successful login"
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        400:
+          description: "Missing username or password"
+        401:
+          description: "Unauthorized - Invalid credentials"
+  /me/cart:
+    get:
+      tags:
+        - "user"
+      summary: "Get users shopping cart"
+      description: "Return the shopping cart of current logged in user"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accessToken"
+          in: "query"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CartItem"
+        401:
+          description: "Unauthorized - User not authenticated"
+    post:
+      tags:
+        - "user"
+      summary: "Add a product to the cart"
+      description: "Adds a product to the current users shopping cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accessToken"
+          in: "query"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "product"
+          required: true
+          schema:
+            type: "object"
+
+      responses:
+        200:
+          description: "Successful operation"
+        401:
+          description: "Unauthorized - User not authenticated"
+        404:
+          description: "Product not found"
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - "user"
+      summary: "Remove product from cart"
+      description: "Remove a specific product from the current users shopping cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accessToken"
+          in: "query"
+          required: true
+          type: "string"
+        - name: "productId"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        204:
+          description: "Product successfully removed from the cart"
+        401:
+          description: "Unauthorized - User not authenticated"
+        404:
+          description: "Product not found in cart"
+    post:
+      tags:
+        - "user"
+      summary: "Update quantity of product in cart"
+      description: "Update the quantity of a specific product to the current users cart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "accessToken"
+          in: "query"
+          required: true
+          type: "string"
+        - name: "productId"
+          in: "path"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: "object"
+      responses:
+        200:
+          description: "Successful operation"
+        401:
+          description: "Unauthorized - User not authenticated"
+        404:
+          description: "Product not found in cart"
+definitions:
+  Brand:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      name:
+        type: "string"
+
+  Product:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      categoryId:
+        type: "string"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      price:
+        type: "number"
+      imageUrls:
+        type: "array"
+        items:
+          type: "string"
+
+  Credentials:
+    type: "object"
+    required:
+      - "username"
+      - "password"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+
+  LoginResponse:
+    type: "object"
+    properties:
+      accessToken:
+        type: "string"
+
+  CartItem:
+    type: "object"
+    properties:
+      productId:
+        type: "string"
+      quantity:
+        type: "integer"
