@@ -7,11 +7,7 @@ host: api.sunglasses.com
 schemes:
   - http
 basePath: /v1
-securityDefinitions:
-  bearerAuth:
-    type: apiKey
-    name: Authorization
-    in: header
+
 tags:
   - name: "store"
     description: "Accessing Your sunglasses orders"
@@ -24,29 +20,29 @@ paths:
         - "store"
       summary: "Returns brands of sunglasses sold by store"
       description: "Returns a list of brands available for purchase"
-      operationId: "getBrands"
       produces:
         - "application/json"
       parameters:
-        - name: search
-          in: query
+        - name: "search"
+          in: "query"
           description: "Search for brands by name"
           required: false
-          type: string
+          type: "string"
       responses:
         200:
           description: "Successful Operation"
           schema:
-            $ref: "#/definitions/BrandsList"
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+        404:
+          description: "Brands not found"
   /store/brands/{Id}/products:
     get:
       tags:
         - "store"
       summary: "Return products by brand Id"
-      description: "Get a list of products associated by brand"
-      operationId: "getProductsByBrandId"
-      security:
-        - bearerAuth: []
+      description: "Returns products associated with a specific brand"
       produces:
         - "application/json"
       parameters:
@@ -59,7 +55,9 @@ paths:
         200:
           description: "Successful Operation"
           schema:
-            $ref: "#/definitions/Products"
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
         400:
           description: "Invalid ID"
         404:
@@ -69,15 +67,22 @@ paths:
       tags:
         - "store"
       summary: "Returns all inventory of the store"
-      description: "Inventory of sunglasses to be fetched"
+      description: "Returns a list of all products"
       operationId: "getInventory"
       produces:
         - "application/json"
+      parameters:
+        - name: "query"
+          in: "query"
+          required: false
+          type: "string"
       responses:
         200:
           description: "Successful Operation"
           schema:
-            $ref: "#/definitions/Products"
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
         404:
           description: "Invetory not found"
   /login:
@@ -85,27 +90,23 @@ paths:
       tags:
         - "user"
       summary: "User Login"
-      description: "This endpoint is used for authentication and generates access token"
+      description: "Logs in user and returns an access token"
       operationId: "userLogin"
       produces:
         - "application/json"
       parameters:
-        - in: body
-          name: credentials
-          description: "User credentials for login"
+        - in: "body"
+          name: "credentials"
           required: true
           schema:
-            type: object
-            properties:
-              username:
-                type: string
-              password:
-                type: string
+            $ref: "#/definitions/Credentials"
       responses:
         200:
           description: "Successful login"
           schema:
             $ref: "#/definitions/LoginResponse"
+        400:
+          description: "Missing username or password"
         401:
           description: "Unauthorized - Invalid credentials"
   /me/cart:
@@ -114,16 +115,18 @@ paths:
         - "user"
       summary: "Get users shopping cart"
       description: "Return the shopping cart of current logged in user"
-      operationId: "getUserCart"
-      security:
-        - bearerAuth: []
       produces:
         - "application/json"
+      parameters:
+        - name: "accessToken"
+          in: "query"
+          required: true
+          type: "string"
       responses:
         200:
           description: "Successful operation"
           schema:
-            type: array
+            type: "array"
             items:
               $ref: "#/definitions/CartItem"
         401:
@@ -131,49 +134,46 @@ paths:
     post:
       tags:
         - "user"
-      summary: "Update users shopping cart"
-      description: "Modify contents of current users shopping cart"
-      operationId: "modifyUserCart"
-      security:
-        - bearerAuth: []
+      summary: "Add a product to the cart"
+      description: "Adds a product to the current users shopping cart"
       produces:
         - "application/json"
       parameters:
-        - in: body
-          name: cartModification
-          description: "Details for modifying the shopping cart"
+        - name: "accessToken"
+          in: "query"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "product"
           required: true
           schema:
-            $ref: "#/definitions/CartModification"
+            type: "object"
+
       responses:
         200:
           description: "Successful operation"
-          schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                description: "Indicates if the modifications were successful"
         401:
           description: "Unauthorized - User not authenticated"
+        404:
+          description: "Product not found"
   /me/cart/{productId}:
     delete:
       tags:
         - "user"
-      summary: "Delete item from users shopping cart"
+      summary: "Remove product from cart"
       description: "Remove a specific product from the current users shopping cart"
-      operationId: "removeCartItem"
-      security:
-        - bearerAuth: []
       produces:
         - "application/json"
       parameters:
-        - name: productId
-          in: path
-          description: "ID of the product to be removed from the users shopping cart"
+        - name: "accessToken"
+          in: "query"
           required: true
-          type: integer
-          format: int64
+          type: "string"
+        - name: "productId"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int64"
       responses:
         204:
           description: "Product successfully removed from the cart"
@@ -184,97 +184,79 @@ paths:
     post:
       tags:
         - "user"
-      summary: "Add quantity of a product to the current users shopping cart"
-      description: "Add a certain quantity of a specific product to the current users cart"
-      operationId: "addProductToCart"
-      security:
-        - bearerAuth: []
+      summary: "Update quantity of product in cart"
+      description: "Update the quantity of a specific product to the current users cart"
       produces:
         - "application/json"
       parameters:
-        - name: productId
-          in: path
-          description: "ID of the product to be added to the shopping cart"
+        - name: "accessToken"
+          in: "query"
           required: true
-          type: integer
-          format: int64
-        - in: body
-          name: cartModification
-          description: "Details for modifying the shopping cart"
+          type: "string"
+        - name: "productId"
+          in: "path"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
           required: true
           schema:
-            type: object
-            properties:
-              quantity:
-                type: integer
+            type: "object"
       responses:
         200:
           description: "Successful operation"
-          schema:
-            type: object
-            properties:
-              success:
-                type: boolean
-                description: "Indicates if the modification was successful"
         401:
           description: "Unauthorized - User not authenticated"
+        404:
+          description: "Product not found in cart"
 definitions:
-  BrandsList:
-    type: array
-    items:
-      $ref: "#/definitions/Brand"
   Brand:
-    type: object
+    type: "object"
     properties:
       id:
-        type: string
-        description: "Unique identifer for the brand"
+        type: "string"
       name:
-        type: string
-        description: "Name of the brand"
-  Products:
-    type: object
+        type: "string"
+
+  Product:
+    type: "object"
     properties:
       id:
-        type: string
-        description: "Unique identifier for the product"
+        type: "string"
       categoryId:
-        type: string
-        description: "Id of the category that the product belongs to"
+        type: "string"
       name:
-        type: string
-        description: "Name of the product"
+        type: "string"
       description:
-        type: string
-        description: "Description of the product"
+        type: "string"
       price:
-        type: number
-        description: "Price of the product"
+        type: "number"
       imageUrls:
-        type: array
+        type: "array"
         items:
-          type: string
-        description: "List of Images for the product"
+          type: "string"
+
+  Credentials:
+    type: "object"
+    required:
+      - "username"
+      - "password"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+
   LoginResponse:
-    type: object
+    type: "object"
     properties:
       accessToken:
-        type: string
-        description: "Access token generated upon successful login"
+        type: "string"
+
   CartItem:
-    allOf:
-      - $ref: "#/definitions/Products"
-      - type: object
-        properties:
-          quantity:
-            type: integer
-            description: "Quantity of the product in the cart"
-  CartModification:
-    type: object
+    type: "object"
     properties:
       productId:
-        type: string
-        description: "Unique identifier for the product"
+        type: "string"
       quantity:
-        type: integer
-        description: "Quantity to be modified in the cart"
+        type: "integer"

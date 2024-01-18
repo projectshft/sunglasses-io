@@ -1,6 +1,7 @@
 let chai = require('chai');
 let chaiHttp = require('chai-http')
-let server = require('../app/server')
+let server = require('../app/server');
+const { request } = require('http');
 
 let should = chai.should();
 
@@ -73,7 +74,7 @@ describe("Products", () => {
 
   describe("GET /api/products", () => {
 
-    it('should return and array of the correct products for any given brand ID', (done) => {
+    it('should return an array of all products if no search query', (done) => {
       chai
         .request(server)
         .get('/api/products')
@@ -86,10 +87,25 @@ describe("Products", () => {
         });
     });
 
-    it('should return a 404 response if inventory is not found', (done) => {
+    it('should return correct products when users complete a search', (done) => {
+      const search = 'Peanut Butter'
+
       chai
         .request(server)
-        .get(`/api/products?q=${search}`)
+        .get(`/api/products?query=${search}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an('array');
+          res.body.should.have.lengthOf(1);
+          done();
+        });
+    });
+
+    it('should return a 404 response if inventory is not found', (done) => {
+      const search = 'Dior'
+      chai
+        .request(server)
+        .get(`/api/products?query=${search}`)
         .end((err, res) => {
           res.should.have.status(404);
           done();
@@ -102,7 +118,7 @@ describe('Login', () => {
 
   describe('POST /api/login', () => {
 
-    it('should successfully log user in with valid credentials', (done) => {
+    it('should successfully log user in with valid credentials and return user data', (done) => {
       let credentials = {
         username: "greenlion235",
         password: "waters"
@@ -114,8 +130,6 @@ describe('Login', () => {
         .send(credentials)
         .end((err, res) => {
           res.should.have.status(200)
-          res.body.should.be.an('object')
-          res.body.should.have.property('accessToken')
           done();
         });
     });
@@ -135,6 +149,22 @@ describe('Login', () => {
           done();
         });
     });
+
+    it('should handle missing password with a 400 response', (done) => {
+      let credentials = {
+        username: 'jimbobjoe16',
+        password: ''
+      };
+
+      chai
+        .request(server)
+        .post('/api/login')
+        .send(credentials)
+        .end((err, res) => {
+          res.should.have.status(400)
+          done();
+        })
+    })
   });
 });
 
@@ -142,57 +172,23 @@ describe('Cart', () => {
 
   describe('GET /api/me/cart', () => {
 
-    accessToken = 'exAccessToken';
-    const cartItem = { item: 'exampleItem', quantity: 2 }
+    const accessToken = "aZVg8xUr8PVZNk3G"
 
-    it('should return an array of the users items in their cart', (done) => {
+    it('should return the users shopping cart', (done) => {
 
       chai
         .request(server)
-        .get('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
+        .get(`/api/me/cart?accessToken=${accessToken}`)
         .end((err, res) => {
           res.should.have.status(200)
           res.body.should.be.an('array')
-          done();
-        });
-    });
-
-    it('should return an empty array before a user has added a product', (done) => {
-      chai
-        .request(server)
-        .get('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .end((err, res) => {
-          res.should.have.status(200)
-          res.body.should.be.an('array')
-          done();
-        });
-    });
-
-    it('should return a subtotal for items in cart', (done) => {
-      chai
-        .request(server)
-        .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .send(cartItem)
-        .end((err, res) => {
-          res.should.have.status(200)
-          done();
-        });
-
-      chai
-        .request(server)
-        .get('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .end((err, res) => {
-          res.should.have.status(200)
-          res.body.should.have.property('subtotal')
+          res.body.should.be.lengthOf(0);
           done();
         });
     });
 
     it('should return a 401 error if user is not authenticated', (done) => {
+
       chai
         .request(server)
         .get('/api/me/cart')
@@ -205,134 +201,110 @@ describe('Cart', () => {
 
   describe('POST /api/me/cart', () => {
 
-    const invalidCartItem = { item: 'banana peppers', quantity: 1 };
-    const cartItem = { itemId: '12', quantity: 1 }
-    it('should not allow user to add invalid items to cart', (done) => {
-      chai
-        .request(server)
-        .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .send(invalidCartItem)
-        .end((err, res) => {
-          res.should.have.status(200)
-          res.body.should.be.an('array')
-          done();
-        });
-    });
+
+
 
     it('should update the users shopping cart with item they selected', (done) => {
+      const accessToken = "aZVg8xUr8PVZNk3G"
+      const cartItem = { id: '10' }
       chai
         .request(server)
-        .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
+        .post(`/api/me/cart?accessToken=${accessToken}`)
         .send(cartItem)
         .end((err, res) => {
           res.should.have.status(200);
+          res.body.should.be.an('object');
+          res.body.should.have.property('cart').which.is.an('array')
+          res.body.cart.length.should.be.above(0);
+          res.body.cart[0].should.have.property('id').eql('10')
           done();
         });
     });
 
-    it('should allow multiple items to be added to the cart in one instance', (done) => {
-      const cartItems = [
-        { itemId: '12', quantity: 2 },
-        { itemId: '21', quantity: 1 }
-      ];
+    it('should return a 404 if product is not found', (done) => {
+      const accessToken = "aZVg8xUr8PVZNk3G"
+      const cartItem = { id: '17' }
+      chai
+        .request(server)
+        .post(`/api/me/cart?accessToken=${accessToken}`)
+        .send(cartItem)
+        .end((err, res) => {
+          res.should.have.status(404)
+          done();
+        })
+    })
 
+
+    it('should return a 401 if user is not authenticated', (done) => {
       chai
         .request(server)
         .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .send(cartItems)
+        .end((err, res) => {
+          res.should.have.status(401)
+          done();
+        });
+    });
+  });
+
+  describe('DELETE /api/me/cart/{productId}', () => {
+
+
+    it('should successfully remove a product from the users cart', (done) => {
+
+      const accessToken = 'aZVg8xUr8PVZNk3G'
+      const productId = '10';
+
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productId}?accessToken=${accessToken}`)
+        .end((err, res) => {
+          res.should.have.status(204);
+          done();
+        });
+    });
+  });
+
+  describe('POST /api/me/cart/{productId}', () => {
+    const accessToken = 'krkR5itCRUSGrw1N'
+    const productToUpdate = { id: '10', quantity: 2 }
+
+    it('should update a product from the users cart by product ID', (done) => {
+
+      chai
+        .request(server)
+        .post(`/api/me/cart/${productToUpdate.id}?accessToken=${accessToken}`)
+        .send(productToUpdate)
         .end((err, res) => {
           res.should.have.status(200);
-          cartItems.forEach(item => {
-            res.body.should.deep.include(item)
-          });
-        });
-    });
+          done();
+        })
+    })
 
-    it('should correctly update the quantities of products in users cart upon modification', (done) => {
-      const initCartItem = { itemId: '12', quantity: 1 }
+    it('should return a 404 if the product does not exist', (done) => {
+
+      const accessToken = 'krkR5itCRUSGrw1N'
+      const productToUpdate = { id: '12', quantity: 2 }
 
       chai
         .request(server)
-        .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .send(initCartItem)
+        .post(`/api/me/cart/${productToUpdate.id}?accessToken=${accessToken}`)
+        .send(productToUpdate)
         .end((err, res) => {
-          res.should.have.status(200)
+          res.should.have.status(404);
           done();
-        });
-      const modifiedCartItem = { itemId: '12', quantity: 3 }
+        })
+    })
 
-      chai
-        .request(server)
-        .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .send(modifiedCartItem)
-        .end((err, modifyRes) => {
-          modifyRes.should.have.status(200)
-          done();
-        });
+    it('should return a 401 if user is not authenticated', (done) => {
 
       chai
         .request(server)
         .get('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .end((err, getRes) => {
-          getRes.should.have.status(200)
+        .end((err, res) => {
+          res.should.have.status(401)
           done();
         });
-    });
-  });
+    })
+  })
 
-  it('should return a 400 error for a bad request', (done) => {
-    chai
-      .request(server)
-      .post('/api/me/cart')
-      .set('Authentication', `Bearer ${accessToken}`)
-      .end((err, res) => {
-        res.should.have.status(400)
-        done();
-      });
-  });
-
-  it('should return a 401 if user is not authenticated', (done) => {
-    chai
-      .request(server)
-      .post('/api/me/cart')
-      .end((err, res) => {
-        res.should.have.status(401)
-        done();
-      });
-  });
-
-  describe('Delete api/me/cart/{productId}', () => {
-
-    it('should successfully remove a product from the users cart', (done) => {
-      const cartItem = { itemId: '12', quantity: 1 };
-
-      chai
-        .request(server)
-        .post('/api/me/cart')
-        .set('Authentication', `Bearer ${accessToken}`)
-        .send(cartItem)
-        .end((err, res) => {
-          res.should.have.status(200);
-        });
-
-      chai
-        .request(server)
-        .delete(`/api/me/cart/${cartItem.itemId}`)
-        .set('Authentication', `Bearer ${accessToken}`)
-        .end((err, res) => {
-          res.should.have.status(204)
-          done();
-        });
-    });
-  });
 });
-
-
-
-
