@@ -4,6 +4,7 @@ var finalHandler = require('finalhandler');
 var queryString = require('querystring');
 var Router = require('router');
 var bodyParser   = require('body-parser');
+const { parse } = require('path');
 var uid = require('rand-token').uid;
 
 const PORT = 3001;
@@ -12,7 +13,7 @@ const PORT = 3001;
 let brands = [];
 let products = [];
 let users = [];
-let accessTokens = [];
+let currentUserLoggedIn = null;
 
 // Setup router
 var myRouter = Router();
@@ -44,6 +45,39 @@ let server = http.createServer(function (request, response) {
     console.log(`Server setup: ${users.length} users loaded`);
   });
 });
+
+// function to add a product to a users cart
+function addProductToUserCart(username, productId, usersArray){
+  let user = users.find((user) => {
+    return user.login.username == username;
+  })
+  let product = products.find((product) => {
+    return product.id == productId;
+  })
+  let cartItem = { product: product, quantity: 1 };
+  let itemInCart = userCartContainsProduct(productId, usersArray);
+  if(itemInCart){
+    user.cart.foreach((item) => {
+      if(item.product.product.id == productId){
+        item.quantity++;
+      }
+    });
+  } else {
+    user.cart.push(cartItem);
+  }
+}
+
+// funciton to check if product is in user cart
+function userCartContainsProduct(productId, usersArray){
+  let inCart = usersArray.find((user) => {
+    return user.cart.forEach((item) => {
+      return item.product.product.id == productId;
+    });  
+   });
+  if(inCart) {
+    return true;
+  }
+}
 
 // gets all brands 
 myRouter.get('/api/brands', function(request, response) {
@@ -88,67 +122,52 @@ myRouter.post('/api/login', function(request, response) {
     });
     // input username and password for a user are found and match and login is successful
     if(user){
-      response.writeHead(200, {"Content-Type": "application/json"});
-      // access token created
-      let currentAccessToken = accessTokens.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
-      });
-      // Update access token timeout period if it exists
-      if(currentAccessToken) {
-        currentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(currentAccessToken.token));
+      // on successful login
+        response.writeHead(200, {"Content-Type": "application/json"});
+        return response.end(JSON.stringify(user))
         // create new access token with user and "random" token
-      } else {
-        let newAccessToken = {
-          username: user.login.username,
-          lastUpdated: new Date(),
-          token: uid(16)
-        }
-        console.log("server token: ");
-        accessTokens.push(newAccessToken);
-        console.log(newAccessToken.token);
-        // console.log("request: ");
-        // console.log(request);
-        console.log("request.body: ");
-        console.log(request.body);
-        return response.end(JSON.stringify(newAccessToken.token));
-      }
     } else {
+      // invalid username or password
       response.writeHead(401, "Invalid username or password");
       return response.end();
     }
-
+  // if username or password is left blank
   } else if(request.body.username == undefined || request.body.password == undefined){
     response.writeHead(400, "Incorrectly formatted response: missing username and/or password input");
     return response.end();
   } 
 });
 
-// Helper method to process access token
-var getValidTokenFromRequest = function(request) {
-  var parsedUrl = require('url').parse(request.url, true);
-  if (parsedUrl.query.accessToken) {
-    // Verify the access token to make sure it's valid and not expired
-    let currentAccessToken = accessTokens.find((accessToken) => {
-      return accessToken.token == parsedUrl.query.accessToken && ((new Date) - accessToken.lastUpdated) < TOKEN_VALIDITY_TIMEOUT;
-    });
-
-    if (currentAccessToken) {
-      return currentAccessToken;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
-  }
-};
-
-myRouter.get('/api/me/cart', function(request, response) {
-
+myRouter.get(`/api/me/cart`, function(request, response) {
+  let user = users.find((user) => {
+    return user.username == request.body.username;
+  })
+  response.writeHead(200, {"Content-Type": "application/json"})
+  return response.end(JSON.stringify(user));
 });
 
 myRouter.post('/api/me/cart', function(request, response) {
-
+  // product to add to cart
+  let product = products.find((product) => {
+    return product.id == request.body.productToAdd.id;
+  })
+  // user adding product to their cart
+  let user = users.find((user) => {
+    return user.login.username == request.body.username;
+  })
+  // checks product and user exts 
+  if(user && product) {
+    // adds item to cart with quantity value 1 if cart is empty
+    if(user.cart.length == 0){
+      let cartItem = { product: {product}, quantity: 1}
+      user.cart.push(cartItem);
+      // increases quantity value by 1 if product already exists in the cart
+    } else if(cartItem.product.id == product.id){
+      cartItem.quantity++
+    }
+    response.writeHead(200, {"Content-Type": "application/json"});
+    return response.end(JSON.stringify(user));
+  }
 });
 
 myRouter.delete('/api/me/cart/:productId', function(request, response) {

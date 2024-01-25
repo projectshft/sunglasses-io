@@ -142,98 +142,125 @@ describe("Sunglasses", () => {
         .send(loginInfo)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.a("string");
+          res.body.should.be.an("object");
+          res.body.should.have.property("cart");
+          res.body.should.have.property("name");
+          res.body.should.have.property("location");
+          res.body.should.have.property("email");
+          res.body.should.have.property("login");
           done();
         })
     });
   })
-  describe("/GET me/cart", () => {
+  describe("/GET /api/me/cart", () => {
     it("it should GET the user cart", (done) => {
-      //arrange: user cart
-
+      //arrange: username of user simulated as "logged in"
+      let loggedInUsername = "yellowleopard753";
+      
       // act: server request
       chai
         .request(server)
-        .get("/me/cart")
+        .get(`/api/me/cart`)
+        .send(loggedInUsername)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an("array");
-          
+          res.body.should.be.an("object");
+          res.body.should.have.property("cart");
+          res.body.should.have.property("name");
+          res.body.should.have.property("location");
+          res.body.should.have.property("email");
+          res.body.should.have.property("dob");
+          res.body.should.have.property("phone");
+          res.body.should.have.property("picture");
+          res.body.cart.should.be.an("array");         
+          res.body.cart.length.should.be.eql(0);
+          done();
+        });
+    });
+  });
+  describe("/POST /api/me/cart", () => {
+    it("it should POST to the user cart", (done) => {
+      // arrange: logged in user and product to add to user cart
+      let productToAddToUserCart = {
+        username: "yellowleopard753",
+        productToAdd: {
+          id: "1",
+          categoryId: "1",
+          name: "Superglasses",
+          description: "The best glasses in the world",
+          price: 150,
+          imageUrls: [
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
+            "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
+          ]
+        }
+      }
+      // act: server request
+      chai
+        .request(server)
+        .post(`/api/me/cart`)
+        .send(productToAddToUserCart)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.login.username.should.be.a("string");
+          res.body.login.username.should.eql(productToAddToUserCart.username);
+          res.body.should.have.property("cart");
+          res.body.cart.should.be.an("array");
+          res.body.cart[0].should.be.an("object");
+          res.body.cart[0].should.have.property("product");
+          res.body.cart[0].should.have.property("quantity");
+          res.body.should.have.property("name");
+          res.body.should.have.property("login");
           done();
         })
     })
 
   })
-  describe("/POST me/cart", () => {
-    it("it should POST to the user cart", (done) => {
-      // arrange: product to add to cart
-      let productToAdd = {
-        id: "1",
-        categoryId: "1",
-        name: "Superglasses",
+  describe("/DELETE /api/me/cart/:productId", () => {
+    it("it should not DELETE the product with productId if it does not exist in the user cart", (done) => {
+
+    })
+    it("it should DELETE the product with productId from the user cart", (done) => {
+      // arrange username, product to delete and adding the product to user cart
+      let username = "yellowleopard753";
+      let productIdToDeleteId = 1;
+
+      // act: server request
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productIdToDeleteId}`)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("object");
+          res.body.should.have.property("id");
+          done();
+        })
+
+    })
+  })
+  describe("/POST /api/me/cart/:productId", () => {
+    it("it should POST product with productId to user cart", (done) => {
+      let product = {
+        id: "4",
+        categoryId: "2",
+        name: "Better glasses",
         description: "The best glasses in the world",
-        price: 150,
+        price: 1500,
         imageUrls: [
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
           "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
         ]
       }
-      // act: server request
       chai
         .request(server)
-        .post("/me/cart")
-        .send(productToAdd)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.an("object");
-          res.body.should.have.property("id");
-          res.body.should.have.property("categoryId");
-          res.body.should.have.property("name");
-          res.body.should.have.property("description");
-          res.body.should.have.property("price");
-          res.body.should.have.property("imgURLs");
-          done();
-        })
-    })
-
-  })
-  describe("/DELETE me/cart/:productId", () => {
-    it("it should DELETE the product with productId from the user cart", (done) => {
-      // arrange: product to delete
-      let cart = [
-        {
-          cartItem: {
-            id: "1",
-            count: 1
-          }
-        }
-      ]
-      let productToDelete = {
-        id: "1",
-      }
-      // act: server request
-      chai
-        .request(server)
-        .delete(`/me/car/${productToDelete.id}`)
-        .end((err, res) => {
-          res.should.have.status(200);
-          res.body.should.be.an("object");
-          res.body.should.have.property("id");
-          done();
-        })
-
-    })
-  })
-  describe("/POST me/cart/:productId", () => {
-    it("it should POST product with productId to user cart", (done) => {
-      chai
-        .request(server)
-        .post("/me/car/:productId")
+        .post(`/api/me/cart/${product.id}`)
         .send()
         .end((err, res) => {
-          done(err);
+          res.should.have.status(200);
+          done();
         });
     })
   })
-})
+});
