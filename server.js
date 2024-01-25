@@ -24,25 +24,21 @@ let server = http.createServer(function (request, response) {
   myRouter(request, response, finalHandler(request, response));
 }).listen(PORT, error => { 
   if (error) {
-    return console.log("Error on Server Startup: ", error);
   }
 
   fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
     if (error) throw error;
     brands = JSON.parse(data);
-    console.log(`Server setup: ${brands.length} brands loaded`);
   });
 
   fs.readFile("initial-data/products.json", "utf8", (error, data) => {
     if(error) throw error;
     products = JSON.parse(data);
-    console.log(`Server setup: ${products.length} products loaded`);
   })
   
   fs.readFile("initial-data/users.json", "utf8", (error, data) => {
     if (error) throw error;
     users = JSON.parse(data);
-    console.log(`Server setup: ${users.length} users loaded`);
   });
 });
 
@@ -165,13 +161,37 @@ myRouter.post('/api/me/cart', function(request, response) {
     } else if(cartItem.product.id == product.id){
       cartItem.quantity++
     }
+    // console.log(users);
     response.writeHead(200, {"Content-Type": "application/json"});
     return response.end(JSON.stringify(user));
   }
 });
 
 myRouter.delete('/api/me/cart/:productId', function(request, response) {
-
+  let user = users.find((user) => {
+    return user.username == request.body.username;
+  })
+  let productToDeleteExistsInCart = user.cart.find((item) => {
+    return item.product.product.id == request.params.productId;
+  })
+  if(productToDeleteExistsInCart){
+    users.forEach((user) => {
+      if(user.username == request.body.username){
+        user.cart.forEach((item) => {
+          if(item.product.product.id == request.params.productId){
+            item.quantity--;
+            if(item.quantity == 0 && user.cart.length > 1){
+              user.cart.splice(indexOf(item), 1);
+            } else if(item.quantity == 0 && user.cart.length == 1){
+              user.cart = [];
+            }
+          }
+        });
+      }
+    });
+  }
+  response.writeHead(200, {"Content-Type": "application/json"});
+  return response.end(JSON.stringify(user));
 });
 
 myRouter.post('/api/me/cart/:productId', function(request, response) {

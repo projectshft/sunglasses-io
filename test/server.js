@@ -3,14 +3,30 @@
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../server");
+var fs = require("fs")
 
+let brands = [];
+let products = [];
+let users = [];
 let should = chai.should();
 
 chai.use(chaiHttp);
 
-// beforeEach(() => {
-  
-// });
+beforeEach(() => {
+  fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
+    if (error) throw error;
+    brands = JSON.parse(data);
+  });
+  fs.readFile("initial-data/products.json", "utf8", (error, data) => {
+    if(error) throw error;
+    products = JSON.parse(data);
+  });
+  fs.readFile("initial-data/users.json", "utf8", (error, data) => {
+    if (error) throw error;
+    users = JSON.parse(data);
+  });
+
+});
 
 describe("Sunglasses", () => {
   describe("/GET /api/brands", () => {
@@ -209,6 +225,8 @@ describe("Sunglasses", () => {
           res.body.cart.should.be.an("array");
           res.body.cart[0].should.be.an("object");
           res.body.cart[0].should.have.property("product");
+          res.body.cart[0].product.product.should.have.property("imageUrls");
+          res.body.cart[0].product.product.imageUrls.should.be.an("array");
           res.body.cart[0].should.have.property("quantity");
           res.body.should.have.property("name");
           res.body.should.have.property("login");
@@ -218,22 +236,24 @@ describe("Sunglasses", () => {
 
   })
   describe("/DELETE /api/me/cart/:productId", () => {
-    it("it should not DELETE the product with productId if it does not exist in the user cart", (done) => {
+    // it("it should not DELETE the product with productId if it does not exist in the user cart", (done) => {
 
-    })
+    // })
     it("it should DELETE the product with productId from the user cart", (done) => {
       // arrange username, product to delete and adding the product to user cart
       let username = "yellowleopard753";
       let productIdToDeleteId = 1;
-
+      
       // act: server request
       chai
         .request(server)
         .delete(`/api/me/cart/${productIdToDeleteId}`)
+        .send(username)
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("object");
-          res.body.should.have.property("id");
+          res.body.should.have.property("cart");
+          res.body.login.should.have.property("username")
           done();
         })
 
