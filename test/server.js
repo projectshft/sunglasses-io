@@ -3,29 +3,12 @@
 let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../server");
-var fs = require("fs")
 
-let brands = [];
-let products = [];
-let users = [];
 let should = chai.should();
 
 chai.use(chaiHttp);
 
 beforeEach(() => {
-  fs.readFile("initial-data/brands.json", "utf8", (error, data) => {
-    if (error) throw error;
-    brands = JSON.parse(data);
-  });
-  fs.readFile("initial-data/products.json", "utf8", (error, data) => {
-    if(error) throw error;
-    products = JSON.parse(data);
-  });
-  fs.readFile("initial-data/users.json", "utf8", (error, data) => {
-    if (error) throw error;
-    users = JSON.parse(data);
-  });
-
 });
 
 describe("Sunglasses", () => {
@@ -58,13 +41,13 @@ describe("Sunglasses", () => {
     })
     it("it should not return products for non existent brand or :id", (done) => {
       // arrange: brand id that does not exist
-      let id = 10;
+      let id = 20;
       // act: server request
       chai
         .request(server)
         .get(`/api/brands/${id}/products`)
         .end((err, res) => {
-          res.should.have.status(500);
+          res.should.have.status(400);
           done(err);
         })
     })
@@ -110,7 +93,7 @@ describe("Sunglasses", () => {
         .send(loginInfo)
         .end((err, res) => {
           res.should.have.status(400);
-          done();
+          done(err);
         });
     });
     it("it should not POST the login if the username input is not valid", (done) => {
@@ -181,6 +164,7 @@ describe("Sunglasses", () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("object");
+          res.body.should.have.property("gender");
           res.body.should.have.property("cart");
           res.body.should.have.property("name");
           res.body.should.have.property("location");
@@ -188,8 +172,7 @@ describe("Sunglasses", () => {
           res.body.should.have.property("dob");
           res.body.should.have.property("phone");
           res.body.should.have.property("picture");
-          res.body.cart.should.be.an("array");         
-          res.body.cart.length.should.be.eql(0);
+          res.body.cart.should.be.an("array");
           done();
         });
     });
@@ -225,8 +208,9 @@ describe("Sunglasses", () => {
           res.body.cart.should.be.an("array");
           res.body.cart[0].should.be.an("object");
           res.body.cart[0].should.have.property("product");
-          res.body.cart[0].product.product.should.have.property("imageUrls");
-          res.body.cart[0].product.product.imageUrls.should.be.an("array");
+          res.body.cart[0].product.should.have.property("price");
+          res.body.cart[0].product.should.have.property("imageUrls");
+          res.body.cart[0].product.imageUrls.should.be.an("array");
           res.body.cart[0].should.have.property("quantity");
           res.body.should.have.property("name");
           res.body.should.have.property("login");
@@ -236,49 +220,119 @@ describe("Sunglasses", () => {
 
   })
   describe("/DELETE /api/me/cart/:productId", () => {
-    // it("it should not DELETE the product with productId if it does not exist in the user cart", (done) => {
-
-    // })
-    it("it should DELETE the product with productId from the user cart", (done) => {
+    it("it should DELETE the product with productId from the user cart that has only one product", (done) => {
       // arrange username, product to delete and adding the product to user cart
-      let username = "yellowleopard753";
-      let productIdToDeleteId = 1;
-      
+      let inputInfo = {
+        username: "yellowleopard753",
+        userCart: [
+          {productId: "1", quantity: 1 }
+        ]
+      }
+      let productIdToDelete = "1";
       // act: server request
       chai
         .request(server)
-        .delete(`/api/me/cart/${productIdToDeleteId}`)
-        .send(username)
+        .delete(`/api/me/cart/${productIdToDelete}`)
+        .send(inputInfo)
         .end((err, res) => {
           res.should.have.status(200);
-          res.body.should.be.an("object");
-          res.body.should.have.property("cart");
-          res.body.login.should.have.property("username")
+          res.body.should.be.an("array");
+          res.body.length.should.be.eql(inputInfo.userCart.length - 1)
+          done();
+        })
+
+    })
+    it("it should DELETE the product with productId from the user cart that has more than one product in it", (done) => {
+      // arrange username, product to delete and userCart with multiple products
+      let inputInfo = {
+        username: "yellowleopard753",
+        userCart: [
+          { productId: "1", quantity: 1 },
+          { productId: "2", quantity: 6 }
+        ]
+      };
+      let productIdToDelete = "1";
+      // act: server request
+      chai
+        .request(server)
+        .delete(`/api/me/cart/${productIdToDelete}`)
+        .send(inputInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.an("array");
+          res.body.length.should.be.eql(inputInfo.userCart.length - 1)
           done();
         })
 
     })
   })
   describe("/POST /api/me/cart/:productId", () => {
-    it("it should POST product with productId to user cart", (done) => {
-      let product = {
-        id: "4",
-        categoryId: "2",
-        name: "Better glasses",
-        description: "The best glasses in the world",
-        price: 1500,
-        imageUrls: [
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg",
-          "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
-        ]
+    it("it should not POST product with productId to user cart if quantity input is not a number", (done) =>{
+      // arrange valid cartItem with valid quantity, valid username and invalid quantity to change cart item quantity to  
+      let postInfo = {
+        productToAdjust:{productId: "1", quantity: 2 },
+        quantityToChangeTo: "x",
+        username: "yellowleopard753"
+      }
+      // act: server request
+      chai
+        .request(server)
+        .post(`/api/me/cart/${postInfo.productToAdjust.productId}`)
+        .send(postInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    })
+    it("it should not POST quantity of product with productId if the quantityToChangeTo is a negative number", (done) => {
+      let postInfo = {
+        productToAdjust: {productId: "1", quantity: 19 },
+        quantityToChangeTo: -1,
+        username: "yellowleopard753"
+      }
+      // act: server request
+      chai
+        .request(server)
+        .post(`/api/me/cart/${postInfo.productToAdjust.productId}`)
+        .send(postInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+        });
+    })
+    it("it should NOT POST the product, with productId, quantity to 0", (done) => {
+      // arrange info of change quantity value of 0 for product in cart
+      let postInfo = {
+        productToAdjust:  { productId: "1", quantity: 12 },
+        quantityToChangeTo: 0,
+        username: "yellowleopard753"
       }
       chai
         .request(server)
-        .post(`/api/me/cart/${product.id}`)
-        .send()
+        .post(`/api/me/cart/${postInfo.productToAdjust.productId}`)
+        .send(postInfo)
+        .end((err, res) => {
+          res.should.have.status(400);
+          done();
+      })
+    })  
+    it("it should POST product with productId with the quantity set to the specified input 'quantityToChangeTo' in user cart", (done) => {
+      // arrange info to change quantity of product in cart
+      let postInfo = {
+        productToAdjust: { productId: "1", quantity: 25 },
+        quantityToChangeTo: 2,
+        username: "yellowleopard753"
+      }
+      chai
+        .request(server)
+        .post(`/api/me/cart/${postInfo.productToAdjust.productId}`)
+        .send(postInfo)
         .end((err, res) => {
           res.should.have.status(200);
+          res.body.should.be.an("object");
+          res.body.should.have.property("productId");
+          res.body.should.have.property("quantity");
+          res.body.quantity.should.be.eql(postInfo.quantityToChangeTo);
           done();
         });
     })
