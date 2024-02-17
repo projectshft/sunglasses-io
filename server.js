@@ -4,7 +4,7 @@ var finalHandler = require('finalhandler');
 var Router = require('router');
 var bodyParser = require('body-parser');
 
-const PORT = 3001;
+const PORT = 3000;
 
 // State holding variables
 let brands = [];
