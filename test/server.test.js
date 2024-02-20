@@ -7,7 +7,6 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 // TODO: Write tests for the server
-
 describe('Brands', () => {
   describe('/api/brands', () => {
     it('should retrieve all brands in the store', (done) => {
@@ -63,6 +62,8 @@ describe('Brands', () => {
         });
     });
   });
+
+describe('Products', () => {
   describe('/api/products', () => {
     it('should retrieve all products in the store', (done) => {
       chai.request(server)
@@ -92,4 +93,25 @@ describe('Brands', () => {
         });
     });
   });
+
+describe('User', () => {
+  describe('/api/login', () => {
+    it('should log the user into the system with valid credentials', (done) => {
+      const userLoginInfo = {
+        username: 'yellowleopard753',
+        password: 'jonjon'
+      };
+    
+      chai.request(server)
+        .post('/api/login')
+        .set('content-type', 'application/json')
+        .send(userLoginInfo)
+        .end((err, res) => {
+          res.should.have.status(200);
+          done();
+        });
+    });
+    });
+  });
+});
 });

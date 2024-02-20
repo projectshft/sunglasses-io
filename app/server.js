@@ -5,6 +5,8 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger-updated.yaml');
 const app = express();
+const uid = require('rand-token').uid;
+const newAccessToken = uid(16);
 
 app.use(bodyParser.json());
 
@@ -12,6 +14,7 @@ app.use(bodyParser.json());
 const users = require('../initial-data/users.json');
 const brands = require('../initial-data/brands.json');
 const products = require('../initial-data/products.json');
+
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -40,6 +43,21 @@ app.get('/api/products', (req, res) => {
   const productsData = [];
   res.status(200).json(productsData);
 });
+
+// Define post /api/login endpoint
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const user = users.find(user => user.login.username === username && user.login.password === password);
+
+  if (user) {
+    res.status(200).json({ message: 'Login succesful'});
+  } else {
+    res.status(401).json({ error: 'Invalid credentials'});
+  }
+});
+
+
 
 // Starting the server
 const PORT = process.env.PORT || 3000;
