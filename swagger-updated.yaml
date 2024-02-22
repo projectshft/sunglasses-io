@@ -1,14 +1,14 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
 schemes:
-    - 'http'
-basePath: '/api'
+  - "http"
+basePath: "/api"
 produces:
-    - 'application/json'
+  - "application/json"
 tags:
   - name: brands
     description: Brands carried in store
@@ -23,22 +23,22 @@ paths:
       tags:
         - brands
       summary: View all brands carried in store
-      description: ''
+      description: ""
       operationId: viewBrands
       consumes:
         - application/json
       produces:
         - application/json
-      parameters: 
+      parameters:
         - in: body
           name: Brands
           description: Array of brands in store
           schema:
-            $ref: '#/definitions/Brands'
-      responses: 
-        '200':
+            $ref: "#/definitions/Brands"
+      responses:
+        "200":
           description: successful
-        '404':
+        "404":
           description: unsuccessful
   /api/brands/{brandId}/products:
     get:
@@ -54,38 +54,38 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: successful
           schema:
             type: array
             items:
-              $ref: '#/definitions/Product'
+              $ref: "#/definitions/Product"
 
   /api/products:
     get:
       tags:
         - products
       summary: View all products in the store
-      description: ''
+      description: ""
       operationId: viewProducts
       consumes:
         - application/json
       produces:
         - application/json
-      responses: 
-        '200':
+      responses:
+        "200":
           description: successful
           schema:
-            type: array  # Corrected to an array type
+            type: array # Corrected to an array type
             items:
-              $ref: '#/definitions/Product'
-          
+              $ref: "#/definitions/Product"
+
   /api/login:
     post:
       tags:
         - user
       summary: Logs user into the system
-      description: ''
+      description: ""
       operationId: loginUser
       produces:
         - application/json
@@ -102,7 +102,7 @@ paths:
           required: true
           type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           headers:
             X-Expires-After:
@@ -115,7 +115,7 @@ paths:
               description: calls per hour allowed by the user
           schema:
             type: string
-        '400':
+        "400":
           description: Invalid username/password supplied
   /api/me/cart:
     get:
@@ -127,17 +127,17 @@ paths:
       produces:
         - application/json
       parameters:
-          - name: username
-            in: query
-            description: The username to get the cart for
-            required: true
-            type: string
+        - name: username
+          in: query
+          description: The username to get the cart for
+          required: true
+          type: string
       responses:
-        '200':
+        "200":
           description: successful operation
           schema:
-            $ref: '#/definitions/UserCart'
-        '404':
+            $ref: "#/definitions/UserCart"
+        "404":
           description: User not found
     post:
       tags:
@@ -155,11 +155,11 @@ paths:
           description: Product object to add to the cart
           required: true
           schema:
-            $ref: '#/definitions/Product'
+            $ref: "#/definitions/Product"
       responses:
-        '200':
+        "200":
           description: successful operation
-        '401':
+        "401":
           description: Unauthorized (user not logged in)
   /api/me/cart/{productId}:
     delete:
@@ -180,11 +180,11 @@ paths:
           type: integer
           format: int64
       responses:
-        '200':
+        "200":
           description: successful operation
-        '401':
+        "401":
           description: Unauthorized (user not logged in)
-        '404':
+        "404":
           description: User or product not found
     post:
       tags:
@@ -204,15 +204,13 @@ paths:
           type: integer
           format: int64
       responses:
-        '200':
+        "200":
           description: successful operation
-        '401':
+        "401":
           description: Unauthorized (user not logged in)
-        '404':
-          description: User or product not found      
-          
-          
-          
+        "404":
+          description: User or product not found
+
 definitions:
   Product:
     type: object
@@ -223,11 +221,11 @@ definitions:
       id:
         type: integer
         format: int64
-      price: 
+      price:
         type: integer
         example: 120
       brand:
-        $ref: '#/definitions/Brand'
+        $ref: "#/definitions/Brand"
       style:
         type: string
         example: Beach
@@ -259,12 +257,12 @@ definitions:
         example: Oakley
   Brands:
     type: array
-    items: 
-      $ref: '#/definitions/Brand'
+    items:
+      $ref: "#/definitions/Brand"
   Store:
     type: array
-    items: 
-      $ref: '#/definitions/Product'
+    items:
+      $ref: "#/definitions/Product"
   User:
     type: object
     properties:
@@ -311,7 +309,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: '#/definitions/CartItem'
+          $ref: "#/definitions/CartItem"
         description: List of items in the cart
     xml:
       name: UserCart
