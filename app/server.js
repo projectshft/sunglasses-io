@@ -1,8 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-const queryString = require('querystring');
-const url = require('url');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger-updated.yaml');
@@ -11,6 +9,7 @@ const fs = require('fs');
 
 app.use(bodyParser.json());
 
+// Access to data
 const products = JSON.parse(fs.readFileSync('api/products.json', 'utf-8'));
 const users = JSON.parse(fs.readFileSync('api/users.json', 'utf-8'));
 const brands = JSON.parse(fs.readFileSync('api/brands.json', 'utf-8'));
@@ -24,13 +23,33 @@ app.use((err, req, res, next) => {
 // Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Define get /api/brands endpoint
+// Verify token function
+function verifyToken(req, res, next) {
+  const authorizationHeader = req.header('Authorization');
+
+  if (!authorizationHeader) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const token = authorizationHeader.replace('Bearer ', '');
+
+  jwt.verify(token, 'secretkey', (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    req.username = decoded.username;
+    next();
+  });
+}
+
+// Define GET /api/brands endpoint
 app.get('/api/brands', (req, res) => {
     res.status(200).json(brands);
   });
 
 
-// Define get /api/brands/:brandId/products endpoint
+// Define GET /api/brands/:brandId/products endpoint
 app.get('/api/brands/:brandId/products', (req, res) => {
   const brandId = req.params.brandId;
 
@@ -41,13 +60,13 @@ app.get('/api/brands/:brandId/products', (req, res) => {
   });
 
 
-// Define get /api/products endpoint 
+// Define GET /api/products endpoint 
 app.get('/api/products', (req, res) => {
     res.status(200).json(products);
   });
 
 
-// Define post /api/login endpoint
+// Define POST /api/login endpoint
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   const secretKey = 'secretkey';
@@ -67,112 +86,108 @@ app.post('/api/login', (req, res) => {
 });
 
 
-// Define api/me/cart get endpoint
-app.get('/api/me/cart', (req, res) => {
-  const token = req.header('Authorization').replace('Bearer ', ''); // Extract token from the Authorization header
+// Define GET api/me/cart endpoint
+app.get('/api/me/cart', verifyToken, (req, res) => {
 
-  // Verify the token to get user information
-  jwt.verify(token, 'secretkey', (err, decoded) => {
-    if (err) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+  const username = req.username;
 
-    const username = decoded.username;
+  // Find the user based on the username in the users array
+  const user = users.find((user) => user.login.username === username);
 
-    // Find the user based on the decoded username
-    const user = users.find(user => user.login.username === username);
-
-      if (user) {
-        // Return the user/cart data
-        res.status(200).json(user);
-      } else {
-        res.status(404).json({ error: 'User not found' });
-      }
-    });
-  });
-
-app.post('/api/me/cart', (req, res) => {
-  const authorizationHeader = req.header('Authorization');
-  
-  if (!authorizationHeader) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
+  if (user) {
+    // Return the user/cart data
+    res.status(200).json(user.cart);
+  } else {
+    res.status(404).json({ error: 'User not found' });
   }
-  
-  const token = authorizationHeader.replace('Bearer ', '');
-  
-  // Verify the token to get user information
-  jwt.verify(token, 'secretkey', (err, decoded) => {
-    if (err) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-  
-    const username = decoded.username;
-  
-    // Find the user based on the decoded username
-    const user = users.find(user => user.login.username === username);
-  
-    if (user) {
-      // Return the current state of the user's cart without modifying it
-      res.status(200).json(user.cart);
-    } 
-  });
 });
 
-app.post('/api/me/cart/:productId', (req, res) => {
-  const authorizationHeader = req.header('Authorization');
 
-  if (!authorizationHeader) {
-    return res.status(401).json({ error: 'Unauthorized' });
+// Define POST /api/me/cart endpoint
+app.post('/api/me/cart', verifyToken, (req, res) => {
+
+  const username = req.username;
+  
+  // Find the user based on the username
+  const user = users.find(user => user.login.username === username);
+  
+  if (user) {
+    // Return the current state of the user's cart without modifying it
+    res.status(200).json(user.cart);
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  });
+
+
+// Define POST /api/me/cart/:productId endpoint
+app.post('/api/me/cart/:productId', verifyToken, (req, res) => {
+
+  const username = req.username;
+
+  // Find the user based on the username
+  const user = users.find(user => user.login.username === username);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
   }
 
-  const token = authorizationHeader.replace('Bearer ', '');
+  const productId = req.params.productId;
+  const productToAdd = products.find(product => product.id === productId);
 
-  // Verify the token to get user information
-  jwt.verify(token, 'secretkey', (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  if (!productToAdd) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
 
-    const username = decoded.username;
+  // Check if the product is already in the user's cart
+  const existingCartItem = user.cart.find(item => item.product.id === productId);
 
-    // Find the user based on the decoded username
-    const user = users.find(user => user.login.username === username);
+  if (existingCartItem) {
+    // If the product is already in the cart, increment the quantity
+    existingCartItem.quantity++;
+  } else {
+    // If the product is not in the cart, add it with a quantity of 1
+    user.cart.push({
+      product: productToAdd,
+      quantity: 1,
+    });
+  }
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+  // Return the updated cart
+  res.status(200).json(user.cart);
+});
 
-    const productId = req.params.productId;
-    const productToAdd = products.find(product => product.id === productId);
 
-    if (!productToAdd) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
+// Define DELETE /api/me/cart/:productId endpoint
+app.delete('/api/me/cart/:productId', verifyToken, (req, res) => {
 
-    // Check if the product is already in the user's cart
-    const existingCartItem = user.cart.find(item => item.product.id === productId);
+  const username = req.username;
 
-    if (existingCartItem) {
-      // If the product is already in the cart, increment the quantity
-      existingCartItem.quantity++;
-    } else {
-      // If the product is not in the cart, add it with a quantity of 1
-      user.cart.push({
-        product: productToAdd,
-        quantity: 1,
-      });
-    }
+  // Find the user based on the username
+  const user = users.find(user => user.login.username === username);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const productId = req.params.productId;
+
+  // Find the product in the user's cart
+  const existingCartItem = user.cart.find(item => item.product.id === productId);
+
+  if (existingCartItem) {
+    // If the product is in the cart, remove it
+    user.cart = user.cart.filter(item => item.product.id !== productId);
 
     // Return the updated cart
     res.status(200).json(user.cart);
-  });
+  } else {
+    // If the product is not in the cart, respond with an error
+    res.status(404).json({ error: 'Product not found in the users cart' });
+  }
 });
 
   
-
 
 
 

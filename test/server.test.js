@@ -15,6 +15,7 @@ describe('Brands', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
+          
           done();
         });
     });
@@ -30,7 +31,6 @@ describe('Brands', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
-
         // Check if all returned products have the correct brandId
         res.body.forEach(product => {
           product.should.have.property('brandId').equal(brandId);
@@ -50,6 +50,7 @@ describe('Products', () => {
         .end((err, res) => {
           res.should.have.status(200);
           res.body.should.be.an("array");
+
           done();
         });
     });
@@ -93,25 +94,9 @@ describe('User', () => {
         });
     });
   });
+
   describe('GET /api/me/cart', () => {
     it('should get the contents of the users cart', (done) => {
-    // Test user
-      const user = {
-        login: {
-          username: 'yellowleopard753',
-          password: 'jonjon',
-        },
-        cart: [
-          {
-            product: {
-              id: '1',
-              name: 'Superglasses',
-              price: 150
-            },
-            quantity: 2,
-          },
-        ],
-      };
       // Perform a login to get a valid token
       chai.request(server)
         .post('/api/login')
@@ -131,30 +116,25 @@ describe('User', () => {
           chai.request(server)
             .get('/api/me/cart')
             .set('Authorization', `Bearer ${token}`)
-            .send({ username: user.login.username })
             .end((err, res) => {
-              if (res.status === 401) {
-                console.log(res.body);
-              }
-  
               res.should.have.status(200);
-              res.body.should.have.property('login');
-              res.body.login.should.have.property('username').equal('yellowleopard753');
-              res.body.should.have.property('cart');
+              res.body.should.be.an('array');
+  
+              res.body.forEach((cartItem) => {
+                cartItem.should.have.property('product');
+                cartItem.should.have.property('quantity');
+              });
   
               done();
-          });
+            });
         });
-      });
     });
+  });
   describe('POST /api/me/cart', () => {
     it('should post the users current cart', (done) => {
-      const testUser = {
-        login: { username: 'testuser' },
-        cart: []
-      };
-    
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InllbGxvd2xlb3BhcmQ3NTMiLCJpYXQiOjE3MDg2MzQzNTUsImV4cCI6MTcwODYzNzk1NX0.8QFVD3EFQSgaxjRcn-0NfyMa7fGQYoDgeGyecZL9j54';
+
+      // replace token with console logged token in the terminal, expires every hour
+      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InllbGxvd2xlb3BhcmQ3NTMiLCJpYXQiOjE3MDg3MDkzOTAsImV4cCI6MTcwODcxMjk5MH0.GLKt_gkAxLCtmzqXS6q6rPFBtxu5ZIH3Uc3kKfQIQfk';
     
       chai.request(server)
         .post('/api/me/cart')
@@ -180,20 +160,9 @@ describe('User', () => {
 
   describe('POST /api/me/cart/:productId', () => {
     it('should add a product to the users cart', (done) => {
-      // Test user
-      const user = {
-        login: {
-          username: 'yellowleopard753',
-          password: 'jonjon'
-        },
-        cart: []
-      };
-
-      // Product to be added to cart
+      // Test product to be added to cart
       const productToAdd = {
-        id: '1',
-        name: 'Superglasses',
-        price: 150
+        id: '10'
       };
 
       // Login to get token
@@ -213,7 +182,7 @@ describe('User', () => {
 
       // Perform a POST request to /api/me/cart/:productId with the obtained token
       chai.request(server)
-        .post(`/api/me/cart/1`) // hardcoded ID as 1 for testing
+        .post(`/api/me/cart/10`) // hardcoded ID as 10 for testing
         .set('Authorization', `Bearer ${token}`)
         .send()
         .end((err, res) => {
@@ -232,7 +201,7 @@ describe('User', () => {
 
     it('should return 401 for unauthorized access', (done) => {
       chai.request(server)
-        .post('/api/me/cart/1') // assuming productId is '1'
+        .post('/api/me/cart/10') // assuming productId is '10'
         .end((err, res) => {
           expect(res).to.have.status(401);
 
@@ -267,8 +236,86 @@ describe('User', () => {
               done();
             });
           });
-});
-});
+        });
+      });
+
+
+  describe('DELETE /api/me/cart/:productId', () => {
+    it('should remove a product from the users cart', (done) => {
+
+      // Product to be removed from cart
+      const productIdToRemove = '10';
+      
+      // Login to get token
+      chai.request(server)
+        .post('/api/login')
+        .set('content-type', 'application/json')
+        .send({
+          username: 'yellowleopard753',
+          password: 'jonjon'
+        })
+        .end((loginErr, loginRes) => {
+          // Check if login was successful
+          loginRes.should.have.status(200);
+          loginRes.body.should.have.property('token');
+      
+          const token = loginRes.body.token;
+      
+          // Perform a DELETE request to /api/me/cart/:productId with the obtained token
+          chai.request(server)
+            .delete(`/api/me/cart/${productIdToRemove}`)
+            .set('Authorization', `Bearer ${token}`)
+            .end((err, res) => {
+              res.should.have.status(200);
+              res.body.should.be.an('array');
+      
+              // Check if the product has been removed from the cart
+              const removedProduct = res.body.find(item => item.product.id === productIdToRemove);
+              expect(removedProduct).to.not.exist;
+      
+              done();
+            });
+          });
+        });
+      
+    it('should return 401 for unauthorized access', (done) => {
+      chai.request(server)
+        .delete('/api/me/cart/10') // assuming productId is '10'
+        .end((err, res) => {
+          expect(res).to.have.status(401);
+      
+          done();
+        });
+    });
+      
+    it('should return 404 for non-existing product', (done) => {
+      // Perform a login to get a valid token
+      chai.request(server)
+        .post('/api/login')
+        .set('content-type', 'application/json')
+        .send({
+          username: 'yellowleopard753',
+          password: 'jonjon',
+        })
+        .end((loginErr, loginRes) => {
+          // Check if login was successful
+          loginRes.should.have.status(200);
+          loginRes.body.should.have.property('token');
+      
+          const token = loginRes.body.token;
+      
+          // Perform a DELETE request to /api/me/cart/:productId with the obtained token for a non-existing product
+          chai.request(server)
+            .delete('/api/me/cart/nonExistingProductId')
+            .set('Authorization', `Bearer ${token}`)
+            .end((err, res) => {
+              expect(res).to.have.status(404);
+      
+              done();
+            });
+        });
+    });
+  });
 });
 });
 });
