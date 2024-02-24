@@ -5,6 +5,7 @@ const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger.yaml'); // Replace './swagger.yaml' with the path to your Swagger file
 const app = express();
+require('dotenv').config();
 
 app.use(bodyParser.json());
 
@@ -26,13 +27,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const authenticateJWT = (req, res, next) => {
 	const authHeader = req.headers.authorization;
-	
-	const sha256 = users.find((user) => user.login.username === req.body.username).login.sha256
 
 	if(authHeader) {
 		const token = authHeader.split(' ')[1];
 
-		jwt.verify(token, sha256, (err, user) => {
+		jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
 			if(err) {
 				return res.sendStatus(403);
 			}
@@ -86,7 +85,7 @@ app.post('/login', (req, res) => {
 	}
 
 	if(user.login.password === req.body.password) {
-		const token	= jwt.sign(user, user.login.sha256)
+		const token	= jwt.sign(user, process.env.JWT_SECRET)
 		res.json({ accessToken: token })
 	}
 	
@@ -94,13 +93,61 @@ app.post('/login', (req, res) => {
 
 
 app.get('/me/cart', authenticateJWT, (req, res) => {
-	let user = users.find((user) => user.login.username === req.body.username)
+	let user = users.find((user) => user.login.username === req.user.login.username)
 	res.json(user.cart);
 });
 
 app.post('/me/cart', authenticateJWT, (req, res) => {
-	let user = users.find((user) => user.login.username === req.body.username)
+	let user = users.find((user) => user.login.username === req.user.login.username)
+	res.sendStatus(201)
 	user.cart.push(req.body)
+	res.json(user.cart);
+});
+
+
+app.delete('/me/cart/:productId', authenticateJWT, (req, res) => {
+	let userIndex = users.findIndex((user) => user.login.username === req.user.login.username);
+    
+	if (userIndex === -1) {
+			return res.status(404).send("User not found");
+	}
+
+	let user = users[userIndex];
+	user.cart = user.cart.filter((product) => product.id != req.params.productId);
+
+	// Update the user in the users array
+	users[userIndex] = user;
+	res.json(user.cart);
+});
+
+app.post('/me/cart/:productId', authenticateJWT, (req, res) => {
+	let userIndex = users.findIndex((user) => user.login.username === req.user.login.username);
+	console.log(userIndex)
+		
+	if (userIndex === -1) {
+			return res.status(404).send("User not found");
+	}
+
+	let user = users[userIndex];
+
+	console.log(user)
+
+	let cartProductIndex = user.cart.findIndex((product) => product.id == req.params.productId);
+
+	console.log(cartProductIndex)
+
+	// update the quantity of the product
+	if (cartProductIndex === -1) {
+		return res.status(404).send("Product not found");
+} else {
+		user.cart[cartProductIndex].quantity = req.body.quantity;
+		console.log(req.body.quantity)
+}
+console.log(user.cart[cartProductIndex].quantity)
+
+	// Update the user in the users array
+	users[userIndex] = user;
+
 	res.json(user.cart);
 });
 
