@@ -15,7 +15,7 @@ tags:
   - name: products
     description: Products carried in store
   - name: user
-    description: Everything about the user
+    description: Everything about the user including the user's cart
 
 paths:
   /api/brands:
@@ -108,11 +108,9 @@ paths:
             X-Expires-After:
               type: string
               format: date-time
-              description: date in UTC when token expires
             X-Rate-Limit:
               type: integer
               format: int32
-              description: calls per hour allowed by the user
           schema:
             type: string
         "400":
