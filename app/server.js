@@ -27,6 +27,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const authenticateJWT = (req, res, next) => {
 	const authHeader = req.headers.authorization;
+	if(!authHeader) {
+		return res.sendStatus(401);
+	}
 
 	if(authHeader) {
 		const token = authHeader.split(' ')[1];
@@ -98,10 +101,15 @@ app.get('/me/cart', authenticateJWT, (req, res) => {
 });
 
 app.post('/me/cart', authenticateJWT, (req, res) => {
+	if(req.body == {}) {
+		return res.status(400).send("Product is required")
+	}
+	if(!req.body.productId || !req.body.name || !req.body.price || !req.body.quantity) {
+		return res.status(400).send("Product is invalid")
+	}
 	let user = users.find((user) => user.login.username === req.user.login.username)
-	res.sendStatus(201)
 	user.cart.push(req.body)
-	res.json(user.cart);
+	res.status(201).json	(user.cart);
 });
 
 
@@ -122,7 +130,6 @@ app.delete('/me/cart/:productId', authenticateJWT, (req, res) => {
 
 app.post('/me/cart/:productId', authenticateJWT, (req, res) => {
 	let userIndex = users.findIndex((user) => user.login.username === req.user.login.username);
-	console.log(userIndex)
 		
 	if (userIndex === -1) {
 			return res.status(404).send("User not found");
@@ -130,20 +137,16 @@ app.post('/me/cart/:productId', authenticateJWT, (req, res) => {
 
 	let user = users[userIndex];
 
-	console.log(user)
 
 	let cartProductIndex = user.cart.findIndex((product) => product.id == req.params.productId);
 
-	console.log(cartProductIndex)
 
 	// update the quantity of the product
 	if (cartProductIndex === -1) {
 		return res.status(404).send("Product not found");
 } else {
 		user.cart[cartProductIndex].quantity = req.body.quantity;
-		console.log(req.body.quantity)
 }
-console.log(user.cart[cartProductIndex].quantity)
 
 	// Update the user in the users array
 	users[userIndex] = user;

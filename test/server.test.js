@@ -123,4 +123,106 @@ describe('/POST Login', () => {
       })
 })});
 
-describe('Cart', () => {});
+describe('Cart', () => {
+  describe('/GET cart', () => {
+    it('should not GET cart if no token is provided', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401)
+          done(err)
+        })
+    })
+    it('should GET cart if token is provided', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .set('Authorization', 'Bearer ' + process.env.AUTH_TOKEN)
+        .end((err, res) => {
+          res.should.have.status(200)
+          done(err)
+        })
+      })
+    })
+  describe('/POST cart', () => {
+    it('should not POST to cart if no token is provided', done => {
+      chai
+        .request(server)
+        .post('/me/cart')
+        .end((err, res) => {
+          res.should.have.status(401)
+          done(err)
+        })
+    })
+    it('should POST to cart if token is provided', done => {
+      const product = {productId: 1, name: "Product 4", price: 400, quantity: 2}
+      chai
+        .request(server)
+        .post('/me/cart')
+        .set('Authorization', 'Bearer ' + process.env.AUTH_TOKEN)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(201)
+          done(err)
+        })
+    })
+    
+    it('should not POST to cart if product is empty', done => {
+      const product = {}
+      chai
+        .request(server)
+        .post('/me/cart')
+        .set('Authorization', 'Bearer ' + process.env.AUTH_TOKEN)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          done(err)
+        })
+    })
+    it('should not POST to cart if product does not contain id, name, price, and quantity', done => {
+      const product = {productId: 1, name: "Product 4", price: 400}
+      chai
+        .request(server)
+        .post('/me/cart')
+        .set('Authorization', 'Bearer ' + process.env.AUTH_TOKEN)
+        .send(product)
+        .end((err, res) => {
+          res.should.have.status(400)
+          done(err)
+        })
+    })
+  })
+  describe('/DELETE cart product', () => {
+    it('should not DELETE cart product if no token is provided', done => {
+      chai
+        .request(server)
+        .delete('/me/cart/1')
+        .end((err, res) => {
+          res.should.have.status(401)
+          done(err)
+        })
+    })
+    it('should DELETE cart product if token is provided', done => {
+      chai
+        .request(server)
+        .delete('/me/cart/1')
+        .set('Authorization', 'Bearer ' + process.env.AUTH_TOKEN)
+        .end((err, res) => {
+          res.should.have.status(200)
+          done(err)
+        })
+    })
+    it('should return cart with product deleted', done => {
+      chai
+        .request(server)
+        .get('/me/cart')
+        .set('Authorization', 'Bearer ' + process.env.AUTH_TOKEN)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.body.should.be.an('array').that.does.not.include({productId: 1, name: "Product 4", price: 400, quantity: 2})
+          done(err)
+        })
+    })
+  })
+  })
