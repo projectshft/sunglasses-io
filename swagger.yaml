@@ -1,11 +1,173 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
-schemes:
-    - 'http'
-basePath: '/api'
-produces:
-    - 'application/json'
+  version: "1.0.0"
+  title: sunglasses-io-api
+  description: The API for Sunglasses.io
+paths:
+  /brands:
+    get:
+      summary: returns all sunglasses brands
+      responses:
+        "200":
+          description: All the brands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+                  example: "Oakley"
+  /brands/{id}/products:
+    get:
+      summary: Get list of products for a specific brand
+      parameters:
+        - name: id
+          in: query
+          description: brand id
+          required: yes
+          type: string
+      responses:
+        "200":
+          description: products for brand with specific ID
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: string
+                  example: "RX7047"
+  /products:
+    get:
+      summary: Get list of all products
+      responses:
+        "200":
+          description: all products in the store
+          content:
+          application/json:
+            schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+  /login:
+    post:
+      summary: User login
+      parameters:
+        - name: username
+          in: query
+          description: input username
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: input password
+          required: true
+          type: string
+      responses:
+        "200":
+          description: successfully logged in
+  /me/cart:
+    get:
+      summary: contents of a logged in user's cart
+      parameters:
+        - name: user
+          in: query
+          description: logged in user token
+          required: true
+          type: string
+      responses:
+        "200":
+          description: returns items in users cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+    post:
+      summary: add products to a cart
+      parameters:
+        - name: id
+          in: query
+          description: id of item
+          required: true
+          type: string
+        - name: user
+          in: query
+          description: user token
+          required: true
+          type: string
+      responses:
+        "200":
+          description: adds an item to the users cart
+  /me/cart/{productId}:
+    delete:
+      summary: deletes an item from the cart
+      parameters:
+        - name: id
+          in: query
+          description: item id to delete
+          required: true
+          type: string
+        - name: user
+          in: query
+          description: user token
+          required: true
+          type: string
+      responses:
+        "200":
+          description: item is deleted from the cart
+    post:
+      summary: change the quantity of an item in the cart
+      parameters:
+        - name: id
+          in: query
+          description: id of item to update
+          required: yes
+          type: string
+        - name: user
+          in: query
+          description: user token
+          required: yes
+          type: string
+        - name: new quantity
+          in: query
+          description: new quantity amount to update
+          required: yes
+          type: string
+      responses:
+        "200":
+          description: item quantity is successfully updated
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id for each brand
+      name:
+        type: string
+        description: brand name
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: unique id for each product
+      name:
+        type: string
+        description: name of product
+      categoryId:
+        type: string
+        description: ID of product category
+      description:
+        type: string
+        description: description of the product
+      price:
+        type: number
+        description: price
+      imageUrls:
+        type: array
+        items:
+          type: string
+          description: url to product image
