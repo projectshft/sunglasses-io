@@ -1,17 +1,16 @@
----
 openapi: 3.0.0
 info:
   title: Sunglasses Shop API
   description: API endpoints for a sunglasses store.
   version: 1.0.0
 servers:
-- url: https://virtserver.swaggerhub.com/NISSAN95SX95/SunglassesWireframe/1.0.0
-  description: SunGlasses Shop
+  - url: https://virtserver.swaggerhub.com/NISSAN95SX95/SunglassesWireframe/1.0.0
+    description: SunGlasses Shop
 paths:
   /api/brands:
     get:
       tags:
-      - Brands
+        - Brands
       summary: Get all brands
       operationId: getBrands
       responses:
@@ -22,21 +21,19 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Brand'
+                  $ref: "#/components/schemas/Brand"
   /api/brands/{id}/products:
     get:
       tags:
-      - Brands
+        - Brands
       summary: Get products by brand ID
       operationId: getProductsByBrandId
       parameters:
-      - name: id
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Products of the specified brand
@@ -45,11 +42,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: "#/components/schemas/Product"
   /api/products:
     get:
       tags:
-      - Products
+        - Products
       summary: Get all products
       operationId: getAllProducts
       responses:
@@ -60,18 +57,18 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Product'
+                  $ref: "#/components/schemas/Product"
   /api/login:
     post:
       tags:
-      - Authentication
+        - Authentication
       summary: Login to the system
       operationId: loginUser
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginCredentials'
+              $ref: "#/components/schemas/LoginCredentials"
         required: true
       responses:
         "200":
@@ -79,7 +76,7 @@ paths:
   /api/me/cart:
     get:
       tags:
-      - Cart
+        - Cart
       summary: Get items in the cart
       operationId: getCartItems
       responses:
@@ -90,17 +87,17 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CartItem'
+                  $ref: "#/components/schemas/CartItem"
     post:
       tags:
-      - Cart
+        - Cart
       summary: Add item to the cart
       operationId: addItemToCart
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: "#/components/schemas/Product"
         required: true
       responses:
         "200":
@@ -108,40 +105,36 @@ paths:
   /api/me/cart/{productId}:
     post:
       tags:
-      - Cart
+        - Cart
       summary: Add quantity of item to the cart
       operationId: addQuantityToCartItem
       parameters:
-      - name: productId
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProductQuantity'
+              $ref: "#/components/schemas/ProductQuantity"
         required: true
       responses:
         "200":
           description: Quantity added to cart item successfully
     delete:
       tags:
-      - Cart
+        - Cart
       summary: Remove item from cart
       operationId: removeItemFromCart
       parameters:
-      - name: productId
-        in: path
-        description: ID of the product to be removed from the cart
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - name: productId
+          in: path
+          description: ID of the product to be removed from the cart
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           description: Item removed from cart successfully

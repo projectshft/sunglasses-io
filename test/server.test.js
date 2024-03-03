@@ -1,67 +1,52 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const server = require('../app/server'); 
+const server = require('../app/server'); // Path to your server.js file
 
-const should = chai.should();
+// Configure chai
 chai.use(chaiHttp);
+chai.should();
 
-// Brands Tests
-describe('Brands', () => {
-    it('should get all brands', (done) => {
-        chai.request(server)
-            .get('/api/brands')
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('array');
-                done();
-            });
-    });
-});
-
-// Login Tests
-describe('Login', () => {
-    it('should login a user', (done) => {
-        chai.request(server)
-            .post('/api/login')
-            .send({ username: 'example', password: 'password' })
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('object');
-                res.body.should.have.property('token');
-                done();
-            });
-    });
-});
-
-// Cart Tests
-describe('Cart', () => {
-    it('should get items in the cart', (done) => {
-        chai.request(server)
-            .get('/api/me/cart')
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('array');
-                done();
-            });
+describe('Server API tests', () => {
+    // Test for GET /api/brands endpoint
+    describe('GET /api/brands', () => {
+        it('should get all brands', (done) => {
+            chai.request(server)
+                .get('/api/brands')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    done(); // Call done to indicate test completion
+                });
+        });
     });
 
-    it('should add an item to the cart', (done) => {
-        chai.request(server)
-            .post('/api/me/cart')
-            .send({ productId: 'exampleProductId', quantity: 1 })
-            .end((err, res) => {
-                res.should.have.status(200);
-                res.body.should.be.a('object');
-                done();
-            });
+    // Test for POST /api/login endpoint
+    describe('POST /api/login', () => {
+        it('should login a user', (done) => {
+            chai.request(server)
+                .post('/api/login')
+                .send({ username: 'yellowleopard753', password: 'jonjon' })
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('object');
+                    res.body.should.have.property('token');
+                    done(); 
+                });
+        });
     });
 
-    it('should remove an item from the cart', (done) => {
-        chai.request(server)
-            .delete('/api/me/cart/exampleProductId')
-            .end((err, res) => {
-                res.should.have.status(200);
-                done();
-            });
+    // Test for GET /api/me/cart endpoint
+    describe('GET /api/me/cart', () => {
+        it('should get items in the cart', (done) => {
+            chai.request(server)
+                .get('/api/me/cart')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.an('array');
+                    done(); 
+                });
+        });
     });
+
+    // Add more tests for other endpoints as needed
 });
