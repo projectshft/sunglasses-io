@@ -49,7 +49,7 @@ paths:
           required: true
           type: integer
       responses:
-        400:
+        200:
           description: An array of all of a specified brand's products
           schema:
             type: array
