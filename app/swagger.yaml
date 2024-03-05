@@ -1,0 +1,380 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
+schemes:
+  - "http"
+basePath: "/api"
+produces:
+  - "application/json"
+securityDefinitions:
+  accessToken:
+    type: basic
+    description: a user needs an access token to login
+
+paths:
+  /brands:
+    get:
+      summary: Brands
+      description: |
+        The brands endpoint returns a list of all of the brands in our sunglasses store
+      tags:
+        - Brands
+      responses:
+        200:
+          description: an array of brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        404:
+          description: No brands found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      tags:
+        - Brands
+      summary: Brand Products
+      description: |
+        The {id}/products endpoint returns a list of all products within a particular brand.
+      parameters:
+        - name: id
+          in: path
+          description: ID of brand products to return
+          required: true
+          type: integer
+      responses:
+        200:
+          description: An array of all of a specified brand's products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: Brand with that id does not exist
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: All Products
+      description: |
+        The /products endpoint allows you to search all products for a specific product if a search query is specified
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          required: false
+          type: string
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: Product not found
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      tags:
+        - login
+      summary: Logs a user into the system
+      description: ""
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          type: string
+          required: true
+        - name: password
+          in: query
+          description: The password for login in clear text
+          type: string
+          required: true
+
+      responses:
+        200:
+          description: successful login, access token updated
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: username of user
+              lastUpdated:
+                type: string
+                description: date token is good until
+              token:
+                type: string
+                description: uid token
+
+        400:
+          description: Invalid or no username/password supplied
+        401:
+          description: Invalid username/password
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      security:
+        - accessToken: []
+      tags:
+        - Me
+      summary: Displays a logged in user's information with cart
+
+      responses:
+        200:
+          description: Given user's shopping cart
+          schema:
+            $ref: "#/definitions/User"
+        401:
+          description: User must be logged in to view the shopping cart
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+    post:
+      security:
+        - accessToken: []
+      tags:
+        - Me
+      summary: Add a product to a user's cart
+      description: Add a product to a logged in user's cart
+      consumes:
+        - "application/json"
+        - "application/xml"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Product object that needs to be added to the store"
+          required: true
+          schema:
+            $ref: "#/definitions/CartItem"
+      responses:
+        "200":
+          description: product added to cart
+        "401":
+          description: You can not add a product to your cart if you are not logged in
+        "404":
+          description: You can not add a product to your cart that does not exist
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /me/cart/{productId}:
+    delete:
+      security:
+        - accessToken: []
+      tags:
+        - Me
+      summary: Remove a product from your cart
+      description: remove a product from a logged in user's cart
+      parameters:
+        - name: productId
+          in: path
+          description: "product id to delete"
+          required: true
+          type: string
+      responses:
+        202:
+          description: product removed from cart
+        401:
+          description: user must be logged in to remove an item from their cart
+        404:
+          description: product with that id is not in the cart
+    post:
+      security:
+        - accessToken: []
+      tags:
+        - Me
+      summary: changes the quantity of a product in your cart
+      description: Change the quantity of an item in a logged in user's cart
+      parameters:
+        - name: productId
+          description: product id of the product you want to update the quantity of
+          type: string
+          in: path
+          required: true
+        - name: quantity
+          description: quantity of product
+          in: body
+          schema:
+            items:
+              $ref: "#/definitions/CartItem"
+      responses:
+        200:
+          description: product quantity changed successfully
+          schema:
+            $ref: "#/definitions/CartItem"
+        401:
+          description: A user can not update their cart without being logged in
+        404:
+          description: product not found in cart
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: A unique identifier representing a specific brand
+      name:
+        type: string
+        description: The name of a unique brand
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: A unique identifier representing a sepcific brand
+      categoryID:
+        type: string
+        description: A unique category's specific id
+      name:
+        type: string
+        description: The name of the product
+      description:
+        type: string
+        description: A description of the current product
+      price:
+        type: integer
+        description: The price of the product
+      imageUrls:
+        type: array
+        description: Urls that are images of the products
+        items:
+          type: string
+  CartItem:
+    type: object
+    properties:
+      productId:
+        type: string
+        description: the id of a product
+      quantity:
+        type: integer
+        description: the quantity of a particular product in the cart
+
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: a user's gender
+      cart:
+        type: array
+        description: a User's cart
+        items:
+          $ref: "#/definitions/CartItem"
+      name:
+        type: object
+        properties:
+          title:
+            type: string
+            description: A user's name title
+          first:
+            type: string
+            description: A user's first name
+          last:
+            type: string
+            description: A user's last name
+      location:
+        type: object
+        description: Info about User's location
+        properties:
+          street:
+            type: string
+            description: User's street address
+          city:
+            type: string
+            description: User's current city
+          state:
+            type: string
+            description: User's current state
+          postcode:
+            type: number
+            description: User's postal code
+          email:
+            type: string
+            description: User's email address
+      login:
+        type: object
+        description: User's login Info
+        properties:
+          username:
+            type: string
+            description: username of user
+          password:
+            type: string
+            description: password of user
+          salt:
+            type: string
+            description: salt for authentication
+          md5:
+            type: string
+            description: md5 for authentication
+          sha1:
+            type: string
+            description: sha1 for authentication
+          sha256:
+            type: string
+            description: sha256 for authentication
+      dob:
+        type: string
+        description: date of birth of User
+      registered:
+        type: string
+        description: date user registered
+      phone:
+        type: string
+        description: phone number of user
+      cell:
+        type: string
+        description: cell phone number of user
+      picture:
+        type: object
+        description: large, medium, and small picture of User
+        properties:
+          large:
+            type: string
+            description: large photo href
+          medium:
+            type: string
+            description: medium photo href
+          thumnail:
+            type: string
+            description: small photo href
+      nat:
+        type: string
+        description: nationality
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
