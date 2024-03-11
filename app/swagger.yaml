@@ -1,0 +1,194 @@
+swagger: "2.0"
+info:
+  title: Sunglasses-io API
+  description: You've got a bright future with our sunglasses API
+  version: 1.0.0
+host: api.sunglasses.com
+schemes:
+  - http
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /api/brands:
+    get:
+      tags:
+        - brands
+      summary: Returns sunglasses brand names
+      description: |
+        Returns a list of items of sunglasses brand names
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/components/schemas/Brands'
+  /api/brands/:id/products:
+    get:
+      tags:
+        - brands
+      summary: Returns brand product by matching id
+      description: |
+        Returns sunglasses products by matching brand name id
+      responses:
+        '200':
+          description: successful operation
+          content:
+            applciation/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/components/schemas/Brands'
+  /api/products:
+    get:
+      tags: 
+        - brands
+      summary: Returns sunglasses products
+      description: |
+        Returns all products of sunglasses
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '/components/schemas/Brands'
+  /api/login:
+    post:
+      tags:
+        - user
+      summary: Log into API user account
+      description: |
+        Challenges a user for their login username and password
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/components/schemas/User'
+  /api/me/cart:
+    get:
+      tags:
+        - user
+      summary: Shows what items are inside a users cart
+      description: |
+        This endpoint brings a user, who is successfully logged into their account, to their shopping cart and displays what items are currently inside of it. From here the user can either checkout or continue shopping
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+      default:
+        description: Unexpected error
+        schema:
+          $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - user
+      summary: Add a product to the cart
+      description: |
+        How a user will add new items to their cart
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/components/schemas/User'
+  /api/me/cart/:productId:
+    delete:
+      tags:
+        - user
+      summary: remove a product from the cart
+      description: |
+        How a user will remove a product from their cart
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                    type: integer
+                    format: int32
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - user
+      summary: Modifies the quantity of a product inside the user's cart
+      description: |
+        With this endpoint a user can modify the quantity of an item in their shopping cart by adding more or taking away the same product
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                    type: integer
+                    format: int32
+          default:
+            description: unexpected error
+            schema:
+              $ref: '#/components/schemas/User'
+components:
+  schemas:
+    Brands:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: 'Oakley'
+    User:
+      type: object
+      properties:
+        id:
