@@ -7,16 +7,11 @@ var bodyParser = require("body-parser");
 var uid = require("rand-token").uid;
 const url = require("url");
 
-//state holding variables
 let brands = [];
 let products = [];
 let users = [];
 
-const API_KEYS = [
-  "7abd95d6-aezx-5242-e1zw-5bbd58f0cd6d",
-  "76531065-qmeh-5985-uzgw-7aa506f263be",
-];
-let accessTokens = [];
+let accessTokens = ["nZQ3lxORlCvXbLcE","cdH7Xhjw9tjwwXvz"];
 
 const PORT = 8000;
 const hostname = "localhost";
@@ -74,24 +69,11 @@ myRouter.post("/api/login", (request, response) => {
       );
     });
     if (user) {
-      let presentAccessToken = accessTokens.find((tokenObject) => {
-        return tokenObject.username == user.login.username;
-      });
-
-      response.writeHead(200, "You have sucessfully logged in!");
-      console.log("access Tokens array:", accessTokens);
-      if (presentAccessToken) {
-        presentAccessToken.lastUpdated = new Date();
-        return response.end(JSON.stringify(presentAccessToken.token));
-      } else {
-        let newAccessToken = {
-          username: request.body.username,
-          lastUpdated: new Date(),
-          token: uid(16),
-        };
-        accessTokens.push(newAccessToken);
-        return response.end(JSON.stringify(newAccessToken.token));
-      }
+      let newToken = uid(16)
+      user.login.accessToken = newToken;
+      accessTokens.push(newToken)
+      response.writeHead(200, "You have sucessfully logged in!"); 
+      response.end()
     } else {
       response.writeHead(401, "Username or password is incorrect");
       response.end();
@@ -103,135 +85,85 @@ myRouter.post("/api/login", (request, response) => {
 });
 
 myRouter.get("/api/me/cart", (request, response) => {
-  if (request.body.token) {
-    let presentToken = accessTokens.find((tokenObj) => {
-      return tokenObj.token == request.body.token;
-    });
-    if (!presentToken) {
-      response.writeHead(401, "Unauthorized! Please log in to view your cart.");
-      response.end();
-    } else {
-      response.writeHead(200, "authToken recieved");
-      let foundUser = users.find((user) => {
-        return user.login.username == presentToken.username;
-      });
-      response.end(JSON.stringify(foundUser.cart));
-    }
-  } else {
-    response.writeHead(401, "Unauthorized! Please log in to view your cart");
-    return response.end();
-  }
+let user = users.find((user) => {
+  let match = accessTokens.find((token) => {
+    return token == user.login.accessToken
+  })
+  return match
+})
+
+if(user){
+  response.writeHead(200, { 'Content-Type':'application/json' })
+  response.end(JSON.stringify(user.cart))
+} else {
+  response.writeHead(401, "You need to be logged in to access this")
+  response.end()
+}
 });
 
 myRouter.post("/api/me/cart", (request, response) => {
-  let reqParams = queryString.parse(url.parse(request.url).query);
+  let user = users.find((user) => {
+    let match = accessTokens.find((token) => {
+      return token == user.login.accessToken
+    })
+    return match
+  })
 
-  if (reqParams.accessToken) {
-    let presentToken = accessTokens.find((tokenObj) => {
-      return tokenObj.token == reqParams.accessToken;
-    });
-    if (!presentToken) {
-      response.writeHead(
-        401,
-        "Unauthorized! Please log in to access your cart"
-      );
-      response.end();
-    } else {
-      response.writeHead(200, "You have added a new item to your cart!");
-
-      let foundUser = users.find((user) => {
-        return user.login.username == presentToken.username;
-      });
-
-      let requestedProduct = products.find((item) => {
-        return request.body.id == item.id;
-      });
-
-      const newCart = foundUser.cart;
-      newCart.push(requestedProduct);
-      console.log(newCart);
-
-      response.end(JSON.stringify(newCart));
-    }
+  if(user){
+    response.writeHead(200, { 'Content-Type':'application/json' });
+    let foundItem = products.find((item) => {
+      return item.id == request.body.productId
+    })
+    user.cart.push(foundItem)
+    response.end(JSON.stringify(user.cart))
+  }else {
+    response.writeHead(401, "You need to be logged in to access this")
+    response.end()
   }
 });
 
 myRouter.delete("/api/me/cart/:productId", (request, response) => {
-  response.writeHead(200, {"Content-Type":"application/json"});
-
-  if(request.body.accessToken){
-    let presentToken = accessTokens.find((tokenObj) => {
-      return tokenObj.token == request.body.accessToken
+  response.writeHead(200, {'Content-Type':'application/json'})
+  let user = users.find((user) => {
+    let match = accessTokens.find((token) => {
+      return token == user.login.accessToken
     })
-    if(!presentToken){
-      response.writeHead(401, "Unauthorized! Please log in to access your cart");
-      response.end()
-    } else {
-      response.writeHead(200, "Auth token found! You may proceed to delete the selected item from your cart")
+    return match
+  })
 
-      let foundUser = users.find((user) => {
-        return user.login.username == presentToken.username;
-      });
+  user.cart.push(products[1]);
+  user.cart.push(products[2]);
+  user.cart.push(products[3]);
+  
+  let newCart = user.cart.filter((item) => {
+    return item.id !== request.params.productId
+  })
 
-      let updatedList = foundUser.cart.filter((item) => {
-        return item.id !== request.params.productId
-      })
-
-      console.log(updatedList)
-
-      return response.end(JSON.stringify(updatedList))
-    }
-  }
-  response.end(); 
- });  
+  response.end(JSON.stringify(newCart)); 
+});  
 
 myRouter.put("/api/me/cart/:productId", (request, response) => {
-  if(!request.body.accessToken){
-    response.writeHead(401, "Unauthorized")
-    response.end()
-  }
-
-  if(request.body.accessToken){
-    let presentToken = accessTokens.find((tokenObj) => {
-      return tokenObj.token == request.body.accessToken
+  response.writeHead(200, {'Content-Type':'application/json'})
+  let user = users.find((user) => {
+    let match = accessTokens.find((token) => {
+      return token == user.login.accessToken
     })
-    if(!presentToken){
-      response.writeHead(401, "Unauthorized! Please log in to access your cart");
-      response.end()
-    } else {
-      response.writeHead(200, "Auth token found! You may proceed to update your cart")
+    return match
+  })
 
-      let foundUser = users.find((user) => {
-        return user.login.username == presentToken.username;
-      });//does foundUser find the proper user? [CHECK]
-      // console.log(foundUser)
-      
-      //search cart and add one of the items from that selection
-
-      let foundItem = foundUser.cart.find((item) => {
-        return item.id == request.params.productId
-      })// is this function returning the correct item?? [CHECK]
-      console.log("update cart found item", foundItem)
-
-      if(foundItem) {
-        
-      }
-      // if(!foundItem){
-      //   response.end("No items found")
-      // } else {
-      //   let newCart = foundUser.cart.push(foundItem)
-      //   return response.end(JSON.stringify(newCart))
-      // }
-
-
-      // console.log(requestedItem)
-
-      // let cart = foundUser.cart
-
-      // cart.push(requestedItem)
-
-      // response.end(JSON.stringify(updatedList)) updatedList is returning 1 instead of the array of items that we just fucking searched for...???
+  if(user){
+    response.writeHead(200, { 'Content-Type':'application/json' });
+    let foundItem = products.find((item) => {
+      return item.id == request.body.productId
+    })
+    let qty = request.body.qty
+    for(let i = 0; i < qty; i++) {
+      user.cart.push(foundItem)
     }
+    response.end(JSON.stringify(user.cart))
+  }else {
+    response.writeHead(401, "You need to be logged in to access this")
+    response.end()
   }
 
   response.end();
