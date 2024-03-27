@@ -14,6 +14,17 @@ const brands = require("../initial-data/brands.json");
 const products = require("../initial-data/products.json");
 let tokens = ["3nAqNTvQr3n3eEDA", "WzA6j5mCsxwSZ2za"];
 
+const authenticate = (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, "yoursecretkey");
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Authentication failed" });
+  }
+};
+
 // GET /api/brands
 app.get("/api/brands", (req, res) => {
   res.status(200).json(brands);
@@ -59,19 +70,85 @@ app.post("/api/login", (req, res) => {
   }
 });
 
+// GET /api/me/cart
+app.get("/api/me/cart", (req, res) => {
+  const { userId } = req;
+  const user = users.find((user) => user.id === userId);
+  if (user) {
+    res.status(200).json(user.cart);
+  } else {
+    res.status(404).json({ message: "User not found" });
+  }
+});
+
 // POST /api/me/cart
 app.post("/api/me/cart", (req, res) => {
   const { userId } = req;
-  const user = users.find((user) => user.id === userId);
-  const { productId, quantity } = req.body;
-  const product = products.find((product) => product.id === productId);
+  const user = users.find((user) => user.id == userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const { productId } = req.body;
+  const product = products.find((product) => {
+    return product.id == productId;
+  });
 
   if (!product) {
-    user.cart.push({ productId, quantity });
-    res.status(200).json({ message: "Product added to cart", user });
-  } else {
-    res.status(401).json({ message: "Product not found", user });
+    return res.status(404).json({ message: "Product not found" });
   }
+
+  user.cart.push(product);
+  return res.status(200).json({ message: "Product added to cart" });
+});
+
+// DELETE /api/me/cart/:productId
+app.delete("/api/me/cart/:productId", (req, res) => {
+  const { userId } = req;
+  const user = users.find((user) => user.id === userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "No user" });
+  }
+
+  const productId = req.params.productId;
+  const product = products.find((product) => {
+    return product.id == productId;
+  });
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  user.cart = user.cart.filter((item) => item.productId !== productId);
+  res.status(200).json({ message: "Product removed from cart" });
+});
+
+// PATCH /api/me/cart/:productId
+app.patch("/api/me/cart/:productId", (req, res) => {
+  const { userId } = req;
+  const user = users.find((user) => {
+    return user.id == userId;
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const productId = req.params.productId;
+  const product = products.find((product) => product.id == productId);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  const { quantity } = req.body;
+  if (quantity <= 0) {
+    return res.status(400).json({ message: "Invalid quantity" });
+  }
+
+  product.quantity = quantity;
+  res.status(200).json({ message: "Quantity updated" });
 });
 
 // Error handling middleware
@@ -90,31 +167,6 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
-// // POST /api/me/cart
-// app.post("/api/me/cart", authenticate, (req, res) => {
-//   const { userId } = req;
-//   const user = users.find((user) => user.id === userId);
-//   const { productId, quantity } = req.body;
-//   const product = products.find((product) => product.id === productId);
-
-//   if (!product) {
-//     user.cart.push({ productId, quantity });
-//     res.status(200).json({ message: "Product added to cart", user });
-//   } else {
-//     res.status(401).json({ message: "Product not found", user });
-//   }
-// });
-
-// // DELETE /api/me/cart/:productId
-// app.delete("/api/me/cart/:productId", authenticate, (req, res) => {
-//   const { userId } = req;
-//   const user = users.find((user) => user.id === userId);
-//   const productId = req.params.productId;
-
-//   user.cart = user.cart.filter((item) => item.productId !== productId);
-//   res.status(200).json({ message: "Product removed from cart", user });
-// });
 
 // // POST /api/me/cart/:productId
 // app.post();
