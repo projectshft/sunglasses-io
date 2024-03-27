@@ -22,11 +22,11 @@ paths:
               $ref: "#/definitions/Brand"
   /brands/{id}/products:
     get:
-      summary: "Get products by brand ID"
+      summary: "Get product by brand ID"
       parameters:
         - name: id
           in: path
-          description: "The ID of the brand to get products for"
+          description: "The ID of the brand to get product for"
           required: true
           type: string
       responses:

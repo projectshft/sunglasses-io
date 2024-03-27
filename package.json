@@ -18,10 +18,14 @@
     "http": "latest",
     "js-yaml": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-uid": "^0.1.3",
     "querystring": "^0.2.0",
     "rand-token": "^0.4.0",
     "router": "^1.3.2",
-    "swagger-ui-express": "^5.0.0"
+    "swagger-ui-express": "^5.0.0",
+    "uid": "^2.0.2",
+    "uid-safe": "^2.1.5",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "chai": "^4.4.1",
