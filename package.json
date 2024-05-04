@@ -1,7 +1,7 @@
 {
 	"name": "sunglasses-io",
 	"version": "1.0.0",
-	"description": "",
+	"description": "sunglasses project",
 	"main": "server.js",
 	"type": "commonjs",
 	"scripts": {
@@ -9,8 +9,8 @@
 		"test": "mocha ./test/*.js"
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "Peyton",
+	"license": "UNLICENSED",
 	"dependencies": {
 		"body-parser": "^1.18.2",
 		"express": "^4.18.2",
@@ -27,5 +27,16 @@
 		"chai": "^4.4.1",
 		"chai-http": "^4.4.0",
 		"mocha": "^10.2.0"
-	}
+	},
+	"directories": {
+		"test": "test"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PeytonLamb/sunglasses-io-peyton.git"
+	},
+	"bugs": {
+		"url": "https://github.com/PeytonLamb/sunglasses-io-peyton/issues"
+	},
+	"homepage": "https://github.com/PeytonLamb/sunglasses-io-peyton#readme"
 }
