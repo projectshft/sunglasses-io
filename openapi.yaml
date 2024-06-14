@@ -1,0 +1,280 @@
+openapi: '3.0.3'
+info:
+  version: '1.0.0'
+  title: 'Sunglasses API'
+  description: 'API for managing brands, products, and user cart'
+servers:
+  - url: 'http://localhost:3000/api/v1'
+tags:
+  - name: brand
+    description: Operations related to brands
+  - name: products
+    description: Operations related to products
+  - name: user
+    description: Operations related to user accounts
+  - name: cart
+    description: Operations related to the shopping cart
+paths:
+  /brands:
+    get:
+      tags:
+        - brand
+      summary: Returns all available brands of sunglasses
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+        default:
+          description: Unexpected error
+  /brands/{brandId}/products:
+    get:
+      tags:
+        - brand
+      summary: Returns sunglasses of a specific brand
+      parameters:
+        - name: brandId
+          in: path
+          description: ID of brand to return
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Brand not found
+  /products:
+    get:
+      tags:
+        - products
+      summary: Returns all products
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /user/login:
+    get:
+      tags:
+        - user
+      summary: Logs user into the system
+      parameters:
+        - name: username
+          in: query
+          description: The username for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Invalid username or password supplied
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: Logs out current user session
+      responses:
+        default:
+          description: successful operation
+  /me/cart:
+    get:
+      tags:
+        - cart
+      summary: Returns contents of the current user's cart
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+        '401':
+          description: Authentication required
+    post:
+      tags:
+        - cart
+      summary: Adds an item to the current user's cart
+      security:
+        - api_key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+      responses:
+        '201':
+          description: Successfully added product to cart
+        '401':
+          description: Authentication required
+        '403':
+          description: Unable to add a product that already exists in the cart
+        '404':
+          description: Failed to locate product with the specified ID
+  /me/cart/{productId}:
+    put:
+      tags:
+        - cart
+      summary: Updates the quantity of a product in the cart
+      parameters:
+        - name: productId
+          in: path
+          description: productId to be updated
+          required: true
+          schema:
+            type: string
+      security:
+        - api_key: []
+      requestBody:
+        description: Updates the quantity of a product in the cart
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItem'
+      responses:
+        '200':
+          description: Successfully updated product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartItem'
+        '401':
+          description: Authentication required
+        '403':
+          description: Unable to update the quantity of the product to that value
+        '404':
+          description: Failed to locate product with the specified ID
+    delete:
+      tags:
+        - cart
+      summary: Deletes a product from the cart
+      parameters:
+        - name: productId
+          in: path
+          description: productId to be updated
+          required: true
+          schema:
+            type: string
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: Successfully deleted product
+        '401':
+          description: Authentication required
+        '404':
+          description: Failed to locate product with the specified ID
+components:
+  schemas:
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '1'
+        name:
+          type: string
+          example: 'Oakley'
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '1'
+        categoryId: 
+          type: 'string'
+          example: '1'
+        name:
+          type: 'string'
+          example: 'Glasses'
+        description:
+          type: 'string'
+          example: 'They are actually not sunglasses.'
+        price:
+          type: integer
+          example: 200
+        imageUrls:
+          type: array
+          items:
+            type: string
+          example: ['http://exampleglasses.com/glasses1.jpg', 'http://exampleglasses.com/glasses1-white-background.jpg']
+    User:
+        type: object
+        properties:
+          email:
+            type: string
+            example: 'reacher@gmail.com'
+          login:
+            type: object
+            properties:
+              username:
+                type: string
+                example: 'jreacher'
+              password:
+                type: string
+                example: 'password123!'
+    CartItem:
+          type: object
+          properties:
+            productId:
+              type: integer
+              example: 1
+            quantity:
+              type: integer
+              example: 3
+            price:
+              type: integer
+              example: 99
+            name:
+              type: 'string'
+              example: 'Glasses'    
+          required:
+            - productId
+            - quantity
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        fields:
+          type: string
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
