@@ -29,8 +29,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Brand'
-        default:
-          description: Unexpected error
   /brands/{brandId}/products:
     get:
       tags:
@@ -52,10 +50,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Product'
-        '400':
-          description: Invalid ID supplied
         '404':
-          description: Brand not found
+          description: Failed to locate brand with the specified ID
   /products:
     get:
       tags:
@@ -71,23 +67,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/Product'
   /user/login:
-    get:
+    post:
       tags:
         - user
       summary: Logs user into the system
-      parameters:
-        - name: username
-          in: query
-          description: The username for login
-          required: true
-          schema:
-            type: string
-        - name: password
-          in: query
-          description: The password for login
-          required: true
-          schema:
-            type: string
+      requestBody:
+        description: 'user credentials for login'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: Successful operation
@@ -95,16 +84,18 @@ paths:
             application/json:
               schema:
                 type: object
-        '400':
+        '401':
           description: Invalid username or password supplied
   /user/logout:
-    get:
+    post:
       tags:
         - user
       summary: Logs out current user session
       responses:
-        default:
-          description: successful operation
+        '204':
+          description: Successful operation
+        '500':
+          description: Internal server error
   /me/cart:
     get:
       tags:
@@ -170,6 +161,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CartItem'
+        '400':
+          description: Invalid request
         '401':
           description: Authentication required
         '403':
@@ -233,18 +226,15 @@ components:
     User:
         type: object
         properties:
-          email:
+          username:
             type: string
-            example: 'reacher@gmail.com'
-          login:
-            type: object
-            properties:
-              username:
-                type: string
-                example: 'jreacher'
-              password:
-                type: string
-                example: 'password123!'
+            example: 'jreacher'
+          password:
+            type: string
+            example: 'password123!'
+        required:
+            - username
+            - password
     CartItem:
           type: object
           properties:
