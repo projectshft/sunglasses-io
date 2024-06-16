@@ -26,6 +26,8 @@ describe('Brands', () => {
         .get(`/v1/brands/${brandId}/products`)
         .end((err,res) => {
           res.should.have.status(200);
+          res.res.statusMessage.should.be.eq('OK');
+          res.body.should.be.an('array')
           res.body.length.should.be.eq(3);
           done();
         });
@@ -37,6 +39,7 @@ describe('Brands', () => {
         .get(`/v1/brands/${badBrandId}/products`)
         .end((err, res) => {
           res.should.have.status(404);
+          res.res.statusMessage.should.be.eq('Not Found');
           done();
         });
     });
@@ -52,6 +55,8 @@ describe('Products', () => {
         .get('/v1/products')
         .end((err, res) => {
           res.should.have.status(200);
+          res.body.should.be.an('array')
+          res.body.length.should.be.eq(11);
         done();
       });
     });
@@ -69,7 +74,10 @@ describe('Login/Logout', () => {
         .send({'username': 'reacher', 'password': 'Roscoe123!'})
         .end((err, res) => {
           res.should.have.status(200);
-          response.res.statusMessage.should.be.eq('login success');
+          res.res.statusMessage.should.be.eq('OK');
+          res.body.should.have.property('username','reacher');
+          res.body.should.have.property('lastUpdated').that.is.a('string');
+          res.body.should.have.property('token').that.is.a('string');
           done();
         });
     });
@@ -81,7 +89,7 @@ describe('Login/Logout', () => {
         .send({'username': 'baduser', 'password': 'Roscoe123!'})
         .end((err, res) => {
           res.should.have.status(401);
-          response.res.statusMessage.should.be.eq('bad username or password');
+          res.res.statusMessage.should.be.eq('Unauthorized');
           done();
         });
     });
@@ -92,7 +100,7 @@ describe('Login/Logout', () => {
         .send({'username': 'reacher', 'password': 'badpassword'})
         .end((err, res) => {
           res.should.have.status(401);
-          response.res.statusMessage.should.be.eq('bad username or password');
+          res.res.statusMessage.should.be.eq('Unauthorized');
           done();
         });
     });
@@ -106,7 +114,7 @@ describe('Login/Logout', () => {
         .send({'username': 'reacher', 'password': 'badpassword'})
         .end((err, res) => {
           res.should.have.status(204);
-          response.res.statusMessage.should.be.eq('bad username or password');
+          res.res.statusMessage.should.be.eq('No Content');
           done();
         });
     });
@@ -118,7 +126,7 @@ describe('Login/Logout', () => {
         .send({'username': 'reacher', 'password': 'badpassword'})
         .end((err, res) => {
           res.should.have.status(500);
-          response.res.statusMessage.should.be.eq('bad username or password');
+          res.res.statusMessage.should.be.eq('bad username or password');
           done();
       });
     });
@@ -150,19 +158,19 @@ describe('Cart', () => {
   describe('/POST', () => {
     const testProduct = { productId: '1' };
     /**Test successfully adding an item to the cart*/
-    it('should successfully add an item to the cart and return 200', done => {
+    it('should successfully add an item to the cart and return 201', done => {
       chai.request(server)
         .post('/v1/me/cart')
         .send(testProduct)
         .end((err, res) => {
-          res.should.have.status(200)
+          res.should.have.status(201)
           done();
         });
     });
     /**Test accessing cart not logged in */
     it('should fail if accessing cart unauthenticated and return 401', done => {
       chai.request(server)
-        .post('v1/me/cart')
+        .post('/v1/me/cart')
         .send(testProduct)
         .end((err, res) => {
           res.should.have.status(401);
@@ -173,7 +181,7 @@ describe('Cart', () => {
     it('should fail if adding a product already in the cart and return 403', done => {
       //cart.push(testProduct);
       chai.request(server)
-        .post('v1/me/cart')
+        .post('/v1/me/cart')
         .send(testProduct)
         .end((err, res) => {
           res.should.have.status(403);
@@ -183,7 +191,7 @@ describe('Cart', () => {
     /**Test adding a product that doesn't exist */
     it('should fail if adding a product that does not exist and return 404', done => {
       chai.request(server)
-        .post('v1/me/cart')
+        .post('/v1/me/cart')
         .send({ productId: '2001' })
         .end((err, res) => {
           res.should.have.status(403);
