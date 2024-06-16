@@ -39,6 +39,34 @@ app.use((err, req, res, next) => {
 // Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+/**Get Root */
+app.get('/', (req, res) => {
+	res.send('Hello world');
+});
+
+/**GET brands */
+app.get('/v1/brands', (req, res) => {
+	res.send(brands);
+});
+
+/**GET brandId */
+app.get('/v1/brands/:brandId/products', (req, res) => {
+	const { brandId } = req.params;
+	const matchingProducts = products.filter(product => product.categoryId === brandId);
+	res.send(matchingProducts);
+})
+
+/**GET products */
+
+/**POST user/login */
+
+/**POST user/logout */
+
+/**GET cart */
+/**POST cart */
+/**PUT cart item */
+/**DELETE cart item */
+
 // Starting the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

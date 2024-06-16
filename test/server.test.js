@@ -26,6 +26,7 @@ describe('Brands', () => {
         .get(`/v1/brands/${brandId}/products`)
         .end((err,res) => {
           res.should.have.status(200);
+          res.body.length.should.be.eq(3);
           done();
         });
     });
