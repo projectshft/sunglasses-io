@@ -36,13 +36,14 @@ describe('Brands', () => {
         });
     });
     /**Test getting a brandId that doesn't exist*/
-    it('should fail to get non-existant brandId and return 404', done => {
+    it('should fail to get products for a non-existant brandId', done => {
       const badBrandId = 12;
       chai.request(server)
         .get(`/v1/brands/${badBrandId}/products`)
         .end((err, res) => {
-          res.should.have.status(404);
-          res.res.statusMessage.should.be.eq('Not Found');
+          res.should.have.status(200);
+          res.body.should.be.an('array')
+          res.body.length.should.be.eq(0);
           done();
         });
     });

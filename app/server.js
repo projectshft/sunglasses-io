@@ -49,9 +49,9 @@ app.get('/v1/brands/:brandId/products', (req, res) => {
 	const { brandId } = req.params;
 	// Are there any matching brand IDs?
 	const matchingProducts = products.filter(product => product.categoryId === brandId);
-	if (matchingProducts.length === 0) {
-		return res.status(404).send('Failed to locate product with the specified ID');
-	}
+	// if (matchingProducts.length === 0) {
+	// 	return res.status(404).send('Failed to locate product with the specified ID');
+	// }
 	// Successful request
 	 return res.send(matchingProducts);
 });
@@ -202,7 +202,7 @@ app.put('/v1/me/cart/:productId', (req, res) => {
 	// Did the request query parameters include a productId?
 	const productId = req.params.productId;
 	if (!productId) {
-		return res.status(400).send('Missing required query parameter');
+		return res.status(400).send('Missing required parameter: productId');
 	}
 	
 	// Did the request body include a quantity?
@@ -212,7 +212,7 @@ app.put('/v1/me/cart/:productId', (req, res) => {
 	}			
 	
 	if (Number(quantity) === 0 || quantity > 1000) {
-		return res.status(403).send('Unable to update the quantity to that value');
+		return res.status(400).send('Unable to update the quantity to that value');
 	}			
 
 	// Check for item in cart
