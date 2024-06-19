@@ -1,8 +1,7 @@
 function checkCart(cart, productId) {
   // Is the item already in the cart?
-  const matchingItem = cart.filter(cartItem => cartItem.id === productId);
-  const itemExists = matchingItem.length > 0;
-  return itemExists; // Should return true or false
+  const matchingItem = cart.find(cartItem => cartItem.id === productId);
+  return matchingItem;
 }
 
 function getCart(users, token) {

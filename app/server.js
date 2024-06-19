@@ -7,19 +7,14 @@ const swaggerDocument = YAML.load('./openapi.yaml');
 const app = express();
 const fs = require('fs');
 const { generateToken, checkToken } = require('./token');
-const { checkCart, getCart, addCartItem, updateCartItem, deleteCartItem } = require('./cart');
+const { checkCart, addCartItem, updateCartItem, deleteCartItem } = require('./cart');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // Handle x-www-form-urlencoded in request body
 
-if (process.env.NODE_ENV === 'test') {
-  console.log('Running in test mode');
-}
-
-const usersFilePath = process.env.NODE_ENV === 'test' ? './test/testUsers.json' : './data/users.json';
-const tokensFilePath = process.env.NODE_ENV === 'test' ? './test/testTokens.json' : '';
-
 /* Helper functions to read and write user data */
+const usersFilePath = process.env.NODE_ENV === 'test' ? './test/testUsers.json' : './data/users.json';
+
 function readUsers() {
   return JSON.parse(fs.readFileSync(usersFilePath,"utf-8"));
 };
@@ -34,51 +29,36 @@ let activeUser = {};
 const brands = require('../data/brands.json');
 const products = require('../data/products.json');
 let accessTokens = [];
-
-/* Helper functions to read and write tokens for testing */
-function readTokens() {
-	return JSON.parse(fs.readFileSync(tokensFilePath,"utf-8"));
-};
-
-function writeTokens(tokens) {
-	fs.writeFileSync(tokensFilePath, JSON.stringify(tokens, null, 2), 'utf-8');
-}
 			
-/* Error handling */
+/**Error handling */
 app.use((err, req, res, next) => {
 	console.error(err.stack);
-	res.status(500).send('Something broke!');
+	return res.status(500).send('Something went wrong');
 });
 				
-/* OpenAPI Documentation */
+/**OpenAPI Documentation */
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-/**Get Root */
-app.get('/', (req, res) => {
-	res.send('Nothing to see here. Check localhost:3000/api-docs');
-});
 
 /**GET brands */
 app.get('/v1/brands', (req, res) => {
-	res.send(brands);
+	return res.send(brands);
 });
 
 /**GET brandId */
 app.get('/v1/brands/:brandId/products', (req, res) => {
 	const { brandId } = req.params;
+	// Are there any matching brand IDs?
 	const matchingProducts = products.filter(product => product.categoryId === brandId);
-	if (matchingProducts.length > 0) {
-		//successful match
-		res.send(matchingProducts);
-	} else {
-		//failed to get a match
-		res.status(404).send();
+	if (matchingProducts.length === 0) {
+		return res.status(404).send('Failed to locate product with the specified ID');
 	}
+	// Successful request
+	 return res.send(matchingProducts);
 });
 
 /**GET products */
 app.get('/v1/products', (req, res) => {
-	res.send(products);
+	return res.send(products);
 });
 
 /**POST user/login */
@@ -120,30 +100,37 @@ app.post('/v1/user/logout', (req, res) => {
 	}
 
 	// Successful logout
+	// Find the token of the active user
 	const matchingToken = accessTokens.find(token => token.username === activeUser.login.username);
-	const filteredAccessTokens = accessTokens.filter(token => token !== matchingToken);
-	accessTokens = filteredAccessTokens;
+	// Filter the matching token from the list
+	accessTokens = accessTokens.filter(token => token !== matchingToken);
+	// Reset active user
 	activeUser = {};
 	return res.status(204).send("Successful logout");
 });
 
 /**GET cart */
 app.get('/v1/me/cart', (req, res) => {
-	const requestToken = req.headers.authorization;
 	// Did the request include a token?
-	if (requestToken) {
-		// Is the token valid?
-		const matchingToken = checkToken(accessTokens, requestToken);
-		if (matchingToken) {
-			// Find the user associated
-			activeUser = users.find(user => user.login.username === matchingToken.username);
-			res.send(activeUser.cart);
-		} else {
-			res.status(401).send('Authentication required');
-		}
-	} else {
-		res.status(401).send('Authentication required');
+	const requestToken = req.headers.authorization;
+	if (!requestToken) {
+		return res.status(401).send('Authentication required: Missing token');
 	}
+	
+	// Is the token valid?
+	const matchingToken = checkToken(accessTokens, requestToken);
+	if (!matchingToken) {
+		return res.status(401).send('Authentication required: Invalid token');
+	}
+	
+	// Find the user associated with the token
+	activeUser = users.find(user => user.login.username === matchingToken.username);
+	if (!activeUser) {
+		return res.status(404).send('User not found');
+	}
+	
+	// Successful request
+	return res.send(activeUser.cart);
 });
 
 /**POST cart */
@@ -180,15 +167,15 @@ app.post('/v1/me/cart', (req, res) => {
 	}
 
 	// Check for product already in cart
-	const existingCartItem = checkCart(activeUser.cart, productId)
-	if (existingCartItem) {
+	const matchingCartItem = checkCart(activeUser.cart, productId)
+	if (matchingCartItem) {
 		return res.status(403).send('Unable to add a product that already exists in the cart');
 	}
 
 	// Add item to cart
 	activeUser.cart = addCartItem(activeUser.cart, matchingProduct, quantity);
 	writeUsers(users);
-	res.status(201).send('Successfully added product to cart');
+	return res.status(201).send('Successfully added product to cart');
 });
 
 /**PUT cart item */
@@ -229,15 +216,15 @@ app.put('/v1/me/cart/:productId', (req, res) => {
 	}			
 
 	// Check for item in cart
-	const existingCartItem = checkCart(activeUser.cart, productId);
-	if (!existingCartItem) {
+	const matchingCartItem = checkCart(activeUser.cart, productId);
+	if (!matchingCartItem) {
 		return res.status(404).send('Failed to locate product with the specified ID');
 	}
 	
 	// Update item in cart
 	activeUser.cart = updateCartItem(activeUser.cart, productId, quantity);
 	writeUsers(users);
-	res.status(200).send('Successfully updated cart item');
+	return res.status(200).send('Successfully updated cart item');
 });
 
 /**DELETE cart item */
@@ -262,8 +249,8 @@ app.delete('/v1/me/cart/:productId', (req, res) => {
 	}
 
 	// Check for item in cart
-	const existingCartItem = checkCart(activeUser.cart, productId);
-	if (!existingCartItem) {
+	const matchingCartItem = checkCart(activeUser.cart, productId);
+	if (!matchingCartItem) {
 		return res.status(404).send('Failed to locate product with the specified ID');
 	}
 
@@ -271,6 +258,11 @@ app.delete('/v1/me/cart/:productId', (req, res) => {
 	activeUser.cart = deleteCartItem(activeUser.cart, productId);
 	writeUsers(users);
 	return res.status(200).send('Successfully deleted cart item');
+});
+
+/**Catch-all route for undefined routes */
+app.use((req, res, next) => {
+	return res.status(404).send({ error: 'Route not found. Check /api-docs for available routes.' });
 });
 
 // Starting the server

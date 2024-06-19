@@ -15,7 +15,8 @@ describe('Brands', () => {
       chai.request(server)
         .get('/v1/brands')
         .end((err, res) => {
-          res.should.have.status(200)
+          res.should.have.status(200);
+          res.body.length.should.be.eq(5);
           done();
         });
     });
