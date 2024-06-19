@@ -166,7 +166,7 @@ paths:
         '401':
           description: Authentication required
         '403':
-          description: Unable to update the quantity of the product to that value
+          description: Unable to update the quantity to that value
         '404':
           description: Failed to locate product with the specified ID
     delete:
@@ -217,12 +217,12 @@ components:
           example: 'They are actually not sunglasses.'
         price:
           type: integer
-          example: 200
+          example: 99
         imageUrls:
           type: array
           items:
             type: string
-          example: ['http://exampleglasses.com/glasses1.jpg', 'http://exampleglasses.com/glasses1-white-background.jpg']
+            example: ['http://exampleglasses.com/glasses1.jpg', 'http://exampleglasses.com/glasses1-white-background.jpg']
     User:
         type: object
         properties:
@@ -238,31 +238,32 @@ components:
     CartItem:
           type: object
           properties:
-            productId:
-              type: integer
-              example: 1
-            quantity:
-              type: integer
-              example: 3
+            id:
+              type: string
+              example: '1'
+            categoryId: 
+              type: 'string'
+              example: '1'
+            name:
+              type: 'string'
+              example: 'Glasses'  
+            description:
+              type: 'string'
+              example: 'They are actually not sunglasses.'
             price:
               type: integer
               example: 99
-            name:
-              type: 'string'
-              example: 'Glasses'    
+            imageUrls:
+              type: array
+              items:
+                type: string
+                example: ['http://exampleglasses.com/glasses1.jpg', 'http://exampleglasses.com/glasses1-white-background.jpg']
+            quantity:
+              type: string
+              example: '3'
           required:
-            - productId
+            - id
             - quantity
-    Error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
-        fields:
-          type: string
   securitySchemes:
     api_key:
       type: apiKey

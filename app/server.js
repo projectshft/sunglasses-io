@@ -6,7 +6,8 @@ const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./openapi.yaml');
 const app = express();
 const fs = require('fs');
-const uid = require('rand-token').uid;
+const { generateToken, checkToken } = require('./token');
+const { checkCart, getCart, addCartItem, updateCartItem, deleteCartItem } = require('./cart');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // Handle x-www-form-urlencoded in request body
@@ -27,28 +28,13 @@ function writeUsers(users) {
   fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf-8');
 }
 
-
 // Importing the data from JSON files
 const users = readUsers();
+let activeUser = {};
 const brands = require('../data/brands.json');
 const products = require('../data/products.json');
+let accessTokens = [];
 
-/**Authentication */
-const accessTokens = [];
-// An access token can look like this:
-// {
-	//   username: 'bob',
-	//   lastUpdated: <A valid date>,
-	//   token: 'qwertyuiopasdfg1'
-	// }
-function generateToken(username) {
-	const newToken = { username: username, lastUpdated: new Date(), token: uid(16) };
-	accessTokens.push(newToken);
-	if (process.env.NODE_ENV === 'test') {
-		writeTokens(accessTokens);
-		}
-	return newToken;
-}
 /* Helper functions to read and write tokens for testing */
 function readTokens() {
 	return JSON.parse(fs.readFileSync(tokensFilePath,"utf-8"));
@@ -58,18 +44,18 @@ function writeTokens(tokens) {
 	fs.writeFileSync(tokensFilePath, JSON.stringify(tokens, null, 2), 'utf-8');
 }
 			
-			// Error handling
-			app.use((err, req, res, next) => {
-				console.error(err.stack);
-				res.status(500).send('Something broke!');
-				});
+/* Error handling */
+app.use((err, req, res, next) => {
+	console.error(err.stack);
+	res.status(500).send('Something broke!');
+});
 				
-				// Swagger
+/* OpenAPI Documentation */
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 /**Get Root */
 app.get('/', (req, res) => {
-	res.send('Hello world');
+	res.send('Nothing to see here. Check localhost:3000/api-docs');
 });
 
 /**GET brands */
@@ -97,72 +83,194 @@ app.get('/v1/products', (req, res) => {
 
 /**POST user/login */
 app.post('/v1/user/login', (req, res) => {
-	// Make sure there is a username and password in the request
+	// Pull username and password from the request
 	const { username, password } = req.body;
-	const matchingUser = users.filter(user => user.login.username === username);
+	
 	// Is there a matching user?
-	if (matchingUser.length === 1) {
-		// Is the password correct for this specific user?
-		if (matchingUser[0].login.password === password) {
-			// Is there already an access token for this user? 
-			let currentAccessToken = accessTokens.find(token => token.username === username);
-			if (currentAccessToken) { // If access token, update the timestamp.
-				currentAccessToken.lastUpdated = new Date();
-			} else { // If no access token, generate a new one.
-				currentAccessToken = generateToken(username);
-			}
-			res.send(currentAccessToken);
-		} else {
-			res.status(401).send("Invalid username or password supplied")
-		}
-	} else {
-		res.status(401).send("Invalid username or password supplied")
+	const matchingUser = users.find(user => user.login.username === username);
+	if (!matchingUser) {
+		return res.status(401).send("Invalid username or password supplied")
+	}
+	
+	// Is the password correct for this specific user?
+	const matchingPassword = matchingUser.login.password === password ? true : false;
+	if (!matchingPassword) {
+		return res.status(401).send("Invalid username or password supplied")
 	}
 
-	// Add functionality for access token
-	// If they already have an access token, use that.
-	// Update the last updated value of the existing token so we get another time period before expiration
-	// Create a new token with the user value and a "random" token
-	// If they are missing one of the parameters, tell the client "something was wrong with the formatting of the request"
-
-
+	// Is there already an access token for this user? 
+	let currentAccessToken = accessTokens.find(token => token.username === username);
+	if (currentAccessToken) { // If access token, update the timestamp.
+		currentAccessToken.lastUpdated = new Date();
+	} else { // If no access token, generate a new one.
+		currentAccessToken = generateToken(username);
+		accessTokens.push(currentAccessToken);
+	}
+	
+	// Login successful
+	activeUser = matchingUser;
+	return res.send(currentAccessToken);
 });
 
 /**POST user/logout */
 app.post('/v1/user/logout', (req, res) => {
-	//error
-	// if user not logged in
-	// How is user login state handled?
-	// res.status(500).send();
+	// Is the user not logged in?
+	if (Object.keys(activeUser).length === 0) {
+		return res.status(500).send("Something went wrong");
+	}
 
-	//success
-	res.status(204).send();
+	// Successful logout
+	const matchingToken = accessTokens.find(token => token.username === activeUser.login.username);
+	const filteredAccessTokens = accessTokens.filter(token => token !== matchingToken);
+	accessTokens = filteredAccessTokens;
+	activeUser = {};
+	return res.status(204).send("Successful logout");
 });
 
 /**GET cart */
 app.get('/v1/me/cart', (req, res) => {
-	res.send(); // user.cart
+	const requestToken = req.headers.authorization;
+	// Did the request include a token?
+	if (requestToken) {
+		// Is the token valid?
+		const matchingToken = checkToken(accessTokens, requestToken);
+		if (matchingToken) {
+			// Find the user associated
+			activeUser = users.find(user => user.login.username === matchingToken.username);
+			res.send(activeUser.cart);
+		} else {
+			res.status(401).send('Authentication required');
+		}
+	} else {
+		res.status(401).send('Authentication required');
+	}
 });
 
 /**POST cart */
 app.post('/v1/me/cart', (req, res) => {
-	//success
-	res.status(201).send(); // user.cart
-	//failed
+	
+	// Did the request include a token?
+	const requestToken = req.headers.authorization;
+	if (!requestToken) {
+		return res.status(401).send('Authentication required: Missing token');
+	}
+	
+	// Is the token valid?
+	const matchingToken = checkToken(accessTokens, requestToken);
+	if (!matchingToken) {
+		return res.status(401).send('Authentication required: Invalid token');
+	}
+	
+	// Find the user associated with the token
+	activeUser = users.find(user => user.login.username === matchingToken.username);
+	if (!activeUser) {
+		return res.status(404).send('User not found');
+	}
+
+	const { productId, quantity } = req.body;
+	// Did the request include a product?
+	if (!productId) {
+		return res.status(400).send('Please include a product to add to the cart.');
+	}
+
+	// Check for product in list of products
+	const matchingProduct = products.find(product => product.id === productId);
+	if (!matchingProduct) {
+		return res.status(404).send('Failed to locate product with the specified ID');
+	}
+
+	// Check for product already in cart
+	const existingCartItem = checkCart(activeUser.cart, productId)
+	if (existingCartItem) {
+		return res.status(403).send('Unable to add a product that already exists in the cart');
+	}
+
+	// Add item to cart
+	activeUser.cart = addCartItem(activeUser.cart, matchingProduct, quantity);
+	writeUsers(users);
+	res.status(201).send('Successfully added product to cart');
 });
 
 /**PUT cart item */
 app.put('/v1/me/cart/:productId', (req, res) => {
-	//success
-	res.status(200).send(); // user.cart
-	//failed
+	
+	// Did the request include a token?
+	const requestToken = req.headers.authorization;
+	if (!requestToken) {
+		return res.status(401).send('Authentication required: Missing token');
+	}
+
+	// Is the token valid?
+	const matchingToken = checkToken(accessTokens, requestToken);
+	if (!matchingToken) {
+		return res.status(401).send('Authentication required: Invalid token');
+	}
+
+	// Find the user associated with the token
+	activeUser = users.find(user => user.login.username === matchingToken.username);
+	if (!activeUser) {
+		return res.status(404).send('User not found');
+	}
+
+	// Did the request query parameters include a productId?
+	const productId = req.params.productId;
+	if (!productId) {
+		return res.status(400).send('Missing required query parameter');
+	}
+	
+	// Did the request body include a quantity?
+	const quantity = req.body.quantity;
+	if (!quantity) {
+		return res.status(400).send('Missing quantity from request');
+	}			
+	
+	if (Number(quantity) === 0 || quantity > 1000) {
+		return res.status(403).send('Unable to update the quantity to that value');
+	}			
+
+	// Check for item in cart
+	const existingCartItem = checkCart(activeUser.cart, productId);
+	if (!existingCartItem) {
+		return res.status(404).send('Failed to locate product with the specified ID');
+	}
+	
+	// Update item in cart
+	activeUser.cart = updateCartItem(activeUser.cart, productId, quantity);
+	writeUsers(users);
+	res.status(200).send('Successfully updated cart item');
 });
 
 /**DELETE cart item */
 app.delete('/v1/me/cart/:productId', (req, res) => {
-	//success
-	res.status(200).send(); // user.cart
-	//failed
+	
+	// Did the request include a token?
+	const requestToken = req.headers.authorization;
+	if (!requestToken) {
+		return res.status(401).send('Authentication required: Missing token');
+	}
+
+	// Is the token valid?
+	const matchingToken = checkToken(accessTokens, requestToken);
+	if (!matchingToken) {
+		return res.status(401).send('Authentication required: Invalid token');
+	}
+
+	// Did the request query parameters include a productId?
+	const productId = req.params.productId;
+	if (!productId) {
+		return res.status(400).send('Missing required query parameter');
+	}
+
+	// Check for item in cart
+	const existingCartItem = checkCart(activeUser.cart, productId);
+	if (!existingCartItem) {
+		return res.status(404).send('Failed to locate product with the specified ID');
+	}
+
+	// Remove item from cart
+	activeUser.cart = deleteCartItem(activeUser.cart, productId);
+	writeUsers(users);
+	return res.status(200).send('Successfully deleted cart item');
 });
 
 // Starting the server

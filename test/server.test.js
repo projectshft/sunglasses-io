@@ -5,6 +5,8 @@ const server = require('../app/server');
 chai.use(chaiHttp);
 chai.should();
 
+const testTokens = [];
+
 /**Testing API calls related to brand*/
 describe('Brands', () => {
   describe('/GET brands', () => {
@@ -63,9 +65,9 @@ describe('Products', () => {
   });
 });
 
-/**Testing API calls related to login/logout */
-describe('Login/Logout', () => {
-  describe('/POST login', () => {
+/**Testing API calls related to login */
+describe('Login', () => {
+  describe('/POST user/login', () => {
     /**Test successful login */
     it('should succeed with login and return status 200', done => {
       chai.request(server)
@@ -73,6 +75,7 @@ describe('Login/Logout', () => {
         .set('content-type', 'application/x-www-form-urlencoded')
         .send({'username': 'reacher', 'password': 'Roscoe123!'})
         .end((err, res) => {
+          testTokens.push(res.body);
           res.should.have.status(200);
           res.res.statusMessage.should.be.eq('OK');
           res.body.should.have.property('username','reacher');
@@ -105,41 +108,16 @@ describe('Login/Logout', () => {
         });
     });
   });
-  describe('/POST logout', () => {
-    /**Successful logout */
-    it('should logout the user and return 204', done => {
-      chai.request(server)
-        .post('/v1/user/logout')
-        .set('content-type', 'application/x-www-form-urlencoded')
-        .send({'username': 'reacher', 'password': 'badpassword'})
-        .end((err, res) => {
-          res.should.have.status(204);
-          res.res.statusMessage.should.be.eq('No Content');
-          done();
-        });
-    });
-    /**Test for failed logout */
-    it('should fail to logout the user if not logged in and return 500', done => {
-      chai.request(server)
-        .post('/v1/user/logout')
-        .set('content-type', 'application/x-www-form-urlencoded')
-        .send({'username': 'reacher', 'password': 'badpassword'})
-        .end((err, res) => {
-          res.should.have.status(500);
-          res.res.statusMessage.should.be.eq('bad username or password');
-          done();
-      });
-    });
-  });
 });
 
 /**Testing API calls related to the shopping cart */
-describe('Cart', () => {
+describe('Cart', () => {  
   describe('/GET', () => {
     /**Test successfully getting cart*/
     it('should successfully return all items in the cart in json and status 200', done => {
       chai.request(server)
         .get('/v1/me/cart')
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .end((err, res) => {
           res.should.have.status(200)
           done();
@@ -156,11 +134,12 @@ describe('Cart', () => {
     });
   });
   describe('/POST', () => {
-    const testProduct = { productId: '1' };
+    const testProduct = { productId: '1', quantity: '2' };
     /**Test successfully adding an item to the cart*/
     it('should successfully add an item to the cart and return 201', done => {
       chai.request(server)
         .post('/v1/me/cart')
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .send(testProduct)
         .end((err, res) => {
           res.should.have.status(201)
@@ -179,9 +158,9 @@ describe('Cart', () => {
     });
     /**Test adding a product already in cart (duplicate item) */
     it('should fail if adding a product already in the cart and return 403', done => {
-      //cart.push(testProduct);
       chai.request(server)
         .post('/v1/me/cart')
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .send(testProduct)
         .end((err, res) => {
           res.should.have.status(403);
@@ -192,19 +171,22 @@ describe('Cart', () => {
     it('should fail if adding a product that does not exist and return 404', done => {
       chai.request(server)
         .post('/v1/me/cart')
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .send({ productId: '2001' })
         .end((err, res) => {
-          res.should.have.status(403);
+          res.should.have.status(404);
           done();
         });
     });
   });
   describe('/PUT', () => {
-    //cart.push({ productId: '1', quantity: '1' });
+    const productId = '1';
     /**Test successfully updating an item in cart */
     it('should successfully update an item quantity and return 200', done => {
       chai.request(server)
-        .put(`/v1/me/cart/${{ productId: '1', quantity: '2' }}`) //TODO: How do you properly put?
+        .put('/v1/me/cart/' + productId)
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
+        .send({ quantity: '3' })
         .end((err, res) => {
           res.should.have.status(200);
           done();
@@ -213,7 +195,8 @@ describe('Cart', () => {
     /**Test sending a request with missing requirements */
     it('should fail due to missing quantity and return 400', done => {
       chai.request(server)
-        .put(`/v1/me/cart/${{ productId: '1' }}`) //TODO: How do you properly put?
+        .put('/v1/me/cart/' + productId)
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .end((err, res) => {
           res.should.have.status(400);
           done();
@@ -222,7 +205,7 @@ describe('Cart', () => {
     /**Test accessing cart not logged in */
     it('should fail if accessing cart unauthenticated and return 401', done => {
       chai.request(server)
-        .put(`/v1/me/cart/${{ productId: '1', quantity: '1' }}`) //TODO: How do you properly put?
+        .put('/v1/me/cart/' + productId)
         .end((err, res) => {
           res.should.have.status(401);
           done();
@@ -231,7 +214,9 @@ describe('Cart', () => {
     /**Test updating an item quantity to 0 */
     it('should fail to update an item quantity to 0 and return 403', done => {
       chai.request(server)
-        .put(`/v1/me/cart/${{productId: '1', quantity: '0'}}`) //TODO: How do you properly put?
+        .put('/v1/me/cart/' + productId)
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
+        .send({ quantity: '0' })
         .end((err, res) => {
           res.should.have.status(403);
           done();
@@ -240,7 +225,9 @@ describe('Cart', () => {
     /**Test updating an item quantity beyond the max */
     it('should fail to update an item quantity beyond 1000 and return 403', done => {
       chai.request(server)
-        .put(`/v1/me/cart/${{productId: '1', quantity: '1001'}}`) //TODO: How do you properly put?
+        .put('/v1/me/cart/' + productId)
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
+        .send({ quantity: '1001' })
         .end((err, res) => {
           res.should.have.status(403);
           done();
@@ -249,7 +236,9 @@ describe('Cart', () => {
     /**Test updating an item not in the cart */
     it('should fail if accessing an item that is not in the cart and return 404', done => {
       chai.request(server)
-        .put(`/v1/me/cart/${{productId: '2001', quantity: '2'}}`) //TODO: How do you properly put?
+        .put('/v1/me/cart/2001')
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
+        .send({ quantity: '3' })
         .end((err, res) => {
           res.should.have.status(404);
           done();
@@ -257,11 +246,12 @@ describe('Cart', () => {
     });
   });
   describe('/DELETE', () => {
-    //cart.push({ productId: '1', quantity: '1' });
+    const productId = '1';
     /**Test successfully deleting an item from cart */
     it('should successfully delete an item in the cart', done => {
       chai.request(server)
-        .delete(`/v1/me/cart/${{ productId: '1' }}`)
+        .delete('/v1/me/cart/' + productId)
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .end((err, res) => {
           res.should.have.status(200);
           done();
@@ -270,7 +260,7 @@ describe('Cart', () => {
     /**Test accessing cart not logged in */
     it('should fail if accessing cart unauthenticated and return 401', done => {
       chai.request(server)
-        .delete(`/v1/me/cart/${{ productId: '1' }}`)
+        .delete('/v1/me/cart/' + productId)
         .end((err, res) => {
           res.should.have.status(401);
           done();
@@ -279,11 +269,38 @@ describe('Cart', () => {
     /**Test deleting an item that doesn't exist and return 404 */
     it('should fail if accessing an item that is not in the cart and return 404', done => {
       chai.request(server)
-        .delete(`/v1/me/cart/${{ productId: '2001' }}`)
+        .delete('/v1/me/cart/2001')
+        .set('Authorization', `Bearer ${testTokens[0].token}`)
         .end((err, res) => {
           res.should.have.status(404);
           done();
         });
+    });
+  });
+});
+
+/**Testing API calls related to logout */
+describe('Logout', () => {
+  describe('/POST user/logout', () => {
+    /**Test for successful logout */
+    it('should logout the user and return 204', done => {
+      chai.request(server)
+        .post('/v1/user/logout')
+        .end((err, res) => {
+          res.should.have.status(204);
+          res.res.statusMessage.should.be.eq('No Content');
+          done();
+        });
+    });
+    /**Test for failed logout */
+    it('should fail to logout the user if not logged in and return 500', done => {
+      chai.request(server)
+        .post('/v1/user/logout')
+        .end((err, res) => {
+          res.should.have.status(500);
+          res.res.statusMessage.should.be.eq("Internal Server Error");
+          done();
+      });
     });
   });
 });
