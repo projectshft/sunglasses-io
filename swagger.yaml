@@ -1,11 +1,211 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  description: "API documentation for the Sunglasses Store application"
+  version: "1.0.0"
+  title: "Sunglasses Store API"
+host: "localhost:3001"
+basePath: "/"
 schemes:
-    - 'http'
-basePath: '/api'
-produces:
-    - 'application/json'
+  - "http"
+paths:
+  /brands:
+    get:
+      summary: "Get all brands"
+      responses:
+        200:
+          description: "A list of all brands"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Brand"
+
+  /brands/{brandName}/products:
+    get:
+      summary: Get products by brand
+      parameters:
+        - name: brandName
+          in: path
+          required: true
+          description: The name of the brand to filter products by
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of products for the specified brand
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "404":
+          description: Brand not found
+  /me/cart:
+    get:
+      summary: "Get user cart"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: "The user's cart"
+          schema:
+            $ref: "#/definitions/Cart"
+
+    post:
+      summary: "Add product to cart"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "productId"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              productId:
+                type: "integer"
+                description: "ID of the product to add"
+              quantity:
+                type: "integer"
+                description: "Quantity of the product to add"
+      responses:
+        200:
+          description: "Product added to cart"
+        400:
+          description: "Invalid input"
+
+  /me/cart/{productId}:
+    delete:
+      summary: "Delete a product from the cart"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "productId"
+          in: "path"
+          required: true
+          type: "integer"
+          description: "ID of the product to delete from the cart"
+      responses:
+        200:
+          description: "Product deleted from cart"
+        404:
+          description: "Product not found in cart"
+
+    post:
+      summary: "Change the quantity of a product in the cart"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "productId"
+          in: "path"
+          required: true
+          type: "integer"
+          description: "ID of the product to update"
+        - name: "quantity"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              quantity:
+                type: "integer"
+                description: "New quantity of the product"
+      responses:
+        200:
+          description: "Product quantity updated"
+        400:
+          description: "Invalid input"
+        404:
+          description: "Product not found in cart"
+
+  /users/register:
+    post:
+      summary: "Register a new user"
+      parameters:
+        - name: "user"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              username:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        201:
+          description: "User registered successfully"
+
+  /users/login:
+    post:
+      summary: "Login a user"
+      parameters:
+        - name: "user"
+          in: "body"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              username:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "User logged in successfully"
+          schema:
+            type: "object"
+            properties:
+              accessToken:
+                type: "string"
+        403:
+          description: "Invalid username or password"
+
+definitions:
+  Brand:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      description:
+        type: "string"
+
+  Product:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+      brandId:
+        type: "integer"
+      price:
+        type: "number"
+      categoryId:
+        type: "integer"
+      description:
+        type: "string"
+
+  Cart:
+    type: "object"
+    properties:
+      products:
+        type: "array"
+        items:
+          $ref: "#/definitions/CartItem"
+
+  CartItem:
+    type: "object"
+    properties:
+      productId:
+        type: "integer"
+      quantity:
+        type: "integer"
+
+securityDefinitions:
+  BearerAuth:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"

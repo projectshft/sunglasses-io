@@ -1,31 +1,36 @@
 {
-	"name": "sunglasses-io",
-	"version": "1.0.0",
-	"description": "",
-	"main": "server.js",
-	"type": "commonjs",
-	"scripts": {
-		"start": "node app/server.js",
-		"test": "mocha ./test/*.js"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"body-parser": "^1.18.2",
-		"express": "^4.18.2",
-		"finalhandler": "latest",
-		"http": "latest",
-		"jsonwebtoken": "^9.0.2",
-		"querystring": "^0.2.0",
-		"rand-token": "^0.4.0",
-		"router": "^1.3.2",
-		"swagger-ui-express": "^5.0.0",
-		"yamljs": "^0.3.0"
-	},
-	"devDependencies": {
-		"chai": "^4.4.1",
-		"chai-http": "^4.4.0",
-		"mocha": "^10.2.0"
-	}
+  "name": "sunglasses-io",
+  "version": "2.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node app/server.js",
+    "test": "mocha ./test/*.js "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.1.0",
+    "finalhandler": "latest",
+    "fs": "^0.0.1-security",
+    "http": "latest",
+    "jsonwebtoken": "^9.0.2",
+    "querystring": "^0.2.0",
+    "rand-token": "^0.4.0",
+    "router": "^1.3.2",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "chai": "^4.5.0",
+    "chai-http": "^4.4.0",
+    "jest": "^27.5.1",
+    "mocha": "^10.7.0"
+  }
 }
