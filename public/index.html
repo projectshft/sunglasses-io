@@ -1,0 +1,149 @@
+<!-- <!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8'>
+    <title>Sunglasses.io</title>
+  </head>
+  <body>
+    <h1>Let's shop for SUPER sunglasses!!!</h1>
+
+    <div id="input-box">
+      <div id="username-password-input-box">
+        <input id="username-box" type="text" placeholder="username"></input>
+        <input id="password-box" type="password" placeholder="password"></input>
+        <button id="submit" type="button">Login</button>
+        </br>
+      </div>
+    </div>
+
+    <img src="/SunglassesWireframe.png" alt="Sunglasses Wireframeeeee">
+
+    <script>
+      document.getElementById('submit').addEventListener('click', (event) => {
+        event.preventDefault();
+        console.log('FRONT END...');
+
+        const username = document.getElementById('username-box').value;
+        const password = document.getElementById('password-box').value;
+        const credentials = btoa(`${username}:${password}`);
+        let name = '';
+        let redirectUrl = ``;
+
+        function loadUsers() {
+          return fetch('../initial-data/users.json')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+              }
+              return response.json();
+            })
+            .then(data => data)
+            .catch(error => {
+              console.error('Error loading users:', error);
+            });
+        };
+
+        function fetchUserCart(name, token) {
+          console.log('Fetching Cart For: ', name);
+          console.log('Using Token: ', token);
+
+          fetch(`http://localhost:3000/${name}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              return response.text().then(text => {
+                throw new Error(text);
+              });
+            }
+          })
+          .then(data => {
+            if (data.users) {
+              console.log('User Cart:', data.users);
+
+
+              console.log('Auth Token: ', data.token);
+              window.location.href = redirectUrl;
+            } else {
+              console.error('Error fetching cart:', data);
+              alert('Failed to fetch user cart');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch user cart');
+          });
+        };
+
+
+        function loginUser(username, password) {
+          const credentials = btoa(`${username}:${password}`);
+
+          return fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Basic ${credentials}`
+            },
+            body: JSON.stringify({ username, password })
+          })
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              return response.text();
+            }
+          })
+          .then(data => {
+            if (data.token) {
+              console.log('Data.Token : ', data.token);
+              return data;
+            } else {
+              console.error('Error: ', data.message || data);
+              alert('FE Login Failed' + (data.message || 'unknown'));
+              return Promise.reject('Login failed');
+            }
+          })
+          .catch(error => {
+            console.error('Login Error:', error);
+          });
+        };
+
+
+        loadUsers()
+          .then(users => {
+            if (users) {
+              const user = users.find(user => user.login.username === username);
+              name = user ? user.name.first : 'Username not found';
+              redirectUrl = `http://localhost:3000/${name}`;
+              console.log(`First Name: ${name}`);
+              console.log(`http://localhost:3000/${name}`);
+              
+              return loginUser(username, password);
+            } else {
+              throw new Error('No users found');
+            }
+          })
+        .then(data => {
+          if (data.token) {
+            console.log('Token Saved: ', data.token);
+
+            return fetchUserCart(name, data.token);
+          } else {
+            console.error('Error: ', data.message || data);
+            alert('FE Login Failed' + (data.message || data));
+            return Promise.reject('Login failed');
+          }
+        })
+        .catch(error => {
+        console.error('Error:', error);
+        alert('Failed all the way through index');
+        });
+      });
+    </script>
+  </body>
+</html> -->
