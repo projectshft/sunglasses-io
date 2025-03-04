@@ -1,11 +1,206 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
 schemes:
-    - 'http'
-basePath: '/api'
+  - "http"
+basePath: "/api"
 produces:
-    - 'application/json'
+  - "application/json"
+tags:
+  - name: "brands and products"
+    description: "Everything about products"
+  - name: "cart"
+    description: "Everything to do with the cart"
+  - name: "authentication"
+    description: "Everything to do with authentication"
+paths:
+  /brands:
+    get:
+      tags:
+        - "brands and products"
+      summary: "Get all brands"
+      description: "Returns a list of available brands, or an error message."
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful response with a list of brands"
+        404:
+          description: "No brands found"
+  /brands/{id}/products:
+    get:
+      tags:
+        - "brands and products"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          type: "integer"
+          description: "The brand ID"
+      summary: "Get all products of a certain brands"
+      description: "Returns a list of products for a specific brands"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful response with a list of products"
+        400:
+          description: "No products found"
+  /products:
+    get:
+      tags:
+        - "brands and products"
+      summary: "Get all products"
+      description: "Returns a list of all available products"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful response with a list of all products"
+        400:
+          description: "No products found"
+  /me/cart:
+    get:
+      tags:
+        - "cart"
+      summary: "Get the cart"
+      description: "Returns the cart if a user is logged in"
+      produces:
+        - "application/json"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: "Successful response with a list of products inside the cart"
+        401:
+          description: "User must be logged in"
+    post:
+      tags:
+        - "cart"
+      summary: "Add item to cart"
+      description: "Returns the cart with the new item inside it"
+      produces:
+        - "application/json"
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: "body"
+          name: "product"
+          description: "product to be added to cart"
+          schema:
+            type: "object"
+            required:
+              - "id"
+              - "name"
+              - "description"
+              - "price"
+            properties:
+              id:
+                type: "string"
+              name:
+                type: "string"
+              description:
+                type: "string"
+              price:
+                type: "integer"
+              categoryId:
+                type: "string"
+              imageUrls:
+                type: "array"
+                items:
+                  type: "string"
+      responses:
+        200:
+          description: "Successful response with new item added to cart"
+        401:
+          description: "You must be logged in to add items to the cart"
+  /me/cart/{productId}:
+    post:
+      tags:
+        - "cart"
+      summary: "change quantity of an item in the cart. Adds item if it does not exist"
+      description: "Returns the cart and items with the new quantity."
+      produces:
+        - "application/json"
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: "body"
+          name: "new quantity"
+          description: "New quantity for item"
+          schema:
+            type: "object"
+            required:
+              - "quantity"
+            properties:
+              quantity:
+                type: "integer"
+        - in: "path"
+          name: "productId"
+          type: "integer"
+          required: true
+          description: "Product that needs quantity changed"
+      responses:
+        200:
+          description: "Successful response with item quantity updated"
+        401:
+          description: "You must be logged in to access the cart"
+    delete:
+      tags:
+        - "cart"
+      summary: "remove an item from the cart"
+      description: "Returns the new cart without to deleted item"
+      produces:
+        - "application/json"
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: "path"
+          name: "productId"
+          type: "integer"
+          required: true
+          description: "Item to be removed"
+      responses:
+        200:
+          description: "Successful response with item removed"
+        401:
+          description: "You must be logged in to access the cart"
+  /login:
+    post:
+      tags:
+        - "authentication"
+      summary: "Logs the user in"
+      description: "Returns the logged in user object with their authentication token"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "user"
+          description: "The user to be logged in"
+          schema:
+            type: "object"
+            required:
+              - "username"
+              - "password"
+            properties:
+              username:
+                type: "string"
+              password:
+                type: "string"
+      produces:
+        - "object"
+      responses:
+        200:
+          description: "Successful authentication, user logged in"
+        400:
+          description: "Incorrectly formatted response"
+        401:
+          description: "Invalid username or password"
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
