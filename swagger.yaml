@@ -1,11 +1,167 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
 schemes:
-    - 'http'
-basePath: '/api'
+  - "http"
+basePath: "/api"
 produces:
-    - 'application/json'
+  - "application/json"
+paths:
+  /brands:
+    get:
+      summary: "Returns a list of brands"
+      responses:
+        "200":
+          description: "A list of brands"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /brands/{id}/products:
+    get:
+      summary: "Returns a list of products for a specific brand"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: "List of brand products"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /products:
+    get:
+      summary: "Returns a list of products"
+      responses:
+        "200":
+          description: "List of products"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /login:
+    post:
+      summary: "Allows user to login"
+      parameters:
+        - in: body
+          name: login
+          description: "The login information (username and password) for the user"
+          schema:
+            $ref: "#/definitions/Login"
+      responses:
+        "200":
+          description: "Successful login"
+        "401":
+          description: "Unauthorized"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart:
+    get:
+      summary: "Gets the cart for an authenticated user"
+      responses:
+        "200":
+          description: "User cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      summary: "Adds item to user cart"
+      responses:
+        "200":
+          description: "Product successfully added to cart"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+  /me/cart/{productId}:
+    post:
+      summary: "Edits the quantity of a particular item in the cart"
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: "Product quantity successfully updated"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      summary: "Deletes a particular item from the cart"
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: "Product successfully deleted"
+        default:
+          description: "Unexpected error"
+          schema:
+            $ref: "#/definitions/Error"
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+      categoryId:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      price:
+        type: integer
+      imageUrls:
+        type: array
+        items:
+          type: string
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
