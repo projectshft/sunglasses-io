@@ -1,11 +1,322 @@
-swagger: '2.0'
+openapi: "3.0.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
-schemes:
-    - 'http'
-basePath: '/api'
-produces:
-    - 'application/json'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: login
+    description: Operations about user authentication
+  - name: brands
+    description: Operations related to sunglasses brands and products
+  - name: cart
+    description: Operations related to the shopping cart
+paths:
+  /api/login:
+    post:
+      tags:
+        - login
+      summary: Log in to make purchases
+      description: Log in to receive an access token for further actions
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: moresunglassesplease@sunglasseslover.com
+                password:
+                  type: string
+                  example: $ungl@$$es@r3@wesome!
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: object
+                    example:
+                      first: Suzie
+                      last: Deal
+                  email:
+                    type: string
+                    example: suzie@cooltown.com
+                  token:
+                    type: string
+                    example: "9uf87h6sjjkf97f"
+                  lastUpdated:
+                    type: string
+                    format: date-time
+        "400":
+          description: Incomplete login information provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Incomplete login information provided
+        "401":
+          description: Invalid login credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid login credentials
+
+  /api/sunglasses/brands:
+    get:
+      tags:
+        - brands
+      summary: Finds sunglasses by brand
+      description: Retrieves sunglasses based on a brand name query parameter
+      operationId: findSunglassesByBrand
+      parameters:
+        - name: brand
+          in: query
+          description: Brand name to filter sunglasses
+          required: true
+          schema:
+            type: string
+            example: "Oakley"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sunglasses"
+        "400":
+          description: Brand name required in query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Brand name required in query
+        "404":
+          description: Brand not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Brand not found
+
+  /api/sunglasses/search:
+    get:
+      tags:
+        - brands
+      summary: Search sunglasses by keyword
+      description: Retrieves sunglasses that match the search query
+      operationId: findSunglassesByQuery
+      parameters:
+        - name: search
+          in: query
+          description: Keyword to search by product name or description
+          required: true
+          schema:
+            type: string
+            example: "black"
+      responses:
+        "200":
+          description: Sunglasses matching search
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sunglasses"
+        "400":
+          description: Search query required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Search query required
+        "404":
+          description: No sunglasses match your search
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: No sunglasses match your search
+
+  /api/me/cart/{itemId}:
+    post:
+      tags:
+        - cart
+      summary: Add an item to the shopping cart
+      description: Adds a product to the authenticated user's shopping cart
+      operationId: addItemToCart
+      parameters:
+        - name: itemId
+          in: path
+          description: Product ID to add to the cart
+          required: true
+          schema:
+            type: string
+            example: "3"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Item added to cart successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "401":
+          description: Login required to add items to cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login required to add items to cart
+        "404":
+          description: Invalid product id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid product id
+
+    delete:
+      tags:
+        - cart
+      summary: Delete item from cart
+      description: Deletes an item from the authenticated user's shopping cart
+      operationId: deleteItemFromCart
+      parameters:
+        - name: itemId
+          in: path
+          description: Product ID to delete from the cart
+          required: true
+          schema:
+            type: string
+            example: "3"
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Item deleted from cart successfully
+        "401":
+          description: Login required to delete items from cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login required to delete items from cart
+        "404":
+          description: Invalid product id or item not found in cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid product id or item not found in cart
+
+  /api/me/cart:
+    get:
+      tags:
+        - cart
+      summary: Get items from shopping cart
+      description: Retrieve items from the authenticated user's shopping cart
+      operationId: getCartItems
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sunglasses"
+        "401":
+          description: Login required to view cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login required to view cart
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-authentication
+
+  schemas:
+    Sunglasses:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        categoryId:
+          type: string
+          example: "2"
+        name:
+          type: string
+          example: "Superglasses"
+        price:
+          type: number
+          example: 125
+        imageUrls:
+          type: array
+          items:
+            type: string
+          example:
+            - "https://example.com/image1.jpg"
+            - "https://example.com/image2.jpg"
+
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Action successful"
