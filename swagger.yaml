@@ -9,3 +9,233 @@ schemes:
 basePath: '/api'
 produces:
     - 'application/json'
+tags:
+  - name: brands
+  - name: products
+  - name: user
+  - name: cart
+paths:
+  /login:
+    post:
+      summary: route for user to login
+      tags:
+        - user
+      parameters:
+        - in: "body"
+          name: username
+          required: true
+          schema:
+            type: string
+        - in: "body"
+          name: password
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+            description: Successful login
+            schema:
+              type: string
+        "400":  
+            description: Response incorrectly formatted  
+        "401":  
+            description: Invalid username or password
+  /products:
+    get:
+      summary: returns all products or filtered products based on search query  
+      tags:
+        - products
+      parameters:
+        - in: query
+          name: searchTerm
+          type: string
+          required: false
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items: 
+              $ref: "#/definitions/Product"
+  /brands:
+    get:
+      tags:
+        - brands
+      summary: returns brands
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+        "404":
+          description: No brands found
+  /brands/{brandId}/products:
+    get:
+      tags:
+        - products
+        - brands
+      summary: returns all products of specific brand
+      parameters:
+        - in: path
+          name: brandId
+          type: string
+          required: true
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Invalid brand id
+  /me/cart:
+    get:
+      tags:
+        - cart
+      summary: returns cart
+      parameters:
+        - in: header
+          name: authorization
+          type: string
+          description: JWT token in the format of "Bearer JWT""
+          required: true      
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Cart"
+        "403":
+          description: User must login to view cart
+    post:
+      tags:
+        - cart
+      summary: add product to cart
+      parameters:
+        - in: header
+          name: authorization
+          type: string
+          description: JWT token in the format of "Bearer JWT""
+          required: true 
+        - in: body
+          name: product
+          schema:
+            $ref: "#/definitions/Product"
+      responses:
+        "201":
+          description: Successfully added product to cart
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: Invalid product supplied
+        "403":
+          description: User must login to add to cart
+  /me/cart/{productId}:
+    put:
+      tags:
+        - cart
+      summary: update product in cart
+      parameters:
+        - in: header
+          name: authorization
+          type: string
+          description: JWT token in the format of "Bearer JWT""
+          required: true 
+        - in: path
+          name: productId
+          type: string
+          required: true
+        - in: body
+          name: new_quantity
+          schema:
+            $ref: "#/definitions/New_Quantity"
+      responses:
+        "201": 
+          description: Successfully updated product in cart
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: Invalid product id
+        "401":
+          description: User must login to update cart
+        "404":
+          description: Product not found in cart
+    delete:
+      tags:
+        - cart
+      summary: remove product from cart
+      parameters:
+        - in: header
+          name: authorization
+          type: string
+          description: JWT token in the format of "Bearer JWT""
+          required: true 
+        - in: path
+          name: productId
+          type: string
+          required: true
+      responses:
+        "200":
+          description: Successfully removed product from cart
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: Invalid product supplied
+        "403":
+          description: User must login to delete items from cart
+        "404":
+          description: Product not found in cart
+definitions:
+  Product:
+    type: object
+    properties: 
+      id:
+        type: string
+        description: Product id
+      categoryId:
+        type: string
+        description: brand id
+      name:
+        type: string
+        description: product name
+      description:
+        type: string
+        description: product description
+      price:
+        type: number
+      imageUrls:
+        type: array
+        items: 
+          type: string
+        description: array of image urls
+  Brand:
+    type: object
+    properties: 
+      id:
+        type: string
+        description: brand id
+      name:
+        type: string
+        description: brand name
+  Cart:
+    type: array
+    items: 
+      type: object
+      properties: 
+        quantity:
+          type: number
+        proudctId:
+          type: string
+        categoryId:
+          type: string
+          description: brand id
+        name:
+          type: string
+          description: product name
+  New_Quantity:
+    type: object
+    properties: 
+      quantity:
+        type: number
