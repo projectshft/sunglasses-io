@@ -1,0 +1,259 @@
+swagger: "2.0"
+info:
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+  version: "1.0"
+host: "localhost:3000"
+basePath: "/api"
+schemes:
+  - http
+paths:
+  /search:
+    get:
+      summary: Search for products
+      parameters:
+        - name: query
+          in: query
+          description: Search term for products
+          required: false
+          type: string
+      responses:
+        200:
+          description: List of matching products
+          examples:
+            application/json:
+              products: []
+
+  /categories:
+    get:
+      summary: Browse product categories
+      responses:
+        200:
+          description: List of available categories
+          examples:
+            application/json:
+              categories: ["Sunglasses", "Prescription", "Kids"]
+
+  /brands:
+    get:
+      tags:
+        - brands
+      summary: GET all brands
+      description: Returns a list of all sunglasses brands
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          in: query
+          description: Filter brands by name
+          required: false
+          type: string
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              brands:
+                type: array
+                items:
+                  $ref: "#/definitions/Brand"
+              total:
+                type: integer
+                description: Total number of brands
+        400:
+          description: Invalid parameters
+        500:
+          description: Server error
+
+  /brands/{brandId}/products:
+    get:
+      tags:
+        - brands
+      summary: Get products by brand
+      description: Returns all products for a specific brand
+      produces:
+        - application/json
+      parameters:
+        - name: brandId
+          in: path
+          description: ID of the brand
+          required: true
+          type: integer
+        - name: limit
+          in: query
+          description: Maximum number of products to return
+          required: false
+          type: integer
+          default: 20
+        - name: offset
+          in: query
+          description: Number of records to skip for pagination
+          required: false
+          type: integer
+          default: 0
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              products:
+                type: array
+                items:
+                  $ref: "#/definitions/Product"
+              total:
+                type: integer
+                description: Total number of products
+        404:
+          description: Brand not found
+        500:
+          description: Server error
+
+  /products:
+    get:
+      tags:
+        - products
+      summary: Get all products
+      description: Returns all products
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: object
+            properties:
+              products:
+                type: array
+                items:
+                  $ref: "#/definitions/Product"
+        404:
+          description: Brand not found
+        500:
+          description: Server error
+
+  /login:
+    post:
+      tags:
+        - login
+      summary: User login
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Login successful
+          examples:
+            application/json:
+              token: "your-jwt-token"
+
+  /me/cart:
+    get:
+      tags:
+        - me/cart
+      summary: Get user's shopping cart
+      responses:
+        200:
+          description: Cart contents
+          examples:
+            application/json:
+              cart: []
+
+    post:
+      tags:
+        - me/cart
+      summary: Add items to cart
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              productId:
+                type: integer
+              productName:
+                type: string
+              brandId:
+                type: integer
+              quantity:
+                type: integer
+              price:
+                type: integer
+      responses:
+        200:
+          description: Item added to cart
+          examples:
+            application/json:
+              message: "Item added"
+
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - me/cart
+      summary: Remove item from cart
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Item removed successfully
+          examples:
+            application/json:
+              message: "Item removed"
+
+    post:
+      tags:
+        - me/cart
+      summary: Update item quantity in cart
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: integer
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: integer
+      responses:
+        200:
+          description: Item quantity updated
+          examples:
+            application/json:
+              message: "Quantity updated"
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      brandId:
+        type: integer
