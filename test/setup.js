@@ -2,13 +2,12 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const server = require('../app/server'); // Adjust the path as needed
 
-const should = chai.should();
 chai.use(chaiHttp);
 
-// TODO: Write tests for the server
+const shared = {
+  should: chai.should(),
+  agent: chai.request.agent(server),
+  jwt: null,
+};
 
-describe('Brands', () => {});
-
-describe('Login', () => {});
-
-describe('Cart', () => {});
+module.exports = shared;
