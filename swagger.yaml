@@ -1,11 +1,155 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
 schemes:
-    - 'http'
-basePath: '/api'
+  - "http"
+basePath: "/api"
 produces:
-    - 'application/json'
+  - "application/json"
+paths:
+  /users:
+    get:
+      summary: user
+      description: |
+        The Users endpoint returns information about the sunglass store user.
+      tags:
+        - User
+      responses:
+        "200":
+          description: Profile information for a user
+          schema:
+            $ref: "#/definitions/user"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/error"
+
+definitions:
+  user:
+    type: object
+    properties:
+      gender:
+        type: string
+        description: The user's gender
+      cart:
+        type: array
+        description: The user's shopping cart
+        items:
+          $ref: "#/definitions/cart"
+      name:
+        $ref: "#/definitions/name"
+      location:
+        $ref: "#/definitions/location"
+      email:
+        type: string
+        description: The user's email address
+      login:
+        $ref: "#/definitions/login"
+      dob:
+        type: string
+        format: date-time
+        description: Date of birth
+      registered:
+        type: string
+        format: date-time
+        description: Registration date
+      phone:
+        type: string
+        description: The user's phone number
+      cell:
+        type: string
+        description: The user's cell phone number
+      picture:
+        $ref: "#/definitions/picture"
+      nationality:
+        type: string
+        description: nationality
+
+  name:
+    type: object
+    description: User's name information
+    properties:
+      title:
+        type: string
+        description: User's title
+      first:
+        type: string
+        description: First name
+      last:
+        type: string
+        description: Last name
+
+  location:
+    type: object
+    description: User's location information
+    properties:
+      street:
+        type: string
+        description: street name
+      city:
+        type: string
+        description: city name
+      state:
+        type: string
+        description: state name
+      postcode:
+        type: integer
+        description: zip/postal code
+
+  login:
+    type: object
+    description: User's login information
+    properties:
+      username:
+        type: string
+        description: Unique username used to login
+      password:
+        type: string
+        description: Original plaintext password (realisitcally wouldnt be here like this)
+      salt:
+        type: string
+        description: A random string added to the password before hashing to increase security
+      md5:
+        type: string
+        description: MD5 hash of the passsword and salt
+      sha1:
+        type: string
+        description: SHA-1 hash of the password and salt
+      sha256:
+        type: string
+        description: SHA-256 hash of the password and salt
+
+  picture:
+    type: object
+    properties:
+      large:
+        type: string
+        description: URL to large image
+      medium:
+        type: string
+        description: URL to medium image
+      thumbnail:
+        type: string
+        description: URL to thumbnail
+
+  cart:
+    type: object
+    properties:
+      temporary:
+        type: string
+        description: temporary
+
+  error:
+    type: object
+    description: Standard error response
+    properties:
+      code:
+        type: integer
+        format: int32
+        description: HTTP status code (e.g., 400, 401, 404)
+      message:
+        type: string
+        description: Human-readable error message
