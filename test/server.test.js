@@ -7,8 +7,24 @@ chai.use(chaiHttp);
 
 // TODO: Write tests for the server
 
-describe('Brands', () => {});
+describe('GET /products', () => {
+  it("should return all products", (done) => {
+    chai.request(server)
+      .get('/products')
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an('array');
+        done();
+      });
+  });
 
-describe('Login', () => {});
-
-describe('Cart', () => {});
+  it('should return 404 for product not found', (done) => {
+    chai.request(server) 
+      .get('/products')
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        expect(res.body).to.have.property('error');
+        done();
+      });
+  });
+});
