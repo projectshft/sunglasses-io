@@ -12,7 +12,7 @@ produces:
 paths:
   /users:
     get:
-      summary: user
+      summary: User
       description: |
         The Users endpoint returns information about the sunglass store user.
       tags:
@@ -26,6 +26,152 @@ paths:
           description: Unexpected error
           schema:
             $ref: "#/definitions/error"
+
+  /users/{id}:
+    get:
+      summary: Get a specific user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: User ID
+      responses:
+        "200":
+          description: User found
+          schema:
+            $ref: "#/definitions/user"
+        "404":
+          description: User not found
+          schema:
+            $ref: "#/definitions/error"
+
+  /users/{id}/cart:
+    get:
+      summary: Get user cart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: User ID
+      responses:
+        "200":
+          description: User cart
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/cartItem"
+        "401":
+          description: Not authenticated
+          schema:
+            $ref: "#/definitions/error"
+    post:
+      summary: Add item to cart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/cartItem"
+      responses:
+        "201":
+          description: Product added to cart
+        "400":
+          description: Invalid request
+
+  /users/{id}/cart/product/{productId}:
+    delete:
+      summary: Remove product from cart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: productId
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Product removed
+        "404":
+          description: Product not in cart
+
+  /brands:
+    get:
+      summary: Brand
+      description: |
+        The brands enpoint returns all brands
+      tags:
+        - Brands
+      responses:
+        "200":
+          description: List of all brands
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/brand"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/error"
+
+  /brands/{id}/products:
+    get:
+      summary: Get all products by brand/category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: Brand ID
+      responses:
+        "200":
+          description: Products under this category
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/product"
+        "404":
+          description: Category not found
+          schema:
+            $ref: "#/definitions/error"
+
+  /products:
+    get:
+      summary: Product
+      description: |
+        The products endpoint returns the product info.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Product information
+          schema:
+            $ref: "#/definitions/product"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/error"
+
+  /products/{id}:
+    get:
+      summary: Get a single product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: Product id
+      responses:
+        "200":
+          description: Product found
+          schema:
+            $ref: "#/definitions/product"
 
 definitions:
   user:
@@ -153,3 +299,51 @@ definitions:
       message:
         type: string
         description: Human-readable error message
+
+  brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Brand ID
+      name:
+        type: string
+        description: Brand name
+
+  product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Product ID
+      categoryId:
+        type: string
+        description: Sunglass category ID number
+      name:
+        type: string
+        description: Product name
+      description:
+        type: string
+        description: Product description
+      price:
+        type: integer
+        description: Product price
+      imageUrls:
+        type: array
+        description: Product staged images
+        items:
+          type: string
+
+  cartItem:
+    type: object
+    required:
+      - productId
+      - quantity
+    properties:
+      productId:
+        type: string
+        description: The ID of the product added to the cart
+      quantity:
+        type: integer
+        minimum: 1
+        description: Number of units the user wants to purchase

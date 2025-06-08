@@ -15,8 +15,16 @@ const users = require('../initial-data/users.json');
 const brands = require('../initial-data/brands.json');
 const products = require('../initial-data/products.json');
 
-app.get('/api/users', (req, res) => {
-	res.status(200).json(users);
+app.get('/api/products', (req, res) => {
+	res.status(200).json(products);
+});
+
+app.get('/api/products/:id', (req, res) => {
+  const product = products.find(p => p.id === req.params.id);
+  if (!product) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
+  res.status(200).json(product);
 });
 
 // Error handling
