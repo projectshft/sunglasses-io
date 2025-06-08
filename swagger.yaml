@@ -10,6 +10,35 @@ basePath: "/api"
 produces:
   - "application/json"
 paths:
+  /login:
+    post:
+      summary: User login
+      description: Authenticates a user based on username and password.
+      tags:
+        - Login
+      parameters:
+        - in: body
+          name: credentials
+          required: true
+          schema:
+            $ref: "#/definitions/login"
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+        "400":
+          description: Missing fields
+          schema:
+            $ref: "#/definitions/error"
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: "#/definitions/error"
+
   /users:
     get:
       summary: User
@@ -27,15 +56,15 @@ paths:
           schema:
             $ref: "#/definitions/error"
 
-  /users/{id}:
+  /users/{username}:
     get:
       summary: Get a specific user
       parameters:
-        - name: id
+        - name: username
           in: path
           required: true
           type: string
-          description: User ID
+          description: Specific users' username
       responses:
         "200":
           description: User found
@@ -46,15 +75,15 @@ paths:
           schema:
             $ref: "#/definitions/error"
 
-  /users/{id}/cart:
+  /users/{username}/cart:
     get:
       summary: Get user cart
       parameters:
-        - name: id
+        - name: username
           in: path
           required: true
           type: string
-          description: User ID
+          description: Specific users' username
       responses:
         "200":
           description: User cart
@@ -69,10 +98,11 @@ paths:
     post:
       summary: Add item to cart
       parameters:
-        - name: id
+        - name: username
           in: path
           required: true
           type: string
+          description: Specific users' username for adding item to cart
         - in: body
           name: body
           schema:
@@ -83,11 +113,11 @@ paths:
         "400":
           description: Invalid request
 
-  /users/{id}/cart/product/{productId}:
+  /users/{username}/cart/product/{productId}:
     delete:
       summary: Remove product from cart
       parameters:
-        - name: id
+        - name: username
           in: path
           required: true
           type: string
