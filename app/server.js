@@ -4,9 +4,18 @@ const jwt = require('jsonwebtoken');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger.yaml'); // Replace './swagger.yaml' with the path to your Swagger file
+const cors = require('cors');
+
 const app = express();
 
 const PRIVATE_KEY = "ILoveSunglasses";
+
+app.use(cors({
+	origin: 'http://localhost:3000',
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+	allowedHeaders: ['Authorization', 'Content-Type'],
+	credentials: true
+}));
 
 app.use(bodyParser.json());
 
