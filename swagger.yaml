@@ -91,7 +91,7 @@ paths:
         - application/json
       parameters:
         - in: header
-          name: tokenAuthorization
+          name: Authorization
           type: string
           required: true
           description: "Bearer token"
@@ -114,7 +114,7 @@ paths:
         - application/json
       parameters:
         - in: header
-          name: tokenAuthorization
+          name: Authorization
           type: string
           required: true
           description: "Bearer token"
@@ -143,7 +143,7 @@ paths:
         - application/json
       parameters:
         - in: header
-          name: tokenAuthorization
+          name: Authorization
           type: string
           required: true
           description: "Bearer token"
@@ -166,7 +166,7 @@ paths:
         - application/json
       parameters:
         - in: header
-          name: tokenAuthorization
+          name: Authorization
           type: string
           required: true
           description: "Bearer token"
