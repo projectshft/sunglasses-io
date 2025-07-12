@@ -77,11 +77,18 @@ app.post('/login', (req, res) => {
 
 app.get('/brands/:id/products', (req, res) => {
 	const brandId = req.params.id;
-	const selectedProducts = products.filter(product => product.categoryId == brandId);
-	if (selectedProducts.length === 0) {
-		return res.status(404).json({ error: 'No products found for this brand' });
+	const targetBrand = brands.filter(brand => brand.id === brandId);
+	if (targetBrand.length === 0) {
+		return res.status(404).json({ error: 'Invalid brand ID' });
 	}
-	res.status(200).json(selectedProducts);
+	const brandName = targetBrand[0].name;
+	const brandProducts = products.filter(product => product.categoryId === brandId)
+	if (brandProducts.length === 0) {
+		return res.status(422).json({ error: `No products found for ${brandName}` });
+	}
+
+	res.status(200).json(brandProducts);
+
 });
 
 app.get('/me/cart', verifyToken, (req, res) => {
@@ -147,6 +154,5 @@ if (require.main === module) {
 		console.log(`Server running on port ${PORT}`);
 });
 }
-
 
 module.exports = app;
