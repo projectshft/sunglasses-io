@@ -72,7 +72,11 @@ app.post('/login', (req, res) => {
 		return res.status(401).json({ error: 'Invalid login info' });
 	}
 	const token = jwt.sign({ username: username }, PRIVATE_KEY, { expiresIn: '1h' });
-	res.status(200).json({token});
+	res.locals.newToken = token;
+	res.status(200).json({
+		cart: user.cart,
+		token: res.locals.newToken
+	});
 });
 
 app.get('/brands/:id/products', (req, res) => {
