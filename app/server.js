@@ -24,6 +24,7 @@ const users = require('../initial-data/users.json');
 const brands = require('../initial-data/brands.json');
 const products = require('../initial-data/products.json');
 
+
 const verifyToken = (req, res, next) => {
 	const authHeader = req.headers.authorization;
 	if (!authHeader) {
@@ -109,12 +110,28 @@ app.get('/me/cart', verifyToken, (req, res) => {
 app.post('/me/cart', verifyToken, (req, res) => {
 	const { productId, quantity } = req.body;
 	if (!productId || !quantity) {
-		return res.status(400).json({ error: 'Missing productId or quantity' });
+		return res.status(400).json({ error: 'Missing productId and/or quantity' });
+	} ;
+	if (typeof quantity !== 'number' || quantity <= 0){
+		return res.status(422).json({ error: 'Quantity must be a positive number' });
 	}
-	const currentUser = users.find(user => user.login.username === req.username);
-	currentUser.cart.push({ productId, quantity });
-	res.status(200).json({
-		cart: currentUser.cart,
+	
+	const product = products.find(product => product.id === productId);
+	if (!product) {
+		return res.status(404).json({ error: 'Invalid Product ID' })
+	};
+
+	const user = users.find(user => user.login.username === req.username);
+
+	const existingItemIndex = user.cart.findIndex(item => item.productId === productId);
+	if (existingItemIndex >= 0) {
+		user.cart[existingItemIndex].quantity += quantity;
+	} else {
+		user.cart.push({ productId, quantity });
+	};
+
+	return res.status(200).json({
+		cart: user.cart,
 		token: res.locals.newToken
 	});
 });
