@@ -139,11 +139,20 @@ app.post('/me/cart', verifyToken, (req, res) => {
 app.delete('/me/cart/:productId', verifyToken, (req, res) => {
 	const user = users.find(user => user.login.username === req.username);
 	const productId = req.params.productId;
-	user.cart = user.cart.filter(item => item.productId != productId);
-	res.status(200).json({
-		cart: user.cart,
-		token: res.locals.newToken
-	});
+	const product = products.find(product => product.id === productId);
+
+	if (!product) {
+		return res.status(404).json({ error: 'Invalid Product ID' });
+	};
+
+	const existingItemIndex = user.cart.findIndex(item => item.productId === productId);
+	if (existingItemIndex < 0) {
+		return res.status(404).json({ error: 'Product not in cart' });
+	} else {
+		user.cart = user.cart.filter(item => item.productId != productId);
+		res.status(200).json({ cart: user.cart, token: res.locals.newToken });
+	};	
+
 });
 
 app.put('/me/cart/:productId', verifyToken, (req, res) => {
