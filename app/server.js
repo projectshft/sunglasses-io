@@ -140,7 +140,6 @@ app.delete('/me/cart/:productId', verifyToken, (req, res) => {
 	const user = users.find(user => user.login.username === req.username);
 	const productId = req.params.productId;
 	const product = products.find(product => product.id === productId);
-
 	if (!product) {
 		return res.status(404).json({ error: 'Invalid Product ID' });
 	};
@@ -158,20 +157,31 @@ app.delete('/me/cart/:productId', verifyToken, (req, res) => {
 app.put('/me/cart/:productId', verifyToken, (req, res) => {
 	const user = users.find(user => user.login.username === req.username);
 	const productId = req.params.productId;
+	const product = products.find(product => product.id === productId);
+	if (!product) {
+		return res.status(404).json({ error: 'Invalid Product ID' });
+	};
+
+	const existingItemIndex = user.cart.findIndex(item => item.productId === productId);
+	if (existingItemIndex < 0) {
+		return res.status(404).json({ error: 'Item not found in cart' });
+	}
+
 	const { quantity } = req.body;
-	if (!quantity || typeof quantity !== 'number') {
-		return res.status(400).json({ error: 'Must use valid quantity' });
+	if ((!quantity && quantity != 0) || typeof quantity !== 'number' || quantity < 0) {
+		return res.status(422).json({ error: 'Must use valid quantity' });
 	}
-	const item = user.cart.find(item => item.productId ===productId);
-	if (item) {
-		item.quantity = quantity;
-		res.status(200).json({
-			cart: user.cart,
-			token: res.locals.newToken
-		});
-	} else {
-		res.status(404).json({ error: 'Item not found in cart' });
-	}
+
+	if (quantity === 0) {
+		user.cart = user.cart.filter(item => item.productId != productId);
+		return res.status(200).json({ cart: user.cart, token: res.locals.newToken });
+	};
+
+	user.cart[existingItemIndex].quantity = quantity;
+	return res.status(200).json({
+		cart: user.cart,
+		token: res.locals.newToken
+	});
 });
 
 // Swagger
