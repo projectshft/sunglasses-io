@@ -57,9 +57,11 @@ paths:
             items:
               $ref: "#/definitions/Product"
         "404":
-          description: No products found for specified brand
+          description: Invalid ID
           schema:
             $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: Out of Stock
 
   /login:
     post:
@@ -77,6 +79,8 @@ paths:
       responses:
         "200":
           description: "Login successful"
+          schema:
+            $ref: "#/definitions/CartResponse"
         "401":
           description: "Invalid login info"
           schema:
@@ -130,7 +134,15 @@ paths:
           schema:
             $ref: "#/definitions/CartResponse"
         "400":
-          description: "Missing id or quantity"
+          description: "Missing Product ID and/or quantity"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: "Invalid Product ID"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: "Quantity must be a positive number"
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -157,6 +169,10 @@ paths:
           description: "Item deleted from cart"
           schema:
             $ref: "#/definitions/CartResponse"
+        "404":
+          description: "Product not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
 
     put:
       tags:
@@ -175,17 +191,24 @@ paths:
           type: string
           required: true
           description: "ID of product to change quantity of"
+        - in: body
+          name: itemQuantity
+          required: true
+          description: "Quantity of item to change"
+          schema:
+            $ref: "#/definitions/ItemQuantity"
+
       responses:
         "200":
           description: "Quantity changed in cart"
           schema:
             $ref: "#/definitions/CartResponse"
-        "400":
-          description: "Invalid quantity"
+        "404":
+          description: "Invalid ID/Item not found"
           schema:
             $ref: "#/definitions/ErrorResponse"
-        "404":
-          description: "Item not found"
+        "422":
+          description: "Must use valid quantity"
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -301,6 +324,16 @@ definitions:
       quantity:
         type: integer
         minimum: 1
+        example: 5
+
+  ItemQuantity:
+    type: object
+    required:
+      - quantity
+    properties:
+      quantity:
+        type: integer
+        minimum: 0
         example: 5
 
   CartResponse:
