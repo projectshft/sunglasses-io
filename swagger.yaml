@@ -1,11 +1,390 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
 schemes:
-    - 'http'
-basePath: '/api'
-produces:
-    - 'application/json'
+  - "http"
+tags:
+  - name: "products"
+    description: "Everything about the store's products"
+  - name: "login"
+    description: "User login"
+  - name: "cart"
+    description: "Access to user's cart"
+paths:
+  /brands:
+    get:
+      tags:
+        - "products"
+      summary: "all brands offered in the store"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: An array of brands
+
+  /products:
+    get:
+      tags:
+        - "products"
+      summary: "returns array of all products"
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: An array of products
+
+  /brands/{id}/products:
+    get:
+      tags:
+        - "products"
+      summary: "Get products for a specified brand"
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: the ID represents the brand of glasses
+      responses:
+        "200":
+          description: An array of products by specified brand
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        "404":
+          description: Invalid ID
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: Out of Stock
+
+  /login:
+    post:
+      tags:
+        - "login"
+      summary: "login user and access to cart"
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: login credentials
+          required: true
+          schema:
+            $ref: "#/definitions/Login"
+      responses:
+        "200":
+          description: "Login successful"
+          schema:
+            $ref: "#/definitions/CartResponse"
+        "401":
+          description: "Invalid login info"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /me/cart:
+    get:
+      tags:
+        - "cart"
+      summary: "gets user's cart"
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: "Bearer token"
+      responses:
+        "200":
+          description: "user's cart and renewed token"
+          schema:
+            $ref: "#/definitions/CartResponse"
+        "404":
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - "cart"
+      summary: "add item to user's cart"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: "Bearer token"
+        - in: body
+          name: cartItem
+          required: true
+          description: "Item and quantity to add to cart"
+          schema:
+            $ref: "#/definitions/CartItem"
+      responses:
+        "200":
+          description: "Item added to cart"
+          schema:
+            $ref: "#/definitions/CartResponse"
+        "400":
+          description: "Missing Product ID and/or quantity"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: "Invalid Product ID"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: "Quantity must be a positive number"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /me/cart/{productId}:
+    delete:
+      tags:
+        - "cart"
+      summary: "deletes an item from user's cart"
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: "Bearer token"
+        - in: path
+          name: productId
+          type: string
+          required: true
+          description: "ID of product to delete"
+      responses:
+        "200":
+          description: "Item deleted from cart"
+          schema:
+            $ref: "#/definitions/CartResponse"
+        "404":
+          description: "Product not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+    put:
+      tags:
+        - "cart"
+      summary: "changes quantity of an item in user's cart"
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+          description: "Bearer token"
+        - in: path
+          name: productId
+          type: string
+          required: true
+          description: "ID of product to change quantity of"
+        - in: body
+          name: itemQuantity
+          required: true
+          description: "Quantity of item to change"
+          schema:
+            $ref: "#/definitions/ItemQuantity"
+
+      responses:
+        "200":
+          description: "Quantity changed in cart"
+          schema:
+            $ref: "#/definitions/CartResponse"
+        "404":
+          description: "Invalid ID/Item not found"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "422":
+          description: "Must use valid quantity"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+definitions:
+  User:
+    type: object
+    properties:
+      gender:
+        type: string
+        example: "female"
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/CartItem"
+      name:
+        $ref: "#/definitions/Name"
+      location:
+        $ref: "#/definitions/Location"
+      email:
+        type: string
+        example: "susanna.richards@example.com"
+      login:
+        $ref: "#/definitions/Login"
+      dob:
+        type: string
+        example: "1954-10-09 10:47:17"
+      registered:
+        type: string
+        example: "2003-08-03 01:12:24"
+      phone:
+        type: string
+        example: "031-941-6700"
+      cell:
+        type: string
+        example: "081-032-7884"
+      picture:
+        $ref: "#/definitions/Picture"
+      nat:
+        type: string
+        example: "IE"
+
+  Name:
+    type: object
+    properties:
+      title:
+        type: string
+        example: "mrs"
+      first:
+        type: string
+        example: "susanna"
+      last:
+        type: string
+        example: "richards"
+
+  Location:
+    type: object
+    properties:
+      street:
+        type: string
+        example: "2343 herbert road"
+      city:
+        type: string
+        example: "duleek"
+      state:
+        type: string
+        example: "donegal"
+      postcode:
+        type: integer
+        example: 38567
+
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+        example: "yellowleopard753"
+      password:
+        type: string
+        example: "jonjon"
+    required:
+      - username
+      - password
+
+  Picture:
+    type: object
+    properties:
+      large:
+        type: string
+        example: "https://randomuser.me/api/portraits/women/55.jpg"
+      medium:
+        type: string
+        example: "https://randomuser.me/api/portraits/med/women/55.jpg"
+      thumbnail:
+        type: string
+        example: "https://ramdomuser.me/api/portraits/thumb/women/55.jpg"
+
+  ErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        example: "No products found for specified brand"
+
+  CartItem:
+    type: object
+    required:
+      - productId
+      - quantity
+    properties:
+      productId:
+        type: string
+        example: "2"
+      quantity:
+        type: integer
+        minimum: 1
+        example: 5
+
+  ItemQuantity:
+    type: object
+    required:
+      - quantity
+    properties:
+      quantity:
+        type: integer
+        minimum: 0
+        example: 5
+
+  CartResponse:
+    type: object
+    properties:
+      cart:
+        type: array
+        items:
+          $ref: "#/definitions/CartItem"
+      token:
+        type: string
+        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InllbGxvd2xlb3BhcmQ3NTMiLCJpYXQiOjE3NDk0ODIxMzIsImV4cCI6MTc0OTQ4NTczMn0.vRtQc5EGzLtC9uGtfXQuR6-j-L-9MiVqLdMrKohxSL4"
+
+  Brand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific brand of sunglasses.
+        example: "1"
+      name:
+        type: string
+        description: A string containing the brand name
+        example: "Oakley"
+
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a specific model of sunglasses
+        example: "3"
+      categoryId:
+        type: string
+        description: A string identifier that represents a specific brand of sunglasses
+        example: "1"
+      name:
+        type: string
+        description: Specifies the model of sunglasses
+        example: "Brown Sunglasses"
+      description:
+        type: string
+        description: A description of the specified sunglasses
+        example: "The best glasses in the world"
+      price:
+        type: integer
+        description: A number that represents the price of each pair of specified sunglasses
+        example: 50
+      imageUrls:
+        type: array
+        description: An array of image URLs to display pics of specified product
+        items:
+          type: string
+          example: "https://image.shutterstock.com/z/stock-photo-yellow-sunglasses-white-backgound-600820286.jpg"
