@@ -1,11 +1,372 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-    version: '1.0.0'
-    title: 'E-Commerce API'
-    description: 'API for managing brands, products, and user cart'
-host: 'localhost:3000'
+  version: "1.0.0"
+  title: "E-Commerce API"
+  description: "API for managing brands, products, and user cart"
+host: "localhost:3000"
 schemes:
-    - 'http'
-basePath: '/api'
+  - "http"
+basePath: "/api"
 produces:
-    - 'application/json'
+  - "application/json"
+
+securityDefinitions:
+  BearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: "Enter the JWT in this format: Bearer <token>"
+
+paths:
+  /glassesSearch:
+    get:
+      tags:
+        - "Products"
+      summary: "Search for glasses by name"
+      description: "Returns a product whose name exactly matches the supplied search query."
+      parameters:
+        - name: name
+          in: query
+          required: true
+          type: string
+          description: "Exact name of the glasses"
+      responses:
+        200:
+          description: "Matching glasses product"
+          schema:
+            $ref: "#/definitions/Product"
+        404:
+          description: "Glasses not found"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /brands:
+    get:
+      tags:
+        - "Brands"
+      summary: "Get all brands"
+      responses:
+        200:
+          description: "A list of all brands"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Brand"
+
+  /brands/{id}/products:
+    get:
+      tags:
+        - "Brands"
+        - "Products"
+      summary: "Get products for a specific brand"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          description: "Brand ID"
+      responses:
+        200:
+          description: "Products belonging to the specified brand"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Product"
+        404:
+          description: "Brand not found"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /login:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Log in with a username and password"
+      parameters:
+        - name: credentials
+          in: body
+          required: true
+          description: "User login credentials"
+          schema:
+            $ref: "#/definitions/LoginRequest"
+      responses:
+        200:
+          description: "Authentication successful"
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        401:
+          description: "User not found or incorrect password"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /me/cart:
+    get:
+      tags:
+        - "Cart"
+      summary: "Get the current user's cart"
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: "The current cart"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        401:
+          description: "User authentication failed"
+          schema:
+            $ref: "#/definitions/Error"
+
+    post:
+      tags:
+        - "Cart"
+      summary: "Add a product to the cart"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: cartItem
+          in: body
+          required: true
+          description: "Product and quantity to add"
+          schema:
+            $ref: "#/definitions/CartItem"
+      responses:
+        200:
+          description: "Product added to the cart"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        401:
+          description: "User authentication failed"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "Product not found"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /me/cart/{productId}:
+    post:
+      tags:
+        - "Cart"
+      summary: "Update a product's quantity in the cart"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: integer
+          description: "ID of the product in the cart"
+        - name: quantity
+          in: body
+          required: true
+          description: "New product quantity"
+          schema:
+            $ref: "#/definitions/QuantityRequest"
+      responses:
+        200:
+          description: "Product quantity updated"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        401:
+          description: "User authentication failed"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "Product not found in cart"
+          schema:
+            $ref: "#/definitions/Error"
+
+    delete:
+      tags:
+        - "Cart"
+      summary: "Delete a product from the cart"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          type: integer
+          description: "ID of the product to remove"
+      responses:
+        200:
+          description: "Product removed from the cart"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/CartItem"
+        401:
+          description: "User authentication failed"
+          schema:
+            $ref: "#/definitions/Error"
+        404:
+          description: "Product not found in cart"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /subscribe:
+    post:
+      tags:
+        - "Subscriptions"
+      summary: "Subscribe an email address"
+      parameters:
+        - name: subscription
+          in: body
+          required: true
+          description: "Email address to subscribe"
+          schema:
+            $ref: "#/definitions/SubscriptionRequest"
+      responses:
+        200:
+          description: "Updated list of subscribed email addresses"
+          schema:
+            type: array
+            items:
+              type: string
+              format: email
+
+  /articles:
+    get:
+      tags:
+        - "Articles"
+      summary: "Get all articles"
+      responses:
+        200:
+          description: "A list of all articles"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Article"
+
+  /articles/{id}:
+    get:
+      tags:
+        - "Articles"
+      summary: "Get an article's content by ID"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          description: "Article ID"
+      responses:
+        200:
+          description: "The requested article content"
+          schema:
+            type: string
+        404:
+          description: "Article not found"
+          schema:
+            $ref: "#/definitions/Error"
+
+definitions:
+  Brand:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: "Ray-Ban"
+
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      name:
+        type: string
+        example: "Superglasses"
+      price:
+        type: number
+        format: float
+        example: 150
+      brandId:
+        type: integer
+        example: 1
+
+  LoginRequest:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        example: "ben"
+      password:
+        type: string
+        format: password
+        example: "password123"
+
+  LoginResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Auth successful"
+      token:
+        type: string
+        description: "JWT used to authenticate protected endpoints"
+
+  CartItem:
+    type: object
+    required:
+      - productId
+      - quantity
+    properties:
+      productId:
+        type: integer
+        example: 1
+      quantity:
+        type: integer
+        minimum: 1
+        example: 2
+
+  QuantityRequest:
+    type: object
+    required:
+      - quantity
+    properties:
+      quantity:
+        type: integer
+        minimum: 1
+        example: 5
+
+  SubscriptionRequest:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: string
+        format: email
+        example: "ben@example.com"
+
+  Article:
+    type: object
+    properties:
+      id:
+        type: integer
+        example: 1
+      title:
+        type: string
+        example: "How to Choose Sunglasses"
+      content:
+        type: string
+        example: "Article content goes here."
+
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        example: "Resource not found"
